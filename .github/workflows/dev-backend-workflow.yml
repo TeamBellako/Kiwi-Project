@@ -95,9 +95,9 @@ jobs:
 
       - name: Set up (or update) kubernetes accounts, roles, and bindings
         run: |
-          kubectl apply -f k8s/dev/dev-service-account.yaml --force
-          kubectl apply -f k8s/dev/dev-cluster-role.yaml --force
-          kubectl apply -f k8s/dev/dev-cluster-role-binding.yaml --force
+          kubectl apply -f k8s/dev/dev-service-account.yaml --overwrite
+          kubectl apply -f k8s/dev/dev-cluster-role.yaml --overwrite
+          kubectl apply -f k8s/dev/dev-cluster-role-binding.yaml --overwrite
 
       - name: Get Fresh Kubernetes Service Account Token 
         run: |
