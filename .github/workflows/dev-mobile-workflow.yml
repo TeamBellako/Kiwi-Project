@@ -3,15 +3,15 @@ name: Mobile CI/CD (Dev)
 on:
   push:
     branches:
-      # - develop
-      # - feature/ci-cd
+      - develop
+      - feature/ci-cd
     paths:
       - 'mobile/**'
       - '.github/workflows/dev-mobile-workflow.yml'
   pull_request:
     branches:
-      # - develop
-      # - feature/ci-cd
+      - develop
+      - feature/ci-cd
     paths:
       - 'mobile/**'
       - '.github/workflows/dev-mobile-workflow.yml'
