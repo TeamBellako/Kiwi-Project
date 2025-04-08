@@ -4,6 +4,6 @@ metadata:
   namespace: dev
   name: kiwi-ci-cd-cluster-role
 rules:
-  - apiGroups: ["", "apps"]
-    resources: ["deployments", "services"]
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["deployments", "services", "ingresses"]
     verbs: ["get", "list", "create", "patch"]
