@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      containers:
+        - name: traefik
+          image: traefik:v2.5
+          args:
+            - "--api.insecure=true" 
+            - "--entrypoints.web.address=:80" 
+            - "--entrypoints.websecure.address=:443"  
+            - "--certificatesresolvers.myresolver.acme.tlschallenge=true" 
+            - "--certificatesresolvers.myresolver.acme.email=bellakotech@example.com" 
+            - "--certificatesresolvers.myresolver.acme.storage=/acme.json"  
+            - "--log.level=DEBUG" 
+            - "--accesslog=true" 
+            - "--providers.kubernetescrd" 
+            - "--providers.kubernetesingress" 
+          volumeMounts:
+            - name: acme-storage
+              mountPath: /acme.json
+              subPath: acme.json
+              readOnly: false
+      volumes:
+        - name: acme-storage
+          emptyDir: {}
