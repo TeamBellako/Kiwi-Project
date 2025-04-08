@@ -13,6 +13,7 @@ spec:
       labels:
         app: traefik
     spec:
+      serviceAccountName: traefik-service-account
       containers:
         - name: traefik
           image: traefik:v2.5

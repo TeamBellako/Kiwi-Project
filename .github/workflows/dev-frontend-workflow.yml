@@ -120,9 +120,3 @@ jobs:
           token: ${{ env.K8S_TOKEN }}
           namespace: dev
           templates: k8s/dev/dev-frontend-*.yaml
-
-      - name: Create frontend ingress and apply traefix configuration
-        run: |
-          kubectl apply -f k8s/dev/dev-frontend-ingress.yaml
-          kubectl apply -f k8s/dev/dev-traefik-deployment.yaml
-          kubectl apply -f k8s/dev/dev-traefik-service.yaml
