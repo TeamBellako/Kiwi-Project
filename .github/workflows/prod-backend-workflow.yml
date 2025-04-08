@@ -50,9 +50,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
-      - name: Set mvnw permissions
-        run: chmod +x ./mvnw
 
       - name: Run backend tests
         working-directory: ./backend
