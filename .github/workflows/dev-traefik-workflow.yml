@@ -36,6 +36,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
       - name: Create (or update) service account and cluster role
         run: |
           kubectl apply -f k8s/dev/dev-traefik-service-account.yaml --overwrite
