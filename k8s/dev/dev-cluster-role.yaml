@@ -1,0 +1,9 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: dev
+  name: kiwi-ci-cd-cluster-role
+rules:
+  - apiGroups: ["", "apps"]
+    resources: ["deployments", "services"]
+    verbs: ["get", "list", "create", "patch"]

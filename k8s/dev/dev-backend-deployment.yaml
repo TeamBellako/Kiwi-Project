@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiwi-backend-dev
+  namespace: dev 
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: kiwi-backend-dev
+  template:
+    metadata:
+      labels:
+        app: kiwi-backend-dev
+    spec:
+      serviceAccountName: kiwi-ci-cd-service-account
+      containers:
+      - name: kiwi-backend-dev
+        image: danielrobledo/kiwi-project:backend-dev-latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: BACKEND_DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret  
+              key: BACKEND_DB_URL_K8S
+        - name: BACKEND_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: BACKEND_DB_USERNAME
+        - name: BACKEND_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: BACKEND_DB_PASSWORD
+      imagePullSecrets:
+        - name: dockerhub-secret

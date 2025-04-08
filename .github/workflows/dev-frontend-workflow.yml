@@ -1,0 +1,116 @@
+name: Frontend CI/CD (Dev)
+
+on:
+  push:
+    branches:
+      # - develop
+      # - feature/ci-cd
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/dev-frontend-workflow.yml'
+      - 'k8s/dev/dev-frontend-deployment.yaml'
+      - 'k8s/dev/dev-frontend-service.yaml'
+  pull_request:
+    branches:
+      - develop
+      # - feature/ci-cd
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/dev-frontend-workflow.yml'
+      - 'k8s/dev/dev-frontend-deployment.yaml'
+      - 'k8s/dev/dev-frontend-service.yaml'
+
+jobs:
+  frontend-ci-cd:
+    name: Test, Build, and Push Frontend Image
+    runs-on: ubuntu-latest
+
+    environment:
+      name: dev
+
+    env:
+      REACT_APP_API_URL: ${{ secrets.VITE_FRONT_API_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: npm test -- --watchAll=false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create .env file for Docker build
+        working-directory: ./frontend
+        run: |
+          echo "VITE_FRONT_API_URL=${{ secrets.VITE_FRONT_API_URL }}" > .env
+
+      - name: Build and push Docker image
+        working-directory: ./frontend
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project
+          GIT_SHA=${{ github.sha }}
+
+          docker build -t $IMAGE_NAME:frontend-dev-$GIT_SHA -t $IMAGE_NAME:frontend-dev-latest -f Dockerfile.dev .
+
+          docker push $IMAGE_NAME:frontend-dev-$GIT_SHA
+          docker push $IMAGE_NAME:frontend-dev-latest
+
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      - name: Create Kubernetes secrets for frontend
+        run: |
+          kubectl create secret generic frontend-secret \
+            --from-literal=VITE_FRONT_API_URL=${{ secrets.VITE_FRONT_API_URL_K8S }} \
+            --namespace=dev \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create DockerHub Secret for Private Image Pulling
+        run: |
+          kubectl create secret docker-registry dockerhub-secret \
+            --docker-server=https://index.docker.io/v1/ \
+            --docker-username=${{ secrets.DOCKERHUB_USERNAME }} \
+            --docker-password=${{ secrets.DOCKERHUB_TOKEN }} \
+            --docker-email=${{ secrets.DOCKERHUB_EMAIL }} \
+            --namespace=dev \
+            --dry-run=client -o yaml | kubectl apply -f -
+      
+      - name: Set up (or update) kubernetes accounts, roles, and bindings
+        run: |
+          kubectl apply -f k8s/dev/dev-service-account.yaml --force
+          kubectl apply -f k8s/dev/dev-cluster-role.yaml --force
+          kubectl apply -f k8s/dev/dev-cluster-role-binding.yaml --force
+
+      - name: Get Fresh Kubernetes Service Account Token
+        run: |
+          export TOKEN=$(kubectl -n dev create token kiwi-ci-cd-service-account --duration=600s)
+          echo "K8S_TOKEN=${TOKEN}" >> $GITHUB_ENV
+
+      - name: Deploy to Kubernetes (dev)
+        uses: appleboy/kubernetes-action@v0.0.1
+        with:
+          server: ${{ secrets.K8S_SERVER }}
+          ca_cert: ${{ secrets.K8S_CA_CERT }}
+          token: ${{ secrets.K8S_TOKEN }}
+          namespace: dev
+          templates: k8s/dev/dev-frontend-*.yaml

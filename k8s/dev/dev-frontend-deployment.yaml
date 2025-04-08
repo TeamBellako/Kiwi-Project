@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiwi-frontend-dev
+  namespace: dev 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiwi-frontend-dev
+  template:
+    metadata:
+      labels:
+        app: kiwi-frontend-dev
+    spec:
+      serviceAccountName: kiwi-ci-cd-service-account
+      containers:
+      - name: kiwi-frontend-dev
+        image: danielrobledo/kiwi-project:frontend-dev-latest
+        ports:
+        - containerPort: 5173
+        env:
+        - name: VITE_FRONT_API_URL
+          valueFrom:
+            secretKeyRef:
+              name: frontend-secret
+              key: VITE_FRONT_API_URL
+      imagePullSecrets:
+        - name: dockerhub-secret
