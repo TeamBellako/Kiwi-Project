@@ -45,7 +45,7 @@ jobs:
         run: |
           kubectl apply -f k8s/dev/dev-traefik-service-account.yaml --overwrite
           kubectl apply -f k8s/dev/dev-traefik-cluster-role.yaml --overwrite
-          kubectl apply -f k8s/dev/dev-traefik-cluster.yaml --overwrite
+          kubectl apply -f k8s/dev/dev-traefik-cluster-role-binding.yaml --overwrite
       
       - name: Deploy and configure ingress
         run: |
