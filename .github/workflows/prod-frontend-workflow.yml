@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "VITE_FRONT_API_URL=${{ secrets.VITE_FRONT_API_URL }}" > .env
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image 
         working-directory: ./frontend
         run: |
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project

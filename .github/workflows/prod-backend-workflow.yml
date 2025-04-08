@@ -56,7 +56,7 @@ jobs:
         run: |
           ./mvnw test
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image 
         working-directory: ./backend
         run: |
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project

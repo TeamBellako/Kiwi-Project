@@ -58,7 +58,7 @@ jobs:
           name: kiwi-project-release-apk
           path: mobile/app/build/outputs/apk/release/app-release.apk
           
-      - name: Set APK Version
+      - name: Set APK Version 
         run: |
           VERSION_TAG=$(git describe --tags --abbrev=0 || date +'%Y-%m-%d-%H%M%S')
           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
