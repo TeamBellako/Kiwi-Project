@@ -4,15 +4,23 @@ metadata:
   name: traefik-cluster-role
 rules:
   - apiGroups: [""]
-    resources: ["services", "endpoints", "secrets"]
+    resources: ["services", "endpoints", "secrets", "pods"]
     verbs: ["get", "list", "watch"]
-  
+
   - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses"]
+    resources: ["ingresses", "ingressclasses"]
     verbs: ["get", "list", "watch"]
-  
+
   - apiGroups: ["traefik.containo.us"]
     resources: [
-      "ingressroutes", "middlewares", "tlsstores", "tlsoptions", "traefikservices", "serverstransports"
+      "ingressroutes", "middlewares", "tlsstores", "tlsoptions", "traefikservices", "serverstransports", 
+      "ingressrouteudps", "ingressroutetcps", "middlewares", "middlewaretcps", "traefikservices"
+    ]
+    verbs: ["get", "list", "watch"]
+
+  - apiGroups: ["traefik.containo.us"]
+    resources: [
+      "ingressroutetcps", "ingressrouteudps", "middlewaretcps", "traefikservices", "serverstransports", 
+      "tlsoptions", "tlsstores"
     ]
     verbs: ["get", "list", "watch"]
