@@ -55,6 +55,7 @@ jobs:
       - name: Run backend tests
         working-directory: ./backend
         run: |
+          chmod +x mvnw
           ./mvnw test
 
       - name: Build and push Docker image
