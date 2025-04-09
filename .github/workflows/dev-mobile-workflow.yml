@@ -63,7 +63,8 @@ jobs:
       - name: Authenticate Firebase
         run: |
           echo "${{ secrets.FIREBASE_CREDENTIALS }}" > ${HOME}/firebase.json
-          firebase use --add --project ${{ secrets.FIREBASE_PROJECT_ID }}
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase.json
+          firebase use --project ${{ secrets.FIREBASE_PROJECT_ID }}
 
       - name: Upload APK to Firebase App Distribution
         run: |
