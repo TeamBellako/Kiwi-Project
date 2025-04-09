@@ -24,3 +24,10 @@ rules:
       "tlsoptions", "tlsstores"
     ]
     verbs: ["get", "list", "watch"]
+    
+  - apiGroups: ["traefik.io"]
+    resources: ["ingressroutes", "middlewares", "traefikservices", "serverstransports", "tlsstores", "tlsoptions", "middlewaretcps", "ingressrouteudps", "ingressroutetcps"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
