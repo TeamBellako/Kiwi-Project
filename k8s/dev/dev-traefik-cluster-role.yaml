@@ -4,7 +4,7 @@ metadata:
   name: traefik-cluster-role
 rules:
   - apiGroups: [""]
-    resources: ["services", "endpoints", "secrets", "pods"]
+    resources: ["services", "endpoints", "secrets", "pods", "endpointslices", "nodes"]
     verbs: ["get", "list", "watch"]
 
   - apiGroups: ["networking.k8s.io"]
@@ -13,21 +13,22 @@ rules:
 
   - apiGroups: ["traefik.containo.us"]
     resources: [
-      "ingressroutes", "middlewares", "tlsstores", "tlsoptions", "traefikservices", "serverstransports", 
-      "ingressrouteudps", "ingressroutetcps", "middlewares", "middlewaretcps", "traefikservices"
+      "ingressroutes", "middlewares", "tlsstores", "tlsoptions", "traefikservices", "serverstransports",
+      "ingressrouteudps", "ingressroutetcps", "middlewaretcps"
     ]
     verbs: ["get", "list", "watch"]
 
-  - apiGroups: ["traefik.containo.us"]
-    resources: [
-      "ingressroutetcps", "ingressrouteudps", "middlewaretcps", "traefikservices", "serverstransports", 
-      "tlsoptions", "tlsstores"
-    ]
-    verbs: ["get", "list", "watch"]
-    
   - apiGroups: ["traefik.io"]
-    resources: ["ingressroutes", "middlewares", "traefikservices", "serverstransports", "tlsstores", "tlsoptions", "middlewaretcps", "ingressrouteudps", "ingressroutetcps"]
+    resources: [
+      "ingressroutes", "middlewares", "traefikservices", "serverstransports", "tlsstores", "tlsoptions",
+      "middlewaretcps", "ingressrouteudps", "ingressroutetcps"
+    ]
     verbs: ["get", "list", "watch", "create", "update", "delete"]
+
   - apiGroups: ["discovery.k8s.io"]
     resources: ["endpointslices"]
     verbs: ["get", "list", "watch"]
+
+  - apiGroups: ["traefik.containo.us"]
+    resources: ["certificatesresolvers"]
+    verbs: ["get", "list", "watch", "create"]
