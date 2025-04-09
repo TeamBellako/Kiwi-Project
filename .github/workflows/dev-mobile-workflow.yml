@@ -55,18 +55,9 @@ jobs:
           name: kiwi-project-debug-apk
           path: mobile/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Set up Firebase CLI
-        run: |
-          curl -sL https://firebase.tools | bash
-
-      - name: Authenticate Firebase with CI Token
-        run: |
-          firebase login:ci --token ${{ secrets.FIREBASE_CI_TOKEN }}
-
       - name: Upload APK to Firebase App Distribution
-        run: |
-          firebase appdistribution:distribute mobile/app/build/outputs/apk/debug/app-debug.apk \
-            --app ${{ secrets.FIREBASE_APP_ID }} \
-            --groups "Dev Testers" \
-            --token ${{ secrets.FIREBASE_CREDENTIALS }}
-        continue-on-error: false
+        uses: w9jds/firebase-action@v14.1.0
+        with:
+          args: appdistribution:distribute mobile/app/build/outputs/apk/debug/app-debug.apk --app ${{ secrets.FIREBASE_APP_ID }} --groups "Dev Testers"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_CI_TOKEN }}
