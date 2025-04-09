@@ -11,8 +11,6 @@ on:
       - 'k8s/dev/dev-frontend-deployment.yaml'
       - 'k8s/dev/dev-frontend-service.yaml'
       - 'k8s/dev/dev-frontend-ingress.yaml'
-      - 'k8s/dev/dev-traefik-deployment.yaml'
-      - 'k8s/dev/dev-traefik-service.yaml'
   pull_request:
     branches:
       - develop
@@ -23,8 +21,6 @@ on:
       - 'k8s/dev/dev-frontend-deployment.yaml'
       - 'k8s/dev/dev-frontend-service.yaml'
       - 'k8s/dev/dev-frontend-ingress.yaml'
-      - 'k8s/dev/dev-traefik-deployment.yaml'
-      - 'k8s/dev/dev-traefik-service.yaml'
 
 jobs:
   frontend-ci-cd:
