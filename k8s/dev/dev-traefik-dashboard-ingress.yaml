@@ -1,4 +1,4 @@
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1
 kind: IngressRoute
 metadata:
   name: traefik-dashboard
@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: dev.kiwibellako.com
+    - match: Host('dev.kiwibellako.com')
       kind: Rule
       services:
         - name: traefik-dashboard
