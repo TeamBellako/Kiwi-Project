@@ -21,7 +21,7 @@ rules:
   - apiGroups: ["traefik.io"]
     resources: [
       "ingressroutes", "middlewares", "traefikservices", "serverstransports", "tlsstores", "tlsoptions",
-      "middlewaretcps", "ingressrouteudps", "ingressroutetcps"
+      "middlewaretcps", "ingressrouteudps", "ingressroutetcps", "serverstransporttcps"
     ]
     verbs: ["get", "list", "watch", "create", "update", "delete"]
 
