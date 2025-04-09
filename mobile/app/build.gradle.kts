@@ -18,6 +18,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
 android {
@@ -32,7 +33,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.drobledo.kiwi"
+        applicationId = "com.kiwi"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -99,6 +100,8 @@ android {
 configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations"))}
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+    implementation(libs.firebase.analytics)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

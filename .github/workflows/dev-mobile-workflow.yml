@@ -54,3 +54,22 @@ jobs:
         with:
           name: kiwi-project-debug-apk
           path: mobile/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Set up Firebase CLI
+        run: |
+          curl -sL https://firebase.tools | bash
+        continue-on-error: false
+
+      - name: Authenticate Firebase
+        run: |
+          echo "${{ secrets.FIREBASE_CREDENTIALS }}" > ${HOME}/firebase.json
+          firebase login:ci --token ${{ secrets.FIREBASE_CREDENTIALS }}
+        continue-on-error: false
+
+      - name: Upload APK to Firebase App Distribution
+        run: |
+          firebase appdistribution:distribute mobile/app/build/outputs/apk/debug/app-debug.apk \
+            --app ${{ secrets.FIREBASE_APP_ID }} \
+            --groups "Dev Testers" \
+            --token ${{ secrets.FIREBASE_CREDENTIALS }}
+        continue-on-error: false
