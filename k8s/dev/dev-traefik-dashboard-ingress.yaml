@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: kube-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: dev.kiwibellako.com
+      kind: Rule
+      services:
+        - name: traefik-dashboard
+          port: 8080

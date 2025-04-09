@@ -13,6 +13,8 @@ on:
       - 'k8s/dev/dev-traefik-deployment.yaml'
       - 'k8s/dev/dev-traefik-service.yaml'
       - 'k8s/dev/dev-traefik-pvc.yaml'
+      - 'k8s/dev/dev-traefik-dashboard-ingress.yaml'
+      - 'k8s/dev/dev-traefik-dashboard-service.yaml'
   pull_request:
     branches:
       - develop
@@ -25,6 +27,8 @@ on:
       - 'k8s/dev/dev-traefik-deployment.yaml'
       - 'k8s/dev/dev-traefik-service.yaml'
       - 'k8s/dev/dev-traefik-pvc.yaml'
+      - 'k8s/dev/dev-traefik-dashboard-ingress.yaml'
+      - 'k8s/dev/dev-traefik-dashboard-service.yaml'
 
 jobs:
   frontend-ci-cd:
@@ -58,3 +62,8 @@ jobs:
           kubectl apply -f k8s/dev/dev-traefik-deployment.yaml
           kubectl apply -f k8s/dev/dev-traefik-service.yaml
           kubectl apply -f k8s/dev/dev-traefik-ingress.yaml
+
+      - name: Deploy and configure ingress for dashboard
+        run: |
+          kubectl apply -f k8s/dev/dev-traefik-dashboard-service.yaml
+          kubectl apply -f k8s/dev/dev-traefik-dashboard-ingress.yaml
