@@ -63,8 +63,7 @@ jobs:
       - name: Authenticate Firebase
         run: |
           echo "${{ secrets.FIREBASE_CREDENTIALS }}" > ${HOME}/firebase.json
-          firebase login:ci --token ${{ secrets.FIREBASE_CREDENTIALS }}
-        continue-on-error: false
+          firebase use --add --project ${{ secrets.FIREBASE_PROJECT_ID }}
 
       - name: Upload APK to Firebase App Distribution
         run: |
