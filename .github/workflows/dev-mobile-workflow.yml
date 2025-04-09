@@ -58,13 +58,10 @@ jobs:
       - name: Set up Firebase CLI
         run: |
           curl -sL https://firebase.tools | bash
-        continue-on-error: false
 
-      - name: Authenticate Firebase
+      - name: Authenticate Firebase with CI Token
         run: |
-          echo "${{ secrets.FIREBASE_CREDENTIALS }}" > ${HOME}/firebase.json
-          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase.json
-          firebase use --project ${{ secrets.FIREBASE_PROJECT_ID }}
+          firebase login:ci --token ${{ secrets.FIREBASE_CI_TOKEN }}
 
       - name: Upload APK to Firebase App Distribution
         run: |
