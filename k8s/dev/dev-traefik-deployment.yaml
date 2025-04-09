@@ -19,6 +19,7 @@ spec:
           image: traefik:v3.3
           args:
             - "--api.insecure=true"
+            - "--api.dashboard=true" 
             - "--entrypoints.web.address=:80"
             - "--entrypoints.websecure.address=:443"
             - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
