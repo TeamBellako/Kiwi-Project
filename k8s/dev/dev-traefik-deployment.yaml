@@ -14,27 +14,20 @@ spec:
         app: traefik
     spec:
       serviceAccountName: traefik-service-account
-      initContainers:
-        - name: fix-acme-json-permissions
-          image: busybox
-          command: ["sh", "-c", "chmod 600 /acme-storage/acme.json"]
-          volumeMounts:
-            - name: acme-storage
-              mountPath: /acme-storage
       containers:
         - name: traefik
           image: traefik:v3.3
           args:
-            - "--api.insecure=true" 
-            - "--entrypoints.web.address=:80" 
-            - "--entrypoints.websecure.address=:443"  
-            - "--certificatesresolvers.myresolver.acme.tlschallenge=true" 
-            - "--certificatesresolvers.myresolver.acme.email=bellakotech@example.com" 
-            - "--certificatesresolvers.myresolver.acme.storage=/acme-storage/acme.json"  
-            - "--log.level=DEBUG" 
-            - "--accesslog=true" 
-            - "--providers.kubernetescrd" 
-            - "--providers.kubernetesingress" 
+            - "--api.insecure=true"
+            - "--entrypoints.web.address=:80"
+            - "--entrypoints.websecure.address=:443"
+            - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+            - "--certificatesresolvers.myresolver.acme.email=bellakotech@example.com"
+            - "--certificatesresolvers.myresolver.acme.storage=/acme-storage/acme.json"
+            - "--log.level=DEBUG"
+            - "--accesslog=true"
+            - "--providers.kubernetescrd"
+            - "--providers.kubernetesingress"
           volumeMounts:
             - name: acme-storage
               mountPath: /acme-storage
@@ -42,4 +35,5 @@ spec:
               readOnly: false
       volumes:
         - name: acme-storage
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: acme-storage-pvc
