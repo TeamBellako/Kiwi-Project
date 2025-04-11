@@ -13,6 +13,17 @@ if (envFileProd.exists()) {
     envPropertiesProd.load(envFileProd.inputStream())
 }
 
+fun getVersionCodeFromCI(): Int {
+    val runNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+    return runNumber
+}
+
+fun getVersionNameFromCI(): String {
+    val sha = System.getenv("GITHUB_SHA")?.take(7) ?: "dev"
+    return "0.1.$sha"
+}
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -46,6 +57,11 @@ android {
             "\"${envPropertiesDev["MOBILE_API_URL"]}\""
         )
 
+        defaultConfig {
+            versionCode = getVersionCodeFromCI()
+            versionName = getVersionNameFromCI()
+        }
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -66,6 +82,15 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            val ciVersionCode: String? by project
+            val ciVersionName: String? by project
+
+            defaultConfig {
+                versionCode = ciVersionCode?.toIntOrNull() ?: 1
+                versionName = ciVersionName ?: "0.1.0"
+            }
+
         }
         release {
             buildConfigField(
