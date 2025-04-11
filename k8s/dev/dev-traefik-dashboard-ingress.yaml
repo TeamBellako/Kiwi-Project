@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host('dev.kiwibellako.com')
+    - match: Host(`dev.kiwibellako.com`)
       kind: Rule
       services:
         - name: traefik-dashboard
