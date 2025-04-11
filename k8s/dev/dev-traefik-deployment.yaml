@@ -16,6 +16,8 @@ spec:
       serviceAccountName: traefik-service-account
       containers:
         - name: traefik
+          ports:
+          - containerPort: 80
           image: traefik:v3.3
           args:
             - "--api.insecure=true"
