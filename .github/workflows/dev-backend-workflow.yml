@@ -8,8 +8,8 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/dev-backend-workflow.yml'
-      - 'k8s/dev/dev-backend-deployment.yml'
-      - 'k8s/dev/dev-backend-service.yml'
+      - 'k8s/dev/dev-backend-deployment.yaml'
+      - 'k8s/dev/dev-backend-service.yaml'
   pull_request:
     branches:
       - develop
@@ -17,8 +17,8 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/dev-backend-workflow.yml'
-      - 'k8s/dev/dev-backend-deployment.yml'
-      - 'k8s/dev/dev-backend-service.yml'
+      - 'k8s/dev/dev-backend-deployment.yaml'
+      - 'k8s/dev/dev-backend-service.yaml'
 
 jobs:
   backend-ci-cd:
