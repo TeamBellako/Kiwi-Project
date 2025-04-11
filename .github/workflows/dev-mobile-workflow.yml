@@ -58,6 +58,7 @@ jobs:
       - name: Upload APK to Firebase App Distribution
         uses: w9jds/firebase-action@v14.1.0
         with:
-          args: appdistribution:distribute mobile/app/build/outputs/apk/debug/app-debug.apk --app ${{ secrets.FIREBASE_APP_ID }} --groups "Dev Testers"
+          args: appdistribution:distribute mobile/app/build/outputs/apk/debug/app-debug.apk --app ${{ secrets.FIREBASE_APP_ID }} --groups "Dev Testers" --debug
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_CI_TOKEN }}
+          PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
