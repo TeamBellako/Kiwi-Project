@@ -17,6 +17,7 @@ spec:
       containers:
       - name: kiwi-frontend-dev
         image: danielrobledo/kiwi-project:frontend-dev-latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5173
         env:

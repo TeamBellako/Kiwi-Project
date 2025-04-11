@@ -17,6 +17,7 @@ spec:
       containers:
       - name: kiwi-backend-dev
         image: danielrobledo/kiwi-project:backend-dev-latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
