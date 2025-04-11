@@ -49,16 +49,12 @@ jobs:
         run: ./gradlew assembleDebug
         working-directory: ./mobile
 
-      - name: Upload APK as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kiwi-project-debug-apk
-          path: mobile/app/build/outputs/apk/debug/app-debug.apk
+      - name: Write service account key
+        run: echo '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}' > ${GITHUB_WORKSPACE}/firebase-key.json
 
       - name: Upload APK to Firebase App Distribution
         uses: w9jds/firebase-action@v14.1.0
         with:
-          args: appdistribution:distribute mobile/app/build/outputs/apk/debug/app-debug.apk --app ${{ secrets.FIREBASE_APP_ID }} --groups "Dev Testers" --debug
+          args: appdistribution:distribute --app ${{ secrets.FIREBASE_APP_ID }} --project your-project-id --groups "Dev Testers" --file mobile/app/build/outputs/apk/debug/app-debug.apk --debug
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_CI_TOKEN }}
-          PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-key.json
