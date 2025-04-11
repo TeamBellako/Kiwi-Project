@@ -55,11 +55,12 @@ jobs:
           name: kiwi-project-debug-apk
           path: mobile/app/build/outputs/apk/debug/app-debug.apk
 
+      - name: Write service account key
+        run: echo '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}' > ${GITHUB_WORKSPACE}/firebase-key.json
+
       - name: Upload APK to Firebase App Distribution
         uses: w9jds/firebase-action@v14.1.0
         with:
           args: appdistribution:distribute mobile/app/build/outputs/apk/debug/app-debug.apk --app ${{ secrets.FIREBASE_APP_ID }} --project ${{ secrets.FIREBASE_PROJECT_ID }} --groups "Dev Testers" --debug
-
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_CI_TOKEN }}
-
-          
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-key.json
