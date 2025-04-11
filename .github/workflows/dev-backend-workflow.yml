@@ -104,7 +104,6 @@ jobs:
           export TOKEN=$(kubectl -n dev create token kiwi-ci-cd-service-account --duration=600s)
           echo "K8S_TOKEN=${TOKEN}" >> $GITHUB_ENV
         
-
       - name: Deploy to Kubernetes (dev)
         uses: appleboy/kubernetes-action@v0.0.1
         with:
@@ -113,3 +112,7 @@ jobs:
           token: ${{ env.K8S_TOKEN }}
           namespace: dev
           templates: k8s/dev/dev-backend-*.yaml
+
+      - name: Restart deployment to pull latest image
+        run: |
+          kubectl rollout restart deployment/kiwi-backend-dev -n dev

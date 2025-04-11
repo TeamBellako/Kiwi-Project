@@ -116,3 +116,7 @@ jobs:
           token: ${{ env.K8S_TOKEN }}
           namespace: dev
           templates: k8s/dev/dev-frontend-*.yaml
+      
+      - name: Restart deployment to pull latest image
+        run: |
+          kubectl rollout restart deployment/kiwi-frontend-dev -n dev
