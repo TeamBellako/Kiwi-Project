@@ -70,9 +70,9 @@ jobs:
           IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project
           GIT_SHA=${{ github.sha }}
 
-          docker build -t $IMAGE_NAME:frontend-dev:$GIT_SHA -t $IMAGE_NAME:frontend-dev:latest -f Dockerfile.dev .
+          docker build -t $IMAGE_NAME:frontend-dev-$GIT_SHA -t $IMAGE_NAME:frontend-dev:latest -f Dockerfile.dev .
 
-          docker push $IMAGE_NAME:frontend-dev:$GIT_SHA
+          docker push $IMAGE_NAME:frontend-dev-$GIT_SHA
           docker push $IMAGE_NAME:frontend-dev:latest
 
       - name: Set up Kubeconfig
