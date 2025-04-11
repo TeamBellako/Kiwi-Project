@@ -25,7 +25,7 @@ public class HelloController {
             return ResponseEntity.ok(Collections.singletonMap("message", message));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("message", "Message not found, I'm sorry"));
+                    .body(Collections.singletonMap("message", "Message not found"));
         }
     }
 }
