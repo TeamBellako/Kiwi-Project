@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0',
-    allowedHosts: ["dev.kiwibellako.com", "localhost", "127.0.0.1"],
+    allowedHosts: ["kiwibellako.com", "dev.kiwibellako.com", "localhost", "127.0.0.1"],
     watch: {
       usePolling: true,
     }
