@@ -16,7 +16,7 @@ spec:
       serviceAccountName: kiwi-ci-cd-service-account
       containers:
       - name: kiwi-frontend-dev
-        image: teambellako/kiwi-project-frontend-dev:latest
+        image: teambellako/kiwi-project:frontend-dev-latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5173
