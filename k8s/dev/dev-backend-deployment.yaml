@@ -16,7 +16,7 @@ spec:
       serviceAccountName: kiwi-ci-cd-service-account
       containers:
       - name: kiwi-backend-dev
-        image: danielrobledo/kiwi-project:backend-dev-latest
+        image: teambellako/kiwi-project:backend-dev-latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
