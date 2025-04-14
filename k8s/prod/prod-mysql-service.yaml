@@ -8,10 +8,19 @@ metadata:
     tier: database
     environment: prod
 spec:
-  type: ClusterIP 
+  type: NodePort
   selector:
-    app: kiwi-mysql-prod
+    app: kiwi-mysql-dev
   ports:
     - protocol: TCP
-      port: 3306
+      port: 3306 
       targetPort: 3306
+      nodePort: 30307
+# spec:
+#   type: ClusterIP 
+#   selector:
+#     app: kiwi-mysql-prod
+#   ports:
+#     - protocol: TCP
+#       port: 3306
+#       targetPort: 3306

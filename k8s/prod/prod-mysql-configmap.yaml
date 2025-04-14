@@ -3,14 +3,10 @@ kind: ConfigMap
 metadata:
   name: kiwi-mysql-prod-init-script
   namespace: prod
-  labels:
-    app: kiwi-mysql-prod
-    tier: database
-    environment: prod
 data:
   init-db.sh: |
-    #!/usr/bin/env bash
-    set -euo pipefail
+    #!/usr/bin/bash
+    set -e
 
     TMP_MY_CNF="/tmp/.my.cnf"
 
