@@ -3,12 +3,8 @@ kind: Deployment
 metadata:
   name: kiwi-frontend-prod
   namespace: prod
-  labels:
-    app: kiwi-frontend-prod
-    tier: frontend
-    environment: prod
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: kiwi-frontend-prod
@@ -16,8 +12,6 @@ spec:
     metadata:
       labels:
         app: kiwi-frontend-prod
-        tier: frontend
-        environment: prod
     spec:
       serviceAccountName: kiwi-ci-cd-service-account
       containers:
@@ -32,24 +26,5 @@ spec:
                 secretKeyRef:
                   name: frontend-secret
                   key: VITE_FRONT_API_URL
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "250m"
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 5173
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 5173
-            initialDelaySeconds: 15
-            periodSeconds: 20
       imagePullSecrets:
         - name: dockerhub-secret
