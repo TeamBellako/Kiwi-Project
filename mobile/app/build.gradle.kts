@@ -1,17 +1,6 @@
 import org.gradle.kotlin.dsl.implementation
-import java.util.Properties
 
-val envPropertiesDev = Properties()
-val envFileDev = rootProject.file(".env.dev")
-if (envFileDev.exists()) {
-    envPropertiesDev.load(envFileDev.inputStream())
-}
-
-val envPropertiesProd = Properties()
-val envFileProd = rootProject.file(".env.prod")
-if (envFileProd.exists()) {
-    envPropertiesProd.load(envFileProd.inputStream())
-}
+val mobileApiUrl: String = System.getenv("MOBILE_API_URL") ?: "http://10.0.2.2:8080"
 
 fun getVersionCodeFromCI(): Int {
     val runNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
@@ -22,7 +11,6 @@ fun getVersionNameFromCI(): String {
     val sha = System.getenv("GITHUB_SHA")?.take(7) ?: "dev"
     return "0.1.$sha"
 }
-
 
 plugins {
     alias(libs.plugins.android.application)
@@ -51,27 +39,17 @@ android {
         versionName = "1.0"
         android.buildFeatures.buildConfig = true
 
-        buildConfigField(
-            "String",
-            "MOBILE_API_URL",
-            "\"${envPropertiesDev["MOBILE_API_URL"]}\""
-        )
-
         defaultConfig {
             versionCode = getVersionCodeFromCI()
             versionName = getVersionNameFromCI()
         }
-
+        buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         debug {
-            buildConfigField(
-                "String",
-                "MOBILE_API_URL",
-                "\"${envPropertiesDev["MOBILE_API_URL"]}\""
-            )
+            buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
             buildConfigField(
                 "boolean",
                 "LOGGING_ENABLED",
@@ -93,11 +71,7 @@ android {
 
         }
         release {
-            buildConfigField(
-                "String",
-                "MOBILE_API_URL",
-                "\"${envPropertiesProd["MOBILE_API_URL"]}\""
-            )
+            buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
             buildConfigField(
                 "boolean",
                 "LOGGING_ENABLED",
@@ -125,7 +99,7 @@ android {
 configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations"))}
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+    implementation(libs.firebase.bom)
     implementation(libs.firebase.analytics)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

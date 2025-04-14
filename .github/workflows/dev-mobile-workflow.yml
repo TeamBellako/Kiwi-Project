@@ -34,9 +34,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Write .env file
-        run: |
-          sed -i 's|^MOBILE_API_URL=.*|MOBILE_API_URL=${{ secrets.MOBILE_API_URL }}|' mobile/.env.dev
+      - name: Set API URL
+        run: echo "MOBILE_API_URL=${{ secrets.MOBILE_API_URL }}" >> $GITHUB_ENV
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
