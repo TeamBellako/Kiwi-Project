@@ -187,4 +187,9 @@ dependencies {
     testImplementation(libs.mockito.inline)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.core.testing.v210)
+
+    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.google.firebase.analytics)
 }
