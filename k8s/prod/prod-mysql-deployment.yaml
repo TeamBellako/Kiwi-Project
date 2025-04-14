@@ -26,7 +26,6 @@ spec:
       securityContext:
         runAsNonRoot: false
         runAsUser: 0
-        allowPrivilegeEscalation: false
       volumes:
         - name: kiwi-mysql-prod-init-script-volume
           configMap:
