@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiwi-mysql-prod
+  namespace: prod
+  labels:
+    app: kiwi-mysql-prod
+    tier: database
+    environment: prod
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3306"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiwi-mysql-prod
+  template:
+    metadata:
+      labels:
+        app: kiwi-mysql-prod
+        tier: database
+        environment: prod
+    spec:
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        allowPrivilegeEscalation: false
+      volumes:
+        - name: kiwi-mysql-prod-init-script-volume
+          configMap:
+            name: kiwi-mysql-prod-init-script
+        - name: kiwi-mysql-prod-data
+          persistentVolumeClaim:
+            claimName: kiwi-mysql-prod-pvc
+      containers:
+        - name: kiwi-mysql-prod
+          image: mysql:8.0.36
+          ports:
+            - containerPort: 3306
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_DATABASE
+            - name: MYSQL_INIT_TABLE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_INIT_TABLE
+            - name: BACKEND_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: BACKEND_DB_USERNAME
+            - name: BACKEND_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: BACKEND_DB_PASSWORD
+            - name: TEAM_ROLE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: TEAM_ROLE
+            - name: TEAM_01_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: TEAM_01_USERNAME
+            - name: TEAM_01_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: TEAM_01_PASSWORD
+            - name: TEAM_02_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: TEAM_02_USERNAME
+            - name: TEAM_02_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: TEAM_02_PASSWORD
+            - name: TEAM_03_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: TEAM_03_USERNAME
+            - name: TEAM_03_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: TEAM_03_PASSWORD
+          volumeMounts:
+            - name: kiwi-mysql-prod-init-script-volume
+              mountPath: /docker-entrypoint-initdb.d
+            - name: kiwi-mysql-prod-data
+              mountPath: /var/lib/mysql
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 10
+            periodSeconds: 5

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kiwi-mysql-prod-service
+  namespace: prod
+  labels:
+    app: kiwi-mysql-prod
+    tier: database
+    environment: prod
+spec:
+  type: ClusterIP 
+  selector:
+    app: kiwi-mysql-prod
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306

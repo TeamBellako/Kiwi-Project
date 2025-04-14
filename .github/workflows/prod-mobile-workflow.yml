@@ -15,6 +15,7 @@ on:
         - 'v*'
     branches:
       - main
+      - feature/ci-cd
     paths:
       - 'mobile/**'
       - '.github/workflows/prod-mobile-workflow.yml'
@@ -36,6 +37,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      
+      - name: Write .env file
+        run: |
+          echo "${{ secrets.MOBILE_API_URL }}" > mobile/.env.prod
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -48,14 +53,15 @@ jobs:
         run: ./gradlew test
         working-directory: ./mobile
 
-      - name: Build release APK
-        run: ./gradlew assembleRelease
+      - name: Build Release APK with CI versioning
+        run: |
+          ./gradlew assembleRelease -PversionCode=${{ github.run_number }} -PversionName="0.1.${{ github.sha }}"
         working-directory: ./mobile
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kiwi-project-release-apk
+          name: kiwi-project-release-apk-${{ github.run_number }}
           path: mobile/app/build/outputs/apk/release/app-release.apk
           
       - name: Set APK Version 
