@@ -1,6 +1,6 @@
 [versions]
 activityComposeVersion = "1.8.1"
-agp = "8.11.0-alpha02"
+agp = "8.11.0-alpha06"
 androidxJunit = "1.1.5"
 androidxLifecycleRuntimeKtx = "2.6.1"
 converterGson = "2.9.0"

@@ -36,7 +36,7 @@ jobs:
 
       - name: Write .env file
         run: |
-          echo "${{ secrets.MOBILE_API_URL }}" > mobile/.env.dev
+          sed -i 's|^MOBILE_API_URL=.*|MOBILE_API_URL=${{ secrets.MOBILE_API_URL }}|' mobile/.env.dev
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
