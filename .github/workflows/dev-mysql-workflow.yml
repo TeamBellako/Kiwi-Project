@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - feature/ci-cd
     paths:
       - '.github/workflows/dev-mysql-workflow.yml'
       - 'k8s/dev/dev-mysql-deployment.yaml'
@@ -14,7 +13,6 @@ on:
   pull_request:
     branches:
       - develop
-      - feature/ci-cd
     paths:
       - '.github/workflows/dev-mysql-workflow.yml'
       - 'k8s/dev/dev-mysql-deployment.yaml'

@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature/ci-cd
     tags:
       - 'v*'
     paths:
@@ -17,6 +16,8 @@ on:
   pull_request:
     branches:
       - main
+    tags:
+      - 'v*'
     paths:
       - 'frontend/**'
       - '.github/workflows/prod-frontend-workflow.yml'

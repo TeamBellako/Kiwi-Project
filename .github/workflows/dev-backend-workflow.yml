@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - feature/ci-cd
     paths:
       - 'backend/**'
       - '.github/workflows/dev-backend-workflow.yml'
@@ -13,7 +12,6 @@ on:
   pull_request:
     branches:
       - develop
-      - feature/ci-cd
     paths:
       - 'backend/**'
       - '.github/workflows/dev-backend-workflow.yml'

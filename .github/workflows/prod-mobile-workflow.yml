@@ -11,11 +11,11 @@ on:
       - 'mobile/**'
       - '.github/workflows/prod-mobile-workflow.yml'
   pull_request:
-    tags:
-        - 'v*'
     branches:
       - main
       - feature/ci-cd
+    tags:
+        - 'v*'
     paths:
       - 'mobile/**'
       - '.github/workflows/prod-mobile-workflow.yml'

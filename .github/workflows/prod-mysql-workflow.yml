@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature/ci-cd
     paths:
       - '.github/workflows/prod-mysql-workflow.yml'
       - 'k8s/prod/prod-mysql-deployment.yaml'
@@ -14,7 +13,6 @@ on:
   pull_request:
     branches:
       - main
-      - feature/ci-cd
     paths:
       - '.github/workflows/prod-mysql-workflow.yml'
       - 'k8s/prod/prod-mysql-deployment.yaml'
