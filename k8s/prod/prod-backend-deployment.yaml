@@ -4,7 +4,7 @@ metadata:
   name: kiwi-backend-prod
   namespace: prod
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: kiwi-backend-prod
@@ -36,24 +36,5 @@ spec:
                 secretKeyRef:
                   name: backend-secret
                   key: BACKEND_DB_PASSWORD
-          resources:
-            requests:
-              cpu: "200m"
-              memory: "512Mi"
-            limits:
-              cpu: "500m"
-              memory: "1Gi"
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 5
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 10
       imagePullSecrets:
         - name: dockerhub-secret
