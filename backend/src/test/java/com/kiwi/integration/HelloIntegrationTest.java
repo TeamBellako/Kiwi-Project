@@ -1,8 +1,12 @@
 package com.kiwi.integration;
 
+import com.kiwi.entity.HelloDB;
 import com.kiwi.repository.HelloRepository;
-import com.kiwi.utils.HelloBaseTest;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import org.junit.Test;
@@ -23,17 +27,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Transactional
 @Sql(scripts = "/setUpH2DB.sql")
 @ActiveProfiles("test")
-public class HelloIntegrationTest extends HelloBaseTest {
+public class HelloIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
-
+    
     @Autowired
     private HelloRepository helloRepository;
 
+
     @Test
     public void GetMessageByID_ReturnsMessage_IfItExists() throws Exception {
-        super.setUp(); // calling super here because SpringRunner doesn't automatically do it so
-
+        HelloDB helloDB = new HelloDB(1, "Hello World!");
         helloRepository.save(helloDB);
 
         mockMvc.perform(get("/api/hello/1"))

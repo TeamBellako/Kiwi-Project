@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class HelloDB {
     @Id
     @Column(name = "id")
-    private int id;
+    private Integer id;
     
     @Column(name = "message")
     private String message;
@@ -15,16 +15,16 @@ public class HelloDB {
     public HelloDB() {
     }
 
-    public HelloDB(int id, String message) {
+    public HelloDB(Integer id, String message) {
         this.id = id;
         this.message = message;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
