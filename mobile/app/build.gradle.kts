@@ -9,7 +9,7 @@ fun getVersionCodeFromCI(): Int {
 
 fun getVersionNameFromCI(): String {
     val sha = System.getenv("GITHUB_SHA")?.take(7) ?: "dev"
-    return "0.1.$sha"
+    return "0.0.$sha"
 }
 
 plugins {
@@ -35,14 +35,11 @@ android {
         applicationId = "com.kiwi"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
         android.buildFeatures.buildConfig = true
 
-        defaultConfig {
-            versionCode = getVersionCodeFromCI()
-            versionName = getVersionNameFromCI()
-        }
+        versionCode = getVersionCodeFromCI()
+        versionName = getVersionNameFromCI()
+
         buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
