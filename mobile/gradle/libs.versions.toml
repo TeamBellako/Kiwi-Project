@@ -1,6 +1,6 @@
 [versions]
 activityComposeVersion = "1.8.1"
-agp = "8.11.0-alpha02"
+agp = "8.11.0-alpha06"
 androidxJunit = "1.1.5"
 androidxLifecycleRuntimeKtx = "2.6.1"
 converterGson = "2.9.0"
@@ -8,6 +8,7 @@ core = "1.6.1"
 coreTesting = "2.2.0"
 coreTestingVersion = "2.1.0"
 espressoCoreVersion = "3.5.1"
+firebaseBom = "33.12.0"
 junitJupiterApi = "5.12.1"
 junitJupiterEngine = "5.8.2"
 kotlin = "2.0.21"
@@ -57,6 +58,10 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+google-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

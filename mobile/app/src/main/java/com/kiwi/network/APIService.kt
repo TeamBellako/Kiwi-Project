@@ -7,8 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-object RetrofitClient {
-    private val retrofit: Retrofit = Retrofit.Builder()
+object RetrofitClient { private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BuildConfig.MOBILE_API_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

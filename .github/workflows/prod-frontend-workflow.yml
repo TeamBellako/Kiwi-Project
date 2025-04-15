@@ -9,6 +9,10 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/prod-frontend-workflow.yml'
+      - 'k8s/prod/prod-frontend-deployment.yaml'
+      - 'k8s/prod/prod-frontend-service.yaml'
+      - 'k8s/prod/prod-frontend-ingress.yaml'
+
   pull_request:
     branches:
       - main
@@ -17,17 +21,20 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/prod-frontend-workflow.yml'
+      - 'k8s/prod/prod-frontend-deployment.yaml'
+      - 'k8s/prod/prod-frontend-service.yaml'
+      - 'k8s/prod/prod-frontend-ingress.yaml'
 
 jobs:
   frontend-ci-cd:
-    name: Test, Build, and Push Frontend
+    name: Test, Build, and Deploy Frontend (Prod)
     runs-on: ubuntu-latest
 
     environment:
       name: prod
 
     env:
-      REACT_APP_API_URL: ${{ secrets.VITE_FRONT_API_URL }}
+      VITE_FRONT_API_URL: ${{ secrets.VITE_FRONT_API_URL }}
 
     steps:
       - name: Checkout code
@@ -63,11 +70,57 @@ jobs:
       - name: Build and push Docker image
         working-directory: ./frontend
         run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project:frontend-prod
           GIT_SHA=${{ github.sha }}
           VERSION_TAG=$(git describe --tags --abbrev=0 || date +'%Y-%m-%d-%H%M%S')
 
-          docker build -t $IMAGE_NAME:frontend-prod-$VERSION_TAG -t $IMAGE_NAME:frontend-prod-latest -f Dockerfile.prod .
+          docker build -t $IMAGE_NAME-$VERSION_TAG -t $IMAGE_NAME-latest -f Dockerfile.prod .
 
-          docker push $IMAGE_NAME:frontend-prod-$VERSION_TAG
-          docker push $IMAGE_NAME:frontend-prod-latest
+          docker push $IMAGE_NAME-$VERSION_TAG
+          docker push $IMAGE_NAME-latest
+
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      - name: Create Kubernetes secrets for frontend
+        run: |
+          kubectl create secret generic frontend-secret \
+            --from-literal=VITE_FRONT_API_URL=${{ secrets.VITE_FRONT_API_URL_K8S }} \
+            --namespace=prod \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create DockerHub Secret for Private Image Pulling
+        run: |
+          kubectl create secret docker-registry dockerhub-secret \
+            --docker-server=https://index.docker.io/v1/ \
+            --docker-username=${{ secrets.DOCKERHUB_USERNAME }} \
+            --docker-password=${{ secrets.DOCKERHUB_TOKEN }} \
+            --docker-email=${{ secrets.DOCKERHUB_EMAIL }} \
+            --namespace=prod \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Set up (or update) Kubernetes accounts, roles, and bindings
+        run: |
+          kubectl apply -f k8s/prod/prod-service-account.yaml --overwrite
+          kubectl apply -f k8s/prod/prod-cluster-role.yaml --overwrite
+          kubectl apply -f k8s/prod/prod-cluster-role-binding.yaml --overwrite
+
+      - name: Get Fresh Kubernetes Service Account Token
+        run: |
+          export TOKEN=$(kubectl -n prod create token kiwi-ci-cd-service-account --duration=600s)
+          echo "K8S_TOKEN=${TOKEN}" >> $GITHUB_ENV
+
+      - name: Deploy to Kubernetes (prod)
+        uses: appleboy/kubernetes-action@v0.0.1
+        with:
+          server: ${{ secrets.K8S_SERVER }}
+          ca_cert: ${{ secrets.K8S_CA_CERT }}
+          token: ${{ env.K8S_TOKEN }}
+          namespace: prod
+          templates: k8s/prod/prod-frontend-*.yaml
+
+      - name: Restart deployment to pull latest image
+        run: |
+          kubectl rollout restart deployment/kiwi-frontend-prod -n prod

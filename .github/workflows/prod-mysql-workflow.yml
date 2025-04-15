@@ -1,32 +1,32 @@
-name: MySQL CD (Dev)
-  
+name: MySQL CD (Prod)
+
 on:
   push:
     branches:
-      - develop
+      - main
     paths:
-      - '.github/workflows/dev-mysql-workflow.yml'
-      - 'k8s/dev/dev-mysql-deployment.yaml'
-      - 'k8s/dev/dev-mysql-service.yaml'
-      - 'k8s/dev/dev-mysql-configmap.yaml'
-      - 'k8s/dev/dev-mysql-pvc.yaml'
+      - '.github/workflows/prod-mysql-workflow.yml'
+      - 'k8s/prod/prod-mysql-deployment.yaml'
+      - 'k8s/prod/prod-mysql-service.yaml'
+      - 'k8s/prod/prod-mysql-configmap.yaml'
+      - 'k8s/prod/prod-mysql-pvc.yaml'
   pull_request:
     branches:
-      - develop
+      - main
     paths:
-      - '.github/workflows/dev-mysql-workflow.yml'
-      - 'k8s/dev/dev-mysql-deployment.yaml'
-      - 'k8s/dev/dev-mysql-service.yaml'
-      - 'k8s/dev/dev-mysql-configmap.yaml'
-      - 'k8s/dev/dev-mysql-pvc.yaml'
+      - '.github/workflows/prod-mysql-workflow.yml'
+      - 'k8s/prod/prod-mysql-deployment.yaml'
+      - 'k8s/prod/prod-mysql-service.yaml'
+      - 'k8s/prod/prod-mysql-configmap.yaml'
+      - 'k8s/prod/prod-mysql-pvc.yaml'
 
 jobs:
   mysql-cd:
-    name: Deploy MySQL (Dev)
+    name: Deploy MySQL (Prod)
     runs-on: ubuntu-latest
 
     environment:
-      name: dev
+      name: prod
 
     steps:
       - name: Checkout code
@@ -52,18 +52,18 @@ jobs:
             --from-literal=TEAM_02_PASSWORD=${{ secrets.TEAM_02_PASSWORD }} \
             --from-literal=TEAM_03_USERNAME=${{ secrets.TEAM_03_USERNAME }} \
             --from-literal=TEAM_03_PASSWORD=${{ secrets.TEAM_03_PASSWORD }} \
-            --namespace=dev \
+            --namespace=prod \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy MySQL PVC for persistent storage
         run: |
-          kubectl apply -f k8s/dev/dev-mysql-pvc.yaml
-          
+          kubectl apply -f k8s/prod/prod-mysql-pvc.yaml
+
       - name: Deploy MySQL ConfigMap for initialization script
         run: |
-          kubectl apply -f k8s/dev/dev-mysql-configmap.yaml
+          kubectl apply -f k8s/prod/prod-mysql-configmap.yaml
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f k8s/dev/dev-mysql-deployment.yaml
-          kubectl apply -f k8s/dev/dev-mysql-service.yaml
+          kubectl apply -f k8s/prod/prod-mysql-deployment.yaml
+          kubectl apply -f k8s/prod/prod-mysql-service.yaml

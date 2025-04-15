@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiwi-backend-prod
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiwi-backend-prod
+  template:
+    metadata:
+      labels:
+        app: kiwi-backend-prod
+    spec:
+      serviceAccountName: kiwi-ci-cd-service-account
+      containers:
+        - name: kiwi-backend-prod
+          image: teambellako/kiwi-project:backend-prod-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: BACKEND_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: BACKEND_DB_URL_K8S
+            - name: BACKEND_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: BACKEND_DB_USERNAME
+            - name: BACKEND_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: BACKEND_DB_PASSWORD
+      imagePullSecrets:
+        - name: dockerhub-secret

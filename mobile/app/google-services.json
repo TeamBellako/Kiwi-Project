@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "37652561141",
+    "project_id": "kiwi-project-e4971",
+    "storage_bucket": "kiwi-project-e4971.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:37652561141:android:49446fa8561511256c59bc",
+        "android_client_info": {
+          "package_name": "com.kiwi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKzYyPP49WB-5ajv2yi6vewucxCt8teeI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

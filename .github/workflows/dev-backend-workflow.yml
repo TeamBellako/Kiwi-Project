@@ -3,22 +3,20 @@ name: Backend CI/CD (Dev)
 on:
   push:
     branches:
-      # - develop
-      # - feature/ci-cd
+      - develop
     paths:
       - 'backend/**'
       - '.github/workflows/dev-backend-workflow.yml'
-      - 'k8s/dev/dev-backend-deployment.yml'
-      - 'k8s/dev/dev-backend-service.yml'
+      - 'k8s/dev/dev-backend-deployment.yaml'
+      - 'k8s/dev/dev-backend-service.yaml'
   pull_request:
     branches:
-      # - develop
-      # - feature/ci-cd
+      - develop
     paths:
       - 'backend/**'
       - '.github/workflows/dev-backend-workflow.yml'
-      - 'k8s/dev/dev-backend-deployment.yml'
-      - 'k8s/dev/dev-backend-service.yml'
+      - 'k8s/dev/dev-backend-deployment.yaml'
+      - 'k8s/dev/dev-backend-service.yaml'
 
 jobs:
   backend-ci-cd:
@@ -51,22 +49,23 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+    
       - name: Run backend tests
         working-directory: ./backend
         run: |
+          chmod +x mvnw
           ./mvnw test
 
       - name: Build and push Docker image
         working-directory: ./backend
         run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project:backend-dev
           GIT_SHA=${{ github.sha }}
 
-          docker build -t $IMAGE_NAME:backend-dev-$GIT_SHA -t $IMAGE_NAME:backend-dev-latest -f Dockerfile.dev .
+          docker build -t $IMAGE_NAME-$GIT_SHA -t $IMAGE_NAME-latest -f Dockerfile.dev .
 
-          docker push $IMAGE_NAME:backend-dev-$GIT_SHA
-          docker push $IMAGE_NAME:backend-dev-latest
+          docker push $IMAGE_NAME-$GIT_SHA
+          docker push $IMAGE_NAME-latest
       
       - name: Set up Kubeconfig
         run: |
@@ -94,16 +93,15 @@ jobs:
 
       - name: Set up (or update) kubernetes accounts, roles, and bindings
         run: |
-          kubectl apply -f k8s/dev/dev-service-account.yaml --force
-          kubectl apply -f k8s/dev/dev-cluster-role.yaml --force
-          kubectl apply -f k8s/dev/dev-cluster-role-binding.yaml --force
+          kubectl apply -f k8s/dev/dev-service-account.yaml --overwrite
+          kubectl apply -f k8s/dev/dev-cluster-role.yaml --overwrite
+          kubectl apply -f k8s/dev/dev-cluster-role-binding.yaml --overwrite
 
       - name: Get Fresh Kubernetes Service Account Token 
         run: |
           export TOKEN=$(kubectl -n dev create token kiwi-ci-cd-service-account --duration=600s)
           echo "K8S_TOKEN=${TOKEN}" >> $GITHUB_ENV
         
-
       - name: Deploy to Kubernetes (dev)
         uses: appleboy/kubernetes-action@v0.0.1
         with:
@@ -112,3 +110,7 @@ jobs:
           token: ${{ env.K8S_TOKEN }}
           namespace: dev
           templates: k8s/dev/dev-backend-*.yaml
+
+      - name: Restart deployment to pull latest image
+        run: |
+          kubectl rollout restart deployment/kiwi-backend-dev -n dev

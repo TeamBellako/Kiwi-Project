@@ -1,5 +1,5 @@
 name: Backend CI/CD (Prod)
-  
+
 on:
   push:
     branches:
@@ -9,6 +9,9 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/prod-backend-workflow.yml'
+      - 'k8s/prod/prod-backend-deployment.yaml'
+      - 'k8s/prod/prod-backend-service.yaml'
+
   pull_request:
     branches:
       - main
@@ -17,10 +20,12 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/prod-backend-workflow.yml'
+      - 'k8s/prod/prod-backend-deployment.yaml'
+      - 'k8s/prod/prod-backend-service.yaml'
 
 jobs:
   backend-ci-cd:
-    name: Test, Build, and Push Backend
+    name: Test, Build, and Push Backend (Prod)
     runs-on: ubuntu-latest
 
     environment:
@@ -53,16 +58,65 @@ jobs:
       - name: Run backend tests
         working-directory: ./backend
         run: |
+          chmod +x mvnw
           ./mvnw test
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (Prod)
         working-directory: ./backend
         run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project:backend-prod
           GIT_SHA=${{ github.sha }}
           VERSION_TAG=$(git describe --tags --abbrev=0 || date +'%Y-%m-%d-%H%M%S')
 
-          docker build -t $IMAGE_NAME:backend-prod-$VERSION_TAG -t $IMAGE_NAME:backend-prod-latest -f Dockerfile.prod .
+          docker build -t $IMAGE_NAME-$VERSION_TAG -t $IMAGE_NAME-latest -f Dockerfile.prod .
 
-          docker push $IMAGE_NAME:backend-prod-$VERSION_TAG
-          docker push $IMAGE_NAME:backend-prod-latest
+          docker push $IMAGE_NAME-$VERSION_TAG
+          docker push $IMAGE_NAME-latest
+
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      - name: Create Kubernetes secrets for backend
+        run: |
+          kubectl create secret generic backend-secret \
+            --from-literal=BACKEND_DB_URL_K8S=${{ secrets.BACKEND_DB_URL_K8S }} \
+            --from-literal=BACKEND_DB_USERNAME=${{ secrets.BACKEND_DB_USERNAME }} \
+            --from-literal=BACKEND_DB_PASSWORD=${{ secrets.BACKEND_DB_PASSWORD }} \
+            --namespace=prod \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create DockerHub Secret for Private Image Pulling
+        run: |
+          kubectl create secret docker-registry dockerhub-secret \
+            --docker-server=https://index.docker.io/v1/ \
+            --docker-username=${{ secrets.DOCKERHUB_USERNAME }} \
+            --docker-password=${{ secrets.DOCKERHUB_TOKEN }} \
+            --docker-email=${{ secrets.DOCKERHUB_EMAIL }} \
+            --namespace=prod \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Set up (or update) kubernetes accounts, roles, and bindings
+        run: |
+          kubectl apply -f k8s/prod/prod-service-account.yaml --overwrite
+          kubectl apply -f k8s/prod/prod-cluster-role.yaml --overwrite
+          kubectl apply -f k8s/prod/prod-cluster-role-binding.yaml --overwrite
+
+      - name: Get Fresh Kubernetes Service Account Token 
+        run: |
+          export TOKEN=$(kubectl -n prod create token kiwi-ci-cd-service-account --duration=600s)
+          echo "K8S_TOKEN=${TOKEN}" >> $GITHUB_ENV
+
+      - name: Deploy to Kubernetes (prod)
+        uses: appleboy/kubernetes-action@v0.0.1
+        with:
+          server: ${{ secrets.K8S_SERVER }}
+          ca_cert: ${{ secrets.K8S_CA_CERT }}
+          token: ${{ env.K8S_TOKEN }}
+          namespace: prod
+          templates: k8s/prod/prod-backend-*.yaml
+
+      - name: Restart deployment to pull latest image
+        run: |
+          kubectl rollout restart deployment/kiwi-backend-prod -n prod

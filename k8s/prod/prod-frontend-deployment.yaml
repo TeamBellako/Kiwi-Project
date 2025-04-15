@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiwi-frontend-prod
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiwi-frontend-prod
+  template:
+    metadata:
+      labels:
+        app: kiwi-frontend-prod
+    spec:
+      serviceAccountName: kiwi-ci-cd-service-account
+      containers:
+        - name: kiwi-frontend-prod
+          image: teambellako/kiwi-project:frontend-prod-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: VITE_FRONT_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-secret
+                  key: VITE_FRONT_API_URL
+      imagePullSecrets:
+        - name: dockerhub-secret

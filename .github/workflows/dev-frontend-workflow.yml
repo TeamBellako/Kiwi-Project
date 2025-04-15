@@ -3,22 +3,22 @@ name: Frontend CI/CD (Dev)
 on:
   push:
     branches:
-      # - develop
-      # - feature/ci-cd
+      - develop
     paths:
       - 'frontend/**'
       - '.github/workflows/dev-frontend-workflow.yml'
       - 'k8s/dev/dev-frontend-deployment.yaml'
       - 'k8s/dev/dev-frontend-service.yaml'
+      - 'k8s/dev/dev-frontend-ingress.yaml'
   pull_request:
     branches:
       - develop
-      # - feature/ci-cd
     paths:
       - 'frontend/**'
       - '.github/workflows/dev-frontend-workflow.yml'
       - 'k8s/dev/dev-frontend-deployment.yaml'
       - 'k8s/dev/dev-frontend-service.yaml'
+      - 'k8s/dev/dev-frontend-ingress.yaml'
 
 jobs:
   frontend-ci-cd:
@@ -65,13 +65,13 @@ jobs:
       - name: Build and push Docker image
         working-directory: ./frontend
         run: |
-          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project
+          IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/kiwi-project:frontend-dev
           GIT_SHA=${{ github.sha }}
 
-          docker build -t $IMAGE_NAME:frontend-dev-$GIT_SHA -t $IMAGE_NAME:frontend-dev-latest -f Dockerfile.dev .
+          docker build -t $IMAGE_NAME-$GIT_SHA -t $IMAGE_NAME-latest -f Dockerfile.dev .
 
-          docker push $IMAGE_NAME:frontend-dev-$GIT_SHA
-          docker push $IMAGE_NAME:frontend-dev-latest
+          docker push $IMAGE_NAME-$GIT_SHA
+          docker push $IMAGE_NAME-latest
 
       - name: Set up Kubeconfig
         run: |
@@ -97,9 +97,9 @@ jobs:
       
       - name: Set up (or update) kubernetes accounts, roles, and bindings
         run: |
-          kubectl apply -f k8s/dev/dev-service-account.yaml --force
-          kubectl apply -f k8s/dev/dev-cluster-role.yaml --force
-          kubectl apply -f k8s/dev/dev-cluster-role-binding.yaml --force
+          kubectl apply -f k8s/dev/dev-service-account.yaml --overwrite
+          kubectl apply -f k8s/dev/dev-cluster-role.yaml --overwrite
+          kubectl apply -f k8s/dev/dev-cluster-role-binding.yaml --overwrite
 
       - name: Get Fresh Kubernetes Service Account Token
         run: |
@@ -111,6 +111,10 @@ jobs:
         with:
           server: ${{ secrets.K8S_SERVER }}
           ca_cert: ${{ secrets.K8S_CA_CERT }}
-          token: ${{ secrets.K8S_TOKEN }}
+          token: ${{ env.K8S_TOKEN }}
           namespace: dev
           templates: k8s/dev/dev-frontend-*.yaml
+      
+      - name: Restart deployment to pull latest image
+        run: |
+          kubectl rollout restart deployment/kiwi-frontend-dev -n dev

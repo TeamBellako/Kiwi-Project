@@ -10,22 +10,16 @@ import java.util.Optional;
 
 @Service
 public class HelloService {
-    @Autowired
     private HelloRepository helloRepository;
 
+    @Autowired
+    public HelloService(HelloRepository helloRepository) {
+        this.helloRepository = helloRepository;
+    }
+
     @Transactional
-    public String getMessageById(int id) {
-        Optional<HelloDB> result = helloRepository.findById(id);
-        
-        HelloDB message;
-        if (result.isPresent())
-        {
-            message = result.get();
-        }
-        else {
-            throw new RuntimeException("Message not found");
-        }
-        
-        return message.getMessage();
+    public Optional<HelloDB> getMessageById(Integer id) {
+        return Optional.ofNullable(helloRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Message not found")));
     }
 }
