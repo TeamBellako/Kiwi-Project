@@ -48,7 +48,7 @@ jobs:
 
       - name: Build debug APK with CI versioning
         run: |
-          ./gradlew assembleDebug -PversionCode=${{ github.run_number }} -PversionName="0.1.${{ github.sha }}"
+          ./gradlew assembleDebug -PversionCode=${{ github.run_number }} -PversionName="0.0.${{ github.sha }}"
         working-directory: ./mobile
 
       - name: Upload APK as artifact
