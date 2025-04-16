@@ -58,8 +58,17 @@ jobs:
         run: ./gradlew test
         working-directory: ./mobile
       
+      - name: Extract version info from tag
+        id: version
+        run: |
+          TAG=${GITHUB_REF_NAME#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$TAG"
+          VERSION_CODE=$((MAJOR * 1000000 + MINOR * 1000 + PATCH))
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "VERSION_NAME=$TAG" >> $GITHUB_ENV
+
       - name: Build AAb
-        run: ./gradlew bundleRelease
+        run: ./gradlew bundleRelease -PversionCode=$VERSION_CODE -PversionName=$VERSION_NAME
         working-directory: ./mobile
 
       - name: Sign AAb
