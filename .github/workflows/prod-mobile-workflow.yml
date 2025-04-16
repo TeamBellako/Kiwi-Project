@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature/ci-cd
     tags:
       - 'v*'
     paths:
@@ -13,7 +12,6 @@ on:
   pull_request:
     branches:
       - main
-      - feature/ci-cd
     tags:
         - 'v*'
     paths:
@@ -57,18 +55,29 @@ jobs:
       - name: Run tests
         run: ./gradlew test
         working-directory: ./mobile
-      
-      - name: Extract version info from tag
+
+      - name: Generate version tag, push it, and export version info
         id: version
         run: |
-          TAG=${GITHUB_REF_NAME#v}
+          VERSION_BASE="v0.0."
+          LATEST_TAG=$(git tag --sort=-v:refname | grep '^v0.0.' | tail -n 1)
+          LAST_PATCH=$(echo $LATEST_TAG | cut -d'.' -f3)
+          NEXT_PATCH=$((LAST_PATCH + 1))
+          NEW_TAG="${VERSION_BASE}${NEXT_PATCH}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+
+          TAG=${NEW_TAG#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$TAG"
           VERSION_CODE=$((MAJOR * 1000000 + MINOR * 1000 + PATCH))
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "VERSION_NAME=$TAG" >> $GITHUB_ENV
 
       - name: Build AAb
-        run: ./gradlew bundleRelease -PversionCode=2 -PversionName=$VERSION_NAME
+        run: ./gradlew bundleRelease -PversionCode=$VERSION_CODE -PversionName=$VERSION_NAME
         working-directory: ./mobile
 
       - name: Sign AAb
@@ -99,4 +108,3 @@ jobs:
           packageName: com.bellako.kiwi
           releaseFiles: 'mobile/app/build/outputs/bundle/release/app-release.aab'
           track: internal
-          status: draft
