@@ -57,13 +57,6 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test
         working-directory: ./mobile
-
-      - name: Bump Version Code
-        uses: chkfung/android-version-actions@v1.2.3
-        with:
-          gradlePath: app/build.gradle.kts
-          versionCode: '${{ github.run_number }}'
-          versionName: 0.1.${{ github.sha }}
       
       - name: Build prodRelease
         run: ./gradlew bundleRelease

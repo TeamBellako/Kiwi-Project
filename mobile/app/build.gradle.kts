@@ -2,6 +2,16 @@ import org.gradle.kotlin.dsl.implementation
 
 val mobileApiUrl: String = System.getenv("MOBILE_API_URL") ?: "http://10.0.2.2:8080"
 
+fun getVersionCodeFromCI(): Int {
+    val runNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+    return runNumber
+}
+
+fun getVersionNameFromCI(): String {
+    val sha = System.getenv("GITHUB_SHA")?.take(7) ?: "dev"
+    return "0.0.$sha"
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -27,14 +37,12 @@ android {
         targetSdk = 35
         android.buildFeatures.buildConfig = true
 
-        versionCode = 1
-        versionName = "0.0.0"
+        versionCode = getVersionCodeFromCI()
+        versionName = getVersionNameFromCI()
 
         buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
-
 
     buildTypes {
         debug {
@@ -49,6 +57,15 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            val ciVersionCode: String? by project
+            val ciVersionName: String? by project
+
+            defaultConfig {
+                versionCode = ciVersionCode?.toIntOrNull() ?: 1
+                versionName = ciVersionName ?: "0.1.0"
+            }
+
         }
         release {
             buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
