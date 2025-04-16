@@ -68,7 +68,7 @@ jobs:
           echo "VERSION_NAME=$TAG" >> $GITHUB_ENV
 
       - name: Build AAb
-        run: ./gradlew bundleRelease -PversionCode=0.0.1 -PversionName=$VERSION_NAME
+        run: ./gradlew bundleRelease -PversionCode=2 -PversionName=$VERSION_NAME
         working-directory: ./mobile
 
       - name: Sign AAb
