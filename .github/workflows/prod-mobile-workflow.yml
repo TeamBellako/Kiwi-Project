@@ -58,7 +58,7 @@ jobs:
         run: ./gradlew test
         working-directory: ./mobile
       
-      - name: Build prodRelease
+      - name: Build AAb
         run: ./gradlew bundleRelease
         working-directory: ./mobile
 
@@ -66,18 +66,17 @@ jobs:
         id: sign
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/build/outputs/bundle/release
+          releaseDirectory: mobile/app/build/outputs/bundle/release
           signingKeyBase64: '${{ secrets.KEYSTORE }}'
           alias: '${{ secrets.SIGNING_KEY_ALIAS }}'
           keyStorePassword: '${{ secrets.SIGNING_STORE_PASSWORD }}'
           keyPassword: '${{ secrets.SIGNING_KEY_PASSWORD }}'
-        working-directory: ./mobile
 
       - name: Upload app bundle as artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-bundle
-          path: app/build/outputs/bundle/release/app-release.aab
+          path: mobile/app/build/outputs/bundle/release/app-release.aab
 
       - name: Download app bundle from artifact
         uses: actions/download-artifact@v4.2.1
@@ -89,5 +88,5 @@ jobs:
         with:
           serviceAccountJsonPlainText: '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}'
           packageName: com.kiwi
-          releaseFiles: '${{ github.workspace }}/app-release.aab'
+          releaseFiles: 'mobile/app/build/outputs/bundle/release/app-release.aab'
           track: internal
