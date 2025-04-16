@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:37652561141:android:49446fa8561511256c59bc",
+        "mobilesdk_app_id": "1:37652561141:android:290a17db7687e72c6c59bc",
         "android_client_info": {
-          "package_name": "com.kiwi"
+          "package_name": "com.bellako.kiwi"
         }
       },
       "oauth_client": [],
