@@ -60,6 +60,7 @@ jobs:
       
       - name: Build prodRelease
         run: ./gradlew bundleRelease
+        working-directory: ./mobile
 
       - name: Sign AAb
         id: sign
