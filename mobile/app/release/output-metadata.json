@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.kiwi",
+  "applicationId": "com.bellako.kiwi",
   "variantName": "release",
   "elements": [
     {

@@ -21,7 +21,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kiwi"
+    namespace = "com.bellako.kiwi"
     compileSdk = 35
 
     packaging {
@@ -32,13 +32,21 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.kiwi"
+        applicationId = "com.bellako.kiwi"
         minSdk = 24
         targetSdk = 35
         android.buildFeatures.buildConfig = true
 
         versionCode = getVersionCodeFromCI()
         versionName = getVersionNameFromCI()
+
+        val ciVersionCode: String? by project
+        val ciVersionName: String? by project
+
+        defaultConfig {
+            versionCode = ciVersionCode?.toIntOrNull() ?: 1
+            versionName = ciVersionName ?: "0.1.0"
+        }
 
         buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -57,15 +65,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-
-            val ciVersionCode: String? by project
-            val ciVersionName: String? by project
-
-            defaultConfig {
-                versionCode = ciVersionCode?.toIntOrNull() ?: 1
-                versionName = ciVersionName ?: "0.1.0"
-            }
-
         }
         release {
             buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
@@ -79,6 +78,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+           isDebuggable = false
+           isJniDebuggable = false
         }
     }
     compileOptions {

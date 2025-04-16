@@ -54,9 +54,9 @@ jobs:
         with:
           gradle-home-cache-cleanup: true
 
-      # - name: Run tests
-      #   run: ./gradlew test
-      #   working-directory: ./mobile
+      - name: Run tests
+        run: ./gradlew test
+        working-directory: ./mobile
       
       - name: Build AAb
         run: ./gradlew bundleRelease
@@ -82,11 +82,6 @@ jobs:
         uses: actions/download-artifact@v4.2.1
         with:
           name: app-bundle
-      
-      - name: Debug service account access
-        run: |
-          gcloud auth activate-service-account --key-file="${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}"
-          gcloud projects list
 
       - name: Upload to Google Play Internal Test Track
         uses: r0adkll/upload-google-play@v1
