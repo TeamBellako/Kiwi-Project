@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
     paths:
       - '.github/workflows/prod-mysql-workflow.yml'
       - 'k8s/prod/prod-mysql-deployment.yaml'
@@ -13,6 +15,8 @@ on:
   pull_request:
     branches:
       - main
+    tags:
+      - 'v*'
     paths:
       - '.github/workflows/prod-mysql-workflow.yml'
       - 'k8s/prod/prod-mysql-deployment.yaml'

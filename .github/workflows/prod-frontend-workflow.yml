@@ -12,7 +12,6 @@ on:
       - 'k8s/prod/prod-frontend-deployment.yaml'
       - 'k8s/prod/prod-frontend-service.yaml'
       - 'k8s/prod/prod-frontend-ingress.yaml'
-
   pull_request:
     branches:
       - main
