@@ -44,6 +44,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
+
     buildTypes {
         debug {
             buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
