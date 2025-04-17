@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 public class UserSettingsServiceTest {
     private final UserSettingsRepository userSettingsRepository = Mockito.mock(UserSettingsRepository.class);
@@ -20,7 +21,7 @@ public class UserSettingsServiceTest {
                 true,
                 UserSettings.Theme.LIGHT
         );
-        Mockito.when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
+        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
         
         UserSettings createdUserSettings = userSettingsService.createUserSettings(mockUserSettings);
 
@@ -37,7 +38,7 @@ public class UserSettingsServiceTest {
                 true,
                 UserSettings.Theme.LIGHT
         );
-        Mockito.when(userSettingsRepository.findById(testId)).thenReturn(Optional.of(mockUserSettings));
+        when(userSettingsRepository.findById(testId)).thenReturn(Optional.of(mockUserSettings));
         
         Optional<UserSettings> retrievedUserSettings = userSettingsService.getUserSettingsById(testId);
         
@@ -49,14 +50,15 @@ public class UserSettingsServiceTest {
     @Test
     public void updateUserSettings_validInput_settingsUpdated() {
         Integer testId = 1;
-        
+
         UserSettings mockUserSettings = new UserSettings(
                 testId,
                 "finnthehuman@gmail.com",
                 true,
                 UserSettings.Theme.LIGHT
         );
-        Mockito.when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
+        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
+        when(userSettingsRepository.existsById(testId)).thenReturn(true);
 
         UserSettings userSettingsUpdate = new UserSettings(
                 testId,
@@ -64,15 +66,13 @@ public class UserSettingsServiceTest {
                 false,
                 UserSettings.Theme.DARK
         );
-        userSettingsService.updateUserSettings(userSettingsUpdate);
-        
-        UserSettings updatedUserSettings = new UserSettings();
-        Mockito.when(userSettingsRepository.findById(testId)).thenReturn(Optional.of(updatedUserSettings));
+        when(userSettingsRepository.save(userSettingsUpdate)).thenReturn(userSettingsUpdate);
+        UserSettings updatedUserSettings = userSettingsService.updateUserSettings(userSettingsUpdate);
         
         assertEquals(userSettingsUpdate, updatedUserSettings);
         assertNotEquals(mockUserSettings, updatedUserSettings);
     }
-    
+
     @Test
     public void deleteUserSettings_validInput_settingsDeleted() {
         Integer testId = 1;
@@ -83,12 +83,14 @@ public class UserSettingsServiceTest {
                 true,
                 UserSettings.Theme.LIGHT
         );
-        Mockito.when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
-        
-        assertTrue(userSettingsRepository.existsById(testId));
-        
+        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
+        when(userSettingsRepository.existsById(testId)).thenReturn(true);
+
         userSettingsService.deleteUserSettings(testId);
-        
+        assertTrue(userSettingsRepository.existsById(testId));
+
+        when(userSettingsRepository.existsById(testId)).thenReturn(false);
         assertFalse(userSettingsRepository.existsById(testId));
     }
+
 }

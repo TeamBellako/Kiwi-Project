@@ -17,17 +17,24 @@ public class UserSettingsService {
     }
 
     public UserSettings createUserSettings(UserSettings userSettings) {
-        return null;
+        return userSettingsRepository.save(userSettings);
     }
 
     public Optional<UserSettings> getUserSettingsById(Integer id) {
-        return null;
+        return Optional.of(userSettingsRepository.findById(id))
+                .orElseThrow(() -> new RuntimeException(String.format("UserSettings with id %d not found", id)));
     }
 
     public UserSettings updateUserSettings(UserSettings userSettings) {
-        return null;
+        if (!userSettingsRepository.existsById(userSettings.getId())) throw new RuntimeException(String.format("UserSettings with id %d not found", userSettings.getId()));
+        
+        return userSettingsRepository.save(userSettings);
     }
 
+
     public void deleteUserSettings(Integer id) {
+        if (!userSettingsRepository.existsById(id)) throw new RuntimeException(String.format("UserSettings with id %d not found", id));
+        
+        userSettingsRepository.deleteById(id);
     }
 }
