@@ -1,5 +1,6 @@
 package com.kiwi.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.entity.UserSettings;
 import com.kiwi.service.HelloService;
 import com.kiwi.service.UserSettingsService;
@@ -7,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,8 +38,15 @@ public class UserSettingsControllerTest {
                 true,
                 UserSettings.Theme.LIGHT
         );
+        when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
         
-        mockMvc.perform(post("/api/settings"))
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonContent = objectMapper.writeValueAsString(mockUserSettings);
+        
+        mockMvc.perform(
+                post("/api/settings")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(jsonContent))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userSettings").value(mockUserSettings));
     }
@@ -69,7 +78,6 @@ public class UserSettingsControllerTest {
                 UserSettings.Theme.LIGHT
         );
         when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
-        when(userSettingsService.getUserSettingsById(targetId)).thenReturn(Optional.of(mockUserSettings));
 
         UserSettings userSettingsUpdate = new UserSettings(
                 targetId,
@@ -77,7 +85,15 @@ public class UserSettingsControllerTest {
                 false,
                 UserSettings.Theme.DARK
         );
-        mockMvc.perform(put(String.format("/api/settings/%d", targetId)))
+        when(userSettingsService.updateUserSettings(userSettingsUpdate)).thenReturn(userSettingsUpdate);
+        
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonContent = objectMapper.writeValueAsString(userSettingsUpdate);
+        
+        mockMvc.perform(
+                put("/api/settings")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(jsonContent))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userSettings").value(userSettingsUpdate));
     }
@@ -94,7 +110,7 @@ public class UserSettingsControllerTest {
         when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
         when(userSettingsService.getUserSettingsById(targetId)).thenReturn(Optional.of(mockUserSettings));
         
-        mockMvc.perform(delete("/api/settings"))
+        mockMvc.perform(delete("/api/settings/{id}", targetId))
                 .andExpect(status().isNoContent());
     }
 }
