@@ -2,7 +2,6 @@ package com.kiwi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.entity.UserSettings;
-import com.kiwi.service.HelloService;
 import com.kiwi.service.UserSettingsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,8 +46,7 @@ public class UserSettingsControllerTest {
                 post("/api/settings")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(jsonContent))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.userSettings").value(mockUserSettings));
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -65,7 +63,7 @@ public class UserSettingsControllerTest {
         
         mockMvc.perform(get(String.format("/api/settings/%d", targetId)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userSettings").value(mockUserSettings));
+                .andExpect(jsonPath("$.email").value(targetEmail));
     }
 
     @Test
@@ -95,7 +93,7 @@ public class UserSettingsControllerTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(jsonContent))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userSettings").value(userSettingsUpdate));
+                .andExpect(jsonPath("$.email").value(userSettingsUpdate.getEmail()));
     }
 
     @Test

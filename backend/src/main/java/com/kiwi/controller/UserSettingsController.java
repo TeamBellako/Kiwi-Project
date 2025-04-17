@@ -9,14 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Map;
-
-import static java.util.Collections.singletonMap;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/settings")
 public class UserSettingsController {
-    
+
     private final UserSettingsService userSettingsService;
 
     @Autowired
@@ -24,9 +22,8 @@ public class UserSettingsController {
         this.userSettingsService = userSettingsService;
     }
 
-
     @PostMapping
-    public ResponseEntity<Map<String, UserSettings>> createUserSettings(@RequestBody UserSettings userSettings) {
+    public ResponseEntity<UserSettings> createUserSettings(@RequestBody UserSettings userSettings) {
         UserSettings createdUserSettings = userSettingsService.createUserSettings(userSettings);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -34,25 +31,29 @@ public class UserSettingsController {
                 .buildAndExpand(createdUserSettings.getId())
                 .toUri();
 
-        return ResponseEntity.created(location)
-                .body(singletonMap("userSettings", createdUserSettings));
+        return ResponseEntity.created(location).body(createdUserSettings);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Map<String, UserSettings>> getUserSettingsById(@PathVariable Integer id) {
-        return userSettingsService.getUserSettingsById(id)
-                .map(userSettings -> ResponseEntity.ok(singletonMap("userSettings", userSettings)))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(singletonMap("userSettings", null)));
+    public ResponseEntity<UserSettings> getUserSettingsById(@PathVariable Integer id) {
+        Optional<UserSettings> userSettings = userSettingsService.getUserSettingsById(id);
+
+        return userSettings
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @PutMapping
-    public ResponseEntity<Map<String, UserSettings>> updateUserSettings(@RequestBody UserSettings userSettings) {
-        return ResponseEntity.ok(singletonMap("userSettings", userSettingsService.updateUserSettings(userSettings)));
+    public ResponseEntity<UserSettings> updateUserSettings(@RequestBody UserSettings userSettings) {
+        UserSettings updatedUserSettings = userSettingsService.updateUserSettings(userSettings);
+        
+        return ResponseEntity.ok(updatedUserSettings);
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteUserSettings(@PathVariable Integer id) {
         userSettingsService.deleteUserSettings(id);
+        
         return ResponseEntity.noContent().build();
     }
 }
