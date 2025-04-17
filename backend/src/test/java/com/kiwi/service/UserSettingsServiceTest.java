@@ -11,36 +11,31 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 public class UserSettingsServiceTest {
+    
     private final UserSettingsRepository userSettingsRepository = Mockito.mock(UserSettingsRepository.class);
     private final UserSettingsService userSettingsService = new UserSettingsService(userSettingsRepository);
+
+    private final UserSettings mockUserSettings = new UserSettings(
+            1,
+            "finnthehuman@gmail.com",
+            true,
+            UserSettings.Theme.LIGHT
+    );
     
     @Test
     public void createUserSettings_validInput_settingsCreated() {
-        UserSettings mockUserSettings = new UserSettings(
-                "finnthehuman@gmail.com",
-                true,
-                UserSettings.Theme.LIGHT
-        );
-        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
+        saveMockUserSettings();
         
         UserSettings createdUserSettings = userSettingsService.createUserSettings(mockUserSettings);
-
+        
         assertEquals(mockUserSettings, createdUserSettings);
     }
     
     @Test
     public void getUserSettingsById_validInput_returnsUserSettings() {
-        Integer testId = 1;
+        when(userSettingsRepository.findById(mockUserSettings.getId())).thenReturn(Optional.of(mockUserSettings));
         
-        UserSettings mockUserSettings = new UserSettings(
-                testId,
-                "finnthehuman@gmail.com",
-                true,
-                UserSettings.Theme.LIGHT
-        );
-        when(userSettingsRepository.findById(testId)).thenReturn(Optional.of(mockUserSettings));
-        
-        Optional<UserSettings> retrievedUserSettings = userSettingsService.getUserSettingsById(testId);
+        Optional<UserSettings> retrievedUserSettings = userSettingsService.getUserSettingsById(mockUserSettings.getId());
         
         assertNotNull(retrievedUserSettings);
         assertTrue(retrievedUserSettings.isPresent());
@@ -49,19 +44,10 @@ public class UserSettingsServiceTest {
     
     @Test
     public void updateUserSettings_validInput_settingsUpdated() {
-        Integer testId = 1;
-
-        UserSettings mockUserSettings = new UserSettings(
-                testId,
-                "finnthehuman@gmail.com",
-                true,
-                UserSettings.Theme.LIGHT
-        );
-        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
-        when(userSettingsRepository.existsById(testId)).thenReturn(true);
-
+        saveMockUserSettings();
+        
         UserSettings userSettingsUpdate = new UserSettings(
-                testId,
+                mockUserSettings.getId(),
                 "jakethedog@gmail.com",
                 false,
                 UserSettings.Theme.DARK
@@ -75,22 +61,17 @@ public class UserSettingsServiceTest {
 
     @Test
     public void deleteUserSettings_validInput_settingsDeleted() {
-        Integer testId = 1;
+        saveMockUserSettings();
 
-        UserSettings mockUserSettings = new UserSettings(
-                testId,
-                "finnthehuman@gmail.com",
-                true,
-                UserSettings.Theme.LIGHT
-        );
-        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
-        when(userSettingsRepository.existsById(testId)).thenReturn(true);
+        userSettingsService.deleteUserSettings(mockUserSettings.getId());
+        assertTrue(userSettingsRepository.existsById(mockUserSettings.getId()));
 
-        userSettingsService.deleteUserSettings(testId);
-        assertTrue(userSettingsRepository.existsById(testId));
-
-        when(userSettingsRepository.existsById(testId)).thenReturn(false);
-        assertFalse(userSettingsRepository.existsById(testId));
+        when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(false);
+        assertFalse(userSettingsRepository.existsById(mockUserSettings.getId()));
     }
-
+    
+    private void saveMockUserSettings() {
+        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
+        when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
+    }
 }
