@@ -1,6 +1,7 @@
 package com.kiwi.service;
 
 import com.kiwi.entity.UserSettings;
+import com.kiwi.exception.InvalidUserSettingsException;
 import com.kiwi.exception.UserSettingsNotFoundException;
 import com.kiwi.repository.UserSettingsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +23,37 @@ public class UserSettingsService {
     
     @Transactional
     public UserSettings createUserSettings(UserSettings userSettings) {
-        return userSettingsRepository.save(userSettings);
+        validateUserSettings(userSettings);
+        
+        if (userSettingsRepository.existsById(userSettings.getId())) {
+            throw new IllegalArgumentException(String.format(
+                    "There is already one with id = %d", userSettings.getId()));
+        }
+
+        UserSettings savedUserSettings;
+        try {
+            savedUserSettings = userSettingsRepository.save(userSettings);
+        } catch (Exception e) {
+            throw new RuntimeException("Database error during save operation", e);
+        }
+
+        if (!savedUserSettings.isValid()) {
+            throw new IllegalStateException("Failed to save UserSettings: returned invalid data");
+        }
+        
+        return savedUserSettings;
     }
     
     public Optional<UserSettings> getUserSettingsById(Integer id) {
+        validateUserSettingsId(id);
+        
         return Optional.ofNullable(userSettingsRepository.findById(id)
                 .orElseThrow(() -> new UserSettingsNotFoundException(id)));
     }
 
     @Transactional
     public UserSettings updateUserSettings(UserSettings userSettings) {
+        validateUserSettings(userSettings);
         validateUserSettingsExistence(userSettings.getId());
         
         return userSettingsRepository.save(userSettings);
@@ -39,9 +61,19 @@ public class UserSettingsService {
 
     @Transactional
     public void deleteUserSettings(Integer id) {
+        validateUserSettingsId(id);
         validateUserSettingsExistence(id);
         
         userSettingsRepository.deleteById(id);
+    }
+    
+    private void validateUserSettingsId(Integer id) {
+        if (id <= 0) throw new IllegalArgumentException("UserSettings' id must be bigger than zero");
+    }
+    
+    private void validateUserSettings(UserSettings userSettings) {
+        if (userSettings == null) throw new IllegalArgumentException();
+        if (!userSettings.isValid()) throw new InvalidUserSettingsException();
     }
 
     private void validateUserSettingsExistence(Integer id) {

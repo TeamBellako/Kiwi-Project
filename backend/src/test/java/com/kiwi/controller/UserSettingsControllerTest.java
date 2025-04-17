@@ -91,7 +91,7 @@ public class UserSettingsControllerTest {
                 .andExpect(status().isNoContent());
     }
     
-    private void createMockUserSettings() {
+    private void createMockUserSettings() throws IllegalArgumentException {
         when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
     }
     

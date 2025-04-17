@@ -1,5 +1,6 @@
 package com.kiwi.entity;
 
+import com.kiwi.utils.RegexUtils;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -56,7 +57,7 @@ public class UserSettings {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = RegexUtils.isValidEmail(email) ? email : null;
     }
 
     public boolean isAreNotificationsEnabled() {
@@ -91,12 +92,11 @@ public class UserSettings {
         UserSettings that = (UserSettings) o;
         return areNotificationsEnabled == that.areNotificationsEnabled && Objects.equals(email, that.email) && theme == that.theme;
     }
-
-    @PrePersist
-    public void prePersist() {
-        // Ensure the entity is not updated prematurely
-        if (this.id == null) {
-            // New entity, ready to be saved
-        }
+    
+    public boolean isValid() {
+        boolean isIdValid = this.id != null && this.id > 0;
+        boolean isEmailValid = RegexUtils.isValidEmail(this.email);
+        
+        return isIdValid && isEmailValid;
     }
 }

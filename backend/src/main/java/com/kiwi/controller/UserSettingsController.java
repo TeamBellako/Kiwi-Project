@@ -23,7 +23,7 @@ public class UserSettingsController {
     }
 
     @PostMapping
-    public ResponseEntity<UserSettings> createUserSettings(@RequestBody UserSettings userSettings) {
+    public ResponseEntity<UserSettings> createUserSettings(@RequestBody UserSettings userSettings) throws IllegalArgumentException {
         UserSettings createdUserSettings = userSettingsService.createUserSettings(userSettings);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
