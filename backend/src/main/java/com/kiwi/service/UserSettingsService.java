@@ -27,7 +27,7 @@ public class UserSettingsService {
     
     public Optional<UserSettings> getUserSettingsById(Integer id) {
         return Optional.ofNullable(userSettingsRepository.findById(id)
-                .orElseThrow(() -> new UserSettingsNotFoundException(String.format("UserSettings with id %d not found", id))));
+                .orElseThrow(() -> new UserSettingsNotFoundException(id)));
     }
 
     @Transactional
@@ -46,7 +46,7 @@ public class UserSettingsService {
 
     private void validateUserSettingsExistence(Integer id) {
         if (!userSettingsRepository.existsById(id)) {
-            throw new UserSettingsNotFoundException(String.format("UserSettings with id %d not found", id));
+            throw new UserSettingsNotFoundException(id);
         }
     }
 }

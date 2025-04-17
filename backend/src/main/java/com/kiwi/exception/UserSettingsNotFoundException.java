@@ -1,7 +1,7 @@
 package com.kiwi.exception;
 
 public class UserSettingsNotFoundException extends RuntimeException {
-    public UserSettingsNotFoundException(String message) {
-        super(message);
+    public UserSettingsNotFoundException(Integer id) {
+        super(String.format("UserSettings with id %d not found", id));
     }
 }

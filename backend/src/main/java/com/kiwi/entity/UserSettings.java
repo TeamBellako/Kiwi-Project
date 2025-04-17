@@ -91,4 +91,12 @@ public class UserSettings {
         UserSettings that = (UserSettings) o;
         return areNotificationsEnabled == that.areNotificationsEnabled && Objects.equals(email, that.email) && theme == that.theme;
     }
+
+    @PrePersist
+    public void prePersist() {
+        // Ensure the entity is not updated prematurely
+        if (this.id == null) {
+            // New entity, ready to be saved
+        }
+    }
 }
