@@ -1,4 +1,3 @@
-// Lenguaje: java
 package com.kiwi.controller;
 
 import com.kiwi.entity.HelloDB;

@@ -3,9 +3,11 @@ package com.kiwi.controller;
 import com.kiwi.entity.UserSettings;
 import com.kiwi.service.UserSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Map;
 
 @RestController
@@ -24,8 +26,10 @@ public class UserSettingsController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Map<UserSettings, String>> getUserSettingsById(@PathVariable Integer id) {
-        return null;
+    public ResponseEntity<Map<String, UserSettings>> getUserSettingsById(@PathVariable Integer id) {
+        return userSettingsService.getUserSettingsById(id)
+                .map(userSettings -> ResponseEntity.ok(Collections.singletonMap("userSettings", userSettings)))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("userSettings", null)));
     }
 
     @PutMapping
