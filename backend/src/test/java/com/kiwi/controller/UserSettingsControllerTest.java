@@ -1,5 +1,6 @@
 package com.kiwi.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.entity.UserSettings;
 import com.kiwi.service.UserSettingsService;
@@ -11,104 +12,95 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
+
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Optional;
-
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserSettingsController.class)
 public class UserSettingsControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     private UserSettingsService userSettingsService;
     
+    private final UserSettings mockUserSettings = new UserSettings(
+            1,
+            "finnthehuman@gmail.com",
+            true,
+            UserSettings.Theme.LIGHT
+    );
+    
+    private final String baseAPIUrl = "/api/settings";
+
     @Test
     public void createUserSettings_validInput_returnsCreatedStatus() throws Exception {
-        UserSettings mockUserSettings = new UserSettings(
-                1,
-                "finnthehuman@gmail.com",
-                true,
-                UserSettings.Theme.LIGHT
-        );
-        when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
-        
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonContent = objectMapper.writeValueAsString(mockUserSettings);
+        createMockUserSettings();
         
         mockMvc.perform(
-                post("/api/settings")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(jsonContent))
-                .andExpect(status().isCreated());
+                        post(baseAPIUrl)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .content(serializeUserSettingIntoJSON(mockUserSettings)))
+                .andExpect(status().isCreated()) 
+                .andExpect(getUserSettingsResultMatcher(mockUserSettings));
     }
 
     @Test
-    public void getUserSettingsById_validInput_returnsUserSettings() throws Exception{
-        Integer targetId = 1;
-        String targetEmail = "finnthehuman@gmail.com";
-        UserSettings mockUserSettings = new UserSettings(
-                targetId,
-                targetEmail,
-                true,
-                UserSettings.Theme.LIGHT
-        );
-        when(userSettingsService.getUserSettingsById(targetId)).thenReturn(Optional.of(mockUserSettings));
-        
-        mockMvc.perform(get(String.format("/api/settings/%d", targetId)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(targetEmail));
+    public void getUserSettingsById_validInput_returnsUserSettings() throws Exception {
+        when(userSettingsService.getUserSettingsById(mockUserSettings.getId())).thenReturn(Optional.of(mockUserSettings));
+
+        mockMvc.perform(get(baseAPIUrl + "/{id}", mockUserSettings.getId()))
+                .andExpect(status().isOk()) 
+                .andExpect(getUserSettingsResultMatcher(mockUserSettings));
     }
 
     @Test
     public void updateUserSettings_validInput_returnsUpdatedUserSettings() throws Exception {
-        Integer targetId = 1;
-        UserSettings mockUserSettings = new UserSettings(
-                targetId,
-                "finnthehuman@gmail.com",
-                true,
-                UserSettings.Theme.LIGHT
-        );
-        when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
+        createMockUserSettings();
 
         UserSettings userSettingsUpdate = new UserSettings(
-                targetId,
+                mockUserSettings.getId(),
                 "jakethedog@gmail.com",
                 false,
                 UserSettings.Theme.DARK
         );
         when(userSettingsService.updateUserSettings(userSettingsUpdate)).thenReturn(userSettingsUpdate);
         
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonContent = objectMapper.writeValueAsString(userSettingsUpdate);
-        
         mockMvc.perform(
-                put("/api/settings")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .content(jsonContent))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(userSettingsUpdate.getEmail()));
+                        put(baseAPIUrl)
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .content(serializeUserSettingIntoJSON(userSettingsUpdate)))
+                .andExpect(status().isOk())  
+                .andExpect(getUserSettingsResultMatcher(userSettingsUpdate));
     }
 
     @Test
     public void deleteUserSettings_validInput_returnsNoContent() throws Exception {
-        Integer targetId = 1;
-        UserSettings mockUserSettings = new UserSettings(
-                targetId,
-                "finnthehuman@gmail.com",
-                true,
-                UserSettings.Theme.LIGHT
-        );
-        when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
-        when(userSettingsService.getUserSettingsById(targetId)).thenReturn(Optional.of(mockUserSettings));
+        createMockUserSettings();
         
-        mockMvc.perform(delete("/api/settings/{id}", targetId))
+        when(userSettingsService.getUserSettingsById(mockUserSettings.getId())).thenReturn(Optional.of(mockUserSettings));
+
+        mockMvc.perform(delete(baseAPIUrl + "/{id}", mockUserSettings.getId()))
                 .andExpect(status().isNoContent());
+    }
+    
+    private void createMockUserSettings() {
+        when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
+    }
+    
+    private String serializeUserSettingIntoJSON(UserSettings userSettings) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(userSettings);
+    }
+    
+    private ResultMatcher getUserSettingsResultMatcher(UserSettings expectedUserSettings) {
+        return jsonPath("$.email").value(expectedUserSettings.getEmail());        
     }
 }
