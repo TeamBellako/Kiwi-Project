@@ -45,7 +45,7 @@ public class UserSettingsServiceTest {
     }
 
     @Test(expected = UserSettingsInvalidException.class)
-    public void createUserSettings_invalidInput_throwsInvalidUserSettingsException() throws UserSettingsInvalidException {
+    public void createUserSettings_invalidInput_throwsUserSettingsInvalidException() throws UserSettingsInvalidException {
         userSettingsService.createUserSettings(invalidUserSettings);
     }
 
@@ -115,7 +115,7 @@ public class UserSettingsServiceTest {
     }
 
     @Test(expected = UserSettingsInvalidException.class)
-    public void updateUserSettings_invalidInput_throwsInvalidUserSettingsException() throws UserSettingsInvalidException {
+    public void updateUserSettings_invalidInput_throwsUserSettingsInvalidException() throws UserSettingsInvalidException {
         when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
         when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
 
