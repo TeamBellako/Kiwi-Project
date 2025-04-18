@@ -5,6 +5,8 @@ import org.mockito.Mockito;
 
 import java.util.Optional;
 
+import static com.kiwi.usersettings.UserSettingsTestFactory.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,39 +16,20 @@ public class UserSettingsServiceTest {
     private final UserSettingsRepository userSettingsRepository = Mockito.mock(UserSettingsRepository.class);
     private final UserSettingsService userSettingsService = new UserSettingsService(userSettingsRepository);
 
-    private final UserSettings mockUserSettings = new UserSettings(
-            1,
-            "finnthehuman@gmail.com",
-            true,
-            UserSettings.Theme.LIGHT
-    );
-    private final UserSettings userSettingsUpdate = new UserSettings(
-            mockUserSettings.getId(),
-            "jakethedog@gmail.com",
-            false,
-            UserSettings.Theme.DARK
-    );
-    private final UserSettings invalidUserSettings = new UserSettings(
-            -1,
-            "bmotherobot.com",
-            false,
-            UserSettings.Theme.DARK
-    );
-
 
     @Test
     public void createUserSettings_validInput_settingsCreated() {
-        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
+        when(userSettingsRepository.save(validUserSettings())).thenReturn(validUserSettings());
 
-        UserSettings createdUserSettings = userSettingsService.createUserSettings(mockUserSettings);
+        UserSettings createdUserSettings = userSettingsService.createUserSettings(validUserSettings());
 
-        assertEquals(mockUserSettings, createdUserSettings);
-        verify(userSettingsRepository, Mockito.times(1)).save(mockUserSettings);
+        assertEquals(validUserSettings(), createdUserSettings);
+        verify(userSettingsRepository, Mockito.times(1)).save(validUserSettings());
     }
 
     @Test(expected = UserSettingsInvalidException.class)
     public void createUserSettings_invalidInput_throwsUserSettingsInvalidException() throws UserSettingsInvalidException {
-        userSettingsService.createUserSettings(invalidUserSettings);
+        userSettingsService.createUserSettings(invalidUserSettings());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -54,40 +37,40 @@ public class UserSettingsServiceTest {
         userSettingsService.createUserSettings(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void createUserSettings_userSettingsAlreadyExists_throwsIllegalArgumentException() throws IllegalArgumentException {
-        when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
+    @Test(expected = UserSettingsConflictException.class)
+    public void createUserSettings_userSettingsAlreadyExists_throwsIllegalArgumentException() throws UserSettingsConflictException {
+        when(userSettingsRepository.existsById(validUserSettings().getId())).thenReturn(true);
 
-        userSettingsService.createUserSettings(mockUserSettings);
+        userSettingsService.createUserSettings(validUserSettings());
         
-        verify(userSettingsRepository, Mockito.times(1)).existsById(mockUserSettings.getId());
-        verify(userSettingsRepository, Mockito.times(1)).save(mockUserSettings);
+        verify(userSettingsRepository, Mockito.times(1)).existsById(validUserSettings().getId());
+        verify(userSettingsRepository, Mockito.times(1)).save(validUserSettings());
     }
 
     @Test(expected = IllegalStateException.class)
     public void createUserSettings_saveReturnsEmptyUserSettings_throwsIllegalStateException() {
-        when(userSettingsRepository.save(mockUserSettings)).thenReturn(new UserSettings());
+        when(userSettingsRepository.save(validUserSettings())).thenReturn(new UserSettings());
         
-        userSettingsService.createUserSettings(mockUserSettings);
+        userSettingsService.createUserSettings(validUserSettings());
     }
 
     @Test(expected = RuntimeException.class)
     public void createUserSettings_repositoryFails_throwsRuntimeException() {
-        when(userSettingsRepository.save(mockUserSettings)).thenThrow(new RuntimeException());
+        when(userSettingsRepository.save(validUserSettings())).thenThrow(new RuntimeException());
         
-        userSettingsService.createUserSettings(mockUserSettings);
+        userSettingsService.createUserSettings(validUserSettings());
     }
 
     @Test
     public void getUserSettingsById_validInput_returnsUserSettings() {
-        when(userSettingsRepository.findById(mockUserSettings.getId())).thenReturn(Optional.of(mockUserSettings));
+        when(userSettingsRepository.findById(validUserSettings().getId())).thenReturn(Optional.of(validUserSettings()));
 
-        Optional<UserSettings> retrievedUserSettings = userSettingsService.getUserSettingsById(mockUserSettings.getId());
+        Optional<UserSettings> retrievedUserSettings = userSettingsService.getUserSettingsById(validUserSettings().getId());
 
         assertNotNull(retrievedUserSettings);
         assertTrue(retrievedUserSettings.isPresent());
-        assertEquals(mockUserSettings, retrievedUserSettings.get());
-        verify(userSettingsRepository, Mockito.times(1)).findById(mockUserSettings.getId());
+        assertEquals(validUserSettings(), retrievedUserSettings.get());
+        verify(userSettingsRepository, Mockito.times(1)).findById(validUserSettings().getId());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -102,25 +85,25 @@ public class UserSettingsServiceTest {
 
     @Test
     public void updateUserSettings_validInput_settingsUpdated() {
-        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
-        when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
-        when(userSettingsRepository.save(userSettingsUpdate)).thenReturn(userSettingsUpdate);
+        when(userSettingsRepository.save(validUserSettings())).thenReturn(validUserSettings());
+        when(userSettingsRepository.existsById(validUserSettings().getId())).thenReturn(true);
+        when(userSettingsRepository.save(updatedUserSettings())).thenReturn(updatedUserSettings());
         
-        UserSettings updatedUserSettings = userSettingsService.updateUserSettings(userSettingsUpdate);
+        UserSettings updatedUserSettings = userSettingsService.updateUserSettings(updatedUserSettings());
 
-        assertEquals(userSettingsUpdate, updatedUserSettings);
-        assertNotEquals(mockUserSettings, updatedUserSettings);
-        verify(userSettingsRepository, Mockito.times(1)).existsById(mockUserSettings.getId());
-        verify(userSettingsRepository, Mockito.times(1)).save(userSettingsUpdate);
+        assertEquals(updatedUserSettings(), updatedUserSettings);
+        assertNotEquals(validUserSettings(), updatedUserSettings);
+        verify(userSettingsRepository, Mockito.times(1)).existsById(validUserSettings().getId());
+        verify(userSettingsRepository, Mockito.times(1)).save(updatedUserSettings());
     }
 
     @Test(expected = UserSettingsInvalidException.class)
     public void updateUserSettings_invalidInput_throwsUserSettingsInvalidException() throws UserSettingsInvalidException {
-        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
-        when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
+        when(userSettingsRepository.save(validUserSettings())).thenReturn(validUserSettings());
+        when(userSettingsRepository.existsById(validUserSettings().getId())).thenReturn(true);
 
-        invalidUserSettings.setId(mockUserSettings.getId());
-        userSettingsService.updateUserSettings(invalidUserSettings);
+        invalidUserSettings().setId(validUserSettings().getId());
+        userSettingsService.updateUserSettings(invalidUserSettings());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -130,18 +113,18 @@ public class UserSettingsServiceTest {
 
     @Test(expected = UserSettingsNotFoundException.class)
     public void updateUserSettings_userSettingsDoesNotExist_throwsUserSettingsNotFoundException() {
-        userSettingsService.updateUserSettings(userSettingsUpdate);
+        userSettingsService.updateUserSettings(updatedUserSettings());
     }
 
     @Test
     public void deleteUserSettings_validInput_settingsDeleted() {
-        when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
-        when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
+        when(userSettingsRepository.save(validUserSettings())).thenReturn(validUserSettings());
+        when(userSettingsRepository.existsById(validUserSettings().getId())).thenReturn(true);
 
-        userSettingsService.deleteUserSettings(mockUserSettings.getId());
+        userSettingsService.deleteUserSettings(validUserSettings().getId());
         
-        verify(userSettingsRepository, Mockito.times(1)).deleteById(mockUserSettings.getId());
-        verify(userSettingsRepository, Mockito.times(1)).existsById(mockUserSettings.getId());
+        verify(userSettingsRepository, Mockito.times(1)).deleteById(validUserSettings().getId());
+        verify(userSettingsRepository, Mockito.times(1)).existsById(validUserSettings().getId());
     }
 
     @Test(expected = IllegalArgumentException.class)

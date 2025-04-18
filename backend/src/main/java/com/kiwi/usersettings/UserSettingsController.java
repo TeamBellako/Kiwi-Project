@@ -1,11 +1,8 @@
 package com.kiwi.usersettings;
 
-import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,8 +20,9 @@ public class UserSettingsController {
         this.userSettingsService = userSettingsService;
     }
 
+    
     @PostMapping
-    public ResponseEntity<UserSettings> createUserSettings(@RequestBody UserSettings userSettings) throws IllegalArgumentException {
+    public ResponseEntity<UserSettings> createUserSettings(@RequestBody UserSettings userSettings) {
         UserSettings createdUserSettings = userSettingsService.createUserSettings(userSettings);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
