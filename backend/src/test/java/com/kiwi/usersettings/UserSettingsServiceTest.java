@@ -59,6 +59,7 @@ public class UserSettingsServiceTest {
         when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
 
         userSettingsService.createUserSettings(mockUserSettings);
+        
         verify(userSettingsRepository, Mockito.times(1)).existsById(mockUserSettings.getId());
         verify(userSettingsRepository, Mockito.times(1)).save(mockUserSettings);
     }
@@ -66,12 +67,14 @@ public class UserSettingsServiceTest {
     @Test(expected = IllegalStateException.class)
     public void createUserSettings_saveReturnsEmptyUserSettings_throwsIllegalStateException() {
         when(userSettingsRepository.save(mockUserSettings)).thenReturn(new UserSettings());
+        
         userSettingsService.createUserSettings(mockUserSettings);
     }
 
     @Test(expected = RuntimeException.class)
     public void createUserSettings_repositoryFails_throwsRuntimeException() {
         when(userSettingsRepository.save(mockUserSettings)).thenThrow(new RuntimeException());
+        
         userSettingsService.createUserSettings(mockUserSettings);
     }
 
@@ -101,8 +104,8 @@ public class UserSettingsServiceTest {
     public void updateUserSettings_validInput_settingsUpdated() {
         when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
         when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
-
         when(userSettingsRepository.save(userSettingsUpdate)).thenReturn(userSettingsUpdate);
+        
         UserSettings updatedUserSettings = userSettingsService.updateUserSettings(userSettingsUpdate);
 
         assertEquals(userSettingsUpdate, updatedUserSettings);
@@ -136,6 +139,7 @@ public class UserSettingsServiceTest {
         when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
 
         userSettingsService.deleteUserSettings(mockUserSettings.getId());
+        
         verify(userSettingsRepository, Mockito.times(1)).deleteById(mockUserSettings.getId());
         verify(userSettingsRepository, Mockito.times(1)).existsById(mockUserSettings.getId());
     }
