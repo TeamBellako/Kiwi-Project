@@ -76,8 +76,7 @@ public class UserSettingsIntegrationTest {
         
         assertEquals(noIdUserSettings(), result.get());
     }
-
-
+    
     @Test
     public void deleteUserSettings_validId_deletesUserSettings() {
         userSettingsRepository.deleteById(validUserSettings().getId());
