@@ -1,5 +1,6 @@
 package com.kiwi.exception;
 
+import com.kiwi.usersettings.UserSettingsNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,8 +1,5 @@
-package com.kiwi.integration;
+package com.kiwi.usersettings;
 
-import com.kiwi.entity.UserSettings;
-import com.kiwi.exception.UserSettingsNotFoundException;
-import com.kiwi.repository.UserSettingsRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

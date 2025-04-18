@@ -1,4 +1,4 @@
-package com.kiwi.entity;
+package com.kiwi.usersettings;
 
 import com.kiwi.utils.RegexUtils;
 import jakarta.persistence.*;

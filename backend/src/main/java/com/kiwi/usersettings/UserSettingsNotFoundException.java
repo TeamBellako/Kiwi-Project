@@ -1,4 +1,4 @@
-package com.kiwi.exception;
+package com.kiwi.usersettings;
 
 public class UserSettingsNotFoundException extends RuntimeException {
     public UserSettingsNotFoundException(Integer id) {

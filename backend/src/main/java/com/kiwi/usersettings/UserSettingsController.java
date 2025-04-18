@@ -1,7 +1,5 @@
-package com.kiwi.controller;
+package com.kiwi.usersettings;
 
-import com.kiwi.entity.UserSettings;
-import com.kiwi.service.UserSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,9 +1,5 @@
-package com.kiwi.service;
+package com.kiwi.usersettings;
 
-import com.kiwi.entity.UserSettings;
-import com.kiwi.exception.InvalidUserSettingsException;
-import com.kiwi.exception.UserSettingsNotFoundException;
-import com.kiwi.repository.UserSettingsRepository;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -48,8 +44,8 @@ public class UserSettingsServiceTest {
         verify(userSettingsRepository, Mockito.times(1)).save(mockUserSettings);
     }
 
-    @Test(expected = InvalidUserSettingsException.class)
-    public void createUserSettings_invalidInput_throwsInvalidUserSettingsException() throws InvalidUserSettingsException {
+    @Test(expected = UserSettingsInvalidException.class)
+    public void createUserSettings_invalidInput_throwsInvalidUserSettingsException() throws UserSettingsInvalidException {
         userSettingsService.createUserSettings(invalidUserSettings);
     }
 
@@ -115,8 +111,8 @@ public class UserSettingsServiceTest {
         verify(userSettingsRepository, Mockito.times(1)).save(userSettingsUpdate);
     }
 
-    @Test(expected = InvalidUserSettingsException.class)
-    public void updateUserSettings_invalidInput_throwsInvalidUserSettingsException() throws InvalidUserSettingsException {
+    @Test(expected = UserSettingsInvalidException.class)
+    public void updateUserSettings_invalidInput_throwsInvalidUserSettingsException() throws UserSettingsInvalidException {
         when(userSettingsRepository.save(mockUserSettings)).thenReturn(mockUserSettings);
         when(userSettingsRepository.existsById(mockUserSettings.getId())).thenReturn(true);
 

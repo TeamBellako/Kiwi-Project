@@ -1,9 +1,5 @@
-package com.kiwi.service;
+package com.kiwi.usersettings;
 
-import com.kiwi.entity.UserSettings;
-import com.kiwi.exception.InvalidUserSettingsException;
-import com.kiwi.exception.UserSettingsNotFoundException;
-import com.kiwi.repository.UserSettingsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +69,7 @@ public class UserSettingsService {
     
     private void validateUserSettings(UserSettings userSettings) {
         if (userSettings == null) throw new IllegalArgumentException();
-        if (!userSettings.isValid()) throw new InvalidUserSettingsException();
+        if (!userSettings.isValid()) throw new UserSettingsInvalidException();
     }
 
     private void validateUserSettingsExistence(Integer id) {
