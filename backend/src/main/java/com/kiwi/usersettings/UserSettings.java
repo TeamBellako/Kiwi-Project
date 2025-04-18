@@ -2,6 +2,9 @@ package com.kiwi.usersettings;
 
 import com.kiwi.utils.RegexUtils;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 import java.util.Objects;
 
@@ -17,8 +20,11 @@ public class UserSettings {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    
-    @Column(name = "email")
+
+    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",
+            flags = Pattern.Flag.CASE_INSENSITIVE)
+    @NotBlank(message = "Email is required")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
     
     @Column(name = "are_notifications_enabled")

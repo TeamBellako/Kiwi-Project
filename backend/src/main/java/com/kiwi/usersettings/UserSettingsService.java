@@ -3,6 +3,7 @@ package com.kiwi.usersettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public class UserSettingsService {
 
     
     @Transactional
-    public UserSettings createUserSettings(UserSettings userSettings) {
+    public UserSettings createUserSettings(@Validated UserSettings userSettings) {
         validateUserSettings(userSettings);
         
         if (userSettingsRepository.existsById(userSettings.getId())) {
@@ -47,7 +48,7 @@ public class UserSettingsService {
     }
 
     @Transactional
-    public UserSettings updateUserSettings(UserSettings userSettings) {
+    public UserSettings updateUserSettings(@Validated UserSettings userSettings) {
         validateUserSettings(userSettings);
         validateUserSettingsExistence(userSettings.getId());
         

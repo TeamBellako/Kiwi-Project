@@ -10,6 +10,14 @@ public class UserSettingsTestFactory {
         );
     }
 
+    public static UserSettings duplicateUserSettings() {
+        return new UserSettings(
+                "finnthehuman@gmail.com",
+                false,
+                UserSettings.Theme.DARK
+        );
+    }
+
     public static UserSettings updatedUserSettings() {
         return new UserSettings(
                 1,
@@ -19,12 +27,29 @@ public class UserSettingsTestFactory {
         );
     }
 
+    public static UserSettings noIdUserSettings() {
+        return new UserSettings(
+                "princessbugglegum@gmail.com",
+                false,
+                UserSettings.Theme.LIGHT
+        );
+    }
+
     public static UserSettings invalidUserSettings() {
         return new UserSettings(
                 -1,
-                "bmotherobot.com",
+                "bmolovesfootball",
                 false,
                 UserSettings.Theme.DARK
         );
     }
+    
+    public static UserSettings invalidNoIdUserSettings() {
+        return new UserSettings(
+                "marcelineandsimon4ever",
+                false,
+                UserSettings.Theme.DARK
+        );
+    }
+    
 }

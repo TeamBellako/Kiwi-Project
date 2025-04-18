@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS user_settings;
+
 CREATE TABLE IF NOT EXISTS user_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -5,5 +7,5 @@ CREATE TABLE IF NOT EXISTS user_settings (
     theme VARCHAR(255) NOT NULL
 );
 
-INSERT INTO user_settings (id, email, are_notifications_enabled, theme)
-VALUES (2, 'finnthehuman@gmail.com', TRUE, 'LIGHT');
+INSERT INTO user_settings (email, are_notifications_enabled, theme)
+VALUES ('finnthehuman@gmail.com', TRUE, 'LIGHT');
