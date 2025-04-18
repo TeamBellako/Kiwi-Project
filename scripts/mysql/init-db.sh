@@ -23,6 +23,10 @@ CREATE TABLE IF NOT EXISTS user_settings (
     theme ENUM('LIGHT', 'DARK') NOT NULL
 );
 
+ALTER TABLE user_settings
+ADD CONSTRAINT chk_email_format
+CHECK (email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$');
+
 CREATE TABLE IF NOT EXISTS ${MYSQL_INIT_TABLE} (
     id INT PRIMARY KEY,
     message VARCHAR(255)
