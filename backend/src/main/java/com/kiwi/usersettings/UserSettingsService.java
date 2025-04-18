@@ -22,8 +22,7 @@ public class UserSettingsService {
         validateUserSettings(userSettings);
         
         if (userSettingsRepository.existsById(userSettings.getId())) {
-            throw new IllegalArgumentException(String.format(
-                    "There is already one with id = %d", userSettings.getId()));
+            throw new UserSettingsConflictException(userSettings.getId());
         }
 
         UserSettings savedUserSettings;

@@ -2,10 +2,14 @@ package com.kiwi.usersettings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kiwi.exception.GlobalExceptionHandler;
+import com.mysql.cj.exceptions.ClosedOnExpiredPasswordException;
+import jakarta.servlet.ServletException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -14,6 +18,8 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserSettingsController.class)
+@Import(GlobalExceptionHandler.class)
 public class UserSettingsControllerTest {
 
     @Autowired
@@ -41,12 +48,18 @@ public class UserSettingsControllerTest {
             false,
             UserSettings.Theme.DARK
     );
+    private final UserSettings invalidUserSettings = new UserSettings(
+            -1,
+            "bmotherobot.com",
+            false,
+            UserSettings.Theme.DARK
+    );
     
     private final String baseAPIUrl = "/api/settings";
 
     
     @Test
-    public void createUserSettings_validInput_returnsCreatedStatus() throws Exception {
+    public void createUserSettings_validInput_returnsCreated() throws Exception {
         when(userSettingsService.createUserSettings(mockUserSettings)).thenReturn(mockUserSettings);
         
         mockMvc.perform(post(baseAPIUrl)
@@ -57,19 +70,31 @@ public class UserSettingsControllerTest {
         .andExpect(getUserSettingsResultMatcher(mockUserSettings));
     }
     
-    @Test
-    public void createUserSettings_invalidInput_throwsUserSettingsInvalidException() {
-        
+    @Test(expected = ServletException.class)
+    public void createUserSettings_invalidInput_returnsBadRequest() throws Exception {
+        mockMvc.perform(post(baseAPIUrl)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(serializeUserSettingIntoJSON(invalidUserSettings)));
     }
     
     @Test
-    public void createUserSettings_nullInput_throwsIllegalArgumentException() {
+    public void createUserSettings_nullInput_returnsBadRequest() throws Exception {
+        mockMvc.perform(post(baseAPIUrl)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(""))
 
+        .andExpect(status().isBadRequest());    
     }
 
     @Test
-    public void createUserSettings_userSettingsAlreadyExists_returnsConflict() {
+    public void createUserSettings_userSettingsAlreadyExists_returnsConflict() throws Exception {
+        when(userSettingsService.createUserSettings(mockUserSettings)).thenThrow(new UserSettingsConflictException(mockUserSettings.getId()));
 
+        mockMvc.perform(post(baseAPIUrl)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(serializeUserSettingIntoJSON(mockUserSettings)))
+
+        .andExpect(status().isConflict()); 
     }
     
     @Test
@@ -83,13 +108,19 @@ public class UserSettingsControllerTest {
     }
 
     @Test
-    public void getUserSettingsById_invalidId_throwsUserSettingsInvalidException() {
+    public void getUserSettingsById_invalidId_returnsBadRequest() throws Exception {
+        when(userSettingsService.getUserSettingsById(invalidUserSettings.getId())).thenThrow(new UserSettingsInvalidException());
+        
+        mockMvc.perform(get(baseAPIUrl + "/{id}", invalidUserSettings.getId()))
 
+        .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void getUserSettingsById_invalidId_throwsUserSettingsNotFoundException() {
+    public void getUserSettingsById_userDoesNotExists_returnsNotFound() throws Exception {
+        mockMvc.perform(get(baseAPIUrl + "/{id}", mockUserSettings.getId()))
 
+        .andExpect(status().isNotFound());
     }
 
     @Test
@@ -106,18 +137,34 @@ public class UserSettingsControllerTest {
     }
 
     @Test
-    public void updateUserSettings_invalidInput_throwsUserSettingsInvalidException() {
+    public void updateUserSettings_invalidInput_returnsBadRequest() throws Exception {
+        when(userSettingsService.updateUserSettings(any(UserSettings.class))).thenThrow(new UserSettingsInvalidException());
+        
+        mockMvc.perform(put(baseAPIUrl)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(serializeUserSettingIntoJSON(invalidUserSettings)))
 
+        .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void updateUserSettings_nullInput_throwsIllegalArgumentException() {
+    public void updateUserSettings_nullInput_returnsBadRequest() throws Exception {
+        mockMvc.perform(put(baseAPIUrl)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(""))
 
+        .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void updateUserSettings_userSettingsDoesNotExist_throwsUserSettingsNotFoundException() {
+    public void updateUserSettings_userSettingsDoesNotExist_returnsNotFound() throws Exception {
+        when(userSettingsService.updateUserSettings(mockUserSettings)).thenThrow(new UserSettingsNotFoundException(mockUserSettings.getId()));
+        
+        mockMvc.perform(put(baseAPIUrl)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(serializeUserSettingIntoJSON(mockUserSettings)))
 
+        .andExpect(status().isNotFound());
     }
 
     @Test
@@ -131,13 +178,25 @@ public class UserSettingsControllerTest {
     }
 
     @Test
-    public void deleteUserSettings_invalidId_throwsUserSettingsInvalidException() {
-
+    public void deleteUserSettings_invalidId_returnsBadRequest() throws Exception {
+        doThrow(new UserSettingsInvalidException())
+                .when(userSettingsService)
+                .deleteUserSettings(invalidUserSettings.getId());
+        
+        mockMvc.perform(delete(baseAPIUrl + "/{id}", invalidUserSettings.getId()))
+                
+        .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void deleteUserSettings_userNotFound_throwsUserSettingsNotFoundException() {
+    public void deleteUserSettings_userNotFound_returnsNotFound() throws Exception {
+        doThrow(new UserSettingsNotFoundException(mockUserSettings.getId()))
+                .when(userSettingsService)
+                .deleteUserSettings(mockUserSettings.getId());
+        
+        mockMvc.perform(delete(baseAPIUrl + "/{id}", mockUserSettings.getId()))
 
+        .andExpect(status().isNotFound());
     }
     
     
