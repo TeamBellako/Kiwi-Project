@@ -53,9 +53,11 @@ public class UserSettingsControllerTest {
         .andExpect(getUserSettingsResultMatcher(validUserSettings()));
     }
 
-    @Test(expected = ServletException.class)
+    @Test
     public void createUserSettings_invalidInput_returnsBadRequest() throws Exception {
-        mockMvc.perform(getPOSTRequestContent(invalidUserSettings()));
+        mockMvc.perform(getPOSTRequestContent(invalidUserSettings()))
+        
+        .andExpect(status().isBadRequest());
     }
     
     @Test
