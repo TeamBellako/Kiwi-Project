@@ -1,9 +1,9 @@
 package com.kiwi.usersettings;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -23,7 +23,7 @@ public class UserSettingsController {
 
     
     @PostMapping
-    public ResponseEntity<UserSettings> createUserSettings(@Validated @RequestBody UserSettings userSettings) {
+    public ResponseEntity<UserSettings> createUserSettings(@RequestBody @Valid UserSettings userSettings) {
         UserSettings createdUserSettings = userSettingsService.createUserSettings(userSettings);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -44,7 +44,7 @@ public class UserSettingsController {
     }
 
     @PutMapping
-    public ResponseEntity<UserSettings> updateUserSettings(@Validated @RequestBody UserSettings userSettings) {
+    public ResponseEntity<UserSettings> updateUserSettings(@RequestBody @Valid UserSettings userSettings) {
         UserSettings updatedUserSettings = userSettingsService.updateUserSettings(userSettings);
         
         return ResponseEntity.ok(updatedUserSettings);

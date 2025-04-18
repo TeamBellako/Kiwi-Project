@@ -62,9 +62,7 @@ public class UserSettings {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = RegexUtils.isValidEmail(email) ? email : null;
-    }
+    public void setEmail(String email) { this.email = email; }
 
     public boolean isAreNotificationsEnabled() {
         return areNotificationsEnabled;
@@ -98,11 +96,8 @@ public class UserSettings {
         UserSettings that = (UserSettings) o;
         return areNotificationsEnabled == that.areNotificationsEnabled && Objects.equals(email, that.email) && theme == that.theme;
     }
-    
-    public boolean isValid() {
-        boolean isIdValid = this.id != null && this.id > 0;
-        boolean isEmailValid = RegexUtils.isValidEmail(this.email);
-        
-        return isIdValid && isEmailValid;
+
+    public void validate() {
+        if (!RegexUtils.isValidEmail(this.email)) throw new UserSettingsInvalidException("Invalid email");
     }
 }

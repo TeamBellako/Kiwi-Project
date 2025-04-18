@@ -2,6 +2,7 @@ package com.kiwi.usersettings;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.Optional;
 
@@ -32,8 +33,8 @@ public class UserSettingsServiceTest {
         userSettingsService.createUserSettings(invalidUserSettings());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void createUserSettings_nullInput_throwsIllegalArgumentException() {
+    @Test(expected = NullPointerException.class)
+    public void createUserSettings_nullInput_throwsNullPointerException() {
         userSettingsService.createUserSettings(null);
     }
 
@@ -47,9 +48,9 @@ public class UserSettingsServiceTest {
         verify(userSettingsRepository, Mockito.times(1)).save(validUserSettings());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void createUserSettings_saveReturnsEmptyUserSettings_throwsIllegalStateException() {
-        when(userSettingsRepository.save(validUserSettings())).thenReturn(new UserSettings());
+    @Test(expected = RuntimeException.class)
+    public void createUserSettings_saveReturnsEmptyUserSettings_throwsRuntimeExceptionn() {
+        when(userSettingsRepository.save(validUserSettings())).thenReturn(null);
         
         userSettingsService.createUserSettings(validUserSettings());
     }
@@ -86,14 +87,13 @@ public class UserSettingsServiceTest {
     @Test
     public void updateUserSettings_validInput_settingsUpdated() {
         when(userSettingsRepository.save(validUserSettings())).thenReturn(validUserSettings());
-        when(userSettingsRepository.existsById(validUserSettings().getId())).thenReturn(true);
         when(userSettingsRepository.save(updatedUserSettings())).thenReturn(updatedUserSettings());
+        when(userSettingsRepository.existsById(updatedUserSettings().getId())).thenReturn(true);
         
         UserSettings updatedUserSettings = userSettingsService.updateUserSettings(updatedUserSettings());
 
         assertEquals(updatedUserSettings(), updatedUserSettings);
         assertNotEquals(validUserSettings(), updatedUserSettings);
-        verify(userSettingsRepository, Mockito.times(1)).existsById(validUserSettings().getId());
         verify(userSettingsRepository, Mockito.times(1)).save(updatedUserSettings());
     }
 

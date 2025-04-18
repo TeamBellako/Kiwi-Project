@@ -88,7 +88,7 @@ public class UserSettingsControllerTest {
 
     @Test
     public void getUserSettingsById_invalidId_returnsBadRequest() throws Exception {
-        when(userSettingsService.getUserSettingsById(invalidUserSettings().getId())).thenThrow(new UserSettingsInvalidException());
+        when(userSettingsService.getUserSettingsById(invalidUserSettings().getId())).thenThrow(new UserSettingsInvalidException(""));
         
         mockMvc.perform(get(baseAPIUrl + "/{id}", invalidUserSettings().getId()))
 
@@ -115,7 +115,7 @@ public class UserSettingsControllerTest {
 
     @Test
     public void updateUserSettings_invalidInput_returnsBadRequest() throws Exception {
-        when(userSettingsService.updateUserSettings(any(UserSettings.class))).thenThrow(new UserSettingsInvalidException());
+        when(userSettingsService.updateUserSettings(any(UserSettings.class))).thenThrow(new UserSettingsInvalidException(""));
         
         mockMvc.perform(getPUTRequestContent(invalidUserSettings()))
 
@@ -150,7 +150,7 @@ public class UserSettingsControllerTest {
 
     @Test
     public void deleteUserSettings_invalidId_returnsBadRequest() throws Exception {
-        doThrow(new UserSettingsInvalidException())
+        doThrow(new UserSettingsInvalidException(""))
                 .when(userSettingsService)
                 .deleteUserSettings(invalidUserSettings().getId());
         

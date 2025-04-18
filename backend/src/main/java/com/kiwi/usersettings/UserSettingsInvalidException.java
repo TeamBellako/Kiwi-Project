@@ -1,7 +1,7 @@
 package com.kiwi.usersettings;
 
 public class UserSettingsInvalidException extends RuntimeException {
-    public UserSettingsInvalidException() {
-        super();
+    public UserSettingsInvalidException(String message) {
+        super(message);
     }
 }
