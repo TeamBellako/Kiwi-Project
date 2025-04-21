@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.Optional;
 
+import static com.kiwi.usersettings.UserSettingsController.testingUserSettingsId;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -100,6 +101,16 @@ public class UserSettingsControllerTest {
         mockMvc.perform(get(baseAPIUrl + "/{id}", validUserSettings().getId()))
 
         .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getMyUserSettings_userExists_returnsMyUserSettings() throws Exception {
+        when(userSettingsService.getUserSettingsById(testingUserSettingsId)).thenReturn(Optional.of(validUserSettings()));
+        
+        mockMvc.perform(get(baseAPIUrl + "/me", testingUserSettingsId))
+        
+        .andExpect(status().isOk())
+        .andExpect(getUserSettingsResultMatcher(validUserSettings()));
     }
 
     @Test

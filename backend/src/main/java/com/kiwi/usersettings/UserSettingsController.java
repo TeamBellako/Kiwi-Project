@@ -15,6 +15,9 @@ import java.util.Optional;
 public class UserSettingsController {
 
     private final UserSettingsService userSettingsService;
+    
+    // TODO: Remove placeholder testing value once JWT is implemented
+    public static final Integer testingUserSettingsId = 1;
 
     @Autowired
     public UserSettingsController(UserSettingsService userSettingsService) {
@@ -41,6 +44,11 @@ public class UserSettingsController {
         return userSettings
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+    
+    @GetMapping("/me")
+    public ResponseEntity<UserSettings> getMyUserSettings() {
+        return getUserSettingsById(testingUserSettingsId);
     }
 
     @PutMapping
