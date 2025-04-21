@@ -9,6 +9,6 @@ data class UserSettingsDto(
         LIGHT,
         DARK
     }
-
-    fun UserSettingsDto.toState() = UserSettingsState(this)
 }
+
+fun UserSettingsDto.toState() = UserSettingsState(this)
