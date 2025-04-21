@@ -24,12 +24,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.ui.utils.TestTags
 
 @Composable
 fun UserSettingsScreen() {
     var email by remember { mutableStateOf("") }
     var areNotificationsEnabled by remember { mutableStateOf(false) }
-    var selectedTheme by remember { mutableStateOf(UserSettings.Theme.LIGHT) }
+    var selectedTheme by remember { mutableStateOf(UserSettingsDto.Theme.LIGHT) }
 
     Column(
         modifier = Modifier
@@ -45,7 +46,9 @@ fun UserSettingsScreen() {
                 println("Email changed: $email")
             },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .testTag(TestTags.EMAIL_FIELD)
+                .fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -57,6 +60,7 @@ fun UserSettingsScreen() {
             Text("Enable Notifications")
             Spacer(modifier = Modifier.width(8.dp))
             Switch(
+                modifier = Modifier.testTag(TestTags.NOTIFICATIONS_SWITCH),
                 checked = areNotificationsEnabled,
                 onCheckedChange = {
                     areNotificationsEnabled = it
@@ -69,7 +73,7 @@ fun UserSettingsScreen() {
 
         // Theme Selector
         Text("Theme")
-        UserSettings.Theme.entries.forEach { themeOption ->
+        UserSettingsDto.Theme.entries.forEach { themeOption ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(end = 16.dp)
@@ -80,7 +84,7 @@ fun UserSettingsScreen() {
                         selectedTheme = themeOption
                         println("Theme selected: $selectedTheme")
                     },
-                    modifier = Modifier.testTag("radio_${themeOption.name.lowercase()}") // 👈 here
+                    modifier = Modifier.testTag("radio_${themeOption.name.lowercase()}")
                 )
                 Text(text = themeOption.name)
             }

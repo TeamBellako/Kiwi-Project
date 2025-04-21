@@ -1,15 +1,18 @@
 package com.bellako.kiwi.usersettings
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bellako.kiwi.ui.utils.TestTags
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,42 +23,72 @@ class UserSettingsScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @Test
-    fun emailField_updatesOnInput() {
+    private lateinit var robot: UserSettingsScreenTestRobot;
+
+    private val defaultUserSettingsDto : UserSettingsDto = UserSettingsDto(
+        "Email",
+        false,
+        UserSettingsDto.Theme.LIGHT,
+    )
+    private val validUserSettings : UserSettingsDto = UserSettingsDto(
+        "finnthehuman@gmail.com",
+        false,
+        UserSettingsDto.Theme.LIGHT,
+    )
+
+    @Before
+    fun setUp() {
         composeTestRule.setContent {
             UserSettingsScreen()
         }
 
-        val emailInput = "finnthehuman@gmail.com"
-
-        composeTestRule
-            .onNodeWithText("Email")
-            .performTextInput(emailInput)
-
-        composeTestRule
-            .onNodeWithText(emailInput)
-            .assertExists()
+        robot = UserSettingsScreenTestRobot(composeTestRule);
     }
 
     @Test
-    fun notificationSwitch_togglesOnClick() {
-        composeTestRule.setContent {
-            UserSettingsScreen()
-        }
-
-        composeTestRule
-            .onNode(isToggleable())
-            .performClick()
-            .assertIsOn()
+    fun emailField_renderField_showsInitialValue() {
+        composeTestRule.emailField().assert(hasText(defaultUserSettingsDto.email))
     }
 
     @Test
-    fun themeRadioButton_selectsDarkTheme() {
-        composeTestRule.setContent {
-            UserSettingsScreen()
-        }
+    fun emailField_enterValidInput_updatesFieldValue() {
+        robot.enterEmail(validUserSettings.email);
 
-        composeTestRule.onNodeWithTag("radio_dark").performClick()
-        composeTestRule.onNodeWithTag("radio_dark").assertIsSelected()
+        composeTestRule.emailField().assert(hasText(validUserSettings.email))
     }
+
+    @Test
+    fun notificationSwitch_render_isOffByDefault() {
+        composeTestRule.notificationsSwitch().assertIsOff()
+    }
+
+    @Test
+    fun notificationSwitch_click_toggles() {
+        composeTestRule.notificationsSwitch().assertIsOff()
+
+        robot.toggleNotifications();
+
+        composeTestRule.notificationsSwitch().assertIsOn()
+    }
+
+    @Test
+    fun themeRadioButton_render_isLightByDefault() {
+        composeTestRule.themeRadioButtonLight().assertIsSelected()
+        composeTestRule.themeRadioButtonDark().assertIsNotSelected()
+    }
+
+    @Test
+    fun themeRadioButton_clickOnBothOptions_onlyAllowsToSelectOneAtATime() {
+        robot.clickTheme(UserSettingsDto.Theme.LIGHT.toString().lowercase());
+        robot.clickTheme(UserSettingsDto.Theme.DARK.toString().lowercase());
+
+        composeTestRule.themeRadioButtonLight().assertIsNotSelected()
+        composeTestRule.themeRadioButtonDark().assertIsSelected()
+
+    }
+
+    private fun ComposeTestRule.emailField() = onNodeWithTag(TestTags.EMAIL_FIELD);
+    private fun ComposeTestRule.notificationsSwitch() = onNodeWithTag(TestTags.NOTIFICATIONS_SWITCH);
+    private fun ComposeTestRule.themeRadioButtonLight() = onNodeWithTag(TestTags.RADIO_LIGHT);
+    private fun ComposeTestRule.themeRadioButtonDark() = onNodeWithTag(TestTags.RADIO_DARK);
 }

@@ -1,6 +1,6 @@
 package com.bellako.kiwi.usersettings
 
-data class UserSettings(
+data class UserSettingsDto(
     val email: String,
     val areNotificationsEnabled: Boolean,
     val theme: Theme
