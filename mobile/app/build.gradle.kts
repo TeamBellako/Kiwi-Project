@@ -8,10 +8,13 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services") version "4.4.2" apply false
+    id ("com.google.dagger.hilt.android")
+
 }
 
 android {
     namespace = "com.bellako.kiwi"
+    testNamespace = "com.bellako.kiwi.test"
     compileSdk = 35
 
     packaging {
@@ -146,4 +149,13 @@ dependencies {
 
     implementation(libs.firebase.crashlytics)
     implementation(libs.google.firebase.analytics)
+    testImplementation(kotlin("test"))
+
+    androidTestImplementation(libs.androidx.compose.ui.ui.test.junit4)
+    debugImplementation(libs.ui.test.manifest)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    androidTestImplementation(libs.androidx.foundation)
+
 }
