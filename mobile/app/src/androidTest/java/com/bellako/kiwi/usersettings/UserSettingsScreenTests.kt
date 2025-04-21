@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -22,18 +23,11 @@ import org.junit.runner.RunWith
 class UserSettingsScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
-
     private lateinit var robot: UserSettingsScreenTestRobot;
-
-    private val defaultUserSettingsDto : UserSettingsDto = UserSettingsDto(
-        "Email",
-        false,
-        UserSettingsDto.Theme.LIGHT,
-    )
     private val validUserSettings : UserSettingsDto = UserSettingsDto(
         "finnthehuman@gmail.com",
-        false,
-        UserSettingsDto.Theme.LIGHT,
+        true,
+        UserSettingsDto.Theme.DARK,
     )
 
     @Before
@@ -47,14 +41,14 @@ class UserSettingsScreenTest {
 
     @Test
     fun emailField_renderField_showsInitialValue() {
-        composeTestRule.emailField().assert(hasText(defaultUserSettingsDto.email))
+        composeTestRule.emailField().assert(hasText("Email"))
     }
 
     @Test
     fun emailField_enterValidInput_updatesFieldValue() {
         robot.enterEmail(validUserSettings.email);
 
-        composeTestRule.emailField().assert(hasText(validUserSettings.email))
+        composeTestRule.emailField().assertTextContains(validUserSettings.email)
     }
 
     @Test
