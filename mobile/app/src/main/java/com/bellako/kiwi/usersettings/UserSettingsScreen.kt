@@ -142,6 +142,7 @@ fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
 @Composable
 fun UserSettingsScreenPreview() {
     val previewUserSettings = UserSettingsDto(
+        1, // TODO: Remove when JWT is implemented
         "finn@thehuman.com",
         true,
         UserSettingsDto.Theme.DARK
