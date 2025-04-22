@@ -2,11 +2,16 @@ package com.bellako.kiwi.usersettings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class UserSettingsViewModel(private val repository: UserSettingsRepository) : ViewModel() , IUserSettingsViewModel{
+@HiltViewModel
+class UserSettingsViewModel @Inject constructor(
+    private val repository: UserSettingsRepository
+) : ViewModel(), IUserSettingsViewModel {
     private val _state = MutableStateFlow<UserSettingsState?>(null)
     override val state: StateFlow<UserSettingsState?> = _state
 

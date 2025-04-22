@@ -8,7 +8,9 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services") version "4.4.2" apply false
-    id ("com.google.dagger.hilt.android")
+
+    kotlin("kapt")
+    id("dagger.hilt.android.plugin")
 
 }
 
@@ -170,4 +172,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test.v173)
     testImplementation(libs.mockito.core.v5170)
     testImplementation(libs.mockito.kotlin)
+
+    // Hilt & lifecycle extensions
+    implementation(libs.androidx.hilt.navigation.compose)
 }
