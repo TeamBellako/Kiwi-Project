@@ -39,6 +39,7 @@ mockk = "1.13.17"
 navigationCompose = "2.8.9"
 retrofit = "2.9.0"
 roomRuntime = "2.6.1"
+turbine = "1.2.2"
 ui = "1.7.8"
 uiTooling = "1.7.8"
 uiTestJunit4 = "1.7.8"
@@ -99,6 +100,7 @@ mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
 ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
