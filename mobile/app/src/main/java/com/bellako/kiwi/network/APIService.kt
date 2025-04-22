@@ -1,7 +1,7 @@
 package com.bellako.kiwi.network
 
 import com.bellako.kiwi.BuildConfig
-import com.bellako.kiwi.usersettings.UserSettingsApi
+import com.bellako.kiwi.usersettings.IUserSettingsApi
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -15,7 +15,7 @@ object RetrofitClient { private val retrofit: Retrofit = Retrofit.Builder()
 
     val apiService: APIService = retrofit.create(APIService::class.java)
 
-    val userSettingsApi: UserSettingsApi = retrofit.create(UserSettingsApi::class.java)
+    val userSettingsApi: IUserSettingsApi = retrofit.create(IUserSettingsApi::class.java)
 }
 
 interface APIService {

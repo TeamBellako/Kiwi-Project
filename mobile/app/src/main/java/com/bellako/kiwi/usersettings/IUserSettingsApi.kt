@@ -4,7 +4,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PUT
 
-interface UserSettingsApi {
+interface IUserSettingsApi {
 
     @GET("api/settings/me")
     suspend fun getUserSettings(): UserSettingsDto

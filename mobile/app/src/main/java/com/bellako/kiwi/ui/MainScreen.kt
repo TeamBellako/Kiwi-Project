@@ -1,15 +1,12 @@
 package com.bellako.kiwi.ui
 
-import HelloCard
-import HelloViewModel
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import com.bellako.kiwi.network.RetrofitClient
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bellako.kiwi.usersettings.UserSettingsScreen
+import com.bellako.kiwi.usersettings.UserSettingsViewModel
 
 @Composable
 fun MainScreen() {
-    //HelloCard(viewModel = HelloViewModel(RetrofitClient.apiService), id = 1)
-    UserSettingsScreen();
+    val viewModel: UserSettingsViewModel = viewModel()
+    UserSettingsScreen(viewModel);
 }

@@ -1,6 +1,6 @@
 package com.bellako.kiwi.usersettings
 
-class UserSettingsRepository(private val api: UserSettingsApi) {
+class UserSettingsRepository(private val api: IUserSettingsApi) {
     suspend fun getUserSettings(): Result<UserSettingsDto> =
         runCatching { api.getUserSettings() }
 

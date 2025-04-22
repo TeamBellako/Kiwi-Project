@@ -9,12 +9,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -75,43 +79,72 @@ fun ThemeRadioButtons(
     }
 }
 
-
 @Composable
-fun UserSettingsScreen(defaultUserSettingsDto: UserSettingsDto = UserSettingsDto()) {
-    val userSettingsState = remember { UserSettingsState(defaultUserSettingsDto) }
+fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
+    val settingsState = viewModel.state.collectAsState()
+    val state = settingsState.value
+
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadSettings()
+    }
 
     Column(
         modifier = Modifier
-            .background(Color.White)
             .fillMaxSize()
+            .background(Color.White)
             .padding(16.dp)
     ) {
-        EmailField(
-            email = userSettingsState.email,
-            onEmailChanged = { userSettingsState.email = it }
-        )
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        } else if (state != null) {
+            EmailField(
+                email = state.email,
+                onEmailChanged = { state.email = it }
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        NotificationsSwitch(
-            areNotificationsEnabled = userSettingsState.areNotificationsEnabled,
-            onNotificationChange = { userSettingsState.areNotificationsEnabled = it }
-        )
+            NotificationsSwitch(
+                areNotificationsEnabled = state.areNotificationsEnabled,
+                onNotificationChange = { state.areNotificationsEnabled = it }
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        ThemeRadioButtons(
-            selectedTheme = userSettingsState.theme,
-            onThemeClicked = { selectedTheme ->
-                userSettingsState.theme = selectedTheme
+            ThemeRadioButtons(
+                selectedTheme = state.theme,
+                onThemeClicked = { selected ->
+                    state.theme = selected
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = { viewModel.updateSettings() },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Save")
             }
-        )
+        }
+
+        if (error != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Error: $error", color = Color.Red)
+        }
     }
 }
-
 
 @Preview
 @Composable
 fun UserSettingsScreenPreview() {
-    UserSettingsScreen();
+    val previewUserSettings = UserSettingsDto(
+        "finn@thehuman.com",
+        true,
+        UserSettingsDto.Theme.DARK
+    )
+    UserSettingsScreen(FakeUserSettingsViewModel(previewUserSettings.toState()));
 }

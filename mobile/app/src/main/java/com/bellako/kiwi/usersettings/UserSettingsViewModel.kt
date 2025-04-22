@@ -6,14 +6,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class UserSettingsViewModel(private val repository: UserSettingsRepository) : ViewModel() {
+class UserSettingsViewModel(private val repository: UserSettingsRepository) : ViewModel() , IUserSettingsViewModel{
     private val _state = MutableStateFlow<UserSettingsState?>(null)
-    val state: StateFlow<UserSettingsState?> = _state
+    override val state: StateFlow<UserSettingsState?> = _state
 
-    val isLoading = MutableStateFlow(false)
-    val error = MutableStateFlow<String?>(null)
+    override val isLoading = MutableStateFlow(false)
+    override val error = MutableStateFlow<String?>(null)
 
-    fun loadSettings() {
+    override fun loadSettings() {
         viewModelScope.launch {
             isLoading.value = true
             error.value = null
@@ -29,7 +29,7 @@ class UserSettingsViewModel(private val repository: UserSettingsRepository) : Vi
         }
     }
 
-    fun updateSettings() {
+    override fun updateSettings() {
         viewModelScope.launch {
             val currentState = _state.value ?: return@launch
             repository.updateUserSettings(currentState.toDto())

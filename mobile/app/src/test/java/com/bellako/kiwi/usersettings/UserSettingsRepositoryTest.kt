@@ -11,7 +11,7 @@ import retrofit2.Response
 
 class UserSettingsRepositoryTest {
 
-    private lateinit var api: UserSettingsApi
+    private lateinit var api: IUserSettingsApi
     private lateinit var repository: UserSettingsRepository
 
     private val testDto = UserSettingsDto(
@@ -22,7 +22,7 @@ class UserSettingsRepositoryTest {
 
     @Before
     fun setUp() {
-        api = mock(UserSettingsApi::class.java)
+        api = mock(IUserSettingsApi::class.java)
         repository = UserSettingsRepository(api)
     }
 
