@@ -20,7 +20,7 @@ class UserSettingsViewModelTest {
     private lateinit var viewModel: UserSettingsViewModel
 
     private val testDto = UserSettingsDto(
-        email = "finnthehuman@gmail.com",
+        email = "finn@thehuman.com",
         areNotificationsEnabled = true,
         theme = UserSettingsDto.Theme.DARK
     )

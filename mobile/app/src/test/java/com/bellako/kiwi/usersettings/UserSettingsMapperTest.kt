@@ -5,7 +5,7 @@ import org.junit.Test
 
 class UserSettingsMapperTest {
     private val validUserSettingsDto : UserSettingsDto = UserSettingsDto(
-            email = "finnthehuman@gmail.com",
+            email = "finn@thehuman.com",
             areNotificationsEnabled = false,
             theme = UserSettingsDto.Theme.LIGHT
     )
@@ -14,7 +14,7 @@ class UserSettingsMapperTest {
     fun `toState maps dto to state correctly`() {
         val state = validUserSettingsDto.toState()
 
-        assertEquals("finnthehuman@gmail.com", state.email)
+        assertEquals("finn@thehuman.com", state.email)
         assertFalse(state.areNotificationsEnabled)
         assertEquals(UserSettingsDto.Theme.LIGHT, state.theme)
     }
@@ -32,12 +32,12 @@ class UserSettingsMapperTest {
     fun `toDto reflects changes made to state`() {
         val state = UserSettingsState(validUserSettingsDto)
 
-        state.email = "jakethedog@gmail.com"
+        state.email = "jake@thedog.com"
         state.areNotificationsEnabled = true
         state.theme = UserSettingsDto.Theme.DARK
         val updated = state.toDto()
 
-        assertEquals("jakethedog@gmail.com", updated.email)
+        assertEquals("jake@thedog.com", updated.email)
         assertTrue(updated.areNotificationsEnabled)
         assertEquals(UserSettingsDto.Theme.DARK, updated.theme)
     }

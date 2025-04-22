@@ -24,7 +24,7 @@ class UserSettingsScreenTest {
     private lateinit var state: UserSettingsState
 
     private val validUserSettings = UserSettingsDto(
-        email = "finnthehuman@gmail.com",
+        email = "finn@thehuman.com",
         areNotificationsEnabled = true,
         theme = UserSettingsDto.Theme.DARK
     )

@@ -15,7 +15,7 @@ class UserSettingsRepositoryTest {
     private lateinit var repository: UserSettingsRepository
 
     private val testDto = UserSettingsDto(
-        email = "finnthehuman@gmail.com",
+        email = "finn@thehuman.com",
         areNotificationsEnabled = true,
         theme = UserSettingsDto.Theme.DARK
     )
