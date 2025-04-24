@@ -1,17 +1,24 @@
 package com.bellako.kiwi.usersettings
 
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserSettingsViewModelTest {
@@ -24,6 +31,12 @@ class UserSettingsViewModelTest {
         areNotificationsEnabled = true,
         theme = UserSettingsDto.Theme.DARK
     )
+    private val updateDto = UserSettingsDto(
+        email = "jake@thedog.com",
+        areNotificationsEnabled = false,
+        theme = UserSettingsDto.Theme.LIGHT
+    )
+
     private val testErrorMessage = "Error Message";
 
 
@@ -33,15 +46,23 @@ class UserSettingsViewModelTest {
 
         repository = mock(UserSettingsRepository::class.java)
         viewModel = UserSettingsViewModel(repository)
+
+        reset(repository)
+    }
+
+    @After
+    fun tearDown() {
+        viewModel.viewModelScope.cancel()
+        Dispatchers.resetMain()
     }
 
 
     @Test
     fun `loadSettings sets UserSettings when getUserSettings results in success`() = runTest {
-        `when`(repository.getUserSettings()).thenReturn(Result.success(testDto))
+        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
 
         viewModel.loadSettings()
-        testScheduler.advanceUntilIdle()
+        advanceUntilIdle()
 
         assertEquals(testDto, viewModel.state.first()?.toDto())
         assertNull(viewModel.error.first())
@@ -49,10 +70,10 @@ class UserSettingsViewModelTest {
 
     @Test
     fun `loadSettings shows error message when getUserSettings results in failure`() = runTest {
-        `when`(repository.getUserSettings()).thenReturn(Result.failure(RuntimeException(testErrorMessage)))
+        whenever(repository.getUserSettings()).thenReturn(Result.failure(RuntimeException(testErrorMessage)))
 
         viewModel.loadSettings()
-        testScheduler.advanceUntilIdle()
+        advanceUntilIdle()
 
         assertNull(viewModel.state.first())
         assertEquals(testErrorMessage, viewModel.error.first())
@@ -60,20 +81,61 @@ class UserSettingsViewModelTest {
 
     @Test
     fun `updateSettings calls repository with current state`() = runTest {
-        `when`(repository.getUserSettings()).thenReturn(Result.success(testDto))
-        `when`(repository.updateUserSettings(eq(testDto))).thenReturn(Result.success(Unit))
+        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
+        whenever(repository.updateUserSettings(eq(testDto))).thenReturn(Result.success(Unit))
 
         viewModel.loadSettings()
-        viewModel.updateSettings()
-        testScheduler.advanceUntilIdle()
+        advanceUntilIdle()
+        viewModel.updateSettings(testDto)
+        advanceUntilIdle()
 
         verify(repository).updateUserSettings(eq(testDto))
     }
 
     @Test
-    fun `updateSettings does nothing when state is null`() = runTest {
-        viewModel.updateSettings()
+    fun `autoSave triggers updateSettings when settings change`() = runTest(testDispatcher) {
+        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
+        whenever(repository.updateUserSettings(anyOrNull())).thenReturn(Result.success(Unit))
 
-        verify(repository, never()).updateUserSettings(anyOrNull())
+        viewModel.loadSettings()
+        advanceUntilIdle()
+        viewModel.updateSettings(updateDto)
+        advanceUntilIdle()
+
+        verify(repository, times(1)).updateUserSettings(anyOrNull())
+    }
+
+    @Test
+    fun `autoSave does not call updateSettings if value is unchanged`() = runTest(testDispatcher) {
+        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
+        whenever(repository.updateUserSettings(anyOrNull())).thenReturn(Result.success(Unit))
+
+        viewModel.loadSettings()
+        advanceUntilIdle()
+        viewModel.updateSettings(testDto)
+        advanceUntilIdle()
+        viewModel.updateSettings(testDto)
+        advanceUntilIdle()
+
+        verify(repository, times(1)).updateUserSettings(anyOrNull())
+    }
+
+    @Test
+    fun `autoSave triggers updateSettings only once after rapid changes`() = runTest(testDispatcher) {
+        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
+        whenever(repository.updateUserSettings(anyOrNull())).thenReturn(Result.success(Unit))
+
+        viewModel.loadSettings()
+        advanceUntilIdle()
+        viewModel.updateSettings(testDto)
+        advanceTimeBy(100)
+        advanceUntilIdle()
+        viewModel.updateSettings(updateDto)
+        advanceTimeBy(100)
+        advanceUntilIdle()
+        viewModel.updateSettings(testDto)
+        advanceUntilIdle()
+
+        verify(repository, times(1)).updateUserSettings(anyOrNull())
     }
 }

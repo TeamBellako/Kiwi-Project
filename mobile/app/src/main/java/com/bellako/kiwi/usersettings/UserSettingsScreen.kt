@@ -1,6 +1,8 @@
+
 package com.bellako.kiwi.usersettings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -18,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,10 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.utils.TestTags
 
 @Composable
-fun EmailField(
-    email: String,
-    onEmailChanged: (String) -> Unit
-) {
+fun EmailField(email: String, onEmailChanged: (String) -> Unit) {
     OutlinedTextField(
         value = email,
         onValueChange = onEmailChanged,
@@ -43,100 +40,80 @@ fun EmailField(
 }
 
 @Composable
-fun NotificationsSwitch(
-    areNotificationsEnabled: Boolean,
-    onNotificationChange: (Boolean) -> Unit
-) {
+fun NotificationsSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text("Enable Notifications")
         Spacer(modifier = Modifier.width(8.dp))
         Switch(
-            modifier = Modifier.testTag(TestTags.NOTIFICATIONS_SWITCH),
-            checked = areNotificationsEnabled,
-            onCheckedChange = onNotificationChange
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.testTag(TestTags.NOTIFICATIONS_SWITCH)
         )
     }
 }
 
 @Composable
-fun ThemeRadioButtons(
-    selectedTheme: UserSettingsDto.Theme,
-    onThemeClicked: (UserSettingsDto.Theme) -> Unit
-) {
+fun ThemeRadioButtons(selectedTheme: UserSettingsDto.Theme, onThemeChange: (UserSettingsDto.Theme) -> Unit) {
     Text("Theme")
-    UserSettingsDto.Theme.entries.forEach { themeOption ->
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(end = 16.dp)
-        ) {
+    UserSettingsDto.Theme.entries.forEach { theme ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
-                selected = selectedTheme == themeOption,
-                onClick = { onThemeClicked(themeOption) },
-                modifier = Modifier.testTag("radio_${themeOption.name.lowercase()}")
+                selected = selectedTheme == theme,
+                onClick = { onThemeChange(theme) },
+                modifier = Modifier.testTag("radio_${theme.name.lowercase()}")
             )
-            Text(text = themeOption.name)
+            Text(text = theme.name)
         }
     }
 }
 
 @Composable
 fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
-    val settingsState = viewModel.state.collectAsState()
-    val state = settingsState.value
-
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
-
     LaunchedEffect(Unit) {
         viewModel.loadSettings()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(16.dp)
-    ) {
-        if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else if (state != null) {
-            EmailField(
-                email = state.email,
-                onEmailChanged = { state.email = it }
-            )
+    val state: UserSettingsState? = viewModel.state.collectAsState().value
 
+    state?.let {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(16.dp)
+        ) {
+            EmailField(email = it.email, onEmailChanged = { email ->
+                viewModel.updateSettings(it.copy(email = email).toDto())
+            })
             Spacer(modifier = Modifier.height(16.dp))
 
             NotificationsSwitch(
-                areNotificationsEnabled = state.areNotificationsEnabled,
-                onNotificationChange = { state.areNotificationsEnabled = it }
+                checked = it.areNotificationsEnabled,
+                onCheckedChange = { checked ->
+                    viewModel.updateSettings(it.copy(areNotificationsEnabled = checked).toDto())
+                }
             )
-
             Spacer(modifier = Modifier.height(16.dp))
 
             ThemeRadioButtons(
-                selectedTheme = state.theme,
-                onThemeClicked = { selected ->
-                    state.theme = selected
+                selectedTheme = it.theme,
+                onThemeChange = { theme ->
+                    viewModel.updateSettings(it.copy(theme = theme).toDto())
                 }
             )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { viewModel.updateSettings() },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Save")
-            }
         }
-
-        if (error != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Error: $error", color = Color.Red)
+    } ?: run {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
     }
 }
+
 
 @Preview
 @Composable

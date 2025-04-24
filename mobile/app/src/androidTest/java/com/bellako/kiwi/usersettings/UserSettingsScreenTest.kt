@@ -1,9 +1,14 @@
 package com.bellako.kiwi.usersettings
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.ui.utils.TestTags
 import org.junit.Before
@@ -14,7 +19,6 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalMaterial3Api::class)
 @RunWith(AndroidJUnit4::class)
 class UserSettingsScreenTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -31,7 +35,7 @@ class UserSettingsScreenTest {
 
     @Before
     fun setUp() {
-        state = UserSettingsState(UserSettingsDto())
+        state = UserSettingsState.fromDto(UserSettingsDto())
         fakeViewModel = FakeUserSettingsViewModel(state)
 
         composeTestRule.setContent {
@@ -39,6 +43,7 @@ class UserSettingsScreenTest {
         }
 
         robot = UserSettingsScreenTestRobot(composeTestRule)
+
     }
 
     @Test

@@ -8,5 +8,5 @@ interface IUserSettingsViewModel {
     val error: StateFlow<String?>
 
     fun loadSettings()
-    fun updateSettings()
+    fun updateSettings(userSettingsDto: UserSettingsDto)
 }

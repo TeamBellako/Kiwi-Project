@@ -11,5 +11,7 @@ class FakeUserSettingsViewModel(private val backingState: UserSettingsState) : I
     override val error = MutableStateFlow<String?>(null)
 
     override fun loadSettings() = Unit
-    override fun updateSettings() = Unit
+    override fun updateSettings(newSettings: UserSettingsDto) {
+        _state.value = UserSettingsState.fromDto(newSettings)
+    }
 }

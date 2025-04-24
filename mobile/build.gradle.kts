@@ -7,3 +7,13 @@ plugins {
     id("com.google.gms.google-services") version "4.4.2"
     id ("com.google.dagger.hilt.android") version "2.56.2" apply false
 }
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.hilt.android.gradle.plugin)
+    }
+}

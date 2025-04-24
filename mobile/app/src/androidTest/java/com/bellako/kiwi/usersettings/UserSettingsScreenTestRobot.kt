@@ -5,8 +5,9 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.bellako.kiwi.ui.utils.TestTags
 
 class UserSettingsScreenTestRobot(private val rule: ComposeTestRule) {
-    fun enterEmail(email: String) = apply {
+    fun enterEmail(email: String)  {
         rule.onNodeWithTag(TestTags.EMAIL_FIELD).performTextInput(email)
+        rule.waitForIdle()
     }
 
     fun toggleNotifications() = apply {

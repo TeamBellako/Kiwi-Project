@@ -1,13 +1,27 @@
 package com.bellako.kiwi.usersettings
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+data class UserSettingsState(
+    val email: String = "",
+    val areNotificationsEnabled: Boolean = false,
+    val theme: UserSettingsDto.Theme = UserSettingsDto.Theme.LIGHT
+) {
+    fun toDto(): UserSettingsDto {
+        return UserSettingsDto(
+            email = email,
+            areNotificationsEnabled = areNotificationsEnabled,
+            theme = theme
+        )
+    }
 
-class UserSettingsState(dto: UserSettingsDto) {
-    var email by mutableStateOf(dto.email)
-    var areNotificationsEnabled by mutableStateOf(dto.areNotificationsEnabled)
-    var theme by mutableStateOf(dto.theme)
+    companion object {
+        fun fromDto(dto: UserSettingsDto): UserSettingsState {
+            return UserSettingsState(
+                email = dto.email,
+                areNotificationsEnabled = dto.areNotificationsEnabled,
+                theme = dto.theme
+            )
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -28,10 +42,4 @@ class UserSettingsState(dto: UserSettingsDto) {
         result = 31 * result + theme.hashCode()
         return result
     }
-
-    fun toDto() = UserSettingsDto(
-        email = email,
-        areNotificationsEnabled = areNotificationsEnabled,
-        theme = theme
-    )
 }

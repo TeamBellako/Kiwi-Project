@@ -11,7 +11,7 @@ data class UserSettingsDto(
         DARK
     }
 
-    fun toState() = UserSettingsState(this)
+    fun toState() = UserSettingsState.fromDto(this)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

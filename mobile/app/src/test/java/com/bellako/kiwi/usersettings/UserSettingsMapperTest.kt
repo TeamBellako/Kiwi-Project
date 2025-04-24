@@ -21,24 +21,10 @@ class UserSettingsMapperTest {
 
     @Test
     fun `toDto maps state to dto correctly`() {
-        val state = UserSettingsState(validUserSettingsDto)
+        val state = UserSettingsState.fromDto(validUserSettingsDto)
 
         val result = state.toDto()
 
         assertEquals(validUserSettingsDto, result)
-    }
-
-    @Test
-    fun `toDto reflects changes made to state`() {
-        val state = UserSettingsState(validUserSettingsDto)
-
-        state.email = "jake@thedog.com"
-        state.areNotificationsEnabled = true
-        state.theme = UserSettingsDto.Theme.DARK
-        val updated = state.toDto()
-
-        assertEquals("jake@thedog.com", updated.email)
-        assertTrue(updated.areNotificationsEnabled)
-        assertEquals(UserSettingsDto.Theme.DARK, updated.theme)
     }
 }
