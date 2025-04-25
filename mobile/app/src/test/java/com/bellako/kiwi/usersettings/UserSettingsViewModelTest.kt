@@ -12,10 +12,14 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -36,6 +40,11 @@ class UserSettingsViewModelTest {
         areNotificationsEnabled = false,
         theme = UserSettingsDto.Theme.LIGHT
     )
+    private val invalidDto = UserSettingsDto(
+        email = "bmolovesfootball.com",
+        areNotificationsEnabled = false,
+        theme = UserSettingsDto.Theme.LIGHT
+    )
 
     private val testErrorMessage = "Error Message";
 
@@ -45,7 +54,7 @@ class UserSettingsViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = mock(UserSettingsRepository::class.java)
-        viewModel = UserSettingsViewModel(repository)
+        viewModel = UserSettingsViewModel(repository, testDispatcher)
 
         reset(repository)
     }
@@ -137,5 +146,20 @@ class UserSettingsViewModelTest {
         advanceUntilIdle()
 
         verify(repository, times(1)).updateUserSettings(anyOrNull())
+    }
+
+    @Test
+    fun `updateSettings updates error when entered email is not valid`() = runTest(testDispatcher) {
+        val errorMessage : String = "Invalid email format"
+        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
+        whenever(repository.updateUserSettings(invalidDto))
+            .thenReturn(Result.failure(RuntimeException(errorMessage)))
+
+        viewModel.loadSettings()
+        advanceUntilIdle()
+        viewModel.updateSettings(invalidDto)
+        advanceUntilIdle()
+
+        assertEquals(errorMessage, viewModel.error.value)
     }
 }

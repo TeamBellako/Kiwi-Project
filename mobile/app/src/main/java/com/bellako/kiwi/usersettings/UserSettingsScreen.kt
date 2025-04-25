@@ -68,12 +68,24 @@ fun ThemeRadioButtons(selectedTheme: UserSettingsDto.Theme, onThemeChange: (User
 }
 
 @Composable
+fun ErrorText(errorMessage: String) {
+    Text(
+        text = errorMessage,
+        color = Color.Red,
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .testTag(TestTags.ERROR_TEXT)
+    )
+}
+
+@Composable
 fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
     LaunchedEffect(Unit) {
         viewModel.loadSettings()
     }
 
     val state: UserSettingsState? = viewModel.state.collectAsState().value
+    val errorMessage = viewModel.error.collectAsState().value
 
     state?.let {
         Column(
@@ -85,6 +97,10 @@ fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
             EmailField(email = it.email, onEmailChanged = { email ->
                 viewModel.updateSettings(it.copy(email = email).toDto())
             })
+            if (!errorMessage.isNullOrBlank()) {
+                ErrorText(errorMessage)
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             NotificationsSwitch(

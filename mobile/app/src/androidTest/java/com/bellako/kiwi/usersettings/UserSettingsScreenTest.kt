@@ -1,6 +1,7 @@
 package com.bellako.kiwi.usersettings
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -32,10 +33,16 @@ class UserSettingsScreenTest {
         areNotificationsEnabled = true,
         theme = UserSettingsDto.Theme.DARK
     )
+    private val inValidUserSettings = UserSettingsDto(
+        email = "bmolovesfootball.com",
+        areNotificationsEnabled = true,
+        theme = UserSettingsDto.Theme.DARK
+    )
 
     @Before
     fun setUp() {
         state = UserSettingsState.fromDto(UserSettingsDto())
+
         fakeViewModel = FakeUserSettingsViewModel(state)
 
         composeTestRule.setContent {
@@ -56,6 +63,17 @@ class UserSettingsScreenTest {
         robot.enterEmail(validUserSettings.email)
 
         composeTestRule.emailField().assertTextContains(validUserSettings.email)
+    }
+
+    @Test
+    fun emailField_enterInvalidInput_showsErrorMessage() {
+        fakeViewModel.simulateError = true
+        fakeViewModel.simulatedErrorMessage = "Invalid email format"
+
+        robot.enterEmail(inValidUserSettings.email)
+
+        composeTestRule.errorText().assertIsDisplayed()
+        composeTestRule.errorText().assertTextContains(fakeViewModel.simulatedErrorMessage)
     }
 
     @Test
@@ -85,6 +103,7 @@ class UserSettingsScreenTest {
         composeTestRule.themeRadioButtonDark().assertIsSelected()
     }
 
+    private fun ComposeTestRule.errorText() = onNodeWithTag(TestTags.ERROR_TEXT)
     private fun ComposeTestRule.emailField() = onNodeWithTag(TestTags.EMAIL_FIELD)
     private fun ComposeTestRule.notificationsSwitch() = onNodeWithTag(TestTags.NOTIFICATIONS_SWITCH)
     private fun ComposeTestRule.themeRadioButtonLight() = onNodeWithTag(TestTags.RADIO_LIGHT)

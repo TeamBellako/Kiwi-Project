@@ -1,6 +1,8 @@
 package com.bellako.kiwi.ui.utils
 
 object TestTags {
+    const val ERROR_TEXT = "error_text"
+
     const val EMAIL_FIELD = "email_field"
 
     const val NOTIFICATIONS_SWITCH = "notifications_switch"
