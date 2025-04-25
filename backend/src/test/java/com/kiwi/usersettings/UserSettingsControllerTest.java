@@ -3,7 +3,6 @@ package com.kiwi.usersettings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.exception.GlobalExceptionHandler;
-import jakarta.servlet.ServletException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
