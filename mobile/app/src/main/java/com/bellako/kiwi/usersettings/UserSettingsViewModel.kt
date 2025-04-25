@@ -49,10 +49,12 @@ class UserSettingsViewModel @Inject constructor(
     }
 
     override fun loadSettings() {
+        _isLoading.value = true
         viewModelScope.launch {
             val result = repository.getUserSettings()
             result.onSuccess {
                 _state.value = UserSettingsState.fromDto(it)
+                _isLoading.value = false
             }.onFailure {
                 _error.value = it.message
             }
@@ -85,6 +87,9 @@ class UserSettingsViewModel @Inject constructor(
     private suspend fun saveSettings(dto: UserSettingsDto) {
         withContext(dispatcher) {
             repository.updateUserSettings(dto)
+                .onSuccess {
+                    _error.value = null
+                }
                 .onFailure { throwable ->
                     val errorMessage = when (throwable) {
                         is HttpException -> {
@@ -103,7 +108,7 @@ class UserSettingsViewModel @Inject constructor(
             val jsonObject = JSONObject(json ?: "")
             jsonObject.getString("message")
         } catch (e: Exception) {
-            "Something went wrong"
+            "Error parsing message $json"
         }
     }
 }

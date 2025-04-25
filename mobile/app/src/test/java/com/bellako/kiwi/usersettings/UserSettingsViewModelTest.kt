@@ -102,6 +102,21 @@ class UserSettingsViewModelTest {
     }
 
     @Test
+    fun `updateSettings sets error when updateUserSettings results in failure`() = runTest(testDispatcher) {
+        val errorMessage : String = "Invalid email format"
+        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
+        whenever(repository.updateUserSettings(invalidDto))
+            .thenReturn(Result.failure(RuntimeException(errorMessage)))
+
+        viewModel.loadSettings()
+        advanceUntilIdle()
+        viewModel.updateSettings(invalidDto)
+        advanceUntilIdle()
+
+        assertEquals(errorMessage, viewModel.error.value)
+    }
+
+    @Test
     fun `autoSave triggers updateSettings when settings change`() = runTest(testDispatcher) {
         whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
         whenever(repository.updateUserSettings(anyOrNull())).thenReturn(Result.success(Unit))
@@ -146,20 +161,5 @@ class UserSettingsViewModelTest {
         advanceUntilIdle()
 
         verify(repository, times(1)).updateUserSettings(anyOrNull())
-    }
-
-    @Test
-    fun `updateSettings updates error when entered email is not valid`() = runTest(testDispatcher) {
-        val errorMessage : String = "Invalid email format"
-        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
-        whenever(repository.updateUserSettings(invalidDto))
-            .thenReturn(Result.failure(RuntimeException(errorMessage)))
-
-        viewModel.loadSettings()
-        advanceUntilIdle()
-        viewModel.updateSettings(invalidDto)
-        advanceUntilIdle()
-
-        assertEquals(errorMessage, viewModel.error.value)
     }
 }

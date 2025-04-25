@@ -1,7 +1,9 @@
 package com.bellako.kiwi.ui.utils
 
 object TestTags {
-    const val ERROR_TEXT = "error_text"
+    const val CIRCULAR_PROGRESS_INDICATOR = "circular_progress_indicator"
+    const val FIELD_ERROR = "field_error"
+    const val SERVER_ERROR = "server_error"
 
     const val EMAIL_FIELD = "email_field"
 

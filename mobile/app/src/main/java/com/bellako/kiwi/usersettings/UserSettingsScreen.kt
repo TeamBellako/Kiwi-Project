@@ -27,6 +27,109 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.utils.TestTags
 
+@Preview
+@Composable
+fun UserSettingsScreenPreview() {
+    val previewUserSettings = UserSettingsDto(
+        1, // TODO: Remove when JWT is implemented
+        "finn@thehuman.com",
+        true,
+        UserSettingsDto.Theme.DARK
+    )
+    UserSettingsScreen(FakeUserSettingsViewModel(previewUserSettings.toState()));
+}
+
+@Composable
+fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
+    val state: UserSettingsState? = viewModel.state.collectAsState().value
+    val isLoading: Boolean = viewModel.isLoading.collectAsState().value
+    val errorMessage : String? = viewModel.error.collectAsState().value
+
+    LaunchedEffect(Unit) {
+        viewModel.loadSettings()
+    }
+
+    if (isLoading) {
+        LoadingIndicator(!errorMessage.isNullOrBlank())
+    } else {
+        UserSettingsFields(state, viewModel, errorMessage)
+    }
+}
+
+@Composable
+private fun UserSettingsFields(
+    state: UserSettingsState?,
+    viewModel: IUserSettingsViewModel,
+    errorMessage: String?
+) {
+    state?.let {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(16.dp)
+        ) {
+            EmailField(email = it.email, onEmailChanged = { email ->
+                viewModel.updateSettings(it.copy(email = email).toDto())
+            })
+            if (!errorMessage.isNullOrBlank()) {
+                FieldError(errorMessage)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            NotificationsSwitch(
+                checked = it.areNotificationsEnabled,
+                onCheckedChange = { checked ->
+                    viewModel.updateSettings(it.copy(areNotificationsEnabled = checked).toDto())
+                }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ThemeRadioButtons(
+                selectedTheme = it.theme,
+                onThemeChange = { theme ->
+                    viewModel.updateSettings(it.copy(theme = theme).toDto())
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun LoadingIndicator(hasFailed: Boolean) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        if (hasFailed) ServerError() else CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun ServerError() {
+    Text(
+        text = "Internal server error, please try again later.",
+        color = Color.Red,
+        modifier = Modifier
+            .padding(vertical = 80.dp)
+            .testTag(TestTags.SERVER_ERROR)
+    )
+}
+
+@Composable
+fun FieldError(errorMessage: String) {
+    Text(
+        text = errorMessage,
+        color = Color.Red,
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .testTag(TestTags.FIELD_ERROR)
+    )
+}
+
 @Composable
 fun EmailField(email: String, onEmailChanged: (String) -> Unit) {
     OutlinedTextField(
@@ -65,80 +168,4 @@ fun ThemeRadioButtons(selectedTheme: UserSettingsDto.Theme, onThemeChange: (User
             Text(text = theme.name)
         }
     }
-}
-
-@Composable
-fun ErrorText(errorMessage: String) {
-    Text(
-        text = errorMessage,
-        color = Color.Red,
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .testTag(TestTags.ERROR_TEXT)
-    )
-}
-
-@Composable
-fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
-    LaunchedEffect(Unit) {
-        viewModel.loadSettings()
-    }
-
-    val state: UserSettingsState? = viewModel.state.collectAsState().value
-    val errorMessage = viewModel.error.collectAsState().value
-
-    state?.let {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(16.dp)
-        ) {
-            EmailField(email = it.email, onEmailChanged = { email ->
-                viewModel.updateSettings(it.copy(email = email).toDto())
-            })
-            if (!errorMessage.isNullOrBlank()) {
-                ErrorText(errorMessage)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            NotificationsSwitch(
-                checked = it.areNotificationsEnabled,
-                onCheckedChange = { checked ->
-                    viewModel.updateSettings(it.copy(areNotificationsEnabled = checked).toDto())
-                }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ThemeRadioButtons(
-                selectedTheme = it.theme,
-                onThemeChange = { theme ->
-                    viewModel.updateSettings(it.copy(theme = theme).toDto())
-                }
-            )
-        }
-    } ?: run {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-    }
-}
-
-
-@Preview
-@Composable
-fun UserSettingsScreenPreview() {
-    val previewUserSettings = UserSettingsDto(
-        1, // TODO: Remove when JWT is implemented
-        "finn@thehuman.com",
-        true,
-        UserSettingsDto.Theme.DARK
-    )
-    UserSettingsScreen(FakeUserSettingsViewModel(previewUserSettings.toState()));
 }
