@@ -7,7 +7,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.bellako.kiwi.network.APIService
+import com.bellako.kiwi.network.HelloAPIService
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -25,7 +25,7 @@ class HelloCardTest {
     val composeTestRule = createComposeRule()
 
     @Mock
-    lateinit var apiService: APIService
+    lateinit var apiService: HelloAPIService
 
     @InjectMocks
     lateinit var viewModel: HelloViewModel

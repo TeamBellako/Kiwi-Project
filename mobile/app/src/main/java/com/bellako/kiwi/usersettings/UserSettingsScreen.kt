@@ -50,7 +50,7 @@ fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
     }
 
     if (isLoading) {
-        LoadingIndicator(!errorMessage.isNullOrBlank())
+        LoadingIndicator(errorMessage)
     } else {
         UserSettingsFields(state, viewModel, errorMessage)
     }
@@ -97,14 +97,14 @@ private fun UserSettingsFields(
 }
 
 @Composable
-fun LoadingIndicator(hasFailed: Boolean) {
+fun LoadingIndicator(errorMessage: String?) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
-        if (hasFailed) ServerError() else CircularProgressIndicator()
+        if (errorMessage.isNullOrBlank()) CircularProgressIndicator() else ServerError()
     }
 }
 

@@ -2,6 +2,7 @@ package com.bellako.kiwi.usersettings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -86,29 +87,40 @@ class UserSettingsViewModel @Inject constructor(
 
     private suspend fun saveSettings(dto: UserSettingsDto) {
         withContext(dispatcher) {
-            repository.updateUserSettings(dto)
+            repository.pingServer()
                 .onSuccess {
-                    _error.value = null
-                }
-                .onFailure { throwable ->
-                    val errorMessage = when (throwable) {
-                        is HttpException -> {
-                            val errorBody = throwable.response()?.errorBody()?.string()
-                            parseErrorMessage(errorBody)
+                    repository.updateUserSettings(dto)
+                        .onSuccess {
+                            _error.value = null
                         }
-                        else -> throwable.message ?: "Unknown error"
-                    }
-                    _error.value = errorMessage
+                        .onFailure { throwable ->
+                            val errorMessage = when (throwable) {
+                                is HttpException -> {
+                                    val errorBody = throwable.response()?.errorBody()?.string()
+                                    parseErrorMessage(errorBody)
+                                }
+                                else -> "Unknown error"
+                            }
+                            _error.value = errorMessage
+                        }
+                }
+                .onFailure {
+                    loadSettings()
                 }
         }
     }
 
+    data class ErrorResponse(val message: String?)
     fun parseErrorMessage(json: String?): String {
+        if (json.isNullOrBlank()) {
+            return "Unknown error"
+        }
+
         return try {
-            val jsonObject = JSONObject(json ?: "")
-            jsonObject.getString("message")
+            val errorResponse = Gson().fromJson(json, ErrorResponse::class.java)
+            errorResponse.message ?: "Unknown error"
         } catch (e: Exception) {
-            "Error parsing message $json"
+            "Error parsing message: ${e.localizedMessage}"
         }
     }
 }

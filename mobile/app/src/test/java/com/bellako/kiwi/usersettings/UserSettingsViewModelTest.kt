@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -23,6 +24,9 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import retrofit2.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
+import retrofit2.HttpException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserSettingsViewModelTest {
@@ -103,10 +107,15 @@ class UserSettingsViewModelTest {
 
     @Test
     fun `updateSettings sets error when updateUserSettings results in failure`() = runTest(testDispatcher) {
-        val errorMessage : String = "Invalid email format"
-        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
+        val errorMessage = "Invalid Email Format"
+        val errorJson = """{ "message": "$errorMessage" }"""
+        val errorResponse = Response.error<Unit>(
+            400,
+            errorJson.toResponseBody(contentType = "application/json".toMediaTypeOrNull())
+        )
         whenever(repository.updateUserSettings(invalidDto))
-            .thenReturn(Result.failure(RuntimeException(errorMessage)))
+            .thenReturn(Result.failure(HttpException(errorResponse)))
+        whenever(repository.getUserSettings()).thenReturn(Result.success(testDto))
 
         viewModel.loadSettings()
         advanceUntilIdle()

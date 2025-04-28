@@ -13,12 +13,12 @@ object RetrofitClient { private val retrofit: Retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val apiService: APIService = retrofit.create(APIService::class.java)
+    val apiService: HelloAPIService = retrofit.create(HelloAPIService::class.java)
 
     val userSettingsApi: IUserSettingsApi = retrofit.create(IUserSettingsApi::class.java)
 }
 
-interface APIService {
+interface HelloAPIService {
     @GET("api/hello/{id}")
     suspend fun getMessage(@Path("id") id: Int): Response<HelloResponse>
 }

@@ -1,7 +1,7 @@
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bellako.kiwi.network.APIService
+import com.bellako.kiwi.network.HelloAPIService
 import kotlinx.coroutines.launch
 
 data class HelloState(
@@ -9,7 +9,7 @@ data class HelloState(
     val message: String = ""
 )
 
-class HelloViewModel(private val apiService: APIService) : ViewModel() {
+class HelloViewModel(private val apiService: HelloAPIService) : ViewModel() {
 
     private val _state = mutableStateOf(HelloState())
     var state = _state

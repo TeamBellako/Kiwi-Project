@@ -32,6 +32,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RunWith(AndroidJUnit4::class)
@@ -70,25 +71,38 @@ class UserSettingsScreenTest {
     }
 
     @Test
-    fun loadingIndicator_loadingInProgress_showsCircularProgressIndicator() {
-        fakeViewModel.infiniteLoading = true
-        fakeViewModel.loadSettings()
-
-        composeTestRule.circularProgressIndicator().assertIsDisplayed()
-        composeTestRule.serverError().assertIsNotDisplayed()
-    }
-
-    @Test
-    fun loadingIndicator_serverError_showsErrorMessage() {
+    fun loadingIndicator_serverErrorOnLoadSettings_showsHardCodedErrorMessage() {
         val errorMessage = "Server error with sensible information"
-        fakeViewModel.simulateError = true
+        fakeViewModel.simulateLoadError = true
         fakeViewModel.simulatedErrorMessage = errorMessage
         fakeViewModel.loadSettings()
 
         composeTestRule.circularProgressIndicator().assertIsNotDisplayed()
         composeTestRule.serverError().assertIsDisplayed()
-        // We don't want any server error to be exposed here for security reasons
+        // We check for assertDoesNotExists because we don't want any server error to be exposed
+        // here since it may contain sensible information
         composeTestRule.onNodeWithText(errorMessage).assertDoesNotExist()
+    }
+
+    @Test
+    fun loadingIndicator_serverErrorOnUpdateSettings_showsHardCodedErrorMessage() {
+        val errorMessage = "Server error with sensible information"
+        fakeViewModel.simulateLoadError = true
+        fakeViewModel.simulatedErrorMessage = errorMessage
+
+        // This is just so that the update settings pipeline is triggered
+        var newUserSettingsDto : UserSettingsDto = UserSettingsDto(
+            email = validUserSettings.email,
+            areNotificationsEnabled = !validUserSettings.areNotificationsEnabled,
+            theme = validUserSettings.theme
+        )
+        fakeViewModel.updateSettings(newUserSettingsDto)
+
+        composeTestRule.serverError().assertIsDisplayed()
+        // We check for assertDoesNotExists because we don't want any server error to be exposed
+        // here since it may contain sensible information
+        composeTestRule.onNodeWithText(errorMessage).assertDoesNotExist()
+        composeTestRule.fieldError().assertIsNotDisplayed()
     }
 
     @Test
@@ -106,7 +120,7 @@ class UserSettingsScreenTest {
     @Test
     fun emailField_enterInvalidInput_showsErrorMessage() {
         val errorMessage : String = "Server error"
-        fakeViewModel.simulateError = true
+        fakeViewModel.simulateUpdateError = true
         fakeViewModel.simulatedErrorMessage = errorMessage
 
         robot.enterEmail(inValidUserSettings.email)
@@ -118,11 +132,11 @@ class UserSettingsScreenTest {
 
     @Test
     fun emailField_enterValidEmailAfterInvalidOne_hidesErrorMessage() {
-        fakeViewModel.simulateError = true
+        fakeViewModel.simulateUpdateError = true
         robot.enterEmail(inValidUserSettings.email)
         composeTestRule.fieldError().assertIsDisplayed()
 
-        fakeViewModel.simulateError = false
+        fakeViewModel.simulateUpdateError = false
         robot.enterEmail(validUserSettings.email)
 
         composeTestRule.fieldError().assertIsNotDisplayed()

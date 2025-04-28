@@ -1,5 +1,5 @@
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.bellako.kiwi.network.APIService
+import com.bellako.kiwi.network.HelloAPIService
 import com.bellako.kiwi.network.HelloResponse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestDispatcher
@@ -24,7 +24,7 @@ class HelloViewModelTest {
     val instantExecutorRule = InstantTaskExecutorRule()
 
     @Mock
-    lateinit var apiService: APIService
+    lateinit var apiService: HelloAPIService
 
     private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 

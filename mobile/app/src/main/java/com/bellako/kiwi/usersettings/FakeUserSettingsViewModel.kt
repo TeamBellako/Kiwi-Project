@@ -15,21 +15,22 @@ class FakeUserSettingsViewModel(
     override var isLoading = MutableStateFlow(false)
     override val error = MutableStateFlow<String?>(null)
 
-    var infiniteLoading: Boolean = true
-    var simulateError: Boolean = false
+    var simulateLoadError: Boolean = false
+    var simulateUpdateError: Boolean = false
     var simulatedErrorMessage: String = "Something went wrong"
 
     override fun loadSettings() {
         isLoading.value = true
-        if (simulateError) {
+        if (simulateLoadError) {
             error.value = simulatedErrorMessage
-        } else if (!infiniteLoading) {
+        } else {
             isLoading.value = false
         }
     }
 
     override fun updateSettings(userSettingsDto: UserSettingsDto) {
-        if (simulateError) {
+        if (simulateUpdateError || simulateLoadError) {
+            isLoading.value = simulateLoadError
             error.value = simulatedErrorMessage
         } else {
             _state.value = UserSettingsState.fromDto(userSettingsDto)
