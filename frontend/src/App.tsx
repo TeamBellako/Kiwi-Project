@@ -1,11 +1,10 @@
 ﻿import React from 'react';
-import HelloCard from "./components/HelloCard";
+import UserSettingsForm from "./usersettings/UserSettingsForm";
 
 const App: React.FC = () => {
     return (
         <div className="App">
-            <h1>Front-End Message Display</h1>
-            <HelloCard id={1} />
+            <UserSettingsForm />
         </div>
     );
 };
