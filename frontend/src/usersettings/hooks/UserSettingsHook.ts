@@ -1,6 +1,6 @@
 ﻿import {useState} from "react";
-import {ThemeOption, UserSettings} from "./UserSettings";
-import {isValidEmail} from "../utils/ValidationUtils";
+import {ThemeOption, UserSettings} from "../types/UserSettings";
+import {isValidEmail} from "../../utils/ValidationUtils";
 
 type UserSettingsFormProps = Partial<UserSettings>;
 
