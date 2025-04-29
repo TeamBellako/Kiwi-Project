@@ -6,7 +6,7 @@
 } from "../../usersettings/UserSettingsSlice";
 import {UserSettings} from "../../usersettings/UserSettings";
 
-const mockSettings: UserSettings = {
+const validUserSettings: UserSettings = {
     email: 'finn@thehuman.com',
     areNotificationsEnabled: true,
     theme: 'dark',
@@ -33,22 +33,23 @@ describe('UserSettings Slice Tests', () => {
         it('slice transitions to succeeded on fetch success', () => {
             const nextState = userSettingsReducer(
                 initialState,
-                fetchUserSettings.fulfilled(mockSettings, '', undefined)
+                fetchUserSettings.fulfilled(validUserSettings, '', undefined)
             );
             
             expect(nextState.status).toBe('succeeded');
-            expect(nextState.userSettings).toEqual(mockSettings);
+            expect(nextState.userSettings).toEqual(validUserSettings);
             expect(nextState.error).toBeNull();
         });
     
         it('slice transitions to failed on fetch failure', () => {
+            const errorMessage = 'Failed to fetch'
             const nextState = userSettingsReducer(
                 initialState,
-                fetchUserSettings.rejected(new Error('Failed'), '', undefined, 'Failed')
+                fetchUserSettings.rejected(new Error(errorMessage), '', undefined, errorMessage)
             );
             
             expect(nextState.status).toBe('failed');
-            expect(nextState.error).toBe('Failed');
+            expect(nextState.error).toBe(errorMessage);
         });
     })
 
@@ -56,7 +57,7 @@ describe('UserSettings Slice Tests', () => {
         it('slice transitions to loading on update', () => {
             const nextState = userSettingsReducer(
                 initialState,
-                updateUserSettings.pending('', mockSettings)
+                updateUserSettings.pending('', validUserSettings)
             );
             
             expect(nextState.status).toBe('loading');
@@ -65,21 +66,22 @@ describe('UserSettings Slice Tests', () => {
         it('slice transitions to succeeded on update success', () => {
             const nextState = userSettingsReducer(
                 initialState,
-                updateUserSettings.fulfilled(mockSettings, '', mockSettings)
+                updateUserSettings.fulfilled(validUserSettings, '', validUserSettings)
             );
             
             expect(nextState.status).toBe('succeeded');
-            expect(nextState.userSettings).toEqual(mockSettings);
+            expect(nextState.userSettings).toEqual(validUserSettings);
         });
     
         it('slice transitions to failed on update failure', () => {
+            const errorMessage = 'Failed to update'
             const nextState = userSettingsReducer(
                 initialState,
-                updateUserSettings.rejected(new Error('Update failed'), '', mockSettings, 'Update failed')
+                updateUserSettings.rejected(new Error(errorMessage), '', validUserSettings, errorMessage)
             );
-            
+
             expect(nextState.status).toBe('failed');
-            expect(nextState.error).toBe('Update failed');
+            expect(nextState.error).toBe(errorMessage);
         });
     })
 });
