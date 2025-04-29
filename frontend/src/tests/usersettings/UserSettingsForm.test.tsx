@@ -1,33 +1,55 @@
 ﻿import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserSettingsForm from "../../usersettings/UserSettingsForm";
+import { userSettingsLabels } from '../constants/Labels';
 
 describe('UserSettingsFormTest', () => {
+    const validUserSettings = {
+        email: 'finn@thehuman.com',
+    };
+    const inValidUserSettings = {
+        email: 'bmolovesfootball.com',
+    };
+
+    let formFields: ReturnType<typeof getFormFields>;
+    const getFormFields = () => {
+        const getEmailInput = () =>
+            screen.getByRole('textbox', { name: userSettingsLabels.email });
+        const getNotificationToggle = () =>
+            screen.getByRole('checkbox', { name: userSettingsLabels.notifications });
+        const getThemeRadio = (theme: 'light' | 'dark') =>
+            screen.getByRole('radio', { name: new RegExp(theme, 'i') });
+        
+        return {
+            getEmailInput,
+            getNotificationToggle,
+            getThemeRadio
+        };
+    };
+    
+    beforeEach(() => {
+        render(<UserSettingsForm />)
+        formFields = getFormFields();
+    })
     
     test('email field gets valid input and accept it', async () => {
-        render(<UserSettingsForm />);
+        const emailInput = formFields.getEmailInput();
+        await userEvent.type(emailInput, validUserSettings.email);
         
-        const emailInput = screen.getByLabelText(/Email/i);
-        await userEvent.type(emailInput, 'finn@thehuman.com');
-        
-        expect(emailInput).toHaveValue('finn@thehuman.com');
+        expect(emailInput).toHaveValue(validUserSettings.email);
     });
 
     test('email field gets invalid input and rejects it, showing an error message', async () => {
-        render(<UserSettingsForm />);
-        
-        const emailInput = screen.getByLabelText(/Email/i);
-        await userEvent.type(emailInput, 'invalidemail');
+        const emailInput = formFields.getEmailInput();
+        await userEvent.type(emailInput, inValidUserSettings.email);
         emailInput.blur();
-        const error = await screen.findByText(/invalid email/i);
         
+        const error = await screen.findByText(/invalid email/i);
         expect(error).toBeInTheDocument();
     });
 
     test('notifications switches toggles between on and off', async () => {
-        render(<UserSettingsForm />);
-        
-        const toggle = screen.getByLabelText(/notifications/i);
+        const toggle = formFields.getNotificationToggle();
         expect(toggle).not.toBeChecked();
         
         await userEvent.click(toggle);
@@ -38,11 +60,9 @@ describe('UserSettingsFormTest', () => {
     });
 
     test('theme selector only allows one option simultaneously', async () => {
-        render(<UserSettingsForm />);
+        const lightOption = formFields.getThemeRadio("light")
+        const darkOption = formFields.getThemeRadio("dark")
         
-        const lightOption = screen.getByLabelText(/light/i);
-        const darkOption = screen.getByLabelText(/dark/i);
-
         await userEvent.click(darkOption);
         expect(darkOption).toBeChecked();
         expect(lightOption).not.toBeChecked();
