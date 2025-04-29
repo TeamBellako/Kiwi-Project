@@ -3,14 +3,11 @@ import userEvent from '@testing-library/user-event';
 import UserSettingsForm from "../../usersettings/UserSettingsForm";
 import { userSettingsLabels } from '../constants/Labels';
 
-describe('UserSettingsFormTest', () => {
-    const validUserSettings = {
-        email: 'finn@thehuman.com',
-    };
-    const inValidUserSettings = {
-        email: 'bmolovesfootball.com',
-    };
+import { axe, toHaveNoViolations } from 'jest-axe';
+import {inValidUserSettings, validUserSettings} from "./UserSettingsTestFactory";
+expect.extend(toHaveNoViolations);
 
+describe('UserSettingsFormTest', () => {
     let formFields: ReturnType<typeof getFormFields>;
     const getFormFields = () => {
         const getEmailInput = () =>
@@ -70,5 +67,13 @@ describe('UserSettingsFormTest', () => {
         await userEvent.click(lightOption);
         expect(lightOption).toBeChecked();
         expect(darkOption).not.toBeChecked();
+    });
+
+    it('has no accessibility violations', async () => {
+        const { container } = render(<UserSettingsForm />);
+        
+        const results = await axe(container);
+        
+        expect(results).toHaveNoViolations();
     });
 })
