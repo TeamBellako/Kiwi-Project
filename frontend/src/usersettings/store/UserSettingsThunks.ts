@@ -10,7 +10,7 @@ const mockFetch = async (): Promise<UserSettings> => ({
 
 const mockSave = async (settings: UserSettings): Promise<UserSettings> => settings;
 
-export const fetchUserSettings = createAsyncThunk<UserSettings>(
+export const loadUserSettings = createAsyncThunk<UserSettings>(
     'userSettings/loadUserSettings',
     async () => {
         return await mockFetch();

@@ -1,7 +1,7 @@
 ﻿import {UserSettings} from "../../usersettings/types/UserSettings";
 import {userSettingsReducer} from "../../usersettings/store/UserSettingsSlice";
 import {initialState} from "../../usersettings/store/UserSettingsState";
-import {fetchUserSettings, updateUserSettings} from "../../usersettings/store/UserSettingsThunks"
+import {loadUserSettings, updateUserSettings} from "../../usersettings/store/UserSettingsThunks"
 
 const validUserSettings: UserSettings = {
     email: 'finn@thehuman.com',
@@ -20,7 +20,7 @@ describe('UserSettings Slice Tests', () => {
         it('slice transitions to loading on fetch', () => {
             const nextState = userSettingsReducer(
                 initialState,
-                fetchUserSettings.pending('', undefined)
+                loadUserSettings.pending('', undefined)
             );
             
             expect(nextState.status).toBe('loading');
@@ -30,7 +30,7 @@ describe('UserSettings Slice Tests', () => {
         it('slice transitions to succeeded on fetch success', () => {
             const nextState = userSettingsReducer(
                 initialState,
-                fetchUserSettings.fulfilled(validUserSettings, '', undefined)
+                loadUserSettings.fulfilled(validUserSettings, '', undefined)
             );
             
             expect(nextState.status).toBe('succeeded');
@@ -42,7 +42,7 @@ describe('UserSettings Slice Tests', () => {
             const errorMessage = 'Failed to fetch'
             const nextState = userSettingsReducer(
                 initialState,
-                fetchUserSettings.rejected(new Error(errorMessage), '', undefined, errorMessage)
+                loadUserSettings.rejected(new Error(errorMessage), '', undefined, errorMessage)
             );
             
             expect(nextState.status).toBe('failed');
