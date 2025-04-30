@@ -1,7 +1,7 @@
-﻿import {UserSettings} from "../../usersettings/types/UserSettings";
-import {userSettingsReducer} from "../../usersettings/store/UserSettingsSlice";
-import {initialState} from "../../usersettings/store/UserSettingsState";
-import {loadUserSettings, updateUserSettings} from "../../usersettings/store/UserSettingsThunks"
+﻿import {UserSettings} from "../../userSettings/types/UserSettings";
+import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
+import {initialState} from "../../userSettings/store/UserSettingsState";
+import {loadUserSettings, updateUserSettings} from "../../userSettings/store/UserSettingsThunks"
 
 const validUserSettings: UserSettings = {
     email: 'finn@thehuman.com',

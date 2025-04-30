@@ -1,10 +1,10 @@
 ﻿import React from 'react';
-import UserSettingsForm from "./usersettings/UserSettingsForm";
+import UserSettingsPage from "./userSettings/components/UserSettingsPage";
 
 const App: React.FC = () => {
     return (
         <div className="App">
-            <UserSettingsForm />
+            <UserSettingsPage />
         </div>
     );
 };

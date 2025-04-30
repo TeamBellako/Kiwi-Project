@@ -1,10 +1,10 @@
 ﻿import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import UserSettingsForm from "../../usersettings/UserSettingsForm";
 import { userSettingsLabels } from '../constants/Labels';
 
 import { axe, toHaveNoViolations } from 'jest-axe';
 import {inValidUserSettings, validUserSettings} from "./UserSettingsTestFactory";
+import UserSettingsForm from "../../userSettings/components/UserSettingsForm";
 expect.extend(toHaveNoViolations);
 
 let formFields: ReturnType<typeof getFormFields>;
