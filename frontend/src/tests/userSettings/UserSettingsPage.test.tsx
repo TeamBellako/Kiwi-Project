@@ -1,10 +1,10 @@
-﻿import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+﻿import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import UserSettingsPage from "../../userSettings/components/UserSettingsPage";
 import { configureStore, Store, UnknownAction } from '@reduxjs/toolkit';
 import api from "../../services/api";
 import { userSettingsReducer } from "../../userSettings/store/UserSettingsSlice";
-import {userSettingsLabels} from "../constants/Labels";
+import { userSettingsLabels } from "../constants/Labels";
 
 jest.mock("../../services/api");
 
@@ -18,11 +18,13 @@ const validUserSettings = {
     areNotificationsEnabled: true,
     theme: 'DARK',
 };
+
 const updateUserSettings = {
     email: 'jake@thedog.com',
     areNotificationsEnabled: false,
     theme: 'LIGHT',
 };
+
 const invalidUserSettings = {
     email: 'bmolovesfootball.com',
     areNotificationsEnabled: true,
@@ -34,6 +36,7 @@ describe('UserSettingsPage Tests', () => {
 
     beforeEach(() => {
         jest.resetAllMocks();
+        jest.useFakeTimers();
 
         mockStore = configureStore({
             reducer: {
@@ -65,7 +68,6 @@ describe('UserSettingsPage Tests', () => {
     const mockApiPutErrorRequest = (error: any) => {
         api.put = jest.fn().mockRejectedValue(new Error(error));
     };
-    
 
     describe('load tests', () => {
         test('displays loading message while loading data', () => {
@@ -78,12 +80,12 @@ describe('UserSettingsPage Tests', () => {
 
         test('displays user settings when load is successful', async () => {
             mockApiGetRequest(validUserSettings);
-            
+
             renderUserSettingsPage();
 
             await waitFor(() => {
-                expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email)
-                expect(screen.getByLabelText(/Dark/i)).toBeChecked()
+                expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email);
+                expect(screen.getByLabelText(/Dark/i)).toBeChecked();
             });
         });
 
@@ -94,54 +96,90 @@ describe('UserSettingsPage Tests', () => {
 
             await waitFor(() => {
                 expect(screen.getByText(/Server Error:/i)).toBeInTheDocument();
-                // We don't want any server error to be directly shown in the UI, since it may contain sensible information
+                // We don't want sensible information contained in the server error message to be displayed
                 expect(screen.queryByText(errorMessage)).toBeNull();
             });
         });
     });
-
+    
     describe('update tests', () => {
-        test('update shows results when successful (simulating autosave)', async () => {
+        test('should trigger saveSettings after a debounce delay', async () => {
             mockApiGetRequest(validUserSettings);
-            mockApiPutRequest(updateUserSettings);
-            renderUserSettingsPage();
-
-            await waitFor(() => {
-                const emailInput = screen.getByLabelText(userSettingsLabels.email);
-                fireEvent.change(emailInput, {target: {value: updateUserSettings.email}});
-            });
-
-            await waitFor(() => expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(updateUserSettings.email))
-        });
-
-        test('update shows invalid error when trying to update to invalid values (simulating autosave)', async () => {
-            mockApiGetRequest(validUserSettings);
-            mockApiPutErrorRequest(invalidEmailError);
-            renderUserSettingsPage();
-
-            await waitFor(() => {
-                const emailInput = screen.getByLabelText(userSettingsLabels.email);
-                fireEvent.change(emailInput, {target: {value: invalidUserSettings.email}});
-            });
-
-            await waitFor(() => expect(screen.getByText(invalidEmailError)).toBeInTheDocument())
-        });
-
-        test('update forces loading when server error occurs (simulating autosave)', async () => {
             mockApiPutRequest(validUserSettings);
 
             renderUserSettingsPage();
-
-            const emailInput = screen.getByLabelText(userSettingsLabels.email);
-            fireEvent.change(emailInput, { target: { value: 'updated@thehuman.com' } });
-
             await waitFor(() => {
-                expect(screen.getByText(loadingMessage)).toBeInTheDocument();
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
+            });
+            
+            jest.advanceTimersByTime(1000);
+            await waitFor(() => {
+                expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(updateUserSettings.email);
+                expect(api.put).toHaveBeenCalledTimes(1);
+            });
+        });
+
+        test('should not trigger saveSettings if there are no changes', async () => {
+            mockApiGetRequest(validUserSettings);
+            renderUserSettingsPage();
+            
+            await waitFor(() => {
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: validUserSettings.email } });
             });
 
-            mockApiGetErrorRequest(serverErrorMessage);
+            jest.advanceTimersByTime(1000);
+            await waitFor(() => {
+                expect(api.put).toHaveBeenCalledTimes(0);
+            });
+        });
+
+        test('should not trigger saveSettings too frequently', async () => {
+            mockApiGetRequest(validUserSettings);
+            renderUserSettingsPage();
+            
+            await waitFor(() => {
+                const emailInput = screen.getByLabelText(userSettingsLabels.email);
+                fireEvent.change(emailInput, { target: { value: updateUserSettings.email } });
+                fireEvent.change(emailInput, { target: { value: 'jake@thedog3.com' } });
+                fireEvent.change(emailInput, { target: { value: 'jake@thedog4.com' } });
+            });
+            
+            jest.advanceTimersByTime(1000);
+            await waitFor(() => {
+                expect(api.put).toHaveBeenCalledTimes(1);
+            });
+        });
+
+        test('should display error message for invalid email format', async () => {
+            mockApiGetRequest(validUserSettings);
+            mockApiPutErrorRequest(invalidEmailError);
+            renderUserSettingsPage();
+            
+            await waitFor(() => {
+                const emailInput = screen.getByLabelText(userSettingsLabels.email);
+                fireEvent.change(emailInput, { target: { value: invalidUserSettings.email } });
+            });
+
+            await waitFor(() => {
+                expect(screen.getByText(invalidEmailError)).toBeInTheDocument();
+                expect(api.put).toHaveBeenCalledTimes(0);
+            });
+        });
+
+        test('should handle server failure during settings update', async () => {
+            mockApiPutErrorRequest(errorMessage);
+            mockApiGetRequest(validUserSettings);
+            
+            renderUserSettingsPage();
+            await waitFor(() => {
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
+            });
+            jest.advanceTimersByTime(1000);
+
             await waitFor(() => {
                 expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
+                // We don't want sensible information contained in the server error message to be displayed
+                expect(screen.queryByText(errorMessage)).toBeNull();
             });
         });
     });

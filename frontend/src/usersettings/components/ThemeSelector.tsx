@@ -13,7 +13,7 @@ const ThemeSelector: React.FC<Props> = ({ value, setValue }) => (
                 type="radio"
                 name="theme"
                 value="light"
-                checked={value === 'light'}
+                checked={value.toLowerCase() === 'light'}
                 onChange={() => setValue('light')}
             />
             Light
@@ -23,7 +23,7 @@ const ThemeSelector: React.FC<Props> = ({ value, setValue }) => (
                 type="radio"
                 name="theme"
                 value="dark"
-                checked={value === 'dark'}
+                checked={value.toLowerCase() === 'dark'}
                 onChange={() => setValue('dark')}
             />
             Dark
