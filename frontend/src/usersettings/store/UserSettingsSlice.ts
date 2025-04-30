@@ -16,9 +16,9 @@ const userSettingsSlice = createSlice({
                 state.status = 'succeeded';
                 state.userSettings = action.payload;
             })
-            .addCase(loadUserSettings.rejected, (state, action) => {
+            .addCase(loadUserSettings.rejected, (state) => {
                 state.status = 'failed';
-                state.error = action.error.message ?? 'Failed to fetch user settings';
+                state.error = 'Failed to load user settings';
             })
 
             .addCase(updateUserSettings.pending, (state) => {

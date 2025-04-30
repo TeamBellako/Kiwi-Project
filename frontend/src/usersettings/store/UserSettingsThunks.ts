@@ -1,25 +1,27 @@
-﻿import { createAsyncThunk } from '@reduxjs/toolkit';
+﻿import {createAsyncThunk} from '@reduxjs/toolkit';
 import {UserSettings} from "../types/UserSettings";
-
-// TODO: Placeholder until API connection is implemented
-const mockFetch = async (): Promise<UserSettings> => ({
-    email: 'finn@thehuman.com',
-    areNotificationsEnabled: true,
-    theme: 'dark',
-});
-
-const mockSave = async (settings: UserSettings): Promise<UserSettings> => settings;
+import api from "../../services/api";
 
 export const loadUserSettings = createAsyncThunk<UserSettings>(
     'userSettings/loadUserSettings',
-    async () => {
-        return await mockFetch();
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/api/settings/me')
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue('Failed to load user settings');
+        }
     }
 );
 
 export const updateUserSettings = createAsyncThunk<UserSettings, UserSettings>(
     'userSettings/saveUserSettings',
-    async (settings) => {
-        return await mockSave(settings);
+    async (settings, { rejectWithValue }) => {
+        try {
+            const response = await api.put('/api/settings', settings);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.message || 'Failed to update user settings');
+        }
     }
 );

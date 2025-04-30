@@ -9,7 +9,7 @@ const UserSettingsPage = () => {
     const userSettings = useAppSelector(selectUserSettings);
     const status = useAppSelector(selectUserSettingsStatus);
     const error = useAppSelector(selectUserSettingsError);
-
+    
     useEffect(() => {
         dispatch(loadUserSettings());
     }, [dispatch]);
@@ -19,7 +19,7 @@ const UserSettingsPage = () => {
     }
 
     if (error) {
-        return <p className="text-red-600">Error: {error}</p>;
+        return <p className="text-red-600">Server Error: {error}</p>;
     }
 
     return (

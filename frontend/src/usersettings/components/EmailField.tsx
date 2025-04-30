@@ -21,9 +21,9 @@ const EmailField: React.FC<Props> = ({ value, setValue, error, validate }) => {
                 className="mt-1 w-full border p-2 rounded"
             />
             {error && (
-                <p className="text-red-500 mt-1" role="alert">
+                <label className="text-red-500 mt-1" role="alert">
                     {error}
-                </p>
+                </label>
             )}
         </div>
     );

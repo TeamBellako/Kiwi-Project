@@ -16,12 +16,17 @@ const serverErrorMessage = "Error: Server error during update";
 const validUserSettings = {
     email: 'finn@thehuman.com',
     areNotificationsEnabled: true,
-    theme: 'dark',
+    theme: 'DARK',
+};
+const updateUserSettings = {
+    email: 'jake@thedog.com',
+    areNotificationsEnabled: false,
+    theme: 'LIGHT',
 };
 const invalidUserSettings = {
     email: 'bmolovesfootball.com',
     areNotificationsEnabled: true,
-    theme: 'dark',
+    theme: 'DARK',
 };
 
 describe('UserSettingsPage Tests', () => {
@@ -53,9 +58,14 @@ describe('UserSettingsPage Tests', () => {
         api.put = jest.fn().mockResolvedValue({ data: response });
     };
 
-    const mockApiErrorRequest = (error: any) => {
+    const mockApiGetErrorRequest = (error: any) => {
         api.get = jest.fn().mockRejectedValue(new Error(error));
     };
+
+    const mockApiPutErrorRequest = (error: any) => {
+        api.put = jest.fn().mockRejectedValue(new Error(error));
+    };
+    
 
     describe('load tests', () => {
         test('displays loading message while loading data', () => {
@@ -71,11 +81,14 @@ describe('UserSettingsPage Tests', () => {
             
             renderUserSettingsPage();
 
-            await waitFor(() => expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email))
+            await waitFor(() => {
+                expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email)
+                expect(screen.getByLabelText(/Dark/i)).toBeChecked()
+            });
         });
 
         test('displays error message when load fails', async () => {
-            mockApiErrorRequest(errorMessage);
+            mockApiGetErrorRequest(errorMessage);
 
             renderUserSettingsPage();
 
@@ -89,29 +102,29 @@ describe('UserSettingsPage Tests', () => {
 
     describe('update tests', () => {
         test('update shows results when successful (simulating autosave)', async () => {
-            mockApiPutRequest(validUserSettings);
-
+            mockApiGetRequest(validUserSettings);
+            mockApiPutRequest(updateUserSettings);
             renderUserSettingsPage();
 
-            const emailInput = screen.getByLabelText(userSettingsLabels.email);
-            fireEvent.change(emailInput, { target: { value: 'updated@thehuman.com' } });
-
             await waitFor(() => {
-                expect(screen.getByText('updated@thehuman.com')).toBeInTheDocument();
+                const emailInput = screen.getByLabelText(userSettingsLabels.email);
+                fireEvent.change(emailInput, {target: {value: updateUserSettings.email}});
             });
+
+            await waitFor(() => expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(updateUserSettings.email))
         });
 
         test('update shows invalid error when trying to update to invalid values (simulating autosave)', async () => {
-            mockApiPutRequest(validUserSettings);
-
+            mockApiGetRequest(validUserSettings);
+            mockApiPutErrorRequest(invalidEmailError);
             renderUserSettingsPage();
 
-            const emailInput = screen.getByLabelText(userSettingsLabels.email);
-            fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
-
             await waitFor(() => {
-                expect(screen.getByText(invalidEmailError)).toBeInTheDocument();
+                const emailInput = screen.getByLabelText(userSettingsLabels.email);
+                fireEvent.change(emailInput, {target: {value: invalidUserSettings.email}});
             });
+
+            await waitFor(() => expect(screen.getByText(invalidEmailError)).toBeInTheDocument())
         });
 
         test('update forces loading when server error occurs (simulating autosave)', async () => {
@@ -126,7 +139,7 @@ describe('UserSettingsPage Tests', () => {
                 expect(screen.getByText(loadingMessage)).toBeInTheDocument();
             });
 
-            mockApiErrorRequest(serverErrorMessage);
+            mockApiGetErrorRequest(serverErrorMessage);
             await waitFor(() => {
                 expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
             });
