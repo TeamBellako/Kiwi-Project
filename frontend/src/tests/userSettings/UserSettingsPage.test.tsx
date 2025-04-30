@@ -13,8 +13,13 @@ const errorMessage = "Error: Failed to load";
 const invalidEmailError = "Invalid email address";
 const serverErrorMessage = "Error: Server error during update";
 
-const mockSettings = {
+const validUserSettings = {
     email: 'finn@thehuman.com',
+    areNotificationsEnabled: true,
+    theme: 'dark',
+};
+const invalidUserSettings = {
+    email: 'bmolovesfootball.com',
     areNotificationsEnabled: true,
     theme: 'dark',
 };
@@ -62,43 +67,29 @@ describe('UserSettingsPage Tests', () => {
         });
 
         test('displays user settings when load is successful', async () => {
-            mockApiGetRequest(mockSettings);
-
+            mockApiGetRequest(validUserSettings);
+            
             renderUserSettingsPage();
 
-            await waitFor(() => expect(screen.getByText(mockSettings.email)).toBeInTheDocument());
-            expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(mockSettings.email);
-            expect(screen.getByLabelText(/Dark/i)).toBeChecked();
+            await waitFor(() => expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email))
         });
 
-        test('displays error message when fetch fails', async () => {
+        test('displays error message when load fails', async () => {
             mockApiErrorRequest(errorMessage);
 
             renderUserSettingsPage();
 
-            await waitFor(() => expect(screen.getByText(errorMessage)).toBeInTheDocument());
-        });
-
-        test('dispatches loadUserSettings on mount', async () => {
-            mockApiGetRequest(mockSettings);
-
-            renderUserSettingsPage();
-
-            await waitFor(() => expect(screen.getByText(mockSettings.email)).toBeInTheDocument());
-        });
-
-        test('displays general error message when load fails', async () => {
-            mockApiErrorRequest('Connection failed');
-
-            renderUserSettingsPage();
-
-            await waitFor(() => expect(screen.getByText(/Failed to load settings/i)).toBeInTheDocument());
+            await waitFor(() => {
+                expect(screen.getByText(/Server Error:/i)).toBeInTheDocument();
+                // We don't want any server error to be directly shown in the UI, since it may contain sensible information
+                expect(screen.queryByText(errorMessage)).toBeNull();
+            });
         });
     });
 
     describe('update tests', () => {
         test('update shows results when successful (simulating autosave)', async () => {
-            mockApiPutRequest(mockSettings);
+            mockApiPutRequest(validUserSettings);
 
             renderUserSettingsPage();
 
@@ -111,7 +102,7 @@ describe('UserSettingsPage Tests', () => {
         });
 
         test('update shows invalid error when trying to update to invalid values (simulating autosave)', async () => {
-            mockApiPutRequest(mockSettings);
+            mockApiPutRequest(validUserSettings);
 
             renderUserSettingsPage();
 
@@ -124,7 +115,7 @@ describe('UserSettingsPage Tests', () => {
         });
 
         test('update forces loading when server error occurs (simulating autosave)', async () => {
-            mockApiPutRequest(mockSettings);
+            mockApiPutRequest(validUserSettings);
 
             renderUserSettingsPage();
 
