@@ -4,8 +4,20 @@ import UserSettingsPage from "../../userSettings/components/UserSettingsPage";
 import { configureStore, Store, UnknownAction } from '@reduxjs/toolkit';
 import api from "../../services/api";
 import { userSettingsReducer } from "../../userSettings/store/UserSettingsSlice";
+import {userSettingsLabels} from "../constants/Labels";
 
 jest.mock("../../services/api");
+
+const loadingMessage = "Loading settings...";
+const errorMessage = "Error: Failed to load";
+const invalidEmailError = "Invalid email address";
+const serverErrorMessage = "Error: Server error during update";
+
+const mockSettings = {
+    email: 'finn@thehuman.com',
+    areNotificationsEnabled: true,
+    theme: 'dark',
+};
 
 describe('UserSettingsPage Tests', () => {
     let mockStore: Store<unknown, UnknownAction, unknown>;
@@ -20,155 +32,112 @@ describe('UserSettingsPage Tests', () => {
         });
     });
 
+    const renderUserSettingsPage = () => {
+        return render(
+            <Provider store={mockStore}>
+                <UserSettingsPage />
+            </Provider>
+        );
+    };
+
+    const mockApiGetRequest = (response: any) => {
+        api.get = jest.fn().mockResolvedValue({ data: response });
+    };
+
+    const mockApiPutRequest = (response: any) => {
+        api.put = jest.fn().mockResolvedValue({ data: response });
+    };
+
+    const mockApiErrorRequest = (error: any) => {
+        api.get = jest.fn().mockRejectedValue(new Error(error));
+    };
+
     describe('load tests', () => {
         test('displays loading message while loading data', () => {
             api.get = jest.fn().mockImplementation(() => new Promise(() => {}));
 
-            render(
-                <Provider store={mockStore}>
-                    <UserSettingsPage />
-                </Provider>
-            );
+            renderUserSettingsPage();
 
-            expect(screen.getByText(/Loading settings.../i)).toBeInTheDocument();
+            expect(screen.getByText(loadingMessage)).toBeInTheDocument();
         });
 
         test('displays user settings when load is successful', async () => {
-            const mockSettings = {
-                email: 'finn@thehuman.com',
-                areNotificationsEnabled: true,
-                theme: 'dark',
-            };
-            api.get = jest.fn().mockResolvedValue({ data: mockSettings });
+            mockApiGetRequest(mockSettings);
 
-            render(
-                <Provider store={mockStore}>
-                    <UserSettingsPage />
-                </Provider>
-            );
+            renderUserSettingsPage();
 
             await waitFor(() => expect(screen.getByText(mockSettings.email)).toBeInTheDocument());
+            expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(mockSettings.email);
             expect(screen.getByLabelText(/Dark/i)).toBeChecked();
         });
 
         test('displays error message when fetch fails', async () => {
-            api.get = jest.fn().mockRejectedValue(new Error('Failed to load'));
+            mockApiErrorRequest(errorMessage);
 
-            render(
-                <Provider store={mockStore}>
-                    <UserSettingsPage />
-                </Provider>
-            );
+            renderUserSettingsPage();
 
-            await waitFor(() => expect(screen.getByText(/Error: Failed to load/)).toBeInTheDocument());
+            await waitFor(() => expect(screen.getByText(errorMessage)).toBeInTheDocument());
         });
 
         test('dispatches loadUserSettings on mount', async () => {
-            const mockSettings = {
-                email: 'finn@thehuman.com',
-                areNotificationsEnabled: true,
-                theme: 'dark',
-            };
+            mockApiGetRequest(mockSettings);
 
-            api.get = jest.fn().mockResolvedValue({ data: mockSettings });
-
-            render(
-                <Provider store={mockStore}>
-                    <UserSettingsPage />
-                </Provider>
-            );
+            renderUserSettingsPage();
 
             await waitFor(() => expect(screen.getByText(mockSettings.email)).toBeInTheDocument());
         });
 
-        // New test for server error on load
         test('displays general error message when load fails', async () => {
-            api.get = jest.fn().mockRejectedValue(new Error('Connection failed'));
+            mockApiErrorRequest('Connection failed');
 
-            render(
-                <Provider store={mockStore}>
-                    <UserSettingsPage />
-                </Provider>
-            );
+            renderUserSettingsPage();
 
             await waitFor(() => expect(screen.getByText(/Failed to load settings/i)).toBeInTheDocument());
         });
     });
 
     describe('update tests', () => {
-        test('update shows results when successful', async () => {
-            const mockSettings = {
-                email: 'finn@thehuman.com',
-                areNotificationsEnabled: true,
-                theme: 'dark',
-            };
+        test('update shows results when successful (simulating autosave)', async () => {
+            mockApiPutRequest(mockSettings);
 
-            api.put = jest.fn().mockResolvedValue({ data: mockSettings });
+            renderUserSettingsPage();
 
-            render(
-                <Provider store={mockStore}>
-                    <UserSettingsPage />
-                </Provider>
-            );
-
-            const emailInput = screen.getByLabelText(/Email/i);
+            const emailInput = screen.getByLabelText(userSettingsLabels.email);
             fireEvent.change(emailInput, { target: { value: 'updated@thehuman.com' } });
-
-            const saveButton = screen.getByText(/Save/i);
-            fireEvent.click(saveButton);
 
             await waitFor(() => {
                 expect(screen.getByText('updated@thehuman.com')).toBeInTheDocument();
             });
         });
 
-        test('update shows invalid error when trying to update to invalid values', async () => {
-            const mockSettings = {
-                email: 'finn@thehuman.com',
-                areNotificationsEnabled: true,
-                theme: 'dark',
-            };
+        test('update shows invalid error when trying to update to invalid values (simulating autosave)', async () => {
+            mockApiPutRequest(mockSettings);
 
-            api.put = jest.fn().mockResolvedValue({ data: mockSettings });
+            renderUserSettingsPage();
 
-            render(
-                <Provider store={mockStore}>
-                    <UserSettingsPage />
-                </Provider>
-            );
-
-            const emailInput = screen.getByLabelText(/Email/i);
+            const emailInput = screen.getByLabelText(userSettingsLabels.email);
             fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
 
-            const saveButton = screen.getByText(/Save/i);
-            fireEvent.click(saveButton);
-
             await waitFor(() => {
-                expect(screen.getByText(/Invalid email address/i)).toBeInTheDocument();
+                expect(screen.getByText(invalidEmailError)).toBeInTheDocument();
             });
         });
 
-        test('update forces loading when server error occurs', async () => {
-            api.put = jest.fn().mockRejectedValue(new Error('Server error during update'));
+        test('update forces loading when server error occurs (simulating autosave)', async () => {
+            mockApiPutRequest(mockSettings);
 
-            render(
-                <Provider store={mockStore}>
-                    <UserSettingsPage />
-                </Provider>
-            );
+            renderUserSettingsPage();
 
-            const emailInput = screen.getByLabelText(/Email/i);
+            const emailInput = screen.getByLabelText(userSettingsLabels.email);
             fireEvent.change(emailInput, { target: { value: 'updated@thehuman.com' } });
 
-            const saveButton = screen.getByText(/Save/i);
-            fireEvent.click(saveButton);
-
             await waitFor(() => {
-                expect(screen.getByText(/Loading.../i)).toBeInTheDocument();
+                expect(screen.getByText(loadingMessage)).toBeInTheDocument();
             });
 
+            mockApiErrorRequest(serverErrorMessage);
             await waitFor(() => {
-                expect(screen.getByText(/Error: Server error during update/i)).toBeInTheDocument();
+                expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
             });
         });
     });
