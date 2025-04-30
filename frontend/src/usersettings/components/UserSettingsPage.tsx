@@ -1,18 +1,19 @@
 ﻿import { useEffect } from 'react';
 import UserSettingsForm from './UserSettingsForm';
-import {loadUserSettings} from "../store/UserSettingsThunks";
-import {useAppDispatch, useAppSelector} from "../../store/Hooks";
-import {selectUserSettings, selectUserSettingsError, selectUserSettingsStatus} from "../store/UserSettingsSelector";
+import { loadUserSettings } from "../store/UserSettingsThunks";
+import { useAppDispatch, useAppSelector } from "../../store/Hooks";
+import { selectUserSettings, selectUserSettingsError, selectUserSettingsStatus } from "../store/UserSettingsSelector";
 
 const UserSettingsPage = () => {
     const dispatch = useAppDispatch();
+
     const userSettings = useAppSelector(selectUserSettings);
     const status = useAppSelector(selectUserSettingsStatus);
     const error = useAppSelector(selectUserSettingsError);
-    
+
     useEffect(() => {
         dispatch(loadUserSettings());
-    }, [dispatch]);
+    }, []);
 
     if (status === 'loading') {
         return <p>Loading settings...</p>;

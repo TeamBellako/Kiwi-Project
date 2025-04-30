@@ -1,4 +1,4 @@
-﻿import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+﻿import {render, screen, waitFor, fireEvent, act} from '@testing-library/react';
 import { Provider } from 'react-redux';
 import UserSettingsPage from "../../userSettings/components/UserSettingsPage";
 import { configureStore, Store, UnknownAction } from '@reduxjs/toolkit';
@@ -111,8 +111,10 @@ describe('UserSettingsPage Tests', () => {
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
             });
+            await act(async () => {
+                jest.advanceTimersByTime(600);
+            });
             
-            jest.advanceTimersByTime(1000);
             await waitFor(() => {
                 expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(updateUserSettings.email);
                 expect(api.put).toHaveBeenCalledTimes(1);

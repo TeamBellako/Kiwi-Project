@@ -4,6 +4,7 @@ import {initialState} from "../../userSettings/store/UserSettingsState";
 import {loadUserSettings, updateUserSettings} from "../../userSettings/store/UserSettingsThunks"
 
 const validUserSettings: UserSettings = {
+    id: 1, // TODO: Remove when JWT is implemented
     email: 'finn@thehuman.com',
     areNotificationsEnabled: true,
     theme: 'dark',
