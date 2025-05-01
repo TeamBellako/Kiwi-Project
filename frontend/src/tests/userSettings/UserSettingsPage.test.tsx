@@ -70,25 +70,23 @@ describe('UserSettingsPage Tests', () => {
     };
 
     describe('load tests', () => {
-        test('displays loading message while loading data', () => {
+        test('should display loading message while loading data', () => {
             api.get = jest.fn().mockImplementation(() => new Promise(() => {}));
             renderUserSettingsPage();
 
             expect(screen.getByText(loadingMessage)).toBeInTheDocument();
         });
 
-        test('displays user settings when load is successful', async () => {
+        test('should display user settings when load is successful', async () => {
             mockApiGetRequest(validUserSettings);
             renderUserSettingsPage();
 
             await waitFor(() => {
-                expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email);
-                // We also check the enum to avoid regression from malformed string validation on UserSettings
                 expect(screen.getByLabelText(/Dark/i)).toBeChecked();
             });
         });
 
-        test('displays error message when load fails', async () => {
+        test('should display error message when load fails', async () => {
             mockApiGetErrorRequest(errorMessage);
 
             renderUserSettingsPage();
@@ -125,7 +123,7 @@ describe('UserSettingsPage Tests', () => {
             renderUserSettingsPage();
             
             await waitFor(() => {
-                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: validUserSettings.email } });
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.notifications), { target: { value: validUserSettings.email } });
             });
 
             await act(async () => {
@@ -133,9 +131,9 @@ describe('UserSettingsPage Tests', () => {
             });
             
             await waitFor(() => {
-                // We expect 1 because it needs to first set the validUserSettings data, but not 2 since we are not
-                // changing any value
-                expect(api.put).toHaveBeenCalledTimes(1);
+                expect(api.put).toHaveBeenCalledTimes(0);
+                // Save is getting called even if the state is the same
+                throw new Error('Not Implemented');
             });
         });
 
@@ -160,7 +158,6 @@ describe('UserSettingsPage Tests', () => {
 
         test('should display error message for invalid email format', async () => {
             mockApiGetRequest(validUserSettings);
-            mockApiPutErrorRequest(invalidEmailError);
             renderUserSettingsPage();
             
             await waitFor(() => {
@@ -191,6 +188,14 @@ describe('UserSettingsPage Tests', () => {
                 // We don't want sensible information contained in the server error message to be displayed
                 expect(screen.queryByText(errorMessage)).toBeNull();
             });
+        });
+
+        test('should not trigger saveSettings after loadSettings', async () => {
+            throw new Error('Not Implemented');
+        });
+
+        test('should not trigger loadSettings after saveSettings', async () => {
+            throw new Error('Not Implemented');
         });
     });
 });

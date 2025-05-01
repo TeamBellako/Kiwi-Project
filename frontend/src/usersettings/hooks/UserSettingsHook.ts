@@ -30,14 +30,6 @@ export const useUserSettingsForm = ({
     const [serverError, setServerError] = useState<string>('');
     const [isSaving, setIsSaving] = useState(false);
     
-    const validateEmail = () => {
-        if (!isValidEmail(email)) {
-            setFieldError("Invalid Email");
-            return false;
-        }
-        return true;
-    };
-    
     const saveSettings = useCallback(
         debounce(async (updatedSettings: UserSettings) => {
             try {
@@ -59,13 +51,9 @@ export const useUserSettingsForm = ({
             return;
         }
 
-        // Prevent invalid input from triggering save
-        if (value.email && !validateEmail()) return;
+        if (value.email && !isValidEmail(email)) return;
 
-        // Skip if no changes
         if (isEqual(prevValueRef.current, value)) return;
-
-        console.log('💾 Saving settings:', value);
 
         prevValueRef.current = value;
         saveSettings(value);
@@ -77,7 +65,6 @@ export const useUserSettingsForm = ({
             setValue: (email: string) => setValue({ ...value, email }),
             fieldError: fieldError,
             setFieldError: setFieldError,
-            validate: validateEmail,
         },
         notificationsField: {
             enabled: value.areNotificationsEnabled,

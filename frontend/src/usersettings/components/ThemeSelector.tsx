@@ -1,8 +1,8 @@
 ﻿import React from "react";
 
 type Props = {
-    value: 'light' | 'dark';
-    setValue: (theme: 'light' | 'dark') => void;
+    value: 'LIGHT' | 'DARK';
+    setValue: (theme: 'LIGHT' | 'DARK') => void;
 };
 
 const ThemeSelector: React.FC<Props> = ({ value, setValue }) => (
@@ -13,8 +13,8 @@ const ThemeSelector: React.FC<Props> = ({ value, setValue }) => (
                 type="radio"
                 name="theme"
                 value="light"
-                checked={value.toLowerCase() === 'light'}
-                onChange={() => setValue('light')}
+                checked={value.toUpperCase() === 'LIGHT'}
+                onChange={() => setValue('LIGHT')}
             />
             Light
         </label>
@@ -23,8 +23,8 @@ const ThemeSelector: React.FC<Props> = ({ value, setValue }) => (
                 type="radio"
                 name="theme"
                 value="dark"
-                checked={value.toLowerCase() === 'dark'}
-                onChange={() => setValue('dark')}
+                checked={value.toUpperCase() === 'DARK'}
+                onChange={() => setValue('DARK')}
             />
             Dark
         </label>
