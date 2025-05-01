@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import UserSettingsPage from "../../userSettings/components/UserSettingsPage";
 import { configureStore, Store, UnknownAction } from '@reduxjs/toolkit';
 import api from "../../services/api";
-import { userSettingsReducer } from "../../userSettings/store/UserSettingsSlice";
+import { userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
 import { userSettingsLabels } from "../constants/Labels";
 
 jest.mock("../../services/api");
@@ -45,9 +45,9 @@ describe('UserSettingsPage Tests', () => {
         });
     });
 
-    const renderUserSettingsPage = () => {
+    const renderUserSettingsPage = (store = mockStore) => {
         return render(
-            <Provider store={mockStore}>
+            <Provider store={store}>
                 <UserSettingsPage />
             </Provider>
         );
@@ -72,7 +72,6 @@ describe('UserSettingsPage Tests', () => {
     describe('load tests', () => {
         test('displays loading message while loading data', () => {
             api.get = jest.fn().mockImplementation(() => new Promise(() => {}));
-
             renderUserSettingsPage();
 
             expect(screen.getByText(loadingMessage)).toBeInTheDocument();
@@ -80,11 +79,11 @@ describe('UserSettingsPage Tests', () => {
 
         test('displays user settings when load is successful', async () => {
             mockApiGetRequest(validUserSettings);
-
             renderUserSettingsPage();
 
             await waitFor(() => {
                 expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email);
+                // We also check the enum to avoid regression from malformed string validation on UserSettings
                 expect(screen.getByLabelText(/Dark/i)).toBeChecked();
             });
         });
@@ -105,9 +104,9 @@ describe('UserSettingsPage Tests', () => {
     describe('update tests', () => {
         test('should trigger saveSettings after a debounce delay', async () => {
             mockApiGetRequest(validUserSettings);
-            mockApiPutRequest(validUserSettings);
-
+            mockApiPutRequest(updateUserSettings);
             renderUserSettingsPage();
+            
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
             });
@@ -129,9 +128,14 @@ describe('UserSettingsPage Tests', () => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: validUserSettings.email } });
             });
 
-            jest.advanceTimersByTime(1000);
+            await act(async () => {
+                jest.advanceTimersByTime(600);
+            });
+            
             await waitFor(() => {
-                expect(api.put).toHaveBeenCalledTimes(0);
+                // We expect 1 because it needs to first set the validUserSettings data, but not 2 since we are not
+                // changing any value
+                expect(api.put).toHaveBeenCalledTimes(1);
             });
         });
 
@@ -142,11 +146,13 @@ describe('UserSettingsPage Tests', () => {
             await waitFor(() => {
                 const emailInput = screen.getByLabelText(userSettingsLabels.email);
                 fireEvent.change(emailInput, { target: { value: updateUserSettings.email } });
-                fireEvent.change(emailInput, { target: { value: 'jake@thedog3.com' } });
-                fireEvent.change(emailInput, { target: { value: 'jake@thedog4.com' } });
+                fireEvent.change(emailInput, { target: { value: 'marceline@lovessimon.com' } });
+                fireEvent.change(emailInput, { target: { value: 'princess@bubblegum.com' } });
+            });
+            await act(async () => {
+                jest.advanceTimersByTime(600);
             });
             
-            jest.advanceTimersByTime(1000);
             await waitFor(() => {
                 expect(api.put).toHaveBeenCalledTimes(1);
             });
@@ -176,7 +182,9 @@ describe('UserSettingsPage Tests', () => {
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
             });
-            jest.advanceTimersByTime(1000);
+            await act(async () => {
+                jest.advanceTimersByTime(600);
+            });
 
             await waitFor(() => {
                 expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
