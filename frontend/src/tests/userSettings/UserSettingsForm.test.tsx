@@ -5,6 +5,9 @@ import { userSettingsLabels } from '../constants/Labels';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import {inValidUserSettings, validUserSettings} from "./UserSettingsTestFactory";
 import UserSettingsForm from "../../userSettings/components/UserSettingsForm";
+import UserSettingsPage from "../../userSettings/components/UserSettingsPage";
+import {Provider} from "react-redux";
+import {store} from "../../store/Store";
 expect.extend(toHaveNoViolations);
 
 let formFields: ReturnType<typeof getFormFields>;
@@ -25,7 +28,11 @@ const getFormFields = () => {
 
 describe('UserSettings Form Tests', () => {
     beforeEach(() => {
-        render(<UserSettingsForm />)
+        render(
+            <Provider store={store}>
+                <UserSettingsForm />
+            </Provider>
+        )
         formFields = getFormFields();
     })
     
@@ -77,7 +84,11 @@ describe('UserSettings Form Tests', () => {
     
     describe('General Tests', () => {
         it('has no accessibility violations', async () => {
-            const { container } = render(<UserSettingsForm />);
+            const { container } = render(
+                <Provider store={store}>
+                    <UserSettingsForm />
+                </Provider>
+            );
             
             const results = await axe(container);
             

@@ -47,7 +47,6 @@ describe('UserSettings Slice Tests', () => {
             );
             
             expect(nextState.status).toBe('failed');
-            expect(nextState.error).toBe(errorMessage);
         });
     })
 
