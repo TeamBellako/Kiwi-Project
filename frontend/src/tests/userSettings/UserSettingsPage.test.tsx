@@ -1,4 +1,4 @@
-﻿import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
+﻿import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {Provider} from 'react-redux';
 import UserSettingsPage from "../../userSettings/components/UserSettingsPage";
 import {configureStore, Store, UnknownAction} from '@reduxjs/toolkit';
@@ -106,9 +106,6 @@ describe('UserSettingsPage Tests', () => {
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
             });
-            await act(async () => {
-                jest.advanceTimersByTime(600);
-            });
             
             await waitFor(() => {
                 expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(updateUserSettings.email);
@@ -123,9 +120,6 @@ describe('UserSettingsPage Tests', () => {
             
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.notifications), { target: { value: validUserSettings.email } });
-            });
-            await act(async () => {
-                jest.advanceTimersByTime(600);
             });
             
             await waitFor(() => {
@@ -142,9 +136,6 @@ describe('UserSettingsPage Tests', () => {
                 fireEvent.change(emailInput, { target: { value: updateUserSettings.email } });
                 fireEvent.change(emailInput, { target: { value: 'marceline@lovessimon.com' } });
                 fireEvent.change(emailInput, { target: { value: 'princess@bubblegum.com' } });
-            });
-            await act(async () => {
-                jest.advanceTimersByTime(600);
             });
             
             await waitFor(() => {
@@ -181,9 +172,6 @@ describe('UserSettingsPage Tests', () => {
             
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
-            });
-            await act(async () => {
-                jest.advanceTimersByTime(600);
             });
 
             await waitFor(() => {
