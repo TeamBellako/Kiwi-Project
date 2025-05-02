@@ -26,7 +26,7 @@ export const updateUserSettings = createAsyncThunk<UserSettings, UserSettings>(
 
         if (!isAlive) {
             await dispatch(loadUserSettings());
-            return rejectWithValue('Server is not reachable. Settings reloaded instead.');
+            return rejectWithValue('Server is not reachable.');
         }
 
         try {

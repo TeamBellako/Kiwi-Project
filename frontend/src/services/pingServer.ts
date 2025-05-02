@@ -3,7 +3,7 @@
 export const pingServer = async (): Promise<boolean> => {
     const controller = new AbortController();
 
-    const timeout = setTimeout(() => controller.abort(), 1000);
+    const timeout = setTimeout(() => controller.abort(), 250);
 
     try {
         await api.get('/api/ping', { signal: controller.signal });
