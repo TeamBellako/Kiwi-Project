@@ -32,11 +32,9 @@ export const useUserSettingsForm = ({
     const saveSettings = useCallback(
         debounce(async (updatedSettings: UserSettings) => {
             try {
-                if (!isEqual(prevValueRef.current, value)) {
-                    setIsSaving(true);
-                    await dispatch(updateUserSettings(updatedSettings));
-                    setIsSaving(false);
-                }
+                setIsSaving(true);
+                await dispatch(updateUserSettings(updatedSettings));
+                setIsSaving(false);
             } catch (err) {
                 setIsSaving(false);
             }

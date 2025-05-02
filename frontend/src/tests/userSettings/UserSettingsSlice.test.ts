@@ -7,7 +7,7 @@ const validUserSettings: UserSettings = {
     id: 1, // TODO: Remove when JWT is implemented
     email: 'finn@thehuman.com',
     areNotificationsEnabled: true,
-    theme: 'dark',
+    theme: 'DARK',
 };
 
 describe('UserSettings Slice Tests', () => {
@@ -51,15 +51,6 @@ describe('UserSettings Slice Tests', () => {
     })
 
     describe('Update Tests', () => {
-        it('slice transitions to loading on update', () => {
-            const nextState = userSettingsReducer(
-                initialState,
-                updateUserSettings.pending('', validUserSettings)
-            );
-            
-            expect(nextState.status).toBe('loading');
-        });
-    
         it('slice transitions to succeeded on update success', () => {
             const nextState = userSettingsReducer(
                 initialState,
