@@ -1,4 +1,4 @@
-﻿export const THEMES = ['light', 'dark'] as const;
+﻿export const THEMES = ['LIGHT', 'DARK'] as const;
 export type ThemeOption = (typeof THEMES)[number];
 
 export interface UserSettings {
