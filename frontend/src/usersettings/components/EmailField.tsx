@@ -1,4 +1,6 @@
-﻿type Props = {
+﻿import React from "react";
+
+type Props = {
     value: string;
     setValue: (value: string) => void;
     error: string;
@@ -6,7 +8,7 @@
     validate: () => void;
 };
 
-const EmailField: React.FC<Props> = ({ value, setValue, error, validate }) => {
+const EmailField: React.FC<Props> = ({ value, setValue, error, setError, validate }) => {
     return (
         <div>
             <label htmlFor="email" className="block font-medium">

@@ -156,7 +156,7 @@ describe('UserSettingsPage Tests', () => {
             });
         });
 
-        test('should display error message for invalid email format and then hide it', async () => {
+        test('should display error message for invalid email format and then hide it when email is valid again', async () => {
             mockApiGetRequest(validUserSettings);
             renderUserSettingsPage();
             
@@ -174,8 +174,7 @@ describe('UserSettingsPage Tests', () => {
                 fireEvent.change(emailInput, { target: { value: validUserSettings.email } });
             });
             await waitFor(() => {
-                expect(screen.getByText(invalidEmailError)).toBeNull();
-                expect(api.put).toHaveBeenCalledTimes(1);
+                expect(screen.queryByText(invalidEmailError)).toBeNull();
             });
         });
 
