@@ -9,9 +9,8 @@ import { userSettingsLabels } from "../constants/Labels";
 jest.mock("../../services/api");
 
 const loadingMessage = "Loading settings...";
-const errorMessage = "Error: Failed to load";
 const invalidEmailError = "Invalid email format";
-const serverErrorMessage = "Error: Server error during update";
+const errorMessageWithSensibleInformation = "Adventure Time > Steven Universe";
 
 const validUserSettings = {
     email: 'finn@thehuman.com',
@@ -86,15 +85,14 @@ describe('UserSettingsPage Tests', () => {
             });
         });
 
-        test('should display error message when load fails', async () => {
-            mockApiGetErrorRequest(errorMessage);
-
+        test('should display hardcoded error message when load fails with a 500 response', async () => {
+            mockApiGetErrorRequest(errorMessageWithSensibleInformation);
             renderUserSettingsPage();
 
             await waitFor(() => {
                 expect(screen.getByText(/Server Error:/i)).toBeInTheDocument();
                 // We don't want sensible information contained in the server error message to be displayed
-                expect(screen.queryByText(errorMessage)).toBeNull();
+                expect(screen.queryByText(errorMessageWithSensibleInformation)).toBeNull();
             });
         });
     });
@@ -178,11 +176,11 @@ describe('UserSettingsPage Tests', () => {
             });
         });
 
-        test('should trigger loading if update fails', async () => {
-            mockApiPutErrorRequest(errorMessage);
+        test('should trigger loading if update fails and show a hardcoded error message when receiving a 500 response', async () => {
             mockApiGetRequest(validUserSettings);
-            
+            mockApiPutErrorRequest(errorMessageWithSensibleInformation);
             renderUserSettingsPage();
+            
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
             });
@@ -191,18 +189,10 @@ describe('UserSettingsPage Tests', () => {
             });
 
             await waitFor(() => {
-                expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
+                expect(screen.getByText(/Server Error:/i)).toBeInTheDocument();
                 // We don't want sensible information contained in the server error message to be displayed
-                expect(screen.queryByText(errorMessage)).toBeNull();
+                expect(screen.queryByText(errorMessageWithSensibleInformation)).toBeNull();
             });
-        });
-
-        test('should not trigger saveSettings after loadSettings', async () => {
-            throw new Error('Not Implemented');
-        });
-
-        test('should not trigger loadSettings after saveSettings', async () => {
-            throw new Error('Not Implemented');
         });
     });
 });

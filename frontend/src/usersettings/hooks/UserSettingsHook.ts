@@ -54,7 +54,9 @@ export const useUserSettingsForm = ({
         if (value.email && !isValidEmail(value.email)) {
             setError('Invalid email format');
             return;
-        } 
+        } else if (error.length > 0) {
+            setError('');
+        }
 
         if (isEqual(prevValueRef.current, value)) return;
 
