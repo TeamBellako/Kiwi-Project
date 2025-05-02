@@ -27,7 +27,6 @@ export const useUserSettingsForm = ({
     const isFirstRender = useRef(true);
 
     const [error, setError] = useState('');
-    const [serverError, setServerError] = useState<string>('');
     const [isSaving, setIsSaving] = useState(false);
     
     const saveSettings = useCallback(
@@ -37,7 +36,6 @@ export const useUserSettingsForm = ({
                 await dispatch(updateUserSettings(updatedSettings));
                 setIsSaving(false);
             } catch (err) {
-                setServerError('Internal server error, try again later');
                 setIsSaving(false);
             }
         }, 500),
@@ -83,7 +81,6 @@ export const useUserSettingsForm = ({
             value: value.theme,
             setValue: (theme: ThemeOption) => setValue({ ...value, theme }),
         },
-        isSaving,
-        serverError,
+        isSaving
     };
 };
