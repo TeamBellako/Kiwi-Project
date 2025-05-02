@@ -1,6 +1,7 @@
 ﻿import {createAsyncThunk} from '@reduxjs/toolkit';
 import {UserSettings} from "../types/UserSettings";
 import api from "../../services/api";
+import {pingServer} from "../../services/pingServer";
 
 export const loadUserSettings = createAsyncThunk<UserSettings>(
     'userSettings/loadUserSettings',
@@ -20,7 +21,14 @@ export const loadUserSettings = createAsyncThunk<UserSettings>(
 
 export const updateUserSettings = createAsyncThunk<UserSettings, UserSettings>(
     'userSettings/updateUserSettings',
-    async (settings, { rejectWithValue }) => {
+    async (settings, { rejectWithValue, dispatch }) => {
+        const isAlive = await pingServer();
+
+        if (!isAlive) {
+            await dispatch(loadUserSettings());
+            return rejectWithValue('Server is not reachable. Settings reloaded instead.');
+        }
+
         try {
             const response = await api.put('/api/settings', settings);
             return response.data;
