@@ -1,9 +1,9 @@
-﻿import {useState, useCallback, useEffect, useRef} from "react";
-import { ThemeOption, UserSettings } from "../types/UserSettings";
-import { isValidEmail } from "../../utils/ValidationUtils";
+﻿import {useCallback, useEffect, useRef, useState} from "react";
+import {ThemeOption, UserSettings} from "../types/UserSettings";
+import {isValidEmail} from "../../utils/ValidationUtils";
 import {debounce, isEqual} from "lodash";
-import { useDispatch } from "react-redux";
-import { updateUserSettings } from "../store/UserSettingsThunks";
+import {useDispatch} from "react-redux";
+import {updateUserSettings} from "../store/UserSettingsThunks";
 import {AppDispatch} from "../../store/Store";
 
 type UserSettingsFormProps = Partial<UserSettings>;
@@ -32,9 +32,11 @@ export const useUserSettingsForm = ({
     const saveSettings = useCallback(
         debounce(async (updatedSettings: UserSettings) => {
             try {
-                setIsSaving(true);
-                await dispatch(updateUserSettings(updatedSettings));
-                setIsSaving(false);
+                if (!isEqual(prevValueRef.current, value)) {
+                    setIsSaving(true);
+                    await dispatch(updateUserSettings(updatedSettings));
+                    setIsSaving(false);
+                }
             } catch (err) {
                 setIsSaving(false);
             }
@@ -56,10 +58,10 @@ export const useUserSettingsForm = ({
             setError('');
         }
 
-        if (isEqual(prevValueRef.current, value)) return;
-
-        prevValueRef.current = value;
-        saveSettings(value);
+        if (!isEqual(prevValueRef.current, value)) {
+            prevValueRef.current = value;
+            saveSettings(value);
+        }
     }, [value]);
 
     return {

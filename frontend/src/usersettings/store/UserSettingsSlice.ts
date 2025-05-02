@@ -1,6 +1,6 @@
-﻿import { createSlice } from '@reduxjs/toolkit';
-import { initialState } from './UserSettingsState';
-import { loadUserSettings, updateUserSettings } from './UserSettingsThunks';
+﻿import {createSlice} from '@reduxjs/toolkit';
+import {initialState} from './UserSettingsState';
+import {loadUserSettings, updateUserSettings} from './UserSettingsThunks';
 
 const userSettingsSlice = createSlice({
     name: 'userSettings',
@@ -20,11 +20,7 @@ const userSettingsSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload as string ?? 'Failed to load user settings';
             })
-
-            .addCase(updateUserSettings.pending, (state) => {
-                state.status = 'loading';
-                state.error = null;
-            })
+            
             .addCase(updateUserSettings.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.userSettings = action.payload;

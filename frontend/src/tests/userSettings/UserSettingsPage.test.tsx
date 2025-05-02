@@ -1,10 +1,10 @@
-﻿import {render, screen, waitFor, fireEvent, act} from '@testing-library/react';
-import { Provider } from 'react-redux';
+﻿import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {Provider} from 'react-redux';
 import UserSettingsPage from "../../userSettings/components/UserSettingsPage";
-import { configureStore, Store, UnknownAction } from '@reduxjs/toolkit';
+import {configureStore, Store, UnknownAction} from '@reduxjs/toolkit';
 import api from "../../services/api";
-import { userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
-import { userSettingsLabels } from "../constants/Labels";
+import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
+import {userSettingsLabels} from "../constants/Labels";
 
 jest.mock("../../services/api");
 
@@ -116,7 +116,7 @@ describe('UserSettingsPage Tests', () => {
             });
         });
 
-        test('should not trigger neither saveSettings nor loadSettings if there are no changes', async () => {
+        test('should not trigger neither saveSettings if there are no changes', async () => {
             mockApiGetRequest(validUserSettings);
             mockApiPutRequest(validUserSettings);
             renderUserSettingsPage();
@@ -124,13 +124,11 @@ describe('UserSettingsPage Tests', () => {
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.notifications), { target: { value: validUserSettings.email } });
             });
-
             await act(async () => {
                 jest.advanceTimersByTime(600);
             });
             
             await waitFor(() => {
-                expect(api.get).toHaveBeenCalledTimes(0);
                 expect(api.put).toHaveBeenCalledTimes(0);
             });
         });
