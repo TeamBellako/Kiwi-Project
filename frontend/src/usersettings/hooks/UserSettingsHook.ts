@@ -12,7 +12,7 @@ export const useUserSettingsForm = ({
     id = 1, // TODO: Remove when JWT is implemented
     email = '',
     areNotificationsEnabled = false,
-    theme = 'light',
+    theme = 'LIGHT',
 }: UserSettingsFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
 
@@ -26,7 +26,7 @@ export const useUserSettingsForm = ({
     const prevValueRef = useRef<UserSettings | null>(null);
     const isFirstRender = useRef(true);
 
-    const [fieldError, setFieldError] = useState('');
+    const [error, setError] = useState('');
     const [serverError, setServerError] = useState<string>('');
     const [isSaving, setIsSaving] = useState(false);
     
@@ -51,7 +51,10 @@ export const useUserSettingsForm = ({
             return;
         }
 
-        if (value.email && !isValidEmail(email)) return;
+        if (value.email && !isValidEmail(value.email)) {
+            setError('Invalid email format');
+            return;
+        } 
 
         if (isEqual(prevValueRef.current, value)) return;
 
@@ -63,8 +66,8 @@ export const useUserSettingsForm = ({
         emailField: {
             value: value.email,
             setValue: (email: string) => setValue({ ...value, email }),
-            fieldError: fieldError,
-            setFieldError: setFieldError,
+            error: error,
+            setError: (error: string) => setError(error),
         },
         notificationsField: {
             enabled: value.areNotificationsEnabled,

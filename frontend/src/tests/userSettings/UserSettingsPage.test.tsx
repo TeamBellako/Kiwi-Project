@@ -10,7 +10,7 @@ jest.mock("../../services/api");
 
 const loadingMessage = "Loading settings...";
 const errorMessage = "Error: Failed to load";
-const invalidEmailError = "Invalid email address";
+const invalidEmailError = "Invalid email format";
 const serverErrorMessage = "Error: Server error during update";
 
 const validUserSettings = {
@@ -118,8 +118,9 @@ describe('UserSettingsPage Tests', () => {
             });
         });
 
-        test('should not trigger saveSettings if there are no changes', async () => {
+        test('should not trigger neither saveSettings nor loadSettings if there are no changes', async () => {
             mockApiGetRequest(validUserSettings);
+            mockApiPutRequest(validUserSettings);
             renderUserSettingsPage();
             
             await waitFor(() => {
@@ -131,9 +132,8 @@ describe('UserSettingsPage Tests', () => {
             });
             
             await waitFor(() => {
+                expect(api.get).toHaveBeenCalledTimes(0);
                 expect(api.put).toHaveBeenCalledTimes(0);
-                // Save is getting called even if the state is the same
-                throw new Error('Not Implemented');
             });
         });
 
@@ -156,7 +156,7 @@ describe('UserSettingsPage Tests', () => {
             });
         });
 
-        test('should display error message for invalid email format', async () => {
+        test('should display error message for invalid email format and then hide it', async () => {
             mockApiGetRequest(validUserSettings);
             renderUserSettingsPage();
             
@@ -164,14 +164,22 @@ describe('UserSettingsPage Tests', () => {
                 const emailInput = screen.getByLabelText(userSettingsLabels.email);
                 fireEvent.change(emailInput, { target: { value: invalidUserSettings.email } });
             });
-
             await waitFor(() => {
                 expect(screen.getByText(invalidEmailError)).toBeInTheDocument();
                 expect(api.put).toHaveBeenCalledTimes(0);
             });
+
+            await waitFor(() => {
+                const emailInput = screen.getByLabelText(userSettingsLabels.email);
+                fireEvent.change(emailInput, { target: { value: validUserSettings.email } });
+            });
+            await waitFor(() => {
+                expect(screen.getByText(invalidEmailError)).toBeNull();
+                expect(api.put).toHaveBeenCalledTimes(1);
+            });
         });
 
-        test('should handle server failure during settings update', async () => {
+        test('should trigger loading if update fails', async () => {
             mockApiPutErrorRequest(errorMessage);
             mockApiGetRequest(validUserSettings);
             
