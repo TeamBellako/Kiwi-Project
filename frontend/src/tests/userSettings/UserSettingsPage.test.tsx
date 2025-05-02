@@ -98,17 +98,25 @@ describe('UserSettingsPage Tests', () => {
     });
     
     describe('update tests', () => {
-        test('should trigger saveSettings after a debounce delay', async () => {
+        test('should trigger saveSettings after a debounce delay, multiple times', async () => {
             mockApiGetRequest(validUserSettings);
-            mockApiPutRequest(updateUserSettings);
             renderUserSettingsPage();
             
+            mockApiPutRequest(updateUserSettings);
             await waitFor(() => {
                 fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
             });
-            
             await waitFor(() => {
                 expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(updateUserSettings.email);
+                expect(api.put).toHaveBeenCalledTimes(1);
+            });
+
+            mockApiPutRequest(validUserSettings);
+            await waitFor(() => {
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: validUserSettings.email}});
+            });
+            await waitFor(() => {
+                expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email);
                 expect(api.put).toHaveBeenCalledTimes(1);
             });
         });
