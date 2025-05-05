@@ -1,5 +1,10 @@
-package com.bellako.kiwi.usersettings
+package com.bellako.kiwi.userSettings
 
+import com.bellako.kiwi.userSettings.network.IUserSettingsAPI
+import com.bellako.kiwi.userSettings.network.UserSettingsRepository
+import com.bellako.kiwi.userSettings.types.UserSettings
+import com.bellako.kiwi.userSettings.types.UserSettingsDTO
+import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
 import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.*
@@ -11,29 +16,23 @@ import retrofit2.Response
 
 class UserSettingsRepositoryTest {
 
-    private lateinit var api: IUserSettingsApi
+    private lateinit var api: IUserSettingsAPI
     private lateinit var repository: UserSettingsRepository
-
-    private val testDto = UserSettingsDto(
-        email = "finn@thehuman.com",
-        areNotificationsEnabled = true,
-        theme = UserSettingsDto.Theme.DARK
-    )
 
     @Before
     fun setUp() {
-        api = mock(IUserSettingsApi::class.java)
+        api = mock(IUserSettingsAPI::class.java)
         repository = UserSettingsRepository(api)
     }
 
     @Test
     fun `getUserSettings returns success when API responds`() = runTest {
-        `when`(api.getUserSettings()).thenReturn(testDto)
+        `when`(api.getUserSettings()).thenReturn(validUserSettings())
 
         val result = repository.getUserSettings()
 
         assertTrue(result.isSuccess)
-        assertEquals(testDto, result.getOrNull())
+        assertEquals(validUserSettings(), result.getOrNull())
     }
 
     @Test
@@ -48,18 +47,18 @@ class UserSettingsRepositoryTest {
 
     @Test
     fun `updateUserSettings returns success when API completes`() = runTest {
-        `when`(api.getUserSettings()).thenReturn(testDto)
+        `when`(api.getUserSettings()).thenReturn(validUserSettings())
 
-        val result = repository.updateUserSettings(testDto)
+        val result = repository.updateUserSettings(validUserSettings())
 
         assertTrue(result.isSuccess)
     }
 
     @Test
     fun `updateUserSettings returns failure when API throws any exception`() = runTest {
-        doThrow(fakeHttpException(500)).`when`(api).updateUserSettings(testDto)
+        doThrow(fakeHttpException(500)).`when`(api).updateUserSettings(validUserSettings())
 
-        val result = repository.updateUserSettings(testDto)
+        val result = repository.updateUserSettings(validUserSettings())
 
         assertTrue(result.isFailure)
         assertNotNull(result.exceptionOrNull())

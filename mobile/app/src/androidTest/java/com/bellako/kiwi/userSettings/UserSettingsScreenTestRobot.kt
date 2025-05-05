@@ -1,4 +1,4 @@
-package com.bellako.kiwi.usersettings
+package com.bellako.kiwi.userSettings
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -6,7 +6,7 @@ import com.bellako.kiwi.ui.utils.TestTags
 
 class UserSettingsScreenTestRobot(private val rule: ComposeTestRule) {
     fun enterEmail(email: String)  {
-        rule.onNodeWithTag(TestTags.EMAIL_FIELD).performTextInput(email)
+        rule.onNodeWithTag(TestTags.EMAIL_FIELD).performTextReplacement(email)
         rule.waitForIdle()
     }
 

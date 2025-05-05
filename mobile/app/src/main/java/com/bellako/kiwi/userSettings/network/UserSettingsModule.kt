@@ -1,4 +1,4 @@
-package com.bellako.kiwi.usersettings
+package com.bellako.kiwi.userSettings.network
 
 import com.bellako.kiwi.BuildConfig
 import dagger.Module
@@ -12,17 +12,17 @@ import retrofit2.converter.gson.GsonConverterFactory
 @InstallIn(SingletonComponent::class)
 object UserSettingsModule {
     @Provides
-    fun provideUserSettingsApi(): IUserSettingsApi {
+    fun provideUserSettingsApi(): IUserSettingsAPI {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.MOBILE_API_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(IUserSettingsApi::class.java)
+            .create(IUserSettingsAPI::class.java)
     }
 
     @Provides
     fun provideUserSettingsRepository(
-        api: IUserSettingsApi
+        api: IUserSettingsAPI
     ): UserSettingsRepository {
         return UserSettingsRepository(api)
     }

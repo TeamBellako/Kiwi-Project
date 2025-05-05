@@ -1,21 +1,26 @@
-﻿import {createAsyncThunk} from '@reduxjs/toolkit';
-import {UserSettings} from "../types/UserSettings";
+﻿import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from "../../services/api";
-import {pingServer} from "../../services/pingServer";
+import { pingServer } from "../../services/pingServer";
+import {
+    UserSettings,
+    UserSettingsDTO,
+    toDomainObject,
+    toDTO
+} from "../types/UserSettingsTypes";
 
 export const loadUserSettings = createAsyncThunk<UserSettings>(
     'userSettings/loadUserSettings',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await api.get('/api/settings/me');
-            return response.data;
+            const response = await api.get<UserSettingsDTO>('/api/settings/me');
+            return toDomainObject(response.data);
         } catch (error: any) {
             const status = error.response?.status;
-            
+
             const message = status === 500
                 ? 'Internal server error. Try again later.'
                 : error.response?.data?.message || 'Failed to load user settings';
-            
+
             return rejectWithValue(message);
         }
     }
@@ -33,15 +38,17 @@ export const updateUserSettings = createAsyncThunk<UserSettings, UserSettings>(
         }
 
         try {
-            const response = await api.put('/api/settings', settings);
-            return response.data;
+            // TODO: using id = 1 since JWT isn't in place yet
+            const dto: UserSettingsDTO = toDTO(settings, 1);
+            const response = await api.put<UserSettingsDTO>('/api/settings', dto);
+            return toDomainObject(response.data);
         } catch (error: any) {
             const status = error.response?.status;
-            
+
             const message = status === 500
                 ? 'Internal server error. Try again later.'
                 : error.response?.data?.message || 'Failed to update user settings';
-            
+
             return rejectWithValue(message);
         }
     }

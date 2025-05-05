@@ -1,45 +1,42 @@
-﻿import {useCallback, useEffect, useRef, useState} from "react";
-import {ThemeOption, UserSettings} from "../types/UserSettings";
-import {isValidEmail} from "../../utils/ValidationUtils";
-import {debounce, isEqual} from "lodash";
-import {useDispatch} from "react-redux";
-import {updateUserSettings} from "../store/UserSettingsThunks";
-import {AppDispatch} from "../../store/Store";
-import {Logger} from "../../utils/Logger";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { ThemeOption, UserSettings } from "../types/UserSettings";
+import { isValidEmail } from "../../utils/ValidationUtils";
+import { debounce, isEqual } from "lodash";
+import { useDispatch } from "react-redux";
+import { updateUserSettings } from "../store/UserSettingsThunks";
+import { AppDispatch } from "../../store/Store";
+import { Logger } from "../../utils/Logger";
 
 type UserSettingsFormProps = Partial<UserSettings>;
 
 export const useUserSettingsForm = ({
-    id = 1, // TODO: Remove when JWT is implemented
     email = '',
     areNotificationsEnabled = false,
     theme = 'LIGHT',
 }: UserSettingsFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
 
-    const [value, setValue] = useState<UserSettings>({
-        id,
+    const [formState, setFormState] = useState<UserSettings>({
         email,
         areNotificationsEnabled,
         theme,
     });
-    
+
     const prevValueRef = useRef<UserSettings | null>(null);
     const isFirstRender = useRef(true);
 
     const [error, setError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
-    
+
     const saveSettings = useCallback(
         debounce(async (updatedSettings: UserSettings) => {
             try {
                 setIsSaving(true);
-                
-                Logger.info("Saving settings")
+                Logger.info("Saving settings");
                 await dispatch(updateUserSettings(updatedSettings));
-                
                 setIsSaving(false);
             } catch (err) {
+                Logger.error("Failed to save settings", err);
                 setIsSaving(false);
             }
         }, 500),
@@ -49,44 +46,43 @@ export const useUserSettingsForm = ({
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
-            prevValueRef.current = value;
+            prevValueRef.current = formState;
             return;
         }
 
-        if (value.email && !isValidEmail(value.email)) {
+        if (formState.email && !isValidEmail(formState.email)) {
             setError('Invalid email format');
             return;
         } else if (error.length > 0) {
             setError('');
         }
 
-        if (!isEqual(prevValueRef.current, value)) {
-            Logger.info("Queuing save settings")
-            
-            prevValueRef.current = value;
-            saveSettings(value);
+        if (!isEqual(prevValueRef.current, formState)) {
+            Logger.info("Queuing save settings");
+            prevValueRef.current = formState;
+            saveSettings(formState);
         }
-    }, [value]);
+    }, [formState, error, saveSettings]);
 
     return {
         emailField: {
-            value: value.email,
-            setValue: (email: string) => setValue({ ...value, email }),
-            error: error,
-            setError: (error: string) => setError(error),
+            value: formState.email,
+            setValue: (email: string) => setFormState({ ...formState, email }),
+            error,
+            setError,
         },
         notificationsField: {
-            enabled: value.areNotificationsEnabled,
+            enabled: formState.areNotificationsEnabled,
             onToggle: () =>
-                setValue((prev) => ({
+                setFormState((prev) => ({
                     ...prev,
                     areNotificationsEnabled: !prev.areNotificationsEnabled,
                 })),
         },
         themeField: {
-            value: value.theme,
-            setValue: (theme: ThemeOption) => setValue({ ...value, theme }),
+            value: formState.theme,
+            setValue: (theme: ThemeOption) => setFormState({ ...formState, theme }),
         },
-        isSaving
+        isSaving,
     };
 };

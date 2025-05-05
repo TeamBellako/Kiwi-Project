@@ -2,8 +2,8 @@
 import UserSettingsEmailField from './UserSettingsEmailField';
 import UserSettingsNotificationsToggle from './UserSettingsNotificationsToggle';
 import UserSettingsThemeSelector from './UserSettingsThemeSelector';
-import {UserSettings} from "../types/UserSettings";
 import {useUserSettingsForm} from "../hooks/UserSettingsHook";
+import {UserSettings} from "../types/UserSettingsTypes";
 
 type UserSettingsProps = Partial<UserSettings>;
 
