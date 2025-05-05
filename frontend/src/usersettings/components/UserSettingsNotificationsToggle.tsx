@@ -1,11 +1,11 @@
 ﻿import React from "react";
 
-type Props = {
+type UserSettingsNotificationsToggleProps = {
     enabled: boolean;
     onToggle: () => void;
 };
 
-const NotificationsToggle: React.FC<Props> = ({ enabled, onToggle }) => (
+const UserSettingsNotificationsToggle: React.FC<UserSettingsNotificationsToggleProps> = ({ enabled, onToggle }) => (
     <div>
         <label htmlFor="notifications" className="flex items-center gap-2">
             <input
@@ -19,4 +19,4 @@ const NotificationsToggle: React.FC<Props> = ({ enabled, onToggle }) => (
     </div>
 );
 
-export default NotificationsToggle;
+export default UserSettingsNotificationsToggle;

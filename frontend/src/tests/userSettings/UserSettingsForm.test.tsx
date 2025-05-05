@@ -1,13 +1,13 @@
-﻿import { render, screen } from '@testing-library/react';
+﻿import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { userSettingsLabels } from '../constants/Labels';
+import {userSettingsLabels} from '../constants/Labels';
 
-import { axe, toHaveNoViolations } from 'jest-axe';
-import {inValidUserSettings, validUserSettings} from "./UserSettingsTestFactory";
+import {axe, toHaveNoViolations} from 'jest-axe';
+import {invalidUserSettings, validUserSettings} from "./UserSettingsTestFactory";
 import UserSettingsForm from "../../userSettings/components/UserSettingsForm";
-import UserSettingsPage from "../../userSettings/components/UserSettingsPage";
 import {Provider} from "react-redux";
 import {store} from "../../store/Store";
+
 expect.extend(toHaveNoViolations);
 
 let formFields: ReturnType<typeof getFormFields>;
@@ -46,7 +46,7 @@ describe('UserSettings Form Tests', () => {
     
         test('email field gets invalid input and rejects it, showing an error message', async () => {
             const emailInput = formFields.getEmailInput();
-            await userEvent.type(emailInput, inValidUserSettings.email);
+            await userEvent.type(emailInput, invalidUserSettings.email);
             emailInput.blur();
             
             const error = await screen.findByText(/invalid email/i);

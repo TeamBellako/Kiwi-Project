@@ -1,11 +1,11 @@
 ﻿import React from "react";
 
-type Props = {
+type UserSettingsThemeSelectorProps = {
     value: 'LIGHT' | 'DARK';
     setValue: (theme: 'LIGHT' | 'DARK') => void;
 };
 
-const ThemeSelector: React.FC<Props> = ({ value, setValue }) => (
+const UserSettingsThemeSelector: React.FC<UserSettingsThemeSelectorProps> = ({ value, setValue }) => (
     <fieldset>
         <legend className="block font-medium mb-1">Theme</legend>
         <label className="flex items-center gap-2">
@@ -31,4 +31,4 @@ const ThemeSelector: React.FC<Props> = ({ value, setValue }) => (
     </fieldset>
 );
 
-export default ThemeSelector;
+export default UserSettingsThemeSelector;

@@ -1,14 +1,13 @@
 ﻿import React from "react";
 
-type Props = {
+type UserSettingsEmailFieldProps = {
     value: string;
     setValue: (value: string) => void;
     error: string;
     setError: (error: string) => void;
-    validate: () => void;
 };
 
-const EmailField: React.FC<Props> = ({ value, setValue, error, setError, validate }) => {
+const UserSettingsEmailField: React.FC<UserSettingsEmailFieldProps> = ({ value, setValue, error }) => {
     return (
         <div>
             <label htmlFor="email" className="block font-medium">
@@ -19,7 +18,6 @@ const EmailField: React.FC<Props> = ({ value, setValue, error, setError, validat
                 type="email"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                onBlur={validate}
                 className="mt-1 w-full border p-2 rounded"
             />
             {error && (
@@ -31,4 +29,4 @@ const EmailField: React.FC<Props> = ({ value, setValue, error, setError, validat
     );
 };
 
-export default EmailField;
+export default UserSettingsEmailField;

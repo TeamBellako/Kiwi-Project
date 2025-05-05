@@ -1,7 +1,7 @@
 ﻿import React from 'react';
-import EmailField from './EmailField';
-import NotificationsToggle from './NotificationsToggle';
-import ThemeSelector from './ThemeSelector';
+import UserSettingsEmailField from './UserSettingsEmailField';
+import UserSettingsNotificationsToggle from './UserSettingsNotificationsToggle';
+import UserSettingsThemeSelector from './UserSettingsThemeSelector';
 import {UserSettings} from "../types/UserSettings";
 import {useUserSettingsForm} from "../hooks/UserSettingsHook";
 
@@ -13,9 +13,9 @@ const UserSettingsForm: React.FC<UserSettingsProps> = (props) => {
     return (
         <>
             <form className="space-y-6" data-testid="settings-form">
-                <EmailField {...form.emailField} />
-                <NotificationsToggle {...form.notificationsField} />
-                <ThemeSelector {...form.themeField} />
+                <UserSettingsEmailField {...form.emailField} />
+                <UserSettingsNotificationsToggle {...form.notificationsField} />
+                <UserSettingsThemeSelector {...form.themeField} />
             </form>
         </>
     );

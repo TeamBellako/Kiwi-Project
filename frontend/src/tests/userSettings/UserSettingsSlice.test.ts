@@ -1,14 +1,7 @@
-﻿import {UserSettings} from "../../userSettings/types/UserSettings";
-import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
+﻿import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
 import {initialState} from "../../userSettings/store/UserSettingsState";
 import {loadUserSettings, updateUserSettings} from "../../userSettings/store/UserSettingsThunks"
-
-const validUserSettings: UserSettings = {
-    id: 1, // TODO: Remove when JWT is implemented
-    email: 'finn@thehuman.com',
-    areNotificationsEnabled: true,
-    theme: 'DARK',
-};
+import {validUserSettings} from "./UserSettingsTestFactory";
 
 describe('UserSettings Slice Tests', () => {
     describe('General Tests', () => {

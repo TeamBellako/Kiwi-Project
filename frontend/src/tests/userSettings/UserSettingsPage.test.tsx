@@ -5,30 +5,13 @@ import {configureStore, Store, UnknownAction} from '@reduxjs/toolkit';
 import api from "../../services/api";
 import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
 import {userSettingsLabels} from "../constants/Labels";
+import {invalidUserSettings, updateUserSettings, validUserSettings} from "./UserSettingsTestFactory";
 
 jest.mock("../../services/api");
 
 const loadingMessage = "Loading settings...";
 const invalidEmailError = "Invalid email format";
 const errorMessageWithSensibleInformation = "Adventure Time > Steven Universe";
-
-const validUserSettings = {
-    email: 'finn@thehuman.com',
-    areNotificationsEnabled: true,
-    theme: 'DARK',
-};
-
-const updateUserSettings = {
-    email: 'jake@thedog.com',
-    areNotificationsEnabled: false,
-    theme: 'LIGHT',
-};
-
-const invalidUserSettings = {
-    email: 'bmolovesfootball.com',
-    areNotificationsEnabled: true,
-    theme: 'DARK',
-};
 
 describe('UserSettingsPage Tests', () => {
     let mockStore: Store<unknown, UnknownAction, unknown>;
