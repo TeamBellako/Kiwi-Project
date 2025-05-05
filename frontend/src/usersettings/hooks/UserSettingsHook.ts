@@ -5,6 +5,7 @@ import {debounce, isEqual} from "lodash";
 import {useDispatch} from "react-redux";
 import {updateUserSettings} from "../store/UserSettingsThunks";
 import {AppDispatch} from "../../store/Store";
+import {Logger} from "../../utils/Logger";
 
 type UserSettingsFormProps = Partial<UserSettings>;
 
@@ -33,7 +34,10 @@ export const useUserSettingsForm = ({
         debounce(async (updatedSettings: UserSettings) => {
             try {
                 setIsSaving(true);
+                
+                Logger.info("Saving settings")
                 await dispatch(updateUserSettings(updatedSettings));
+                
                 setIsSaving(false);
             } catch (err) {
                 setIsSaving(false);
@@ -57,6 +61,8 @@ export const useUserSettingsForm = ({
         }
 
         if (!isEqual(prevValueRef.current, value)) {
+            Logger.info("Queuing save settings")
+            
             prevValueRef.current = value;
             saveSettings(value);
         }
