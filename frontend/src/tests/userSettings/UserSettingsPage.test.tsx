@@ -156,8 +156,7 @@ describe('UserSettingsPage Tests', () => {
             renderUserSettingsPage();
             
             await waitFor(() => {
-                const emailInput = screen.getByLabelText(userSettingsLabels.email);
-                fireEvent.change(emailInput, { target: { value: invalidUserSettings.email } });
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: invalidUserSettings.email } });
             });
             await waitFor(() => {
                 expect(screen.getByText(invalidEmailError)).toBeInTheDocument();
@@ -165,8 +164,7 @@ describe('UserSettingsPage Tests', () => {
             });
 
             await waitFor(() => {
-                const emailInput = screen.getByLabelText(userSettingsLabels.email);
-                fireEvent.change(emailInput, { target: { value: validUserSettings.email } });
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: validUserSettings.email } });
             });
             await waitFor(() => {
                 expect(screen.queryByText(invalidEmailError)).toBeNull();
