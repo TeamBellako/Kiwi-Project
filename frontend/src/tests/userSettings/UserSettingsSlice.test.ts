@@ -1,7 +1,7 @@
 ﻿import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
-import {initialState} from "../../userSettings/store/UserSettingsState";
 import {loadUserSettings, updateUserSettings} from "../../userSettings/store/UserSettingsThunks"
 import {validUserSettings} from "./UserSettingsTestFactory";
+import {initialState} from "../../userSettings/types/UserSettingsTypes";
 
 describe('UserSettings Slice Tests', () => {
     describe('General Tests', () => {
