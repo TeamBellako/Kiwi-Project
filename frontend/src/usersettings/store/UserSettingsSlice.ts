@@ -31,6 +31,4 @@ const userSettingsSlice = createSlice({
             });
     },
 });
-
-export const userSettingsActions = userSettingsSlice.actions;
 export const userSettingsReducer = userSettingsSlice.reducer;

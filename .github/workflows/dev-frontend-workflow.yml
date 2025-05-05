@@ -61,6 +61,7 @@ jobs:
         working-directory: ./frontend
         run: |
           echo "VITE_FRONT_API_URL=${{ secrets.VITE_FRONT_API_URL }}" > .env
+          echo "VITE_LOGGING=${{ secrets.VITE_LOGGING }}" > .env
 
       - name: Build and push Docker image
         working-directory: ./frontend

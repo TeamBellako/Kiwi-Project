@@ -11,9 +11,11 @@ export const loadUserSettings = createAsyncThunk<UserSettings>(
             return response.data;
         } catch (error: any) {
             const status = error.response?.status;
+            
             const message = status === 500
                 ? 'Internal server error. Try again later.'
                 : error.response?.data?.message || 'Failed to load user settings';
+            
             return rejectWithValue(message);
         }
     }
@@ -22,9 +24,10 @@ export const loadUserSettings = createAsyncThunk<UserSettings>(
 export const updateUserSettings = createAsyncThunk<UserSettings, UserSettings>(
     'userSettings/updateUserSettings',
     async (settings, { rejectWithValue, dispatch }) => {
-        const isAlive = await pingServer();
-
-        if (!isAlive) {
+        // We check the server here because this ping has a much lower timout, which creates a better UX if the server
+        // is down because the user immediately sees an error
+        const isServerAlive = await pingServer();
+        if (!isServerAlive) {
             await dispatch(loadUserSettings());
             return rejectWithValue('Server is not reachable.');
         }
@@ -34,9 +37,11 @@ export const updateUserSettings = createAsyncThunk<UserSettings, UserSettings>(
             return response.data;
         } catch (error: any) {
             const status = error.response?.status;
+            
             const message = status === 500
                 ? 'Internal server error. Try again later.'
                 : error.response?.data?.message || 'Failed to update user settings';
+            
             return rejectWithValue(message);
         }
     }

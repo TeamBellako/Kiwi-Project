@@ -12,7 +12,7 @@ const UserSettingsThemeSelector: React.FC<UserSettingsThemeSelectorProps> = ({ v
             <input
                 type="radio"
                 name="theme"
-                value="light"
+                value="LIGHT"
                 checked={value.toUpperCase() === 'LIGHT'}
                 onChange={() => setValue('LIGHT')}
             />
@@ -22,7 +22,7 @@ const UserSettingsThemeSelector: React.FC<UserSettingsThemeSelectorProps> = ({ v
             <input
                 type="radio"
                 name="theme"
-                value="dark"
+                value="DARK"
                 checked={value.toUpperCase() === 'DARK'}
                 onChange={() => setValue('DARK')}
             />
