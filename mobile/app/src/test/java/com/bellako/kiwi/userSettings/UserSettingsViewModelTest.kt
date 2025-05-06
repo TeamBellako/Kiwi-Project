@@ -1,5 +1,6 @@
 package com.bellako.kiwi.userSettings
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
 import com.bellako.kiwi.userSettings.types.UserSettingsState
@@ -7,6 +8,7 @@ import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.invalidUserSe
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.updateUserSettings
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsViewModel
+import com.bellako.kiwi.utils.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -19,13 +21,16 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.*
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
+import org.robolectric.RobolectricTestRunner
 import retrofit2.HttpException
 import retrofit2.Response
 
+@RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserSettingsViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
@@ -37,8 +42,10 @@ class UserSettingsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+
         repository = mock(UserSettingsRepository::class.java)
         viewModel = UserSettingsViewModel(repository, testDispatcher)
+
         reset(repository)
     }
 
