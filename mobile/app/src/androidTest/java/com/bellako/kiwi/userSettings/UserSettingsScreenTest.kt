@@ -20,11 +20,10 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalMaterial3Api::class)
 @RunWith(AndroidJUnit4::class)
 class UserSettingsScreenTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private lateinit var robot: UserSettingsScreenTestRobot
+    private lateinit var robot: UserSettingsTestRobot
     private lateinit var fakeViewModel: UserSettingsFakeViewModel
     private lateinit var state: UserSettingsState
 
@@ -42,7 +41,7 @@ class UserSettingsScreenTest {
             UserSettingsScreen(viewModel = fakeViewModel)
         }
 
-        robot = UserSettingsScreenTestRobot(composeTestRule)
+        robot = UserSettingsTestRobot(composeTestRule)
     }
 
     @Test
