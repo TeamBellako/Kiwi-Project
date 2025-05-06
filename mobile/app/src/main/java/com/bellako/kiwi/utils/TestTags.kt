@@ -1,4 +1,4 @@
-package com.bellako.kiwi.ui.utils
+package com.bellako.kiwi.utils
 
 object TestTags {
     const val CIRCULAR_PROGRESS_INDICATOR = "circular_progress_indicator"

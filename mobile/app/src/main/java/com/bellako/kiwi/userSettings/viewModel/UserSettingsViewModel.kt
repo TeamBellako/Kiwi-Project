@@ -7,6 +7,7 @@ import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
 import com.bellako.kiwi.userSettings.types.ValidatedEmail
+import com.bellako.kiwi.utils.Logger
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -95,6 +96,8 @@ class UserSettingsViewModel @Inject constructor(
         state.toDomainObject().onSuccess { domain ->
             if (previousValidDomainSettings == domain) return
 
+            Logger.info("Queueing settings save")
+
             previousValidDomainSettings = domain
             _pendingSave.tryEmit(domain)
         }
@@ -117,6 +120,8 @@ class UserSettingsViewModel @Inject constructor(
         withContext(dispatcher) {
             repository.pingServer()
                 .onSuccess {
+                    Logger.info("Saving user settings")
+
                     repository.updateUserSettings(domain.toDto())
                         .onSuccess {
                             _validationState.value = UserSettingsValidationState() // Clear general error

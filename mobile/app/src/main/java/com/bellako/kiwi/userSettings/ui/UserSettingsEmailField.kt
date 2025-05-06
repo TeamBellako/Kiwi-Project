@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.ui.utils.TestTags
+import com.bellako.kiwi.utils.TestTags
 
 @Composable
 fun UserSettingsEmailField(email: String, error: String? = null, onEmailChanged: (String) -> Unit) {

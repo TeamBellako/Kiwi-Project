@@ -5,10 +5,8 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.bellako.kiwi.ui.utils.TestTags
+import com.bellako.kiwi.utils.TestTags
 import com.bellako.kiwi.userSettings.types.Theme
-import com.bellako.kiwi.userSettings.types.UserSettings
-import com.bellako.kiwi.userSettings.types.UserSettingsDTO
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.ui.UserSettingsScreen
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.invalidUserSettings

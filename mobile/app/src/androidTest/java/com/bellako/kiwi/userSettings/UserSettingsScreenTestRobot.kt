@@ -2,7 +2,7 @@ package com.bellako.kiwi.userSettings
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import com.bellako.kiwi.ui.utils.TestTags
+import com.bellako.kiwi.utils.TestTags
 
 class UserSettingsScreenTestRobot(private val rule: ComposeTestRule) {
     fun enterEmail(email: String)  {
