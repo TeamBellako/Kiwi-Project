@@ -15,7 +15,7 @@ import java.util.Optional;
 public class UserSettingsController {
 
     private final UserSettingsService userSettingsService;
-    
+
     // TODO: Remove placeholder testing value once JWT is implemented
     public static final Integer testingUserSettingsId = 1;
 
@@ -24,44 +24,43 @@ public class UserSettingsController {
         this.userSettingsService = userSettingsService;
     }
 
-    
     @PostMapping
-    public ResponseEntity<UserSettings> createUserSettings(@RequestBody @Valid UserSettings userSettings) {
-        UserSettings createdUserSettings = userSettingsService.createUserSettings(userSettings);
+    public ResponseEntity<UserSettingsDTO> createUserSettings(@RequestBody @Valid UserSettingsDTO userSettingsDTO) {
+        UserSettingsDTO createdUserSettingsDTO = userSettingsService.createUserSettings(userSettingsDTO);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(createdUserSettings.getId())
+                .buildAndExpand(createdUserSettingsDTO.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(createdUserSettings);
+        return ResponseEntity.created(location).body(createdUserSettingsDTO);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<UserSettings> getUserSettingsById(@PathVariable Integer id) {
-        Optional<UserSettings> userSettings = userSettingsService.getUserSettingsById(id);
+    public ResponseEntity<UserSettingsDTO> getUserSettingsById(@PathVariable Integer id) {
+        Optional<UserSettingsDTO> userSettingsDTO = Optional.ofNullable(userSettingsService.getUserSettingsById(id).orElse(null));
 
-        return userSettings
+        return userSettingsDTO
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-    
+
     @GetMapping("/me")
-    public ResponseEntity<UserSettings> getMyUserSettings() {
+    public ResponseEntity<UserSettingsDTO> getMyUserSettings() {
         return getUserSettingsById(testingUserSettingsId);
     }
 
     @PutMapping
-    public ResponseEntity<UserSettings> updateUserSettings(@RequestBody @Valid UserSettings userSettings) {
-        UserSettings updatedUserSettings = userSettingsService.updateUserSettings(userSettings);
-        
-        return ResponseEntity.ok(updatedUserSettings);
+    public ResponseEntity<UserSettingsDTO> updateUserSettings(@RequestBody @Valid UserSettingsDTO userSettingsDTO) {
+        UserSettingsDTO updatedUserSettingsDTO = userSettingsService.updateUserSettings(userSettingsDTO);
+
+        return ResponseEntity.ok(updatedUserSettingsDTO);
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteUserSettings(@PathVariable Integer id) {
         userSettingsService.deleteUserSettings(id);
-        
+
         return ResponseEntity.noContent().build();
     }
 }

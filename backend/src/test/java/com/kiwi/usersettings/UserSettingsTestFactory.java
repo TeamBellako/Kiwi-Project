@@ -1,29 +1,39 @@
 package com.kiwi.usersettings;
 
 public class UserSettingsTestFactory {
-    public static UserSettings validUserSettings() {
-        return new UserSettings(
+    public static UserSettingsDTO validUserSettingsDTO() {
+        return new UserSettingsDTO(
                 1,
                 "finnthehuman@gmail.com",
                 true,
-                UserSettings.Theme.LIGHT
+                UserSettingsEnums.Theme.LIGHT
         );
     }
 
-    public static UserSettings duplicateUserSettings() {
-        return new UserSettings(
+    public static UserSettingsDTO duplicateUserSettingsDTO() {
+        return new UserSettingsDTO(
+                1,
                 "finnthehuman@gmail.com",
                 false,
-                UserSettings.Theme.DARK
+                UserSettingsEnums.Theme.DARK
         );
     }
 
-    public static UserSettings updatedUserSettings() {
-        return new UserSettings(
+    public static UserSettingsDTO updatedUserSettingsDTO() {
+        return new UserSettingsDTO(
                 1,
                 "jakethedog@gmail.com",
                 false,
-                UserSettings.Theme.DARK
+                UserSettingsEnums.Theme.DARK
+        );
+    }
+
+    public static UserSettingsDTO invalidUserSettingsDTO() {
+        return new UserSettingsDTO(
+                -1,
+                "bmolovesfootball",
+                false,
+                UserSettingsEnums.Theme.DARK
         );
     }
 
@@ -31,16 +41,7 @@ public class UserSettingsTestFactory {
         return new UserSettings(
                 "princessbugglegum@gmail.com",
                 false,
-                UserSettings.Theme.LIGHT
-        );
-    }
-
-    public static UserSettings invalidUserSettings() {
-        return new UserSettings(
-                -1,
-                "bmolovesfootball",
-                false,
-                UserSettings.Theme.DARK
+                UserSettingsEnums.Theme.DARK
         );
     }
     
@@ -48,8 +49,7 @@ public class UserSettingsTestFactory {
         return new UserSettings(
                 "marcelineandsimon4ever",
                 false,
-                UserSettings.Theme.DARK
+                UserSettingsEnums.Theme.DARK
         );
     }
-    
 }

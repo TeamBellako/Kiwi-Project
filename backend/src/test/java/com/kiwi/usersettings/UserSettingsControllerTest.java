@@ -45,17 +45,19 @@ public class UserSettingsControllerTest {
     
     @Test
     public void createUserSettings_validInput_returnsCreated() throws Exception {
-        when(userSettingsService.createUserSettings(UserSettingsTestFactory.validUserSettings())).thenReturn(validUserSettings());
+        when(userSettingsService.createUserSettings(any(UserSettingsDTO.class))).thenReturn(validUserSettingsDTO());
         
-        mockMvc.perform(getPOSTRequestContent(validUserSettings()))
+        mockMvc.perform(getPOSTRequestContent(validUserSettingsDTO()))
                 
         .andExpect(status().isCreated()) 
-        .andExpect(getUserSettingsResultMatcher(validUserSettings()));
+        .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
     }
 
     @Test
     public void createUserSettings_invalidInput_returnsBadRequest() throws Exception {
-        mockMvc.perform(getPOSTRequestContent(invalidUserSettings()))
+        when(userSettingsService.createUserSettings(any(UserSettingsDTO.class))).thenThrow(new UserSettingsInvalidException(""));
+        
+        mockMvc.perform(getPOSTRequestContent(invalidUserSettingsDTO()))
         
         .andExpect(status().isBadRequest());
     }
@@ -69,65 +71,66 @@ public class UserSettingsControllerTest {
 
     @Test
     public void createUserSettings_userSettingsAlreadyExists_returnsConflict() throws Exception {
-        when(userSettingsService.createUserSettings(validUserSettings())).thenThrow(new UserSettingsConflictException(validUserSettings().getId()));
+        when(userSettingsService.createUserSettings(any(UserSettingsDTO.class)))
+                .thenThrow(new UserSettingsConflictException(validUserSettingsDTO().getId()));
 
-        mockMvc.perform(getPOSTRequestContent(validUserSettings()))
+        mockMvc.perform(getPOSTRequestContent(validUserSettingsDTO()))
 
         .andExpect(status().isConflict()); 
     }
     
     @Test
     public void getUserSettingsById_validInput_returnsUserSettings() throws Exception {
-        when(userSettingsService.getUserSettingsById(validUserSettings().getId())).thenReturn(Optional.of(validUserSettings()));
+        when(userSettingsService.getUserSettingsById(validUserSettingsDTO().getId())).thenReturn(Optional.of(validUserSettingsDTO()));
 
-        mockMvc.perform(get(baseAPIUrl + "/{id}", validUserSettings().getId()))
+        mockMvc.perform(get(baseAPIUrl + "/{id}", validUserSettingsDTO().getId()))
                 
         .andExpect(status().isOk()) 
-        .andExpect(getUserSettingsResultMatcher(validUserSettings()));
+        .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
     }
 
     @Test
     public void getUserSettingsById_invalidId_returnsBadRequest() throws Exception {
-        when(userSettingsService.getUserSettingsById(invalidUserSettings().getId())).thenThrow(new UserSettingsInvalidException(""));
+        when(userSettingsService.getUserSettingsById(invalidUserSettingsDTO().getId())).thenThrow(new UserSettingsInvalidException(""));
         
-        mockMvc.perform(get(baseAPIUrl + "/{id}", invalidUserSettings().getId()))
+        mockMvc.perform(get(baseAPIUrl + "/{id}", invalidUserSettingsDTO().getId()))
 
         .andExpect(status().isBadRequest());
     }
 
     @Test
     public void getUserSettingsById_userDoesNotExists_returnsNotFound() throws Exception {
-        mockMvc.perform(get(baseAPIUrl + "/{id}", validUserSettings().getId()))
+        mockMvc.perform(get(baseAPIUrl + "/{id}", validUserSettingsDTO().getId()))
 
         .andExpect(status().isNotFound());
     }
 
     @Test
     public void getMyUserSettings_userExists_returnsMyUserSettings() throws Exception {
-        when(userSettingsService.getUserSettingsById(testingUserSettingsId)).thenReturn(Optional.of(validUserSettings()));
+        when(userSettingsService.getUserSettingsById(testingUserSettingsId)).thenReturn(Optional.of(validUserSettingsDTO()));
         
         mockMvc.perform(get(baseAPIUrl + "/me", testingUserSettingsId))
         
         .andExpect(status().isOk())
-        .andExpect(getUserSettingsResultMatcher(validUserSettings()));
+        .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
     }
 
     @Test
-    public void updateUserSettings_validInput_returnsUpdatedUserSettings() throws Exception {
-        when(userSettingsService.createUserSettings(validUserSettings())).thenReturn(validUserSettings());
-        when(userSettingsService.updateUserSettings(updatedUserSettings())).thenReturn(updatedUserSettings());
+    public void updateUserSettings_validInput_returnsUpdatedUserSettingsDTO() throws Exception {
+        when(userSettingsService.createUserSettings(any(UserSettingsDTO.class))).thenReturn(validUserSettingsDTO());
+        when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class))).thenReturn(updatedUserSettingsDTO());
         
-        mockMvc.perform(getPUTRequestContent(updatedUserSettings()))
+        mockMvc.perform(getPUTRequestContent(updatedUserSettingsDTO()))
         
         .andExpect(status().isOk())  
-        .andExpect(getUserSettingsResultMatcher(updatedUserSettings()));
+        .andExpect(getUserSettingsResultMatcher(updatedUserSettingsDTO()));
     }
 
     @Test
     public void updateUserSettings_invalidInput_returnsBadRequest() throws Exception {
-        when(userSettingsService.updateUserSettings(any(UserSettings.class))).thenThrow(new UserSettingsInvalidException(""));
+        when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class))).thenThrow(new UserSettingsInvalidException(""));
         
-        mockMvc.perform(getPUTRequestContent(invalidUserSettings()))
+        mockMvc.perform(getPUTRequestContent(invalidUserSettingsDTO()))
 
         .andExpect(status().isBadRequest());
     }
@@ -141,19 +144,20 @@ public class UserSettingsControllerTest {
 
     @Test
     public void updateUserSettings_userSettingsDoesNotExist_returnsNotFound() throws Exception {
-        when(userSettingsService.updateUserSettings(validUserSettings())).thenThrow(new UserSettingsNotFoundException(validUserSettings().getId()));
+        when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
+                .thenThrow(new UserSettingsNotFoundException(validUserSettingsDTO().getId()));
         
-        mockMvc.perform(getPUTRequestContent(validUserSettings()))
+        mockMvc.perform(getPUTRequestContent(validUserSettingsDTO()))
 
         .andExpect(status().isNotFound());
     }
 
     @Test
     public void deleteUserSettings_validInput_returnsNoContent() throws Exception {
-        when(userSettingsService.createUserSettings(validUserSettings())).thenReturn(validUserSettings());
-        when(userSettingsService.getUserSettingsById(validUserSettings().getId())).thenReturn(Optional.of(validUserSettings()));
+        when(userSettingsService.createUserSettings(any(UserSettingsDTO.class))).thenReturn(validUserSettingsDTO());
+        when(userSettingsService.getUserSettingsById(validUserSettingsDTO().getId())).thenReturn(Optional.of(validUserSettingsDTO()));
 
-        mockMvc.perform(delete(baseAPIUrl + "/{id}", validUserSettings().getId()))
+        mockMvc.perform(delete(baseAPIUrl + "/{id}", validUserSettingsDTO().getId()))
                 
         .andExpect(status().isNoContent());
     }
@@ -162,43 +166,43 @@ public class UserSettingsControllerTest {
     public void deleteUserSettings_invalidId_returnsBadRequest() throws Exception {
         doThrow(new UserSettingsInvalidException(""))
                 .when(userSettingsService)
-                .deleteUserSettings(invalidUserSettings().getId());
+                .deleteUserSettings(invalidUserSettingsDTO().getId());
         
-        mockMvc.perform(delete(baseAPIUrl + "/{id}", invalidUserSettings().getId()))
+        mockMvc.perform(delete(baseAPIUrl + "/{id}", invalidUserSettingsDTO().getId()))
                 
         .andExpect(status().isBadRequest());
     }
 
     @Test
     public void deleteUserSettings_userNotFound_returnsNotFound() throws Exception {
-        doThrow(new UserSettingsNotFoundException(validUserSettings().getId()))
+        doThrow(new UserSettingsNotFoundException(validUserSettingsDTO().getId()))
                 .when(userSettingsService)
-                .deleteUserSettings(validUserSettings().getId());
+                .deleteUserSettings(validUserSettingsDTO().getId());
         
-        mockMvc.perform(delete(baseAPIUrl + "/{id}", validUserSettings().getId()))
+        mockMvc.perform(delete(baseAPIUrl + "/{id}", validUserSettingsDTO().getId()))
 
         .andExpect(status().isNotFound());
     }
 
     
-    private @NotNull MockHttpServletRequestBuilder getPOSTRequestContent(UserSettings userSettings) throws JsonProcessingException {
+    private @NotNull MockHttpServletRequestBuilder getPOSTRequestContent(UserSettingsDTO userSettingsDTO) throws JsonProcessingException {
         return post(baseAPIUrl)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(serializeUserSettingIntoJSON(userSettings));
+                .content(serializeUserSettingIntoJSON(userSettingsDTO));
     }
 
-    private @NotNull MockHttpServletRequestBuilder getPUTRequestContent(UserSettings userSettings) throws JsonProcessingException {
+    private @NotNull MockHttpServletRequestBuilder getPUTRequestContent(UserSettingsDTO userSettingsDTO) throws JsonProcessingException {
         return put(baseAPIUrl)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(serializeUserSettingIntoJSON(userSettings));
+                .content(serializeUserSettingIntoJSON(userSettingsDTO));
     }
     
-    private String serializeUserSettingIntoJSON(UserSettings userSettings) throws JsonProcessingException {
+    private String serializeUserSettingIntoJSON(UserSettingsDTO userSettingsDTO) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(userSettings);
+        return objectMapper.writeValueAsString(userSettingsDTO);
     }
     
-    private @NotNull ResultMatcher getUserSettingsResultMatcher(@NotNull UserSettings expectedUserSettings) {
-        return jsonPath("$.email").value(expectedUserSettings.getEmail());        
+    private @NotNull ResultMatcher getUserSettingsResultMatcher(@NotNull UserSettingsDTO userSettingsDTO) {
+        return jsonPath("$.email").value(userSettingsDTO.getEmail());        
     }
 }

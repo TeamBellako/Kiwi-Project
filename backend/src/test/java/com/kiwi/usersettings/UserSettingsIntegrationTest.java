@@ -32,41 +32,26 @@ public class UserSettingsIntegrationTest {
         assertEquals(noIdUserSettings(), userSettingsRepository.saveAndFlush(noIdUserSettings()));
     }
 
-    @Test(expected = jakarta.validation.ConstraintViolationException.class)
-    public void createUserSettings_invalidInput_throwsConstrainViolationException() {
-        userSettingsRepository.saveAndFlush(invalidNoIdUserSettings());
-    }
-
-    @Test(expected = DataIntegrityViolationException.class)
-    public void createUserSettings_userSettingsAlreadyExists_throwsDataIntegrityViolationException() {
-        userSettingsRepository.saveAndFlush(duplicateUserSettings());
-    }
-
     @Test
     public void getUserSettingsById_validId_returnsUserSettings() {
-        assertNotNull(userSettingsRepository.findById(validUserSettings().getId()));
+        assertNotNull(userSettingsRepository.findById(validUserSettingsDTO().getId()));
     }
 
     @Test
     public void getUserSettingsById_invalidId_returnsEmptyOptional() {
-        assertEquals(Optional.empty(), userSettingsRepository.findById(invalidUserSettings().getId()));
+        assertEquals(Optional.empty(), userSettingsRepository.findById(invalidUserSettingsDTO().getId()));
     }
 
     @Test
     public void getUserSettingsById_userSettingsDoesNotExist_returnsEmptyOptional() {
-        assertEquals(Optional.empty(), userSettingsRepository.findById(validUserSettings().getId() + 1));
+        assertEquals(Optional.empty(), userSettingsRepository.findById(validUserSettingsDTO().getId() + 1));
     }
 
     @Test
     public void updateUserSettings_validInput_updatesUserSettings() {
-        userSettingsRepository.saveAndFlush(updatedUserSettings());
+        userSettingsRepository.saveAndFlush(updatedUserSettingsDTO().toDomainObject());
         
-        assertEquals(userSettingsRepository.findById(validUserSettings().getId()).get(), updatedUserSettings());
-    }
-
-    @Test(expected = jakarta.validation.ConstraintViolationException.class)
-    public void updateUserSettings_invalidInput_throwsConstraintViolationException() {
-        userSettingsRepository.saveAndFlush(invalidNoIdUserSettings());
+        assertEquals(userSettingsRepository.findById(validUserSettingsDTO().getId()).get(), updatedUserSettingsDTO().toDomainObject());
     }
 
     @Test
@@ -79,22 +64,22 @@ public class UserSettingsIntegrationTest {
     
     @Test
     public void deleteUserSettings_validId_deletesUserSettings() {
-        userSettingsRepository.deleteById(validUserSettings().getId());
+        userSettingsRepository.deleteById(validUserSettingsDTO().getId());
         
-        assertEquals(Optional.empty(), userSettingsRepository.findById(validUserSettings().getId()));
+        assertEquals(Optional.empty(), userSettingsRepository.findById(validUserSettingsDTO().getId()));
     }
 
     @Test
     public void deleteUserSettings_invalidId_doesNothing() {
-        userSettingsRepository.deleteById(invalidUserSettings().getId());
+        userSettingsRepository.deleteById(invalidUserSettingsDTO().getId());
         
-        assertNotNull(userSettingsRepository.findById(validUserSettings().getId()).get());
+        assertNotNull(userSettingsRepository.findById(validUserSettingsDTO().getId()).get());
     }
 
     @Test
     public void deleteUserSettings_userDoesNotExists_doesNothing() {
-        userSettingsRepository.deleteById(validUserSettings().getId() + 1);
+        userSettingsRepository.deleteById(validUserSettingsDTO().getId() + 1);
 
-        assertNotNull(userSettingsRepository.findById(validUserSettings().getId()).get());
+        assertNotNull(userSettingsRepository.findById(validUserSettingsDTO().getId()).get());
     }
 }

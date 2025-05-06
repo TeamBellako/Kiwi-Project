@@ -11,46 +11,35 @@ import java.util.Objects;
 @Entity
 @Table(name = "user_settings")
 public class UserSettings {
-    public enum Theme {
-        LIGHT,
-        DARK,
-    }
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-
-    @Email(
-            regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",
-            flags = Pattern.Flag.CASE_INSENSITIVE,
-            message = "Invalid email format"
-    )
-    @NotBlank(message = "Email is required")
+    
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-    
+
     @Column(name = "are_notifications_enabled")
     private boolean areNotificationsEnabled;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "theme", nullable = false)
-    private Theme theme;
+    private UserSettingsEnums.Theme theme;
 
     public UserSettings() {
     }
 
-    public UserSettings(Integer id, String email, boolean areNotificationsEnabled, Theme theme) {
-        this.id = id;
-        this.email = email;
-        this.areNotificationsEnabled = areNotificationsEnabled;
-        this.theme = theme;
+    public UserSettings(Integer id, String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+        setId(id);
+        setEmail(email);
+        setAreNotificationsEnabled(areNotificationsEnabled);
+        setTheme(theme);
     }
 
-    public UserSettings(String email, boolean areNotificationsEnabled, Theme theme) {
-        this.email = email;
-        this.areNotificationsEnabled = areNotificationsEnabled;
-        this.theme = theme;
+    public UserSettings(String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+        setEmail(email);
+        setAreNotificationsEnabled(areNotificationsEnabled);
+        setTheme(theme);
     }
 
     public Integer getId() {
@@ -58,6 +47,8 @@ public class UserSettings {
     }
 
     public void setId(Integer id) {
+        if (id == null || id <= 0) throw new UserSettingsInvalidException("UserSettings Id's must be bigger than zero");
+        
         this.id = id;
     }
 
@@ -65,8 +56,12 @@ public class UserSettings {
         return email;
     }
 
-    public void setEmail(String email) { this.email = email; }
-
+    public void setEmail(String email) {
+        if (!RegexUtils.isValidEmail(email)) throw new UserSettingsInvalidException("Invalid email format");
+        
+        this.email = email;
+    }
+    
     public boolean isAreNotificationsEnabled() {
         return areNotificationsEnabled;
     }
@@ -75,11 +70,11 @@ public class UserSettings {
         this.areNotificationsEnabled = areNotificationsEnabled;
     }
 
-    public Theme getTheme() {
+    public UserSettingsEnums.Theme getTheme() {
         return theme;
     }
 
-    public void setTheme(Theme theme) {
+    public void setTheme(UserSettingsEnums.Theme theme) {
         this.theme = theme;
     }
 
@@ -100,7 +95,12 @@ public class UserSettings {
         return areNotificationsEnabled == that.areNotificationsEnabled && Objects.equals(email, that.email) && theme == that.theme;
     }
 
-    public void validate() {
-        if (!RegexUtils.isValidEmail(this.email)) throw new UserSettingsInvalidException("Invalid email");
+    public UserSettingsDTO toDTO() {
+        return new UserSettingsDTO(
+            getId(),
+            getEmail(),
+            isAreNotificationsEnabled(),
+            getTheme()
+        );
     }
 }
