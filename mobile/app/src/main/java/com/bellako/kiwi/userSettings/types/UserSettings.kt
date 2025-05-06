@@ -22,7 +22,7 @@ data class UserSettings(
     val areNotificationsEnabled: Boolean,
     val theme: Theme
 ) {
-    fun toDto(): UserSettingsDTO {
+    fun toDTO(): UserSettingsDTO {
         return UserSettingsDTO(
             email = email.value,
             areNotificationsEnabled = areNotificationsEnabled,

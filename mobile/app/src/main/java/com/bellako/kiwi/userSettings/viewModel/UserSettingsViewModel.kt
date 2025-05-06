@@ -122,7 +122,7 @@ class UserSettingsViewModel @Inject constructor(
                 .onSuccess {
                     Logger.info("Saving user settings")
 
-                    repository.updateUserSettings(domain.toDto())
+                    repository.updateUserSettings(domain.toDTO())
                         .onSuccess {
                             _validationState.value = UserSettingsValidationState() // Clear general error
                         }

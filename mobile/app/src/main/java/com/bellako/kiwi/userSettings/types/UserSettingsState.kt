@@ -5,7 +5,7 @@ data class UserSettingsState(
     val areNotificationsEnabled: Boolean = false,
     val theme: Theme = Theme.LIGHT
 ) {
-    fun toDto() : UserSettingsDTO {
+    fun toDTO() : UserSettingsDTO {
         return UserSettingsDTO(
             email = email,
             areNotificationsEnabled = areNotificationsEnabled,
