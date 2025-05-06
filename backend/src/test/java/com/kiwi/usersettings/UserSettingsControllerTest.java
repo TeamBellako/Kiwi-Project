@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.util.Optional;
 
 import static com.kiwi.usersettings.UserSettingsController.testingUserSettingsId;
+import static com.kiwi.usersettings.UserSettingsHTTPUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -47,7 +48,7 @@ public class UserSettingsControllerTest {
     public void createUserSettings_validInput_returnsCreated() throws Exception {
         when(userSettingsService.createUserSettings(any(UserSettingsDTO.class))).thenReturn(validUserSettingsDTO());
         
-        mockMvc.perform(getPOSTRequestContent(validUserSettingsDTO()))
+        mockMvc.perform(getPOSTRequestContent(baseAPIUrl, validUserSettingsDTO()))
                 
         .andExpect(status().isCreated()) 
         .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
@@ -57,14 +58,14 @@ public class UserSettingsControllerTest {
     public void createUserSettings_invalidInput_returnsBadRequest() throws Exception {
         when(userSettingsService.createUserSettings(any(UserSettingsDTO.class))).thenThrow(new UserSettingsInvalidException(""));
         
-        mockMvc.perform(getPOSTRequestContent(invalidUserSettingsDTO()))
+        mockMvc.perform(getPOSTRequestContent(baseAPIUrl, invalidUserSettingsDTO()))
         
         .andExpect(status().isBadRequest());
     }
     
     @Test
     public void createUserSettings_nullInput_returnsBadRequest() throws Exception {
-        mockMvc.perform(getPOSTRequestContent(null))
+        mockMvc.perform(getPOSTRequestContent(baseAPIUrl, null))
 
         .andExpect(status().isBadRequest());    
     }
@@ -74,7 +75,7 @@ public class UserSettingsControllerTest {
         when(userSettingsService.createUserSettings(any(UserSettingsDTO.class)))
                 .thenThrow(new UserSettingsConflictException(validUserSettingsDTO().getId()));
 
-        mockMvc.perform(getPOSTRequestContent(validUserSettingsDTO()))
+        mockMvc.perform(getPOSTRequestContent(baseAPIUrl, validUserSettingsDTO()))
 
         .andExpect(status().isConflict()); 
     }
@@ -120,7 +121,7 @@ public class UserSettingsControllerTest {
         when(userSettingsService.createUserSettings(any(UserSettingsDTO.class))).thenReturn(validUserSettingsDTO());
         when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class))).thenReturn(updatedUserSettingsDTO());
         
-        mockMvc.perform(getPUTRequestContent(updatedUserSettingsDTO()))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, updatedUserSettingsDTO()))
         
         .andExpect(status().isOk())  
         .andExpect(getUserSettingsResultMatcher(updatedUserSettingsDTO()));
@@ -130,14 +131,14 @@ public class UserSettingsControllerTest {
     public void updateUserSettings_invalidInput_returnsBadRequest() throws Exception {
         when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class))).thenThrow(new UserSettingsInvalidException(""));
         
-        mockMvc.perform(getPUTRequestContent(invalidUserSettingsDTO()))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl,invalidUserSettingsDTO()))
 
         .andExpect(status().isBadRequest());
     }
 
     @Test
     public void updateUserSettings_nullInput_returnsBadRequest() throws Exception {
-        mockMvc.perform(getPUTRequestContent(null))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, null))
 
         .andExpect(status().isBadRequest());
     }
@@ -147,7 +148,7 @@ public class UserSettingsControllerTest {
         when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
                 .thenThrow(new UserSettingsNotFoundException(validUserSettingsDTO().getId()));
         
-        mockMvc.perform(getPUTRequestContent(validUserSettingsDTO()))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, validUserSettingsDTO()))
 
         .andExpect(status().isNotFound());
     }
@@ -182,27 +183,5 @@ public class UserSettingsControllerTest {
         mockMvc.perform(delete(baseAPIUrl + "/{id}", validUserSettingsDTO().getId()))
 
         .andExpect(status().isNotFound());
-    }
-
-    
-    private @NotNull MockHttpServletRequestBuilder getPOSTRequestContent(UserSettingsDTO userSettingsDTO) throws JsonProcessingException {
-        return post(baseAPIUrl)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(serializeUserSettingIntoJSON(userSettingsDTO));
-    }
-
-    private @NotNull MockHttpServletRequestBuilder getPUTRequestContent(UserSettingsDTO userSettingsDTO) throws JsonProcessingException {
-        return put(baseAPIUrl)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(serializeUserSettingIntoJSON(userSettingsDTO));
-    }
-    
-    private String serializeUserSettingIntoJSON(UserSettingsDTO userSettingsDTO) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(userSettingsDTO);
-    }
-    
-    private @NotNull ResultMatcher getUserSettingsResultMatcher(@NotNull UserSettingsDTO userSettingsDTO) {
-        return jsonPath("$.email").value(userSettingsDTO.getEmail());        
     }
 }

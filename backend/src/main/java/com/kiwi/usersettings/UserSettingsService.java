@@ -19,7 +19,7 @@ public class UserSettingsService {
     }
 
     @Transactional
-    public UserSettingsDTO createUserSettings(@Validated UserSettingsDTO userSettingsDTO) {
+    public UserSettingsDTO createUserSettings(@Valid UserSettingsDTO userSettingsDTO) {
         UserSettings userSettings = userSettingsDTO.toDomainObject();
         if (userSettings == null) {
             throw new IllegalArgumentException("Invalid user settings provided");
@@ -48,7 +48,7 @@ public class UserSettingsService {
     }
 
     @Transactional
-    public UserSettingsDTO updateUserSettings(UserSettingsDTO userSettingsDTO) {
+    public UserSettingsDTO updateUserSettings(@Valid UserSettingsDTO userSettingsDTO) {
         UserSettings userSettings = userSettingsDTO.toDomainObject();
         if (userSettings == null) {
             throw new IllegalArgumentException("Invalid user settings provided");
