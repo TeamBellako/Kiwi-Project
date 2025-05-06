@@ -22,7 +22,19 @@ data class UserSettings(
     val areNotificationsEnabled: Boolean,
     val theme: Theme
 ) {
-    enum class Theme {
-        LIGHT, DARK
+    fun toDto(): UserSettingsDTO {
+        return UserSettingsDTO(
+            email = email.value,
+            areNotificationsEnabled = areNotificationsEnabled,
+            theme = Theme.valueOf(theme.name)
+        )
+    }
+
+    fun toState(): UserSettingsState {
+        return UserSettingsState(
+            email = email.value,
+            areNotificationsEnabled = areNotificationsEnabled,
+            theme = theme
+        )
     }
 }

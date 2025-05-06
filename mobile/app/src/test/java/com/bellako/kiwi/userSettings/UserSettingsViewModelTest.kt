@@ -2,7 +2,6 @@ package com.bellako.kiwi.userSettings
 
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
-import com.bellako.kiwi.userSettings.types.UserSettingsFactory
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.invalidUserSettings
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.updateUserSettings
@@ -56,10 +55,7 @@ class UserSettingsViewModelTest {
         viewModel.loadSettings()
         advanceUntilIdle()
 
-        val expectedState = UserSettingsFactory
-            .fromDto(validUserSettings())
-            .getOrThrow()
-            .let { UserSettingsFactory.toState(it) }
+        val expectedState = validUserSettings().toState()
 
         assertEquals(expectedState, viewModel.state.first())
         assertNull(viewModel.validationState.first().generalError)
@@ -113,10 +109,7 @@ class UserSettingsViewModelTest {
         viewModel.loadSettings()
         advanceUntilIdle()
 
-        val state = UserSettingsFactory
-            .fromDto(updateUserSettings())
-            .getOrThrow()
-            .let { UserSettingsFactory.toState(it) }
+        val state = updateUserSettings().toState()
 
         viewModel.updateSettings(state)
         advanceUntilIdle()
@@ -132,10 +125,7 @@ class UserSettingsViewModelTest {
         viewModel.loadSettings()
         advanceUntilIdle()
 
-        val state = UserSettingsFactory
-            .fromDto(validUserSettings())
-            .getOrThrow()
-            .let { UserSettingsFactory.toState(it) }
+        val state = validUserSettings().toState()
 
         viewModel.updateSettings(state)
         advanceUntilIdle()
@@ -152,15 +142,9 @@ class UserSettingsViewModelTest {
         viewModel.loadSettings()
         advanceUntilIdle()
 
-        val state1 = UserSettingsFactory
-            .fromDto(validUserSettings())
-            .getOrThrow()
-            .let { UserSettingsFactory.toState(it) }
+        val state1 = validUserSettings().toState()
 
-        val state2 = UserSettingsFactory
-            .fromDto(updateUserSettings())
-            .getOrThrow()
-            .let { UserSettingsFactory.toState(it) }
+        val state2 = updateUserSettings().toState()
 
         viewModel.updateSettings(state1)
         advanceTimeBy(100)

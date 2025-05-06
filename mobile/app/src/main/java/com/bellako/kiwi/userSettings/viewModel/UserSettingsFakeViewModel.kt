@@ -1,7 +1,6 @@
 package com.bellako.kiwi.userSettings.viewModel
 
 import com.bellako.kiwi.userSettings.types.UserSettings
-import com.bellako.kiwi.userSettings.types.UserSettingsFactory
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
 import com.bellako.kiwi.userSettings.types.ValidatedEmail
@@ -20,7 +19,7 @@ class UserSettingsFakeViewModel(
     private val _validationState = MutableStateFlow(UserSettingsValidationState())
     override val validationState: StateFlow<UserSettingsValidationState> = _validationState
 
-    private var currentDomainSettings: UserSettings? = UserSettingsFactory.fromState(backingState).getOrNull()
+    private var currentDomainSettings: UserSettings? = backingState.toDomainObject().getOrNull()
 
     var simulateLoadError: Boolean = false
     var simulateUpdateError: Boolean = false
@@ -53,14 +52,14 @@ class UserSettingsFakeViewModel(
             return
         }
 
-        val result = UserSettingsFactory.fromState(state)
+        val result = state.toDomainObject()
 
         result.onFailure {
             _validationState.value = UserSettingsValidationState(emailError = it.message)
         }.onSuccess { domain ->
             if (currentDomainSettings != domain) {
                 currentDomainSettings = domain
-                _state.value = UserSettingsFactory.toState(domain)
+                _state.value = domain.toState()
                 _validationState.value = UserSettingsValidationState() // Clear errors after success
             }
         }

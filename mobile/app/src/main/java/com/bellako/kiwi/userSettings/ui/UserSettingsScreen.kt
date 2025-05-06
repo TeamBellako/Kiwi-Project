@@ -11,10 +11,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.utils.TestTags
+import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.viewModel.IUserSettingsViewModel
 import com.bellako.kiwi.userSettings.types.UserSettings
-import com.bellako.kiwi.userSettings.types.UserSettingsDTO
-import com.bellako.kiwi.userSettings.types.UserSettingsFactory
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
@@ -22,13 +21,11 @@ import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
 @Preview
 @Composable
 fun UserSettingsScreenPreview() {
-    val previewState = UserSettingsFactory.fromDto(
-        UserSettingsDTO(
-            email = "finn@thehuman.com",
-            areNotificationsEnabled = true,
-            theme = UserSettings.Theme.DARK
-        )
-    ).getOrThrow().let { UserSettingsFactory.toState(it) }
+    val previewState = UserSettingsState(
+        email = "finn@thehuman.com",
+        areNotificationsEnabled = true,
+        theme = Theme.DARK
+    )
 
     UserSettingsScreen(UserSettingsFakeViewModel(previewState))
 }
@@ -155,11 +152,11 @@ fun NotificationsSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 
 @Composable
 fun ThemeRadioButtons(
-    selectedTheme: UserSettings.Theme,
-    onThemeChange: (UserSettings.Theme) -> Unit
+    selectedTheme: Theme,
+    onThemeChange: (Theme) -> Unit
 ) {
     Text("Theme")
-    UserSettings.Theme.entries.forEach { theme ->
+    Theme.entries.forEach { theme ->
         Row(verticalAlignment = Alignment.CenterVertically) {
             RadioButton(
                 selected = selectedTheme == theme,

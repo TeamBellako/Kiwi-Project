@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
 import com.bellako.kiwi.userSettings.types.UserSettings
-import com.bellako.kiwi.userSettings.types.UserSettingsFactory
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
 import com.bellako.kiwi.userSettings.types.ValidatedEmail
@@ -56,9 +55,9 @@ class UserSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val result = repository.getUserSettings()
             result.onSuccess { dto ->
-                UserSettingsFactory.fromDto(dto)
+                dto.toDomainObject()
                     .onSuccess { domain ->
-                        _state.value = UserSettingsFactory.toState(domain)
+                        _state.value = domain.toState()
                         previousDomainSettings = domain
                         _isLoading.value = false
                         _validationState.value = UserSettingsValidationState() // Clear any general error
@@ -93,7 +92,7 @@ class UserSettingsViewModel @Inject constructor(
 
         _validationState.value = UserSettingsValidationState()
 
-        UserSettingsFactory.fromState(state).onSuccess { domain ->
+        state.toDomainObject().onSuccess { domain ->
             if (previousValidDomainSettings == domain) return
 
             previousValidDomainSettings = domain
@@ -118,7 +117,7 @@ class UserSettingsViewModel @Inject constructor(
         withContext(dispatcher) {
             repository.pingServer()
                 .onSuccess {
-                    repository.updateUserSettings(UserSettingsFactory.toDto(domain))
+                    repository.updateUserSettings(domain.toDto())
                         .onSuccess {
                             _validationState.value = UserSettingsValidationState() // Clear general error
                         }

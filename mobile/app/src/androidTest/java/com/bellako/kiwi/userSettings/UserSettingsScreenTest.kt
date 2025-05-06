@@ -6,9 +6,9 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.ui.utils.TestTags
+import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsDTO
-import com.bellako.kiwi.userSettings.types.UserSettingsFactory
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.ui.UserSettingsScreen
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.invalidUserSettings
@@ -32,10 +32,11 @@ class UserSettingsScreenTest {
 
     @Before
     fun setUp() {
-        state = UserSettingsFactory
-            .fromDto(UserSettingsDTO(email = "initial@gmail.com", areNotificationsEnabled = false, theme = UserSettings.Theme.LIGHT))
-            .getOrThrow()
-            .let { UserSettingsFactory.toState(it) }
+        state = UserSettingsState(
+            email = "initial@gmail.com",
+            areNotificationsEnabled = false,
+            theme = Theme.LIGHT
+        )
 
         fakeViewModel = UserSettingsFakeViewModel(state)
 
@@ -59,10 +60,11 @@ class UserSettingsScreenTest {
     fun loadingIndicator_serverErrorOnUpdateSettings_showsErrorMessage() {
         fakeViewModel.simulateUpdateError = true
 
-        val updatedState = UserSettingsFactory
-            .fromDto(validUserSettings().copy(areNotificationsEnabled = !validUserSettings().areNotificationsEnabled))
-            .getOrThrow()
-            .let { UserSettingsFactory.toState(it) }
+        val updatedState = UserSettingsState(
+            email = validUserSettings().email,
+            areNotificationsEnabled = !validUserSettings().areNotificationsEnabled,
+            theme = validUserSettings().theme
+        )
 
         fakeViewModel.updateSettings(updatedState)
 
