@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.utils.TestTags
 import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.viewModel.IUserSettingsViewModel
-import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
@@ -60,26 +59,24 @@ private fun UserSettingsFields(
                 .background(Color.White)
                 .padding(16.dp)
         ) {
-            EmailField(
+            UserSettingsEmailField(
                 email = it.email,
                 error = validationState?.emailError,
                 onEmailChanged = { email ->
                     viewModel.updateSettings(it.copy(email = email))
                 }
             )
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            NotificationsSwitch(
+            UserSettingsNotificationsToggle(
                 checked = it.areNotificationsEnabled,
                 onCheckedChange = { checked ->
                     viewModel.updateSettings(it.copy(areNotificationsEnabled = checked))
                 }
             )
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            ThemeRadioButtons(
+            UserSettingsThemeSelector(
                 selectedTheme = it.theme,
                 onThemeChange = { theme ->
                     viewModel.updateSettings(it.copy(theme = theme))
@@ -110,60 +107,4 @@ fun ServerError(message: String) {
             .padding(vertical = 80.dp)
             .testTag(TestTags.SERVER_ERROR)
     )
-}
-
-@Composable
-fun EmailField(email: String, error: String? = null, onEmailChanged: (String) -> Unit) {
-    Column {
-        OutlinedTextField(
-            value = email,
-            onValueChange = onEmailChanged,
-            label = { Text("Email") },
-            isError = error != null,
-            modifier = Modifier
-                .testTag(TestTags.EMAIL_FIELD)
-                .fillMaxWidth()
-        )
-        if (error != null) {
-            Text(
-                text = error,
-                color = Color.Red,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .testTag(TestTags.FIELD_ERROR)
-            )
-        }
-    }
-}
-
-
-@Composable
-fun NotificationsSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("Enable Notifications")
-        Spacer(modifier = Modifier.width(8.dp))
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            modifier = Modifier.testTag(TestTags.NOTIFICATIONS_SWITCH)
-        )
-    }
-}
-
-@Composable
-fun ThemeRadioButtons(
-    selectedTheme: Theme,
-    onThemeChange: (Theme) -> Unit
-) {
-    Text("Theme")
-    Theme.entries.forEach { theme ->
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(
-                selected = selectedTheme == theme,
-                onClick = { onThemeChange(theme) },
-                modifier = Modifier.testTag("radio_${theme.name.lowercase()}")
-            )
-            Text(text = theme.name)
-        }
-    }
 }
