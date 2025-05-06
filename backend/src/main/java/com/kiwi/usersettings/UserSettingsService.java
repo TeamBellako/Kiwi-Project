@@ -21,6 +21,9 @@ public class UserSettingsService {
     @Transactional
     public UserSettingsDTO createUserSettings(@Validated UserSettingsDTO userSettingsDTO) {
         UserSettings userSettings = userSettingsDTO.toDomainObject();
+        if (userSettings == null) {
+            throw new IllegalArgumentException("Invalid user settings provided");
+        }
 
         if (userSettings.getId() != null && userSettingsRepository.existsById(userSettings.getId())) {
             throw new UserSettingsConflictException(userSettings.getId());

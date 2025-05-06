@@ -38,7 +38,7 @@ public class UserSettingsController {
 
     @GetMapping("{id}")
     public ResponseEntity<UserSettingsDTO> getUserSettingsById(@PathVariable Integer id) {
-        Optional<UserSettingsDTO> userSettingsDTO = Optional.ofNullable(userSettingsService.getUserSettingsById(id).orElse(null));
+        Optional<UserSettingsDTO> userSettingsDTO = userSettingsService.getUserSettingsById(id);
 
         return userSettingsDTO
                 .map(ResponseEntity::ok)
