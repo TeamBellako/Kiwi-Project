@@ -1,4 +1,4 @@
-﻿import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
+import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
 import {loadUserSettings, updateUserSettings} from "../../userSettings/store/UserSettingsThunks"
 import {validUserSettings} from "./UserSettingsTestFactory";
 import {initialState} from "../../userSettings/types/UserSettingsTypes";

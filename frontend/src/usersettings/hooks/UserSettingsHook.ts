@@ -1,4 +1,4 @@
-﻿import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {isValidEmail} from "../../utils/ValidationUtils";
 import {debounce, isEqual} from "lodash";
 import {useDispatch} from "react-redux";

@@ -1,4 +1,4 @@
-﻿import {screen} from "@testing-library/react";
+import {screen} from "@testing-library/react";
 import {userSettingsLabels} from "../constants/Labels";
 
 export const getFormFields = () => {

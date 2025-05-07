@@ -1,12 +1,7 @@
-﻿import { createAsyncThunk } from '@reduxjs/toolkit';
+import {createAsyncThunk} from '@reduxjs/toolkit';
 import api from "../../services/api";
-import { pingServer } from "../../services/pingServer";
-import {
-    UserSettings,
-    UserSettingsDTO,
-    toDomainObject,
-    toDTO
-} from "../types/UserSettingsTypes";
+import {pingServer} from "../../services/pingServer";
+import {toDomainObject, toDTO, UserSettings, UserSettingsDTO} from "../types/UserSettingsTypes";
 
 export const loadUserSettings = createAsyncThunk<UserSettings>(
     'userSettings/loadUserSettings',

@@ -1,4 +1,4 @@
-﻿type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 const isProd = import.meta.env.VITE_FRONT_ENV === 'prod';
 

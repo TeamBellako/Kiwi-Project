@@ -1,4 +1,4 @@
-﻿import {useEffect} from 'react';
+import {useEffect} from 'react';
 import UserSettingsForm from './UserSettingsForm';
 import {loadUserSettings} from "../store/UserSettingsThunks";
 import {useAppDispatch, useAppSelector} from "../../store/Hooks";

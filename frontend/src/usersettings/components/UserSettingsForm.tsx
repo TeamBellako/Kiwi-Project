@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import UserSettingsEmailField from './UserSettingsEmailField';
 import UserSettingsNotificationsToggle from './UserSettingsNotificationsToggle';
 import UserSettingsThemeSelector from './UserSettingsThemeSelector';

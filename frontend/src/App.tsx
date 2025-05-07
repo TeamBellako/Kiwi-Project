@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import UserSettingsPage from "./userSettings/components/UserSettingsPage";
 
 const App: React.FC = () => {

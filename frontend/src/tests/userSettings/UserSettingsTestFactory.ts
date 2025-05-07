@@ -1,4 +1,4 @@
-﻿import {UserSettings} from "../../userSettings/types/UserSettingsTypes";
+import {UserSettings} from "../../userSettings/types/UserSettingsTypes";
 
 export const validUserSettings: UserSettings = {
     email: 'finn@thehuman.com',

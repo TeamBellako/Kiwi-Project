@@ -1,4 +1,4 @@
-﻿import api from "./api";
+import api from "./api";
 
 export const pingServer = async (): Promise<boolean> => {
     const controller = new AbortController();

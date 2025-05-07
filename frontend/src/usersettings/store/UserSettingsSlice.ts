@@ -1,4 +1,4 @@
-﻿import {createSlice} from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
 import {loadUserSettings, updateUserSettings} from './UserSettingsThunks';
 import {initialState} from "../types/UserSettingsTypes";
 
