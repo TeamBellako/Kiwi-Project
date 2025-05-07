@@ -10,15 +10,6 @@ on:
       - 'k8s/dev/dev-frontend-deployment.yaml'
       - 'k8s/dev/dev-frontend-service.yaml'
       - 'k8s/dev/dev-frontend-ingress.yaml'
-  pull_request:
-    branches:
-      - develop
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/dev-frontend-workflow.yml'
-      - 'k8s/dev/dev-frontend-deployment.yaml'
-      - 'k8s/dev/dev-frontend-service.yaml'
-      - 'k8s/dev/dev-frontend-ingress.yaml'
 
 jobs:
   frontend-ci-cd:
@@ -61,6 +52,7 @@ jobs:
         working-directory: ./frontend
         run: |
           echo "VITE_FRONT_API_URL=${{ secrets.VITE_FRONT_API_URL }}" > .env
+          echo "VITE_LOGGING=${{ secrets.VITE_LOGGING }}" > .env
 
       - name: Build and push Docker image
         working-directory: ./frontend

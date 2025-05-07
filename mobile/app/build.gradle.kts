@@ -8,10 +8,15 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.gms.google-services") version "4.4.2" apply false
+
+    kotlin("kapt")
+    id("dagger.hilt.android.plugin")
+
 }
 
 android {
     namespace = "com.bellako.kiwi"
+    testNamespace = "com.bellako.kiwi.test"
     compileSdk = 35
 
     packaging {
@@ -78,6 +83,15 @@ android {
 
 configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations"))}
 
+tasks.withType<Test> {
+    testLogging {
+        events("passed", "skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStandardStreams = true
+    }
+}
+
+
 dependencies {
     implementation(libs.firebase.bom)
     implementation(libs.firebase.analytics)
@@ -89,6 +103,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.room.runtime.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -146,4 +161,21 @@ dependencies {
 
     implementation(libs.firebase.crashlytics)
     implementation(libs.google.firebase.analytics)
+    testImplementation(kotlin("test"))
+
+    androidTestImplementation(libs.androidx.compose.ui.ui.test.junit4)
+    debugImplementation(libs.ui.test.manifest)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    androidTestImplementation(libs.androidx.foundation)
+
+    testImplementation(libs.kotlinx.coroutines.test.v173)
+    testImplementation(libs.mockito.core.v5170)
+    testImplementation(libs.mockito.kotlin)
+
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    androidTestImplementation(libs.mockwebserver)
+    testImplementation(libs.robolectric)
 }

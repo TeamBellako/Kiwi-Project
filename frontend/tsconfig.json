@@ -21,7 +21,7 @@
     "declaration": true,           
     "emitDeclarationOnly": false,  
     "outDir": "./dist",            
-    "types": ["jest", "node"],
+    "types": ["jest", "node", "@testing-library/jest-dom"],
 
     "noEmit": false
   },

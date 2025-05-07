@@ -3,7 +3,7 @@ package com.kiwi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.kiwi")
 public class KiwiProjectApplication {
 
 	public static void main(String[] args) {
