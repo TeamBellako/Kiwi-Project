@@ -177,7 +177,5 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     androidTestImplementation(libs.mockwebserver)
-    androidTestImplementation(libs.hilt.android.testing)
-    kaptAndroidTest(libs.hilt.compiler.v2381)
     testImplementation(libs.robolectric)
 }
