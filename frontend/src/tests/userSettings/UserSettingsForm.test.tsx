@@ -1,30 +1,16 @@
 ﻿import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {userSettingsLabels} from '../constants/Labels';
 
 import {axe, toHaveNoViolations} from 'jest-axe';
 import {invalidUserSettings, validUserSettings} from "./UserSettingsTestFactory";
 import UserSettingsForm from "../../userSettings/components/UserSettingsForm";
 import {Provider} from "react-redux";
 import {store} from "../../store/Store";
+import {getFormFields} from "./UserSettingsTestUtils";
 
 expect.extend(toHaveNoViolations);
 
 let formFields: ReturnType<typeof getFormFields>;
-const getFormFields = () => {
-    const getEmailInput = () =>
-        screen.getByRole('textbox', { name: userSettingsLabels.email });
-    const getNotificationToggle = () =>
-        screen.getByRole('checkbox', { name: userSettingsLabels.notifications });
-    const getThemeRadio = (theme: 'light' | 'dark') =>
-        screen.getByRole('radio', { name: new RegExp(theme, 'i') });
-
-    return {
-        getEmailInput,
-        getNotificationToggle,
-        getThemeRadio
-    };
-};
 
 describe('UserSettings Form Tests', () => {
     beforeEach(() => {

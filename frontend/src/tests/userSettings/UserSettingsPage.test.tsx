@@ -81,7 +81,7 @@ describe('UserSettingsPage Tests', () => {
     });
     
     describe('update tests', () => {
-        test('should trigger saveSettings after a debounce delay, multiple times', async () => {
+        test('should trigger saveSettings after a debounce delay', async () => {
             mockApiGetRequest(validUserSettings);
             renderUserSettingsPage();
             
