@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 
-const UserSettingsLoadingPage: FC = () => {
+const UserSettingsLoadingPage: React.FC = () => {
     return (
         <div>
             <p>

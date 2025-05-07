@@ -1,10 +1,9 @@
-﻿import React from 'react';
+﻿import React from "react";
 
 interface UserSettingsErrorPageProps {
     error: string;
 }
-
-const UserSettingsErrorPage: FC<UserSettingsErrorPageProps> = ({ error }) => {
+const UserSettingsErrorPage: React.FC<UserSettingsErrorPageProps> = ({ error }) => {
     return (
         <div>
             <p className="text-red-600">

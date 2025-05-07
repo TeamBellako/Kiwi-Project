@@ -1,14 +1,13 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react";
-import { ThemeOption, UserSettings } from "../types/UserSettings";
-import { isValidEmail } from "../../utils/ValidationUtils";
-import { debounce, isEqual } from "lodash";
-import { useDispatch } from "react-redux";
-import { updateUserSettings } from "../store/UserSettingsThunks";
-import { AppDispatch } from "../../store/Store";
-import { Logger } from "../../utils/Logger";
+﻿import {useCallback, useEffect, useRef, useState} from "react";
+import {isValidEmail} from "../../utils/ValidationUtils";
+import {debounce, isEqual} from "lodash";
+import {useDispatch} from "react-redux";
+import {updateUserSettings} from "../store/UserSettingsThunks";
+import {AppDispatch} from "../../store/Store";
+import {Logger} from "../../utils/Logger";
+import {ThemeOption, UserSettings} from "../types/UserSettingsTypes";
 
 type UserSettingsFormProps = Partial<UserSettings>;
-
 export const useUserSettingsForm = ({
     email = '',
     areNotificationsEnabled = false,
