@@ -8,7 +8,7 @@ describe('UserSettings Slice Tests', () => {
         it('slice loads and shows initial state', () => {
             expect(userSettingsReducer(undefined, { type: 'unknown' })).toEqual(initialState);
         });
-    })
+    }) 
     
     describe('Fetch Tests', () => {
         it('slice transitions to loading on fetch', () => {
