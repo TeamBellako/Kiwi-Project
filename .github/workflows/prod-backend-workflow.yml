@@ -12,17 +12,6 @@ on:
       - 'k8s/prod/prod-backend-deployment.yaml'
       - 'k8s/prod/prod-backend-service.yaml'
 
-  pull_request:
-    branches:
-      - main
-    tags:
-      - 'v*'
-    paths:
-      - 'backend/**'
-      - '.github/workflows/prod-backend-workflow.yml'
-      - 'k8s/prod/prod-backend-deployment.yaml'
-      - 'k8s/prod/prod-backend-service.yaml'
-
 jobs:
   backend-ci-cd:
     name: Test, Build, and Push Backend (Prod)
