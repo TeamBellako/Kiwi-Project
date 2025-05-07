@@ -2,9 +2,7 @@ package com.bellako.kiwi.userSettings.network
 
 import com.bellako.kiwi.network.createHealthApiService
 import com.bellako.kiwi.userSettings.types.UserSettingsDTO
-import jakarta.inject.Singleton
 
-@Singleton
 class UserSettingsRepository(private val api: IUserSettingsAPI) {
 
     suspend fun getUserSettings(): Result<UserSettingsDTO> =
