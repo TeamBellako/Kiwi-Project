@@ -1,29 +1,22 @@
 package com.kiwi.usersettings;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.exception.GlobalExceptionHandler;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.Optional;
 
-import static com.kiwi.usersettings.UserSettingsController.testingUserSettingsId;
 import static com.kiwi.usersettings.UserSettingsHTTPUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
 
@@ -107,15 +100,22 @@ public class UserSettingsControllerTest {
     }
 
     @Test
-    public void getMyUserSettings_userExists_returnsMyUserSettings() throws Exception {
-        when(userSettingsService.getUserSettingsById(testingUserSettingsId)).thenReturn(Optional.of(validUserSettingsDTO()));
+    @WithMockUser(username = "finn@thehuman.com")
+    public void getMyUserSettings_authenticatedUser_returnsUserSettings() throws Exception {
+        when(userSettingsService.getUserSettingsByEmail(validUserSettingsDTO().getEmail())).thenReturn(Optional.of(validUserSettingsDTO()));
         
-        mockMvc.perform(get(baseAPIUrl + "/me", testingUserSettingsId))
+        mockMvc.perform(get(baseAPIUrl + "/me"))
         
         .andExpect(status().isOk())
         .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
     }
 
+    @Test
+    public void getMyUserSettings_unauthenticated_returnsUnauthorized() throws Exception {
+        mockMvc.perform(get(baseAPIUrl + "/me"))
+                .andExpect(status().isUnauthorized());
+    }
+    
     @Test
     public void updateUserSettings_validInput_returnsUpdatedUserSettingsDTO() throws Exception {
         when(userSettingsService.createUserSettings(any(UserSettingsDTO.class))).thenReturn(validUserSettingsDTO());

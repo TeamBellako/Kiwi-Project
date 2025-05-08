@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -13,11 +14,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("api/settings")
 public class UserSettingsController {
-
     private final UserSettingsService userSettingsService;
-
-    // TODO: Remove placeholder testing value once JWT is implemented
-    public static final Integer testingUserSettingsId = 1;
 
     @Autowired
     public UserSettingsController(UserSettingsService userSettingsService) {
@@ -47,7 +44,11 @@ public class UserSettingsController {
 
     @GetMapping("/me")
     public ResponseEntity<UserSettingsDTO> getMyUserSettings() {
-        return getUserSettingsById(testingUserSettingsId);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        return userSettingsService.getUserSettingsByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping

@@ -1,10 +1,10 @@
 package com.kiwi.usersettings;
 
+import com.kiwi.utils.RegexUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
@@ -45,6 +45,14 @@ public class UserSettingsService {
         return Optional.ofNullable(userSettingsRepository.findById(id)
                 .map(UserSettings::toDTO)
                 .orElseThrow(() -> new UserSettingsNotFoundException(id)));
+    }
+
+    public Optional<UserSettingsDTO> getUserSettingsByEmail(String email) {
+        if (!RegexUtils.isValidEmail(email)) throw new IllegalArgumentException("Invalid email format");
+
+        return Optional.ofNullable(userSettingsRepository.findByEmail(email)
+                .map(UserSettings::toDTO)
+                .orElseThrow(() -> new UserSettingsNotFoundException(email)));
     }
 
     @Transactional

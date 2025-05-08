@@ -4,7 +4,7 @@ public class UserSettingsTestFactory {
     public static UserSettingsDTO validUserSettingsDTO() {
         return new UserSettingsDTO(
                 1,
-                "finnthehuman@gmail.com",
+                "finn@thehuman.com",
                 true,
                 UserSettingsEnums.Theme.LIGHT
         );
@@ -13,7 +13,7 @@ public class UserSettingsTestFactory {
     public static UserSettingsDTO duplicateUserSettingsDTO() {
         return new UserSettingsDTO(
                 1,
-                "finnthehuman@gmail.com",
+                "finn@thehuman.com",
                 false,
                 UserSettingsEnums.Theme.DARK
         );
@@ -22,7 +22,7 @@ public class UserSettingsTestFactory {
     public static UserSettingsDTO updatedUserSettingsDTO() {
         return new UserSettingsDTO(
                 1,
-                "jakethedog@gmail.com",
+                "jake@thedog.com",
                 false,
                 UserSettingsEnums.Theme.DARK
         );
@@ -39,7 +39,7 @@ public class UserSettingsTestFactory {
 
     public static UserSettings noIdUserSettings() {
         return new UserSettings(
-                "princessbugglegum@gmail.com",
+                "princess@bugglegum.com",
                 false,
                 UserSettingsEnums.Theme.DARK
         );
