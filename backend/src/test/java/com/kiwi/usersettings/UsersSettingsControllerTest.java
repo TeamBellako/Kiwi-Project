@@ -1,6 +1,8 @@
 package com.kiwi.usersettings;
 
 import com.kiwi.exception.GlobalExceptionHandler;
+import com.kiwi.security.CustomUserDetailsService;
+import com.kiwi.security.JwtUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,6 @@ import java.util.Optional;
 
 import static com.kiwi.usersettings.UserSettingsHTTPUtils.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,12 @@ public class UsersSettingsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private JwtUtils jwtUtils;
+
+    @MockitoBean
+    private CustomUserDetailsService userDetailsService;
 
     @MockitoBean
     private UserSettingsService userSettingsService;

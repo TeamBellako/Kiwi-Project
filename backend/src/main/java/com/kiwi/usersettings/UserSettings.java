@@ -13,8 +13,7 @@ public class UserSettings {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @OneToOne
-    @JoinColumn(name = "email", referencedColumnName = "email", insertable = false, updatable = false)
+    @OneToOne(mappedBy = "userSettings")
     private Users users;
 
     @Column(name = "are_notifications_enabled")

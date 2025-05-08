@@ -18,7 +18,7 @@ public class Users {
 
     private String password;
 
-    @OneToOne(mappedBy = "user") 
+    @OneToOne(mappedBy = "users") 
     private UserSettings userSettings;
 
     public Users() {

@@ -1,11 +1,14 @@
 package com.kiwi.usersettings;
 
+import com.kiwi.security.JwtUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +24,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @Sql(scripts = "/UserSettingsTestSetUp.sql")
 @ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.properties")
 public class UsersSettingsRepositoryTest {
     
     @Autowired
     private UserSettingsRepository userSettingsRepository;
+
+    @MockitoBean
+    private JwtUtils jwtUtils;
 
     @Test
     public void getUserSettings_validId_returnsUserSettings() {

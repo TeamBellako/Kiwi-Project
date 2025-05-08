@@ -1,5 +1,7 @@
 package com.kiwi.usersettings;
 
+import com.kiwi.security.CustomUserDetailsService;
+import com.kiwi.security.JwtUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +37,13 @@ public class UsersSettingsEndToEndTest {
 
     @Autowired
     private UserSettingsService userSettingsService;
+
+    @MockitoBean
+    private JwtUtils jwtUtils;
+
+    @MockitoBean
+    private CustomUserDetailsService userDetailsService;
+    
 
     private final String baseAPIUrl = "/api/settings";
 
