@@ -18,9 +18,12 @@ public class JwtUtils {
     private int jwtExpirationMs;
     
     private SecretKey key;
-    
+
     @PostConstruct
     public void init() {
+        if (jwtSecret.length() < 32) {
+            throw new IllegalArgumentException("JWT secret key must be at least 256 bits long.");
+        }
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
     

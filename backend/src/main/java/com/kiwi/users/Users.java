@@ -1,6 +1,5 @@
 package com.kiwi.users;
 
-import com.kiwi.usersettings.UserSettings;
 import com.kiwi.utils.RegexUtils;
 import jakarta.persistence.*;
 
@@ -17,9 +16,6 @@ public class Users {
     private String email;
 
     private String password;
-
-    @OneToOne(mappedBy = "users") 
-    private UserSettings userSettings;
 
     public Users() {
     }
@@ -58,14 +54,6 @@ public class Users {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public UserSettings getUserSettings() {
-        return userSettings;
-    }
-
-    public void setUserSettings(UserSettings userSettings) {
-        this.userSettings = userSettings;
     }
 
     @Override

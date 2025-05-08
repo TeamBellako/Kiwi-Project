@@ -1,6 +1,5 @@
 package com.kiwi.usersettings;
 
-import com.kiwi.users.Users;
 import com.kiwi.utils.RegexUtils;
 import jakarta.persistence.*;
 
@@ -12,9 +11,6 @@ public class UserSettings {
     @Id
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-
-    @OneToOne(mappedBy = "userSettings")
-    private Users users;
 
     @Column(name = "are_notifications_enabled")
     private boolean areNotificationsEnabled;
@@ -55,14 +51,6 @@ public class UserSettings {
 
     public void setTheme(UserSettingsEnums.Theme theme) {
         this.theme = theme;
-    }
-
-    public Users getUser() {
-        return users;
-    }
-
-    public void setUser(Users users) {
-        this.users = users;
     }
 
     @Override
