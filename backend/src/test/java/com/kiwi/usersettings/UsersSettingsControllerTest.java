@@ -1,28 +1,35 @@
 package com.kiwi.usersettings;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.exception.GlobalExceptionHandler;
 import com.kiwi.security.CustomUserDetailsService;
+import com.kiwi.security.JwtAuthenticationFilter;
 import com.kiwi.security.JwtUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.kiwi.usersettings.UserSettingsHTTPUtils.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
 
 import static com.kiwi.usersettings.UserSettingsTestFactory.*;
-
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserSettingsController.class)
@@ -78,14 +85,22 @@ public class UsersSettingsControllerTest {
     }
     
     @Test
-    @WithMockUser(username = "finn@thehuman.com")
+    @WithMockUser(username = "finn@thehuman.com", roles = {"USER"})
     public void updateUserSettings_validInput_returnsUpdatedUserSettingsDTO() throws Exception {
+        when(jwtUtils.getUsernameFromToken(anyString())).thenReturn("finn@thehuman.com");
+        when(jwtUtils.validateJwtToken(anyString())).thenReturn(true);  // Simulate valid token
+
+        // Mock the user settings service
         when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
-            .thenReturn(updatedUserSettingsDTO());
+                .thenReturn(validUserSettingsDTO());
         
-        mockMvc.perform(getPUTRequestContent(baseAPIUrl, updatedUserSettingsDTO()))
-            .andExpect(status().isOk())  
-            .andExpect(getUserSettingsResultMatcher(updatedUserSettingsDTO()));
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(put(baseAPIUrl)
+                        .header("Authorization", "Bearer mock") // Add the Authorization header
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(validUserSettingsDTO())))
+                .andExpect(status().isOk())
+                .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
     }
 
     @Test
@@ -94,7 +109,7 @@ public class UsersSettingsControllerTest {
         when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
             .thenThrow(new UserSettingsInvalidException(""));
         
-        mockMvc.perform(getPUTRequestContent(baseAPIUrl,invalidUserSettingsDTO()))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, invalidUserSettingsDTO()))
             .andExpect(status().isBadRequest());
     }
 
