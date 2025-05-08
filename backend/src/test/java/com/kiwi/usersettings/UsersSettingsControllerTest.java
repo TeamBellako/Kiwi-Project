@@ -26,7 +26,7 @@ import static com.kiwi.usersettings.UserSettingsTestFactory.*;
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserSettingsController.class)
 @Import(GlobalExceptionHandler.class)
-public class UserSettingsControllerTest {
+public class UsersSettingsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

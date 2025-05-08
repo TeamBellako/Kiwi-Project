@@ -1,0 +1,70 @@
+package com.kiwi.users;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
+import java.util.Objects;
+
+public class UsersDTO {
+    @Email(
+            regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",
+            flags = Pattern.Flag.CASE_INSENSITIVE,
+            message = "Invalid email format"
+    )
+    @NotBlank(message = "Email is required")
+    private String email;
+    
+    private String password;
+
+    public UsersDTO() {
+    }
+
+    public UsersDTO(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        UsersDTO usersDTO = (UsersDTO) o;
+        return Objects.equals(email, usersDTO.email) && Objects.equals(password, usersDTO.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email, password);
+    }
+
+    @Override
+    public String toString() {
+        return "UsersDTO{" +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
+    
+    public Users toDomainObject() {
+        return new Users(
+            getEmail(),
+            getPassword()
+        );
+    }
+}

@@ -12,7 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class UserSettingsServiceTest {
+public class UsersSettingsServiceTest {
 
     private final UserSettingsRepository userSettingsRepository = Mockito.mock(UserSettingsRepository.class);
     private final UserSettingsService userSettingsService = new UserSettingsService(userSettingsRepository);
@@ -52,7 +52,7 @@ public class UserSettingsServiceTest {
 
         assertEquals(updatedUserSettings, newUserSettings);
         assertNotEquals(validUserSettings, updatedUserSettings);
-        verify(userSettingsRepository, Mockito.times(1)).save(UserSettingsServiceTest.this.updatedUserSettings);
+        verify(userSettingsRepository, Mockito.times(1)).save(UsersSettingsServiceTest.this.updatedUserSettings);
     }
 
     @Test(expected = UserSettingsInvalidException.class)

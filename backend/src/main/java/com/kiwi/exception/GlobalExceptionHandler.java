@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserSettingsNotFoundException.class)
     public ResponseEntity<String> handleUserSettingsNotFound(UserSettingsNotFoundException ex) {
-        logger.error("User settings not found: {}", ex.getMessage(), ex);
+        logger.error("Users settings not found: {}", ex.getMessage(), ex);
         
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserSettingsConflictException.class)
     public ResponseEntity<String> handleUserSettingsConflict(UserSettingsConflictException ex) {
-        logger.error("User settings conflict: {}", ex.getMessage(), ex);
+        logger.error("Users settings conflict: {}", ex.getMessage(), ex);
         
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }

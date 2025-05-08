@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @Sql(scripts = "/UserSettingsTestSetUp.sql")
 @ActiveProfiles("test")
-public class UserSettingsEndToEndTest {
+public class UsersSettingsEndToEndTest {
     @Autowired
     private MockMvc mockMvc;
 

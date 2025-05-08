@@ -1,5 +1,6 @@
 package com.kiwi.usersettings;
 
+import com.kiwi.users.Users;
 import com.kiwi.utils.RegexUtils;
 import jakarta.persistence.*;
 
@@ -11,6 +12,10 @@ public class UserSettings {
     @Id
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+
+    @OneToOne
+    @JoinColumn(name = "email", referencedColumnName = "email", insertable = false, updatable = false)
+    private Users users;
 
     @Column(name = "are_notifications_enabled")
     private boolean areNotificationsEnabled;
@@ -34,10 +39,9 @@ public class UserSettings {
 
     public void setEmail(String email) {
         if (!RegexUtils.isValidEmail(email)) throw new UserSettingsInvalidException("Invalid email format");
-        
         this.email = email;
     }
-    
+
     public boolean isAreNotificationsEnabled() {
         return areNotificationsEnabled;
     }
@@ -52,6 +56,14 @@ public class UserSettings {
 
     public void setTheme(UserSettingsEnums.Theme theme) {
         this.theme = theme;
+    }
+
+    public Users getUser() {
+        return users;
+    }
+
+    public void setUser(Users users) {
+        this.users = users;
     }
 
     @Override
@@ -72,9 +84,9 @@ public class UserSettings {
 
     public UserSettingsDTO toDTO() {
         return new UserSettingsDTO(
-            getEmail(),
-            isAreNotificationsEnabled(),
-            getTheme()
+                getEmail(),
+                isAreNotificationsEnabled(),
+                getTheme()
         );
     }
 }
