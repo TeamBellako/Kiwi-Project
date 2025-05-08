@@ -48,7 +48,7 @@ public class UserSettingsService {
     }
 
     public Optional<UserSettingsDTO> getUserSettingsByEmail(String email) {
-        if (!RegexUtils.isValidEmail(email)) throw new IllegalArgumentException("Invalid email format");
+        if (!RegexUtils.isValidEmail(email)) throw new UserSettingsInvalidException("Invalid email format");
 
         return Optional.ofNullable(userSettingsRepository.findByEmail(email)
                 .map(UserSettings::toDTO)

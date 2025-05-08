@@ -31,7 +31,7 @@ public class UserSettingsTestFactory {
     public static UserSettingsDTO invalidUserSettingsDTO() {
         return new UserSettingsDTO(
                 -1,
-                "bmolovesfootball",
+                "bmolovesfootball.com",
                 false,
                 UserSettingsEnums.Theme.DARK
         );
@@ -47,7 +47,7 @@ public class UserSettingsTestFactory {
     
     public static UserSettings invalidNoIdUserSettings() {
         return new UserSettings(
-                "marcelineandsimon4ever",
+                "marcelineandsimon4ever.com",
                 false,
                 UserSettingsEnums.Theme.DARK
         );
