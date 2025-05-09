@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,11 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static com.kiwi.usersettings.UserSettingsHTTPUtils.getPUTRequestContent;
 import static com.kiwi.usersettings.UserSettingsHTTPUtils.getUserSettingsResultMatcher;
-import static com.kiwi.usersettings.UserSettingsTestFactory.updatedUserSettingsDTO;
 import static com.kiwi.usersettings.UserSettingsTestFactory.validUserSettingsDTO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -60,13 +58,29 @@ public class UsersSettingsIntegrationTest {
     }
     
     @Test
+    public void getUserSettings_unauthorizedUser_returnsUnauthorized() throws Exception {
+        mockMvc.perform(get(baseAPIUrl))
+            .andExpect(status().isUnauthorized());
+    }
+    
+    @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateUserSettings_validInput_returnsUpdatedSettings() throws Exception {
         userSettingsRepository.save(validUserSettingsDTO().toDomainObject());
-
-        mockMvc.perform(getPUTRequestContent(baseAPIUrl, updatedUserSettingsDTO()))
+        UserSettingsDTO updatedUserSettingsDTO = validUserSettingsDTO();
+        updatedUserSettingsDTO.setAreNotificationsEnabled(!validUserSettingsDTO().isAreNotificationsEnabled());
+        
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, updatedUserSettingsDTO))
             .andExpect(status().isOk())
-            .andExpect(getUserSettingsResultMatcher(updatedUserSettingsDTO()));
+            .andExpect(getUserSettingsResultMatcher(updatedUserSettingsDTO));
+        
+        assertEquals(updatedUserSettingsDTO.toDomainObject(), userSettingsRepository.findById(validUserSettingsDTO().getEmail()).get());
+    }
+
+    @Test
+    public void updateUserSettings_unauthorizedUser_returnsUnauthorized() throws Exception {
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, validUserSettingsDTO()))
+                .andExpect(status().isUnauthorized());
     }
 }
 
