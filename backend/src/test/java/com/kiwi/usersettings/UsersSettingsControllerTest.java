@@ -1,7 +1,6 @@
 package com.kiwi.usersettings;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.exception.GlobalExceptionHandler;
 import com.kiwi.security.*;
 import org.junit.Test;
@@ -9,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static com.kiwi.usersettings.UserSettingsHTTPUtils.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
@@ -35,10 +36,8 @@ public class UsersSettingsControllerTest {
 
     @MockitoBean
     private JwtUtils jwtUtils;
-
     @MockitoBean
     private CustomUserDetailsService userDetailsService;
-    
     @MockitoBean
     private AuthEntryPointJwt authEntryPointJwt;
 
@@ -53,7 +52,7 @@ public class UsersSettingsControllerTest {
         when(userSettingsService.getUserSettingsByEmail(validUserSettingsDTO().getEmail()))
             .thenReturn(Optional.of(validUserSettingsDTO()));
         
-        mockMvc.perform(get(baseAPIUrl + "/me"))
+        mockMvc.perform(get(baseAPIUrl))
             .andExpect(status().isOk())
             .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
     }
@@ -64,37 +63,30 @@ public class UsersSettingsControllerTest {
         when(userSettingsService.getUserSettingsByEmail(invalidUserSettingsDTO().getEmail()))
                 .thenThrow(new UserSettingsInvalidException(""));
 
-        mockMvc.perform(get(baseAPIUrl + "/me"))
+        mockMvc.perform(get(baseAPIUrl))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getUserSettings_nonExistingUser_returnsNotFound() throws Exception {
-        mockMvc.perform(get(baseAPIUrl + "/me"))
+        mockMvc.perform(get(baseAPIUrl))
             .andExpect(status().isNotFound());
     }
     
     @Test
     public void getUserSettings_unauthenticated_returnsUnauthorized() throws Exception {
-        mockMvc.perform(get(baseAPIUrl + "/me"))
+        mockMvc.perform(get(baseAPIUrl))
             .andExpect(status().isUnauthorized());
     }
     
     @Test
-    @WithMockUser(username = "finn@thehuman.com", password = "mathematical")
+    @WithMockUser(username = "finn@thehuman.com")
     public void updateUserSettings_validInput_returnsUpdatedUserSettingsDTO() throws Exception {
-        when(jwtUtils.getUsernameFromToken("mock")).thenReturn("finn@thehuman.com");
-        when(jwtUtils.validateJwtToken("mock")).thenReturn(true);
-        
         when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
                 .thenReturn(validUserSettingsDTO());
         
-        ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(put(baseAPIUrl)
-                        .header("Authorization", "Bearer mock")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(validUserSettingsDTO())))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, validUserSettingsDTO()))
                 .andExpect(status().isOk())
                 .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
     }

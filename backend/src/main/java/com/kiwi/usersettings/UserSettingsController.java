@@ -2,8 +2,9 @@ package com.kiwi.usersettings;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +18,15 @@ public class UserSettingsController {
         this.userSettingsService = userSettingsService;
     }
 
-    @GetMapping("/me")
+    @GetMapping
     public ResponseEntity<UserSettingsDTO> getUserSettings() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        String email = authentication.getName();
+        
         return userSettingsService.getUserSettingsByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -28,6 +34,11 @@ public class UserSettingsController {
 
     @PutMapping
     public ResponseEntity<UserSettingsDTO> updateUserSettings(@RequestBody @Valid UserSettingsDTO userSettingsDTO) {
+        Authentication authentication =SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!userSettingsDTO.getEmail().equals(email)) return ResponseEntity.badRequest().build(); 
         
