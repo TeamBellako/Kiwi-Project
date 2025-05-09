@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -16,9 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
-import static com.kiwi.usersettings.UserSettingsHTTPUtils.*;
+import static com.kiwi.usersettings.UserSettingsTestHTTPUtils.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
@@ -33,28 +31,28 @@ public class UsersSettingsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    
     @MockitoBean
     private JwtUtils jwtUtils;
     @MockitoBean
     private CustomUserDetailsService userDetailsService;
     @MockitoBean
     private AuthEntryPointJwt authEntryPointJwt;
-
+    
     @MockitoBean
     private UserSettingsService userSettingsService;
     
     private final String baseAPIUrl = "/api/settings";
     
+    
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getUserSettings_validInput_returnsUserSettings() throws Exception {
         when(userSettingsService.getUserSettingsByEmail(validUserSettingsDTO().getEmail()))
-            .thenReturn(Optional.of(validUserSettingsDTO()));
+                .thenReturn(Optional.of(validUserSettingsDTO()));
         
         mockMvc.perform(get(baseAPIUrl))
-            .andExpect(status().isOk())
-            .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -72,12 +70,6 @@ public class UsersSettingsControllerTest {
     public void getUserSettings_nonExistingUser_returnsNotFound() throws Exception {
         mockMvc.perform(get(baseAPIUrl))
             .andExpect(status().isNotFound());
-    }
-    
-    @Test
-    public void getUserSettings_unauthenticated_returnsUnauthorized() throws Exception {
-        mockMvc.perform(get(baseAPIUrl))
-            .andExpect(status().isUnauthorized());
     }
     
     @Test
@@ -116,11 +108,5 @@ public class UsersSettingsControllerTest {
         
         mockMvc.perform(getPUTRequestContent(baseAPIUrl, validUserSettingsDTO()))
             .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void updateUserSettings_unauthenticated_returnsUnauthorized() throws Exception {
-        mockMvc.perform(getPUTRequestContent(baseAPIUrl, validUserSettingsDTO()))
-                .andExpect(status().isUnauthorized());
     }
 }

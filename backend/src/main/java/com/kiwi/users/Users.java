@@ -9,9 +9,6 @@ import java.util.Objects;
 @Table(name = "users")
 public class Users {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
@@ -20,23 +17,9 @@ public class Users {
     public Users() {
     }
 
-    public Users(Long id, String email, String password) {
-        setId(id);
-        setEmail(email);
-        setPassword(password);
-    }
-
     public Users(String email, String password) {
         setEmail(email);
         setPassword(password);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getEmail() {
@@ -60,19 +43,18 @@ public class Users {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Users users = (Users) o;
-        return Objects.equals(id, users.id) && Objects.equals(email, users.email) && Objects.equals(password, users.password);
+        return Objects.equals(email, users.email) && Objects.equals(password, users.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, password);
+        return Objects.hash(email, password);
     }
 
     @Override
     public String toString() {
         return "Users{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
+                "email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
     }

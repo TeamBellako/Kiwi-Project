@@ -9,9 +9,13 @@ import java.util.Collections;
 
 @Service
 public class CustomUserDetailsService  implements UserDetailsService {
-    @Autowired
-    private UsersRepository usersRepository;
+    private final UsersRepository usersRepository;
     
+    @Autowired
+    public CustomUserDetailsService(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Users users = usersRepository.findByEmail(username);

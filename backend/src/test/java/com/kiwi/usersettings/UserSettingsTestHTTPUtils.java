@@ -10,8 +10,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-public class UserSettingsHTTPUtils {
-    public static @NotNull MockHttpServletRequestBuilder getPUTRequestContent(String baseAPIUrl, UserSettingsDTO userSettingsDTO) throws JsonProcessingException {
+public class UserSettingsTestHTTPUtils {
+    public static @NotNull MockHttpServletRequestBuilder getPUTRequestContent(
+            String baseAPIUrl,
+            UserSettingsDTO userSettingsDTO
+    ) throws JsonProcessingException {
         return put(baseAPIUrl)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(serializeUserSettingIntoJSON(userSettingsDTO));

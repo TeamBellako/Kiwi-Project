@@ -16,16 +16,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class WebSecurityConfig {
-
+    
+    private final AuthEntryPointJwt unauthorizedHandler;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    
     @Autowired
-    CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
-
-    @Bean
-    public JwtAuthenticationFilter authenticationJwtTokenFilter() {
-        return new JwtAuthenticationFilter();
+    public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, AuthEntryPointJwt unauthorizedHandler) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.unauthorizedHandler = unauthorizedHandler;
     }
 
     @Bean
@@ -43,7 +41,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api")
+                .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(new WebConfig().corsConfigurationSource()))
                 .exceptionHandling(exceptionHandling ->
@@ -54,10 +52,10 @@ public class WebSecurityConfig {
                 )
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
                 );
 
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

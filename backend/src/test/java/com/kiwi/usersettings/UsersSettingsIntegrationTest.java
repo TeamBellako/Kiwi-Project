@@ -17,8 +17,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.kiwi.usersettings.UserSettingsHTTPUtils.getPUTRequestContent;
-import static com.kiwi.usersettings.UserSettingsHTTPUtils.getUserSettingsResultMatcher;
+import static com.kiwi.usersettings.UserSettingsTestHTTPUtils.getPUTRequestContent;
+import static com.kiwi.usersettings.UserSettingsTestHTTPUtils.getUserSettingsResultMatcher;
 import static com.kiwi.usersettings.UserSettingsTestFactory.validUserSettingsDTO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

@@ -16,12 +16,17 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtUtils jwtUtils;
     
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private final JwtUtils jwtUtils;
     
+    private final CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, CustomUserDetailsService userDetailsService) {
+        this.jwtUtils = jwtUtils;
+        this.userDetailsService = userDetailsService;
+    }
+
     @Override
     protected void doFilterInternal(
             @NotNull HttpServletRequest request,
@@ -30,8 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-            
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUsernameFromToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 
@@ -51,6 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         filterChain.doFilter(request, response);
     }
+    
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
         
