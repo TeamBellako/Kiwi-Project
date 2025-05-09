@@ -1,30 +1,23 @@
 package com.kiwi.usersettings;
 
+import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.exception.GlobalExceptionHandler;
-import com.kiwi.security.CustomUserDetailsService;
-import com.kiwi.security.JwtAuthenticationFilter;
-import com.kiwi.security.JwtUtils;
+import com.kiwi.security.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
 import java.util.Optional;
 
 import static com.kiwi.usersettings.UserSettingsHTTPUtils.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
@@ -33,7 +26,8 @@ import static com.kiwi.usersettings.UserSettingsTestFactory.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserSettingsController.class)
-@Import(GlobalExceptionHandler.class)
+@AutoConfigureAddonsWebmvcResourceServerSecurity
+@Import({ GlobalExceptionHandler.class, WebSecurityConfig.class })
 public class UsersSettingsControllerTest {
 
     @Autowired
@@ -44,12 +38,15 @@ public class UsersSettingsControllerTest {
 
     @MockitoBean
     private CustomUserDetailsService userDetailsService;
+    
+    @MockitoBean
+    private AuthEntryPointJwt authEntryPointJwt;
 
     @MockitoBean
     private UserSettingsService userSettingsService;
     
     private final String baseAPIUrl = "/api/settings";
-
+    
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getUserSettings_validInput_returnsUserSettings() throws Exception {
@@ -85,18 +82,17 @@ public class UsersSettingsControllerTest {
     }
     
     @Test
-    @WithMockUser(username = "finn@thehuman.com", roles = {"USER"})
+    @WithMockUser(username = "finn@thehuman.com", password = "mathematical")
     public void updateUserSettings_validInput_returnsUpdatedUserSettingsDTO() throws Exception {
-        when(jwtUtils.getUsernameFromToken(anyString())).thenReturn("finn@thehuman.com");
-        when(jwtUtils.validateJwtToken(anyString())).thenReturn(true);  // Simulate valid token
-
-        // Mock the user settings service
+        when(jwtUtils.getUsernameFromToken("mock")).thenReturn("finn@thehuman.com");
+        when(jwtUtils.validateJwtToken("mock")).thenReturn(true);
+        
         when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
                 .thenReturn(validUserSettingsDTO());
         
         ObjectMapper objectMapper = new ObjectMapper();
         mockMvc.perform(put(baseAPIUrl)
-                        .header("Authorization", "Bearer mock") // Add the Authorization header
+                        .header("Authorization", "Bearer mock")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(validUserSettingsDTO())))
                 .andExpect(status().isOk())
