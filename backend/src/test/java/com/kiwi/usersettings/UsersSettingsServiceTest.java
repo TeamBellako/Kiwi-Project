@@ -21,14 +21,14 @@ public class UsersSettingsServiceTest {
 
     @Test
     public void getUserSettings_validInput_returnsUserSettings() {
-        when(userSettingsRepository.findByEmail(validUserSettings.getEmail())).thenReturn(Optional.of(validUserSettings));
+        when(userSettingsRepository.findByEmail(validUserSettings.getEmail().getValue())).thenReturn(Optional.of(validUserSettings));
 
-        Optional<UserSettingsDTO> retrievedUserSettings = userSettingsService.getUserSettingsByEmail(validUserSettings.getEmail());
+        Optional<UserSettingsDTO> retrievedUserSettings = userSettingsService.getUserSettingsByEmail(validUserSettings.getEmail().getValue());
 
         assertNotNull(retrievedUserSettings);
         assertTrue(retrievedUserSettings.isPresent());
         assertEquals(validUserSettings.toDTO(), retrievedUserSettings.get());
-        verify(userSettingsRepository, Mockito.times(1)).findByEmail(validUserSettings.getEmail());
+        verify(userSettingsRepository, Mockito.times(1)).findByEmail(validUserSettings.getEmail().getValue());
     }
 
     @Test(expected = UserSettingsInvalidException.class)
@@ -45,7 +45,7 @@ public class UsersSettingsServiceTest {
     public void updateUserSettings_validInput_settingsUpdated() {
         when(userSettingsRepository.saveAndFlush(validUserSettings)).thenReturn(validUserSettings);
         when(userSettingsRepository.saveAndFlush(updatedUserSettings)).thenReturn(updatedUserSettings);
-        when(userSettingsRepository.findByEmail(updatedUserSettings.getEmail())).thenReturn(Optional.of(validUserSettings));
+        when(userSettingsRepository.findByEmail(updatedUserSettings.getEmail().getValue())).thenReturn(Optional.of(validUserSettings));
         
         UserSettings newUserSettings = userSettingsService.updateUserSettings(updatedUserSettings.toDTO()).toDomainObject();
 
@@ -53,9 +53,9 @@ public class UsersSettingsServiceTest {
         verify(userSettingsRepository, Mockito.times(1)).saveAndFlush(UsersSettingsServiceTest.this.updatedUserSettings);
     }
 
-    @Test(expected = UserSettingsInvalidException.class)
-    public void updateUserSettings_invalidInput_throwsUserSettingsInvalidException() throws UserSettingsInvalidException {
-        when(userSettingsRepository.existsById(invalidUserSettingsDTO().getEmail())).thenReturn(true);
+    @Test(expected = IllegalArgumentException.class)
+    public void updateUserSettings_invalidInput_throwsIllegalArgumentException() throws IllegalArgumentException {
+        when(userSettingsRepository.existsByEmail(invalidUserSettingsDTO().getEmail())).thenReturn(true);
         
         userSettingsService.updateUserSettings(invalidUserSettingsDTO());
     }

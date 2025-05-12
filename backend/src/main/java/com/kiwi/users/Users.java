@@ -1,6 +1,5 @@
 package com.kiwi.users;
 
-import com.kiwi.utils.RegexUtils;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -21,7 +20,7 @@ public class Users {
     public Users() {
     }
 
-    public Users(String email, String password) {
+    public Users(Email email, String password) {
         setEmail(email);
         setPassword(password);
     }
@@ -36,14 +35,12 @@ public class Users {
         this.id = id;
     }
 
-    public String getEmail() {
-        return email;
+    public Email getEmail() {
+        return new Email(this.email);
     }
 
-    public void setEmail(String email) {
-        if (!RegexUtils.isValidEmail(email)) throw new IllegalArgumentException("Invalid email format");
-        
-        this.email = email;
+    public void setEmail(Email email) {
+        this.email = email.getValue();
     }
 
     public String getPassword() {
@@ -77,7 +74,7 @@ public class Users {
 
     public UsersDTO toDTO() {
         return new UsersDTO(
-                getEmail(),
+                getEmail().getValue(),
                 getPassword()
         );
     }

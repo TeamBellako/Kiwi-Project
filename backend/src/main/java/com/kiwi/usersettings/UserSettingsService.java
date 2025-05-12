@@ -30,8 +30,8 @@ public class UserSettingsService {
         UserSettings userSettings = userSettingsDTO.toDomainObject();
         if (userSettings == null) throw new IllegalArgumentException("Invalid user settings provided");
         
-        Optional<UserSettings> existing = userSettingsRepository.findByEmail(userSettings.getEmail());
-        if (existing.isEmpty()) throw new UserSettingsNotFoundException(userSettings.getEmail());
+        Optional<UserSettings> existing = userSettingsRepository.findByEmail(userSettings.getEmail().getValue());
+        if (existing.isEmpty()) throw new UserSettingsNotFoundException(userSettings.getEmail().getValue());
         
         UserSettings existingUserSettings = existing.get();
         existingUserSettings.mergeFromDTO(userSettingsDTO);

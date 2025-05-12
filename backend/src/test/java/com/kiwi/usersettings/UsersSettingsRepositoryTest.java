@@ -56,7 +56,7 @@ public class UsersSettingsRepositoryTest {
     @Test
     public void updateUserSettings_userSettingsDoesNotExist_createsUserSetting() {
         UserSettings saved = userSettingsRepository.saveAndFlush(validUserSettingsDTO().toDomainObject());
-        Optional<UserSettings> result = userSettingsRepository.findByEmail(saved.getEmail());
+        Optional<UserSettings> result = userSettingsRepository.findByEmail(saved.getEmail().getValue());
         
         assertEquals(validUserSettingsDTO().toDomainObject(), result.get());
     }

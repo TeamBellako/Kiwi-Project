@@ -1,20 +1,12 @@
 package com.kiwi.users;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 import java.util.Objects;
 
 public class UsersDTO {
-    @Email(
-            regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",
-            flags = Pattern.Flag.CASE_INSENSITIVE,
-            message = "Invalid email format"
-    )
-    @NotBlank(message = "Email is required")
     private String email;
-    
     private String password;
 
     public UsersDTO() {
@@ -63,7 +55,7 @@ public class UsersDTO {
     
     public Users toDomainObject() {
         return new Users(
-            getEmail(),
+            new Email(getEmail()),
             getPassword()
         );
     }

@@ -1,6 +1,6 @@
 package com.kiwi.usersettings;
 
-import com.kiwi.utils.RegexUtils;
+import com.kiwi.users.Email;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -26,14 +26,14 @@ public class UserSettings {
     public UserSettings() {
     }
 
-    public UserSettings(Integer id, String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+    public UserSettings(Integer id, Email email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
         setId(id);
         setEmail(email);
         setAreNotificationsEnabled(areNotificationsEnabled);
         setTheme(theme);
     }
 
-    public UserSettings(String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+    public UserSettings(Email email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
         setEmail(email);
         setAreNotificationsEnabled(areNotificationsEnabled);
         setTheme(theme);
@@ -49,13 +49,12 @@ public class UserSettings {
         this.id = id;
     }
 
-    public String getEmail() {
-        return email;
+    public Email getEmail() {
+        return new Email(this.email);
     }
 
-    public void setEmail(String email) {
-        if (!RegexUtils.isValidEmail(email)) throw new UserSettingsInvalidException("Invalid email format");
-        this.email = email;
+    public void setEmail(Email email) {
+        this.email = email.getValue();
     }
 
     public boolean isAreNotificationsEnabled() {
@@ -93,7 +92,7 @@ public class UserSettings {
 
     public UserSettingsDTO toDTO() {
         return new UserSettingsDTO(
-                getEmail(),
+                getEmail().getValue(),
                 isAreNotificationsEnabled(),
                 getTheme()
         );
