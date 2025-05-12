@@ -61,7 +61,7 @@ class UserSettingsViewModel @Inject constructor(
                         _state.value = domain.toState()
                         previousDomainSettings = domain
                         _isLoading.value = false
-                        _validationState.value = UserSettingsValidationState() // Clear any general error
+                        _validationState.value = UserSettingsValidationState()
                     }
                     .onFailure { ex ->
                         if (ex is HttpException && ex.code() != 500) {
@@ -124,7 +124,7 @@ class UserSettingsViewModel @Inject constructor(
 
                     repository.updateUserSettings(domain.toDTO())
                         .onSuccess {
-                            _validationState.value = UserSettingsValidationState() // Clear general error
+                            _validationState.value = UserSettingsValidationState()
                         }
                         .onFailure { throwable ->
                             val errorMessage = when (throwable) {
