@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.kiwi.usersettings.UserSettingsTestFactory.updatedUserSettingsDTO;
 import static com.kiwi.usersettings.UserSettingsTestHTTPUtils.getPUTRequestContent;
 import static com.kiwi.usersettings.UserSettingsTestHTTPUtils.getUserSettingsResultMatcher;
 import static com.kiwi.usersettings.UserSettingsTestFactory.validUserSettingsDTO;
@@ -51,7 +52,7 @@ public class UsersSettingsIntegrationTest {
     @WithMockUser(username = "finn@thehuman.com")
     public void getUserSettings_validInput_returnsCurrentSettings() throws Exception {
         userSettingsRepository.save(validUserSettingsDTO().toDomainObject());
-
+        
         mockMvc.perform(get(baseAPIUrl))
             .andExpect(status().isOk())
             .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
@@ -67,14 +68,12 @@ public class UsersSettingsIntegrationTest {
     @WithMockUser(username = "finn@thehuman.com")
     public void updateUserSettings_validInput_returnsUpdatedSettings() throws Exception {
         userSettingsRepository.save(validUserSettingsDTO().toDomainObject());
-        UserSettingsDTO updatedUserSettingsDTO = validUserSettingsDTO();
-        updatedUserSettingsDTO.setAreNotificationsEnabled(!validUserSettingsDTO().isAreNotificationsEnabled());
         
-        mockMvc.perform(getPUTRequestContent(baseAPIUrl, updatedUserSettingsDTO))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, updatedUserSettingsDTO()))
             .andExpect(status().isOk())
-            .andExpect(getUserSettingsResultMatcher(updatedUserSettingsDTO));
+            .andExpect(getUserSettingsResultMatcher(updatedUserSettingsDTO()));
         
-        assertEquals(updatedUserSettingsDTO.toDomainObject(), userSettingsRepository.findById(validUserSettingsDTO().getEmail()).get());
+        assertEquals(updatedUserSettingsDTO().toDomainObject(), userSettingsRepository.findByEmail(validUserSettingsDTO().getEmail()).get());
     }
 
     @Test

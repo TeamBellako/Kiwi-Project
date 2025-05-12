@@ -21,14 +21,14 @@ public class UsersSettingsServiceTest {
 
     @Test
     public void getUserSettings_validInput_returnsUserSettings() {
-        when(userSettingsRepository.findById(validUserSettings.getEmail())).thenReturn(Optional.of(validUserSettings));
+        when(userSettingsRepository.findByEmail(validUserSettings.getEmail())).thenReturn(Optional.of(validUserSettings));
 
         Optional<UserSettingsDTO> retrievedUserSettings = userSettingsService.getUserSettingsByEmail(validUserSettings.getEmail());
 
         assertNotNull(retrievedUserSettings);
         assertTrue(retrievedUserSettings.isPresent());
         assertEquals(validUserSettings.toDTO(), retrievedUserSettings.get());
-        verify(userSettingsRepository, Mockito.times(1)).findById(validUserSettings.getEmail());
+        verify(userSettingsRepository, Mockito.times(1)).findByEmail(validUserSettings.getEmail());
     }
 
     @Test(expected = UserSettingsInvalidException.class)
@@ -43,15 +43,14 @@ public class UsersSettingsServiceTest {
 
     @Test
     public void updateUserSettings_validInput_settingsUpdated() {
-        when(userSettingsRepository.save(validUserSettings)).thenReturn(validUserSettings);
-        when(userSettingsRepository.save(updatedUserSettings)).thenReturn(updatedUserSettings);
-        when(userSettingsRepository.existsById(updatedUserSettings.getEmail())).thenReturn(true);
+        when(userSettingsRepository.saveAndFlush(validUserSettings)).thenReturn(validUserSettings);
+        when(userSettingsRepository.saveAndFlush(updatedUserSettings)).thenReturn(updatedUserSettings);
+        when(userSettingsRepository.findByEmail(updatedUserSettings.getEmail())).thenReturn(Optional.of(validUserSettings));
         
         UserSettings newUserSettings = userSettingsService.updateUserSettings(updatedUserSettings.toDTO()).toDomainObject();
 
         assertEquals(updatedUserSettings, newUserSettings);
-        assertNotEquals(validUserSettings, updatedUserSettings);
-        verify(userSettingsRepository, Mockito.times(1)).save(UsersSettingsServiceTest.this.updatedUserSettings);
+        verify(userSettingsRepository, Mockito.times(1)).saveAndFlush(UsersSettingsServiceTest.this.updatedUserSettings);
     }
 
     @Test(expected = UserSettingsInvalidException.class)

@@ -20,7 +20,7 @@ public class UserSettingsService {
     public Optional<UserSettingsDTO> getUserSettingsByEmail(String email) {
         if (!RegexUtils.isValidEmail(email)) throw new UserSettingsInvalidException("Invalid email format");
 
-        return Optional.ofNullable(userSettingsRepository.findById(email)
+        return Optional.ofNullable(userSettingsRepository.findByEmail(email)
                 .map(UserSettings::toDTO)
                 .orElseThrow(() -> new UserSettingsNotFoundException(email)));
     }
@@ -30,10 +30,12 @@ public class UserSettingsService {
         UserSettings userSettings = userSettingsDTO.toDomainObject();
         if (userSettings == null) throw new IllegalArgumentException("Invalid user settings provided");
         
-        if (!userSettingsRepository.existsById(userSettings.getEmail())) 
-            throw new UserSettingsNotFoundException(userSettings.getEmail());
+        Optional<UserSettings> existing = userSettingsRepository.findByEmail(userSettings.getEmail());
+        if (existing.isEmpty()) throw new UserSettingsNotFoundException(userSettings.getEmail());
+        
+        UserSettings existingUserSettings = existing.get();
+        existingUserSettings.mergeFromDTO(userSettingsDTO);
 
-        UserSettings updatedUserSettings = userSettingsRepository.save(userSettings);
-        return updatedUserSettings.toDTO();
+        return userSettingsRepository.saveAndFlush(existingUserSettings).toDTO();
     }
 }

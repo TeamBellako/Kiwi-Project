@@ -11,7 +11,7 @@ public class UserSettingsTestFactory {
 
     public static UserSettingsDTO updatedUserSettingsDTO() {
         return new UserSettingsDTO(
-                "jake@thedog.com",
+                "finn@thehuman.com",
                 false,
                 UserSettingsEnums.Theme.DARK
         );

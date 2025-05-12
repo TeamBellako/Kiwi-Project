@@ -9,6 +9,10 @@ import java.util.Objects;
 @Table(name = "users")
 public class Users {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+    
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
@@ -22,12 +26,23 @@ public class Users {
         setPassword(password);
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        if (id == null || id <= 0) throw new IllegalArgumentException("User Id's must be bigger than zero");
+
+        this.id = id;
+    }
+
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         if (!RegexUtils.isValidEmail(email)) throw new IllegalArgumentException("Invalid email format");
+        
         this.email = email;
     }
 
@@ -54,7 +69,8 @@ public class Users {
     @Override
     public String toString() {
         return "Users{" +
-                "email='" + email + '\'' +
+                "id=" + id +
+                ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
     }

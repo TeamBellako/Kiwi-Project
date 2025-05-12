@@ -29,39 +29,34 @@ public class UsersSettingsRepositoryTest {
     @Autowired
     private UserSettingsRepository userSettingsRepository;
 
-    @MockitoBean
-    private JwtUtils jwtUtils;
-    
-    @MockitoBean
-    private CustomUserDetailsService customUserDetailsService;
-
-
     @Test
     public void getUserSettings_validId_returnsUserSettings() {
-        assertNotNull(userSettingsRepository.findById(validUserSettingsDTO().getEmail()));
+        userSettingsRepository.saveAndFlush(validUserSettingsDTO().toDomainObject());
+        
+        assertNotNull(userSettingsRepository.findByEmail(validUserSettingsDTO().getEmail()));
     }
 
     @Test
     public void getUserSettings_invalidId_returnsEmptyOptional() {
-        assertEquals(Optional.empty(), userSettingsRepository.findById(invalidUserSettingsDTO().getEmail()));
+        assertEquals(Optional.empty(), userSettingsRepository.findByEmail(invalidUserSettingsDTO().getEmail()));
     }
 
     @Test
     public void getUserSettings_userSettingsDoesNotExist_returnsEmptyOptional() {
-        assertEquals(Optional.empty(), userSettingsRepository.findById(validUserSettingsDTO().getEmail() + 1));
+        assertEquals(Optional.empty(), userSettingsRepository.findByEmail(validUserSettingsDTO().getEmail() + 1));
     }
 
     @Test
     public void updateUserSettings_validInput_updatesUserSettings() {
         userSettingsRepository.saveAndFlush(updatedUserSettingsDTO().toDomainObject());
         
-        assertEquals(userSettingsRepository.findById(updatedUserSettingsDTO().getEmail()).get(), updatedUserSettingsDTO().toDomainObject());
+        assertEquals(userSettingsRepository.findByEmail(updatedUserSettingsDTO().getEmail()).get(), updatedUserSettingsDTO().toDomainObject());
     }
 
     @Test
     public void updateUserSettings_userSettingsDoesNotExist_createsUserSetting() {
         UserSettings saved = userSettingsRepository.saveAndFlush(validUserSettingsDTO().toDomainObject());
-        Optional<UserSettings> result = userSettingsRepository.findById(saved.getEmail());
+        Optional<UserSettings> result = userSettingsRepository.findByEmail(saved.getEmail());
         
         assertEquals(validUserSettingsDTO().toDomainObject(), result.get());
     }
