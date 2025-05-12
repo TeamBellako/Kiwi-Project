@@ -7,7 +7,7 @@ export const loadUserSettings = createAsyncThunk<UserSettings>(
     'userSettings/loadUserSettings',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await api.get<UserSettingsDTO>('/api/settings/me');
+            const response = await api.get<UserSettingsDTO>('/api/settings');
             return toDomainObject(response.data);
         } catch (error: any) {
             const status = error.response?.status;
