@@ -15,6 +15,15 @@ public class AuthEntryPointJwt  implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Unauthorized");
+        Exception exception = (Exception) request.getAttribute("jwt_exception");
+
+        String message = "Unauthorized: Invalid or missing token.";
+        if (exception != null) {
+            message = "Unauthorized: " + exception.getMessage();
+        }
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }
