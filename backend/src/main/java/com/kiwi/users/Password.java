@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public record Password(String value) {
     private static final Pattern PASSWORD_REGEX =
-            Pattern.compile("^[A-Za-z0-9._%+-]$");
+            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
 
     public Password {
         if (!isValid(value)) throw new IllegalArgumentException("Password format is not valid");
