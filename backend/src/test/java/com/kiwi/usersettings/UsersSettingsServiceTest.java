@@ -21,14 +21,14 @@ public class UsersSettingsServiceTest {
 
     @Test
     public void getUserSettings_validInput_returnsUserSettings() {
-        when(userSettingsRepository.findByEmail(validUserSettings.getEmail().getValue())).thenReturn(Optional.of(validUserSettings));
+        when(userSettingsRepository.findByEmail(validUserSettings.getEmail().value())).thenReturn(Optional.of(validUserSettings));
 
-        Optional<UserSettingsDTO> retrievedUserSettings = userSettingsService.getUserSettingsByEmail(validUserSettings.getEmail().getValue());
+        Optional<UserSettingsDTO> retrievedUserSettings = userSettingsService.getUserSettingsByEmail(validUserSettings.getEmail().value());
 
         assertNotNull(retrievedUserSettings);
         assertTrue(retrievedUserSettings.isPresent());
         assertEquals(validUserSettings.toDTO(), retrievedUserSettings.get());
-        verify(userSettingsRepository, Mockito.times(1)).findByEmail(validUserSettings.getEmail().getValue());
+        verify(userSettingsRepository, Mockito.times(1)).findByEmail(validUserSettings.getEmail().value());
     }
 
     @Test(expected = UserSettingsInvalidException.class)
@@ -45,7 +45,7 @@ public class UsersSettingsServiceTest {
     public void updateUserSettings_validInput_settingsUpdated() {
         when(userSettingsRepository.saveAndFlush(validUserSettings)).thenReturn(validUserSettings);
         when(userSettingsRepository.saveAndFlush(updatedUserSettings)).thenReturn(updatedUserSettings);
-        when(userSettingsRepository.findByEmail(updatedUserSettings.getEmail().getValue())).thenReturn(Optional.of(validUserSettings));
+        when(userSettingsRepository.findByEmail(updatedUserSettings.getEmail().value())).thenReturn(Optional.of(validUserSettings));
         
         UserSettings newUserSettings = userSettingsService.updateUserSettings(updatedUserSettings.toDTO()).toDomainObject();
 

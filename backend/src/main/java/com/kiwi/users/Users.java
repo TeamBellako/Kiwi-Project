@@ -40,7 +40,7 @@ public class Users {
     }
 
     public void setEmail(Email email) {
-        this.email = email.getValue();
+        this.email = email.value();
     }
 
     public String getPassword() {
@@ -74,7 +74,7 @@ public class Users {
 
     public UsersDTO toDTO() {
         return new UsersDTO(
-                getEmail().getValue(),
+                getEmail().value(),
                 getPassword()
         );
     }

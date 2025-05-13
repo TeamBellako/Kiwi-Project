@@ -1,14 +1,11 @@
 package com.kiwi.usersettings;
 
-import com.kiwi.security.CustomUserDetailsService;
-import com.kiwi.security.JwtUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +53,7 @@ public class UsersSettingsRepositoryTest {
     @Test
     public void updateUserSettings_userSettingsDoesNotExist_createsUserSetting() {
         UserSettings saved = userSettingsRepository.saveAndFlush(validUserSettingsDTO().toDomainObject());
-        Optional<UserSettings> result = userSettingsRepository.findByEmail(saved.getEmail().getValue());
+        Optional<UserSettings> result = userSettingsRepository.findByEmail(saved.getEmail().value());
         
         assertEquals(validUserSettingsDTO().toDomainObject(), result.get());
     }

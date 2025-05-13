@@ -54,7 +54,7 @@ public class UserSettings {
     }
 
     public void setEmail(Email email) {
-        this.email = email.getValue();
+        this.email = email.value();
     }
 
     public boolean isAreNotificationsEnabled() {
@@ -92,7 +92,7 @@ public class UserSettings {
 
     public UserSettingsDTO toDTO() {
         return new UserSettingsDTO(
-                getEmail().getValue(),
+                getEmail().value(),
                 isAreNotificationsEnabled(),
                 getTheme()
         );
