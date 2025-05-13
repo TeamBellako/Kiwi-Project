@@ -27,7 +27,7 @@ import static com.kiwi.usersettings.UserSettingsTestFactory.*;
 @WebMvcTest(UserSettingsController.class)
 @AutoConfigureAddonsWebmvcResourceServerSecurity
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class })
-public class UsersSettingsControllerTest {
+public class UserSettingsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

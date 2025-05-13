@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc 
 @AutoConfigureAddonsWebmvcResourceServerSecurity
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class, JwtUtils.class })
-public class UsersSettingsIntegrationTest {
+public class UserSettingsIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 

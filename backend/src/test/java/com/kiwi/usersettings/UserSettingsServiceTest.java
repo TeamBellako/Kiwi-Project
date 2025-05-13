@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class UsersSettingsServiceTest {
+public class UserSettingsServiceTest {
 
     private final UserSettingsRepository userSettingsRepository = Mockito.mock(UserSettingsRepository.class);
     private final UserSettingsService userSettingsService = new UserSettingsService(userSettingsRepository);
@@ -50,7 +50,7 @@ public class UsersSettingsServiceTest {
         UserSettings newUserSettings = userSettingsService.updateUserSettings(updatedUserSettings.toDTO()).toDomainObject();
 
         assertEquals(updatedUserSettings, newUserSettings);
-        verify(userSettingsRepository, Mockito.times(1)).saveAndFlush(UsersSettingsServiceTest.this.updatedUserSettings);
+        verify(userSettingsRepository, Mockito.times(1)).saveAndFlush(UserSettingsServiceTest.this.updatedUserSettings);
     }
 
     @Test(expected = IllegalArgumentException.class)

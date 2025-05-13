@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @Sql(scripts = "/UserSettingsTestSetUp.sql")
 @ActiveProfiles("test")
-public class UsersSettingsRepositoryTest {
+public class UserSettingsRepositoryTest {
     
     @Autowired
     private UserSettingsRepository userSettingsRepository;
