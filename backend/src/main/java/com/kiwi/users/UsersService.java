@@ -20,6 +20,7 @@ public class UsersService {
     @Transactional
     public void createUser(@Valid @NotNull UsersDTO userDTO) {
         Users user = userDTO.toDomainObject();
+        
         String userEmailValue = user.getEmail().value(); 
         if (usersRepository.existsByEmail(userEmailValue)) throw new UsersConflictException(userEmailValue);
         
@@ -34,13 +35,14 @@ public class UsersService {
     @Transactional
     public void updateUser(@Valid @NotNull UsersDTO userDTO) {
         Users userUpdate = userDTO.toDomainObject();
+        Email userUpdateEmail = userUpdate.getEmail();
         
-        Optional<UsersPersistence> existingUserPersistenceOptional = 
-                Optional.ofNullable(usersRepository.findByEmail(userUpdate.getEmail().value()));
-        if (existingUserPersistenceOptional.isEmpty()) throw new UsersNotFoundException(userUpdate.getEmail().value());
+        Optional<UsersPersistence> existingUserPersistenceOptional = Optional.ofNullable(usersRepository.findByEmail(userUpdateEmail.value()));
+        if (existingUserPersistenceOptional.isEmpty()) throw new UsersNotFoundException(userUpdateEmail.value());
         
         UsersPersistence usersPersistence = existingUserPersistenceOptional.get();
         usersPersistence.mergeFromDomainObject(userUpdate);
+        
         usersRepository.saveAndFlush(usersPersistence);
     }
 
