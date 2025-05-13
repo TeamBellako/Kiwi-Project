@@ -6,7 +6,7 @@ export const pingServer = async (): Promise<boolean> => {
     const timeout = setTimeout(() => controller.abort(), 250);
 
     try {
-        await api.get('/api/ping', { signal: controller.signal });
+        await api.get('/api/public/ping', { signal: controller.signal });
         return true;
     } catch (error) {
         return false;

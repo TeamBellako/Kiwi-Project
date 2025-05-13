@@ -1,7 +1,7 @@
 import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
-import {loadUserSettings, updateUserSettingsDTO} from "../../userSettings/store/UserSettingsThunks"
 import {validUserSettingsDTO} from "./UserSettingsTestFactory";
 import {initialState} from "../../userSettings/types/UserSettingsState";
+import {loadUserSettings, updateUserSettings} from "../../userSettings/store/UserSettingsThunks";
 
 describe('UserSettings Slice Tests', () => {
     describe('General Tests', () => {
@@ -28,7 +28,7 @@ describe('UserSettings Slice Tests', () => {
             );
             
             expect(nextState.status).toBe('succeeded');
-            expect(nextState.userSettings).toEqual(validUserSettingsDTO);
+            expect(nextState.userSettingsDTO).toEqual(validUserSettingsDTO);
             expect(nextState.error).toBeNull();
         });
     
@@ -47,18 +47,18 @@ describe('UserSettings Slice Tests', () => {
         it('slice transitions to succeeded on update success', () => {
             const nextState = userSettingsReducer(
                 initialState,
-                updateUserSettingsDTO.fulfilled(validUserSettingsDTO, '', validUserSettingsDTO)
+                updateUserSettings.fulfilled(validUserSettingsDTO, '', validUserSettingsDTO)
             );
             
             expect(nextState.status).toBe('succeeded');
-            expect(nextState.userSettings).toEqual(validUserSettingsDTO);
+            expect(nextState.userSettingsDTO).toEqual(validUserSettingsDTO);
         });
     
         it('slice transitions to failed on update failure', () => {
             const errorMessage = 'Failed to update'
             const nextState = userSettingsReducer(
                 initialState,
-                updateUserSettingsDTO.rejected(new Error(errorMessage), '', validUserSettingsDTO, errorMessage)
+                updateUserSettings.rejected(new Error(errorMessage), '', validUserSettingsDTO, errorMessage)
             );
 
             expect(nextState.status).toBe('failed');

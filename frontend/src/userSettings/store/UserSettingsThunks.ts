@@ -14,7 +14,7 @@ export const loadUserSettings = createAsyncThunk<
     'userSettings/loadUserSettings',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await api.get<UserSettingsDTO>('/api/settings');
+            const response = await api.get<UserSettingsDTO>('/api/user/settings');
             return response.data;
         } catch (error: any) {
             const status = error.response?.status;
@@ -42,7 +42,7 @@ export const updateUserSettings = createAsyncThunk<
         }
 
         try {
-            const response = await api.put<UserSettingsDTO>('/api/settings', settingsDTO);
+            const response = await api.put<UserSettingsDTO>('/api/user/settings', settingsDTO);
             return response.data;
         } catch (error: any) {
             const status = error.response?.status;

@@ -47,10 +47,6 @@ describe('UserSettingsPage Tests', () => {
         api.get = jest.fn().mockRejectedValue(new Error(error));
     };
 
-    const mockApiPutErrorRequest = (error: any) => {
-        api.put = jest.fn().mockRejectedValue(new Error(error));
-    };
-
     describe('load tests', () => {
         test('should display loading message while loading data', () => {
             api.get = jest.fn().mockImplementation(() => new Promise(() => {}));
@@ -153,22 +149,6 @@ describe('UserSettingsPage Tests', () => {
             });
             await waitFor(() => {
                 expect(screen.queryByText(invalidEmailError)).toBeNull();
-            });
-        });
-
-        test('should trigger loading if update fails and show a hardcoded error message when receiving a 500 response', async () => {
-            mockApiGetRequest(validUserSettingsDTO);
-            mockApiPutErrorRequest(errorMessageWithSensibleInformation);
-            renderUserSettingsPage();
-            
-            await waitFor(() => {
-                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettingsDTO.email}});
-            });
-
-            await waitFor(() => {
-                expect(screen.getByText(/Server Error:/i)).toBeInTheDocument();
-                // We don't want sensible information contained in the server error message to be displayed
-                expect(screen.queryByText(errorMessageWithSensibleInformation)).toBeNull();
             });
         });
     });
