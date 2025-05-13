@@ -1,10 +1,7 @@
 package com.kiwi.usersettings;
 
-import com.kiwi.utils.RegexUtils;
+import com.kiwi.users.Email;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 
 import java.util.Objects;
 
@@ -29,14 +26,14 @@ public class UserSettings {
     public UserSettings() {
     }
 
-    public UserSettings(Integer id, String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+    public UserSettings(Integer id, Email email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
         setId(id);
         setEmail(email);
         setAreNotificationsEnabled(areNotificationsEnabled);
         setTheme(theme);
     }
 
-    public UserSettings(String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+    public UserSettings(Email email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
         setEmail(email);
         setAreNotificationsEnabled(areNotificationsEnabled);
         setTheme(theme);
@@ -48,20 +45,18 @@ public class UserSettings {
 
     public void setId(Integer id) {
         if (id == null || id <= 0) throw new UserSettingsInvalidException("UserSettings Id's must be bigger than zero");
-        
+
         this.id = id;
     }
 
-    public String getEmail() {
-        return email;
+    public Email getEmail() {
+        return new Email(this.email);
     }
 
-    public void setEmail(String email) {
-        if (!RegexUtils.isValidEmail(email)) throw new UserSettingsInvalidException("Invalid email format");
-        
-        this.email = email;
+    public void setEmail(Email email) {
+        this.email = email.value();
     }
-    
+
     public boolean isAreNotificationsEnabled() {
         return areNotificationsEnabled;
     }
@@ -97,10 +92,15 @@ public class UserSettings {
 
     public UserSettingsDTO toDTO() {
         return new UserSettingsDTO(
-            getId(),
-            getEmail(),
-            isAreNotificationsEnabled(),
-            getTheme()
+                getEmail().value(),
+                isAreNotificationsEnabled(),
+                getTheme()
         );
     }
+
+    public void mergeFromDTO(UserSettingsDTO dto) {
+        this.areNotificationsEnabled = dto.isAreNotificationsEnabled();
+        this.theme = dto.getTheme();
+    }
+
 }

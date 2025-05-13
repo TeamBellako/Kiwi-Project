@@ -1,40 +1,18 @@
 package com.kiwi.usersettings;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import com.kiwi.users.Email;
 
 import java.util.Objects;
 
 public class UserSettingsDTO {
-
-    private Integer id;
-    
-    @Email(
-            regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}",
-            flags = Pattern.Flag.CASE_INSENSITIVE,
-            message = "Invalid email format"
-    )
-    @NotBlank(message = "Email is required")
     private String email;
-    
     private boolean areNotificationsEnabled;
-    
     private UserSettingsEnums.Theme theme;
 
-    public UserSettingsDTO(Integer id, String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
-        this.id = id;
+    public UserSettingsDTO(String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
         this.email = email;
         this.areNotificationsEnabled = areNotificationsEnabled;
         this.theme = theme;
-    }
-    
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getEmail() {
@@ -65,19 +43,18 @@ public class UserSettingsDTO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UserSettingsDTO that = (UserSettingsDTO) o;
-        return areNotificationsEnabled == that.areNotificationsEnabled && Objects.equals(id, that.id) && Objects.equals(email, that.email) && theme == that.theme;
+        return areNotificationsEnabled == that.areNotificationsEnabled && Objects.equals(email, that.email) && theme == that.theme;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, areNotificationsEnabled, theme);
+        return Objects.hash(email, areNotificationsEnabled, theme);
     }
 
     @Override
     public String toString() {
         return "UserSettingsDTO{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
+                "email='" + email + '\'' +
                 ", areNotificationsEnabled=" + areNotificationsEnabled +
                 ", theme=" + theme +
                 '}';
@@ -85,11 +62,9 @@ public class UserSettingsDTO {
 
     public UserSettings toDomainObject() {
         return new UserSettings(
-            getId(),
-            getEmail(),
+            new Email(getEmail()),
             isAreNotificationsEnabled(),
             getTheme()
         );
     }
 }
-

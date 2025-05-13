@@ -1,6 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import {loadUserSettings, updateUserSettings} from './UserSettingsThunks';
-import {initialState} from "../types/UserSettingsTypes";
+import {initialState} from "../types/UserSettingsState";
 
 const userSettingsSlice = createSlice({
     name: 'userSettings',
@@ -14,7 +14,7 @@ const userSettingsSlice = createSlice({
             })
             .addCase(loadUserSettings.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.userSettings = action.payload;
+                state.userSettingsDTO = action.payload;
             })
             .addCase(loadUserSettings.rejected, (state, action) => {
                 state.status = 'failed';
@@ -23,7 +23,7 @@ const userSettingsSlice = createSlice({
             
             .addCase(updateUserSettings.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.userSettings = action.payload;
+                state.userSettingsDTO = action.payload;
             })
             .addCase(updateUserSettings.rejected, (state, action) => {
                 state.status = 'failed';

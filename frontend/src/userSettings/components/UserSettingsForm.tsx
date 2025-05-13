@@ -3,9 +3,9 @@ import UserSettingsEmailField from './UserSettingsEmailField';
 import UserSettingsNotificationsToggle from './UserSettingsNotificationsToggle';
 import UserSettingsThemeSelector from './UserSettingsThemeSelector';
 import {useUserSettingsForm} from "../hooks/UserSettingsHook";
-import {UserSettings} from "../types/UserSettingsTypes";
+import {UserSettingsDTO} from "../types/UserSettingsDTO";
 
-type UserSettingsProps = Partial<UserSettings>;
+type UserSettingsProps = Partial<UserSettingsDTO>;
 
 const UserSettingsForm: React.FC<UserSettingsProps> = (props) => {
     const form = useUserSettingsForm(props);

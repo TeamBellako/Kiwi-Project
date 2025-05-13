@@ -25,60 +25,36 @@ public class UserSettingsRepositoryTest {
     
     @Autowired
     private UserSettingsRepository userSettingsRepository;
-    
+
     @Test
-    public void createUserSettings_validInput_createsUserSettings() {
-        assertEquals(noIdUserSettings(), userSettingsRepository.saveAndFlush(noIdUserSettings()));
+    public void getUserSettings_validId_returnsUserSettings() {
+        userSettingsRepository.saveAndFlush(validUserSettingsDTO().toDomainObject());
+        
+        assertNotNull(userSettingsRepository.findByEmail(validUserSettingsDTO().getEmail()));
     }
 
     @Test
-    public void getUserSettingsById_validId_returnsUserSettings() {
-        assertNotNull(userSettingsRepository.findById(validUserSettingsDTO().getId()));
+    public void getUserSettings_invalidId_returnsEmptyOptional() {
+        assertEquals(Optional.empty(), userSettingsRepository.findByEmail(invalidUserSettingsDTO().getEmail()));
     }
 
     @Test
-    public void getUserSettingsById_invalidId_returnsEmptyOptional() {
-        assertEquals(Optional.empty(), userSettingsRepository.findById(invalidUserSettingsDTO().getId()));
-    }
-
-    @Test
-    public void getUserSettingsById_userSettingsDoesNotExist_returnsEmptyOptional() {
-        assertEquals(Optional.empty(), userSettingsRepository.findById(validUserSettingsDTO().getId() + 1));
+    public void getUserSettings_userSettingsDoesNotExist_returnsEmptyOptional() {
+        assertEquals(Optional.empty(), userSettingsRepository.findByEmail(validUserSettingsDTO().getEmail() + 1));
     }
 
     @Test
     public void updateUserSettings_validInput_updatesUserSettings() {
         userSettingsRepository.saveAndFlush(updatedUserSettingsDTO().toDomainObject());
         
-        assertEquals(userSettingsRepository.findById(validUserSettingsDTO().getId()).get(), updatedUserSettingsDTO().toDomainObject());
+        assertEquals(userSettingsRepository.findByEmail(updatedUserSettingsDTO().getEmail()).get(), updatedUserSettingsDTO().toDomainObject());
     }
 
     @Test
     public void updateUserSettings_userSettingsDoesNotExist_createsUserSetting() {
-        UserSettings saved = userSettingsRepository.saveAndFlush(noIdUserSettings());
-        Optional<UserSettings> result = userSettingsRepository.findById(saved.getId());
+        UserSettings saved = userSettingsRepository.saveAndFlush(validUserSettingsDTO().toDomainObject());
+        Optional<UserSettings> result = userSettingsRepository.findByEmail(saved.getEmail().value());
         
-        assertEquals(noIdUserSettings(), result.get());
-    }
-    
-    @Test
-    public void deleteUserSettings_validId_deletesUserSettings() {
-        userSettingsRepository.deleteById(validUserSettingsDTO().getId());
-        
-        assertEquals(Optional.empty(), userSettingsRepository.findById(validUserSettingsDTO().getId()));
-    }
-
-    @Test
-    public void deleteUserSettings_invalidId_doesNothing() {
-        userSettingsRepository.deleteById(invalidUserSettingsDTO().getId());
-        
-        assertNotNull(userSettingsRepository.findById(validUserSettingsDTO().getId()).get());
-    }
-
-    @Test
-    public void deleteUserSettings_userDoesNotExists_doesNothing() {
-        userSettingsRepository.deleteById(validUserSettingsDTO().getId() + 1);
-
-        assertNotNull(userSettingsRepository.findById(validUserSettingsDTO().getId()).get());
+        assertEquals(validUserSettingsDTO().toDomainObject(), result.get());
     }
 }

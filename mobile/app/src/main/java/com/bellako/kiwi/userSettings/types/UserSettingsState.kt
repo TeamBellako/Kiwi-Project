@@ -1,5 +1,7 @@
 package com.bellako.kiwi.userSettings.types
 
+import com.bellako.kiwi.users.Email
+
 data class UserSettingsState(
     val email: String = "",
     val areNotificationsEnabled: Boolean = false,
@@ -14,7 +16,7 @@ data class UserSettingsState(
     }
 
     fun toDomainObject(): Result<UserSettings> {
-        return ValidatedEmail.of(email).map { validEmail ->
+        return Email.of(email).map { validEmail ->
             UserSettings(
                 email = validEmail,
                 areNotificationsEnabled = areNotificationsEnabled,

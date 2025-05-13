@@ -2,7 +2,7 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import {axe, toHaveNoViolations} from 'jest-axe';
-import {invalidUserSettings, validUserSettings} from "./UserSettingsTestFactory";
+import {invalidUserSettingsDTO, validUserSettingsDTO} from "./UserSettingsTestFactory";
 import UserSettingsForm from "../../userSettings/components/UserSettingsForm";
 import {Provider} from "react-redux";
 import {store} from "../../store/Store";
@@ -25,14 +25,14 @@ describe('UserSettings Form Tests', () => {
     describe('Email Field Tests', () => {
         test('email field gets valid input and accept it', async () => {
             const emailInput = formFields.getEmailInput();
-            await userEvent.type(emailInput, validUserSettings.email);
+            await userEvent.type(emailInput, validUserSettingsDTO.email);
             
-            expect(emailInput).toHaveValue(validUserSettings.email);
+            expect(emailInput).toHaveValue(validUserSettingsDTO.email);
         });
     
         test('email field gets invalid input and rejects it, showing an error message', async () => {
             const emailInput = formFields.getEmailInput();
-            await userEvent.type(emailInput, invalidUserSettings.email);
+            await userEvent.type(emailInput, invalidUserSettingsDTO.email);
             emailInput.blur();
             
             const error = await screen.findByText(/invalid email/i);
@@ -42,6 +42,9 @@ describe('UserSettings Form Tests', () => {
     
     describe('Notifications Toggle Tests', () => {
         test('notifications switches toggles between on and off', async () => {
+            const emailInput = formFields.getEmailInput();
+            await userEvent.type(emailInput, validUserSettingsDTO.email);
+            
             const toggle = formFields.getNotificationToggle();
             expect(toggle).not.toBeChecked();
             
@@ -55,6 +58,9 @@ describe('UserSettings Form Tests', () => {
     
     describe('Theme Selector Tests', () => {
         test('theme selector only allows one option simultaneously', async () => {
+            const emailInput = formFields.getEmailInput();
+            await userEvent.type(emailInput, validUserSettingsDTO.email);
+            
             const lightOption = formFields.getThemeRadio("light")
             const darkOption = formFields.getThemeRadio("dark")
             

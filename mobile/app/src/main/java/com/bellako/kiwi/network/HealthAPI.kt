@@ -17,7 +17,7 @@ private fun createShortTimeoutOkHttpClient(): OkHttpClient {
 }
 
 interface HealthApiService {
-    @GET("actuator/health")
+    @GET("api/public/ping")
     suspend fun ping(): Response<Unit>
 }
 

@@ -1,0 +1,32 @@
+package com.kiwi.security;
+
+import com.kiwi.users.Users;
+import com.kiwi.users.UsersRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.stereotype.Service;
+import java.util.Collections;
+
+@Service
+public class CustomUserDetailsService  implements UserDetailsService {
+    private final UsersRepository usersRepository;
+    
+    @Autowired
+    public CustomUserDetailsService(UsersRepository usersRepository) {
+        this.usersRepository = usersRepository;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Users users = usersRepository.findByEmail(username);
+        
+        if (users == null) 
+            throw new UsernameNotFoundException("Users Not Found with username: " + username);
+        
+        return new User(
+                users.getEmail().value(),
+                users.getPassword(),
+                Collections.emptyList()
+        );
+    }
+}

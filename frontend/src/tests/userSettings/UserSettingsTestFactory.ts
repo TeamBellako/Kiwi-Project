@@ -1,19 +1,19 @@
-import {UserSettings} from "../../userSettings/types/UserSettingsTypes";
+import {UserSettingsDTO} from "../../userSettings/types/UserSettingsDTO";
 
-export const validUserSettings: UserSettings = {
+export const validUserSettingsDTO: UserSettingsDTO = {
     email: 'finn@thehuman.com',
     areNotificationsEnabled: true,
-    theme: 'DARK',
+    theme: 'DARK'
 };
 
-export const updateUserSettings: UserSettings = {
-    email: 'jake@thedog.com',
+export const updateUserSettingsDTO: UserSettingsDTO = {
+    email: 'finn@thehuman.com',
     areNotificationsEnabled: false,
-    theme: 'LIGHT',
+    theme: 'LIGHT'
 };
 
-export const invalidUserSettings: UserSettings = {
+export const invalidUserSettingsDTO: UserSettingsDTO = {
     email: 'bmolovesfootball.com',
     areNotificationsEnabled: true,
-    theme: 'DARK',
+    theme: 'DARK'
 };

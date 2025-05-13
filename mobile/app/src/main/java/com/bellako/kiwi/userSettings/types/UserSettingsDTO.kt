@@ -1,7 +1,8 @@
 package com.bellako.kiwi.userSettings.types
 
+import com.bellako.kiwi.users.Email
+
 data class UserSettingsDTO(
-    val id: Int = 1, // TODO: Remove when JWT is implemented
     val email: String,
     val areNotificationsEnabled: Boolean,
     val theme: Theme
@@ -16,7 +17,7 @@ data class UserSettingsDTO(
     }
 
     fun toDomainObject(): Result<UserSettings> {
-        return ValidatedEmail.of(email).map { validEmail ->
+        return Email.of(email).map { validEmail ->
             UserSettings(
                 email = validEmail,
                 areNotificationsEnabled = areNotificationsEnabled,
