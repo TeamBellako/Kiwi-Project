@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UsersRepository extends JpaRepository<UsersPersistence, Long> {
     UsersPersistence findByEmail(String email);
+    
     boolean existsByEmail(String email);
+    
     void deleteByEmail(String email);
 }

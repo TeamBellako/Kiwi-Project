@@ -17,7 +17,11 @@ public class UsersService {
 
     @Transactional
     public void createUser(@Valid @NotNull UsersDTO userDTO) {
+        Users user = userDTO.toDomainObject();
+        String userEmailValue = user.getEmail().value(); 
+        if (this.usersRepository.existsByEmail(userEmailValue)) throw new UsersConflictException(userEmailValue);
         
+        this.usersRepository.saveAndFlush(userDTO.toPersistenceObject());
     }
     
     public UsersDTO getUserByEmail(@NotNull Email email) {
