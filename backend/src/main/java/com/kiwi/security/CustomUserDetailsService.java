@@ -1,6 +1,6 @@
 package com.kiwi.security;
 
-import com.kiwi.users.Users;
+import com.kiwi.users.UsersPersistence;
 import com.kiwi.users.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.*;
@@ -18,14 +18,14 @@ public class CustomUserDetailsService  implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users users = usersRepository.findByEmail(username);
+        UsersPersistence usersPersistence = usersRepository.findByEmail(username);
         
-        if (users == null) 
-            throw new UsernameNotFoundException("Users Not Found with username: " + username);
+        if (usersPersistence == null) 
+            throw new UsernameNotFoundException("User Not Found with username: " + username);
         
         return new User(
-                users.getEmail().value(),
-                users.getPassword(),
+                usersPersistence.getEmail().value(),
+                usersPersistence.getPassword().value(),
                 Collections.emptyList()
         );
     }
