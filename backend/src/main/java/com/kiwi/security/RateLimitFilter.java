@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,9 +20,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
-
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-
+    
+    private final JwtUtils jwtUtils;
+    
+    @Autowired
+    public RateLimitFilter(JwtUtils jwtUtils) {
+        this.jwtUtils = jwtUtils;
+    }
+    
     private Bucket createNewBucket() {
         Refill refill = Refill.greedy(10, Duration.ofMinutes(1));
         Bandwidth limit = Bandwidth.classic(10, refill);
@@ -33,9 +40,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     @NotNull HttpServletResponse response,
                                     @NotNull FilterChain filterChain)
             throws ServletException, IOException {
-
-        String ip = request.getRemoteAddr(); // simple per-IP limiter
-        Bucket bucket = buckets.computeIfAbsent(ip, k -> createNewBucket());
+        
+        String key;
+        
+        String jwt = jwtUtils.parseJwt(request);
+        if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            key = jwtUtils.getUsernameFromToken(jwt);
+        } else {
+            key = request.getRemoteAddr();
+        }
+        
+        Bucket bucket = buckets.computeIfAbsent(key, k -> createNewBucket());
 
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);

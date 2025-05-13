@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         try {
-            String jwt = parseJwt(request);
+            String jwt = jwtUtils.parseJwt(request);
 
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUsernameFromToken(jwt);
@@ -66,13 +66,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authenticationEntryPoint.commence(request, response,
                     new AuthenticationServiceException("JWT Error: " + ex.getMessage(), ex));
         }
-    }
-
-    private String parseJwt(HttpServletRequest request) {
-        String headerAuth = request.getHeader("Authorization");
-        if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7);
-        }
-        return null;
     }
 }
