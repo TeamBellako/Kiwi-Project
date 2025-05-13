@@ -1,7 +1,7 @@
 import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
-import {loadUserSettings, updateUserSettings} from "../../userSettings/store/UserSettingsThunks"
-import {validUserSettings} from "./UserSettingsTestFactory";
-import {initialState} from "../../userSettings/types/UserSettingsTypes";
+import {loadUserSettings, updateUserSettingsDTO} from "../../userSettings/store/UserSettingsThunks"
+import {validUserSettingsDTO} from "./UserSettingsTestFactory";
+import {initialState} from "../../userSettings/types/UserSettingsState";
 
 describe('UserSettings Slice Tests', () => {
     describe('General Tests', () => {
@@ -24,11 +24,11 @@ describe('UserSettings Slice Tests', () => {
         it('slice transitions to succeeded on fetch success', () => {
             const nextState = userSettingsReducer(
                 initialState,
-                loadUserSettings.fulfilled(validUserSettings, '', undefined)
+                loadUserSettings.fulfilled(validUserSettingsDTO, '', undefined)
             );
             
             expect(nextState.status).toBe('succeeded');
-            expect(nextState.userSettings).toEqual(validUserSettings);
+            expect(nextState.userSettings).toEqual(validUserSettingsDTO);
             expect(nextState.error).toBeNull();
         });
     
@@ -47,18 +47,18 @@ describe('UserSettings Slice Tests', () => {
         it('slice transitions to succeeded on update success', () => {
             const nextState = userSettingsReducer(
                 initialState,
-                updateUserSettings.fulfilled(validUserSettings, '', validUserSettings)
+                updateUserSettingsDTO.fulfilled(validUserSettingsDTO, '', validUserSettingsDTO)
             );
             
             expect(nextState.status).toBe('succeeded');
-            expect(nextState.userSettings).toEqual(validUserSettings);
+            expect(nextState.userSettings).toEqual(validUserSettingsDTO);
         });
     
         it('slice transitions to failed on update failure', () => {
             const errorMessage = 'Failed to update'
             const nextState = userSettingsReducer(
                 initialState,
-                updateUserSettings.rejected(new Error(errorMessage), '', validUserSettings, errorMessage)
+                updateUserSettingsDTO.rejected(new Error(errorMessage), '', validUserSettingsDTO, errorMessage)
             );
 
             expect(nextState.status).toBe('failed');

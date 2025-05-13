@@ -5,7 +5,7 @@ import {configureStore, Store, UnknownAction} from '@reduxjs/toolkit';
 import api from "../../services/api";
 import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
 import {userSettingsLabels} from "../constants/Labels";
-import {invalidUserSettings, updateUserSettings, validUserSettings} from "./UserSettingsTestFactory";
+import {invalidUserSettingsDTO, updateUserSettingsDTO, validUserSettingsDTO} from "./UserSettingsTestFactory";
 
 jest.mock("../../services/api");
 
@@ -60,7 +60,7 @@ describe('UserSettingsPage Tests', () => {
         });
 
         test('should display user settings when load is successful', async () => {
-            mockApiGetRequest(validUserSettings);
+            mockApiGetRequest(validUserSettingsDTO);
             renderUserSettingsPage();
 
             await waitFor(() => {
@@ -82,35 +82,37 @@ describe('UserSettingsPage Tests', () => {
     
     describe('update tests', () => {
         test('should trigger saveSettings after a debounce delay', async () => {
-            mockApiGetRequest(validUserSettings);
+            mockApiGetRequest(validUserSettingsDTO);
             renderUserSettingsPage();
             
-            mockApiPutRequest(updateUserSettings);
+            mockApiPutRequest(updateUserSettingsDTO);
             await waitFor(() => {
-                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
+                fireEvent.click(screen.getByLabelText(userSettingsLabels.notifications),
+                    {target: {value: updateUserSettingsDTO.areNotificationsEnabled}});
             });
             await waitFor(() => {
-                expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(updateUserSettings.email);
+                expect(screen.getByLabelText(userSettingsLabels.notifications)).not.toBeChecked();
                 expect(api.put).toHaveBeenCalledTimes(1);
             });
 
-            mockApiPutRequest(validUserSettings);
+            mockApiPutRequest(validUserSettingsDTO);
             await waitFor(() => {
-                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: validUserSettings.email}});
+                fireEvent.click(screen.getByLabelText(userSettingsLabels.notifications),
+                    {target: {value: updateUserSettingsDTO.areNotificationsEnabled}});
             });
             await waitFor(() => {
-                expect(screen.getByLabelText(userSettingsLabels.email)).toHaveValue(validUserSettings.email);
+                expect(screen.getByLabelText(userSettingsLabels.notifications)).toBeChecked();
                 expect(api.put).toHaveBeenCalledTimes(1);
             });
         });
 
         test('should not trigger neither saveSettings if there are no changes', async () => {
-            mockApiGetRequest(validUserSettings);
-            mockApiPutRequest(validUserSettings);
+            mockApiGetRequest(validUserSettingsDTO);
+            mockApiPutRequest(validUserSettingsDTO);
             renderUserSettingsPage();
             
             await waitFor(() => {
-                fireEvent.change(screen.getByLabelText(userSettingsLabels.notifications), { target: { value: validUserSettings.email } });
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.notifications), { target: { value: validUserSettingsDTO.email } });
             });
             
             await waitFor(() => {
@@ -119,12 +121,12 @@ describe('UserSettingsPage Tests', () => {
         });
 
         test('should not trigger saveSettings too frequently', async () => {
-            mockApiGetRequest(validUserSettings);
+            mockApiGetRequest(validUserSettingsDTO);
             renderUserSettingsPage();
             
             await waitFor(() => {
                 const emailInput = screen.getByLabelText(userSettingsLabels.email);
-                fireEvent.change(emailInput, { target: { value: updateUserSettings.email } });
+                fireEvent.change(emailInput, { target: { value: updateUserSettingsDTO.email } });
                 fireEvent.change(emailInput, { target: { value: 'marceline@lovessimon.com' } });
                 fireEvent.change(emailInput, { target: { value: 'princess@bubblegum.com' } });
             });
@@ -135,11 +137,11 @@ describe('UserSettingsPage Tests', () => {
         });
 
         test('should display error message for invalid email format and then hide it when email is valid again', async () => {
-            mockApiGetRequest(validUserSettings);
+            mockApiGetRequest(validUserSettingsDTO);
             renderUserSettingsPage();
             
             await waitFor(() => {
-                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: invalidUserSettings.email } });
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: invalidUserSettingsDTO.email } });
             });
             await waitFor(() => {
                 expect(screen.getByText(invalidEmailError)).toBeInTheDocument();
@@ -147,7 +149,7 @@ describe('UserSettingsPage Tests', () => {
             });
 
             await waitFor(() => {
-                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: validUserSettings.email } });
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), { target: { value: validUserSettingsDTO.email } });
             });
             await waitFor(() => {
                 expect(screen.queryByText(invalidEmailError)).toBeNull();
@@ -155,12 +157,12 @@ describe('UserSettingsPage Tests', () => {
         });
 
         test('should trigger loading if update fails and show a hardcoded error message when receiving a 500 response', async () => {
-            mockApiGetRequest(validUserSettings);
+            mockApiGetRequest(validUserSettingsDTO);
             mockApiPutErrorRequest(errorMessageWithSensibleInformation);
             renderUserSettingsPage();
             
             await waitFor(() => {
-                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettings.email}});
+                fireEvent.change(screen.getByLabelText(userSettingsLabels.email), {target: {value: updateUserSettingsDTO.email}});
             });
 
             await waitFor(() => {
