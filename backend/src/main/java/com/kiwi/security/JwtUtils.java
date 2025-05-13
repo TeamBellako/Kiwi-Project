@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtils {
@@ -41,12 +42,30 @@ public class JwtUtils {
     }
 
     public String generateToken(String username) {
+        List<String> roles = List.of("USER");
+        
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public List<String> getRolesFromToken(String token) {
+        List<?> rolesList = (List<?>) Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("roles", List.class);
+
+        if (rolesList != null) {
+            return (List<String>) rolesList;
+        }
+        
+        return null;
     }
 
     public String getUsernameFromToken(String token) throws JwtException {
