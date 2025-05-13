@@ -16,14 +16,14 @@ object UserSettingsTestFactory {
 
     fun updateUserSettings(): UserSettingsDTO =
         UserSettingsDTO(
-            email = "jake@thedog.com",
+            email = "finn@thehuman.com",
             areNotificationsEnabled = false,
             theme = Theme.LIGHT
         )
 
     fun invalidUserSettings(): UserSettingsDTO =
         UserSettingsDTO(
-            email = "bmolovesfootball.com", // invalid email
+            email = "bmolovesfootball.com",
             areNotificationsEnabled = false,
             theme = Theme.LIGHT
         )
