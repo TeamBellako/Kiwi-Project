@@ -4,6 +4,8 @@ import com.kiwi.exception.GlobalExceptionHandler;
 import org.junit.Test;
 import org.springframework.context.annotation.Import;
 
+import java.util.Optional;
+
 import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,67 +35,58 @@ public class UsersServiceTest {
     @Test(expected = UsersConflictException.class)
     public void createDuplicatedUser() {
         usersService.createUser(validUserDTO());
-        
         usersService.createUser(validUserDTO());
     }
 
     @Test
     public void getValidUser() {
-        // TODO
-        assertEquals(true, false);
+        usersRepositoryInMemory.saveAndFlush(validUserDTO().toPersistenceObject());
+        
+        assertEquals(validUserDTO(), usersService.getUserByEmail(new Email(validUserDTO().getEmail())).get());
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void getWithNullEmail() {
-        // TODO
-        assertEquals(true, false);
+        usersService.getUserByEmail(null);
     }
 
     @Test
     public void getNonExistingUser() {
-        // TODO
-        assertEquals(true, false);
+        assertEquals(Optional.empty(), usersService.getUserByEmail(new Email(validUserDTO().getEmail())));
     }
 
     @Test
     public void updateValidUser() {
-        // TODO
-        assertEquals(true, false);
+        throw new AssertionError("Test not implemented yet");
     }
 
     @Test
     public void updateInvalidUser() {
-        // TODO
-        assertEquals(true, false);
+        throw new AssertionError("Test not implemented yet");
     }
 
     @Test
     public void updateNullUser() {
-        // TODO
-        assertEquals(true, false);
+        throw new AssertionError("Test not implemented yet");
     }
 
     @Test
     public void updateNonExistingUser() {
-        // TODO
-        assertEquals(true, false);
+        throw new AssertionError("Test not implemented yet");
     }
 
     @Test
     public void deleteValidUser() {
-        // TODO
-        assertEquals(true, false);
+        throw new AssertionError("Test not implemented yet");
     }
 
     @Test
     public void deleteNullUser() {
-        // TODO
-        assertEquals(true, false);
+        throw new AssertionError("Test not implemented yet");
     }
 
     @Test
     public void deleteNonExistingUser() {
-        // TODO
-        assertEquals(true, false);
+        throw new AssertionError("Test not implemented yet");
     }
 }

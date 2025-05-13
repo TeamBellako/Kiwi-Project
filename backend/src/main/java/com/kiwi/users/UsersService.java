@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class UsersService {
     private final UsersRepository usersRepository;
@@ -24,8 +26,9 @@ public class UsersService {
         this.usersRepository.saveAndFlush(userDTO.toPersistenceObject());
     }
     
-    public UsersDTO getUserByEmail(@NotNull Email email) {
-        return null;
+    public Optional<UsersDTO> getUserByEmail(@NotNull Email email) {
+        return Optional.ofNullable(this.usersRepository.findByEmail(email.value()))
+                .map(UsersPersistence::toDTO);
     }
 
     @Transactional
