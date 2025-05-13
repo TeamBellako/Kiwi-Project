@@ -15,11 +15,13 @@ public class UsersServiceTest {
     private final UsersRepositoryInMemory usersRepositoryInMemory = new UsersRepositoryInMemory();
     private final UsersService usersService = new UsersService(usersRepositoryInMemory);
     
+    private final String validEmailString = validUserDTO().getEmail(); 
+    
     @Test
     public void createValidUser() {
         usersService.createUser(validUserDTO());
         
-        assertEquals(validUserDTO().toPersistenceObject(), usersRepositoryInMemory.findByEmail(validUserDTO().getEmail()));
+        assertEquals(validUserDTO().toPersistenceObject(), usersRepositoryInMemory.findByEmail(validEmailString));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -42,7 +44,7 @@ public class UsersServiceTest {
     public void getValidUser() {
         usersRepositoryInMemory.saveAndFlush(validUserDTO().toPersistenceObject());
         
-        assertEquals(validUserDTO(), usersService.getUserByEmail(new Email(validUserDTO().getEmail())).get());
+        assertEquals(validUserDTO(), usersService.getUserByEmail(getValidEmail()).get());
     }
 
     @Test(expected = NullPointerException.class)
@@ -52,7 +54,7 @@ public class UsersServiceTest {
 
     @Test
     public void getNonExistingUser() {
-        assertEquals(Optional.empty(), usersService.getUserByEmail(new Email(validUserDTO().getEmail())));
+        assertEquals(Optional.empty(), usersService.getUserByEmail(getValidEmail()));
     }
 
     @Test
@@ -84,11 +86,11 @@ public class UsersServiceTest {
     @Test
     public void deleteValidUser() {
         usersRepositoryInMemory.saveAndFlush(validUserDTO().toPersistenceObject());
-        assertTrue(usersRepositoryInMemory.existsByEmail(validUserDTO().getEmail()));
+        assertTrue(usersRepositoryInMemory.existsByEmail(validEmailString));
         
-        usersService.deleteUser(new Email(validUserDTO().getEmail()));
+        usersService.deleteUser(getValidEmail());
         
-        assertFalse(usersRepositoryInMemory.existsByEmail(validUserDTO().getEmail()));
+        assertFalse(usersRepositoryInMemory.existsByEmail(validEmailString));
     }
 
     @Test(expected = NullPointerException.class)
@@ -98,6 +100,8 @@ public class UsersServiceTest {
 
     @Test(expected = UsersNotFoundException.class)
     public void deleteNonExistingUser() {
-        usersService.deleteUser(new Email(validUserDTO().getEmail()));
+        usersService.deleteUser(getValidEmail());
     }
+    
+    private Email getValidEmail() { return new Email(validEmailString); }
 }
