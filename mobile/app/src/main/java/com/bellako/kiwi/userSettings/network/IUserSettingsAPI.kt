@@ -6,9 +6,9 @@ import retrofit2.http.GET
 import retrofit2.http.PUT
 
 interface IUserSettingsAPI {
-    @GET("api/settings")
+    @GET("api/user/settings")
     suspend fun getUserSettings(): UserSettingsDTO
 
-    @PUT("api/settings")
+    @PUT("api/user/settings")
     suspend fun updateUserSettings(@Body settings: UserSettingsDTO)
 }
