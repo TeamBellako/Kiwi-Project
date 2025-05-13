@@ -1,5 +1,6 @@
 package com.kiwi.exception;
 
+import com.kiwi.users.UsersConflictException;
 import com.kiwi.usersettings.UserSettingsConflictException;
 import com.kiwi.usersettings.UserSettingsInvalidException;
 import com.kiwi.usersettings.UserSettingsNotFoundException;
@@ -40,7 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserSettingsConflictException.class)
     public ResponseEntity<String> handleUserSettingsConflict(UserSettingsConflictException ex) {
-        logger.error("UsersPersistence settings conflict: {}", ex.getMessage(), ex);
+        logger.error("User settings conflict: {}", ex.getMessage(), ex);
         
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ex.getMessage());
@@ -115,5 +116,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body("Unauthorized: Invalid JWT token.");
     }
+    
+    @ExceptionHandler(UsersConflictException.class)
+    public ResponseEntity<String> handleUsersConflict(UsersConflictException ex) {
+        logger.error("Users conflict: {}", ex.getMessage(), ex);
 
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
+    }
 }
