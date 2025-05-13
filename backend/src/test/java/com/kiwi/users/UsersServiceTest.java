@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Import({GlobalExceptionHandler.class})
 public class UsersServiceTest {
@@ -57,36 +57,47 @@ public class UsersServiceTest {
 
     @Test
     public void updateValidUser() {
-        throw new AssertionError("Test not implemented yet");
+        UsersDTO userDTO = validUserDTO();
+        usersRepositoryInMemory.saveAndFlush(userDTO.toPersistenceObject());
+
+        userDTO.setPassword("Simon*Marceline4ever");
+        usersRepositoryInMemory.saveAndFlush(userDTO.toPersistenceObject());
+
+        assertEquals(userDTO, usersRepositoryInMemory.findByEmail(userDTO.getEmail()).toDTO());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void updateInvalidUser() {
-        throw new AssertionError("Test not implemented yet");
+        usersService.updateUser(invalidUserDTO());
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void updateNullUser() {
-        throw new AssertionError("Test not implemented yet");
+        usersService.updateUser(null);
     }
 
-    @Test
+    @Test(expected = UsersNotFoundException.class)
     public void updateNonExistingUser() {
-        throw new AssertionError("Test not implemented yet");
+       usersService.updateUser(validUserDTO());
     }
 
     @Test
     public void deleteValidUser() {
-        throw new AssertionError("Test not implemented yet");
+        usersRepositoryInMemory.saveAndFlush(validUserDTO().toPersistenceObject());
+        assertTrue(usersRepositoryInMemory.existsByEmail(validUserDTO().getEmail()));
+        
+        usersService.deleteUser(new Email(validUserDTO().getEmail()));
+        
+        assertFalse(usersRepositoryInMemory.existsByEmail(validUserDTO().getEmail()));
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void deleteNullUser() {
-        throw new AssertionError("Test not implemented yet");
+        usersService.deleteUser(null);
     }
 
-    @Test
+    @Test(expected = UsersNotFoundException.class)
     public void deleteNonExistingUser() {
-        throw new AssertionError("Test not implemented yet");
+        usersService.deleteUser(new Email(validUserDTO().getEmail()));
     }
 }

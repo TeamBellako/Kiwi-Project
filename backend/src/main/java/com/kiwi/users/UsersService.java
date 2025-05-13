@@ -21,23 +21,33 @@ public class UsersService {
     public void createUser(@Valid @NotNull UsersDTO userDTO) {
         Users user = userDTO.toDomainObject();
         String userEmailValue = user.getEmail().value(); 
-        if (this.usersRepository.existsByEmail(userEmailValue)) throw new UsersConflictException(userEmailValue);
+        if (usersRepository.existsByEmail(userEmailValue)) throw new UsersConflictException(userEmailValue);
         
-        this.usersRepository.saveAndFlush(userDTO.toPersistenceObject());
+        usersRepository.saveAndFlush(userDTO.toPersistenceObject());
     }
     
     public Optional<UsersDTO> getUserByEmail(@NotNull Email email) {
-        return Optional.ofNullable(this.usersRepository.findByEmail(email.value()))
+        return Optional.ofNullable(usersRepository.findByEmail(email.value()))
                 .map(UsersPersistence::toDTO);
     }
 
     @Transactional
     public void updateUser(@Valid @NotNull UsersDTO userDTO) {
+        Users userUpdate = userDTO.toDomainObject();
         
+        Optional<UsersPersistence> existingUserPersistenceOptional = 
+                Optional.ofNullable(usersRepository.findByEmail(userUpdate.getEmail().value()));
+        if (existingUserPersistenceOptional.isEmpty()) throw new UsersNotFoundException(userUpdate.getEmail().value());
+        
+        UsersPersistence usersPersistence = existingUserPersistenceOptional.get();
+        usersPersistence.mergeFromDomainObject(userUpdate);
+        usersRepository.saveAndFlush(usersPersistence);
     }
 
     @Transactional
     public void deleteUser(@NotNull Email email) {
+        if (!usersRepository.existsByEmail(email.value())) throw new UsersNotFoundException(email.value());
         
+        usersRepository.deleteByEmail(email.value());
     }
 }

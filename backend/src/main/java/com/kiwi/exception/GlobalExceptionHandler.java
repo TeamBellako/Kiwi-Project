@@ -1,6 +1,7 @@
 package com.kiwi.exception;
 
 import com.kiwi.users.UsersConflictException;
+import com.kiwi.users.UsersNotFoundException;
 import com.kiwi.usersettings.UserSettingsConflictException;
 import com.kiwi.usersettings.UserSettingsInvalidException;
 import com.kiwi.usersettings.UserSettingsNotFoundException;
@@ -25,7 +26,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserSettingsNotFoundException.class)
     public ResponseEntity<String> handleUserSettingsNotFound(UserSettingsNotFoundException ex) {
-        logger.error("UsersPersistence settings not found: {}", ex.getMessage(), ex);
+        logger.error("Users settings not found: {}", ex.getMessage(), ex);
         
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
@@ -122,6 +123,14 @@ public class GlobalExceptionHandler {
         logger.error("Users conflict: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UsersNotFoundException.class)
+    public ResponseEntity<String> handleUsersNotFound(UsersNotFoundException ex) {
+        logger.error("User not found: {}", ex.getMessage(), ex);
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
     }
 }

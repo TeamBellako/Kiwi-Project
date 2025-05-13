@@ -86,4 +86,9 @@ public class UsersPersistence {
                 getPassword()
         );
     }
+    
+    public void mergeFromDomainObject(Users user) {
+        setEmail(user.getEmail());
+        setPassword(user.getPassword());
+    } 
 }
