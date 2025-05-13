@@ -1,8 +1,5 @@
 package com.kiwi.users;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-
 import java.util.Objects;
 
 public class UsersDTO {
@@ -56,7 +53,14 @@ public class UsersDTO {
     public Users toDomainObject() {
         return new Users(
             new Email(getEmail()),
-            getPassword()
+            new Password(getPassword())
+        );
+    }
+    
+    public UsersPersistence toPersistenceObject() {
+        return new UsersPersistence(
+            new Email(getEmail()),
+            new Password(getPassword())
         );
     }
 }
