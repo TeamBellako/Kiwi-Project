@@ -1,24 +1,9 @@
 package com.bellako.kiwi.userSettings.types
 
-@JvmInline
-value class ValidatedEmail private constructor(val value: String) {
-    companion object {
-        fun isValid(email: String): Boolean {
-            return email.contains("@") && email.contains(".")
-        }
-
-        fun of(email: String): Result<ValidatedEmail> {
-            return if (isValid(email)) {
-                Result.success(ValidatedEmail(email))
-            } else {
-                Result.failure(IllegalArgumentException("Invalid email format"))
-            }
-        }
-    }
-}
+import com.bellako.kiwi.users.Email
 
 data class UserSettings(
-    val email: ValidatedEmail,
+    val email: Email,
     val areNotificationsEnabled: Boolean,
     val theme: Theme
 ) {

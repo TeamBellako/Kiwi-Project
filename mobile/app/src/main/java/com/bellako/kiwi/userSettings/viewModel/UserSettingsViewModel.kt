@@ -6,7 +6,7 @@ import com.bellako.kiwi.userSettings.network.UserSettingsRepository
 import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
-import com.bellako.kiwi.userSettings.types.ValidatedEmail
+import com.bellako.kiwi.users.Email
 import com.bellako.kiwi.utils.Logger
 import com.google.gson.Gson
 import dagger.Module
@@ -86,7 +86,7 @@ class UserSettingsViewModel @Inject constructor(
     override fun updateSettings(state: UserSettingsState) {
         _state.value = state
 
-        if (!ValidatedEmail.isValid(state.email)) {
+        if (!Email.isValid(state.email)) {
             _validationState.value = UserSettingsValidationState(emailError = "Invalid email format")
             return
         }
