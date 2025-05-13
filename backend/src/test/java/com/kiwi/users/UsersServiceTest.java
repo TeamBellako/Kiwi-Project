@@ -1,6 +1,5 @@
 package com.kiwi.users;
 
-import com.kiwi.exception.GlobalExceptionHandler;
 import org.junit.Test;
 import org.springframework.context.annotation.Import;
 
@@ -10,7 +9,7 @@ import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Import({GlobalExceptionHandler.class})
+@Import({UsersExceptionHandler.class})
 public class UsersServiceTest {
     private final UsersRepositoryInMemory usersRepositoryInMemory = new UsersRepositoryInMemory();
     private final UsersService usersService = new UsersService(usersRepositoryInMemory);
