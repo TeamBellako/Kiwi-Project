@@ -42,7 +42,7 @@ public class UsersSettingsControllerTest {
     @MockitoBean
     private UserSettingsService userSettingsService;
     
-    private final String baseAPIUrl = "/api/settings";
+    private final String baseAPIUrl = "/api/user/settings";
     
     
     @Test

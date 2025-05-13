@@ -1,6 +1,6 @@
 package com.kiwi.security;
 
-import com.kiwi.utils.HealthController;
+import com.kiwi.utils.PingController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(HealthController.class)
+@WebMvcTest(PingController.class)
 @AutoConfigureMockMvc
 public class RateLimitFilterTest {
 

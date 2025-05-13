@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/settings")
+@RequestMapping("/api/user/settings")
 public class UserSettingsController {
     private final UserSettingsService userSettingsService;
 

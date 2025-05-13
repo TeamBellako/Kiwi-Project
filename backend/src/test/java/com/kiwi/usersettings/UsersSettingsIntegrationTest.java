@@ -46,7 +46,7 @@ public class UsersSettingsIntegrationTest {
     private JwtUtils jwtUtils;
     
 
-    private final String baseAPIUrl = "/api/settings";
+    private final String baseAPIUrl = "/api/user/settings";
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
