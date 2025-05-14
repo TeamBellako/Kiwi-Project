@@ -12,6 +12,12 @@ public class UsersDTO {
     public UsersDTO() {
     }
 
+    public UsersDTO(String email, String password) {
+        this.email = email;
+        this.password = password;
+        this.userSettingsDTO = new UserSettingsDTO(getEmail());
+    }
+
     public UsersDTO(String email, String password, UserSettingsDTO userSettingsDTO) {
         this.email = email;
         this.password = password;

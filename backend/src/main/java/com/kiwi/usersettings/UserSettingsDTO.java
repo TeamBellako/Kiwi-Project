@@ -9,6 +9,10 @@ public class UserSettingsDTO {
     private boolean areNotificationsEnabled;
     private UserSettingsEnums.Theme theme;
 
+    public UserSettingsDTO(String email) {
+        this.email = email;
+    }
+
     public UserSettingsDTO(String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
         this.email = email;
         this.areNotificationsEnabled = areNotificationsEnabled;
