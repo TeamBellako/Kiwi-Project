@@ -32,6 +32,6 @@ public class UserSettingsExceptionHandler {
         logger.error("User settings conflict: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body("User settings conflict");
+                .body("A user settings instance with that information already exists");
     }
 }

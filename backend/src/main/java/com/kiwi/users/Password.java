@@ -7,7 +7,7 @@ public record Password(String value) {
             Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
 
     public Password {
-        if (!isValid(value)) throw new IllegalArgumentException("Password format is not valid");
+        if (!isValid(value)) throw new UsersInvalidException("Password format is not valid");
     }
 
     private boolean isValid(String value) {

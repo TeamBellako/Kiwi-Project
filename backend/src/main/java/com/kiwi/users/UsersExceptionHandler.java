@@ -25,7 +25,7 @@ public class UsersExceptionHandler {
         logger.error("Users conflict: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body("Users conflict");
+                .body("A user with that information already exists");
     }
 
     @ExceptionHandler(UsersNotFoundException.class)
