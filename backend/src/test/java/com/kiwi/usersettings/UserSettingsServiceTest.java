@@ -1,5 +1,6 @@
 package com.kiwi.usersettings;
 
+import com.kiwi.users.UsersInvalidException;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -53,8 +54,8 @@ public class UserSettingsServiceTest {
         verify(userSettingsRepository, Mockito.times(1)).saveAndFlush(UserSettingsServiceTest.this.updatedUserSettings);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void updateUserSettings_invalidInput_throwsIllegalArgumentException() throws IllegalArgumentException {
+    @Test(expected = UsersInvalidException.class)
+    public void updateUserSettings_invalidInput_throwsUsersInvalidException() throws UsersInvalidException {
         when(userSettingsRepository.existsByEmail(invalidUserSettingsDTO().getEmail())).thenReturn(true);
         
         userSettingsService.updateUserSettings(invalidUserSettingsDTO());

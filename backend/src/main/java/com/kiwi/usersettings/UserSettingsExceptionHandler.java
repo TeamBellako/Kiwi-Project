@@ -16,7 +16,7 @@ public class UserSettingsExceptionHandler {
         logger.error("Users settings not found: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
+                .body("Users settings not found");
     }
 
     @ExceptionHandler(UserSettingsInvalidException.class)
@@ -32,6 +32,6 @@ public class UserSettingsExceptionHandler {
         logger.error("User settings conflict: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ex.getMessage());
+                .body("A user settings instance with that information already exists");
     }
 }

@@ -22,7 +22,7 @@ public class UserSettings {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "theme", nullable = false)
-    private UserSettingsEnums.Theme theme;
+    private UserSettingsEnums.Theme theme = UserSettingsEnums.Theme.LIGHT;
 
     @OneToOne(mappedBy = "userSettings")
     private UsersPersistence user;

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("api/public")
+@RequestMapping("/api/public")
 public class UsersController {
     private final UsersService usersService;
     private final JwtUtils jwtUtils;
@@ -25,8 +25,10 @@ public class UsersController {
     }
     
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody UsersDTO userDTO) {
-        return ResponseEntity.status(500).body("Not implemented");
+    public ResponseEntity<String> signup(@RequestBody LoginDTO loginDTO) {
+        UsersDTO newUserDTO = new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword());
+        usersService.createUser(newUserDTO);
+        return ResponseEntity.status(200).body("");
     }
     
     @PostMapping("/login")
@@ -45,7 +47,7 @@ public class UsersController {
             response.put("jwt", jwtUtils.generateToken(internalUser.getEmail().value()));
             return ResponseEntity.status(200).body(response);
         } else {
-            return ResponseEntity.status(401).body(Map.of("error", "Incorrect password"));
+            return ResponseEntity.status(401).body(Map.of("error", "Incorrect email or password"));
         }
     }
 }

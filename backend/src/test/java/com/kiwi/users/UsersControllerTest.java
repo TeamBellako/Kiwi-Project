@@ -1,6 +1,5 @@
 package com.kiwi.users;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.exception.GlobalExceptionHandler;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.CustomUserDetailsService;
@@ -18,10 +17,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
+import static com.kiwi.users.UsersTestHTTPUtils.getPostRequestBuilder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,22 +39,28 @@ public class UsersControllerTest {
     private AuthEntryPointJwt authEntryPointJwt;
 
     @MockitoBean
-    private UsersService userSettingsService;
+    private UsersService usersService;
 
     private final String baseAPIUrl = "/api/public";
+    
+    @Test
+    public void validSignup() throws Exception {
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
+        mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/signup", loginDTO))
+                .andExpect(status().isOk());
+    }
     
     @Test
     public void validLogin() throws Exception {
         String mockToken = "myToken";
         when(jwtUtils.generateToken(anyString())).thenReturn(mockToken);
-        when(userSettingsService.getUserByEmail(any(Email.class))).thenReturn(Optional.of(validUserDTO()));
+        when(usersService.getUserByEmail(any(Email.class))).thenReturn(Optional.of(validUserDTO()));
 
-        ObjectMapper objectMapper = new ObjectMapper();
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
-        mockMvc.perform(post(baseAPIUrl + "/login")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(loginDTO)))
+        mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/login", loginDTO))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwt").value(mockToken));
     }
+    
+    
 }
