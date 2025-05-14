@@ -62,7 +62,7 @@ public class UsersServiceTest {
         userDTO.setPassword("Simon*Marceline4ever");
         usersRepositoryInMemory.saveAndFlush(userDTO.toPersistenceObject());
 
-        assertEquals(userDTO, usersRepositoryInMemory.findByEmail(userDTO.getEmail()).toDTO());
+        assertEquals(userDTO, usersRepositoryInMemory.findByEmail(userDTO.getEmail()).get().toDTO());
     }
 
     @Test(expected = IllegalArgumentException.class)

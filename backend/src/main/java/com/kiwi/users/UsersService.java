@@ -28,8 +28,7 @@ public class UsersService {
     }
     
     public Optional<UsersDTO> getUserByEmail(@NotNull Email email) {
-        return Optional.ofNullable(usersRepository.findByEmail(email.value()))
-                .map(UsersPersistence::toDTO);
+        return usersRepository.findByEmail(email.value()).map(UsersPersistence::toDTO);
     }
 
     @Transactional
@@ -37,7 +36,7 @@ public class UsersService {
         Users userUpdate = userDTO.toDomainObject();
         Email userUpdateEmail = userUpdate.getEmail();
         
-        Optional<UsersPersistence> existingUserPersistenceOptional = Optional.ofNullable(usersRepository.findByEmail(userUpdateEmail.value()));
+        Optional<UsersPersistence> existingUserPersistenceOptional = usersRepository.findByEmail(userUpdateEmail.value());
         if (existingUserPersistenceOptional.isEmpty()) throw new UsersNotFoundException(userUpdateEmail.value());
         
         UsersPersistence usersPersistence = existingUserPersistenceOptional.get();

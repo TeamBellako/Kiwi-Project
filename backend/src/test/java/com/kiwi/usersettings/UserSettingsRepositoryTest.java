@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@Sql(scripts = "/UserSettings+Users.sql")
+@Sql(scripts = "/UserSettingsTestSetUp.sql")
 @ActiveProfiles("test")
 public class UserSettingsRepositoryTest {
     

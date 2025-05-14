@@ -13,5 +13,5 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
 
-    CONSTRAINT fk_user_email_to_settings FOREIGN KEY (email) REFERENCES user_settings(email)
+    CONSTRAINT fk_user_email_to_settings FOREIGN KEY (email) REFERENCES user_settings(email) ON DELETE CASCADE
 );
