@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(scripts = "/UserSettingsTestSetUp.sql")
+@Sql(scripts = "/UserSettings+Users.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc 
 @AutoConfigureAddonsWebmvcResourceServerSecurity

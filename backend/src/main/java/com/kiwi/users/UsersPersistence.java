@@ -1,5 +1,6 @@
 package com.kiwi.users;
 
+import com.kiwi.usersettings.UserSettings;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -17,6 +18,10 @@ public class UsersPersistence {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @OneToOne
+    @JoinColumn(name = "email", referencedColumnName = "email", insertable = false, updatable = false)
+    private UserSettings userSettings;
 
     public UsersPersistence() {
     }
@@ -50,6 +55,14 @@ public class UsersPersistence {
 
     public void setPassword(Password password) {
         this.password = password.value();
+    }
+
+    public UserSettings getUserSettings() {
+        return userSettings;
+    }
+
+    public void setUserSettings(UserSettings userSettings) {
+        this.userSettings = userSettings;
     }
 
     @Override
