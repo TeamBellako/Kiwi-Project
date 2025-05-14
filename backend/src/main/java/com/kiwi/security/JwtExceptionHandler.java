@@ -53,14 +53,6 @@ public class JwtExceptionHandler {
                 .body("Unauthorized: JWT token is not valid yet.");
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("Illegal argument in JWT processing: {}", ex.getMessage(), ex);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Bad Request: JWT token is missing or malformed.");
-    }
-
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<String> handleGenericJwtException(JwtException ex) {
         logger.warn("Generic JWT exception: {}", ex.getMessage(), ex);

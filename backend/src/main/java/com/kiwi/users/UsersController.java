@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/public")
+@RequestMapping("api/public")
 public class UsersController {
     private final UsersService usersService;
     private final JwtUtils jwtUtils;
@@ -29,7 +29,7 @@ public class UsersController {
         return ResponseEntity.status(500).body("Not implemented");
     }
     
-    @PostMapping(path = "/login")
+    @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginDTO loginDTO) {
         Email providedEmail = new Email(loginDTO.getEmail());
         Password providedPassword = new Password(loginDTO.getPassword());
