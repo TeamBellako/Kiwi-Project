@@ -1,5 +1,6 @@
 package com.kiwi.users;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.exception.GlobalExceptionHandler;
 import com.kiwi.security.AuthEntryPointJwt;
@@ -40,15 +41,25 @@ public class UsersControllerTest {
     private AuthEntryPointJwt authEntryPointJwt;
 
     @MockitoBean
-    private UsersService userSettingsService;
+    private UsersService usersService;
 
     private final String baseAPIUrl = "/api/public";
+    
+    @Test
+    public void validSignup() throws Exception {
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockMvc.perform(post(baseAPIUrl + "/signup")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(loginDTO)))
+                .andExpect(status().isOk());
+    }
     
     @Test
     public void validLogin() throws Exception {
         String mockToken = "myToken";
         when(jwtUtils.generateToken(anyString())).thenReturn(mockToken);
-        when(userSettingsService.getUserByEmail(any(Email.class))).thenReturn(Optional.of(validUserDTO()));
+        when(usersService.getUserByEmail(any(Email.class))).thenReturn(Optional.of(validUserDTO()));
 
         ObjectMapper objectMapper = new ObjectMapper();
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());

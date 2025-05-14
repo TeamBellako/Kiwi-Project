@@ -5,9 +5,9 @@ import com.kiwi.users.Email;
 import java.util.Objects;
 
 public class UserSettingsDTO {
-    private String email;
-    private boolean areNotificationsEnabled;
-    private UserSettingsEnums.Theme theme;
+    private String email = "";
+    private boolean areNotificationsEnabled = false;
+    private UserSettingsEnums.Theme theme = UserSettingsEnums.Theme.LIGHT;
 
     public UserSettingsDTO(String email) {
         this.email = email;

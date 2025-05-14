@@ -25,8 +25,10 @@ public class UsersController {
     }
     
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody UsersDTO userDTO) {
-        return ResponseEntity.status(500).body("Not implemented");
+    public ResponseEntity<String> signup(@RequestBody LoginDTO loginDTO) {
+        UsersDTO newUserDTO = new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword());
+        usersService.createUser(newUserDTO);
+        return ResponseEntity.status(200).body("");
     }
     
     @PostMapping("/login")
