@@ -4,7 +4,7 @@ public class UserSettingsTestFactory {
     public static UserSettingsDTO validUserSettingsDTO() {
         return new UserSettingsDTO(
                 "finn@thehuman.com",
-                true,
+                false,
                 UserSettingsEnums.Theme.LIGHT
         );
     }
@@ -12,7 +12,7 @@ public class UserSettingsTestFactory {
     public static UserSettingsDTO updatedUserSettingsDTO() {
         return new UserSettingsDTO(
                 "finn@thehuman.com",
-                false,
+                true,
                 UserSettingsEnums.Theme.DARK
         );
     }

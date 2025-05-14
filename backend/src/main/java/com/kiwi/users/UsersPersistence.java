@@ -80,7 +80,7 @@ public class UsersPersistence {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UsersPersistence that = (UsersPersistence) o;
-        return Objects.equals(id, that.id) && Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(userSettings, that.userSettings);
+        return Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(userSettings, that.userSettings);
     }
 
     @Override
