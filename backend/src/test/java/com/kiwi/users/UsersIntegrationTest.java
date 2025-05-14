@@ -1,14 +1,10 @@
 package com.kiwi.users;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.exception.GlobalExceptionHandler;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.security.WebSecurityConfig;
-import com.kiwi.usersettings.UserSettingsDTO;
-import com.kiwi.usersettings.UserSettingsRepository;
-import com.kiwi.usersettings.UserSettingsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
-import static com.kiwi.users.UsersTestHTTPUtils.getValidLogInPostRequestBuilder;
+import static com.kiwi.users.UsersTestHTTPUtils.getPostRequestBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,7 +54,7 @@ public class UsersIntegrationTest {
     public void validSignup() throws Exception {
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
         
-        mockMvc.perform(getValidLogInPostRequestBuilder(signupAPIUrl, loginDTO))
+        mockMvc.perform(getPostRequestBuilder(signupAPIUrl, loginDTO))
                 .andExpect(status().isOk());
         
         assertEquals(validUserDTO(), usersRepository.findByEmail(validUserDTO().getEmail()).get().toDTO());
@@ -66,19 +62,15 @@ public class UsersIntegrationTest {
 
     @Test
     public void invalidSignup() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(invalidUserDTO().getEmail(), invalidUserDTO().getPassword());
-        
-        mockMvc.perform(getValidLogInPostRequestBuilder(signupAPIUrl, loginDTO))
+        mockMvc.perform(getPostRequestBuilder(signupAPIUrl, getinValidLoginDTO()))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void duplicatedSignup() throws Exception {
         usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
-
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
-
-        mockMvc.perform(getValidLogInPostRequestBuilder(signupAPIUrl, loginDTO))
+        
+        mockMvc.perform(getPostRequestBuilder(signupAPIUrl, getValidLoginDTO()))
                 .andExpect(status().isConflict());
     }
 
@@ -86,8 +78,7 @@ public class UsersIntegrationTest {
     public void validLogin() throws Exception {
         usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
         
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
-        MvcResult result = mockMvc.perform(getValidLogInPostRequestBuilder(loginAPIUrl, loginDTO))
+        MvcResult result = mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getValidLoginDTO()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwt").exists())
                 .andReturn();
@@ -101,17 +92,13 @@ public class UsersIntegrationTest {
 
     @Test
     public void invalidLogin() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(invalidUserDTO().getEmail(), invalidUserDTO().getPassword());
-
-        mockMvc.perform(getValidLogInPostRequestBuilder(loginAPIUrl, loginDTO))
+        mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getinValidLoginDTO()))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void nonExistingLogin() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
-
-        mockMvc.perform(getValidLogInPostRequestBuilder(loginAPIUrl, loginDTO))
+        mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getValidLoginDTO()))
                 .andExpect(status().isNotFound());
     }
 
@@ -121,7 +108,10 @@ public class UsersIntegrationTest {
         
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), "Marceline*Simon4Ever");
 
-        mockMvc.perform(getValidLogInPostRequestBuilder(loginAPIUrl, loginDTO))
+        mockMvc.perform(getPostRequestBuilder(loginAPIUrl, loginDTO))
                 .andExpect(status().isUnauthorized());
     }
+    
+    private LoginDTO getValidLoginDTO() { return new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword()); }
+    private LoginDTO getinValidLoginDTO() { return new LoginDTO(invalidUserDTO().getEmail(), invalidUserDTO().getPassword()); }
 }

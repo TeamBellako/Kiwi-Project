@@ -7,7 +7,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 public class UsersTestHTTPUtils {
-    public static MockHttpServletRequestBuilder getValidLogInPostRequestBuilder(String uri, LoginDTO loginDTO) throws JsonProcessingException {
+    public static MockHttpServletRequestBuilder getPostRequestBuilder(String uri, LoginDTO loginDTO) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         return post(uri)
                 .contentType("application/json")
