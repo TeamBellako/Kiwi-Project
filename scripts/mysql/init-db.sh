@@ -35,6 +35,10 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT users_check_email_format CHECK (
         email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'
     ),
+    CONSTRAINT users_check_password_format CHECK (
+        password REGEXP '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+    ),
+
     CONSTRAINT fk_user_email_to_settings FOREIGN KEY (email) REFERENCES user_settings(email)
 );
 
