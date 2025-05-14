@@ -9,6 +9,9 @@ public class UserSettingsDTO {
     private boolean areNotificationsEnabled = false;
     private UserSettingsEnums.Theme theme = UserSettingsEnums.Theme.LIGHT;
 
+    public UserSettingsDTO() {
+    }
+
     public UserSettingsDTO(String email) {
         this.email = email;
     }

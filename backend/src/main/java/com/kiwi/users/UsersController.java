@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("api/public")
+@RequestMapping("/api/public")
 public class UsersController {
     private final UsersService usersService;
     private final JwtUtils jwtUtils;

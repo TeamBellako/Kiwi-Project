@@ -1,5 +1,6 @@
 package com.kiwi.users;
 
+import com.kiwi.usersettings.UserSettingsInvalidException;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -18,10 +19,10 @@ public class UsersServiceTest {
     public void createValidUser() {
         usersService.createUser(validUserDTO());
         
-        assertEquals(validUserDTO().toPersistenceObject(), usersRepositoryInMemory.findByEmail(validEmailString));
+        assertEquals(validUserDTO(), usersRepositoryInMemory.findByEmail(validEmailString).get().toDTO());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = UsersInvalidException.class)
     public void createInvalidUser() {
         usersService.createUser(invalidUserDTO());
     }
@@ -65,7 +66,7 @@ public class UsersServiceTest {
         assertEquals(userDTO, usersRepositoryInMemory.findByEmail(userDTO.getEmail()).get().toDTO());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = UsersInvalidException.class)
     public void updateInvalidUser() {
         usersService.updateUser(invalidUserDTO());
     }

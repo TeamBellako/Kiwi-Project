@@ -28,7 +28,6 @@ public class UserSettingsService {
     @Transactional
     public UserSettingsDTO updateUserSettings(@Valid UserSettingsDTO userSettingsDTO) {
         UserSettings userSettings = userSettingsDTO.toDomainObject();
-        if (userSettings == null) throw new IllegalArgumentException("Invalid user settings provided");
         
         Optional<UserSettings> existing = userSettingsRepository.findByEmail(userSettings.getEmail().value());
         if (existing.isEmpty()) throw new UserSettingsNotFoundException(userSettings.getEmail().value());
