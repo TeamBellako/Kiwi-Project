@@ -24,6 +24,6 @@ public class UsersExceptionHandler {
         logger.error("User not found: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
+                .body("User not found");
     }
 }

@@ -1,5 +1,6 @@
 package com.kiwi.users;
 
+import com.kiwi.usersettings.UserSettings;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -18,12 +19,17 @@ public class UsersPersistence {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "email", referencedColumnName = "email", insertable = false, updatable = false)
+    private UserSettings userSettings;
+
     public UsersPersistence() {
     }
 
-    public UsersPersistence(Email email, Password password) {
+    public UsersPersistence(Email email, Password password, UserSettings userSettings) {
         setEmail(email);
         setPassword(password);
+        setUserSettings(userSettings);
     }
 
     public Integer getId() {
@@ -52,16 +58,12 @@ public class UsersPersistence {
         this.password = password.value();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        UsersPersistence usersPersistence = (UsersPersistence) o;
-        return Objects.equals(email, usersPersistence.email) && Objects.equals(password, usersPersistence.password);
+    public UserSettings getUserSettings() {
+        return userSettings;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(email, password);
+    public void setUserSettings(UserSettings userSettings) {
+        this.userSettings = userSettings;
     }
 
     @Override
@@ -70,25 +72,41 @@ public class UsersPersistence {
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", userSettings=" + userSettings +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        UsersPersistence that = (UsersPersistence) o;
+        return Objects.equals(id, that.id) && Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(userSettings, that.userSettings);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email, password, userSettings);
     }
 
     public UsersDTO toDTO() {
         return new UsersDTO(
                 getEmail().value(),
-                getPassword().value()
+                getPassword().value(),
+                getUserSettings().toDTO()
         );
     }
 
     public Users toDomainObject() {
         return new Users(
                 getEmail(),
-                getPassword()
+                getPassword(),
+                getUserSettings()
         );
     }
     
     public void mergeFromDomainObject(Users user) {
         setEmail(user.getEmail());
         setPassword(user.getPassword());
+        setUserSettings(user.getUserSettings());
     } 
 }

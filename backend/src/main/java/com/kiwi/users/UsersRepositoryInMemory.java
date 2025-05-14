@@ -20,8 +20,8 @@ public class UsersRepositoryInMemory implements UsersRepository {
     }
 
     @Override
-    public UsersPersistence findByEmail(String email) {
-        return users.getOrDefault(email, null);
+    public Optional<UsersPersistence> findByEmail(String email) {
+        return Optional.ofNullable(users.get(email));
     }
 
     @Override

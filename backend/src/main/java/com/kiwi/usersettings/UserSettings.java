@@ -1,6 +1,7 @@
 package com.kiwi.usersettings;
 
 import com.kiwi.users.Email;
+import com.kiwi.users.UsersPersistence;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -22,6 +23,9 @@ public class UserSettings {
     @Enumerated(EnumType.STRING)
     @Column(name = "theme", nullable = false)
     private UserSettingsEnums.Theme theme;
+
+    @OneToOne(mappedBy = "userSettings")
+    private UsersPersistence user;
 
     public UserSettings() {
     }
@@ -71,6 +75,14 @@ public class UserSettings {
 
     public void setTheme(UserSettingsEnums.Theme theme) {
         this.theme = theme;
+    }
+
+    public UsersPersistence getUser() {
+        return user;
+    }
+
+    public void setUser(UsersPersistence user) {
+        this.user = user;
     }
 
     @Override
