@@ -7,7 +7,7 @@ public record Email(String value) {
             Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     public Email {
-        if (!isValid(value)) throw new IllegalArgumentException("Email format is not valid");
+        if (!isValid(value)) throw new UsersInvalidException("Email format is not valid");
     }
 
     private boolean isValid(String value) {

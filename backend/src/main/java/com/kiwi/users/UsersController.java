@@ -47,7 +47,7 @@ public class UsersController {
             response.put("jwt", jwtUtils.generateToken(internalUser.getEmail().value()));
             return ResponseEntity.status(200).body(response);
         } else {
-            return ResponseEntity.status(401).body(Map.of("error", "Incorrect password"));
+            return ResponseEntity.status(401).body(Map.of("error", "Incorrect email or password"));
         }
     }
 }

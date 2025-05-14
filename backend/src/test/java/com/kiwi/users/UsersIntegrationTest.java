@@ -28,7 +28,6 @@ import static com.kiwi.users.UsersTestHTTPUtils.getValidLogInPostRequestBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,9 +69,7 @@ public class UsersIntegrationTest {
         LoginDTO loginDTO = new LoginDTO(invalidUserDTO().getEmail(), invalidUserDTO().getPassword());
         
         mockMvc.perform(getValidLogInPostRequestBuilder(signupAPIUrl, loginDTO))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email").exists())
-                .andExpect(jsonPath("$.password").exists());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -107,13 +104,12 @@ public class UsersIntegrationTest {
         LoginDTO loginDTO = new LoginDTO(invalidUserDTO().getEmail(), invalidUserDTO().getPassword());
 
         mockMvc.perform(getValidLogInPostRequestBuilder(loginAPIUrl, loginDTO))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.email").exists());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     public void nonExistingLogin() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(invalidUserDTO().getEmail(), invalidUserDTO().getPassword());
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
 
         mockMvc.perform(getValidLogInPostRequestBuilder(loginAPIUrl, loginDTO))
                 .andExpect(status().isNotFound());
@@ -121,6 +117,8 @@ public class UsersIntegrationTest {
 
     @Test
     public void incorrectPasswordLogin() throws Exception {
+        usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
+        
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), "Marceline*Simon4Ever");
 
         mockMvc.perform(getValidLogInPostRequestBuilder(loginAPIUrl, loginDTO))
