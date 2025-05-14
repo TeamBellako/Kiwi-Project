@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.Optional;
 
@@ -47,11 +48,7 @@ public class UsersControllerTest {
     
     @Test
     public void validSignup() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
-        ObjectMapper objectMapper = new ObjectMapper();
-        mockMvc.perform(post(baseAPIUrl + "/signup")
-                    .contentType("application/json")
-                    .content(objectMapper.writeValueAsString(loginDTO)))
+        mockMvc.perform(getValidPostRequestBuilder(baseAPIUrl + "/signup"))
                 .andExpect(status().isOk());
     }
     
@@ -60,13 +57,17 @@ public class UsersControllerTest {
         String mockToken = "myToken";
         when(jwtUtils.generateToken(anyString())).thenReturn(mockToken);
         when(usersService.getUserByEmail(any(Email.class))).thenReturn(Optional.of(validUserDTO()));
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
-        mockMvc.perform(post(baseAPIUrl + "/login")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(loginDTO)))
+        
+        mockMvc.perform(getValidPostRequestBuilder(baseAPIUrl + "/login"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwt").value(mockToken));
+    }
+    
+    private MockHttpServletRequestBuilder getValidPostRequestBuilder(String uri) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
+        return post(uri)
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(loginDTO));
     }
 }
