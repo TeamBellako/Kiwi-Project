@@ -8,6 +8,13 @@ object UsersTestFactory {
         )
     }
 
+    fun incorrectPasswordUsersDTO() : UsersDTO {
+        return UsersDTO(
+            email = "finn@thehuman.com",
+            password = "Math3maticalawdawdwad!"
+        )
+    }
+
     fun invalidUsersDTO() : UsersDTO {
         return UsersDTO(
             email = "bmolovesfootball.com",

@@ -8,6 +8,6 @@ interface IUsersViewModel {
     val state: StateFlow<UsersState?>
     val isLoading: StateFlow<Boolean>
 
-    fun login(state: UsersState)
-    fun signup(state: UsersState)
+    fun login(state: UsersState): Result<String>
+    fun signup(state: UsersState): Result<String>
 }

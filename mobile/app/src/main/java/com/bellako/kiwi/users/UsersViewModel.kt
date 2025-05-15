@@ -19,11 +19,11 @@ class UsersViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    override fun signup(state: UsersState) {
+    override fun signup(state: UsersState) : Result<String> {
         TODO("Not yet implemented")
     }
 
-    override fun login(state: UsersState) {
+    override fun login(state: UsersState) : Result<String> {
         TODO("Not yet implemented")
     }
 }
