@@ -28,7 +28,7 @@ public class UsersController {
     public ResponseEntity<String> signup(@RequestBody LoginDTO loginDTO) {
         UsersDTO newUserDTO = new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword());
         usersService.createUser(newUserDTO);
-        return ResponseEntity.status(200).body("");
+        return ResponseEntity.status(201).body("");
     }
     
     @PostMapping("/login")
