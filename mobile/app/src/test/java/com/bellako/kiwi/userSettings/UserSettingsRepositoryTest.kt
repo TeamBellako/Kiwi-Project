@@ -5,6 +5,7 @@ import com.bellako.kiwi.userSettings.network.UserSettingsRepository
 import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsDTO
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
+import com.bellako.kiwi.utils.HTTPUtils.createFakeHttpException
 import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.*
@@ -37,7 +38,7 @@ class UserSettingsRepositoryTest {
 
     @Test
     fun `getUserSettings returns failure when API throws any exception`() = runTest {
-        `when`(api.getUserSettings()).thenThrow(fakeHttpException(500))
+        `when`(api.getUserSettings()).thenThrow(createFakeHttpException(500))
 
         val result = repository.getUserSettings()
 
@@ -56,20 +57,11 @@ class UserSettingsRepositoryTest {
 
     @Test
     fun `updateUserSettings returns failure when API throws any exception`() = runTest {
-        doThrow(fakeHttpException(500)).`when`(api).updateUserSettings(validUserSettings())
+        doThrow(createFakeHttpException(500)).`when`(api).updateUserSettings(validUserSettings())
 
         val result = repository.updateUserSettings(validUserSettings())
 
         assertTrue(result.isFailure)
         assertNotNull(result.exceptionOrNull())
-    }
-
-    // Helper
-    private fun fakeHttpException(code: Int): HttpException {
-        val response = Response.error<Any>(
-            code,
-            "Error $code".toResponseBody(null)
-        )
-        return HttpException(response)
     }
 }

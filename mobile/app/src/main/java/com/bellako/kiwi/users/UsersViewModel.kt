@@ -1,16 +1,11 @@
 package com.bellako.kiwi.users
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.bellako.kiwi.userSettings.network.UserSettingsRepository
-import com.bellako.kiwi.userSettings.types.UserSettingsState
-import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
