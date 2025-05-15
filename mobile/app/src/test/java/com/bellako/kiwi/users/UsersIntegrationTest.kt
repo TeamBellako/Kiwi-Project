@@ -39,7 +39,7 @@ class UsersIntegrationTest {
     fun `signup with a valid user`() = runTest {
         whenever(api.signup(any())).thenReturn(Response.success(null))
 
-        val result : Result<String> = viewModel.signup(validUsersDTO().toState())
+        val result : Result<Unit> = viewModel.signup(validUsersDTO().toState())
 
         assertTrue(result.isSuccess)
     }
@@ -50,9 +50,9 @@ class UsersIntegrationTest {
             409,
             "Error".toResponseBody(null)
         ))
-        doThrow(mockException).whenever(api).login(any())
+        doThrow(mockException).whenever(api).signup(any())
 
-        val result : Result<String> = viewModel.signup(validUsersDTO().toState())
+        val result : Result<Unit> = viewModel.signup(validUsersDTO().toState())
 
         assertTrue(result.isFailure)
     }

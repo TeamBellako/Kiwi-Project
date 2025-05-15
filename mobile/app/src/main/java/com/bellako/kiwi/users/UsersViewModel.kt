@@ -1,6 +1,7 @@
 package com.bellako.kiwi.users
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
@@ -9,6 +10,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
@@ -19,11 +21,42 @@ class UsersViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    override fun signup(state: UsersState) : Result<String> {
-        TODO("Not yet implemented")
+    override suspend fun signup(state: UsersState) : Result<Unit> {
+        return state.toDomainObject().fold(
+            onSuccess = { user ->
+                _isLoading.value = true
+                try {
+                    val apiResult : Result<Unit> = repository.signup(user.toDTO())
+                    _isLoading.value = false
+                    apiResult
+                } catch (e: Exception) {
+                    _isLoading.value = false
+                    Result.failure(e)
+                }
+            },
+            onFailure = {
+                Result.failure(Exception("Invalid email or password format"))
+            }
+        )
     }
 
-    override fun login(state: UsersState) : Result<String> {
-        TODO("Not yet implemented")
+    override suspend fun login(state: UsersState): Result<String> {
+        return state.toDomainObject().fold(
+            onSuccess = { user ->
+                _isLoading.value = true
+                try {
+                    val apiResult : Result<String> = repository.login(user.toDTO())
+                    _isLoading.value = false
+                    apiResult
+                } catch (e: Exception) {
+                    _isLoading.value = false
+                    Result.failure(e)
+                }
+            },
+            onFailure = {
+                Result.failure(Exception("Invalid email or password format"))
+            }
+        )
     }
+
 }
