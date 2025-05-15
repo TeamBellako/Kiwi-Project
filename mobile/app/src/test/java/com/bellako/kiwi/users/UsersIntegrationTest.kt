@@ -1,5 +1,6 @@
 package com.bellako.kiwi.users
 
+import com.bellako.kiwi.network.JwtAuthInterceptor
 import com.bellako.kiwi.users.UsersTestFactory.incorrectPasswordUsersDTO
 import com.bellako.kiwi.users.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.utils.HTTPUtils.createFakeHttpException
@@ -9,26 +10,26 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.whenever
-import retrofit2.Response
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class UsersIntegrationTest {
     private lateinit var api: IUsersAPI
     private lateinit var repository: UsersRepository
     private lateinit var viewModel: IUsersViewModel
+    private lateinit var jwtAuthInterceptor: JwtAuthInterceptor
 
     @Before
     fun setUp() {
         api = mock(IUsersAPI::class.java)
+        jwtAuthInterceptor = JwtAuthInterceptor()
         repository = UsersRepository(api)
-        viewModel = UsersViewModel(repository)
+        viewModel = UsersViewModel(repository, jwtAuthInterceptor)
     }
 
     @Test
     fun `signup with a valid user`() = runTest {
-        whenever(api.signup(any())).thenReturn(Response.success(null))
+        whenever(api.signup(any())).thenReturn(Result.success(Unit))
 
         val result : Result<Unit> = viewModel.signup(validUsersDTO().toState())
 
@@ -46,20 +47,19 @@ class UsersIntegrationTest {
 
     @Test
     fun `login with a valid user`() = runTest {
-        val mockJwtToken : String = "mockJwt"
-        whenever(api.login(any())).thenReturn(Result.success(mockJwtToken))
+        whenever(api.login(any())).thenReturn(Result.success("mockJwt"))
 
-        val result : Result<String> = viewModel.login(validUsersDTO().toState())
+        val result : Result<Unit> = viewModel.login(validUsersDTO().toState())
 
         assertTrue(result.isSuccess)
-        assertEquals(result.getOrNull(), mockJwtToken)
+        assertTrue(jwtAuthInterceptor.isJwtTokenSet())
     }
 
     @Test
     fun `login with an incorrect password`() = runTest {
         doThrow(createFakeHttpException(401)).whenever(api).login(any())
 
-        val result = viewModel.login(incorrectPasswordUsersDTO().toState())
+        val result : Result<Unit> = viewModel.login(incorrectPasswordUsersDTO().toState())
 
         assertTrue(result.isFailure)
     }

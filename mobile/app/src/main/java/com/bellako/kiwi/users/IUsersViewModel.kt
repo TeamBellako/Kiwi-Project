@@ -7,5 +7,5 @@ interface IUsersViewModel {
     val isLoading: StateFlow<Boolean>
 
     suspend fun signup(state: UsersState): Result<Unit>
-    suspend fun login(state: UsersState): Result<String>
+    suspend fun login(state: UsersState): Result<Unit>
 }

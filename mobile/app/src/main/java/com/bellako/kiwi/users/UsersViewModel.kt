@@ -1,6 +1,7 @@
 package com.bellako.kiwi.users
 
 import androidx.lifecycle.ViewModel
+import com.bellako.kiwi.network.JwtAuthInterceptor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,7 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
-    private val repository: UsersRepository
+    private val repository: UsersRepository,
+    private val jwtAuthInterceptor: JwtAuthInterceptor
 ) : ViewModel(), IUsersViewModel {
     private val _state = MutableStateFlow<UsersState?>(null)
     override val state: StateFlow<UsersState?> = _state.asStateFlow()
@@ -21,9 +23,8 @@ class UsersViewModel @Inject constructor(
             onSuccess = { user ->
                 _isLoading.value = true
                 try {
-                    val apiResult : Result<Unit> = repository.signup(user.toDTO())
                     _isLoading.value = false
-                    apiResult
+                    repository.signup(user.toDTO())
                 } catch (e: Exception) {
                     _isLoading.value = false
                     Result.failure(e)
@@ -35,17 +36,18 @@ class UsersViewModel @Inject constructor(
         )
     }
 
-    override suspend fun login(state: UsersState): Result<String> {
+    override suspend fun login(state: UsersState): Result<Unit> {
         return state.toDomainObject().fold(
             onSuccess = { user ->
                 _isLoading.value = true
-                try {
-                    val apiResult : Result<String> = repository.login(user.toDTO())
-                    _isLoading.value = false
-                    apiResult
-                } catch (e: Exception) {
-                    _isLoading.value = false
-                    Result.failure(e)
+                val apiResult: Result<String> = repository.login(user.toDTO())
+                _isLoading.value = false
+
+                return if (apiResult.isSuccess) {
+                    jwtAuthInterceptor.setJwtToken(apiResult.getOrDefault(""))
+                    Result.success(Unit)
+                } else {
+                    Result.failure(apiResult.exceptionOrNull() ?: Exception("Incorrect email or password"))
                 }
             },
             onFailure = {
@@ -53,5 +55,4 @@ class UsersViewModel @Inject constructor(
             }
         )
     }
-
 }
