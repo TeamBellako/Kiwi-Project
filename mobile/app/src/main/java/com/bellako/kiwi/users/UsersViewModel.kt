@@ -18,7 +18,7 @@ class UsersViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    override suspend fun signup(state: UsersState) : Result<Unit> {
+    override fun signup(state: UsersState) : Result<Unit> {
         return state.toDomainObject().fold(
             onSuccess = { user ->
                 _isLoading.value = true
@@ -36,7 +36,7 @@ class UsersViewModel @Inject constructor(
         )
     }
 
-    override suspend fun login(state: UsersState): Result<Unit> {
+    override fun login(state: UsersState): Result<Unit> {
         return state.toDomainObject().fold(
             onSuccess = { user ->
                 _isLoading.value = true
@@ -54,5 +54,13 @@ class UsersViewModel @Inject constructor(
                 Result.failure(Exception("Invalid email or password format"))
             }
         )
+    }
+
+    override fun onEmailChanged(email: String) {
+        _state.value = _state.value?.copy(email = email)
+    }
+
+    override fun onPasswordChanged(password: String) {
+        _state.value = _state.value?.copy(password = password)
     }
 }
