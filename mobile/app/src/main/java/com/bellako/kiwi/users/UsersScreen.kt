@@ -14,6 +14,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private val separatorHeight = 24.dp
 private val loadingOverlayColor = Color(0x20FFFFFF)
@@ -168,14 +171,16 @@ private fun UsersButtons(
         FormButton(
             "Sign Up",
             {
-                errorMessageState.value = ""
-                successMessageState.value = ""
+                CoroutineScope(Dispatchers.Main).launch {
+                    errorMessageState.value = ""
+                    successMessageState.value = ""
 
-                val result : Result<Unit> = viewModel.signup(currentState)
-                if (result.isSuccess) {
-                    successMessageState.value = "New User Successfully Created!"
-                } else {
-                    errorMessageState.value = result.exceptionOrNull()?.message.toString()
+                    val result: Result<Unit> = viewModel.signup(currentState)
+                    if (result.isSuccess) {
+                        successMessageState.value = "New User Successfully Created!"
+                    } else {
+                        errorMessageState.value = result.exceptionOrNull()?.message.toString()
+                    }
                 }
             },
             isLoading,
@@ -187,16 +192,18 @@ private fun UsersButtons(
 
         FormButton(
             "Login",
-            {
-                errorMessageState.value = ""
-                successMessageState.value = ""
+             {
+                 CoroutineScope(Dispatchers.Main).launch {
+                     errorMessageState.value = ""
+                     successMessageState.value = ""
 
-                val result : Result<Unit> = viewModel.login(currentState)
-                if (result.isSuccess) {
-
-                } else {
-                    errorMessageState.value = result.exceptionOrNull()?.message.toString()
-                }
+                     val result : Result<Unit> = viewModel.login(currentState)
+                     if (result.isSuccess) {
+                         successMessageState.value = "Login Was Successful!"
+                     } else {
+                         errorMessageState.value = result.exceptionOrNull()?.message.toString()
+                     }
+                 }
             },
             isLoading,
             UsersTestTags.LOGIN_BUTTON,

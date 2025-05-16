@@ -13,12 +13,12 @@ class UsersViewModel @Inject constructor(
     private val repository: UsersRepository,
     private val jwtAuthInterceptor: JwtAuthInterceptor
 ) : ViewModel(), IUsersViewModel {
-    private val _state = MutableStateFlow<UsersState?>(null)
+    private val _state = MutableStateFlow<UsersState?>(UsersState("", ""))
     override val state: StateFlow<UsersState?> = _state.asStateFlow()
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    override fun signup(state: UsersState) : Result<Unit> {
+    override suspend fun signup(state: UsersState) : Result<Unit> {
         return state.toDomainObject().fold(
             onSuccess = { user ->
                 _isLoading.value = true
@@ -36,7 +36,7 @@ class UsersViewModel @Inject constructor(
         )
     }
 
-    override fun login(state: UsersState): Result<Unit> {
+    override suspend fun login(state: UsersState): Result<Unit> {
         return state.toDomainObject().fold(
             onSuccess = { user ->
                 _isLoading.value = true

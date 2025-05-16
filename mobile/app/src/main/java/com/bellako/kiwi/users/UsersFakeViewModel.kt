@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class UsersFakeViewModel  (
     initialState: UsersState,
     isLoading: Boolean
-) : ViewModel(), IUsersViewModel{
+) : ViewModel(), IUsersViewModel {
     private val _state = MutableStateFlow<UsersState?>(initialState)
     override val state: StateFlow<UsersState?> = _state.asStateFlow()
     private val _isLoading = MutableStateFlow(isLoading)
@@ -16,7 +16,7 @@ class UsersFakeViewModel  (
 
     var fakeError: Boolean = false
 
-    override fun signup(state: UsersState): Result<Unit> {
+    override suspend fun signup(state: UsersState): Result<Unit> {
         if (fakeError) {
             return Result.failure(Exception("Signup error"))
         }
@@ -24,7 +24,7 @@ class UsersFakeViewModel  (
         return Result.success(Unit)
     }
 
-    override fun login(state: UsersState): Result<Unit> {
+    override suspend fun login(state: UsersState): Result<Unit> {
         if (fakeError) {
             return Result.failure(Exception("Login error"))
         }
