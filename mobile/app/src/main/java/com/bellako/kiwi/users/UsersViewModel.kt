@@ -13,7 +13,7 @@ class UsersViewModel @Inject constructor(
     private val repository: UsersRepository,
     private val jwtAuthInterceptor: JwtAuthInterceptor
 ) : ViewModel(), IUsersViewModel {
-    private val _state = MutableStateFlow<UsersState?>(null)
+    private val _state = MutableStateFlow<UsersState?>(UsersState("", ""))
     override val state: StateFlow<UsersState?> = _state.asStateFlow()
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -54,5 +54,13 @@ class UsersViewModel @Inject constructor(
                 Result.failure(Exception("Invalid email or password format"))
             }
         )
+    }
+
+    override fun onEmailChanged(email: String) {
+        _state.value = _state.value?.copy(email = email)
+    }
+
+    override fun onPasswordChanged(password: String) {
+        _state.value = _state.value?.copy(password = password)
     }
 }

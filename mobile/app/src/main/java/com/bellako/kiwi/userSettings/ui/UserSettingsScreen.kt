@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.utils.TestTags
+import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
 import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.viewModel.IUserSettingsViewModel
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
@@ -105,6 +105,6 @@ fun ServerError(message: String) {
         color = Color.Red,
         modifier = Modifier
             .padding(vertical = 80.dp)
-            .testTag(TestTags.SERVER_ERROR)
+            .testTag(UserSettingsTestTags.SERVER_ERROR)
     )
 }

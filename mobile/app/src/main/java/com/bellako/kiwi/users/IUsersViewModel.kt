@@ -8,4 +8,7 @@ interface IUsersViewModel {
 
     suspend fun signup(state: UsersState): Result<Unit>
     suspend fun login(state: UsersState): Result<Unit>
+
+    fun onEmailChanged(email: String)
+    fun onPasswordChanged(password: String)
 }

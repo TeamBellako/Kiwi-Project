@@ -1,6 +1,6 @@
-package com.bellako.kiwi.utils
+package com.bellako.kiwi.userSettings.utils
 
-object TestTags {
+object UserSettingsTestTags {
     const val CIRCULAR_PROGRESS_INDICATOR = "circular_progress_indicator"
     const val FIELD_ERROR = "field_error"
     const val SERVER_ERROR = "server_error"
