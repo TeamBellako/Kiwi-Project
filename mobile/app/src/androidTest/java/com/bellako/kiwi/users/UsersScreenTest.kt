@@ -61,7 +61,7 @@ class UsersScreenTest {
     fun invalidLogin () {
         fakeViewModel.fakeError = true
 
-        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
+        rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
 
         rule.onNodeWithTag(UsersTestTags.RESULT_TEXT).assertIsNotDisplayed()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()

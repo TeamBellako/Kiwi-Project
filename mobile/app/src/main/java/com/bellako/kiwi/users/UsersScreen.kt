@@ -36,8 +36,8 @@ fun UsersScreen(
 
     val loadingOverlayColor = Color(0x20FFFFFF)
 
-    var errorMessage = ""
-    var resultMessage = ""
+    var errorMessage by remember { mutableStateOf("") }
+    var resultMessage by remember { mutableStateOf("") }
 
     state?.let { currentState ->
         Column(
@@ -59,7 +59,9 @@ fun UsersScreen(
                     singleLine = true,
                     enabled = !isLoading,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(UsersTestTags.EMAIL_FIELD)
                 )
                 if (isLoading) {
                     Box(
@@ -81,7 +83,9 @@ fun UsersScreen(
                     enabled = !isLoading,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(UsersTestTags.PASSWORD_FIELD)
                 )
                 if (isLoading) {
                     Box(
@@ -142,7 +146,9 @@ fun UsersScreen(
                                 errorMessage = result.exceptionOrNull()?.message.toString()
                             }
                       },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(UsersTestTags.LOGIN_BUTTON),
                         enabled = !isLoading
                     ) {
                         Text("Login")
@@ -163,11 +169,12 @@ fun UsersScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFEC55FA))
+                        .background(Color.Red)
                 ) {
                     Text(
-                        modifier = Modifier.padding(10.dp),
-                        color = Color.Red,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .testTag(UsersTestTags.ERROR_TEXT),
                         text =  errorMessage)
                 }
             }
@@ -175,11 +182,12 @@ fun UsersScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFEC55FA))
+                        .background(Color.Green)
                 ) {
                     Text(
-                        modifier = Modifier.padding(10.dp),
-                        color = Color.Green,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .testTag(UsersTestTags.RESULT_TEXT),
                         text =  resultMessage)
                 }
             }
