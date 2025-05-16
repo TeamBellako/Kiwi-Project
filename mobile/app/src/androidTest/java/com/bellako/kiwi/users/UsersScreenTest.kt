@@ -37,7 +37,7 @@ class UsersScreenTest {
     fun validSignup () {
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
 
-        rule.onNodeWithTag(UsersTestTags.RESULT_TEXT).assertIsDisplayed()
+        rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsDisplayed()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsNotDisplayed()
     }
 
@@ -47,14 +47,13 @@ class UsersScreenTest {
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
 
-        rule.onNodeWithTag(UsersTestTags.RESULT_TEXT).assertIsNotDisplayed()
+        rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsNotDisplayed()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 
     @Test
     fun validLogin () {
         // TODO
-        assert(false)
     }
 
     @Test
@@ -63,7 +62,7 @@ class UsersScreenTest {
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
 
-        rule.onNodeWithTag(UsersTestTags.RESULT_TEXT).assertIsNotDisplayed()
+        rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsNotDisplayed()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 }

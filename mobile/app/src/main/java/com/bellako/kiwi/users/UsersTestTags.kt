@@ -7,6 +7,6 @@ object UsersTestTags {
     const val SIGNUP_BUTTON = "signup_button"
     const val LOGIN_BUTTON = "login_button"
 
-    const val RESULT_TEXT = "result_text"
+    const val SUCCESS_TEXT = "success_text"
     const val ERROR_TEXT = "error_text"
 }
