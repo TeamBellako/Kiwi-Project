@@ -15,19 +15,21 @@ class UsersFakeViewModel  (
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     override fun signup(state: UsersState): Result<Unit> {
-        TODO("Not yet implemented")
+        println("signup called with state: $state")
+        return Result.success(Unit)
     }
 
     override fun login(state: UsersState): Result<Unit> {
-        TODO("Not yet implemented")
+        println("login called with state: $state")
+        return Result.success(Unit)
     }
 
+
     override fun onEmailChanged(email: String) {
-        TODO("Not yet implemented")
+        _state.value = _state.value?.copy(email = email)
     }
 
     override fun onPasswordChanged(password: String) {
-        TODO("Not yet implemented")
+        _state.value = _state.value?.copy(password = password)
     }
-
 }

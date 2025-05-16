@@ -33,7 +33,9 @@ fun UsersScreen(
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    state?.let {
+    val loadingOverlayColor = Color(0x20FFFFFF)
+
+    state?.let { currentState ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -45,26 +47,46 @@ fun UsersScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            OutlinedTextField(
-                value = it.email,
-                onValueChange = { email -> viewModel.onEmailChanged(email) },
-                label = { Text("Email") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = currentState.email,
+                    onValueChange = { email -> viewModel.onEmailChanged(email) },
+                    label = { Text("Email") },
+                    singleLine = true,
+                    enabled = !isLoading,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(loadingOverlayColor)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = it.password,
-                onValueChange = { password -> viewModel.onPasswordChanged(password) },
-                label = { Text("Password") },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = currentState.password,
+                    onValueChange = { password -> viewModel.onPasswordChanged(password) },
+                    label = { Text("Password") },
+                    singleLine = true,
+                    enabled = !isLoading,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(loadingOverlayColor)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -72,20 +94,40 @@ fun UsersScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(
-                    onClick = { viewModel.signup(state!!) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Sign Up")
+                Box(modifier = Modifier.weight(1f)) {
+                    Button(
+                        onClick = { viewModel.signup(currentState) },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading
+                    ) {
+                        Text("Sign Up")
+                    }
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .background(loadingOverlayColor)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Button(
-                    onClick = { viewModel.login(state!!) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Login")
+                Box(modifier = Modifier.weight(1f)) {
+                    Button(
+                        onClick = { viewModel.login(currentState) },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading
+                    ) {
+                        Text("Login")
+                    }
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .background(loadingOverlayColor)
+                        )
+                    }
                 }
             }
         }
