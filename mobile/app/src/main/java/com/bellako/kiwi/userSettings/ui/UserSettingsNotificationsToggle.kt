@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.utils.TestTags
+import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
 
 @Composable
 fun UserSettingsNotificationsToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
@@ -20,7 +20,7 @@ fun UserSettingsNotificationsToggle(checked: Boolean, onCheckedChange: (Boolean)
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
-            modifier = Modifier.testTag(TestTags.NOTIFICATIONS_SWITCH)
+            modifier = Modifier.testTag(UserSettingsTestTags.NOTIFICATIONS_SWITCH)
         )
     }
 }

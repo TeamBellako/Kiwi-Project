@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,7 +22,7 @@ fun UsersScreenPreview() {
                 "finn@thehuman.com",
                 "Math3matical!"
             ),
-            false
+            false,
         )
     )
 }
@@ -34,6 +35,9 @@ fun UsersScreen(
     val isLoading by viewModel.isLoading.collectAsState()
 
     val loadingOverlayColor = Color(0x20FFFFFF)
+
+    var errorMessage = ""
+    var resultMessage = ""
 
     state?.let { currentState ->
         Column(
@@ -96,8 +100,20 @@ fun UsersScreen(
             ) {
                 Box(modifier = Modifier.weight(1f)) {
                     Button(
-                        onClick = { viewModel.signup(currentState) },
-                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            errorMessage = ""
+                            resultMessage = ""
+
+                            val result : Result<Unit> = viewModel.signup(currentState)
+                            if (result.isSuccess) {
+                                resultMessage = "New User Successfully Created!"
+                            } else {
+                                errorMessage = result.exceptionOrNull()?.message.toString()
+                            }
+                      },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(UsersTestTags.SIGNUP_BUTTON),
                         enabled = !isLoading
                     ) {
                         Text("Sign Up")
@@ -115,7 +131,17 @@ fun UsersScreen(
 
                 Box(modifier = Modifier.weight(1f)) {
                     Button(
-                        onClick = { viewModel.login(currentState) },
+                        onClick = {
+                            errorMessage = ""
+                            resultMessage = ""
+
+                            val result : Result<Unit> = viewModel.login(currentState)
+                            if (result.isSuccess) {
+
+                            } else {
+                                errorMessage = result.exceptionOrNull()?.message.toString()
+                            }
+                      },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading
                     ) {
@@ -128,6 +154,33 @@ fun UsersScreen(
                                 .background(loadingOverlayColor)
                         )
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (!errorMessage.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFEC55FA))
+                ) {
+                    Text(
+                        modifier = Modifier.padding(10.dp),
+                        color = Color.Red,
+                        text =  errorMessage)
+                }
+            }
+            if (!resultMessage.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFEC55FA))
+                ) {
+                    Text(
+                        modifier = Modifier.padding(10.dp),
+                        color = Color.Green,
+                        text =  resultMessage)
                 }
             }
         }

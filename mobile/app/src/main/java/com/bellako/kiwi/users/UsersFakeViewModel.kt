@@ -14,13 +14,21 @@ class UsersFakeViewModel  (
     private val _isLoading = MutableStateFlow(isLoading)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    var fakeError: Boolean = false
+
     override fun signup(state: UsersState): Result<Unit> {
-        println("signup called with state: $state")
+        if (fakeError) {
+            return Result.failure(Exception("Signup error"))
+        }
+
         return Result.success(Unit)
     }
 
     override fun login(state: UsersState): Result<Unit> {
-        println("login called with state: $state")
+        if (fakeError) {
+            return Result.failure(Exception("Login error"))
+        }
+
         return Result.success(Unit)
     }
 

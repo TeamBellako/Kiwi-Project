@@ -5,7 +5,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.bellako.kiwi.utils.TestTags
+import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
 import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.ui.UserSettingsScreen
@@ -126,11 +126,11 @@ class UserSettingsScreenTest {
     }
 
     // Helper extensions
-    private fun ComposeTestRule.circularProgressIndicator() = onNodeWithTag(TestTags.CIRCULAR_PROGRESS_INDICATOR)
-    private fun ComposeTestRule.fieldError() = onNodeWithTag(TestTags.FIELD_ERROR)
-    private fun ComposeTestRule.serverError() = onNodeWithTag(TestTags.SERVER_ERROR)
-    private fun ComposeTestRule.emailField() = onNodeWithTag(TestTags.EMAIL_FIELD)
-    private fun ComposeTestRule.notificationsSwitch() = onNodeWithTag(TestTags.NOTIFICATIONS_SWITCH)
-    private fun ComposeTestRule.themeRadioButtonLight() = onNodeWithTag(TestTags.RADIO_LIGHT)
-    private fun ComposeTestRule.themeRadioButtonDark() = onNodeWithTag(TestTags.RADIO_DARK)
+    private fun ComposeTestRule.circularProgressIndicator() = onNodeWithTag(UserSettingsTestTags.CIRCULAR_PROGRESS_INDICATOR)
+    private fun ComposeTestRule.fieldError() = onNodeWithTag(UserSettingsTestTags.FIELD_ERROR)
+    private fun ComposeTestRule.serverError() = onNodeWithTag(UserSettingsTestTags.SERVER_ERROR)
+    private fun ComposeTestRule.emailField() = onNodeWithTag(UserSettingsTestTags.EMAIL_FIELD)
+    private fun ComposeTestRule.notificationsSwitch() = onNodeWithTag(UserSettingsTestTags.NOTIFICATIONS_SWITCH)
+    private fun ComposeTestRule.themeRadioButtonLight() = onNodeWithTag(UserSettingsTestTags.RADIO_LIGHT)
+    private fun ComposeTestRule.themeRadioButtonDark() = onNodeWithTag(UserSettingsTestTags.RADIO_DARK)
 }

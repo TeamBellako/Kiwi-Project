@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.utils.TestTags
+import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
 
 @Composable
 fun UserSettingsEmailField(email: String, error: String? = null, onEmailChanged: (String) -> Unit) {
@@ -21,7 +21,7 @@ fun UserSettingsEmailField(email: String, error: String? = null, onEmailChanged:
             label = { Text("Email") },
             isError = error != null,
             modifier = Modifier
-                .testTag(TestTags.EMAIL_FIELD)
+                .testTag(UserSettingsTestTags.EMAIL_FIELD)
                 .fillMaxWidth()
         )
         if (error != null) {
@@ -30,7 +30,7 @@ fun UserSettingsEmailField(email: String, error: String? = null, onEmailChanged:
                 color = Color.Red,
                 modifier = Modifier
                     .padding(top = 4.dp)
-                    .testTag(TestTags.FIELD_ERROR)
+                    .testTag(UserSettingsTestTags.FIELD_ERROR)
             )
         }
     }
