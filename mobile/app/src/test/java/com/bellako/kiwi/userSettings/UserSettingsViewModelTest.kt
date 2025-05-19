@@ -1,34 +1,34 @@
 package com.bellako.kiwi.userSettings
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.network.AuthRepository
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
-import com.bellako.kiwi.userSettings.types.UserSettingsState
-import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.invalidUserSettings
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.updateUserSettings
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsViewModel
-import com.bellako.kiwi.utils.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.ResponseBody.Companion.toResponseBody
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import retrofit2.HttpException
-import retrofit2.Response
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,6 +37,8 @@ class UserSettingsViewModelTest {
     private lateinit var repository: UserSettingsRepository
     private lateinit var viewModel: UserSettingsViewModel
 
+    private lateinit var authRepository: AuthRepository
+
     private val testErrorMessage = "Error Message"
 
     @Before
@@ -44,7 +46,8 @@ class UserSettingsViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         repository = mock(UserSettingsRepository::class.java)
-        viewModel = UserSettingsViewModel(repository, testDispatcher)
+        authRepository = mock(AuthRepository::class.java)
+        viewModel = UserSettingsViewModel(repository, testDispatcher, authRepository)
 
         reset(repository)
     }
@@ -78,35 +81,6 @@ class UserSettingsViewModelTest {
         assertNull(viewModel.state.first())
         assertEquals("An unexpected error occurred.", viewModel.validationState.first().generalError)
     }
-
-    @Test
-    fun `updateSettings sets error when updateUserSettings results in failure`() = runTest(testDispatcher) {
-        val errorMessage = "Invalid email format"
-        val errorJson = """{ "message": "$errorMessage" }"""
-        val errorResponse = Response.error<Unit>(
-            400,
-            errorJson.toResponseBody(contentType = "application/json".toMediaTypeOrNull())
-        )
-
-        whenever(repository.updateUserSettings(anyOrNull()))
-            .thenReturn(Result.failure(HttpException(errorResponse)))
-        whenever(repository.getUserSettings()).thenReturn(Result.success(validUserSettings()))
-
-        viewModel.loadSettings()
-        advanceUntilIdle()
-
-        val invalidState = UserSettingsState(
-            email = invalidUserSettings().email,
-            areNotificationsEnabled = invalidUserSettings().areNotificationsEnabled,
-            theme = invalidUserSettings().theme
-        )
-
-        viewModel.updateSettings(invalidState)
-        advanceUntilIdle()
-
-        assertEquals(errorMessage, viewModel.validationState.first().emailError)
-    }
-
 
     @Test
     fun `autoSave triggers updateSettings when settings change`() = runTest(testDispatcher) {

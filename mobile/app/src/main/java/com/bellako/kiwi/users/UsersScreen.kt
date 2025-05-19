@@ -1,13 +1,35 @@
 package com.bellako.kiwi.users
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,6 +46,7 @@ private val loadingOverlayColor = Color(0x20FFFFFF)
 @Composable
 fun UsersScreen(
     viewModel: IUsersViewModel,
+    onLoginSuccess: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -42,7 +65,7 @@ fun UsersScreen(
             UsersForm(currentState, viewModel, isLoading)
             Spacer(modifier = Modifier.height(separatorHeight))
 
-            UsersButtons(currentState, viewModel, isLoading, errorMessageState, successMessageState)
+            UsersButtons(currentState, viewModel, isLoading, errorMessageState, successMessageState, onLoginSuccess)
             Spacer(modifier = Modifier.height(separatorHeight))
 
             if (!errorMessageState.value.isEmpty()) {
@@ -126,12 +149,18 @@ private fun InputField(
     inputFieldData: InputFieldData
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        var keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        var visualTransformation : VisualTransformation = VisualTransformation.None
+        val shouldShowPassword = remember { mutableStateOf(false) }
 
-        if (inputFieldData.shouldHideInput) {
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            visualTransformation = PasswordVisualTransformation()
+        val keyboardOptions = if (inputFieldData.shouldHideInput) {
+            KeyboardOptions(keyboardType = KeyboardType.Password)
+        } else {
+            KeyboardOptions(keyboardType = KeyboardType.Email)
+        }
+
+        val visualTransformation = if (inputFieldData.shouldHideInput && !shouldShowPassword.value) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
         }
 
         OutlinedTextField(
@@ -144,7 +173,12 @@ private fun InputField(
             keyboardOptions = keyboardOptions,
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag(UsersTestTags.EMAIL_FIELD)
+                .testTag(UsersTestTags.EMAIL_FIELD),
+            trailingIcon = {
+                if (inputFieldData.shouldHideInput) {
+                    ShowPasswordTrailingIcon(shouldShowPassword)
+                }
+            }
         )
         if (isLoading) {
             Box(
@@ -157,12 +191,33 @@ private fun InputField(
 }
 
 @Composable
+private fun ShowPasswordTrailingIcon(
+    shouldShowPasswordState: MutableState<Boolean>
+) {
+    Icon(
+        imageVector = if (shouldShowPasswordState.value) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+        contentDescription = if (shouldShowPasswordState.value) "Hide password" else "Show password",
+        modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        shouldShowPasswordState.value = true
+                        tryAwaitRelease()
+                        shouldShowPasswordState.value = false
+                    }
+                )
+            }
+    )
+}
+
+@Composable
 private fun UsersButtons(
     currentState: UsersState,
     viewModel: IUsersViewModel,
     isLoading: Boolean,
     errorMessageState: MutableState<String>,
-    successMessageState: MutableState<String>
+    successMessageState: MutableState<String>,
+    onLoginSuccess: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -179,7 +234,10 @@ private fun UsersButtons(
                     if (result.isSuccess) {
                         successMessageState.value = "New User Successfully Created!"
                     } else {
-                        errorMessageState.value = result.exceptionOrNull()?.message.toString()
+                        val exception = result.exceptionOrNull()
+                        val message = exception?.message ?: "Unknown error"
+
+                        errorMessageState.value = message
                     }
                 }
             },
@@ -199,9 +257,12 @@ private fun UsersButtons(
 
                      val result : Result<Unit> = viewModel.login(currentState)
                      if (result.isSuccess) {
-                         successMessageState.value = "Login Was Successful!"
+                         onLoginSuccess()
                      } else {
-                         errorMessageState.value = result.exceptionOrNull()?.message.toString()
+                         val exception = result.exceptionOrNull()
+                         val message = exception?.message ?: "Unknown error"
+
+                         errorMessageState.value = message
                      }
                  }
             },
@@ -258,6 +319,7 @@ fun UsersScreenPreview() {
                 "Math3matical!"
             ),
             false,
-        )
+        ),
+        {}
     )
 }

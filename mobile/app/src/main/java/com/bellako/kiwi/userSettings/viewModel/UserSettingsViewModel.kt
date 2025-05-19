@@ -2,11 +2,11 @@ package com.bellako.kiwi.userSettings.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.network.AuthRepository
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
 import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
-import com.bellako.kiwi.users.Email
 import com.bellako.kiwi.utils.Logger
 import com.google.gson.Gson
 import dagger.Module
@@ -29,7 +29,8 @@ object DispatcherModule {
 @HiltViewModel
 class UserSettingsViewModel @Inject constructor(
     private val repository: UserSettingsRepository,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val authRepository: AuthRepository,
 ) : ViewModel(), IUserSettingsViewModel {
 
     private val _state = MutableStateFlow<UserSettingsState?>(null)
@@ -85,12 +86,6 @@ class UserSettingsViewModel @Inject constructor(
 
     override fun updateSettings(state: UserSettingsState) {
         _state.value = state
-
-        if (!Email.isValid(state.email)) {
-            _validationState.value = UserSettingsValidationState(emailError = "Invalid email format")
-            return
-        }
-
         _validationState.value = UserSettingsValidationState()
 
         state.toDomainObject().onSuccess { domain ->
@@ -103,6 +98,9 @@ class UserSettingsViewModel @Inject constructor(
         }
     }
 
+    override fun clearToken() {
+        authRepository.setJwtToken("")
+    }
 
     @OptIn(FlowPreview::class)
     private fun observeDebouncedChanges() {

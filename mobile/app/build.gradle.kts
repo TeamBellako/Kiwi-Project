@@ -116,6 +116,7 @@ dependencies {
     implementation(libs.ui)
     implementation(libs.material3)
     implementation(libs.ui.tooling.preview)
+    implementation(libs.androidx.material.icons.extended)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -132,6 +133,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+    implementation(libs.moshi)
+    kapt(libs.moshi.kotlin.codegen)
+    implementation(libs.converter.moshi)
 
     // Room
     implementation(libs.androidx.room.runtime)
@@ -178,4 +182,7 @@ dependencies {
 
     androidTestImplementation(libs.mockwebserver)
     testImplementation(libs.robolectric)
+
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.espresso.intents)
 }

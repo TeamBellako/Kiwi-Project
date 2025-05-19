@@ -1,6 +1,7 @@
 package com.bellako.kiwi.userSettings.network
 
 import com.bellako.kiwi.BuildConfig
+import com.bellako.kiwi.network.AuthRepository
 import com.bellako.kiwi.network.JwtAuthInterceptor
 import dagger.Module
 import dagger.Provides
@@ -13,10 +14,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 @Module
 @InstallIn(SingletonComponent::class)
 object UserSettingsModule {
+
     @Provides
-    fun provideUserSettingsApi(): IUserSettingsAPI {
+    fun provideJwtAuthInterceptor(authRepository: AuthRepository): JwtAuthInterceptor {
+        return JwtAuthInterceptor(authRepository)
+    }
+
+    @Provides
+    fun provideUserSettingsApi(
+        jwtAuthInterceptor: JwtAuthInterceptor
+    ): IUserSettingsAPI {
         val client = OkHttpClient.Builder()
-            .addInterceptor(JwtAuthInterceptor())
+            .addInterceptor(jwtAuthInterceptor)
             .build()
 
         return Retrofit.Builder()

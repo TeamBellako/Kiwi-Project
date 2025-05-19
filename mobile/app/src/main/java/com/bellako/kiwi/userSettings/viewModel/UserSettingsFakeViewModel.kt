@@ -3,7 +3,6 @@ package com.bellako.kiwi.userSettings.viewModel
 import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
-import com.bellako.kiwi.users.Email
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -40,11 +39,6 @@ class UserSettingsFakeViewModel(
     override fun updateSettings(state: UserSettingsState) {
         _state.value = state
 
-        if (!Email.isValid(state.email)) {
-            _validationState.value = UserSettingsValidationState(emailError = "Invalid email format")
-            return
-        }
-
         _validationState.value = UserSettingsValidationState()
 
         if (simulateUpdateError) {
@@ -55,7 +49,7 @@ class UserSettingsFakeViewModel(
         val result = state.toDomainObject()
 
         result.onFailure {
-            _validationState.value = UserSettingsValidationState(emailError = it.message)
+            _validationState.value = UserSettingsValidationState(generalError = simulatedErrorMessage)
         }.onSuccess { domain ->
             if (currentDomainSettings != domain) {
                 currentDomainSettings = domain
@@ -64,4 +58,6 @@ class UserSettingsFakeViewModel(
             }
         }
     }
+
+    override fun clearToken() {}
 }

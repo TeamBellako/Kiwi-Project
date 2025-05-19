@@ -1,7 +1,7 @@
 package com.bellako.kiwi.users
 
 import androidx.lifecycle.ViewModel
-import com.bellako.kiwi.network.JwtAuthInterceptor
+import com.bellako.kiwi.network.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,50 +11,54 @@ import kotlinx.coroutines.flow.asStateFlow
 @HiltViewModel
 class UsersViewModel @Inject constructor(
     private val repository: UsersRepository,
-    private val jwtAuthInterceptor: JwtAuthInterceptor
+    private val authRepository: AuthRepository,
 ) : ViewModel(), IUsersViewModel {
     private val _state = MutableStateFlow<UsersState?>(UsersState("", ""))
     override val state: StateFlow<UsersState?> = _state.asStateFlow()
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    override suspend fun signup(state: UsersState) : Result<Unit> {
-        return state.toDomainObject().fold(
-            onSuccess = { user ->
-                _isLoading.value = true
-                try {
-                    _isLoading.value = false
-                    repository.signup(user.toDTO())
-                } catch (e: Exception) {
-                    _isLoading.value = false
-                    Result.failure(e)
-                }
-            },
-            onFailure = {
-                Result.failure(Exception("Invalid email or password format"))
-            }
-        )
+    override suspend fun signup(state: UsersState): Result<Unit> {
+        val domainResult = state.toDomainObject()
+        if (domainResult.isFailure) {
+            return Result.failure(Exception("Invalid email or password format"))
+        }
+
+        val user = domainResult.getOrThrow()
+        _isLoading.value = true
+
+        return try {
+            val result = repository.signup(user.toDTO())
+            _isLoading.value = false
+            result
+        } catch (e: Exception) {
+            _isLoading.value = false
+            Result.failure(e)
+        }
     }
+
 
     override suspend fun login(state: UsersState): Result<Unit> {
-        return state.toDomainObject().fold(
-            onSuccess = { user ->
-                _isLoading.value = true
-                val apiResult: Result<String> = repository.login(user.toDTO())
-                _isLoading.value = false
+        val userResult = state.toDomainObject()
+        if (userResult.isFailure) {
+            return Result.failure(Exception("Invalid email or password format"))
+        }
 
-                return if (apiResult.isSuccess) {
-                    jwtAuthInterceptor.setJwtToken(apiResult.getOrDefault(""))
-                    Result.success(Unit)
-                } else {
-                    Result.failure(apiResult.exceptionOrNull() ?: Exception("Incorrect email or password"))
-                }
+        _isLoading.value = true
+        val user = userResult.getOrThrow()
+
+        val apiResult = repository.login(user.toDTO())
+        _isLoading.value = false
+
+        return apiResult.fold(
+            onSuccess = { jwt ->
+                authRepository.setJwtToken(jwt)
+                Result.success(Unit)
             },
-            onFailure = {
-                Result.failure(Exception("Invalid email or password format"))
-            }
+            onFailure = { Result.failure(Exception("Incorrect email or password")) }
         )
     }
+
 
     override fun onEmailChanged(email: String) {
         _state.value = _state.value?.copy(email = email)

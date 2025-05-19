@@ -9,7 +9,6 @@ import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
 import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.ui.UserSettingsScreen
-import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.invalidUserSettings
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
 import org.junit.Before
@@ -39,7 +38,7 @@ class UserSettingsScreenTest {
         fakeViewModel = UserSettingsFakeViewModel(state)
 
         composeTestRule.setContent {
-            UserSettingsScreen(viewModel = fakeViewModel)
+            UserSettingsScreen(viewModel = fakeViewModel, {})
         }
 
         robot = UserSettingsScreenTestRobot(composeTestRule)
@@ -72,31 +71,6 @@ class UserSettingsScreenTest {
     @Test
     fun emailField_renderField_showsInitialValue() {
         composeTestRule.emailField().assertTextContains("Email")
-    }
-
-    @Test
-    fun emailField_enterValidInput_updatesFieldValue() {
-        robot.enterEmail(validUserSettings().email)
-        composeTestRule.emailField().assertTextContains(validUserSettings().email)
-    }
-
-    @Test
-    fun emailField_enterInvalidInput_showsErrorMessage() {
-        robot.enterEmail(invalidUserSettings().email)
-
-        composeTestRule.fieldError().assertIsDisplayed()
-    }
-
-    @Test
-    fun emailField_enterValidEmailAfterInvalidOne_hidesErrorMessage() {
-        fakeViewModel.simulateUpdateError = true
-        robot.enterEmail(invalidUserSettings().email)
-        composeTestRule.fieldError().assertIsDisplayed()
-
-        fakeViewModel.simulateUpdateError = false
-        robot.enterEmail(validUserSettings().email)
-
-        composeTestRule.fieldError().assertIsNotDisplayed()
     }
 
     @Test
