@@ -10,24 +10,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.ui.components.Kiwi_InfoBox
+import com.bellako.kiwi.ui.components.Kiwi_InputField
+import com.bellako.kiwi.ui.components.Kiwi_LoadingIndicator
+import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
 import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.viewModel.IUserSettingsViewModel
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
 import com.bellako.kiwi.userSettings.types.UserSettingsState
-import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
-
-@Preview
-@Composable
-fun UserSettingsScreenPreview() {
-    val previewState = UserSettingsState(
-        email = "finn@thehuman.com",
-        areNotificationsEnabled = true,
-        theme = Theme.DARK
-    )
-
-    UserSettingsScreen(UserSettingsFakeViewModel(previewState), {})
-}
 
 @Composable
 fun UserSettingsScreen(
@@ -43,8 +34,14 @@ fun UserSettingsScreen(
     }
 
     when {
-        isLoading -> LoadingIndicator()
-        !validationState?.generalError.isNullOrBlank() -> ServerError(validationState?.generalError!!)
+        isLoading -> Kiwi_LoadingIndicator()
+
+        !validationState?.generalError.isNullOrBlank() -> Kiwi_InfoBox(
+            validationState?.generalError!!,
+            Color.Red,
+            UserSettingsTestTags.SERVER_ERROR
+        )
+
         else -> UserSettingsFields(state, viewModel, onLogout)
     }
 }
@@ -55,38 +52,49 @@ private fun UserSettingsFields(
     viewModel: IUserSettingsViewModel,
     onLogout: () -> Unit
 ) {
-    state?.let {
+    state?.let { currentState ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(16.dp)
         ) {
-            OutlinedTextField(
-                value = it.email,
-                onValueChange = {},
-                label = { Text("Email") },
-                enabled = false,
-                modifier = Modifier
-                    .testTag(UserSettingsTestTags.EMAIL_FIELD)
-                    .fillMaxWidth()
+            Kiwi_InputField(
+                false,
+                currentState.email,
+                {},
+                { Text("Email") },
+                false,
+                ""
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            UserSettingsNotificationsToggle(
-                checked = it.areNotificationsEnabled,
-                onCheckedChange = { checked ->
-                    viewModel.updateSettings(it.copy(areNotificationsEnabled = checked))
-                }
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Enable Notifications")
+                Spacer(modifier = Modifier.width(8.dp))
+                Switch(
+                    checked = currentState.areNotificationsEnabled,
+                    onCheckedChange = { checked ->
+                        viewModel.updateSettings(currentState.copy(areNotificationsEnabled = checked))
+                    },
+                    modifier = Modifier.testTag(UserSettingsTestTags.NOTIFICATIONS_SWITCH)
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
-            UserSettingsThemeSelector(
-                selectedTheme = it.theme,
-                onThemeChange = { theme ->
-                    viewModel.updateSettings(it.copy(theme = theme))
+            Text("Theme")
+            Theme.entries.forEach { theme ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = currentState.theme == theme,
+                        onClick = {
+                            viewModel.updateSettings(currentState.copy(theme = theme))
+                        },
+                        modifier = Modifier.testTag("radio_${theme.name.lowercase()}")
+                    )
+                    Text(text = theme.name)
                 }
-            )
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -102,25 +110,16 @@ private fun UserSettingsFields(
     }
 }
 
+@Preview
 @Composable
-fun LoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-fun ServerError(message: String) {
-    Text(
-        text = message,
-        color = Color.Red,
-        modifier = Modifier
-            .padding(vertical = 80.dp)
-            .testTag(UserSettingsTestTags.SERVER_ERROR)
+fun UserSettingsScreenPreview() {
+    val previewState = UserSettingsState(
+        email = "finn@thehuman.com",
+        areNotificationsEnabled = true,
+        theme = Theme.DARK
     )
+
+    KiwiTheme {
+        UserSettingsScreen(UserSettingsFakeViewModel(previewState), {})
+    }
 }

@@ -100,8 +100,7 @@ class UserSettingsScreenTest {
     }
 
     // Helper extensions
-    private fun ComposeTestRule.circularProgressIndicator() = onNodeWithTag(UserSettingsTestTags.CIRCULAR_PROGRESS_INDICATOR)
-    private fun ComposeTestRule.fieldError() = onNodeWithTag(UserSettingsTestTags.FIELD_ERROR)
+
     private fun ComposeTestRule.serverError() = onNodeWithTag(UserSettingsTestTags.SERVER_ERROR)
     private fun ComposeTestRule.emailField() = onNodeWithTag(UserSettingsTestTags.EMAIL_FIELD)
     private fun ComposeTestRule.notificationsSwitch() = onNodeWithTag(UserSettingsTestTags.NOTIFICATIONS_SWITCH)

@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 fun Kiwi_InputField(
-    isLoading: Boolean,
+    enabled: Boolean,
     value: String,
     onValueChange: (String) -> Unit,
     label: @Composable (() -> Unit)?,
@@ -51,7 +51,7 @@ fun Kiwi_InputField(
             onValueChange = onValueChange,
             label = label,
             singleLine = true,
-            enabled = !isLoading,
+            enabled = enabled,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             modifier = Modifier
@@ -63,7 +63,7 @@ fun Kiwi_InputField(
                 }
             }
         )
-        if (isLoading) {
+        if (!enabled) {
             Box(
                 modifier = Modifier
                     .matchParentSize()

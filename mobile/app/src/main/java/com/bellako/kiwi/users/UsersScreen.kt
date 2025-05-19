@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
+import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.theme.SeparatorHeight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +71,7 @@ private fun Fields(
     isLoading: Boolean,
 ) {
     Kiwi_InputField(
-        isLoading,
+        !isLoading,
         currentState.email,
         { email -> viewModel.onEmailChanged(email) },
         { Text("Email") },
@@ -81,7 +82,7 @@ private fun Fields(
     Spacer(modifier = Modifier.height(SeparatorHeight))
 
     Kiwi_InputField(
-        isLoading,
+        !isLoading,
         currentState.password,
         { password -> viewModel.onPasswordChanged(password) },
         { Text("Password") },
@@ -208,14 +209,16 @@ private fun InfoBoxes(
 @Preview
 @Composable
 fun UsersScreenPreview() {
-    UsersScreen(
-        UsersFakeViewModel(
-            UsersState(
-                "finn@thehuman.com",
-                "Math3matical!"
+    KiwiTheme {
+        UsersScreen(
+            UsersFakeViewModel(
+                UsersState(
+                    "finn@thehuman.com",
+                    "Math3matical!"
+                ),
+                false,
             ),
-            false,
-        ),
-        {}
-    )
+            {}
+        )
+    }
 }
