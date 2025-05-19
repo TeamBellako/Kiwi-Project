@@ -75,31 +75,6 @@ class UserSettingsScreenTest {
     }
 
     @Test
-    fun emailField_enterValidInput_updatesFieldValue() {
-        robot.enterEmail(validUserSettings().email)
-        composeTestRule.emailField().assertTextContains(validUserSettings().email)
-    }
-
-    @Test
-    fun emailField_enterInvalidInput_showsErrorMessage() {
-        robot.enterEmail(invalidUserSettings().email)
-
-        composeTestRule.fieldError().assertIsDisplayed()
-    }
-
-    @Test
-    fun emailField_enterValidEmailAfterInvalidOne_hidesErrorMessage() {
-        fakeViewModel.simulateUpdateError = true
-        robot.enterEmail(invalidUserSettings().email)
-        composeTestRule.fieldError().assertIsDisplayed()
-
-        fakeViewModel.simulateUpdateError = false
-        robot.enterEmail(validUserSettings().email)
-
-        composeTestRule.fieldError().assertIsNotDisplayed()
-    }
-
-    @Test
     fun notificationSwitch_render_isOffByDefault() {
         composeTestRule.notificationsSwitch().assertIsOff()
     }

@@ -59,12 +59,14 @@ private fun UserSettingsFields(
                 .background(Color.White)
                 .padding(16.dp)
         ) {
-            UserSettingsEmailField(
-                email = it.email,
-                error = validationState?.emailError,
-                onEmailChanged = { email ->
-                    viewModel.updateSettings(it.copy(email = email))
-                }
+            OutlinedTextField(
+                value = it.email,
+                onValueChange = {},
+                label = { Text("Email") },
+                enabled = false,
+                modifier = Modifier
+                    .testTag(UserSettingsTestTags.EMAIL_FIELD)
+                    .fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
 
