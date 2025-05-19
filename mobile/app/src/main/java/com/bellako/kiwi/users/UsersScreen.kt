@@ -1,17 +1,32 @@
 package com.bellako.kiwi.users
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -31,6 +46,7 @@ private val loadingOverlayColor = Color(0x20FFFFFF)
 @Composable
 fun UsersScreen(
     viewModel: IUsersViewModel,
+    onLoginSuccess: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -49,7 +65,7 @@ fun UsersScreen(
             UsersForm(currentState, viewModel, isLoading)
             Spacer(modifier = Modifier.height(separatorHeight))
 
-            UsersButtons(currentState, viewModel, isLoading, errorMessageState, successMessageState)
+            UsersButtons(currentState, viewModel, isLoading, errorMessageState, successMessageState, onLoginSuccess)
             Spacer(modifier = Modifier.height(separatorHeight))
 
             if (!errorMessageState.value.isEmpty()) {
@@ -200,7 +216,8 @@ private fun UsersButtons(
     viewModel: IUsersViewModel,
     isLoading: Boolean,
     errorMessageState: MutableState<String>,
-    successMessageState: MutableState<String>
+    successMessageState: MutableState<String>,
+    onLoginSuccess: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -237,7 +254,7 @@ private fun UsersButtons(
 
                      val result : Result<Unit> = viewModel.login(currentState)
                      if (result.isSuccess) {
-                         successMessageState.value = "Login Was Successful!"
+                         onLoginSuccess()
                      } else {
                          errorMessageState.value = result.exceptionOrNull()?.message.toString()
                      }
@@ -296,6 +313,7 @@ fun UsersScreenPreview() {
                 "Math3matical!"
             ),
             false,
-        )
+        ),
+        {}
     )
 }

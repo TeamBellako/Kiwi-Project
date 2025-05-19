@@ -2,6 +2,7 @@ package com.bellako.kiwi.userSettings.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.network.AuthRepository
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
 import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsState
@@ -29,7 +30,8 @@ object DispatcherModule {
 @HiltViewModel
 class UserSettingsViewModel @Inject constructor(
     private val repository: UserSettingsRepository,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val authRepository: AuthRepository,
 ) : ViewModel(), IUserSettingsViewModel {
 
     private val _state = MutableStateFlow<UserSettingsState?>(null)

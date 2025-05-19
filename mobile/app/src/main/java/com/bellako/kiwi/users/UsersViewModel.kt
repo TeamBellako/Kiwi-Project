@@ -1,18 +1,17 @@
 package com.bellako.kiwi.users
 
 import androidx.lifecycle.ViewModel
-import com.bellako.kiwi.network.JwtAuthInterceptor
+import com.bellako.kiwi.network.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.json.JSONObject
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
     private val repository: UsersRepository,
-    private val jwtAuthInterceptor: JwtAuthInterceptor
+    private val authRepository: AuthRepository,
 ) : ViewModel(), IUsersViewModel {
     private val _state = MutableStateFlow<UsersState?>(UsersState("", ""))
     override val state: StateFlow<UsersState?> = _state.asStateFlow()
@@ -51,7 +50,7 @@ class UsersViewModel @Inject constructor(
 
         return apiResult.fold(
             onSuccess = { jwt ->
-                jwtAuthInterceptor.setJwtToken(jwt)
+                authRepository.setJwtToken(jwt)
                 Result.success(Unit)
             },
             onFailure = { Result.failure(Exception("Incorrect email or password")) }

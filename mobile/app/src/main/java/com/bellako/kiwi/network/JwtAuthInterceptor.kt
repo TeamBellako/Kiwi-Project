@@ -1,21 +1,24 @@
 package com.bellako.kiwi.network
 
-import jakarta.inject.Inject
 import okhttp3.Interceptor
 import okhttp3.Response
+import javax.inject.Inject
 
-class JwtAuthInterceptor @Inject constructor() : Interceptor {
-    private var jwtToken : String = ""
-
-    fun setJwtToken(jwtToken : String) { this.jwtToken = jwtToken }
-
-    fun isJwtTokenSet() = jwtToken.isNotEmpty()
+class JwtAuthInterceptor @Inject constructor(
+    private val authRepository: AuthRepository
+) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
+        val token = authRepository.getJwtToken()
+
         val newRequest = originalRequest.newBuilder()
-            .addHeader("Authorization", "Bearer $jwtToken")
+            .apply {
+                if (token.isNotEmpty()) {
+                    addHeader("Authorization", "Bearer $token")
+                }
+            }
             .build()
 
         return chain.proceed(newRequest)
