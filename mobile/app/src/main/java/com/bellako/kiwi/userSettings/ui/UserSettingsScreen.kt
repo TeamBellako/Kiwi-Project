@@ -19,6 +19,7 @@ import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.viewModel.IUserSettingsViewModel
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
 import com.bellako.kiwi.userSettings.types.UserSettingsState
+import com.bellako.kiwi.users.UsersTestTags
 
 @Composable
 fun UserSettingsScreen(
@@ -65,7 +66,7 @@ private fun UserSettingsFields(
                 {},
                 { Text("Email") },
                 false,
-                ""
+                UsersTestTags.EMAIL_FIELD
             )
             Spacer(modifier = Modifier.height(16.dp))
 
