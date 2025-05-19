@@ -21,6 +21,11 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: JWT_SECRET
         - name: BACKEND_DB_URL
           valueFrom:
             secretKeyRef:

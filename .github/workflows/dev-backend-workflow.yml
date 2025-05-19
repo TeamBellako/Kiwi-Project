@@ -68,7 +68,7 @@ jobs:
       - name: Create Kubernetes secrets for backend
         run: |
           kubectl create secret generic backend-secret \
-          --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
             --from-literal=BACKEND_DB_URL_K8S=${{ secrets.BACKEND_DB_URL_K8S }} \
             --from-literal=BACKEND_DB_USERNAME=${{ secrets.BACKEND_DB_USERNAME }} \
             --from-literal=BACKEND_DB_PASSWORD=${{ secrets.BACKEND_DB_PASSWORD }} \
