@@ -8,16 +8,19 @@ class UsersRepository (private val api: IUsersAPI){
     suspend fun signup(dto: UsersDTO): Result<Unit> {
         return try {
             val response = api.signup(dto)
+
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorMessage = parseErrorMessage(errorBody)
+
                 Result.failure(Exception(errorMessage ?: "Unknown error"))
             }
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
             val errorMessage = parseErrorMessage(errorBody)
+
             Result.failure(Exception(errorMessage ?: e.message()))
         } catch (e: Exception) {
             Result.failure(e)

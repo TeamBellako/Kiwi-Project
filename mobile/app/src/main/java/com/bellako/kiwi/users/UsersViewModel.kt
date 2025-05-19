@@ -41,7 +41,7 @@ class UsersViewModel @Inject constructor(
     override suspend fun login(state: UsersState): Result<Unit> {
         val userResult = state.toDomainObject()
         if (userResult.isFailure) {
-            return Result.failure(Exception("Invalid email or password format"))
+            return Result.failure(Exception(getInvalidDataMessage()))
         }
 
         _isLoading.value = true
@@ -55,10 +55,9 @@ class UsersViewModel @Inject constructor(
                 authRepository.setJwtToken(jwt)
                 Result.success(Unit)
             },
-            onFailure = { Result.failure(Exception("Incorrect email or password")) }
+            onFailure = { Result.failure(Exception(getInvalidDataMessage())) }
         )
     }
-
 
     override fun onEmailChanged(email: String) {
         _state.value = _state.value?.copy(email = email)
@@ -66,5 +65,15 @@ class UsersViewModel @Inject constructor(
 
     override fun onPasswordChanged(password: String) {
         _state.value = _state.value?.copy(password = password)
+    }
+
+    private fun getInvalidDataMessage() : String {
+        return """
+            Incorrect email or password. Password must:
+            - Be at least 8 characters long
+            - Include both uppercase and lowercase letters
+            - Contain at least one number
+            - Contain at least one special character
+        """.trimIndent()
     }
 }
