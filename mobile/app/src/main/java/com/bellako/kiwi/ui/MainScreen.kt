@@ -24,7 +24,9 @@ fun MainScreen(viewModel: UsersViewModel = hiltViewModel()) {
 
         is ScreenState.Settings -> {
             val userSettingsViewModel : UserSettingsViewModel = hiltViewModel()
-            UserSettingsScreen(userSettingsViewModel)
+            UserSettingsScreen(
+                onLogout = { currentScreen = ScreenState.Login},
+                viewModel = userSettingsViewModel)
         }
     }
 }

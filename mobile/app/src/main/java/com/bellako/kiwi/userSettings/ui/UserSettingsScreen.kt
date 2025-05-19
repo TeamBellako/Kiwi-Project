@@ -26,11 +26,14 @@ fun UserSettingsScreenPreview() {
         theme = Theme.DARK
     )
 
-    UserSettingsScreen(UserSettingsFakeViewModel(previewState))
+    UserSettingsScreen(UserSettingsFakeViewModel(previewState), {})
 }
 
 @Composable
-fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
+fun UserSettingsScreen(
+    viewModel: IUserSettingsViewModel,
+    onLogout: () -> Unit
+) {
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val validationState by viewModel.validationState.collectAsState()
@@ -42,7 +45,7 @@ fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
     when {
         isLoading -> LoadingIndicator()
         !validationState?.generalError.isNullOrBlank() -> ServerError(validationState?.generalError!!)
-        else -> UserSettingsFields(state, viewModel, validationState)
+        else -> UserSettingsFields(state, viewModel, onLogout)
     }
 }
 
@@ -50,7 +53,7 @@ fun UserSettingsScreen(viewModel: IUserSettingsViewModel) {
 private fun UserSettingsFields(
     state: UserSettingsState?,
     viewModel: IUserSettingsViewModel,
-    validationState: UserSettingsValidationState?
+    onLogout: () -> Unit
 ) {
     state?.let {
         Column(
@@ -84,6 +87,17 @@ private fun UserSettingsFields(
                     viewModel.updateSettings(it.copy(theme = theme))
                 }
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    viewModel.clearToken()
+                    onLogout()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Logout")
+            }
         }
     }
 }
