@@ -47,7 +47,7 @@ public class UsersControllerTest {
     public void validSignup() throws Exception {
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/signup", loginDTO))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
     
     @Test

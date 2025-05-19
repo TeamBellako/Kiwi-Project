@@ -55,7 +55,7 @@ public class UsersIntegrationTest {
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
         
         mockMvc.perform(getPostRequestBuilder(signupAPIUrl, loginDTO))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
         
         assertEquals(validUserDTO(), usersRepository.findByEmail(validUserDTO().getEmail()).get().toDTO());
     }
