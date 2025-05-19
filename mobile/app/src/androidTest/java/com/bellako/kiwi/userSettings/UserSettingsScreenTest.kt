@@ -5,6 +5,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bellako.kiwi.ui.tags.KIWI_LOADING_INDICATOR
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
 import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.types.UserSettingsState
@@ -49,7 +50,7 @@ class UserSettingsScreenTest {
         fakeViewModel.simulateLoadError = true
         fakeViewModel.loadSettings()
 
-        composeTestRule.circularProgressIndicator().assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag(KIWI_LOADING_INDICATOR).assertIsNotDisplayed()
         composeTestRule.serverError().assertIsDisplayed()
     }
 
@@ -100,8 +101,7 @@ class UserSettingsScreenTest {
     }
 
     // Helper extensions
-    private fun ComposeTestRule.circularProgressIndicator() = onNodeWithTag(UserSettingsTestTags.CIRCULAR_PROGRESS_INDICATOR)
-    private fun ComposeTestRule.fieldError() = onNodeWithTag(UserSettingsTestTags.FIELD_ERROR)
+
     private fun ComposeTestRule.serverError() = onNodeWithTag(UserSettingsTestTags.SERVER_ERROR)
     private fun ComposeTestRule.emailField() = onNodeWithTag(UserSettingsTestTags.EMAIL_FIELD)
     private fun ComposeTestRule.notificationsSwitch() = onNodeWithTag(UserSettingsTestTags.NOTIFICATIONS_SWITCH)
