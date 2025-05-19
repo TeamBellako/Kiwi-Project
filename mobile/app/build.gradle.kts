@@ -133,6 +133,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+    implementation(libs.moshi)
+    kapt(libs.moshi.kotlin.codegen)
+    implementation(libs.converter.moshi)
 
     // Room
     implementation(libs.androidx.room.runtime)

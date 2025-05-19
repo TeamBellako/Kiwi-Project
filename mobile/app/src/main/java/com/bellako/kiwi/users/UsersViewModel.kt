@@ -18,23 +18,25 @@ class UsersViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    override suspend fun signup(state: UsersState) : Result<Unit> {
-        return state.toDomainObject().fold(
-            onSuccess = { user ->
-                _isLoading.value = true
-                try {
-                    _isLoading.value = false
-                    repository.signup(user.toDTO())
-                } catch (e: Exception) {
-                    _isLoading.value = false
-                    Result.failure(e)
-                }
-            },
-            onFailure = {
-                Result.failure(Exception("Invalid email or password format"))
-            }
-        )
+    override suspend fun signup(state: UsersState): Result<Unit> {
+        val domainResult = state.toDomainObject()
+        if (domainResult.isFailure) {
+            return Result.failure(Exception("Invalid email or password format"))
+        }
+
+        val user = domainResult.getOrThrow()
+        _isLoading.value = true
+
+        return try {
+            val result = repository.signup(user.toDTO())
+            _isLoading.value = false
+            result
+        } catch (e: Exception) {
+            _isLoading.value = false
+            Result.failure(e)
+        }
     }
+
 
     override suspend fun login(state: UsersState): Result<Unit> {
         val userResult = state.toDomainObject()

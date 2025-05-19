@@ -234,7 +234,10 @@ private fun UsersButtons(
                     if (result.isSuccess) {
                         successMessageState.value = "New User Successfully Created!"
                     } else {
-                        errorMessageState.value = result.exceptionOrNull()?.message.toString()
+                        val exception = result.exceptionOrNull()
+                        val message = exception?.message ?: "Unknown error"
+
+                        errorMessageState.value = message
                     }
                 }
             },
@@ -256,7 +259,10 @@ private fun UsersButtons(
                      if (result.isSuccess) {
                          onLoginSuccess()
                      } else {
-                         errorMessageState.value = result.exceptionOrNull()?.message.toString()
+                         val exception = result.exceptionOrNull()
+                         val message = exception?.message ?: "Unknown error"
+
+                         errorMessageState.value = message
                      }
                  }
             },
