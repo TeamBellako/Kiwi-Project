@@ -7,6 +7,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONObject
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
@@ -37,24 +38,26 @@ class UsersViewModel @Inject constructor(
     }
 
     override suspend fun login(state: UsersState): Result<Unit> {
-        return state.toDomainObject().fold(
-            onSuccess = { user ->
-                _isLoading.value = true
-                val apiResult: Result<String> = repository.login(user.toDTO())
-                _isLoading.value = false
+        val userResult = state.toDomainObject()
+        if (userResult.isFailure) {
+            return Result.failure(Exception("Invalid email or password format"))
+        }
 
-                return if (apiResult.isSuccess) {
-                    jwtAuthInterceptor.setJwtToken(apiResult.getOrDefault(""))
-                    Result.success(Unit)
-                } else {
-                    Result.failure(apiResult.exceptionOrNull() ?: Exception("Incorrect email or password"))
-                }
+        _isLoading.value = true
+        val user = userResult.getOrThrow()
+
+        val apiResult = repository.login(user.toDTO())
+        _isLoading.value = false
+
+        return apiResult.fold(
+            onSuccess = { jwt ->
+                jwtAuthInterceptor.setJwtToken(jwt)
+                Result.success(Unit)
             },
-            onFailure = {
-                Result.failure(Exception("Invalid email or password format"))
-            }
+            onFailure = { Result.failure(Exception("Incorrect email or password")) }
         )
     }
+
 
     override fun onEmailChanged(email: String) {
         _state.value = _state.value?.copy(email = email)

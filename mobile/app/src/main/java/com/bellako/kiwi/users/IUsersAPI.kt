@@ -8,5 +8,5 @@ interface IUsersAPI {
     suspend fun signup(@Body dto: UsersDTO) : Result<Unit>
 
     @POST("api/public/login")
-    suspend fun login(@Body dto: UsersDTO) : Result<String>
+    suspend fun login(@Body dto: UsersDTO) : Map<String, String>
 }

@@ -53,7 +53,10 @@ class UsersScreenTest {
 
     @Test
     fun validLogin () {
-        // TODO
+        rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
+
+        rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsDisplayed()
+        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsNotDisplayed()
     }
 
     @Test

@@ -11,6 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.whenever
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class UsersIntegrationTest {
@@ -47,12 +48,22 @@ class UsersIntegrationTest {
 
     @Test
     fun `login with a valid user`() = runTest {
-        whenever(api.login(any())).thenReturn(Result.success("mockJwt"))
+        whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
 
         val result : Result<Unit> = viewModel.login(validUsersDTO().toState())
 
         assertTrue(result.isSuccess)
         assertTrue(jwtAuthInterceptor.isJwtTokenSet())
+    }
+
+    @Test
+    fun `login with a valid user but jwt is missing`() = runTest {
+        whenever(api.login(any())).thenReturn(emptyMap())
+
+        val result : Result<Unit> = viewModel.login(validUsersDTO().toState())
+
+        assertTrue(result.isFailure)
+        assertFalse(jwtAuthInterceptor.isJwtTokenSet())
     }
 
     @Test
