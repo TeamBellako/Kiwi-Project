@@ -179,4 +179,7 @@ dependencies {
 
     androidTestImplementation(libs.mockwebserver)
     testImplementation(libs.robolectric)
+
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.espresso.intents)
 }

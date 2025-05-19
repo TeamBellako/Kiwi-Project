@@ -10,6 +10,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class UsersScreenTest {
@@ -18,6 +20,8 @@ class UsersScreenTest {
 
     private lateinit var fakeViewModel: UsersFakeViewModel
     private lateinit var state: UsersState
+
+    private lateinit var onLoginSuccessMock : () -> Unit
 
     @Before
     fun setUp() {
@@ -28,8 +32,9 @@ class UsersScreenTest {
             false
         )
 
+        onLoginSuccessMock = mock<() -> Unit>()
         rule.setContent {
-            UsersScreen(fakeViewModel)
+            UsersScreen(fakeViewModel, onLoginSuccessMock)
         }
     }
 
@@ -55,8 +60,8 @@ class UsersScreenTest {
     fun validLogin () {
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
 
-        rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsDisplayed()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsNotDisplayed()
+        verify(onLoginSuccessMock).invoke()
     }
 
     @Test
