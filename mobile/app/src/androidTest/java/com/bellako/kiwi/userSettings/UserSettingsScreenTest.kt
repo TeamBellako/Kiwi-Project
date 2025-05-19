@@ -9,7 +9,6 @@ import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
 import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.ui.UserSettingsScreen
-import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.invalidUserSettings
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
 import org.junit.Before
@@ -39,7 +38,7 @@ class UserSettingsScreenTest {
         fakeViewModel = UserSettingsFakeViewModel(state)
 
         composeTestRule.setContent {
-            UserSettingsScreen(viewModel = fakeViewModel)
+            UserSettingsScreen(viewModel = fakeViewModel, {})
         }
 
         robot = UserSettingsScreenTestRobot(composeTestRule)
