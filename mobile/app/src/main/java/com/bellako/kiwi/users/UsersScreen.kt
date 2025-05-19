@@ -1,13 +1,20 @@
 package com.bellako.kiwi.users
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
+import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.runtime.*
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -126,12 +133,18 @@ private fun InputField(
     inputFieldData: InputFieldData
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        var keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        var visualTransformation : VisualTransformation = VisualTransformation.None
+        val shouldShowPassword = remember { mutableStateOf(false) }
 
-        if (inputFieldData.shouldHideInput) {
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            visualTransformation = PasswordVisualTransformation()
+        val keyboardOptions = if (inputFieldData.shouldHideInput) {
+            KeyboardOptions(keyboardType = KeyboardType.Password)
+        } else {
+            KeyboardOptions(keyboardType = KeyboardType.Email)
+        }
+
+        val visualTransformation = if (inputFieldData.shouldHideInput && !shouldShowPassword.value) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
         }
 
         OutlinedTextField(
@@ -144,7 +157,12 @@ private fun InputField(
             keyboardOptions = keyboardOptions,
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag(UsersTestTags.EMAIL_FIELD)
+                .testTag(UsersTestTags.EMAIL_FIELD),
+            trailingIcon = {
+                if (inputFieldData.shouldHideInput) {
+                    ShowPasswordTrailingIcon(shouldShowPassword)
+                }
+            }
         )
         if (isLoading) {
             Box(
@@ -154,6 +172,26 @@ private fun InputField(
             )
         }
     }
+}
+
+@Composable
+private fun ShowPasswordTrailingIcon(
+    shouldShowPasswordState: MutableState<Boolean>
+) {
+    Icon(
+        imageVector = if (shouldShowPasswordState.value) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+        contentDescription = if (shouldShowPasswordState.value) "Hide password" else "Show password",
+        modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        shouldShowPasswordState.value = true
+                        tryAwaitRelease()
+                        shouldShowPasswordState.value = false
+                    }
+                )
+            }
+    )
 }
 
 @Composable
