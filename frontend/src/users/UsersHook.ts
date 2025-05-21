@@ -31,10 +31,10 @@ export const useUsersForm = ({
         setResult(null);
         try {
             toDomainObject(formState)
-            await dispatch(signup(formState));
+            await dispatch(signup(formState)).unwrap();
             setResult("New User Successfully Created!");
         } catch (error) {
-            setError(error as Error);
+            setError(Error(error as string));
         } finally {
             setLoading(false);
         }
@@ -46,10 +46,10 @@ export const useUsersForm = ({
         setResult(null);
         try {
             toDomainObject(formState)
-            await dispatch(login(formState));
+            await dispatch(login(formState)).unwrap();
             setResult("Logged in successfully!");
         } catch (error) {
-            setError(error as Error);
+            setError(Error(error as string));
         } finally {
             setLoading(false);
         }

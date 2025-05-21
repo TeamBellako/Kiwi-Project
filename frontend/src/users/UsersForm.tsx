@@ -65,7 +65,7 @@ const UsersForm: React.FC<UsersProps> = (props: UsersProps) => {
 
             {form.result && (
                 <p className="mt-2 text-green-600" role="result">
-                    {form.result}
+                    Result: {form.result}
                 </p>
             )}
         </form>

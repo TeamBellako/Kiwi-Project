@@ -42,28 +42,77 @@ describe('Users Integration Tests', () => {
         await fillFormData(validUserDTO)
         userEvent.click(screen.getByRole('button', { name: /signup/i }));
 
-        const successMessage = await screen.findByRole('result');
-        expect(successMessage).toBeVisible();
+        const resultMessage = await screen.findByRole('result');
+        expect(resultMessage).toBeVisible();
     });
 
-    test('invalid signup', () => {
+    test('invalid signup', async () => {
+        api.post = jest.fn();
+        
+        renderUsersPage()
+        await fillFormData(invalidUserDTO)
+        userEvent.click(screen.getByRole('button', { name: /signup/i }));
 
+        const errorMessage = await screen.findByRole('error');
+        expect(errorMessage).toBeVisible();
+        expect(api.post).not.toHaveBeenCalled();
     });
 
-    test('duplicated signup', () => {
-
+    test('duplicated signup', async () => {
+        api.post = jest.fn().mockRejectedValue({
+            response: {
+                status: 409,
+                data: { message: "Conflict" },
+            },
+        });
+        
+        renderUsersPage()
+        await fillFormData(validUserDTO)
+        userEvent.click(screen.getByRole('button', { name: /signup/i }));
+        
+        const errorMessage = await screen.findByRole('error');
+        expect(errorMessage).toBeVisible();
     });
 
-    test('valid login', () => {
+    test('valid login', async () => {
+        api.post = jest.fn().mockResolvedValue({})
 
+        renderUsersPage()
+        await fillFormData(validUserDTO)
+        userEvent.click(screen.getByRole('button', { name: /login/i }));
+
+        const resultMessage = await screen.findByRole('result');
+        expect(resultMessage).toBeVisible();
+        
+        // TODO: Test navigation and JWT management
     });
 
-    test('invalid login', () => {
+    test('invalid login', async () => {
+        api.post = jest.fn();
 
+        renderUsersPage()
+        await fillFormData(invalidUserDTO)
+        userEvent.click(screen.getByRole('button', { name: /login/i }));
+
+        const errorMessage = await screen.findByRole('error');
+        expect(errorMessage).toBeVisible();
+        expect(api.post).not.toHaveBeenCalled();
     });
 
-    test('incorrect login', () => {
+    test('incorrect login', async () => {
+        api.post = jest.fn().mockRejectedValue({
+            response: {
+                status: 401,
+                data: { message: "Unauthorized" },
+            },
+        });
 
+        renderUsersPage()
+        await fillFormData(incorrectUserDTO)
+        userEvent.click(screen.getByRole('button', { name: /login/i }));
+        
+        const errorMessage = await screen.findByRole('error');
+        expect(errorMessage).toBeVisible();
     });
     
     const fillFormData = async (dto: UsersDTO) => {

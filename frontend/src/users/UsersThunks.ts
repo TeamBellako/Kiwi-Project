@@ -17,7 +17,7 @@ export const signup = createAsyncThunk<
             const message =
                 status === 500
                     ? 'Internal server error. Try again later.'
-                    : error.response?.data?.message || 'Failed to sign up';
+                    : error.response?.data?.error || 'Failed to sign up';
 
             return rejectWithValue(message);
         }
@@ -40,7 +40,7 @@ export const login = createAsyncThunk<
             const message =
                 status === 500
                     ? 'Internal server error. Try again later.'
-                    : error.response?.data?.message || 'Failed to log in';
+                    : error.response?.data?.error || 'Failed to log in';
 
             return rejectWithValue(message);
         }
