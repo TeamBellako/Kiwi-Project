@@ -47,7 +47,6 @@ export const useUsersForm = ({
         try {
             toDomainObject(formState)
             await dispatch(login(formState)).unwrap();
-            setResult("Logged in successfully!");
         } catch (error) {
             setError(Error(error as string));
         } finally {

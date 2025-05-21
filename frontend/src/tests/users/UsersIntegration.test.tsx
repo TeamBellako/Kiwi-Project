@@ -6,6 +6,7 @@ import UsersPage from "../../users/UsersPage";
 import api from "../../services/api";
 import {UsersDTO} from "../../users/UsersDTO";
 import userEvent from "@testing-library/user-event";
+import {tryGetJWTToken} from "../../utils/StorageUtils";
 
 jest.mock("../../services/api")
 
@@ -75,7 +76,14 @@ describe('Users Integration Tests', () => {
     });
 
     test('valid login', async () => {
-        // TODO
+        const fakeJwt = "fake.jwt.token";
+        api.post = jest.fn().mockResolvedValue({ data: { jwt: fakeJwt } });
+
+        renderUsersPage();
+        await fillFormData(validUserDTO);
+        userEvent.click(screen.getByRole('button', { name: /login/i }));
+        
+        expect(tryGetJWTToken()).toBe(fakeJwt);
     });
 
     test('invalid login', async () => {
