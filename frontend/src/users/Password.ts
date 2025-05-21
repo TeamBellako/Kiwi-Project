@@ -10,7 +10,7 @@ export class Password {
     static of(password: string): Password {
         if (!this.isValid(password)) {
             throw new Error(
-                "Incorrect email or password. Password must:\n" +
+                "Invalid password, passwords must:\n" +
                 "- Be at least 8 characters long\n" +
                 "- Include both uppercase and lowercase letters\n" +
                 "- Contain at least one number\n" +
