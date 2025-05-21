@@ -6,6 +6,15 @@ import UsersPage from "../../users/UsersPage";
 import api from "../../services/api";
 import {UsersDTO} from "../../users/UsersDTO";
 import userEvent from "@testing-library/user-event";
+import {tryGetJWTToken} from "../../utils/StorageUtils";
+import {ROUTES} from "../../navigation/Routes"
+
+const mockedNavigate = jest.fn();
+
+jest.mock('react-router-dom', () => ({
+    ...jest.requireActual('react-router-dom'),
+    useNavigate: () => mockedNavigate,
+}));
 
 jest.mock("../../services/api")
 
@@ -22,7 +31,7 @@ describe('Users Integration Tests', () => {
         email: "finn@thehuman.com",
         password: "Math3maticalllydawdawdwa!"
     }
-    
+
     let mockStore: Store<unknown, UnknownAction, unknown>;
 
     beforeEach(() => {
@@ -34,24 +43,26 @@ describe('Users Integration Tests', () => {
             },
         });
     });
-    
+
     test('valid signup', async () => {
         api.post = jest.fn().mockResolvedValue({})
 
         renderUsersPage()
         await fillFormData(validUserDTO)
-        userEvent.click(screen.getByRole('button', { name: /signup/i }));
+        await userEvent.click(screen.getByRole('button', { name: /signup/i }));
 
         const resultMessage = await screen.findByRole('result');
         expect(resultMessage).toBeVisible();
+        expect(api.post).toHaveBeenCalledTimes(1);
+        expect(api.post).toHaveBeenCalledWith(expect.stringContaining('signup'), validUserDTO);
     });
 
     test('invalid signup', async () => {
         api.post = jest.fn();
-        
+
         renderUsersPage()
         await fillFormData(invalidUserDTO)
-        userEvent.click(screen.getByRole('button', { name: /signup/i }));
+        await userEvent.click(screen.getByRole('button', { name: /signup/i }));
 
         const errorMessage = await screen.findByRole('error');
         expect(errorMessage).toBeVisible();
@@ -65,25 +76,38 @@ describe('Users Integration Tests', () => {
                 data: { message: "Conflict" },
             },
         });
-        
+
         renderUsersPage()
         await fillFormData(validUserDTO)
-        userEvent.click(screen.getByRole('button', { name: /signup/i }));
-        
+        await userEvent.click(screen.getByRole('button', { name: /signup/i }));
+
         const errorMessage = await screen.findByRole('error');
         expect(errorMessage).toBeVisible();
+        expect(api.post).toHaveBeenCalledTimes(1);
+        expect(api.post).toHaveBeenCalledWith(expect.stringContaining('signup'), validUserDTO);
     });
 
     test('valid login', async () => {
-        // TODO
+        const fakeJwt : string = "fake.jwt.token";
+        api.post = jest.fn().mockResolvedValue({ data: { jwt: fakeJwt } });
+
+        renderUsersPage();
+        await fillFormData(validUserDTO);
+        await userEvent.click(screen.getByRole('button', { name: /login/i }));
+
+        expect(tryGetJWTToken()).toBe(fakeJwt);
+        expect(mockedNavigate).toHaveBeenCalledWith(ROUTES.SETTINGS);
+        expect(api.post).toHaveBeenCalledTimes(1);
+        expect(api.post).toHaveBeenCalledWith(expect.stringContaining('login'), validUserDTO);
     });
+
 
     test('invalid login', async () => {
         api.post = jest.fn();
 
         renderUsersPage()
         await fillFormData(invalidUserDTO)
-        userEvent.click(screen.getByRole('button', { name: /login/i }));
+        await userEvent.click(screen.getByRole('button', { name: /login/i }));
 
         const errorMessage = await screen.findByRole('error');
         expect(errorMessage).toBeVisible();
@@ -100,12 +124,14 @@ describe('Users Integration Tests', () => {
 
         renderUsersPage()
         await fillFormData(incorrectUserDTO)
-        userEvent.click(screen.getByRole('button', { name: /login/i }));
-        
+        await userEvent.click(screen.getByRole('button', { name: /login/i }));
+
         const errorMessage = await screen.findByRole('error');
         expect(errorMessage).toBeVisible();
+        expect(api.post).toHaveBeenCalledTimes(1);
+        expect(api.post).toHaveBeenCalledWith(expect.stringContaining('login'), incorrectUserDTO);
     });
-    
+
     const fillFormData = async (dto: UsersDTO) => {
         await userEvent.type(screen.getByLabelText(/email/i), dto.email);
         await userEvent.type(screen.getByLabelText(/password/i), dto.password);

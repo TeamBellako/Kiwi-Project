@@ -3,6 +3,8 @@ import {AppDispatch} from "../store/Store";
 import {useDispatch} from "react-redux";
 import {useState} from "react";
 import {login, signup} from "./UsersThunks";
+import {useNavigate} from "react-router-dom";
+import {ROUTES} from "../navigation/Routes";
 
 type UsersFormProps = Partial<UsersDTO>;
 
@@ -11,6 +13,7 @@ export const useUsersForm = ({
     password = '',
 }: UsersFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
 
     const [formState, setFormState] = useState<UsersDTO>({
         email,
@@ -30,8 +33,10 @@ export const useUsersForm = ({
         setError(null);
         setResult(null);
         try {
-            toDomainObject(formState)
+            toDomainObject(formState);
+            
             await dispatch(signup(formState)).unwrap();
+            
             setResult("New User Successfully Created!");
         } catch (error) {
             setError(Error(error as string));
@@ -45,9 +50,11 @@ export const useUsersForm = ({
         setError(null);
         setResult(null);
         try {
-            toDomainObject(formState)
+            toDomainObject(formState);
+            
             await dispatch(login(formState)).unwrap();
-            setResult("Logged in successfully!");
+            
+            navigate(ROUTES.SETTINGS);
         } catch (error) {
             setError(Error(error as string));
         } finally {

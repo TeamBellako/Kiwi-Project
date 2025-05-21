@@ -26,8 +26,8 @@ export const login = createAsyncThunk<
     'users/login',
     async (userData, { rejectWithValue }) => {
         try {
-            const response = await api.post<{ token: string }>('api/public/login', userData);
-            return response.data.token; 
+            const response = await api.post<{ jwt: string }>('api/public/login', userData);
+            return response.data.jwt; 
         } catch (error: any) {
             return rejectWithValue(getServerErrorMessage(error, 'Failed to login'));
         }
