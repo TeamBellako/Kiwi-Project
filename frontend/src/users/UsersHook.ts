@@ -2,7 +2,7 @@ import {toDomainObject, UsersDTO} from "./UsersDTO";
 import {AppDispatch} from "../store/Store";
 import {useDispatch} from "react-redux";
 import {useState} from "react";
-import {signup} from "./UsersThunks";
+import {login, signup} from "./UsersThunks";
 
 type UsersFormProps = Partial<UsersDTO>;
 
@@ -22,20 +22,32 @@ export const useUsersForm = ({
     const [loading, setLoading] = useState(false);
 
     const updateFormState = (key: keyof UsersDTO, value: string) => {
-        setFormState(prev => ({
-            ...prev,
-            [key]: value,
-        }));
+        setFormState(prev => ({ ...prev, [key]: value }));
     };
 
-    const signupUser = async (): Promise<void> => {
+    const signupUser = async () => {
         setLoading(true);
         setError(null);
         setResult(null);
         try {
-            toDomainObject(formState);
+            toDomainObject(formState)
             await dispatch(signup(formState));
             setResult("New User Successfully Created!");
+        } catch (error) {
+            setError(error as Error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loginUser = async () => {
+        setLoading(true);
+        setError(null);
+        setResult(null);
+        try {
+            toDomainObject(formState)
+            await dispatch(login(formState));
+            setResult("Logged in successfully!");
         } catch (error) {
             setError(error as Error);
         } finally {
@@ -47,6 +59,7 @@ export const useUsersForm = ({
         formState,
         updateFormState,
         signupUser,
+        loginUser,
         error,
         result,
         loading,

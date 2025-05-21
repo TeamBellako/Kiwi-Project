@@ -9,8 +9,15 @@ export class Password {
 
     static of(password: string): Password {
         if (!this.isValid(password)) {
-            throw new Error("Invalid password format");
+            throw new Error(
+                "Incorrect email or password. Password must:\n" +
+                "- Be at least 8 characters long\n" +
+                "- Include both uppercase and lowercase letters\n" +
+                "- Contain at least one number\n" +
+                "- Contain at least one special character"
+            );
         }
         return new Password(password);
     }
+
 }

@@ -1,10 +1,10 @@
 import React from 'react';
-import UserSettingsPage from "./userSettings/components/UserSettingsPage";
+import UsersPage from "./users/UsersPage";
 
 const App: React.FC = () => {
     return (
         <div className="App">
-            <UserSettingsPage />
+            <UsersPage />
         </div>
     );
 };
