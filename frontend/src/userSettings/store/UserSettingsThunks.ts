@@ -2,6 +2,7 @@ import {createAsyncThunk} from '@reduxjs/toolkit';
 import api from '../../services/api';
 import {pingServer} from '../../services/pingServer';
 import {UserSettingsDTO} from "../types/UserSettingsDTO";
+import {getServerErrorMessage} from "../../utils/APIUtils";
 
 type RejectMessage = string;
 
@@ -17,14 +18,7 @@ export const loadUserSettings = createAsyncThunk<
             const response = await api.get<UserSettingsDTO>('/api/user/settings');
             return response.data;
         } catch (error: any) {
-            const status = error.response?.status;
-
-            const message =
-                status === 500
-                    ? 'Internal server error. Try again later.'
-                    : error.response?.data?.message || 'Failed to load user settings';
-
-            return rejectWithValue(message);
+            return rejectWithValue(getServerErrorMessage(error, 'Failed to load user settings'));
         }
     }
 );
@@ -45,14 +39,7 @@ export const updateUserSettings = createAsyncThunk<
             const response = await api.put<UserSettingsDTO>('/api/user/settings', settingsDTO);
             return response.data;
         } catch (error: any) {
-            const status = error.response?.status;
-
-            const message =
-                status === 500
-                    ? 'Internal server error. Try again later.'
-                    : error.response?.data?.message || 'Failed to update user settings';
-
-            return rejectWithValue(message);
+            return rejectWithValue(getServerErrorMessage(error, 'Failed to update user settings'));
         }
     }
 );
