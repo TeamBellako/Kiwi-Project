@@ -5,3 +5,9 @@ export interface UsersState {
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null; 
 }
+
+export const usersInitialState : UsersState = {
+    usersDTO: null,
+    status: 'idle',
+    error: null,
+};
