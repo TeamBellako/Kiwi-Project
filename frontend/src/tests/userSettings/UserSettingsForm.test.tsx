@@ -7,6 +7,7 @@ import UserSettingsForm from "../../userSettings/components/UserSettingsForm";
 import {Provider} from "react-redux";
 import {store} from "../../store/Store";
 import {getFormFields} from "./UserSettingsTestUtils";
+import {BrowserRouter} from "react-router-dom";
 
 expect.extend(toHaveNoViolations);
 
@@ -16,11 +17,13 @@ describe('UserSettings Form Tests', () => {
     beforeEach(() => {
         render(
             <Provider store={store}>
-                <UserSettingsForm />
+                <BrowserRouter>
+                    <UserSettingsForm />
+                </BrowserRouter>
             </Provider>
         )
         formFields = getFormFields();
-    })
+    });
     
     describe('Email Field Tests', () => {
         test('email field gets valid input and accept it', async () => {
@@ -77,9 +80,11 @@ describe('UserSettings Form Tests', () => {
     describe('General Tests', () => {
         it('has no accessibility violations', async () => {
             const { container } = render(
-                <Provider store={store}>
-                    <UserSettingsForm />
-                </Provider>
+                <BrowserRouter>
+                    <Provider store={store}>
+                        <UserSettingsForm />
+                    </Provider>
+                </BrowserRouter>
             );
             
             const results = await axe(container);

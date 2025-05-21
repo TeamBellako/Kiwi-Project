@@ -6,6 +6,7 @@ import api from "../../services/api";
 import {userSettingsReducer} from "../../userSettings/store/UserSettingsSlice";
 import {userSettingsLabels} from "../constants/Labels";
 import {invalidUserSettingsDTO, updateUserSettingsDTO, validUserSettingsDTO} from "./UserSettingsTestFactory";
+import {BrowserRouter} from "react-router-dom";
 
 jest.mock("../../services/api");
 
@@ -29,9 +30,11 @@ describe('UserSettingsPage Tests', () => {
 
     const renderUserSettingsPage = (store = mockStore) => {
         return render(
-            <Provider store={store}>
-                <UserSettingsPage />
-            </Provider>
+            <BrowserRouter>
+                <Provider store={store}>
+                    <UserSettingsPage />
+                </Provider>
+            </BrowserRouter>
         );
     };
 
