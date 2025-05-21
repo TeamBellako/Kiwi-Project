@@ -1,6 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {UsersDTO} from "./UsersDTO";
 import api from "../services/api";
+import {getServerErrorMessage} from "../utils/APIUtils";
 
 export const signup = createAsyncThunk<
     void,             
@@ -12,14 +13,7 @@ export const signup = createAsyncThunk<
         try {
             await api.post('api/public/signup', userData);
         } catch (error: any) {
-            const status = error.response?.status;
-            
-            const message =
-                status === 500
-                    ? 'Internal server error. Try again later.'
-                    : error.response?.data?.error || 'Failed to sign up';
-
-            return rejectWithValue(message);
+            return rejectWithValue(getServerErrorMessage(error, 'Failed to signup'));
         }
     }
 );
@@ -35,14 +29,7 @@ export const login = createAsyncThunk<
             const response = await api.post<{ token: string }>('api/public/login', userData);
             return response.data.token; 
         } catch (error: any) {
-            const status = error.response?.status;
-            
-            const message =
-                status === 500
-                    ? 'Internal server error. Try again later.'
-                    : error.response?.data?.error || 'Failed to log in';
-
-            return rejectWithValue(message);
+            return rejectWithValue(getServerErrorMessage(error, 'Failed to login'));
         }
     }
 );
