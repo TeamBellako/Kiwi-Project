@@ -58,13 +58,13 @@ const UsersForm: React.FC<UsersProps> = (props: UsersProps) => {
             </div>
 
             {form.error && (
-                <p className="mt-2 text-red-600" role="alert" style={{ whiteSpace: "pre-wrap" }}>
+                <p className="mt-2 text-red-600" role="error" style={{ whiteSpace: "pre-wrap" }}>
                     Error: {form.error.message}
                 </p>
             )}
 
             {form.result && (
-                <p className="mt-2 text-green-600" role="status">
+                <p className="mt-2 text-green-600" role="result">
                     {form.result}
                 </p>
             )}
