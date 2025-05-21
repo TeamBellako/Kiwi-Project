@@ -3,18 +3,17 @@ import {UsersDTO} from "./UsersDTO";
 import api from "../services/api";
 
 export const signup = createAsyncThunk<
-    UsersDTO,
-    void,
+    void,             
+    UsersDTO,         
     { rejectValue: string }
 >(
     'users/signup',
-    async (_, { rejectWithValue }) => {
+    async (userData, { rejectWithValue }) => {
         try {
-            const response = await api.get<UsersDTO>('api/public/signup');
-            return response.data;
+            await api.post('api/public/signup', userData);
         } catch (error: any) {
             const status = error.response?.status;
-
+            
             const message =
                 status === 500
                     ? 'Internal server error. Try again later.'
@@ -26,22 +25,22 @@ export const signup = createAsyncThunk<
 );
 
 export const login = createAsyncThunk<
-    UsersDTO,
-    string,
+    string,           
+    UsersDTO,         
     { rejectValue: string }
 >(
     'users/login',
-    async (_, { rejectWithValue }) => {
+    async (userData, { rejectWithValue }) => {
         try {
-            const response = await api.get<UsersDTO>('api/public/login');
-            return response.data;
+            const response = await api.post<{ token: string }>('api/public/login', userData);
+            return response.data.token; 
         } catch (error: any) {
             const status = error.response?.status;
-
+            
             const message =
                 status === 500
                     ? 'Internal server error. Try again later.'
-                    : error.response?.data?.message || 'Failed to sign up';
+                    : error.response?.data?.message || 'Failed to log in';
 
             return rejectWithValue(message);
         }
