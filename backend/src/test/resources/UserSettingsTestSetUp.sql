@@ -6,8 +6,7 @@ CREATE TABLE IF NOT EXISTS user_settings (
     email VARCHAR(255) NOT NULL UNIQUE,
 
     sound_volume INT NOT NULL,
-    music_volume INT NOT NULL,
-    is_rumbling_on BOOLEAN NOT NULL
+    music_volume INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (

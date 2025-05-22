@@ -9,7 +9,6 @@ public class UserSettingsDTO {
     private String email = "";
     private int soundVolume = 50;
     private int musicVolume = 50;
-    private boolean isRumblingOn = false;
 
     public UserSettingsDTO() {
     }
@@ -18,11 +17,10 @@ public class UserSettingsDTO {
         this.email = email;
     }
 
-    public UserSettingsDTO(String email, int soundVolume, int musicVolume, boolean isRumblingOn) {
+    public UserSettingsDTO(String email, int soundVolume, int musicVolume) {
         this.email = email;
         this.soundVolume = soundVolume;
         this.musicVolume = musicVolume;
-        this.isRumblingOn = isRumblingOn;
     }
 
     public Integer getId() {
@@ -57,27 +55,18 @@ public class UserSettingsDTO {
         this.musicVolume = musicVolume;
     }
 
-    public boolean isRumblingOn() {
-        return isRumblingOn;
-    }
-
-    public void setRumblingOn(boolean rumblingOn) {
-        isRumblingOn = rumblingOn;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UserSettingsDTO that = (UserSettingsDTO) o;
         return soundVolume == that.soundVolume &&
                 musicVolume == that.musicVolume &&
-                isRumblingOn == that.isRumblingOn &&
                 Objects.equals(email, that.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, soundVolume, musicVolume, isRumblingOn);
+        return Objects.hash(email, soundVolume, musicVolume);
     }
 
     @Override
@@ -87,7 +76,6 @@ public class UserSettingsDTO {
                 ", email='" + email + '\'' +
                 ", soundVolume=" + soundVolume +
                 ", musicVolume=" + musicVolume +
-                ", isRumblingOn=" + isRumblingOn +
                 '}';
     }
 
@@ -95,8 +83,7 @@ public class UserSettingsDTO {
         return new UserSettings(
                 new Email(getEmail()),
                 getSoundVolume(),
-                getMusicVolume(),
-                isRumblingOn()
+                getMusicVolume()
         );
     }
 }

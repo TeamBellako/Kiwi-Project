@@ -23,28 +23,23 @@ public class UserSettings {
     @Column(name = "music_volume")
     private int musicVolume;
 
-    @Column(name = "is_rumbling_on")
-    private boolean isRumblingOn;
-
     @OneToOne(mappedBy = "userSettings")
     private UsersPersistence user;
 
     public UserSettings() {
     }
 
-    public UserSettings(Integer id, Email email, int soundVolume, int musicVolume, boolean isRumblingOn) {
+    public UserSettings(Integer id, Email email, int soundVolume, int musicVolume) {
         setId(id);
         setEmail(email);
         setSoundVolume(soundVolume);
         setMusicVolume(musicVolume);
-        setRumblingOn(isRumblingOn);
     }
 
-    public UserSettings(Email email, int soundVolume, int musicVolume, boolean isRumblingOn) {
+    public UserSettings(Email email, int soundVolume, int musicVolume) {
         setEmail(email);
         setSoundVolume(soundVolume);
         setMusicVolume(musicVolume);
-        setRumblingOn(isRumblingOn);
     }
 
     public Integer getId() {
@@ -86,14 +81,6 @@ public class UserSettings {
         this.musicVolume = musicVolume;
     }
 
-    public boolean isRumblingOn() {
-        return isRumblingOn;
-    }
-
-    public void setRumblingOn(boolean rumblingOn) {
-        isRumblingOn = rumblingOn;
-    }
-
     public UsersPersistence getUser() {
         return user;
     }
@@ -109,7 +96,6 @@ public class UserSettings {
                 ", email='" + email + '\'' +
                 ", soundVolume=" + soundVolume +
                 ", musicVolume=" + musicVolume +
-                ", isRumblingOn=" + isRumblingOn +
                 '}';
     }
 
@@ -119,27 +105,24 @@ public class UserSettings {
         UserSettings that = (UserSettings) o;
         return soundVolume == that.soundVolume &&
                 musicVolume == that.musicVolume &&
-                isRumblingOn == that.isRumblingOn &&
                 Objects.equals(email, that.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, soundVolume, musicVolume, isRumblingOn);
+        return Objects.hash(email, soundVolume, musicVolume);
     }
 
     public UserSettingsDTO toDTO() {
         return new UserSettingsDTO(
                 getEmail().value(),
                 getSoundVolume(),
-                getMusicVolume(),
-                isRumblingOn()
+                getMusicVolume()
         );
     }
 
     public void mergeFromDTO(UserSettingsDTO dto) {
         this.soundVolume = dto.getSoundVolume();
         this.musicVolume = dto.getMusicVolume();
-        this.isRumblingOn = dto.isRumblingOn();
     }
 }

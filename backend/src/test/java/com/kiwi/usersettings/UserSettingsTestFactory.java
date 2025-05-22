@@ -6,8 +6,7 @@ public class UserSettingsTestFactory {
         return new UserSettingsDTO(
                 "finn@thehuman.com",
                 70,                       
-                80,                       
-                true                      
+                80
         );
     }
 
@@ -15,8 +14,7 @@ public class UserSettingsTestFactory {
         return new UserSettingsDTO(
                 "finn@thehuman.com",
                 50,                       
-                40,                       
-                false                     
+                40
         );
     }
 
@@ -24,8 +22,7 @@ public class UserSettingsTestFactory {
         return new UserSettingsDTO(
                 "bmolovesfootball.com",   
                 150,                      
-                -10,                      
-                true                      
+                -10                     
         );
     }
 }
