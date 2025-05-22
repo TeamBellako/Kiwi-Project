@@ -61,27 +61,11 @@ public class UsersDTO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UsersDTO usersDTO = (UsersDTO) o;
-        return Objects.equals(email, usersDTO.email) && Objects.equals(password, usersDTO.password) && Objects.equals(userSettingsDTO, usersDTO.userSettingsDTO);
+        return Objects.equals(email, usersDTO.email) && Objects.equals(userSettingsDTO, usersDTO.userSettingsDTO);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(email, password, userSettingsDTO);
-    }
-
-    public Users toDomainObject() {
-        return new Users(
-            new Email(getEmail()),
-            new Password(getPassword()),
-            userSettingsDTO.toDomainObject()
-        );
-    }
-    
-    public UsersPersistence toPersistenceObject() {
-        return new UsersPersistence(
-            new Email(getEmail()),
-            new Password(getPassword()),
-            userSettingsDTO.toDomainObject()
-        );
     }
 }

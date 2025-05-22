@@ -11,12 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
@@ -43,21 +46,29 @@ public class UsersIntegrationTest {
     private UsersRepository usersRepository;
     @Autowired
     private UsersService usersService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtUtils jwtUtils;
     
     private final String signupAPIUrl = "/api/public/signup";
     private final String loginAPIUrl = "/api/public/login";
-    
+
     @Test
     public void validSignup() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
-        
+        UsersDTO userDTO = validUserDTO();
+        LoginDTO loginDTO = new LoginDTO(userDTO.getEmail(), userDTO.getPassword());
+
         mockMvc.perform(getPostRequestBuilder(signupAPIUrl, loginDTO))
                 .andExpect(status().isCreated());
-        
-        assertEquals(validUserDTO(), usersRepository.findByEmail(validUserDTO().getEmail()).get().toDTO());
+
+        Optional<UsersPersistence> savedUserOpt = usersRepository.findByEmail(userDTO.getEmail());
+        assertTrue(savedUserOpt.isPresent());
+        UsersPersistence savedUser = savedUserOpt.get();
+
+        assertTrue(passwordEncoder.matches(userDTO.getPassword(), savedUser.getPassword()));
+        assertEquals(userDTO.getEmail(), savedUser.getEmail().value());
     }
 
     @Test
@@ -68,7 +79,8 @@ public class UsersIntegrationTest {
 
     @Test
     public void duplicatedSignup() throws Exception {
-        usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
+        Users user = UsersMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
         
         mockMvc.perform(getPostRequestBuilder(signupAPIUrl, getValidLoginDTO()))
                 .andExpect(status().isConflict());
@@ -76,7 +88,9 @@ public class UsersIntegrationTest {
 
     @Test
     public void validLogin() throws Exception {
-        usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
+        Users user = UsersMapper.toDomain(validUserDTO());
+        String hashedPassword = passwordEncoder.encode(validUserDTO().getPassword());
+        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, hashedPassword));
         
         MvcResult result = mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getValidLoginDTO()))
                 .andExpect(status().isOk())
@@ -104,7 +118,8 @@ public class UsersIntegrationTest {
 
     @Test
     public void incorrectPasswordLogin() throws Exception {
-        usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
+        Users user = UsersMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
         
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), "Marceline*Simon4Ever");
 

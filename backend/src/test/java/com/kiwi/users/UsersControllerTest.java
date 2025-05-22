@@ -10,6 +10,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,6 +43,9 @@ public class UsersControllerTest {
     @MockitoBean
     private UsersService usersService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private final String baseAPIUrl = "/api/public";
     
     @Test
@@ -54,13 +59,14 @@ public class UsersControllerTest {
     public void validLogin() throws Exception {
         String mockToken = "myToken";
         when(jwtUtils.generateToken(anyString())).thenReturn(mockToken);
-        when(usersService.getUserByEmail(any(Email.class))).thenReturn(Optional.of(validUserDTO()));
+
+        Users user = UsersMapper.toDomain(validUserDTO());
+        when(usersService.getUserByEmail(any(Email.class)))
+                .thenReturn(Optional.of(UsersMapper.toPersistence(user, passwordEncoder.encode(validUserDTO().getPassword()))));
 
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/login", loginDTO))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwt").value(mockToken));
     }
-    
-    
 }

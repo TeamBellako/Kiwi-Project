@@ -24,7 +24,7 @@ public class CustomUserDetailsService  implements UserDetailsService {
         
         return new User(
                 usersPersistence.get().getEmail().value(),
-                usersPersistence.get().getPassword().value(),
+                usersPersistence.get().getPassword(),
                 Collections.emptyList()
         );
     }

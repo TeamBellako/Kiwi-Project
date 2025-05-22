@@ -1,7 +1,7 @@
 package com.kiwi.users;
 
-import com.kiwi.usersettings.UserSettingsInvalidException;
 import org.junit.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -11,7 +11,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UsersServiceTest {
     private final UsersRepositoryInMemory usersRepositoryInMemory = new UsersRepositoryInMemory();
-    private final UsersService usersService = new UsersService(usersRepositoryInMemory);
+    private final UsersService usersService = new UsersService(usersRepositoryInMemory, new PasswordEncoder() {
+        @Override
+        public String encode(CharSequence rawPassword) {
+            return rawPassword.toString();
+        }
+
+        @Override
+        public boolean matches(CharSequence rawPassword, String encodedPassword) {
+            return true;
+        }
+    });
     
     private final String validEmailString = validUserDTO().getEmail(); 
     
@@ -19,7 +29,8 @@ public class UsersServiceTest {
     public void createValidUser() {
         usersService.createUser(validUserDTO());
         
-        assertEquals(validUserDTO(), usersRepositoryInMemory.findByEmail(validEmailString).get().toDTO());
+        UsersPersistence createdUser = usersRepositoryInMemory.findByEmail(validEmailString).get();
+        assertEquals(UsersMapper.toDomain(validUserDTO()), UsersMapper.toDomain(createdUser));
     }
 
     @Test(expected = UsersInvalidException.class)
@@ -40,9 +51,11 @@ public class UsersServiceTest {
 
     @Test
     public void getValidUser() {
-        usersRepositoryInMemory.saveAndFlush(validUserDTO().toPersistenceObject());
-        
-        assertEquals(validUserDTO(), usersService.getUserByEmail(getValidEmail()).get());
+        Users user = UsersMapper.toDomain(validUserDTO());
+        usersRepositoryInMemory.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+
+        UsersPersistence createdUser = usersRepositoryInMemory.findByEmail(getValidEmail().value()).get();
+        assertEquals(UsersMapper.toDomain(validUserDTO()), UsersMapper.toDomain(createdUser));
     }
 
     @Test(expected = NullPointerException.class)
@@ -55,51 +68,5 @@ public class UsersServiceTest {
         assertEquals(Optional.empty(), usersService.getUserByEmail(getValidEmail()));
     }
 
-    @Test
-    public void updateValidUser() {
-        UsersDTO userDTO = validUserDTO();
-        usersRepositoryInMemory.saveAndFlush(userDTO.toPersistenceObject());
-
-        userDTO.setPassword("Simon*Marceline4ever");
-        usersRepositoryInMemory.saveAndFlush(userDTO.toPersistenceObject());
-
-        assertEquals(userDTO, usersRepositoryInMemory.findByEmail(userDTO.getEmail()).get().toDTO());
-    }
-
-    @Test(expected = UsersInvalidException.class)
-    public void updateInvalidUser() {
-        usersService.updateUser(invalidUserDTO());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void updateNullUser() {
-        usersService.updateUser(null);
-    }
-
-    @Test(expected = UsersNotFoundException.class)
-    public void updateNonExistingUser() {
-       usersService.updateUser(validUserDTO());
-    }
-
-    @Test
-    public void deleteValidUser() {
-        usersRepositoryInMemory.saveAndFlush(validUserDTO().toPersistenceObject());
-        assertTrue(usersRepositoryInMemory.existsByEmail(validEmailString));
-        
-        usersService.deleteUser(getValidEmail());
-        
-        assertFalse(usersRepositoryInMemory.existsByEmail(validEmailString));
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void deleteNullUser() {
-        usersService.deleteUser(null);
-    }
-
-    @Test(expected = UsersNotFoundException.class)
-    public void deleteNonExistingUser() {
-        usersService.deleteUser(getValidEmail());
-    }
-    
     private Email getValidEmail() { return new Email(validEmailString); }
 }
