@@ -52,27 +52,11 @@ public class Users {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Users users = (Users) o;
-        return Objects.equals(email, users.email) && Objects.equals(password, users.password) && Objects.equals(userSettings, users.userSettings);
+        return Objects.equals(email, users.email) && Objects.equals(userSettings, users.userSettings);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(email, password, userSettings);
-    }
-
-    public UsersDTO toDTO() {
-        return new UsersDTO(
-                getEmail().value(),
-                getPassword().value(),
-                getUserSettings().toDTO()
-        );
-    }
-    
-    public UsersPersistence toPersistence() {
-        return new UsersPersistence(
-                getEmail(),
-                getPassword(),
-                getUserSettings()
-        );
     }
 }

@@ -26,9 +26,9 @@ public class UsersPersistence {
     public UsersPersistence() {
     }
 
-    public UsersPersistence(Email email, Password password, UserSettings userSettings) {
+    public UsersPersistence(Email email, String password, UserSettings userSettings) {
         setEmail(email);
-        setPassword(password);
+        this.password = password;
         setUserSettings(userSettings);
     }
 
@@ -50,12 +50,12 @@ public class UsersPersistence {
         this.email = email.value();
     }
 
-    public Password getPassword() {
-        return new Password(this.password);
+    public String getPassword() {
+        return this.password;
     }
 
-    public void setPassword(Password password) {
-        this.password = password.value();
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public UserSettings getUserSettings() {
@@ -87,26 +87,4 @@ public class UsersPersistence {
     public int hashCode() {
         return Objects.hash(id, email, password, userSettings);
     }
-
-    public UsersDTO toDTO() {
-        return new UsersDTO(
-                getEmail().value(),
-                getPassword().value(),
-                getUserSettings().toDTO()
-        );
-    }
-
-    public Users toDomainObject() {
-        return new Users(
-                getEmail(),
-                getPassword(),
-                getUserSettings()
-        );
-    }
-    
-    public void mergeFromDomainObject(Users user) {
-        setEmail(user.getEmail());
-        setPassword(user.getPassword());
-        setUserSettings(user.getUserSettings());
-    } 
 }

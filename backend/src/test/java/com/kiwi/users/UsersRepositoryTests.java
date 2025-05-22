@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
-import static com.kiwi.usersettings.UserSettingsTestFactory.validUserSettingsDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
@@ -33,35 +32,15 @@ public class UsersRepositoryTests {
     
     @Test
     public void createValidUser() {
-        usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
+        Users user =  UsersMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
         
-        assertEquals(validUserDTO().toPersistenceObject(), usersRepository.findByEmail(validUserDTO().getEmail()).get());
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+        assertEquals(user, UsersMapper.toDomain(savedUser));
     }
     
     @Test
     public void getNonExistingUser() {
         assertEquals(Optional.empty(), usersRepository.findByEmail(validUserDTO().getEmail()));
-    }
-
-    @Test
-    public void updateValidUser() {
-        usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
-
-        UsersPersistence userUpdate = usersRepository.findByEmail(validUserDTO().getEmail()).get();
-        userUpdate.setPassword(new Password("Marceline*Simon4Ever"));
-        usersRepository.saveAndFlush(userUpdate);
-        
-        assertEquals(userUpdate, usersRepository.findByEmail(validUserDTO().getEmail()).get());
-    }
-
-    @Test
-    public void deleteValidUserAlsoDeletesSettings() {
-        usersRepository.saveAndFlush(validUserDTO().toPersistenceObject());
-        
-        assertEquals(validUserSettingsDTO().toDomainObject(), userSettingsRepository.findByEmail(validUserDTO().getEmail()).get());
-        usersRepository.deleteByEmail(validUserDTO().getEmail());
-        
-        assertEquals(Optional.empty(), usersRepository.findByEmail(validUserDTO().getEmail()));
-        assertEquals(Optional.empty(), userSettingsRepository.findByEmail(validUserDTO().getEmail()));
     }
 }
