@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS user_settings (
 
     sound_volume INT NOT NULL CHECK (sound_volume >= 0 AND sound_volume <= 100),
     music_volume INT NOT NULL CHECK (music_volume >= 0 AND music_volume <= 100),
-    is_rumbling_on BOOLEAN NOT NULL,
 
     CONSTRAINT user_settings_check_email_format CHECK (
         email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'

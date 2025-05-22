@@ -1,8 +1,12 @@
-package com.bellako.kiwi.users
+package com.bellako.kiwi
 
 import com.bellako.kiwi.network.AuthRepository
+import com.bellako.kiwi.users.IUsersAPI
+import com.bellako.kiwi.users.IUsersViewModel
+import com.bellako.kiwi.users.UsersRepository
 import com.bellako.kiwi.users.UsersTestFactory.incorrectPasswordUsersDTO
 import com.bellako.kiwi.users.UsersTestFactory.validUsersDTO
+import com.bellako.kiwi.users.UsersViewModel
 import com.bellako.kiwi.utils.HTTPUtils.createFakeHttpException
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

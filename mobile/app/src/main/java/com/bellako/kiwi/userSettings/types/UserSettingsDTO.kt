@@ -4,15 +4,14 @@ import com.bellako.kiwi.users.Email
 
 data class UserSettingsDTO(
     val email: String,
-    val areNotificationsEnabled: Boolean,
-    val theme: Theme
-
+    val soundVolume: Int,
+    val musicVolume: Int
 ) {
-    fun toState() : UserSettingsState {
+    fun toState(): UserSettingsState {
         return UserSettingsState(
             email = email,
-            areNotificationsEnabled = areNotificationsEnabled,
-            theme = theme,
+            soundVolume = soundVolume,
+            musicVolume = musicVolume
         )
     }
 
@@ -20,8 +19,8 @@ data class UserSettingsDTO(
         return Email.of(email).map { validEmail ->
             UserSettings(
                 email = validEmail,
-                areNotificationsEnabled = areNotificationsEnabled,
-                theme = Theme.valueOf(theme.name)
+                soundVolume = soundVolume,
+                musicVolume = musicVolume
             )
         }
     }

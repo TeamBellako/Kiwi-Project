@@ -1,4 +1,4 @@
-package com.bellako.kiwi.userSettings
+package com.bellako.kiwi
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.test.*
@@ -7,7 +7,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.ui.tags.KIWI_LOADING_INDICATOR
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
-import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.ui.UserSettingsScreen
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
@@ -19,12 +18,10 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RunWith(AndroidJUnit4::class)
-class UserSettingsScreenTest {
-
+class UserSettingsTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private lateinit var robot: UserSettingsScreenTestRobot
     private lateinit var fakeViewModel: UserSettingsFakeViewModel
     private lateinit var state: UserSettingsState
 
@@ -32,8 +29,8 @@ class UserSettingsScreenTest {
     fun setUp() {
         state = UserSettingsState(
             email = "initial@gmail.com",
-            areNotificationsEnabled = false,
-            theme = Theme.LIGHT
+            soundVolume = 67,
+            musicVolume = 33
         )
 
         fakeViewModel = UserSettingsFakeViewModel(state)
@@ -42,7 +39,6 @@ class UserSettingsScreenTest {
             UserSettingsScreen(viewModel = fakeViewModel, {})
         }
 
-        robot = UserSettingsScreenTestRobot(composeTestRule)
     }
 
     @Test
@@ -60,8 +56,8 @@ class UserSettingsScreenTest {
 
         val updatedState = UserSettingsState(
             email = validUserSettings().email,
-            areNotificationsEnabled = !validUserSettings().areNotificationsEnabled,
-            theme = validUserSettings().theme
+            soundVolume = validUserSettings().soundVolume,
+            musicVolume = validUserSettings().musicVolume
         )
 
         fakeViewModel.updateSettings(updatedState)
@@ -74,37 +70,8 @@ class UserSettingsScreenTest {
         composeTestRule.emailField().assertTextContains("Email")
     }
 
-    @Test
-    fun notificationSwitch_render_isOffByDefault() {
-        composeTestRule.notificationsSwitch().assertIsOff()
-    }
-
-    @Test
-    fun notificationSwitch_click_togglesOn() {
-        robot.toggleNotifications()
-        composeTestRule.notificationsSwitch().assertIsOn()
-    }
-
-    @Test
-    fun themeRadioButton_render_isLightByDefault() {
-        composeTestRule.themeRadioButtonLight().assertIsSelected()
-        composeTestRule.themeRadioButtonDark().assertIsNotSelected()
-    }
-
-    @Test
-    fun themeRadioButton_clickOnBothOptions_onlyAllowsToSelectOneAtATime() {
-        robot.clickTheme("light")
-        robot.clickTheme("dark")
-
-        composeTestRule.themeRadioButtonLight().assertIsNotSelected()
-        composeTestRule.themeRadioButtonDark().assertIsSelected()
-    }
-
     // Helper extensions
 
     private fun ComposeTestRule.serverError() = onNodeWithTag(UserSettingsTestTags.SERVER_ERROR)
     private fun ComposeTestRule.emailField() = onNodeWithTag(UserSettingsTestTags.EMAIL_FIELD)
-    private fun ComposeTestRule.notificationsSwitch() = onNodeWithTag(UserSettingsTestTags.NOTIFICATIONS_SWITCH)
-    private fun ComposeTestRule.themeRadioButtonLight() = onNodeWithTag(UserSettingsTestTags.RADIO_LIGHT)
-    private fun ComposeTestRule.themeRadioButtonDark() = onNodeWithTag(UserSettingsTestTags.RADIO_DARK)
 }

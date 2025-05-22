@@ -2,9 +2,9 @@ package com.bellako.kiwi.userSettings.viewModel
 
 import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsState
-import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class UserSettingsFakeViewModel(
     private var backingState: UserSettingsState
@@ -13,10 +13,11 @@ class UserSettingsFakeViewModel(
     private val _state = MutableStateFlow(backingState)
     override val state: StateFlow<UserSettingsState?> = _state
 
-    override var isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _validationState = MutableStateFlow(UserSettingsValidationState())
-    override val validationState: StateFlow<UserSettingsValidationState> = _validationState
+    private val _error = MutableStateFlow<String?>(null)
+    override val error: StateFlow<String?> = _error.asStateFlow()
 
     private var currentDomainSettings: UserSettings? = backingState.toDomainObject().getOrNull()
 
@@ -25,38 +26,40 @@ class UserSettingsFakeViewModel(
     var simulatedErrorMessage: String = "Something went wrong"
 
     override fun loadSettings() {
-        isLoading.value = true
+        _isLoading.value = true
 
         if (simulateLoadError) {
-            _validationState.value = UserSettingsValidationState(generalError = simulatedErrorMessage)
+            _error.value = simulatedErrorMessage
         } else {
-            _validationState.value = UserSettingsValidationState()
+            _error.value = null
         }
 
-        isLoading.value = false
+        _isLoading.value = false
     }
 
     override fun updateSettings(state: UserSettingsState) {
         _state.value = state
 
-        _validationState.value = UserSettingsValidationState()
+        _error.value = null
 
         if (simulateUpdateError) {
-            _validationState.value = UserSettingsValidationState(generalError = simulatedErrorMessage)
+            _error.value = simulatedErrorMessage
             return
         }
 
         val result = state.toDomainObject()
 
-        result.onFailure {
-            _validationState.value = UserSettingsValidationState(generalError = simulatedErrorMessage)
-        }.onSuccess { domain ->
-            if (currentDomainSettings != domain) {
-                currentDomainSettings = domain
-                _state.value = domain.toState()
-                _validationState.value = UserSettingsValidationState()
+        result
+            .onFailure {
+                _error.value = simulatedErrorMessage
             }
-        }
+            .onSuccess { domain ->
+                if (currentDomainSettings != domain) {
+                    currentDomainSettings = domain
+                    _state.value = domain.toState()
+                    _error.value = null
+                }
+            }
     }
 
     override fun clearToken() {}

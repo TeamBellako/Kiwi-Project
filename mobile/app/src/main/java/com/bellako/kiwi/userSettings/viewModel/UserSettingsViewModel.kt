@@ -6,7 +6,6 @@ import com.bellako.kiwi.network.AuthRepository
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
 import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsState
-import com.bellako.kiwi.userSettings.types.UserSettingsValidationState
 import com.bellako.kiwi.utils.Logger
 import com.google.gson.Gson
 import dagger.Module
@@ -36,11 +35,11 @@ class UserSettingsViewModel @Inject constructor(
     private val _state = MutableStateFlow<UserSettingsState?>(null)
     override val state: StateFlow<UserSettingsState?> = _state.asStateFlow()
 
-    private val _validationState = MutableStateFlow(UserSettingsValidationState())
-    override val validationState: StateFlow<UserSettingsValidationState> = _validationState.asStateFlow()
-
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    override val error: StateFlow<String?> = _error.asStateFlow()
 
     private var previousValidDomainSettings: UserSettings? = null
 
@@ -62,21 +61,21 @@ class UserSettingsViewModel @Inject constructor(
                         _state.value = domain.toState()
                         previousDomainSettings = domain
                         _isLoading.value = false
-                        _validationState.value = UserSettingsValidationState()
+                        _error.value = null
                     }
                     .onFailure { ex ->
                         if (ex is HttpException && ex.code() != 500) {
-                            _validationState.value = UserSettingsValidationState(generalError = ex.message)
+                            _error.value = ex.message.toString()
                         } else {
-                            _validationState.value = UserSettingsValidationState(generalError = "An unexpected error occurred.")
+                            _error.value = "An unexpected error occurred."
                         }
                         _isLoading.value = false
                     }
             }.onFailure { ex ->
                 if (ex is HttpException && ex.code() != 500) {
-                    _validationState.value = UserSettingsValidationState(generalError = ex.message)
+                    _error.value = ex.message.toString()
                 } else {
-                    _validationState.value = UserSettingsValidationState(generalError = "An unexpected error occurred.")
+                    _error.value = "An unexpected error occurred."
                 }
                 _isLoading.value = false
             }
@@ -86,7 +85,7 @@ class UserSettingsViewModel @Inject constructor(
 
     override fun updateSettings(state: UserSettingsState) {
         _state.value = state
-        _validationState.value = UserSettingsValidationState()
+        _error.value = null
 
         state.toDomainObject().onSuccess { domain ->
             if (previousValidDomainSettings == domain) return
@@ -122,7 +121,7 @@ class UserSettingsViewModel @Inject constructor(
 
                     repository.updateUserSettings(domain.toDTO())
                         .onSuccess {
-                            _validationState.value = UserSettingsValidationState()
+                            _error.value = null
                         }
                         .onFailure { throwable ->
                             val errorMessage = when (throwable) {
@@ -132,7 +131,7 @@ class UserSettingsViewModel @Inject constructor(
                                 }
                                 else -> "Unknown error"
                             }
-                            _validationState.value = UserSettingsValidationState(generalError = errorMessage)
+                            _error.value = errorMessage
                         }
                 }
                 .onFailure {

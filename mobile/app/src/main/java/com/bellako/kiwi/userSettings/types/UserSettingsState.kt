@@ -1,26 +1,24 @@
 package com.bellako.kiwi.userSettings.types
 
-import com.bellako.kiwi.users.Email
-
 data class UserSettingsState(
     val email: String = "",
-    val areNotificationsEnabled: Boolean = false,
-    val theme: Theme = Theme.LIGHT
+    val soundVolume: Int = 50,
+    val musicVolume: Int = 50
 ) {
-    fun toDTO() : UserSettingsDTO {
+    fun toDTO(): UserSettingsDTO {
         return UserSettingsDTO(
             email = email,
-            areNotificationsEnabled = areNotificationsEnabled,
-            theme = theme,
+            soundVolume = soundVolume,
+            musicVolume = musicVolume
         )
     }
 
     fun toDomainObject(): Result<UserSettings> {
-        return Email.of(email).map { validEmail ->
+        return com.bellako.kiwi.users.Email.of(email).map { validEmail ->
             UserSettings(
                 email = validEmail,
-                areNotificationsEnabled = areNotificationsEnabled,
-                theme = theme
+                soundVolume = soundVolume,
+                musicVolume = musicVolume
             )
         }
     }

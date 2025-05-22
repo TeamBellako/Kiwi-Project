@@ -1,7 +1,5 @@
 package com.bellako.kiwi.userSettings.utils
 
-import com.bellako.kiwi.userSettings.types.Theme
-import com.bellako.kiwi.userSettings.types.UserSettings
 import com.bellako.kiwi.userSettings.types.UserSettingsDTO
 
 object UserSettingsTestFactory {
@@ -9,22 +7,21 @@ object UserSettingsTestFactory {
     fun validUserSettings(): UserSettingsDTO =
         UserSettingsDTO(
             email = "finn@thehuman.com",
-            areNotificationsEnabled = true,
-            theme = Theme.DARK
+            soundVolume = 67,
+            musicVolume = 33
         )
-
 
     fun updateUserSettings(): UserSettingsDTO =
         UserSettingsDTO(
             email = "finn@thehuman.com",
-            areNotificationsEnabled = false,
-            theme = Theme.LIGHT
+            soundVolume = 33,
+            musicVolume = 0
         )
 
     fun invalidUserSettings(): UserSettingsDTO =
         UserSettingsDTO(
             email = "bmolovesfootball.com",
-            areNotificationsEnabled = false,
-            theme = Theme.LIGHT
+            soundVolume = -10,
+            musicVolume = 200
         )
 }

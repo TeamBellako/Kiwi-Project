@@ -1,4 +1,4 @@
-package com.bellako.kiwi.userSettings
+package com.bellako.kiwi
 
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.network.AuthRepository
@@ -68,7 +68,7 @@ class UserSettingsViewModelTest {
         val expectedState = validUserSettings().toState()
 
         assertEquals(expectedState, viewModel.state.first())
-        assertNull(viewModel.validationState.first().generalError)
+        assertNull(viewModel.error.first())
     }
 
     @Test
@@ -79,7 +79,7 @@ class UserSettingsViewModelTest {
         advanceUntilIdle()
 
         assertNull(viewModel.state.first())
-        assertEquals("An unexpected error occurred.", viewModel.validationState.first().generalError)
+        assertEquals("An unexpected error occurred.", viewModel.error.first())
     }
 
     @Test

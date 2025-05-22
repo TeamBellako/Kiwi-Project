@@ -1,19 +1,14 @@
-package com.bellako.kiwi.userSettings
+package com.bellako.kiwi
 
 import com.bellako.kiwi.userSettings.network.IUserSettingsAPI
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
-import com.bellako.kiwi.userSettings.types.UserSettings
-import com.bellako.kiwi.userSettings.types.UserSettingsDTO
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
 import com.bellako.kiwi.utils.HTTPUtils.createFakeHttpException
 import kotlinx.coroutines.test.runTest
-import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
-import retrofit2.HttpException
-import retrofit2.Response
 
 class UserSettingsRepositoryTest {
 

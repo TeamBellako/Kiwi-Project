@@ -4,8 +4,7 @@ object UserSettingsTestTags {
 
     const val EMAIL_FIELD = "email_field"
     const val SERVER_ERROR = "server_error"
-    const val NOTIFICATIONS_SWITCH = "notifications_switch"
+    const val SOUND_VOLUME_SLIDER = "sound_volume_slider"
 
-    const val RADIO_LIGHT = "radio_light"
-    const val RADIO_DARK = "radio_dark"
+    const val MUSIC_VOLUME_SLIDER = "music_volume_slider"
 }

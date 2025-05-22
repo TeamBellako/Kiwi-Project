@@ -1,4 +1,4 @@
-package com.bellako.kiwi.users
+package com.bellako.kiwi
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -6,6 +6,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bellako.kiwi.users.UsersFakeViewModel
+import com.bellako.kiwi.users.UsersScreen
+import com.bellako.kiwi.users.UsersState
+import com.bellako.kiwi.users.UsersTestTags
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -14,7 +18,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
-class UsersScreenTest {
+class UsersTest {
     @get:Rule
     val rule = createComposeRule()
 

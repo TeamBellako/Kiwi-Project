@@ -1,4 +1,4 @@
-package com.bellako.kiwi.userSettings
+package com.bellako.kiwi
 
 import com.bellako.kiwi.userSettings.network.IUserSettingsAPI
 import com.bellako.kiwi.userSettings.network.UserSettingsRepository
@@ -6,14 +6,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.mockito.Mockito.mock
+import org.mockito.Mockito
 
 @Module
 @InstallIn(SingletonComponent::class)
 object UserSettingsTestModule {
     @Provides
     fun provideMockUserSettingsApi(): IUserSettingsAPI {
-        return mock(IUserSettingsAPI::class.java)
+        return Mockito.mock(IUserSettingsAPI::class.java)
     }
 
     @Provides

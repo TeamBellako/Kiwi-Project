@@ -1,10 +1,23 @@
 package com.bellako.kiwi.userSettings.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -14,12 +27,13 @@ import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_LoadingIndicator
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
-import com.bellako.kiwi.userSettings.types.Theme
 import com.bellako.kiwi.userSettings.viewModel.IUserSettingsViewModel
 import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
-import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.users.UsersTestTags
+
+private val volumeLevels = listOf(0, 33, 67, 100)
 
 @Composable
 fun UserSettingsScreen(
@@ -28,7 +42,7 @@ fun UserSettingsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val validationState by viewModel.validationState.collectAsState()
+    val error by viewModel.error.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadSettings()
@@ -37,8 +51,8 @@ fun UserSettingsScreen(
     when {
         isLoading -> Kiwi_LoadingIndicator()
 
-        !validationState?.generalError.isNullOrBlank() -> Kiwi_InfoBox(
-            validationState?.generalError!!,
+        error?.isNotBlank() == true -> Kiwi_InfoBox(
+            error!!,
             Color.Red,
             UserSettingsTestTags.SERVER_ERROR
         )
@@ -54,6 +68,9 @@ private fun UserSettingsFields(
     onLogout: () -> Unit
 ) {
     state?.let { currentState ->
+        var soundSliderPosition by remember { mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.soundVolume }.coerceAtLeast(0)) }
+        var musicSliderPosition by remember { mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.musicVolume }.coerceAtLeast(0)) }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -61,42 +78,46 @@ private fun UserSettingsFields(
                 .padding(16.dp)
         ) {
             Kiwi_InputField(
-                false,
-                currentState.email,
-                {},
-                { Text("Email") },
-                false,
-                UsersTestTags.EMAIL_FIELD
+                enabled = false,
+                value = currentState.email,
+                onValueChange = {},
+                label = { Text("Email") },
+                testTag = UsersTestTags.EMAIL_FIELD,
+                shouldHideInput = false
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Enable Notifications")
-                Spacer(modifier = Modifier.width(8.dp))
-                Switch(
-                    checked = currentState.areNotificationsEnabled,
-                    onCheckedChange = { checked ->
-                        viewModel.updateSettings(currentState.copy(areNotificationsEnabled = checked))
-                    },
-                    modifier = Modifier.testTag(UserSettingsTestTags.NOTIFICATIONS_SWITCH)
-                )
-            }
+            Text("Sound Volume", style = MaterialTheme.typography.titleMedium)
+            Slider(
+                value = soundSliderPosition.toFloat(),
+                onValueChange = { newValue ->
+                    val intPos = newValue.toInt()
+                    if (intPos != soundSliderPosition) {
+                        soundSliderPosition = intPos
+                        viewModel.updateSettings(currentState.copy(soundVolume = volumeLevels[intPos]))
+                    }
+                },
+                valueRange = 0f..3f,
+                steps = 2,
+                modifier = Modifier.testTag(UserSettingsTestTags.SOUND_VOLUME_SLIDER)
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Theme")
-            Theme.entries.forEach { theme ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = currentState.theme == theme,
-                        onClick = {
-                            viewModel.updateSettings(currentState.copy(theme = theme))
-                        },
-                        modifier = Modifier.testTag("radio_${theme.name.lowercase()}")
-                    )
-                    Text(text = theme.name)
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+            Text("Music Volume", style = MaterialTheme.typography.titleMedium)
+            Slider(
+                value = musicSliderPosition.toFloat(),
+                onValueChange = { newValue ->
+                    val intPos = newValue.toInt()
+                    if (intPos != musicSliderPosition) {
+                        musicSliderPosition = intPos
+                        viewModel.updateSettings(currentState.copy(musicVolume = volumeLevels[intPos]))
+                    }
+                },
+                valueRange = 0f..3f,
+                steps = 2,
+                modifier = Modifier.testTag(UserSettingsTestTags.MUSIC_VOLUME_SLIDER)
+            )
+            Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
@@ -111,16 +132,16 @@ private fun UserSettingsFields(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun UserSettingsScreenPreview() {
     val previewState = UserSettingsState(
         email = "finn@thehuman.com",
-        areNotificationsEnabled = true,
-        theme = Theme.DARK
+        soundVolume = 67,
+        musicVolume = 33,
     )
 
     KiwiTheme {
-        UserSettingsScreen(UserSettingsFakeViewModel(previewState), {})
+        UserSettingsScreen(UserSettingsFakeViewModel(previewState), onLogout = {})
     }
 }
