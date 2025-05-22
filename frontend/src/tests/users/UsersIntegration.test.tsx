@@ -133,8 +133,8 @@ describe('Users Integration Tests', () => {
     });
 
     const fillFormData = async (dto: UsersDTO) => {
-        await userEvent.type(screen.getByLabelText(/email/i), dto.email);
-        await userEvent.type(screen.getByLabelText(/password/i), dto.password);
+        await userEvent.type(screen.getByRole('textbox', { name: /email/i }), dto.email);
+        await userEvent.type(screen.getByLabelText(/^password$/i), dto.password);
     }
 
     const renderUsersPage = (store = mockStore) => {
