@@ -1,13 +1,13 @@
 import {configureStore, Store, UnknownAction} from "@reduxjs/toolkit";
-import {usersReducer} from "../../users/UsersSlice";
+import {usersReducer} from "../users/UsersSlice";
 import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
-import UsersPage from "../../users/UsersPage";
-import api from "../../services/api";
-import {UsersDTO} from "../../users/UsersDTO";
+import UsersPage from "../users/UsersPage";
+import api from "../services/api";
+import {UsersDTO} from "../users/UsersDTO";
 import userEvent from "@testing-library/user-event";
-import {tryGetJWTToken} from "../../utils/StorageUtils";
-import {ROUTES} from "../../navigation/Routes"
+import {tryGetJWTToken} from "../utils/StorageUtils";
+import {ROUTES} from "../navigation/Routes"
 
 const mockedNavigate = jest.fn();
 
@@ -16,9 +16,9 @@ jest.mock('react-router-dom', () => ({
     useNavigate: () => mockedNavigate,
 }));
 
-jest.mock("../../services/api")
+jest.mock("../services/api")
 
-describe('Users Integration Tests', () => {
+describe('Users Tests', () => {
     const validUserDTO : UsersDTO = {
         email: "finn@thehuman.com",
         password: "Math3matical!"

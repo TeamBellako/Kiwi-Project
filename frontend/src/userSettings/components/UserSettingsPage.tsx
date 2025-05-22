@@ -3,8 +3,7 @@ import UserSettingsForm from './UserSettingsForm';
 import {loadUserSettings} from "../store/UserSettingsThunks";
 import {useAppDispatch, useAppSelector} from "../../store/Hooks";
 import {selectUserSettingsDTO, selectUserSettingsError, selectUserSettingsStatus} from "../store/UserSettingsSelector";
-import UserSettingsLoadingPage from "./UserSettingsLoadingPage";
-import UserSettingsErrorPage from "./UserSettingsErrorPage";
+import {Kiwi_InfoBox} from "../../ui/components/Kiwi_InfoBox";
 
 const UserSettingsPage = () => {
     const dispatch = useAppDispatch();
@@ -18,11 +17,23 @@ const UserSettingsPage = () => {
     }, []);
 
     if (status === 'loading') {
-        return <UserSettingsLoadingPage />;
+        return (
+            <Kiwi_InfoBox
+                text={"Loading settings..."}
+                role={"result"}
+                boxColor={"result"}
+            />
+        );
     }
 
     if (error) {
-        return <UserSettingsErrorPage error={error} />;
+        return (
+            <Kiwi_InfoBox 
+                text={"Server Error:" + error}
+                role={"error"}
+                boxColor={"error"}
+            />
+        );
     }
 
     return (
