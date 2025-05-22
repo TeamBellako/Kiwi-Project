@@ -13,16 +13,18 @@ public class UserSettings {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "are_notifications_enabled")
-    private boolean areNotificationsEnabled;
+    @Column(name = "sound_volume")
+    private int soundVolume;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "theme", nullable = false)
-    private UserSettingsEnums.Theme theme = UserSettingsEnums.Theme.LIGHT;
+    @Column(name = "music_volume")
+    private int musicVolume;
+
+    @Column(name = "is_rumbling_on")
+    private boolean isRumblingOn;
 
     @OneToOne(mappedBy = "userSettings")
     private UsersPersistence user;
@@ -30,17 +32,19 @@ public class UserSettings {
     public UserSettings() {
     }
 
-    public UserSettings(Integer id, Email email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+    public UserSettings(Integer id, Email email, int soundVolume, int musicVolume, boolean isRumblingOn) {
         setId(id);
         setEmail(email);
-        setAreNotificationsEnabled(areNotificationsEnabled);
-        setTheme(theme);
+        setSoundVolume(soundVolume);
+        setMusicVolume(musicVolume);
+        setRumblingOn(isRumblingOn);
     }
 
-    public UserSettings(Email email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+    public UserSettings(Email email, int soundVolume, int musicVolume, boolean isRumblingOn) {
         setEmail(email);
-        setAreNotificationsEnabled(areNotificationsEnabled);
-        setTheme(theme);
+        setSoundVolume(soundVolume);
+        setMusicVolume(musicVolume);
+        setRumblingOn(isRumblingOn);
     }
 
     public Integer getId() {
@@ -49,7 +53,6 @@ public class UserSettings {
 
     public void setId(Integer id) {
         if (id == null || id <= 0) throw new UserSettingsInvalidException("UserSettings Id's must be bigger than zero");
-
         this.id = id;
     }
 
@@ -61,20 +64,34 @@ public class UserSettings {
         this.email = email.value();
     }
 
-    public boolean isAreNotificationsEnabled() {
-        return areNotificationsEnabled;
+    public int getSoundVolume() {
+        return soundVolume;
     }
 
-    public void setAreNotificationsEnabled(boolean areNotificationsEnabled) {
-        this.areNotificationsEnabled = areNotificationsEnabled;
+    public void setSoundVolume(int soundVolume) {
+        if (soundVolume < 0 || soundVolume > 100) {
+            throw new IllegalArgumentException("Sound volume must be between 0 and 100");
+        }
+        this.soundVolume = soundVolume;
     }
 
-    public UserSettingsEnums.Theme getTheme() {
-        return theme;
+    public int getMusicVolume() {
+        return musicVolume;
     }
 
-    public void setTheme(UserSettingsEnums.Theme theme) {
-        this.theme = theme;
+    public void setMusicVolume(int musicVolume) {
+        if (musicVolume < 0 || musicVolume > 100) {
+            throw new IllegalArgumentException("Music volume must be between 0 and 100");
+        }
+        this.musicVolume = musicVolume;
+    }
+
+    public boolean isRumblingOn() {
+        return isRumblingOn;
+    }
+
+    public void setRumblingOn(boolean rumblingOn) {
+        isRumblingOn = rumblingOn;
     }
 
     public UsersPersistence getUser() {
@@ -90,8 +107,9 @@ public class UserSettings {
         return "UserSettings{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
-                ", areNotificationsEnabled=" + areNotificationsEnabled +
-                ", theme=" + theme +
+                ", soundVolume=" + soundVolume +
+                ", musicVolume=" + musicVolume +
+                ", isRumblingOn=" + isRumblingOn +
                 '}';
     }
 
@@ -99,20 +117,29 @@ public class UserSettings {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UserSettings that = (UserSettings) o;
-        return areNotificationsEnabled == that.areNotificationsEnabled && Objects.equals(email, that.email) && theme == that.theme;
+        return soundVolume == that.soundVolume &&
+                musicVolume == that.musicVolume &&
+                isRumblingOn == that.isRumblingOn &&
+                Objects.equals(email, that.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email, soundVolume, musicVolume, isRumblingOn);
     }
 
     public UserSettingsDTO toDTO() {
         return new UserSettingsDTO(
                 getEmail().value(),
-                isAreNotificationsEnabled(),
-                getTheme()
+                getSoundVolume(),
+                getMusicVolume(),
+                isRumblingOn()
         );
     }
 
     public void mergeFromDTO(UserSettingsDTO dto) {
-        this.areNotificationsEnabled = dto.isAreNotificationsEnabled();
-        this.theme = dto.getTheme();
+        this.soundVolume = dto.getSoundVolume();
+        this.musicVolume = dto.getMusicVolume();
+        this.isRumblingOn = dto.isRumblingOn();
     }
-
 }
