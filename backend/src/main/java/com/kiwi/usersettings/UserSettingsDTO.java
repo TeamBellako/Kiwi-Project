@@ -7,8 +7,8 @@ import java.util.Objects;
 public class UserSettingsDTO {
     private Integer id;
     private String email = "";
-    private int soundVolume = 50;
-    private int musicVolume = 50;
+    private int soundVolume = 67;
+    private int musicVolume = 67;
 
     public UserSettingsDTO() {
     }
