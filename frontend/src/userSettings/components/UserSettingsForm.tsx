@@ -1,9 +1,9 @@
 import React from 'react';
 import {useUserSettingsForm} from '../hooks/UserSettingsHook';
 import {UserSettingsDTO} from '../types/UserSettingsDTO';
-import {useAuth} from "../../navigation/Logout";
-import {Kiwi_InputField} from "../../ui/components/Kiwi_InputField";
-import {Kiwi_Button} from "../../ui/components/Kiwi_Button";
+import {useAuth} from '../../navigation/Logout';
+import {Kiwi_InputField} from '../../ui/components/Kiwi_InputField';
+import {Kiwi_Button} from '../../ui/components/Kiwi_Button';
 
 type UserSettingsProps = Partial<UserSettingsDTO>;
 
@@ -19,48 +19,40 @@ const UserSettingsForm: React.FC<UserSettingsProps> = (props) => {
                     value={form.emailField.value}
                     required={false}
                 />
-                
-                <label htmlFor="notifications" className="flex items-center gap-2">
-                    <input
-                        id="notifications"
-                        type="checkbox"
-                        checked={form.notificationsField.enabled}
-                        onChange={form.notificationsField.onToggle}
-                    />
-                    Enable Notifications
-                </label>
 
-                <fieldset>
-                    <legend className="block font-medium mb-1">Theme</legend>
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            name="theme"
-                            value="LIGHT"
-                            checked={form.themeField.value.toUpperCase() === 'LIGHT'}
-                            onChange={() => form.themeField.setValue('LIGHT')}
-                        />
-                        Light
+                <div className="flex flex-col gap-2">
+                    <label htmlFor="soundVolume" className="font-medium">
+                        Sound Volume
                     </label>
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            name="theme"
-                            value="DARK"
-                            checked={form.themeField.value.toUpperCase() === 'DARK'}
-                            onChange={() => form.themeField.setValue('DARK')}
-                        />
-                        Dark
+                    <input
+                        id="soundVolume"
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={form.soundVolumeField.value}
+                        onChange={(e) => form.soundVolumeField.setValue(Number(e.target.value))}
+                        className="w-full"
+                    />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                    <label htmlFor="musicVolume" className="font-medium">
+                        Music Volume
                     </label>
-                </fieldset>
+                    <input
+                        id="musicVolume"
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={form.musicVolumeField.value}
+                        onChange={(e) => form.musicVolumeField.setValue(Number(e.target.value))}
+                        className="w-full"
+                    />
+                </div>
             </form>
-            
+
             <div className="mt-6">
-                <Kiwi_Button 
-                    text="Logout"
-                    onClick={logoutUser}
-                    disabled={false}
-                />
+                <Kiwi_Button text="Logout" onClick={logoutUser} disabled={false} />
             </div>
         </>
     );

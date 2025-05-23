@@ -1,26 +1,25 @@
-import {useCallback, useEffect, useRef, useState} from "react";
-import {debounce, isEqual} from "lodash";
-import {useDispatch} from "react-redux";
-import {AppDispatch} from "../../store/Store";
-import {Logger} from "../../utils/Logger";
-import {ThemeOption} from "../types/UserSettings";
-import {UserSettingsDTO} from "../types/UserSettingsDTO";
-import {Email} from "../../users/Email";
-import {updateUserSettings} from "../store/UserSettingsThunks";
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {debounce, isEqual} from 'lodash';
+import {useDispatch} from 'react-redux';
+import {AppDispatch} from '../../store/Store';
+import {Logger} from '../../utils/Logger';
+import {UserSettingsDTO} from '../types/UserSettingsDTO';
+import {Email} from '../../users/Email';
+import {updateUserSettings} from '../store/UserSettingsThunks';
 
 type UserSettingsFormProps = Partial<UserSettingsDTO>;
 
 export const useUserSettingsForm = ({
-    email = '',
-    areNotificationsEnabled = false,
-    theme = 'LIGHT',
-}: UserSettingsFormProps) => {
+                                        email = '',
+                                        soundVolume = 67,
+                                        musicVolume = 67,
+                                    }: UserSettingsFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const [formState, setFormState] = useState<UserSettingsDTO>({
         email,
-        areNotificationsEnabled,
-        theme,
+        soundVolume,
+        musicVolume,
     });
 
     const prevValueRef = useRef<UserSettingsDTO | null>(null);
@@ -33,16 +32,15 @@ export const useUserSettingsForm = ({
         debounce(async (updatedSettings: UserSettingsDTO) => {
             try {
                 setIsSaving(true);
-                
-                Logger.info("Saving settings");
-                
+                Logger.info('Saving settings');
+
                 Email.of(updatedSettings.email); // throws if invalid
                 await dispatch(updateUserSettings(updatedSettings));
-                
+
                 setIsSaving(false);
             } catch (err: any) {
-                Logger.error("Failed to save settings", err);
-                setError(err.message || "Failed to save");
+                Logger.error('Failed to save settings', err);
+                setError(err.message || 'Failed to save');
                 setIsSaving(false);
             }
         }, 500),
@@ -67,7 +65,7 @@ export const useUserSettingsForm = ({
         }
 
         if (!isEqual(prevValueRef.current, formState)) {
-            Logger.info("Queuing save settings");
+            Logger.info('Queuing save settings');
             prevValueRef.current = formState;
             saveSettings(formState);
         }
@@ -80,18 +78,15 @@ export const useUserSettingsForm = ({
             error,
             setError,
         },
-        notificationsField: {
-            enabled: formState.areNotificationsEnabled,
-            onToggle: () =>
-                setFormState((prev) => ({
-                    ...prev,
-                    areNotificationsEnabled: !prev.areNotificationsEnabled,
-                })),
+        soundVolumeField: {
+            value: formState.soundVolume,
+            setValue: (value: number) =>
+                setFormState({ ...formState, soundVolume: value }),
         },
-        themeField: {
-            value: formState.theme,
-            setValue: (theme: ThemeOption) =>
-                setFormState({ ...formState, theme }),
+        musicVolumeField: {
+            value: formState.musicVolume,
+            setValue: (value: number) =>
+                setFormState({ ...formState, musicVolume: value }),
         },
         isSaving,
     };

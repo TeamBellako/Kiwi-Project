@@ -1,14 +1,14 @@
-import {ThemeOption, UserSettings} from "./UserSettings";
+import {UserSettings} from "./UserSettings";
 import {Email} from "../../users/Email";
 
 export interface UserSettingsDTO {
     email: string;
-    areNotificationsEnabled: boolean;
-    theme: ThemeOption;
+    soundVolume: number;
+    musicVolume: number;
 }
 
 export const toDomainObject = (dto: UserSettingsDTO): UserSettings => ({
     email: Email.of(dto.email),
-    areNotificationsEnabled: dto.areNotificationsEnabled,
-    theme: dto.theme,
+    soundVolume: dto.soundVolume,
+    musicVolume: dto.musicVolume
 });
