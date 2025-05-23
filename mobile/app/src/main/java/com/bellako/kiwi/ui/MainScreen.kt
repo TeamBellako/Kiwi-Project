@@ -7,8 +7,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bellako.kiwi.navigation.ScreenState
-import com.bellako.kiwi.userSettings.ui.UserSettingsScreen
-import com.bellako.kiwi.userSettings.viewModel.UserSettingsViewModel
+import com.bellako.kiwi.userSettings.UserSettingsScreen
+import com.bellako.kiwi.userSettings.UserSettingsViewModel
 import com.bellako.kiwi.users.UsersScreen
 import com.bellako.kiwi.users.UsersViewModel
 

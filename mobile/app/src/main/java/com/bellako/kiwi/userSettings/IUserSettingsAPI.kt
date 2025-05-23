@@ -1,6 +1,5 @@
-package com.bellako.kiwi.userSettings.network
+package com.bellako.kiwi.userSettings
 
-import com.bellako.kiwi.userSettings.types.UserSettingsDTO
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PUT

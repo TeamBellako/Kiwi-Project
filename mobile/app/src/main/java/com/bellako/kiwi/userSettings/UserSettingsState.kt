@@ -1,14 +1,14 @@
-package com.bellako.kiwi.userSettings.types
+package com.bellako.kiwi.userSettings
 
 import com.bellako.kiwi.users.Email
 
-data class UserSettingsDTO(
-    val email: String,
-    val soundVolume: Int,
-    val musicVolume: Int
+data class UserSettingsState(
+    val email: String = "",
+    val soundVolume: Int = 50,
+    val musicVolume: Int = 50
 ) {
-    fun toState(): UserSettingsState {
-        return UserSettingsState(
+    fun toDTO(): UserSettingsDTO {
+        return UserSettingsDTO(
             email = email,
             soundVolume = soundVolume,
             musicVolume = musicVolume

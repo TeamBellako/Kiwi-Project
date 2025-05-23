@@ -1,7 +1,5 @@
-package com.bellako.kiwi.userSettings.viewModel
+package com.bellako.kiwi.userSettings
 
-import com.bellako.kiwi.userSettings.types.UserSettings
-import com.bellako.kiwi.userSettings.types.UserSettingsState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

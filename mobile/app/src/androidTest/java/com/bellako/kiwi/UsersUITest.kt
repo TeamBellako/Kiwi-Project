@@ -18,7 +18,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
-class UsersTest {
+class UsersUITest {
     @get:Rule
     val rule = createComposeRule()
 

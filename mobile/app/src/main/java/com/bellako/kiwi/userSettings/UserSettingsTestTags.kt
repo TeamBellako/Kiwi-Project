@@ -1,4 +1,4 @@
-package com.bellako.kiwi.userSettings.utils
+package com.bellako.kiwi.userSettings
 
 object UserSettingsTestTags {
 

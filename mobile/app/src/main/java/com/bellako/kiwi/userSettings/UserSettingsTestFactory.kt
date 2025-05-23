@@ -1,6 +1,4 @@
-package com.bellako.kiwi.userSettings.utils
-
-import com.bellako.kiwi.userSettings.types.UserSettingsDTO
+package com.bellako.kiwi.userSettings
 
 object UserSettingsTestFactory {
 

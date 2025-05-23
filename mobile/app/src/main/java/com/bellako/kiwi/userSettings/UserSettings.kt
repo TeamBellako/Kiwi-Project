@@ -1,4 +1,4 @@
-package com.bellako.kiwi.userSettings.types
+package com.bellako.kiwi.userSettings
 
 import com.bellako.kiwi.users.Email
 

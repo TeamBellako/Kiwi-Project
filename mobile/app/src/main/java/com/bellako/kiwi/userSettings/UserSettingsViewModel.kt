@@ -1,11 +1,8 @@
-package com.bellako.kiwi.userSettings.viewModel
+package com.bellako.kiwi.userSettings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.network.AuthRepository
-import com.bellako.kiwi.userSettings.network.UserSettingsRepository
-import com.bellako.kiwi.userSettings.types.UserSettings
-import com.bellako.kiwi.userSettings.types.UserSettingsState
 import com.bellako.kiwi.utils.Logger
 import com.google.gson.Gson
 import dagger.Module

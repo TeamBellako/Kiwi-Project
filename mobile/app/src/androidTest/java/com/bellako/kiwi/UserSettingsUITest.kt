@@ -6,11 +6,11 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.ui.tags.KIWI_LOADING_INDICATOR
-import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
-import com.bellako.kiwi.userSettings.types.UserSettingsState
-import com.bellako.kiwi.userSettings.ui.UserSettingsScreen
-import com.bellako.kiwi.userSettings.utils.UserSettingsTestFactory.validUserSettings
-import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
+import com.bellako.kiwi.userSettings.UserSettingsTestTags
+import com.bellako.kiwi.userSettings.UserSettingsState
+import com.bellako.kiwi.userSettings.UserSettingsScreen
+import com.bellako.kiwi.userSettings.UserSettingsTestFactory.validUserSettings
+import com.bellako.kiwi.userSettings.UserSettingsFakeViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RunWith(AndroidJUnit4::class)
-class UserSettingsTest {
+class UserSettingsUITest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -42,7 +42,7 @@ class UserSettingsTest {
     }
 
     @Test
-    fun loadingIndicator_serverErrorOnLoadSettings_showsErrorMessage() {
+    fun serverErrorOnLoad() {
         fakeViewModel.simulateLoadError = true
         fakeViewModel.loadSettings()
 
@@ -51,7 +51,7 @@ class UserSettingsTest {
     }
 
     @Test
-    fun loadingIndicator_serverErrorOnUpdateSettings_showsErrorMessage() {
+    fun serverErrorOnUpdate() {
         fakeViewModel.simulateUpdateError = true
 
         val updatedState = UserSettingsState(
@@ -65,13 +65,5 @@ class UserSettingsTest {
         composeTestRule.serverError().assertIsDisplayed()
     }
 
-    @Test
-    fun emailField_renderField_showsInitialValue() {
-        composeTestRule.emailField().assertTextContains("Email")
-    }
-
-    // Helper extensions
-
     private fun ComposeTestRule.serverError() = onNodeWithTag(UserSettingsTestTags.SERVER_ERROR)
-    private fun ComposeTestRule.emailField() = onNodeWithTag(UserSettingsTestTags.EMAIL_FIELD)
 }

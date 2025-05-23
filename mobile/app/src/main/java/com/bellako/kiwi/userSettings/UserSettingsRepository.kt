@@ -1,10 +1,11 @@
-package com.bellako.kiwi.userSettings.network
+package com.bellako.kiwi.userSettings
 
-import com.bellako.kiwi.network.createHealthApiService
-import com.bellako.kiwi.userSettings.types.UserSettingsDTO
+import com.bellako.kiwi.network.HealthApiService
 
-class UserSettingsRepository(private val api: IUserSettingsAPI) {
-
+class UserSettingsRepository(
+    private val api: IUserSettingsAPI,
+    private val healthApi: HealthApiService
+) {
     suspend fun getUserSettings(): Result<UserSettingsDTO> =
         runCatching { api.getUserSettings() }
 
@@ -12,5 +13,5 @@ class UserSettingsRepository(private val api: IUserSettingsAPI) {
         runCatching { api.updateUserSettings(settings) }
 
     suspend fun pingServer(): Result<Unit> =
-        runCatching { createHealthApiService().ping() }
+        runCatching { healthApi.ping() }
 }

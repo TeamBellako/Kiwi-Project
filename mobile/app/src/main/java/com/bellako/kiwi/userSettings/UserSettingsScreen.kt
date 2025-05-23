@@ -1,4 +1,4 @@
-package com.bellako.kiwi.userSettings.ui
+package com.bellako.kiwi.userSettings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -27,10 +27,6 @@ import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_LoadingIndicator
 import com.bellako.kiwi.ui.theme.KiwiTheme
-import com.bellako.kiwi.userSettings.types.UserSettingsState
-import com.bellako.kiwi.userSettings.utils.UserSettingsTestTags
-import com.bellako.kiwi.userSettings.viewModel.IUserSettingsViewModel
-import com.bellako.kiwi.userSettings.viewModel.UserSettingsFakeViewModel
 import com.bellako.kiwi.users.UsersTestTags
 
 private val volumeLevels = listOf(0, 33, 67, 100)
