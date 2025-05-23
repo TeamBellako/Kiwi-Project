@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_LoadingIndicator
+import com.bellako.kiwi.ui.components.Kiwi_Slider
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.ui.theme.SeparatorHeight
 import com.bellako.kiwi.users.UsersTestTags
 
 private val volumeLevels = listOf(0, 33, 67, 100)
@@ -81,10 +83,10 @@ private fun UserSettingsFields(
                 testTag = UsersTestTags.EMAIL_FIELD,
                 shouldHideInput = false
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(SeparatorHeight))
 
-            Text("Sound Volume", style = MaterialTheme.typography.titleMedium)
-            Slider(
+            Kiwi_Slider(
+                text = "Sound Volume",
                 value = soundSliderPosition.toFloat(),
                 onValueChange = { newValue ->
                     val intPos = newValue.toInt()
@@ -95,12 +97,12 @@ private fun UserSettingsFields(
                 },
                 valueRange = 0f..3f,
                 steps = 2,
-                modifier = Modifier.testTag(UserSettingsTestTags.SOUND_VOLUME_SLIDER)
+                testTag = UserSettingsTestTags.SOUND_VOLUME_SLIDER
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(SeparatorHeight))
 
-            Text("Music Volume", style = MaterialTheme.typography.titleMedium)
-            Slider(
+            Kiwi_Slider(
+                text = "Music Volume",
                 value = musicSliderPosition.toFloat(),
                 onValueChange = { newValue ->
                     val intPos = newValue.toInt()
@@ -111,9 +113,9 @@ private fun UserSettingsFields(
                 },
                 valueRange = 0f..3f,
                 steps = 2,
-                modifier = Modifier.testTag(UserSettingsTestTags.MUSIC_VOLUME_SLIDER)
+                testTag = UserSettingsTestTags.MUSIC_VOLUME_SLIDER
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(SeparatorHeight*2))
 
             Button(
                 onClick = {
