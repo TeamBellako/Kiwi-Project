@@ -5,9 +5,10 @@ import com.kiwi.users.Email;
 import java.util.Objects;
 
 public class UserSettingsDTO {
+    private Integer id;
     private String email = "";
-    private boolean areNotificationsEnabled = false;
-    private UserSettingsEnums.Theme theme = UserSettingsEnums.Theme.LIGHT;
+    private int soundVolume = 67;
+    private int musicVolume = 67;
 
     public UserSettingsDTO() {
     }
@@ -16,10 +17,18 @@ public class UserSettingsDTO {
         this.email = email;
     }
 
-    public UserSettingsDTO(String email, boolean areNotificationsEnabled, UserSettingsEnums.Theme theme) {
+    public UserSettingsDTO(String email, int soundVolume, int musicVolume) {
         this.email = email;
-        this.areNotificationsEnabled = areNotificationsEnabled;
-        this.theme = theme;
+        this.soundVolume = soundVolume;
+        this.musicVolume = musicVolume;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getEmail() {
@@ -30,48 +39,51 @@ public class UserSettingsDTO {
         this.email = email;
     }
 
-    public boolean isAreNotificationsEnabled() {
-        return areNotificationsEnabled;
+    public int getSoundVolume() {
+        return soundVolume;
     }
 
-    public void setAreNotificationsEnabled(boolean areNotificationsEnabled) {
-        this.areNotificationsEnabled = areNotificationsEnabled;
+    public void setSoundVolume(int soundVolume) {
+        this.soundVolume = soundVolume;
     }
 
-    public UserSettingsEnums.Theme getTheme() {
-        return theme;
+    public int getMusicVolume() {
+        return musicVolume;
     }
 
-    public void setTheme(UserSettingsEnums.Theme theme) {
-        this.theme = theme;
+    public void setMusicVolume(int musicVolume) {
+        this.musicVolume = musicVolume;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UserSettingsDTO that = (UserSettingsDTO) o;
-        return areNotificationsEnabled == that.areNotificationsEnabled && Objects.equals(email, that.email) && theme == that.theme;
+        return soundVolume == that.soundVolume &&
+                musicVolume == that.musicVolume &&
+                Objects.equals(email, that.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, areNotificationsEnabled, theme);
+        return Objects.hash(email, soundVolume, musicVolume);
     }
 
     @Override
     public String toString() {
         return "UserSettingsDTO{" +
-                "email='" + email + '\'' +
-                ", areNotificationsEnabled=" + areNotificationsEnabled +
-                ", theme=" + theme +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", soundVolume=" + soundVolume +
+                ", musicVolume=" + musicVolume +
                 '}';
     }
 
     public UserSettings toDomainObject() {
         return new UserSettings(
-            new Email(getEmail()),
-            isAreNotificationsEnabled(),
-            getTheme()
+                new Email(getEmail()),
+                getSoundVolume(),
+                getMusicVolume()
         );
     }
 }

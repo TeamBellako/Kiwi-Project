@@ -5,11 +5,11 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthRepository @Inject constructor() {
-    private var jwtToken: String = ""
+    private var jwtToken: String? = ""
 
     fun setJwtToken(token: String) { jwtToken = token }
 
-    fun getJwtToken(): String = jwtToken
+    fun getJwtToken(): String? = jwtToken
 
-    fun isJwtTokenSet(): Boolean = jwtToken.isNotEmpty()
+    fun isJwtTokenSet(): Boolean = jwtToken?.isNotEmpty() == true
 }

@@ -1,33 +1,32 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {Provider} from 'react-redux';
-import UserSettingsPage from "../userSettings/components/UserSettingsPage";
 import {configureStore, Store, UnknownAction} from '@reduxjs/toolkit';
-import api from "../services/api";
-import {userSettingsReducer} from "../userSettings/store/UserSettingsSlice";
-import {userSettingsLabels} from "./TestLabels";
-import {BrowserRouter} from "react-router-dom";
-import {UserSettingsDTO} from "../userSettings/types/UserSettingsDTO";
+import api from '../services/api';
+import {BrowserRouter} from 'react-router-dom';
+import {UserSettingsDTO} from "../userSettings/UserSettingsDTO";
+import {userSettingsReducer} from "../userSettings/UserSettingsSlice";
+import UserSettingsPage from "../userSettings/UserSettingsPage";
 
-jest.mock("../services/api");
+jest.mock('../services/api');
 
-const loadingMessage = "Loading settings...";
-const errorMessageWithSensibleInformation = "Adventure Time > Steven Universe";
+const loadingMessage = 'Loading settings...';
+const errorMessageWithSensibleInformation = 'Adventure Time > Steven Universe';
 
 const validUserSettingsDTO: UserSettingsDTO = {
     email: 'finn@thehuman.com',
-    areNotificationsEnabled: true,
-    theme: 'DARK'
+    musicVolume: 40,
+    soundVolume: 50,
 };
 
 const updateUserSettingsDTO: UserSettingsDTO = {
     email: 'finn@thehuman.com',
-    areNotificationsEnabled: false,
-    theme: 'LIGHT'
+    musicVolume: 80,
+    soundVolume: 90,
 };
 
 describe('UserSettings Tests', () => {
     let mockStore: Store<unknown, UnknownAction, unknown>;
-    
+
     beforeEach(() => {
         jest.resetAllMocks();
         jest.useFakeTimers();
@@ -60,21 +59,12 @@ describe('UserSettings Tests', () => {
     const mockApiGetErrorRequest = (error: any) => {
         api.get = jest.fn().mockRejectedValue(new Error(error));
     };
-    
+
     test('load data', () => {
         api.get = jest.fn().mockImplementation(() => new Promise(() => {}));
         renderUserSettingsPage();
 
         expect(screen.getByText(loadingMessage)).toBeInTheDocument();
-    });
-
-    test('display data', async () => {
-        mockApiGetRequest(validUserSettingsDTO);
-        renderUserSettingsPage();
-
-        await waitFor(() => {
-            expect(screen.getByLabelText(/Dark/i)).toBeChecked();
-        });
     });
 
     test('server error', async () => {
@@ -83,32 +73,22 @@ describe('UserSettings Tests', () => {
 
         await waitFor(() => {
             expect(screen.getByText(/Server Error:/i)).toBeInTheDocument();
-            // We don't want sensible information contained in the server error message to be displayed
-            expect(screen.queryByText(errorMessageWithSensibleInformation)).toBeNull();
+            expect(
+                screen.queryByText(errorMessageWithSensibleInformation)
+            ).toBeNull();
         });
     });
-    
+
     test('saveSettings', async () => {
         mockApiGetRequest(validUserSettingsDTO);
         renderUserSettingsPage();
-        
-        mockApiPutRequest(updateUserSettingsDTO);
-        await waitFor(() => {
-            fireEvent.click(screen.getByLabelText(userSettingsLabels.notifications),
-                {target: {value: updateUserSettingsDTO.areNotificationsEnabled}});
-        });
-        await waitFor(() => {
-            expect(screen.getByLabelText(userSettingsLabels.notifications)).not.toBeChecked();
-            expect(api.put).toHaveBeenCalledTimes(1);
-        });
 
-        mockApiPutRequest(validUserSettingsDTO);
+        mockApiPutRequest(updateUserSettingsDTO);
+
+        const soundSlider = await screen.findByLabelText(/Sound Volume/i);
+        fireEvent.change(soundSlider, { target: { value: updateUserSettingsDTO.soundVolume } });
+
         await waitFor(() => {
-            fireEvent.click(screen.getByLabelText(userSettingsLabels.notifications),
-                {target: {value: updateUserSettingsDTO.areNotificationsEnabled}});
-        });
-        await waitFor(() => {
-            expect(screen.getByLabelText(userSettingsLabels.notifications)).toBeChecked();
             expect(api.put).toHaveBeenCalledTimes(1);
         });
     });
@@ -117,27 +97,27 @@ describe('UserSettings Tests', () => {
         mockApiGetRequest(validUserSettingsDTO);
         mockApiPutRequest(validUserSettingsDTO);
         renderUserSettingsPage();
-        
-        await waitFor(() => {
-            fireEvent.change(screen.getByLabelText(userSettingsLabels.notifications), { target: { value: validUserSettingsDTO.email } });
-        });
-        
+
+        const emailField = await screen.findByDisplayValue(validUserSettingsDTO.email);
+        fireEvent.change(emailField, { target: { value: validUserSettingsDTO.email } });
+
         await waitFor(() => {
             expect(api.put).toHaveBeenCalledTimes(0);
         });
     });
 
-    test('saveSettings too frequently', async () => {
+    test('saveSettings throttled on rapid slider changes', async () => {
         mockApiGetRequest(validUserSettingsDTO);
         renderUserSettingsPage();
-        
-        await waitFor(() => {
-            fireEvent.click(screen.getByLabelText(userSettingsLabels.notifications), {target: {value: true}});
-            fireEvent.click(screen.getByLabelText(userSettingsLabels.notifications), {target: {value: false}});
-            fireEvent.click(screen.getByLabelText(userSettingsLabels.notifications), {target: {value: true}});
-            fireEvent.click(screen.getByLabelText(userSettingsLabels.notifications), {target: {value: false}});
-        });
-        
+
+        const soundSlider = await screen.findByLabelText(/Sound Volume/i);
+
+        fireEvent.change(soundSlider, { target: { value: 30 } });
+        fireEvent.change(soundSlider, { target: { value: 35 } });
+        fireEvent.change(soundSlider, { target: { value: 40 } });
+
+        jest.advanceTimersByTime(500);
+
         await waitFor(() => {
             expect(api.put).toHaveBeenCalledTimes(1);
         });

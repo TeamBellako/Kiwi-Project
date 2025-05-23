@@ -1,10 +1,10 @@
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {Provider} from 'react-redux';
-import UserSettingsPage from "./userSettings/components/UserSettingsPage";
 import UsersPage from "./users/UsersPage";
 import {store} from "./store/Store";
-import RequireAuth from "./navigation/RequireAuth";
 import {ROUTES} from "./navigation/Routes";
+import {RequireAuth} from "./navigation/Authentication";
+import UserSettingsPage from "./userSettings/UserSettingsPage";
 
 function App() {
     return (

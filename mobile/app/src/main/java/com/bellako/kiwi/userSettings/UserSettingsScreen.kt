@@ -1,0 +1,145 @@
+package com.bellako.kiwi.userSettings
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.ui.components.Kiwi_InfoBox
+import com.bellako.kiwi.ui.components.Kiwi_InputField
+import com.bellako.kiwi.ui.components.Kiwi_LoadingIndicator
+import com.bellako.kiwi.ui.components.Kiwi_Slider
+import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.ui.theme.SeparatorHeight
+import com.bellako.kiwi.users.UsersTestTags
+
+private val volumeLevels = listOf(0, 33, 67, 100)
+
+@Composable
+fun UserSettingsScreen(
+    viewModel: IUserSettingsViewModel,
+    onLogout: () -> Unit
+) {
+    val state by viewModel.state.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadSettings()
+    }
+
+    when {
+        isLoading -> Kiwi_LoadingIndicator()
+
+        error?.isNotBlank() == true -> Kiwi_InfoBox(
+            error!!,
+            Color.Red,
+            UserSettingsTestTags.SERVER_ERROR
+        )
+
+        else -> UserSettingsFields(state, viewModel, onLogout)
+    }
+}
+
+@Composable
+private fun UserSettingsFields(
+    state: UserSettingsState?,
+    viewModel: IUserSettingsViewModel,
+    onLogout: () -> Unit
+) {
+    state?.let { currentState ->
+        var soundSliderPosition by remember { mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.soundVolume }.coerceAtLeast(0)) }
+        var musicSliderPosition by remember { mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.musicVolume }.coerceAtLeast(0)) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(16.dp)
+        ) {
+            Kiwi_InputField(
+                enabled = false,
+                value = currentState.email,
+                onValueChange = {},
+                label = { Text("Email") },
+                testTag = UsersTestTags.EMAIL_FIELD,
+                shouldHideInput = false
+            )
+            Spacer(modifier = Modifier.height(SeparatorHeight))
+
+            Kiwi_Slider(
+                text = "Sound Volume",
+                value = soundSliderPosition.toFloat(),
+                onValueChange = { newValue ->
+                    val intPos = newValue.toInt()
+                    if (intPos != soundSliderPosition) {
+                        soundSliderPosition = intPos
+                        viewModel.updateSettings(currentState.copy(soundVolume = volumeLevels[intPos]))
+                    }
+                },
+                valueRange = 0f..3f,
+                steps = 2,
+                testTag = UserSettingsTestTags.SOUND_VOLUME_SLIDER
+            )
+            Spacer(modifier = Modifier.height(SeparatorHeight))
+
+            Kiwi_Slider(
+                text = "Music Volume",
+                value = musicSliderPosition.toFloat(),
+                onValueChange = { newValue ->
+                    val intPos = newValue.toInt()
+                    if (intPos != musicSliderPosition) {
+                        musicSliderPosition = intPos
+                        viewModel.updateSettings(currentState.copy(musicVolume = volumeLevels[intPos]))
+                    }
+                },
+                valueRange = 0f..3f,
+                steps = 2,
+                testTag = UserSettingsTestTags.MUSIC_VOLUME_SLIDER
+            )
+            Spacer(modifier = Modifier.height(SeparatorHeight*2))
+
+            Button(
+                onClick = {
+                    viewModel.clearToken()
+                    onLogout()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Logout")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserSettingsScreenPreview() {
+    val previewState = UserSettingsState(
+        email = "finn@thehuman.com",
+        soundVolume = 67,
+        musicVolume = 33,
+    )
+
+    KiwiTheme {
+        UserSettingsScreen(UserSettingsFakeViewModel(previewState), onLogout = {})
+    }
+}

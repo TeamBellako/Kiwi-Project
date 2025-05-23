@@ -15,7 +15,7 @@ class JwtAuthInterceptor @Inject constructor(
 
         val newRequest = originalRequest.newBuilder()
             .apply {
-                if (token.isNotEmpty()) {
+                if (token?.isNotEmpty() == true) {
                     addHeader("Authorization", "Bearer $token")
                 }
             }

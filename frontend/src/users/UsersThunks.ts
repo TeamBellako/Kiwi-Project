@@ -1,7 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {UsersDTO} from "./UsersDTO";
 import api from "../services/api";
-import {getServerErrorMessage} from "../utils/APIUtils";
+import {getServerErrorMessage} from "../utils/HTTPUtils";
 
 export const signup = createAsyncThunk<
     void,             
