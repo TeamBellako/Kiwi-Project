@@ -6,7 +6,7 @@ export type TrailingSensibleInformationIconProps = {
     setShowInformation: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Kiwi_TrailingSensibleInformationIcon: React.FC<TrailingSensibleInformationIconProps> = (props: TrailingSensibleInformationIconProps) => {
+const Kiwi_HideInfoIcon: React.FC<TrailingSensibleInformationIconProps> = (props: TrailingSensibleInformationIconProps) => {
     return (
         <>
             <button
@@ -35,4 +35,4 @@ const Kiwi_TrailingSensibleInformationIcon: React.FC<TrailingSensibleInformation
     )
 };
 
-export default Kiwi_TrailingSensibleInformationIcon;
+export default Kiwi_HideInfoIcon;

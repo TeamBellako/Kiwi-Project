@@ -1,9 +1,9 @@
 import React from 'react';
-import {useUserSettingsForm} from '../hooks/UserSettingsHook';
-import {UserSettingsDTO} from '../types/UserSettingsDTO';
-import {useAuth} from '../../navigation/Logout';
-import {Kiwi_InputField} from '../../ui/components/Kiwi_InputField';
-import {Kiwi_Button} from '../../ui/components/Kiwi_Button';
+import {useUserSettingsForm} from './UserSettingsHook';
+import {UserSettingsDTO} from './UserSettingsDTO';
+import {Kiwi_InputField} from '../ui/components/Kiwi_InputField';
+import {Kiwi_Button} from '../ui/components/Kiwi_Button';
+import {useAuth} from "../navigation/Authentication";
 
 type UserSettingsProps = Partial<UserSettingsDTO>;
 
@@ -15,6 +15,7 @@ const UserSettingsForm: React.FC<UserSettingsProps> = (props) => {
         <>
             <form className="space-y-6" data-testid="settings-form">
                 <Kiwi_InputField
+                    label="Email"
                     type="email"
                     value={form.emailField.value}
                     required={false}

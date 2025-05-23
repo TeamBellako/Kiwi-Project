@@ -1,7 +1,5 @@
 import React from "react";
-import Kiwi_TrailingSensibleInformationIcon, {
-    TrailingSensibleInformationIconProps
-} from "./Kiwi_TrailingSensibleInformationIcon";
+import Kiwi_HideInfoIcon, {TrailingSensibleInformationIconProps} from "./Kiwi_HideInfoIcon";
 
 type InputFieldProps = {
     label?: string;
@@ -16,7 +14,7 @@ export const Kiwi_InputField: React.FC<InputFieldProps> = (props: InputFieldProp
 
     return (
         <>
-            <label htmlFor={props.label?.toLowerCase()} className="block font-medium">
+            <label htmlFor={props.label?.toLowerCase()} className="font-medium">
                 {props.label || ""}
             </label>
             <input
@@ -56,7 +54,7 @@ export const Kiwi_SensibleInputField: React.FC<Kiwi_SensibleInputFieldProps> = (
                     required={props.inputFieldProps.required}
                     disabled={isDisabled}
                 />
-                <Kiwi_TrailingSensibleInformationIcon {...props.trailingIconProps} />
+                <Kiwi_HideInfoIcon {...props.trailingIconProps} />
             </div>
         </>
     );

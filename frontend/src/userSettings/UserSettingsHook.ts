@@ -1,11 +1,11 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {debounce, isEqual} from 'lodash';
 import {useDispatch} from 'react-redux';
-import {AppDispatch} from '../../store/Store';
-import {Logger} from '../../utils/Logger';
-import {UserSettingsDTO} from '../types/UserSettingsDTO';
-import {Email} from '../../users/Email';
-import {updateUserSettings} from '../store/UserSettingsThunks';
+import {AppDispatch} from '../store/Store';
+import {Logger} from '../utils/Logger';
+import {UserSettingsDTO} from './UserSettingsDTO';
+import {Email} from '../users/Email';
+import {updateUserSettings} from './UserSettingsThunks';
 
 type UserSettingsFormProps = Partial<UserSettingsDTO>;
 

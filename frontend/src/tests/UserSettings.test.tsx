@@ -1,11 +1,11 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {Provider} from 'react-redux';
-import UserSettingsPage from '../userSettings/components/UserSettingsPage';
 import {configureStore, Store, UnknownAction} from '@reduxjs/toolkit';
 import api from '../services/api';
-import {userSettingsReducer} from '../userSettings/store/UserSettingsSlice';
 import {BrowserRouter} from 'react-router-dom';
-import {UserSettingsDTO} from '../userSettings/types/UserSettingsDTO';
+import {UserSettingsDTO} from "../userSettings/UserSettingsDTO";
+import {userSettingsReducer} from "../userSettings/UserSettingsSlice";
+import UserSettingsPage from "../userSettings/UserSettingsPage";
 
 jest.mock('../services/api');
 

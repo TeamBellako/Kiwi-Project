@@ -1,4 +1,4 @@
-import {RootState} from "../../store/Store"
+import {RootState} from "../store/Store"
 
 export const selectUserSettingsDTO = (state: RootState) => state.userSettings.userSettingsDTO;
 export const selectUserSettingsStatus = (state: RootState) => state.userSettings.status;

@@ -1,5 +1,5 @@
 import {UserSettings} from "./UserSettings";
-import {Email} from "../../users/Email";
+import {Email} from "../users/Email";
 
 export interface UserSettingsDTO {
     email: string;

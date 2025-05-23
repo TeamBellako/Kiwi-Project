@@ -1,11 +1,10 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
-import api from '../../services/api';
-import {pingServer} from '../../services/pingServer';
-import {UserSettingsDTO} from "../types/UserSettingsDTO";
-import {getServerErrorMessage} from "../../utils/APIUtils";
+import api from '../services/api';
+import {pingServer} from '../services/pingServer';
+import {UserSettingsDTO} from "./UserSettingsDTO";
+import {getServerErrorMessage} from "../utils/HTTPUtils";
 
 type RejectMessage = string;
-
 
 export const loadUserSettings = createAsyncThunk<
     UserSettingsDTO,

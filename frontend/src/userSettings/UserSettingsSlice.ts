@@ -1,6 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import {loadUserSettings, updateUserSettings} from './UserSettingsThunks';
-import {initialState} from "../types/UserSettingsState";
+import {initialState} from "./UserSettingsState";
 
 const userSettingsSlice = createSlice({
     name: 'userSettings',

@@ -1,9 +1,9 @@
 import {useEffect} from 'react';
 import UserSettingsForm from './UserSettingsForm';
-import {loadUserSettings} from "../store/UserSettingsThunks";
-import {useAppDispatch, useAppSelector} from "../../store/Hooks";
-import {selectUserSettingsDTO, selectUserSettingsError, selectUserSettingsStatus} from "../store/UserSettingsSelector";
-import {Kiwi_InfoBox} from "../../ui/components/Kiwi_InfoBox";
+import {loadUserSettings} from "./UserSettingsThunks";
+import {useAppDispatch, useAppSelector} from "../store/Hooks";
+import {selectUserSettingsDTO, selectUserSettingsError, selectUserSettingsStatus} from "./UserSettingsSelector";
+import {Kiwi_InfoBox} from "../ui/components/Kiwi_InfoBox";
 
 const UserSettingsPage = () => {
     const dispatch = useAppDispatch();
