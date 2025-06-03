@@ -1,16 +1,15 @@
 package com.bellako.kiwi
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.ui.test.*
-import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.common.CommonTestTags
-import com.bellako.kiwi.userSettings.UserSettingsTestTags
-import com.bellako.kiwi.userSettings.UserSettingsState
-import com.bellako.kiwi.userSettings.UserSettingsScreen
-import com.bellako.kiwi.userSettings.UserSettingsTestFactory.validUserSettings
 import com.bellako.kiwi.userSettings.UserSettingsFakeViewModel
+import com.bellako.kiwi.userSettings.UserSettingsScreen
+import com.bellako.kiwi.userSettings.UserSettingsState
+import com.bellako.kiwi.userSettings.UserSettingsTestFactory.validUserSettings
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -36,34 +35,32 @@ class UserSettingsUITest {
         fakeViewModel = UserSettingsFakeViewModel(state)
 
         composeTestRule.setContent {
-            UserSettingsScreen(viewModel = fakeViewModel, {})
+            UserSettingsScreen(viewModel = fakeViewModel) {}
         }
 
     }
 
     @Test
-    fun serverErrorOnLoad() {
+    fun errorOnLoad() {
         fakeViewModel.simulateLoadError = true
+
         fakeViewModel.loadSettings()
 
-        composeTestRule.onNodeWithTag(CommonTestTags.LOADING_SCREEN).assertIsNotDisplayed()
-        composeTestRule.serverError().assertIsDisplayed()
+        composeTestRule.onNodeWithTag(CommonTestTags.ERROR_SCREEN).assertIsDisplayed()
     }
 
     @Test
-    fun serverErrorOnUpdate() {
+    fun errorOnUpdate() {
         fakeViewModel.simulateUpdateError = true
 
-        val updatedState = UserSettingsState(
-            email = validUserSettings().email,
-            soundVolume = validUserSettings().soundVolume,
-            musicVolume = validUserSettings().musicVolume
+        fakeViewModel.updateSettings(
+            UserSettingsState(
+                email = validUserSettings().email,
+                soundVolume = validUserSettings().soundVolume,
+                musicVolume = validUserSettings().musicVolume
+            )
         )
 
-        fakeViewModel.updateSettings(updatedState)
-
-        composeTestRule.serverError().assertIsDisplayed()
+        composeTestRule.onNodeWithTag(CommonTestTags.ERROR_SCREEN).assertIsDisplayed()
     }
-
-    private fun ComposeTestRule.serverError() = onNodeWithTag(UserSettingsTestTags.SERVER_ERROR)
 }

@@ -1,10 +1,12 @@
 package com.bellako.kiwi.utils
 
+import com.bellako.kiwi.common.UIState
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
 
 object HTTPUtils {
     fun createFakeHttpException(code: Int): HttpException {
@@ -22,7 +24,7 @@ object HTTPUtils {
         return errorMessage ?: "Something went wrong"
     }
 
-    private fun parseErrorMessage(json: String?): String? {
+    fun parseErrorMessage(json: String?): String? {
         if (json.isNullOrBlank()) return null
 
         return try {
@@ -33,6 +35,17 @@ object HTTPUtils {
             map?.get("error")
         } catch (ex: Exception) {
             null
+        }
+    }
+
+    fun mapExceptionToUIState(e: Throwable): UIState<Unit> {
+        return when (e) {
+            is HttpException -> {
+                if (e.code() >= 500) UIState.GeneralError
+                else UIState.Error(parseErrorMessage(e.response()?.errorBody()?.string())!!)
+            }
+            is IOException -> UIState.GeneralError
+            else -> UIState.GeneralError
         }
     }
 }

@@ -1,64 +1,83 @@
 package com.bellako.kiwi.userSettings
 
+import androidx.lifecycle.ViewModel
+import com.bellako.kiwi.common.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import retrofit2.HttpException
+import java.io.IOException
 
 class UserSettingsFakeViewModel(
     private var backingState: UserSettingsState
-) : IUserSettingsViewModel {
+) : ViewModel(), IUserSettingsViewModel {
 
-    private val _state = MutableStateFlow(backingState)
-    override val state: StateFlow<UserSettingsState?> = _state
+    private val _state = MutableStateFlow<UserSettingsState?>(backingState)
+    override val state: StateFlow<UserSettingsState?> = _state.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _error = MutableStateFlow<String?>(null)
-    override val error: StateFlow<String?> = _error.asStateFlow()
+    private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
+    override val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
     private var currentDomainSettings: UserSettings? = backingState.toDomainObject().getOrNull()
 
     var simulateLoadError: Boolean = false
     var simulateUpdateError: Boolean = false
-    var simulatedErrorMessage: String = "Something went wrong"
+    var simulatedException: Exception = Exception("Something went wrong")
+
+
+    override fun reset() {}
 
     override fun loadSettings() {
         _isLoading.value = true
+        _uiState.value = UIState.Loading
 
         if (simulateLoadError) {
-            _error.value = simulatedErrorMessage
+            _uiState.value = mapExceptionToUIState(simulatedException)
         } else {
-            _error.value = null
+            _uiState.value = UIState.Success(Unit)
         }
 
         _isLoading.value = false
     }
 
     override fun updateSettings(state: UserSettingsState) {
-        _state.value = state
-
-        _error.value = null
+        _isLoading.value = true
+        _uiState.value = UIState.Loading
 
         if (simulateUpdateError) {
-            _error.value = simulatedErrorMessage
+            _isLoading.value = false
+            _uiState.value = mapExceptionToUIState(simulatedException)
             return
         }
 
         val result = state.toDomainObject()
 
-        result
-            .onFailure {
-                _error.value = simulatedErrorMessage
+        result.onFailure {
+            _uiState.value = mapExceptionToUIState(simulatedException)
+        }.onSuccess { domain ->
+            if (currentDomainSettings != domain) {
+                currentDomainSettings = domain
+                _state.value = domain.toState()
+                _uiState.value = UIState.Success(Unit)
             }
-            .onSuccess { domain ->
-                if (currentDomainSettings != domain) {
-                    currentDomainSettings = domain
-                    _state.value = domain.toState()
-                    _error.value = null
-                }
-            }
+        }
+
+        _isLoading.value = false
     }
 
     override fun clearToken() {}
+
+    private fun mapExceptionToUIState(e: Throwable): UIState<Unit> {
+        return when (e) {
+            is HttpException -> {
+                if (e.code() >= 500) UIState.GeneralError
+                else UIState.Error("Server error: ${e.message()}")
+            }
+            is IOException -> UIState.GeneralError
+            else -> UIState.GeneralError
+        }
+    }
 }

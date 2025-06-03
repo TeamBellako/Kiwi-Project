@@ -1,34 +1,33 @@
 package com.bellako.kiwi.userSettings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.common.ErrorScreen
 import com.bellako.kiwi.common.LoadingScreen
+import com.bellako.kiwi.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Slider
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.theme.SeparatorHeight
 import com.bellako.kiwi.users.UsersTestTags
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private val volumeLevels = listOf(0, 33, 67, 100)
+
+private enum class RetryAction {
+    LOAD,
+    SAVE
+}
 
 @Composable
 fun UserSettingsScreen(
@@ -36,23 +35,58 @@ fun UserSettingsScreen(
     onLogout: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    val lastAction = remember { mutableStateOf<RetryAction?>(null) }
 
     LaunchedEffect(Unit) {
+        lastAction.value = RetryAction.LOAD
         viewModel.loadSettings()
     }
 
-    when {
-        isLoading -> LoadingScreen()
+    when (uiState) {
+        is UIState.Loading -> LoadingScreen()
 
-        error?.isNotBlank() == true -> Kiwi_InfoBox(
-            error!!,
-            Color.Red,
-            UserSettingsTestTags.SERVER_ERROR
-        )
+        is UIState.GeneralError -> {
+            ErrorScreen(
+                onRetry = {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        when (lastAction.value) {
+                            RetryAction.LOAD -> {
+                                lastAction.value = RetryAction.LOAD
+                                viewModel.loadSettings()
+                            }
+                            RetryAction.SAVE -> {
+                                viewModel.reset()
 
-        else -> UserSettingsFields(state, viewModel, onLogout)
+                                state?.let {
+                                    lastAction.value = RetryAction.SAVE
+                                    viewModel.updateSettings(it)
+                                }
+                            }
+                            null -> {}
+                        }
+                    }
+                }
+            )
+        }
+
+        is UIState.Error -> {
+            Kiwi_InfoBox(
+                message = (uiState as UIState.Error).message,
+                color = Color.Red,
+                testTag = UserSettingsTestTags.SERVER_ERROR
+            )
+        }
+
+        else -> {
+            UserSettingsFields(
+                state = state,
+                viewModel = viewModel,
+                onLogout = onLogout,
+                onChange = { lastAction.value = RetryAction.SAVE }
+            )
+        }
     }
 }
 
@@ -60,11 +94,16 @@ fun UserSettingsScreen(
 private fun UserSettingsFields(
     state: UserSettingsState?,
     viewModel: IUserSettingsViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onChange: () -> Unit
 ) {
     state?.let { currentState ->
-        var soundSliderPosition by remember { mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.soundVolume }.coerceAtLeast(0)) }
-        var musicSliderPosition by remember { mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.musicVolume }.coerceAtLeast(0)) }
+        var soundSliderPosition by remember {
+            mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.soundVolume }.coerceAtLeast(0))
+        }
+        var musicSliderPosition by remember {
+            mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.musicVolume }.coerceAtLeast(0))
+        }
 
         Column(
             modifier = Modifier
@@ -89,6 +128,7 @@ private fun UserSettingsFields(
                     val intPos = newValue.toInt()
                     if (intPos != soundSliderPosition) {
                         soundSliderPosition = intPos
+                        onChange()
                         viewModel.updateSettings(currentState.copy(soundVolume = volumeLevels[intPos]))
                     }
                 },
@@ -105,6 +145,7 @@ private fun UserSettingsFields(
                     val intPos = newValue.toInt()
                     if (intPos != musicSliderPosition) {
                         musicSliderPosition = intPos
+                        onChange()
                         viewModel.updateSettings(currentState.copy(musicVolume = volumeLevels[intPos]))
                     }
                 },
@@ -112,7 +153,7 @@ private fun UserSettingsFields(
                 steps = 2,
                 testTag = UserSettingsTestTags.MUSIC_VOLUME_SLIDER
             )
-            Spacer(modifier = Modifier.height(SeparatorHeight*2))
+            Spacer(modifier = Modifier.height(SeparatorHeight * 2))
 
             Button(
                 onClick = {

@@ -17,16 +17,18 @@ fun MainScreen(viewModel: UsersViewModel = hiltViewModel()) {
     var currentScreen by remember { mutableStateOf<ScreenState>(ScreenState.Login) }
 
     when (currentScreen) {
-        is ScreenState.Login -> UsersScreen(
-            onLoginSuccess = { currentScreen = ScreenState.Settings },
-            viewModel = viewModel
-        )
+        is ScreenState.Login ->
+            UsersScreen(
+                onLoginSuccess = { currentScreen = ScreenState.Settings },
+                viewModel = viewModel
+            )
 
         is ScreenState.Settings -> {
             val userSettingsViewModel : UserSettingsViewModel = hiltViewModel()
             UserSettingsScreen(
                 onLogout = { currentScreen = ScreenState.Login},
-                viewModel = userSettingsViewModel)
+                viewModel = userSettingsViewModel
+            )
         }
     }
 }

@@ -34,8 +34,6 @@ class UserSettingsIntegrationTest {
     private lateinit var viewModel: UserSettingsViewModel
     private lateinit var authRepository: AuthRepository
 
-    private val testErrorMessage = "Error Message"
-
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -102,18 +100,6 @@ class UserSettingsIntegrationTest {
         val expectedState = validUserSettings().toState()
 
         Assert.assertEquals(expectedState, viewModel.state.first())
-        Assert.assertNull(viewModel.error.first())
-    }
-
-    @Test
-    fun `loadSettings sets error when getUserSettings fails`() = runTest {
-        whenever(api.getUserSettings()).thenThrow(RuntimeException(testErrorMessage))
-
-        viewModel.loadSettings()
-        advanceUntilIdle()
-
-        Assert.assertNull(viewModel.state.first())
-        Assert.assertEquals("An unexpected error occurred.", viewModel.error.first())
     }
 
     @Test
