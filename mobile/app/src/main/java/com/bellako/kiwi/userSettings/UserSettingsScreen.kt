@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,12 +18,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.common.LoadingScreen
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
-import com.bellako.kiwi.ui.components.Kiwi_LoadingIndicator
 import com.bellako.kiwi.ui.components.Kiwi_Slider
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.theme.SeparatorHeight
@@ -47,7 +44,7 @@ fun UserSettingsScreen(
     }
 
     when {
-        isLoading -> Kiwi_LoadingIndicator()
+        isLoading -> LoadingScreen()
 
         error?.isNotBlank() == true -> Kiwi_InfoBox(
             error!!,

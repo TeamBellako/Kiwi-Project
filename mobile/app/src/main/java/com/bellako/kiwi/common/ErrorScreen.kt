@@ -1,4 +1,4 @@
-package com.bellako.kiwi.error
+package com.bellako.kiwi.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +61,7 @@ fun ErrorScreen(
             text = errorMessage,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.testTag(ErrorTestTags.ERROR_TEXT)
+            modifier = Modifier.testTag(CommonTestTags.ERROR_SCREEN)
         )
 
         if (onRetry != null) {
@@ -72,8 +72,7 @@ fun ErrorScreen(
             ) {
                 Kiwi_Button(
                     "Retry",
-                    onRetry,
-                    testTag = ErrorTestTags.RETRY_BUTTON
+                    onRetry
                 )
             }
         }

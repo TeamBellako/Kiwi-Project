@@ -6,7 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.bellako.kiwi.error.ErrorTestTags
+import com.bellako.kiwi.common.CommonTestTags
 import com.bellako.kiwi.users.UsersFakeViewModel
 import com.bellako.kiwi.users.UsersScreen
 import com.bellako.kiwi.users.UsersState
@@ -70,7 +70,7 @@ class UsersUITest {
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
 
-        rule.onNodeWithTag(ErrorTestTags.ERROR_TEXT).assertIsDisplayed()
+        rule.onNodeWithTag(CommonTestTags.ERROR_SCREEN).assertIsDisplayed()
     }
 
     @Test
@@ -99,6 +99,6 @@ class UsersUITest {
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
 
-        rule.onNodeWithTag(ErrorTestTags.ERROR_TEXT).assertIsDisplayed()
+        rule.onNodeWithTag(CommonTestTags.ERROR_SCREEN).assertIsDisplayed()
     }
 }

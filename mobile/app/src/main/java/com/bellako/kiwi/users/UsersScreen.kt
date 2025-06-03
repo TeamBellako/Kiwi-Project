@@ -1,27 +1,16 @@
 package com.bellako.kiwi.users
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.common.ErrorScreen
+import com.bellako.kiwi.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
@@ -38,28 +27,39 @@ fun UsersScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-
-    val errorMessageState = remember { mutableStateOf("") }
-    val successMessageState = remember { mutableStateOf("") }
+    val uiState by (viewModel as? UsersViewModel)?.uiState?.collectAsState() ?: remember { mutableStateOf(UIState.Idle) }
 
     state?.let { currentState ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = "Welcome", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(SeparatorHeight))
 
-            Fields(viewModel, currentState, isLoading)
-            Spacer(modifier = Modifier.height(SeparatorHeight))
+        when (uiState) {
+            is UIState.GeneralError -> {
+                ErrorScreen(onRetry = {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        viewModel.signup(currentState)
+                    }
+                })
+            }
 
-            Buttons(viewModel, currentState, isLoading, errorMessageState, successMessageState, onLoginSuccess)
-            Spacer(modifier = Modifier.height(SeparatorHeight))
+            else -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Welcome", style = MaterialTheme.typography.headlineMedium)
+                    Spacer(modifier = Modifier.height(SeparatorHeight))
 
-            InfoBoxes(errorMessageState, successMessageState)
+                    Fields(viewModel, currentState, isLoading)
+                    Spacer(modifier = Modifier.height(SeparatorHeight))
+
+                    Buttons(viewModel, currentState, isLoading, onLoginSuccess)
+                    Spacer(modifier = Modifier.height(SeparatorHeight))
+
+                    InfoBoxes(uiState)
+                }
+            }
         }
     }
 }
@@ -71,23 +71,23 @@ private fun Fields(
     isLoading: Boolean,
 ) {
     Kiwi_InputField(
-        !isLoading,
-        currentState.email,
-        { email -> viewModel.onEmailChanged(email) },
-        { Text("Email") },
-        false,
-        UsersTestTags.EMAIL_FIELD
+        enabled = !isLoading,
+        value = currentState.email,
+        onValueChange = { viewModel.onEmailChanged(it) },
+        label = { Text("Email") },
+        shouldHideInput = false,
+        testTag = UsersTestTags.EMAIL_FIELD
     )
 
     Spacer(modifier = Modifier.height(SeparatorHeight))
 
     Kiwi_InputField(
-        !isLoading,
-        currentState.password,
-        { password -> viewModel.onPasswordChanged(password) },
-        { Text("Password") },
-        true,
-        UsersTestTags.PASSWORD_FIELD
+        enabled = !isLoading,
+        value = currentState.password,
+        onValueChange = { viewModel.onPasswordChanged(it) },
+        label = { Text("Password") },
+        shouldHideInput = true,
+        testTag = UsersTestTags.PASSWORD_FIELD
     )
 }
 
@@ -96,8 +96,6 @@ private fun Buttons(
     viewModel: IUsersViewModel,
     currentState: UsersState,
     isLoading: Boolean,
-    errorMessageState: MutableState<String>,
-    successMessageState: MutableState<String>,
     onLoginSuccess: () -> Unit
 ) {
     Row(
@@ -105,104 +103,54 @@ private fun Buttons(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Kiwi_Button(
-            "Sign Up",
-            {
-                onSignUpClicked(
-                    viewModel,
-                    currentState,
-                    errorMessageState,
-                    successMessageState
-                )
+            text = "Sign Up",
+            onClick = {
+                CoroutineScope(Dispatchers.Main).launch {
+                    viewModel.signup(currentState)
+                }
             },
-            isLoading,
-            UsersTestTags.SIGNUP_BUTTON,
-            Modifier.weight(1f)
+            isLoading = isLoading,
+            testTag = UsersTestTags.SIGNUP_BUTTON,
+            rowModifier = Modifier.weight(1f)
         )
 
         Spacer(modifier = Modifier.width(SeparatorHeight))
 
         Kiwi_Button(
-            "Login",
-            {
-                onLoginClicked(
-                    viewModel,
-                    currentState,
-                    errorMessageState,
-                    successMessageState,
-                    onLoginSuccess
-                )
+            text = "Login",
+            onClick = {
+                CoroutineScope(Dispatchers.Main).launch {
+                    val result = viewModel.login(currentState)
+                    if (result.isSuccess) onLoginSuccess()
+                }
             },
-            isLoading,
-            UsersTestTags.LOGIN_BUTTON,
-            Modifier.weight(1f)
+            isLoading = isLoading,
+            testTag = UsersTestTags.LOGIN_BUTTON,
+            rowModifier = Modifier.weight(1f)
         )
-    }
-}
-
-private fun onSignUpClicked(
-    viewModel: IUsersViewModel,
-    currentState: UsersState,
-    errorMessageState: MutableState<String>,
-    successMessageState: MutableState<String>
-) {
-    CoroutineScope(Dispatchers.Main).launch {
-        errorMessageState.value = ""
-        successMessageState.value = ""
-
-        val result: Result<Unit> = viewModel.signup(currentState)
-        if (result.isSuccess) {
-            successMessageState.value = "New User Successfully Created!"
-        } else {
-            val exception = result.exceptionOrNull()
-            val message = exception?.message ?: "Unknown error"
-
-            errorMessageState.value = message
-        }
-    }
-}
-
-private fun onLoginClicked(
-    viewModel: IUsersViewModel,
-    currentState: UsersState,
-    errorMessageState: MutableState<String>,
-    successMessageState: MutableState<String>,
-    onLoginSuccess: () -> Unit
-) {
-    CoroutineScope(Dispatchers.Main).launch {
-        errorMessageState.value = ""
-        successMessageState.value = ""
-
-        val result : Result<Unit> = viewModel.login(currentState)
-        if (result.isSuccess) {
-            onLoginSuccess()
-        } else {
-            val exception = result.exceptionOrNull()
-            val message = exception?.message ?: "Unknown error"
-
-            errorMessageState.value = message
-        }
     }
 }
 
 @Composable
-private fun InfoBoxes(
-    errorMessageState: MutableState<String>,
-    successMessageState: MutableState<String>
-) {
-    if (!errorMessageState.value.isEmpty()) {
-        Kiwi_InfoBox(
-            errorMessageState.value,
-            Color.Red,
-            UsersTestTags.ERROR_TEXT
-        )
-    }
+private fun InfoBoxes(uiState: UIState<Unit>) {
+    when (uiState) {
+        is UIState.Error -> {
+            Kiwi_InfoBox(
+                message = uiState.message,
+                color = Color.Red,
+                testTag = UsersTestTags.ERROR_TEXT
+            )
+        }
 
-    if (!successMessageState.value.isEmpty()) {
-        Kiwi_InfoBox(
-            successMessageState.value,
-            Color.Green,
-            UsersTestTags.SUCCESS_TEXT
-        )
+        is UIState.Success -> {
+            Kiwi_InfoBox(
+                message = "New User Successfully Created!",
+                color = Color.Green,
+                testTag = UsersTestTags.SUCCESS_TEXT
+            )
+        }
+
+        else -> {}
     }
 }
 
@@ -212,13 +160,10 @@ fun UsersScreenPreview() {
     KiwiTheme {
         UsersScreen(
             UsersFakeViewModel(
-                UsersState(
-                    "finn@thehuman.com",
-                    "Math3matical!"
-                ),
-                false,
+                UsersState("finn@thehuman.com", "Math3matical!"),
+                isLoading = false
             ),
-            {}
+            onLoginSuccess = {}
         )
     }
 }

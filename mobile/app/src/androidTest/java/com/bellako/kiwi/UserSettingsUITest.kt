@@ -5,7 +5,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.bellako.kiwi.ui.tags.KIWI_LOADING_INDICATOR
+import com.bellako.kiwi.common.CommonTestTags
 import com.bellako.kiwi.userSettings.UserSettingsTestTags
 import com.bellako.kiwi.userSettings.UserSettingsState
 import com.bellako.kiwi.userSettings.UserSettingsScreen
@@ -46,7 +46,7 @@ class UserSettingsUITest {
         fakeViewModel.simulateLoadError = true
         fakeViewModel.loadSettings()
 
-        composeTestRule.onNodeWithTag(KIWI_LOADING_INDICATOR).assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag(CommonTestTags.LOADING_SCREEN).assertIsNotDisplayed()
         composeTestRule.serverError().assertIsDisplayed()
     }
 

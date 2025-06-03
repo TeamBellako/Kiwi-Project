@@ -1,4 +1,4 @@
-package com.bellako.kiwi.ui.components
+package com.bellako.kiwi.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,15 +9,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import com.bellako.kiwi.ui.tags.KIWI_LOADING_INDICATOR
 
 @Composable
-fun Kiwi_LoadingIndicator() {
+fun LoadingScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .testTag(KIWI_LOADING_INDICATOR),
+            .testTag(CommonTestTags.LOADING_SCREEN),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
