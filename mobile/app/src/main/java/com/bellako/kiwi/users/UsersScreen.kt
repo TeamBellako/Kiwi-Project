@@ -27,10 +27,9 @@ fun UsersScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val uiState by (viewModel as? UsersViewModel)?.uiState?.collectAsState() ?: remember { mutableStateOf(UIState.Idle) }
+    val uiState by viewModel.uiState.collectAsState()
 
     state?.let { currentState ->
-
         when (uiState) {
             is UIState.GeneralError -> {
                 ErrorScreen(onRetry = {

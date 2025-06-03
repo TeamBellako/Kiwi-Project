@@ -3,6 +3,7 @@ package com.bellako.kiwi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -49,7 +50,7 @@ class UsersUITest {
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
 
         rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsDisplayed()
-        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsNotDisplayed()
+        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertDoesNotExist()
     }
 
     @Test
