@@ -56,7 +56,7 @@ class UsersUITest {
     @Test
     fun invalidSignup () {
         fakeViewModel.fakeError = true
-        fakeViewModel.fakeException = Exception("Signup error")
+        fakeViewModel.fakeException = createFakeHttpException(401)
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
 
@@ -85,7 +85,7 @@ class UsersUITest {
     @Test
     fun invalidLogin () {
         fakeViewModel.fakeError = true
-        fakeViewModel.fakeException = Exception("Login error")
+        fakeViewModel.fakeException = createFakeHttpException(401)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
 

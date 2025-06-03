@@ -1,5 +1,7 @@
 package com.bellako.kiwi.utils
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
 import retrofit2.Response
@@ -11,5 +13,26 @@ object HTTPUtils {
             "Error $code".toResponseBody(null)
         )
         return HttpException(response)
+    }
+
+    fun extractHttpExceptionMessage(exception: HttpException) : String {
+        val errorBody = exception.response()?.errorBody()?.string()
+        val errorMessage = parseErrorMessage(errorBody)
+
+        return errorMessage ?: "Something went wrong"
+    }
+
+    private fun parseErrorMessage(json: String?): String? {
+        if (json.isNullOrBlank()) return null
+
+        return try {
+            val moshi = Moshi.Builder().build()
+            val type = Types.newParameterizedType(Map::class.java, String::class.java, String::class.java)
+            val adapter = moshi.adapter<Map<String, String>>(type)
+            val map = adapter.fromJson(json)
+            map?.get("error")
+        } catch (ex: Exception) {
+            null
+        }
     }
 }

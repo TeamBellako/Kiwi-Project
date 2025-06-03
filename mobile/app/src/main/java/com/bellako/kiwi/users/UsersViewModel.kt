@@ -3,6 +3,7 @@ package com.bellako.kiwi.users
 import androidx.lifecycle.ViewModel
 import com.bellako.kiwi.common.UIState
 import com.bellako.kiwi.network.AuthRepository
+import com.bellako.kiwi.utils.HTTPUtils.extractHttpExceptionMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,103 +38,75 @@ class UsersViewModel @Inject constructor(
     override suspend fun signup(state: UsersState): Result<Unit> {
         val domainResult = state.toDomainObject()
         if (domainResult.isFailure) {
-            _uiState.value = UIState.Error("Invalid email or password format")
-            return Result.failure(Exception("Invalid email or password format"))
+            val message = getInvalidDataMessage()
+            _uiState.value = UIState.Error(message)
+            return Result.failure(Exception(message))
         }
 
         val user = domainResult.getOrThrow()
         _isLoading.value = true
         _uiState.value = UIState.Loading
 
-        return try {
-            val result = repository.signup(user.toDTO())
-            _isLoading.value = false
+        val result = repository.signup(user.toDTO())
+        _isLoading.value = false
 
-            result.fold(
-                onSuccess = {
-                    _uiState.value = UIState.Success(Unit)
-                    Result.success(Unit)
-                },
-                onFailure = {
-                    val msg = it.message ?: "Sign-up failed"
-                    _uiState.value = UIState.Error(msg)
-                    Result.failure(it)
+        return result.fold(
+            onSuccess = {
+                _uiState.value = UIState.Success(Unit)
+                Result.success(Unit)
+            },
+            onFailure = { throwable ->
+                _uiState.value = when (throwable) {
+                    is HttpException -> {
+                        if (throwable.code() >= 500) UIState.GeneralError
+                        else UIState.Error(extractHttpExceptionMessage(throwable))
+                    }
+                    is IOException -> UIState.GeneralError
+                    else -> UIState.GeneralError
                 }
-            )
-        } catch (e: HttpException) {
-            _isLoading.value = false
-
-            if (e.code() >= 500) {
-                _uiState.value = UIState.GeneralError
-            } else {
-                _uiState.value = UIState.Error("Server error: ${e.message()}")
+                Result.failure(throwable)
             }
-
-            Result.failure(e)
-        } catch (e: IOException) {
-            _isLoading.value = false
-
-            _uiState.value = UIState.Error("Network error. Please try again.")
-            Result.failure(e)
-        } catch (e: Exception) {
-            _isLoading.value = false
-
-            _uiState.value = UIState.GeneralError
-            Result.failure(e)
-        }
+        )
     }
 
     override suspend fun login(state: UsersState): Result<Unit> {
         val domainResult = state.toDomainObject()
         if (domainResult.isFailure) {
-            _uiState.value = UIState.Error(getInvalidDataMessage())
-            return Result.failure(Exception(getInvalidDataMessage()))
+            val message = getInvalidDataMessage()
+            _uiState.value = UIState.Error(message)
+            return Result.failure(Exception(message))
         }
 
         val user = domainResult.getOrThrow()
         _isLoading.value = true
         _uiState.value = UIState.Loading
 
-        return try {
-            val result = repository.login(user.toDTO())
-            _isLoading.value = false
+        val result = repository.login(user.toDTO())
+        _isLoading.value = false
 
-            result.fold(
-                onSuccess = {
-                    authRepository.setJwtToken(it)
-                    _uiState.value = UIState.Success(Unit)
-                    Result.success(Unit)
-                },
-                onFailure = {
-                    _uiState.value = UIState.Error(getInvalidDataMessage())
-                    Result.failure(it)
+        return result.fold(
+            onSuccess = {
+                authRepository.setJwtToken(it)
+                _uiState.value = UIState.Success(Unit)
+                Result.success(Unit)
+            },
+            onFailure = { throwable ->
+                _uiState.value = when (throwable) {
+                    is HttpException -> {
+                        if (throwable.code() >= 500) UIState.GeneralError
+                        else UIState.Error(throwable.message())
+                    }
+                    is IOException -> UIState.GeneralError
+                    else -> UIState.Error("Incorrect email or password.")
                 }
-            )
-        } catch (e: HttpException) {
-            _isLoading.value = false
-
-            if (e.code() >= 500) {
-                _uiState.value = UIState.GeneralError
-            } else {
-                _uiState.value = UIState.Error("Server error: ${e.message()}")
+                Result.failure(throwable)
             }
-            Result.failure(e)
-        } catch (e: IOException) {
-            _isLoading.value = false
-
-            _uiState.value = UIState.Error("Network error. Please try again.")
-            Result.failure(e)
-        } catch (e: Exception) {
-            _isLoading.value = false
-
-            _uiState.value = UIState.GeneralError
-            Result.failure(e)
-        }
+        )
     }
 
     private fun getInvalidDataMessage(): String {
         return """
-            Incorrect email or password. Password must:
+            Invalid email or password. Password must:
             - Be at least 8 characters long
             - Include both uppercase and lowercase letters
             - Contain at least one number

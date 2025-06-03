@@ -2,10 +2,11 @@ package com.bellako.kiwi.users
 
 import androidx.lifecycle.ViewModel
 import com.bellako.kiwi.common.UIState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import retrofit2.HttpException
+import java.io.IOException
 
 class UsersFakeViewModel(
     initialState: UsersState,
@@ -30,7 +31,7 @@ class UsersFakeViewModel(
 
         return if (fakeError) {
             _isLoading.value = false
-            _uiState.value = UIState.Error(fakeException.message ?: "Unknown error")
+            _uiState.value = mapExceptionToUIState(fakeException)
             Result.failure(fakeException)
         } else {
             _isLoading.value = false
@@ -45,7 +46,7 @@ class UsersFakeViewModel(
 
         return if (fakeError) {
             _isLoading.value = false
-            _uiState.value = UIState.Error(fakeException.message ?: "Unknown error")
+            _uiState.value = mapExceptionToUIState(fakeException)
             Result.failure(fakeException)
         } else {
             _isLoading.value = false
@@ -60,5 +61,16 @@ class UsersFakeViewModel(
 
     override fun onPasswordChanged(password: String) {
         _state.value = _state.value?.copy(password = password)
+    }
+
+    private fun mapExceptionToUIState(e: Throwable): UIState<Unit> {
+        return when (e) {
+            is HttpException -> {
+                if (e.code() >= 500) UIState.GeneralError
+                else UIState.Error("Server error: ${e.message()}")
+            }
+            is IOException -> UIState.GeneralError
+            else -> UIState.GeneralError
+        }
     }
 }

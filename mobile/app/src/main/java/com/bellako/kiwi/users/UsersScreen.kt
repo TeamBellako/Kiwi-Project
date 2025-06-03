@@ -20,6 +20,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+enum class RetryAction {
+    SIGNUP,
+    LOGIN
+}
+
 @Composable
 fun UsersScreen(
     viewModel: IUsersViewModel,
@@ -28,13 +33,21 @@ fun UsersScreen(
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    val lastAction = remember { mutableStateOf<RetryAction?>(null) }
 
     state?.let { currentState ->
         when (uiState) {
             is UIState.GeneralError -> {
                 ErrorScreen(onRetry = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.signup(currentState)
+                        when (lastAction.value) {
+                            RetryAction.SIGNUP -> viewModel.signup(currentState)
+                            RetryAction.LOGIN -> {
+                                val result = viewModel.login(currentState)
+                                if (result.isSuccess) onLoginSuccess()
+                            }
+                            null -> {}
+                        }
                     }
                 })
             }
@@ -53,7 +66,7 @@ fun UsersScreen(
                     Fields(viewModel, currentState, isLoading)
                     Spacer(modifier = Modifier.height(SeparatorHeight))
 
-                    Buttons(viewModel, currentState, isLoading, onLoginSuccess)
+                    Buttons(viewModel, currentState, isLoading, lastAction, onLoginSuccess)
                     Spacer(modifier = Modifier.height(SeparatorHeight))
 
                     InfoBoxes(uiState)
@@ -95,6 +108,7 @@ private fun Buttons(
     viewModel: IUsersViewModel,
     currentState: UsersState,
     isLoading: Boolean,
+    lastAction: MutableState<RetryAction?>,
     onLoginSuccess: () -> Unit
 ) {
     Row(
@@ -104,6 +118,7 @@ private fun Buttons(
         Kiwi_Button(
             text = "Sign Up",
             onClick = {
+                lastAction.value = RetryAction.SIGNUP
                 CoroutineScope(Dispatchers.Main).launch {
                     viewModel.signup(currentState)
                 }
@@ -118,6 +133,7 @@ private fun Buttons(
         Kiwi_Button(
             text = "Login",
             onClick = {
+                lastAction.value = RetryAction.LOGIN
                 CoroutineScope(Dispatchers.Main).launch {
                     val result = viewModel.login(currentState)
                     if (result.isSuccess) onLoginSuccess()
