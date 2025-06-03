@@ -14,9 +14,9 @@ import androidx.compose.ui.platform.testTag
 fun Kiwi_Button(
     text: String,
     onClick: () -> Unit,
-    isLoading: Boolean,
-    testTag: String,
-    rowModifier: Modifier
+    isLoading: Boolean = false,
+    testTag: String = "",
+    rowModifier: Modifier = Modifier,
 ) {
     Box(modifier = rowModifier) {
         Button(
