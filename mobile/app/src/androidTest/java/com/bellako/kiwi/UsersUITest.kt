@@ -6,10 +6,12 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bellako.kiwi.error.ErrorTestTags
 import com.bellako.kiwi.users.UsersFakeViewModel
 import com.bellako.kiwi.users.UsersScreen
 import com.bellako.kiwi.users.UsersState
 import com.bellako.kiwi.users.UsersTestTags
+import com.bellako.kiwi.utils.HTTPUtils.createFakeHttpException
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,11 +55,22 @@ class UsersUITest {
     @Test
     fun invalidSignup () {
         fakeViewModel.fakeError = true
+        fakeViewModel.fakeException = Exception("Signup error")
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
 
         rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsNotDisplayed()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
+    }
+
+    @Test
+    fun errorOnSignup() {
+        fakeViewModel.fakeError = true
+        fakeViewModel.fakeException = createFakeHttpException(500)
+
+        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
+
+        rule.onNodeWithTag(ErrorTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 
     @Test
@@ -71,10 +84,21 @@ class UsersUITest {
     @Test
     fun invalidLogin () {
         fakeViewModel.fakeError = true
+        fakeViewModel.fakeException = Exception("Login error")
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
 
         rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsNotDisplayed()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
+    }
+
+    @Test
+    fun errorOnLogin() {
+        fakeViewModel.fakeError = true
+        fakeViewModel.fakeException = createFakeHttpException(500)
+
+        rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
+
+        rule.onNodeWithTag(ErrorTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 }

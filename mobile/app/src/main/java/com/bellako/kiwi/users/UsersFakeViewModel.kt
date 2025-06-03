@@ -15,10 +15,11 @@ class UsersFakeViewModel  (
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     var fakeError: Boolean = false
+    var fakeException: Exception = Exception("")
 
     override suspend fun signup(state: UsersState): Result<Unit> {
         if (fakeError) {
-            return Result.failure(Exception("Signup error"))
+            return Result.failure(fakeException)
         }
 
         return Result.success(Unit)
@@ -26,7 +27,7 @@ class UsersFakeViewModel  (
 
     override suspend fun login(state: UsersState): Result<Unit> {
         if (fakeError) {
-            return Result.failure(Exception("Login error"))
+            return Result.failure(fakeException)
         }
 
         return Result.success(Unit)

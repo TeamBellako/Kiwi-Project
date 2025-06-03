@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,8 @@ fun ErrorScreen(
         Text(
             text = errorMessage,
             style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.testTag(ErrorTestTags.ERROR_TEXT)
         )
 
         if (onRetry != null) {
@@ -71,6 +73,7 @@ fun ErrorScreen(
                 Kiwi_Button(
                     "Retry",
                     onRetry,
+                    testTag = ErrorTestTags.RETRY_BUTTON
                 )
             }
         }
