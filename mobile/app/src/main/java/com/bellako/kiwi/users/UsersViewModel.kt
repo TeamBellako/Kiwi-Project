@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import retrofit2.HttpException
-import java.io.IOException
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
@@ -61,7 +60,6 @@ class UsersViewModel @Inject constructor(
                         if (throwable.code() >= 500) UIState.GeneralError
                         else UIState.Error(extractHttpExceptionMessage(throwable))
                     }
-                    is IOException -> UIState.GeneralError
                     else -> UIState.GeneralError
                 }
                 Result.failure(throwable)
@@ -94,10 +92,9 @@ class UsersViewModel @Inject constructor(
                 _uiState.value = when (throwable) {
                     is HttpException -> {
                         if (throwable.code() >= 500) UIState.GeneralError
-                        else UIState.Error(throwable.message())
+                        else UIState.Error(extractHttpExceptionMessage(throwable))
                     }
-                    is IOException -> UIState.GeneralError
-                    else -> UIState.Error("Incorrect email or password.")
+                    else -> UIState.GeneralError
                 }
                 Result.failure(throwable)
             }

@@ -18,8 +18,15 @@ class UsersRepository(private val api: IUsersAPI) {
         }
     }
 
-    suspend fun login(dto: UsersDTO): Result<String> = runCatching {
-        val response = api.login(dto)
-        response["jwt"] ?: throw Exception("Missing JWT in response")
+    suspend fun login(dto: UsersDTO): Result<String> {
+        return try {
+            val result = api.login(dto)
+            val jwt = result["jwt"] ?: return Result.failure(
+                Exception("Missing JWT in response")
+            )
+            Result.success(jwt)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
