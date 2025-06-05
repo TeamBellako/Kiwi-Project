@@ -5,6 +5,9 @@ import {useState} from "react";
 import {login, signup} from "./UsersThunks";
 import {useNavigate} from "react-router-dom";
 import {ROUTES} from "../navigation/Routes";
+import {RetryAction} from "./UsersState";
+import {useAppSelector} from "../store/Hooks";
+import {selectUsersRetryAction} from "./UsersSelector";
 
 type UsersFormProps = Partial<UsersDTO>;
 
@@ -14,6 +17,7 @@ export const useUsersForm = ({
 }: UsersFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
+    const retryAction = useAppSelector(selectUsersRetryAction)
 
     const [formState, setFormState] = useState<UsersDTO>({
         email,
@@ -62,6 +66,14 @@ export const useUsersForm = ({
         }
     };
 
+    const handleRetry = async () => {
+        if (retryAction === RetryAction.LOGIN) {
+            await loginUser();
+        } else if (retryAction === RetryAction.SIGNUP) {
+            await signupUser();
+        }
+    };
+
     return {
         formState,
         updateFormState,
@@ -70,5 +82,6 @@ export const useUsersForm = ({
         error,
         result,
         loading,
+        handleRetry
     };
 };

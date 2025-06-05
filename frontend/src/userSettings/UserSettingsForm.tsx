@@ -34,7 +34,7 @@ const UserSettingsForm: React.FC<UserSettingsProps> = (props) => {
                     text={"Sound Volume"}
                     label={"soundVolume"}
                     min={0}
-                    max={100}
+                    max={99}
                     step={33}
                     value={form.soundVolumeField.value}
                     onChange={(e) =>
@@ -46,7 +46,7 @@ const UserSettingsForm: React.FC<UserSettingsProps> = (props) => {
                     text={"Music Volume"}
                     label={"musicVolume"}
                     min={0}
-                    max={100}
+                    max={99}
                     step={33}
                     value={form.musicVolumeField.value}
                     onChange={(e) =>

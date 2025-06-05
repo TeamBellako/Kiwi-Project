@@ -10,10 +10,10 @@ import {updateUserSettings} from './UserSettingsThunks';
 type UserSettingsFormProps = Partial<UserSettingsDTO>;
 
 export const useUserSettingsForm = ({
-                                        email = '',
-                                        soundVolume = 67,
-                                        musicVolume = 67,
-                                    }: UserSettingsFormProps) => {
+    email = '',
+    soundVolume = 67,
+    musicVolume = 67,
+}: UserSettingsFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const [formState, setFormState] = useState<UserSettingsDTO>({
