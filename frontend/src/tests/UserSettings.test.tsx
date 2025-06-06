@@ -6,11 +6,9 @@ import {BrowserRouter} from 'react-router-dom';
 import {UserSettingsDTO} from "../userSettings/UserSettingsDTO";
 import {userSettingsReducer} from "../userSettings/UserSettingsSlice";
 import UserSettingsPage from "../userSettings/UserSettingsPage";
+import {TestIDs} from "../common/TestIDs";
 
 jest.mock('../services/api');
-
-const loadingMessage = 'Loading settings...';
-const errorMessageWithSensibleInformation = 'Adventure Time > Steven Universe';
 
 const validUserSettingsDTO: UserSettingsDTO = {
     email: 'finn@thehuman.com',
@@ -56,37 +54,36 @@ describe('UserSettings Tests', () => {
         api.put = jest.fn().mockResolvedValue({ data: response });
     };
 
-    const mockApiGetErrorRequest = (error: any) => {
-        api.get = jest.fn().mockRejectedValue(new Error(error));
-    };
-
     test('load data', () => {
         api.get = jest.fn().mockImplementation(() => new Promise(() => {}));
+        
         renderUserSettingsPage();
 
-        expect(screen.getByText(loadingMessage)).toBeInTheDocument();
+        expect(screen.getByTestId(TestIDs.common.loadingPage)).toBeVisible();
     });
 
-    test('server error', async () => {
-        mockApiGetErrorRequest(errorMessageWithSensibleInformation);
+    test('error on load', async () => {
+        api.get = jest.fn().mockRejectedValue({
+            response: {
+                status: 500,
+                data: { message: "Server Error" },
+            },
+        });
+        
         renderUserSettingsPage();
 
-        await waitFor(() => {
-            expect(screen.getByText(/Server Error:/i)).toBeInTheDocument();
-            expect(
-                screen.queryByText(errorMessageWithSensibleInformation)
-            ).toBeNull();
-        });
+        expect(screen.getByTestId(TestIDs.common.errorPage)).toBeVisible();
     });
 
     test('saveSettings', async () => {
         mockApiGetRequest(validUserSettingsDTO);
         renderUserSettingsPage();
-
         mockApiPutRequest(updateUserSettingsDTO);
-
-        const soundSlider = await screen.findByLabelText(/Sound Volume/i);
-        fireEvent.change(soundSlider, { target: { value: updateUserSettingsDTO.soundVolume } });
+        
+        fireEvent.change(
+            screen.getByTestId(TestIDs.userSettings.soundVolume),
+            { target: { value: updateUserSettingsDTO.soundVolume } }
+        );
 
         await waitFor(() => {
             expect(api.put).toHaveBeenCalledTimes(1);
@@ -98,8 +95,10 @@ describe('UserSettings Tests', () => {
         mockApiPutRequest(validUserSettingsDTO);
         renderUserSettingsPage();
 
-        const emailField = await screen.findByDisplayValue(validUserSettingsDTO.email);
-        fireEvent.change(emailField, { target: { value: validUserSettingsDTO.email } });
+        fireEvent.change(
+            screen.getByTestId(TestIDs.userSettings.soundVolume),
+            { target: { value: validUserSettingsDTO.soundVolume } }
+        );
 
         await waitFor(() => {
             expect(api.put).toHaveBeenCalledTimes(0);
@@ -110,7 +109,7 @@ describe('UserSettings Tests', () => {
         mockApiGetRequest(validUserSettingsDTO);
         renderUserSettingsPage();
 
-        const soundSlider = await screen.findByLabelText(/Sound Volume/i);
+        const soundSlider = screen.getByTestId(TestIDs.userSettings.soundVolume);
 
         fireEvent.change(soundSlider, { target: { value: 30 } });
         fireEvent.change(soundSlider, { target: { value: 35 } });
@@ -121,5 +120,22 @@ describe('UserSettings Tests', () => {
         await waitFor(() => {
             expect(api.put).toHaveBeenCalledTimes(1);
         });
+    });
+
+    test('error on save', async () => {
+        renderUserSettingsPage();
+        api.get = jest.fn().mockRejectedValue({
+            response: {
+                status: 500,
+                data: { message: "Server Error" },
+            },
+        });
+
+        fireEvent.change(
+            screen.getByTestId(TestIDs.userSettings.soundVolume),
+            { target: { value: updateUserSettingsDTO.soundVolume } }
+        );
+
+        expect(screen.getByTestId(TestIDs.common.errorPage)).toBeVisible();
     });
 });

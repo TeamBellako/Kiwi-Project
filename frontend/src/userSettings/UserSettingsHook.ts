@@ -5,7 +5,10 @@ import {AppDispatch} from '../store/Store';
 import {Logger} from '../utils/Logger';
 import {UserSettingsDTO} from './UserSettingsDTO';
 import {Email} from '../users/Email';
-import {updateUserSettings} from './UserSettingsThunks';
+import {loadUserSettings, updateUserSettings} from './UserSettingsThunks';
+import {RetryAction} from "./UserSettingsState";
+import {useAppSelector} from "../store/Hooks";
+import {selectUserSettingsRetryAction} from "./UserSettingsSelector";
 
 type UserSettingsFormProps = Partial<UserSettingsDTO>;
 
@@ -15,6 +18,8 @@ export const useUserSettingsForm = ({
     musicVolume = 67,
 }: UserSettingsFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
+    
+    const retryAction = useAppSelector(selectUserSettingsRetryAction);
 
     const [formState, setFormState] = useState<UserSettingsDTO>({
         email,
@@ -46,8 +51,8 @@ export const useUserSettingsForm = ({
         }, 500),
         [dispatch]
     );
-
-    useEffect(() => {
+    
+    const queueSaveSettings = () => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
             prevValueRef.current = formState;
@@ -69,7 +74,19 @@ export const useUserSettingsForm = ({
             prevValueRef.current = formState;
             saveSettings(formState);
         }
+    }
+
+    useEffect(() => {
+        queueSaveSettings();
     }, [formState, error, saveSettings]);
+
+    const handleRetry = async () => {
+        if (retryAction === RetryAction.LOAD) {
+            dispatch(loadUserSettings());
+        } else if (retryAction === RetryAction.UPDATE) {
+            queueSaveSettings();
+        }
+    };
 
     return {
         emailField: {
@@ -89,5 +106,6 @@ export const useUserSettingsForm = ({
                 setFormState({ ...formState, musicVolume: value }),
         },
         isSaving,
+        handleRetry
     };
 };

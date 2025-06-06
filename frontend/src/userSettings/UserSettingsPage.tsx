@@ -1,11 +1,31 @@
-import {useEffect} from 'react';
-import UserSettingsForm from './UserSettingsForm';
-import {loadUserSettings} from "./UserSettingsThunks";
+import React, {useEffect} from 'react';
+import {useUserSettingsForm} from './UserSettingsHook';
+import {UserSettingsDTO} from './UserSettingsDTO';
+import {Kiwi_InputField} from '../ui/components/Kiwi_InputField';
+import {Kiwi_Button} from '../ui/components/Kiwi_Button';
+import {useAuth} from '../navigation/Authentication';
+import {Kiwi_Slider} from "../ui/components/Kiwi_Slider";
 import {useAppDispatch, useAppSelector} from "../store/Hooks";
 import {selectUserSettingsDTO, selectUserSettingsError, selectUserSettingsStatus} from "./UserSettingsSelector";
-import {Kiwi_InfoBox} from "../ui/components/Kiwi_InfoBox";
+import {loadUserSettings} from "./UserSettingsThunks";
+import LoadingPage from "../common/LoadingPage";
+import ErrorPage from "../common/ErrorPage";
+import {TestIDs} from "../common/TestIDs";
 
-const UserSettingsPage = () => {
+type UserSettingsProps = Partial<UserSettingsDTO>;
+
+const SNAP_VALUES = [0, 33, 67, 100];
+
+const snapToClosest = (value: number) => {
+    return SNAP_VALUES.reduce((prev, curr) =>
+        Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+    );
+};
+
+const UserSettingsPage: React.FC<UserSettingsProps> = (props) => {
+    const form = useUserSettingsForm(props);
+    const { logoutUser } = useAuth();
+
     const dispatch = useAppDispatch();
 
     const userSettingsDTO = useAppSelector(selectUserSettingsDTO);
@@ -18,20 +38,14 @@ const UserSettingsPage = () => {
 
     if (status === 'loading') {
         return (
-            <Kiwi_InfoBox
-                text={"Loading settings..."}
-                role={"result"}
-                boxColor={"result"}
-            />
+            <LoadingPage />
         );
     }
 
-    if (error) {
+    if (status === 'failed' && error?.code && error.code >= 500) {
         return (
-            <Kiwi_InfoBox 
-                text={"Server Error:" + error}
-                role={"error"}
-                boxColor={"error"}
+            <ErrorPage
+                onRetry={form.handleRetry}
             />
         );
     }
@@ -39,14 +53,50 @@ const UserSettingsPage = () => {
     return (
         <div className="p-4 max-w-lg mx-auto">
             {userSettingsDTO && (
-                <UserSettingsForm
-                    email={userSettingsDTO.email}
-                    soundVolume={userSettingsDTO.soundVolume}
-                    musicVolume={userSettingsDTO.musicVolume}
-                />
+                <>
+                    <form className="space-y-6" data-testid="settings-form">
+                        <Kiwi_InputField
+                            label="Email"
+                            type="email"
+                            value={form.emailField.value}
+                            required={false}
+                            testID={TestIDs.userSettings.email}
+                        />
+    
+                        <Kiwi_Slider
+                            text={"Sound Volume"}
+                            label={"soundVolume"}
+                            min={0}
+                            max={99}
+                            step={33}
+                            value={form.soundVolumeField.value}
+                            onChange={(e) =>
+                                form.soundVolumeField.setValue(snapToClosest(Number(e.target.value)))
+                            }
+                            testID={TestIDs.userSettings.musicVolume}
+                        />
+    
+                        <Kiwi_Slider
+                            text={"Music Volume"}
+                            label={"musicVolume"}
+                            min={0}
+                            max={99}
+                            step={33}
+                            value={form.musicVolumeField.value}
+                            onChange={(e) =>
+                                form.musicVolumeField.setValue(snapToClosest(Number(e.target.value)))
+                            }
+                            testID={TestIDs.userSettings.soundVolume}
+                        />
+                    </form>
+                    
+                    <div className="mt-6">
+                        <Kiwi_Button text="Logout" onClick={logoutUser} disabled={false} />
+                    </div>
+                </>
             )}
         </div>
-    );
+    )
 };
 
 export default UserSettingsPage;
