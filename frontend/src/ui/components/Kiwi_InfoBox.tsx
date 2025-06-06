@@ -2,8 +2,8 @@ import React from "react";
 
 type InfoBoxProps = {
     text?: string | null;
-    role: string;
     boxColor: "result" | "error";
+    testID?: string;
 };
 
 const BOX_COLOR_CLASSES: Record<string, { bg: string; border: string; text: string }> = {
@@ -19,15 +19,20 @@ const BOX_COLOR_CLASSES: Record<string, { bg: string; border: string; text: stri
     },
 };
 
-export const Kiwi_InfoBox: React.FC<InfoBoxProps> = ({ text, role, boxColor }) => {
-    if (!text) return null;
+export const Kiwi_InfoBox: React.FC<InfoBoxProps> = (props: InfoBoxProps) => {
+    if (!props.text) return null;
 
-    const colors = BOX_COLOR_CLASSES[boxColor];
+    const colors = BOX_COLOR_CLASSES[props.boxColor];
 
     return (
         <div className={`mt-2 p-3 rounded border-l-4 ${colors.bg} ${colors.border}`}>
-            <p className={`${colors.text}`} role={role} style={{ whiteSpace: "pre-wrap" }}>
-                {text}
+            <p 
+                className={`${colors.text}`}
+                role="alert"
+                style={{ whiteSpace: "pre-wrap" }}
+                data-testid={props.testID}
+            >
+                {props.text}
             </p>
         </div>
     );

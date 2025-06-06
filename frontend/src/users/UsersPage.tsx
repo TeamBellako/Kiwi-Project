@@ -8,6 +8,7 @@ import {useAppSelector} from "../store/Hooks";
 import {selectUsersStatus} from "./UsersSelector";
 import LoadingPage from "../common/LoadingPage";
 import ErrorPage from "../common/ErrorPage";
+import {TestIDs} from "../common/TestIDs";
 
 type UsersProps = Partial<UsersDTO>;
 
@@ -34,6 +35,7 @@ const UsersPage: React.FC<UsersProps> = (props: UsersProps) => {
         <div className="p-4 max-w-lg mx-auto">
             <h1 className="text-2xl font-bold mb-4">Welcome</h1>
             <form
+                role="form"
                 className="space-y-6"
                 data-testid="users-form"
                 onSubmit={e => e.preventDefault()}
@@ -44,6 +46,7 @@ const UsersPage: React.FC<UsersProps> = (props: UsersProps) => {
                     value={form.formState.email}
                     onChange={(e: { target: { value: string; }; }) => form.updateFormState("email", e.target.value)}
                     required={true}
+                    testID={TestIDs.users.email}
                 />
     
                 <Kiwi_SensibleInputField
@@ -52,7 +55,8 @@ const UsersPage: React.FC<UsersProps> = (props: UsersProps) => {
                         type: showPassword ? "text" : "password",
                         value: form.formState.password,
                         onChange: e => form.updateFormState("password", e.target.value),
-                        required: true
+                        required: true,
+                        testID: TestIDs.users.password
                     }}
                     trailingIconProps={{
                         informationName: "password",
@@ -66,25 +70,27 @@ const UsersPage: React.FC<UsersProps> = (props: UsersProps) => {
                         text={"Signup"}
                         onClick={form.signupUser}
                         disabled={form.loading}
+                        testID={TestIDs.users.signup}
                     />
     
                     <Kiwi_Button
                         text={"Login"}
                         onClick={form.loginUser}
                         disabled={form.loading}
+                        testID={TestIDs.users.login}
                     />
                 </div>
                 
                 <Kiwi_InfoBox
                     text={form.error?.message}
-                    role={"error"}
                     boxColor={"error"}
+                    testID={TestIDs.users.errorAlert}
                 />
     
                 <Kiwi_InfoBox
                     text={form.result}
-                    role={"result"}
                     boxColor={"result"}
+                    testID={TestIDs.users.resultAlert}
                 />
             </form>
         </div>

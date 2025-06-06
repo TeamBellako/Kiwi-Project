@@ -1,4 +1,5 @@
 import React from "react";
+import {TestIDs} from "./TestIDs";
 
 interface ErrorPageProps {
     message?: string;
@@ -9,7 +10,7 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ message = "Something went wrong. 
     return (
         <div className="flex flex-col justify-center items-center h-screen bg-white">
             <p className="text-2xl text-red-500 font-semibold mb-2">Oops!</p>
-            <p className="text-xl text-red-500 mb-4">{message}</p>
+            <p className="text-xl text-red-500 mb-4" data-testid={TestIDs.common.errorPage}>{message}</p>
             {
                 onRetry &&
                 <button

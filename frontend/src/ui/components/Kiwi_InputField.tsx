@@ -2,11 +2,12 @@ import React from "react";
 import Kiwi_HideInfoIcon, {TrailingSensibleInformationIconProps} from "./Kiwi_HideInfoIcon";
 
 type InputFieldProps = {
-    label?: string;
-    type?: string | undefined;
+    label?: string
+    type?: string | undefined
     value: string | number | readonly string[] | undefined
     onChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
-    required: boolean;
+    required: boolean
+    testID?: string
 }
 
 export const Kiwi_InputField: React.FC<InputFieldProps> = (props: InputFieldProps) => {
@@ -25,6 +26,7 @@ export const Kiwi_InputField: React.FC<InputFieldProps> = (props: InputFieldProp
                 className={`mt-1 w-full border p-2 rounded ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
                 required={props.required}
                 disabled={isDisabled}
+                data-testid={props.testID}
             />
         </>
     );
@@ -53,6 +55,7 @@ export const Kiwi_SensibleInputField: React.FC<Kiwi_SensibleInputFieldProps> = (
                     className={`mt-1 w-full border p-2 rounded ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
                     required={props.inputFieldProps.required}
                     disabled={isDisabled}
+                    data-testid={props.inputFieldProps.testID}
                 />
                 <Kiwi_HideInfoIcon {...props.trailingIconProps} />
             </div>
