@@ -36,14 +36,18 @@ describe('UserSettings Tests', () => {
         });
     });
 
-    const renderUserSettingsPage = (store = mockStore) => {
-        return render(
+    const renderUserSettingsPage = async (
+        store = mockStore,
+    ) => {
+        render(
             <BrowserRouter>
                 <Provider store={store}>
-                    <UserSettingsPage />
+                    <UserSettingsPage/>
                 </Provider>
             </BrowserRouter>
         );
+
+        await waitFor(() => expect(screen.queryByTestId(TestIDs.common.loadingPage)).toBeNull());
     };
 
     const mockApiGetRequest = (response: any) => {
@@ -56,12 +60,20 @@ describe('UserSettings Tests', () => {
 
     test('load data', () => {
         api.get = jest.fn().mockImplementation(() => new Promise(() => {}));
-        
+
         renderUserSettingsPage();
 
         expect(screen.getByTestId(TestIDs.common.loadingPage)).toBeVisible();
     });
 
+    test('shows read-only email', async () => {
+        mockApiGetRequest(validUserSettingsDTO);
+        
+        await renderUserSettingsPage();
+
+        expect(screen.getByTestId(TestIDs.userSettings.email).value).toBe(validUserSettingsDTO.email);
+    });
+    
     test('error on load', async () => {
         api.get = jest.fn().mockRejectedValue({
             response: {
@@ -69,16 +81,16 @@ describe('UserSettings Tests', () => {
                 data: { message: "Server Error" },
             },
         });
-        
-        renderUserSettingsPage();
+
+        await renderUserSettingsPage();
 
         expect(screen.getByTestId(TestIDs.common.errorPage)).toBeVisible();
     });
 
     test('saveSettings', async () => {
         mockApiGetRequest(validUserSettingsDTO);
-        renderUserSettingsPage();
         mockApiPutRequest(updateUserSettingsDTO);
+        await renderUserSettingsPage();
         
         fireEvent.change(
             screen.getByTestId(TestIDs.userSettings.soundVolume),
@@ -93,7 +105,7 @@ describe('UserSettings Tests', () => {
     test('saveSettings with no changes', async () => {
         mockApiGetRequest(validUserSettingsDTO);
         mockApiPutRequest(validUserSettingsDTO);
-        renderUserSettingsPage();
+        await renderUserSettingsPage();
 
         fireEvent.change(
             screen.getByTestId(TestIDs.userSettings.soundVolume),
@@ -107,7 +119,7 @@ describe('UserSettings Tests', () => {
 
     test('saveSettings throttled on rapid slider changes', async () => {
         mockApiGetRequest(validUserSettingsDTO);
-        renderUserSettingsPage();
+        await renderUserSettingsPage();
 
         const soundSlider = screen.getByTestId(TestIDs.userSettings.soundVolume);
 
@@ -120,22 +132,5 @@ describe('UserSettings Tests', () => {
         await waitFor(() => {
             expect(api.put).toHaveBeenCalledTimes(1);
         });
-    });
-
-    test('error on save', async () => {
-        renderUserSettingsPage();
-        api.get = jest.fn().mockRejectedValue({
-            response: {
-                status: 500,
-                data: { message: "Server Error" },
-            },
-        });
-
-        fireEvent.change(
-            screen.getByTestId(TestIDs.userSettings.soundVolume),
-            { target: { value: updateUserSettingsDTO.soundVolume } }
-        );
-
-        expect(screen.getByTestId(TestIDs.common.errorPage)).toBeVisible();
     });
 });

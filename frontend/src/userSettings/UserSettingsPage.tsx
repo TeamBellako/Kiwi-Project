@@ -34,6 +34,7 @@ const UserSettingsPage: React.FC<UserSettingsProps> = (props) => {
 
     useEffect(() => {
         dispatch(loadUserSettings());
+        form.emailField.setValue(userSettingsDTO?.email!!); // we read from the DTO here because this field is read-only
     }, []);
 
     if (status === 'loading') {
@@ -58,7 +59,7 @@ const UserSettingsPage: React.FC<UserSettingsProps> = (props) => {
                         <Kiwi_InputField
                             label="Email"
                             type="email"
-                            value={form.emailField.value}
+                            value={userSettingsDTO.email} 
                             required={false}
                             testID={TestIDs.userSettings.email}
                         />

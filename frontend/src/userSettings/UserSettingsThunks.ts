@@ -1,15 +1,13 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
-import api from '../services/api';
+import api, {ErrorDetails} from '../services/api';
 import {pingServer} from '../services/pingServer';
 import {UserSettingsDTO} from "./UserSettingsDTO";
 import {getServerErrorMessage} from "../utils/HTTPUtils";
 
-type RejectMessage = string;
-
 export const loadUserSettings = createAsyncThunk<
     UserSettingsDTO,
     void,
-    { rejectValue: RejectMessage }
+    { rejectValue: ErrorDetails }
 >(
     'userSettings/loadUserSettings',
     async (_, { rejectWithValue }) => {
@@ -25,13 +23,13 @@ export const loadUserSettings = createAsyncThunk<
 export const updateUserSettings = createAsyncThunk<
     UserSettingsDTO,
     UserSettingsDTO,
-    { rejectValue: RejectMessage }
+    { rejectValue: ErrorDetails }
 >(
     'userSettings/updateUserSettingsDTO',
     async (settingsDTO, { rejectWithValue }) => {
         const isServerAlive = await pingServer();
         if (!isServerAlive) {
-            return rejectWithValue('Server is not reachable.');
+            return rejectWithValue(getServerErrorMessage(null, 'Failed to update user settings'));
         }
 
         try {

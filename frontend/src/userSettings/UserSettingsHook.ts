@@ -4,7 +4,6 @@ import {useDispatch} from 'react-redux';
 import {AppDispatch} from '../store/Store';
 import {Logger} from '../utils/Logger';
 import {UserSettingsDTO} from './UserSettingsDTO';
-import {Email} from '../users/Email';
 import {loadUserSettings, updateUserSettings} from './UserSettingsThunks';
 import {RetryAction} from "./UserSettingsState";
 import {useAppSelector} from "../store/Hooks";
@@ -39,7 +38,6 @@ export const useUserSettingsForm = ({
                 setIsSaving(true);
                 Logger.info('Saving settings');
 
-                Email.of(updatedSettings.email); // throws if invalid
                 await dispatch(updateUserSettings(updatedSettings));
 
                 setIsSaving(false);
@@ -51,22 +49,12 @@ export const useUserSettingsForm = ({
         }, 500),
         [dispatch]
     );
-    
+
     const queueSaveSettings = () => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
             prevValueRef.current = formState;
             return;
-        }
-
-        if (formState.email) {
-            try {
-                Email.of(formState.email);
-                if (error.length > 0) setError('');
-            } catch {
-                setError('Invalid email format');
-                return;
-            }
         }
 
         if (!isEqual(prevValueRef.current, formState)) {
@@ -84,6 +72,7 @@ export const useUserSettingsForm = ({
         if (retryAction === RetryAction.LOAD) {
             dispatch(loadUserSettings());
         } else if (retryAction === RetryAction.UPDATE) {
+            prevValueRef.current = null
             queueSaveSettings();
         }
     };
