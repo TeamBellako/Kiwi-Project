@@ -1,6 +1,11 @@
 import axios from 'axios';
 import {tryGetJWTToken} from "../utils/StorageUtils";
 
+export interface ErrorDetails {
+    message: string;
+    code?: number;
+}
+
 const api = axios.create({
     baseURL: import.meta.env.VITE_FRONT_API_URL,
 });

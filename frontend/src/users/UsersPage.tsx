@@ -5,7 +5,7 @@ import {Kiwi_InputField, Kiwi_SensibleInputField} from "../ui/components/Kiwi_In
 import {Kiwi_Button} from "../ui/components/Kiwi_Button";
 import {Kiwi_InfoBox} from "../ui/components/Kiwi_InfoBox";
 import {useAppSelector} from "../store/Hooks";
-import {selectUsersStatus} from "./UsersSelector";
+import {selectUsersError, selectUsersStatus} from "./UsersSelector";
 import LoadingPage from "../common/LoadingPage";
 import ErrorPage from "../common/ErrorPage";
 import {TestIDs} from "../common/TestIDs";
@@ -13,9 +13,12 @@ import {TestIDs} from "../common/TestIDs";
 type UsersProps = Partial<UsersDTO>;
 
 const UsersPage: React.FC<UsersProps> = (props: UsersProps) => {
+    const status = useAppSelector(selectUsersStatus)
+    const error = useAppSelector(selectUsersError)
+    
     const form = useUsersForm(props);
     const [showPassword, setShowPassword] = useState(false);
-    const status = useAppSelector(selectUsersStatus)
+    
 
     if (status === 'loading') {
         return (
@@ -23,7 +26,7 @@ const UsersPage: React.FC<UsersProps> = (props: UsersProps) => {
         );
     }
 
-    if (status === 'failed') {
+    if (status === 'failed' && error?.code && error.code >= 500) {
         return (
             <ErrorPage
                 onRetry={form.handleRetry}

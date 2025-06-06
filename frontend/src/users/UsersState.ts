@@ -1,4 +1,5 @@
 import {UsersDTO} from "./UsersDTO";
+import {ErrorDetails} from "../services/api";
 
 export enum RetryAction {
     LOGIN = 'LOGIN',
@@ -8,7 +9,7 @@ export enum RetryAction {
 export interface UsersState {
     usersDTO: UsersDTO | null;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null;
+    error: ErrorDetails | null;
     retryAction: RetryAction | null;
 }
 

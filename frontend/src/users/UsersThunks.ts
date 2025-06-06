@@ -1,12 +1,12 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {UsersDTO} from "./UsersDTO";
-import api from "../services/api";
+import api, {ErrorDetails} from "../services/api";
 import {getServerErrorMessage} from "../utils/HTTPUtils";
 
 export const signup = createAsyncThunk<
     void,             
-    UsersDTO,         
-    { rejectValue: string }
+    UsersDTO,        
+    { rejectValue: ErrorDetails } 
 >(
     'users/signup',
     async (userData, { rejectWithValue }) => {
@@ -20,8 +20,8 @@ export const signup = createAsyncThunk<
 
 export const login = createAsyncThunk<
     string,           
-    UsersDTO,         
-    { rejectValue: string }
+    UsersDTO,        
+    { rejectValue: ErrorDetails } 
 >(
     'users/login',
     async (userData, { rejectWithValue }) => {

@@ -1,5 +1,11 @@
-export function getServerErrorMessage(error: any, defaultMessage: string) : string {
-    return error.response?.status === 500
-        ? 'Internal server error. Try again later.'
-        : error.response?.data?.error || defaultMessage;
-}
+import {ErrorDetails} from "../services/api";
+
+export const getServerErrorMessage = (error: any, fallbackMessage: string): ErrorDetails => {
+    const message = error?.response?.data?.message || fallbackMessage;
+    const code = error?.response?.status || 500;
+
+    return {
+        message,
+        code
+    };
+};
