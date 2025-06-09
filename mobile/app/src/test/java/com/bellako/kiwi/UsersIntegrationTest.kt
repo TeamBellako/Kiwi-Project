@@ -36,6 +36,7 @@ class UsersIntegrationTest {
     @Test
     fun `signup with a valid user`() = runTest {
         whenever(api.signup(any())).thenReturn(Response.success(Unit))
+        whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
 
         val result : Result<Unit> = viewModel.signup(validUsersDTO().toState())
 
