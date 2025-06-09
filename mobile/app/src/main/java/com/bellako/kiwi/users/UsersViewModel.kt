@@ -52,7 +52,7 @@ class UsersViewModel @Inject constructor(
         return result.fold(
             onSuccess = {
                 _uiState.value = UIState.Success(Unit)
-                Result.success(Unit)
+                login(state)
             },
             onFailure = { throwable ->
                 _uiState.value = when (throwable) {

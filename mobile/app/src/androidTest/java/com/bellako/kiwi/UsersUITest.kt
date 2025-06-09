@@ -49,7 +49,6 @@ class UsersUITest {
     fun validSignup () {
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
 
-        rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsDisplayed()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertDoesNotExist()
     }
 

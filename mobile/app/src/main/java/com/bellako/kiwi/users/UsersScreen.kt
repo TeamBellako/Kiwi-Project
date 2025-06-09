@@ -70,7 +70,17 @@ fun UsersScreen(
                     Buttons(viewModel, currentState, isLoading, lastAction, onLoginSuccess)
                     Kiwi_Spacer()
 
-                    InfoBoxes(uiState)
+                    when (uiState) {
+                        is UIState.Error -> {
+                            Kiwi_InfoBox(
+                                message = (uiState as UIState.Error).message,
+                                color = Color.Red,
+                                testTag = UsersTestTags.ERROR_TEXT
+                            )
+                        }
+
+                        else -> {}
+                    }
                 }
             }
         }
@@ -123,7 +133,9 @@ private fun Buttons(
                 Logger.info("Retry action set to " + lastAction.value.toString())
 
                 CoroutineScope(Dispatchers.Main).launch {
-                    viewModel.signup(currentState)
+                    if (viewModel.signup(currentState).isSuccess) {
+                        onLoginSuccess()
+                    }
                 }
             },
             isLoading = isLoading,
@@ -140,37 +152,15 @@ private fun Buttons(
                 Logger.info("Retry action set to " + lastAction.value.toString())
 
                 CoroutineScope(Dispatchers.Main).launch {
-                    val result = viewModel.login(currentState)
-                    if (result.isSuccess) onLoginSuccess()
+                    if (viewModel.login(currentState).isSuccess) {
+                        onLoginSuccess()
+                    }
                 }
             },
             isLoading = isLoading,
             testTag = UsersTestTags.LOGIN_BUTTON,
             rowModifier = Modifier.weight(1f)
         )
-    }
-}
-
-@Composable
-private fun InfoBoxes(uiState: UIState<Unit>) {
-    when (uiState) {
-        is UIState.Error -> {
-            Kiwi_InfoBox(
-                message = uiState.message,
-                color = Color.Red,
-                testTag = UsersTestTags.ERROR_TEXT
-            )
-        }
-
-        is UIState.Success -> {
-            Kiwi_InfoBox(
-                message = "New User Successfully Created!",
-                color = Color.Green,
-                testTag = UsersTestTags.SUCCESS_TEXT
-            )
-        }
-
-        else -> {}
     }
 }
 
