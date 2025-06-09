@@ -18,6 +18,7 @@ import com.bellako.kiwi.ui.components.Kiwi_Slider
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.users.UsersTestTags
+import com.bellako.kiwi.utils.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,6 +42,8 @@ fun UserSettingsScreen(
 
     LaunchedEffect(Unit) {
         lastAction.value = RetryAction.LOAD
+        Logger.info("Retry action set to " + lastAction.value.toString())
+
         viewModel.loadSettings()
     }
 
@@ -54,6 +57,8 @@ fun UserSettingsScreen(
                         when (lastAction.value) {
                             RetryAction.LOAD -> {
                                 lastAction.value = RetryAction.LOAD
+                                Logger.info("Retry action set to " + lastAction.value.toString())
+
                                 viewModel.loadSettings()
                             }
                             RetryAction.SAVE -> {
@@ -61,6 +66,8 @@ fun UserSettingsScreen(
 
                                 state?.let {
                                     lastAction.value = RetryAction.SAVE
+                                    Logger.info("Retry action set to " + lastAction.value.toString())
+
                                     viewModel.updateSettings(it)
                                 }
                             }

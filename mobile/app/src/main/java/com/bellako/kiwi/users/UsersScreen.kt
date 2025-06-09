@@ -16,6 +16,7 @@ import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.utils.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -119,6 +120,8 @@ private fun Buttons(
             text = "Sign Up",
             onClick = {
                 lastAction.value = RetryAction.SIGNUP
+                Logger.info("Retry action set to " + lastAction.value.toString())
+
                 CoroutineScope(Dispatchers.Main).launch {
                     viewModel.signup(currentState)
                 }
@@ -134,6 +137,8 @@ private fun Buttons(
             text = "Login",
             onClick = {
                 lastAction.value = RetryAction.LOGIN
+                Logger.info("Retry action set to " + lastAction.value.toString())
+
                 CoroutineScope(Dispatchers.Main).launch {
                     val result = viewModel.login(currentState)
                     if (result.isSuccess) onLoginSuccess()
