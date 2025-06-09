@@ -34,6 +34,10 @@ class UsersViewModel @Inject constructor(
         _state.value = _state.value?.copy(password = password)
     }
 
+    override fun logout() {
+        authRepository.setJwtToken("")
+    }
+
     override suspend fun signup(state: UsersState): Result<Unit> {
         val domainResult = state.toDomainObject()
         if (domainResult.isFailure) {

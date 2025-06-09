@@ -33,7 +33,7 @@ private enum class RetryAction {
 @Composable
 fun UserSettingsScreen(
     viewModel: IUserSettingsViewModel,
-    onLogout: () -> Unit
+    onBackToHome: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -90,7 +90,7 @@ fun UserSettingsScreen(
             UserSettingsFields(
                 state = state,
                 viewModel = viewModel,
-                onLogout = onLogout,
+                onBackToHome = onBackToHome,
                 onChange = { lastAction.value = RetryAction.SAVE }
             )
         }
@@ -101,7 +101,7 @@ fun UserSettingsScreen(
 private fun UserSettingsFields(
     state: UserSettingsState?,
     viewModel: IUserSettingsViewModel,
-    onLogout: () -> Unit,
+    onBackToHome: () -> Unit,
     onChange: () -> Unit
 ) {
     state?.let { currentState ->
@@ -164,12 +164,11 @@ private fun UserSettingsFields(
 
             Button(
                 onClick = {
-                    viewModel.clearToken()
-                    onLogout()
+                    onBackToHome()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Logout")
+                Text("Back To Home")
             }
         }
     }
@@ -185,6 +184,6 @@ fun UserSettingsScreenPreview() {
     )
 
     KiwiTheme {
-        UserSettingsScreen(UserSettingsFakeViewModel(previewState), onLogout = {})
+        UserSettingsScreen(UserSettingsFakeViewModel(previewState), onBackToHome = {})
     }
 }

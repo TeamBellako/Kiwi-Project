@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bellako.kiwi.common.HelpScreen
+import com.bellako.kiwi.common.HomeScreen
 import com.bellako.kiwi.navigation.ScreenState
 import com.bellako.kiwi.userSettings.UserSettingsScreen
 import com.bellako.kiwi.userSettings.UserSettingsViewModel
@@ -14,20 +16,36 @@ import com.bellako.kiwi.users.UsersViewModel
 
 @Composable
 fun MainScreen(viewModel: UsersViewModel = hiltViewModel()) {
-    var currentScreen by remember { mutableStateOf<ScreenState>(ScreenState.Login) }
+    var currentScreen by remember { mutableStateOf<ScreenState>(ScreenState.Home) }
 
     when (currentScreen) {
-        is ScreenState.Login ->
-            UsersScreen(
-                onLoginSuccess = { currentScreen = ScreenState.Settings },
-                viewModel = viewModel
+        is ScreenState.Home -> {
+            HomeScreen(
+                onNavigateToSettings = { currentScreen = ScreenState.Settings },
+                onNavigateToHelp = { currentScreen = ScreenState.Help },
+                onLogout = {
+                    currentScreen = ScreenState.Login
+                    viewModel.logout()
+                }
             )
+        }
+
+        is ScreenState.Help -> {
+            HelpScreen()
+        }
+
+        is ScreenState.Login -> {
+            UsersScreen(
+                viewModel = viewModel,
+                onLoginSuccess = { currentScreen = ScreenState.Settings }
+            )
+        }
 
         is ScreenState.Settings -> {
             val userSettingsViewModel : UserSettingsViewModel = hiltViewModel()
             UserSettingsScreen(
-                onLogout = { currentScreen = ScreenState.Login},
-                viewModel = userSettingsViewModel
+                viewModel = userSettingsViewModel,
+                onBackToHome = { currentScreen = ScreenState.Home}
             )
         }
     }

@@ -68,8 +68,6 @@ class UserSettingsFakeViewModel(
         _isLoading.value = false
     }
 
-    override fun clearToken() {}
-
     private fun mapExceptionToUIState(e: Throwable): UIState<Unit> {
         return when (e) {
             is HttpException -> {

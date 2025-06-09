@@ -36,7 +36,6 @@ object DispatcherModule {
 class UserSettingsViewModel @Inject constructor(
     private val repository: UserSettingsRepository,
     private val dispatcher: CoroutineDispatcher,
-    private val authRepository: AuthRepository,
 ) : ViewModel(), IUserSettingsViewModel {
 
     private val _state = MutableStateFlow<UserSettingsState?>(null)
@@ -94,10 +93,6 @@ class UserSettingsViewModel @Inject constructor(
             previousValidDomainSettings = domain
             _pendingSave.tryEmit(domain)
         }
-    }
-
-    override fun clearToken() {
-        authRepository.setJwtToken("")
     }
 
     @OptIn(FlowPreview::class)
