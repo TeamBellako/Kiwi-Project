@@ -14,8 +14,8 @@ import com.bellako.kiwi.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
+import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.theme.KiwiTheme
-import com.bellako.kiwi.ui.theme.SeparatorHeight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,13 +61,13 @@ fun UsersScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(text = "Welcome", style = MaterialTheme.typography.headlineMedium)
-                    Spacer(modifier = Modifier.height(SeparatorHeight))
+                    Kiwi_Spacer()
 
                     Fields(viewModel, currentState, isLoading)
-                    Spacer(modifier = Modifier.height(SeparatorHeight))
+                    Kiwi_Spacer()
 
                     Buttons(viewModel, currentState, isLoading, lastAction, onLoginSuccess)
-                    Spacer(modifier = Modifier.height(SeparatorHeight))
+                    Kiwi_Spacer()
 
                     InfoBoxes(uiState)
                 }
@@ -91,7 +91,7 @@ private fun Fields(
         testTag = UsersTestTags.EMAIL_FIELD
     )
 
-    Spacer(modifier = Modifier.height(SeparatorHeight))
+    Kiwi_Spacer()
 
     Kiwi_InputField(
         enabled = !isLoading,
@@ -128,7 +128,7 @@ private fun Buttons(
             rowModifier = Modifier.weight(1f)
         )
 
-        Spacer(modifier = Modifier.width(SeparatorHeight))
+        Kiwi_Spacer()
 
         Kiwi_Button(
             text = "Login",

@@ -15,8 +15,8 @@ import com.bellako.kiwi.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Slider
+import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.theme.KiwiTheme
-import com.bellako.kiwi.ui.theme.SeparatorHeight
 import com.bellako.kiwi.users.UsersTestTags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -119,7 +119,7 @@ private fun UserSettingsFields(
                 testTag = UsersTestTags.EMAIL_FIELD,
                 shouldHideInput = false
             )
-            Spacer(modifier = Modifier.height(SeparatorHeight))
+            Kiwi_Spacer()
 
             Kiwi_Slider(
                 text = "Sound Volume",
@@ -136,7 +136,7 @@ private fun UserSettingsFields(
                 steps = 2,
                 testTag = UserSettingsTestTags.SOUND_VOLUME_SLIDER
             )
-            Spacer(modifier = Modifier.height(SeparatorHeight))
+            Kiwi_Spacer()
 
             Kiwi_Slider(
                 text = "Music Volume",
@@ -153,7 +153,7 @@ private fun UserSettingsFields(
                 steps = 2,
                 testTag = UserSettingsTestTags.MUSIC_VOLUME_SLIDER
             )
-            Spacer(modifier = Modifier.height(SeparatorHeight * 2))
+            Kiwi_Spacer(2F)
 
             Button(
                 onClick = {
