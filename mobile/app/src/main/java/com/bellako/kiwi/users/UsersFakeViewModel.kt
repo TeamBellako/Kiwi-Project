@@ -55,6 +55,8 @@ class UsersFakeViewModel(
         }
     }
 
+    override fun logout() {}
+
     override fun onEmailChanged(email: String) {
         _state.value = _state.value?.copy(email = email)
     }

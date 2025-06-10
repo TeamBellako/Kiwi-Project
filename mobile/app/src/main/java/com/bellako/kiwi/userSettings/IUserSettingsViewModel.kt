@@ -11,5 +11,4 @@ interface IUserSettingsViewModel {
     fun reset()
     fun loadSettings()
     fun updateSettings(state: UserSettingsState)
-    fun clearToken()
 }

@@ -32,7 +32,6 @@ class UserSettingsIntegrationTest {
     private lateinit var healthApi: HealthApiService
     private lateinit var repository: UserSettingsRepository
     private lateinit var viewModel: UserSettingsViewModel
-    private lateinit var authRepository: AuthRepository
 
     @Before
     fun setUp() {
@@ -40,9 +39,8 @@ class UserSettingsIntegrationTest {
 
         api = mock(IUserSettingsAPI::class.java)
         healthApi = mock(HealthApiService::class.java)
-        authRepository = AuthRepository()
         repository = UserSettingsRepository(api, healthApi)
-        viewModel = UserSettingsViewModel(repository, testDispatcher, authRepository)
+        viewModel = UserSettingsViewModel(repository, testDispatcher)
     }
 
     @After
