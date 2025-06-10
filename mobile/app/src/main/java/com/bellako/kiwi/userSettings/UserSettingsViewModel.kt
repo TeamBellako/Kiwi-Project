@@ -109,8 +109,6 @@ class UserSettingsViewModel @Inject constructor(
 
     private suspend fun saveSettings(domain: UserSettings) {
         withContext(dispatcher) {
-            _uiState.value = UIState.Loading
-
             repository.pingServer()
                 .onSuccess {
                     Logger.info("Saving user settings")
