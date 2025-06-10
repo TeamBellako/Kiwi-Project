@@ -2,7 +2,6 @@ package com.bellako.kiwi.userSettings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -12,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.ErrorScreen
 import com.bellako.kiwi.common.LoadingScreen
 import com.bellako.kiwi.common.UIState
+import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Slider
@@ -162,14 +162,10 @@ private fun UserSettingsFields(
             )
             Kiwi_Spacer(2F)
 
-            Button(
-                onClick = {
-                    onBackToHome()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Back To Home")
-            }
+            Kiwi_Button(
+                "Back To Home",
+                onBackToHome
+            )
         }
     }
 }

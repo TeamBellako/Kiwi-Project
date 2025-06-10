@@ -26,7 +26,9 @@ fun Kiwi_Button(
                 .testTag(testTag),
             enabled = !isLoading
         ) {
-            Text(text)
+            Kiwi_P1(Kiwi_TextArguments(
+                text
+            ))
         }
         if (isLoading) {
             Box(

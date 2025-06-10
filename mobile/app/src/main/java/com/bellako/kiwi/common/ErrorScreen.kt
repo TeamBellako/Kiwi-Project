@@ -21,7 +21,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.components.Kiwi_Button
+import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
+import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @Composable
@@ -48,20 +50,18 @@ fun ErrorScreen(
 
         Kiwi_Spacer()
 
-        Text(
-            text = "Oops!",
-            style = MaterialTheme.typography.headlineSmall,
+        Kiwi_P1(Kiwi_TextArguments(
+            "Oops!",
             color = MaterialTheme.colorScheme.error
-        )
+        ))
 
         Kiwi_Spacer(0.5F)
 
-        Text(
-            text = errorMessage,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
+        Kiwi_P1(Kiwi_TextArguments(
+            errorMessage,
+            TextAlign.Center,
             modifier = Modifier.testTag(CommonTestTags.ERROR_SCREEN)
-        )
+        ))
 
         if (onRetry != null) {
             Kiwi_Spacer()

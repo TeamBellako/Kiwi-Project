@@ -16,7 +16,10 @@ fun Kiwi_Slider(
     steps: Int,
     testTag: String
 ) {
-    Text(text, style = MaterialTheme.typography.titleMedium)
+    Kiwi_H2(Kiwi_TextArguments(
+      text
+    ))
+
     Slider(
         value = value,
         onValueChange = onValueChange,

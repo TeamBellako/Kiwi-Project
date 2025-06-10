@@ -14,7 +14,9 @@ import com.bellako.kiwi.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
+import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
+import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.utils.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -61,7 +63,9 @@ fun UsersScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Welcome", style = MaterialTheme.typography.headlineMedium)
+                    Kiwi_P1(Kiwi_TextArguments(
+                        "Welcome!"
+                    ))
                     Kiwi_Spacer()
 
                     Fields(viewModel, currentState, isLoading)
