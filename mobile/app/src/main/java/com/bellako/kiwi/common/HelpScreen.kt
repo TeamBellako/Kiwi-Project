@@ -1,8 +1,11 @@
 package com.bellako.kiwi.common
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,6 +29,8 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 fun HelpScreen(
     onBackToHome: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -52,29 +58,35 @@ fun HelpScreen(
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
             modifier = Modifier
+                .clickable() {
+                    openEmailClient(
+                        context,
+                        "bellakotech@gmail.com"
+                    )
+                }
                 .padding(bottom = 24.dp)
                 .testTag(CommonTestTags.HELP_SCREEN)
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Kiwi_Button(
-                "Contact Us",
-                {}
-            )
+        Kiwi_Button(
+            "Back To Home",
+            onBackToHome
+        )
+    }
+}
 
-            Kiwi_Spacer()
+private fun openEmailClient(context: Context, email: String) {
+    val subject = "Help Request"
+    val body = "Hello,\n\nI need assistance with..."
 
-            Kiwi_Button(
-                "Back To Home",
-                onBackToHome
-            )
-        }
+    val emailIntent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$email"))
+    emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
+    emailIntent.putExtra(Intent.EXTRA_TEXT, body)
+
+    try {
+        context.startActivity(emailIntent)
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
 }
 
