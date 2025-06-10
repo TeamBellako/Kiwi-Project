@@ -1,5 +1,6 @@
 package com.bellako.kiwi.common
 
+import com.bellako.kiwi.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.components.Kiwi_Button
+import com.bellako.kiwi.ui.components.Kiwi_Image
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.theme.KiwiTheme
 
@@ -24,11 +26,18 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(48.dp)
             .background(Color.White),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Kiwi_Image(
+            R.drawable.meme,
+            ""
+        )
+
+        Kiwi_Spacer()
+
         Kiwi_Button(
             "Settings",
             onNavigateToSettings

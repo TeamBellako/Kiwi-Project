@@ -16,7 +16,7 @@ import com.bellako.kiwi.users.UsersViewModel
 
 @Composable
 fun MainScreen(viewModel: UsersViewModel = hiltViewModel()) {
-    var currentScreen by remember { mutableStateOf<ScreenState>(ScreenState.Home) }
+    var currentScreen by remember { mutableStateOf<ScreenState>(ScreenState.Login) }
 
     when (currentScreen) {
         is ScreenState.Home -> {
@@ -31,13 +31,15 @@ fun MainScreen(viewModel: UsersViewModel = hiltViewModel()) {
         }
 
         is ScreenState.Help -> {
-            HelpScreen()
+            HelpScreen(
+                onBackToHome = { currentScreen = ScreenState.Home}
+            )
         }
 
         is ScreenState.Login -> {
             UsersScreen(
                 viewModel = viewModel,
-                onLoginSuccess = { currentScreen = ScreenState.Settings }
+                onLoginSuccess = { currentScreen = ScreenState.Home }
             )
         }
 

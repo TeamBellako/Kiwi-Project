@@ -18,10 +18,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.components.Kiwi_Button
+import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @Composable
-fun HelpScreen() {
+fun HelpScreen(
+    onBackToHome: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,12 +56,23 @@ fun HelpScreen() {
                 .testTag(CommonTestTags.HELP_SCREEN)
         )
 
-        Box(
-            modifier = Modifier.padding(24.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Kiwi_Button(
                 "Contact Us",
                 {}
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_Button(
+                "Back To Home",
+                onBackToHome
             )
         }
     }
@@ -68,6 +82,6 @@ fun HelpScreen() {
 @Composable
 fun HelpScreenPreview() {
     KiwiTheme {
-        HelpScreen()
+        HelpScreen() {}
     }
 }
