@@ -61,7 +61,10 @@ fun HelpScreen(
         ))
 
         Kiwi_Button(
-            "Back To Home",
+            Kiwi_TextArguments(
+                "Back To Home",
+                color = Color.White
+            ),
             onBackToHome
         )
     }

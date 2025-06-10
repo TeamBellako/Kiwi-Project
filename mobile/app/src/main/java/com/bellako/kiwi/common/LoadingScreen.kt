@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.tooling.preview.Preview
+import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @Composable
 fun LoadingScreen() {
@@ -20,5 +22,13 @@ fun LoadingScreen() {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
+    }
+}
+
+@Preview
+@Composable
+fun LoadingScreenPreview() {
+    KiwiTheme {
+        LoadingScreen()
     }
 }

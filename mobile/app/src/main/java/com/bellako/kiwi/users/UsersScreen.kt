@@ -2,7 +2,7 @@ package com.bellako.kiwi.users
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.ErrorScreen
 import com.bellako.kiwi.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_Button
+import com.bellako.kiwi.ui.components.Kiwi_H1
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_P1
@@ -63,7 +64,7 @@ fun UsersScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Kiwi_P1(Kiwi_TextArguments(
+                    Kiwi_H1(Kiwi_TextArguments(
                         "Welcome!"
                     ))
                     Kiwi_Spacer()
@@ -128,10 +129,13 @@ private fun Buttons(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Kiwi_Button(
-            text = "Sign Up",
+            Kiwi_TextArguments(
+                "Sign Up",
+                color = Color.White
+            ),
             onClick = {
                 lastAction.value = RetryAction.SIGNUP
                 Logger.info("Retry action set to " + lastAction.value.toString())
@@ -147,10 +151,13 @@ private fun Buttons(
             rowModifier = Modifier.weight(1f)
         )
 
-        Kiwi_Spacer()
+        Box(modifier = Modifier.padding(24.dp))
 
         Kiwi_Button(
-            text = "Login",
+            Kiwi_TextArguments(
+                "Log In",
+                color = Color.White
+            ),
             onClick = {
                 lastAction.value = RetryAction.LOGIN
                 Logger.info("Retry action set to " + lastAction.value.toString())

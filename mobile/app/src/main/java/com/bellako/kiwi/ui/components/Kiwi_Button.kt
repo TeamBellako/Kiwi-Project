@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.testTag
 
 @Composable
 fun Kiwi_Button(
-    text: String,
+    textArguments: Kiwi_TextArguments,
     onClick: () -> Unit,
     isLoading: Boolean = false,
     testTag: String = "",
@@ -26,9 +26,7 @@ fun Kiwi_Button(
                 .testTag(testTag),
             enabled = !isLoading
         ) {
-            Kiwi_P1(Kiwi_TextArguments(
-                text
-            ))
+            Kiwi_P1(textArguments)
         }
         if (isLoading) {
             Box(

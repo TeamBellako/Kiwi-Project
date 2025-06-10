@@ -16,6 +16,7 @@ import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Slider
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
+import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.users.UsersTestTags
 import com.bellako.kiwi.utils.Logger
@@ -129,7 +130,7 @@ private fun UserSettingsFields(
             Kiwi_Spacer()
 
             Kiwi_Slider(
-                text = "Sound Volume",
+                Kiwi_TextArguments("Sound Volume"),
                 value = soundSliderPosition.toFloat(),
                 onValueChange = { newValue ->
                     val intPos = newValue.toInt()
@@ -146,7 +147,7 @@ private fun UserSettingsFields(
             Kiwi_Spacer()
 
             Kiwi_Slider(
-                text = "Music Volume",
+                Kiwi_TextArguments("Music Volume"),
                 value = musicSliderPosition.toFloat(),
                 onValueChange = { newValue ->
                     val intPos = newValue.toInt()
@@ -163,7 +164,10 @@ private fun UserSettingsFields(
             Kiwi_Spacer(2F)
 
             Kiwi_Button(
-                "Back To Home",
+                Kiwi_TextArguments(
+                    "Back To Home",
+                    color = Color.White
+                ),
                 onBackToHome
             )
         }

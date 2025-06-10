@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.components.Kiwi_Button
+import com.bellako.kiwi.ui.components.Kiwi_H1
 import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
@@ -50,7 +51,7 @@ fun ErrorScreen(
 
         Kiwi_Spacer()
 
-        Kiwi_P1(Kiwi_TextArguments(
+        Kiwi_H1(Kiwi_TextArguments(
             "Oops!",
             color = MaterialTheme.colorScheme.error
         ))
@@ -70,7 +71,10 @@ fun ErrorScreen(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Kiwi_Button(
-                    "Retry",
+                    Kiwi_TextArguments(
+                        "Retry",
+                        color = Color.White
+                    ),
                     onRetry
                 )
             }

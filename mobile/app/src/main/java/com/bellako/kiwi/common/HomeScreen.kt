@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_Image
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
+import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @Composable
@@ -39,21 +40,30 @@ fun HomeScreen(
         Kiwi_Spacer()
 
         Kiwi_Button(
-            "Settings",
+            Kiwi_TextArguments(
+                "Settings",
+                color = Color.White
+            ),
             onNavigateToSettings
         )
 
         Kiwi_Spacer()
 
         Kiwi_Button(
-            "Help",
+            Kiwi_TextArguments(
+                "Help",
+                color = Color.White
+            ),
             onNavigateToHelp
         )
 
         Kiwi_Spacer()
 
         Kiwi_Button(
-            "Logout",
+            Kiwi_TextArguments(
+                "Logout",
+                color = Color.White
+            ),
             onLogout
         )
     }
