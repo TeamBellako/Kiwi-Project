@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.components.Kiwi_Button
-import com.bellako.kiwi.ui.components.Kiwi_Spacer
+import com.bellako.kiwi.BuildConfig
 import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @Composable
@@ -53,17 +53,12 @@ fun HelpScreen(
         )
 
         Text(
-            text = "bellakotech@gmail.com",
+            text = BuildConfig.MOBILE_COMPANY_EMAIL,
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .clickable() {
-                    openEmailClient(
-                        context,
-                        "bellakotech@gmail.com"
-                    )
-                }
+                .clickable() { openEmailClient(context) }
                 .padding(bottom = 24.dp)
                 .testTag(CommonTestTags.HELP_SCREEN)
         )
@@ -75,13 +70,11 @@ fun HelpScreen(
     }
 }
 
-private fun openEmailClient(context: Context, email: String) {
-    val subject = "Help Request"
-    val body = "Hello,\n\nI need assistance with..."
-
-    val emailIntent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$email"))
-    emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
-    emailIntent.putExtra(Intent.EXTRA_TEXT, body)
+private fun openEmailClient(context: Context) {
+    val emailIntent = Intent(
+        Intent.ACTION_SENDTO,
+        Uri.parse("mailto:${BuildConfig.MOBILE_COMPANY_EMAIL}")
+    )
 
     try {
         context.startActivity(emailIntent)

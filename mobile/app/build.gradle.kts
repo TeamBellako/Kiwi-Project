@@ -1,6 +1,7 @@
 import org.gradle.kotlin.dsl.implementation
 
 val mobileApiUrl: String = System.getenv("MOBILE_API_URL") ?: "http://10.0.2.2:8080"
+val companyEmail: String = System.getenv("MOBILE_COMPANY_EMAIL") ?: "simon@petrikov.com"
 
 plugins {
     alias(libs.plugins.android.application)
@@ -36,12 +37,14 @@ android {
         versionName = project.findProperty("versionName") as String? ?: "0.1-dev"
 
         buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
+        buildConfigField("String", "MOBILE_COMPANY_EMAIL", "\"$companyEmail\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         debug {
             buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
+            buildConfigField("String", "MOBILE_COMPANY_EMAIL", "\"$companyEmail\"")
             buildConfigField(
                 "boolean",
                 "LOGGING_ENABLED",
@@ -55,6 +58,7 @@ android {
         }
         release {
             buildConfigField("String", "MOBILE_API_URL", "\"$mobileApiUrl\"")
+            buildConfigField("String", "MOBILE_COMPANY_EMAIL", "\"$companyEmail\"")
             buildConfigField(
                 "boolean",
                 "LOGGING_ENABLED",

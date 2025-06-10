@@ -29,6 +29,9 @@ jobs:
       - name: Set API URL
         run: echo "MOBILE_API_URL=${{ secrets.MOBILE_API_URL }}" >> $GITHUB_ENV
 
+      - name: Set COMPANY EMAIL
+        run: echo "MOBILE_COMPANY_EMAIL=${{ secrets.MOBILE_COMPANY_EMAIL }}" >> $GITHUB_ENV
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
