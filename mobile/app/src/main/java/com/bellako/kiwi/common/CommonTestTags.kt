@@ -1,6 +1,8 @@
 package com.bellako.kiwi.common
 
 object CommonTestTags {
+    const val BOTTOM_APPBAR = "common_bottom_appbar"
+
     const val LOADING_MODAL = "common_loading_modal"
     const val ERROR_MODAL = "common_error_modal"
 
