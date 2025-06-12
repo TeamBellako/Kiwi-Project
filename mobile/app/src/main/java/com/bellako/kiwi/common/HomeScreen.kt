@@ -10,8 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_Image
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
@@ -20,15 +23,15 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @Composable
 fun HomeScreen(
-    onNavigateToSettings: () -> Unit,
-    onNavigateToHelp: () -> Unit,
+    navController: NavController,
     onLogout: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
             .padding(48.dp)
-            .background(Color.White),
+            .testTag(CommonTestTags.HOME_SCREEN),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -44,7 +47,7 @@ fun HomeScreen(
                 "Settings",
                 color = Color.White
             ),
-            onNavigateToSettings
+            { navController.navigate(ScreenRoutes.SETTINGS) }
         )
 
         Kiwi_Spacer()
@@ -54,7 +57,7 @@ fun HomeScreen(
                 "Help",
                 color = Color.White
             ),
-            onNavigateToHelp
+            { navController.navigate(ScreenRoutes.HELP) }
         )
 
         Kiwi_Spacer()
@@ -74,9 +77,7 @@ fun HomeScreen(
 fun HomeScreenPreview() {
     KiwiTheme {
         HomeScreen(
-            {},
-            {},
-            {}
-        )
+            rememberNavController()
+        ) {}
     }
 }

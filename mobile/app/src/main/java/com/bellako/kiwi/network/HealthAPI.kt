@@ -20,12 +20,3 @@ interface HealthApiService {
     @GET("api/public/ping")
     suspend fun ping(): Response<Unit>
 }
-
-fun createHealthApiService(): HealthApiService {
-    return Retrofit.Builder()
-        .baseUrl(BuildConfig.MOBILE_API_URL)
-        .client(createShortTimeoutOkHttpClient())
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(HealthApiService::class.java)
-}
