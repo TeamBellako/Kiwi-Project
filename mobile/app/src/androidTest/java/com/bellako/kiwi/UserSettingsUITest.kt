@@ -4,8 +4,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.common.CommonTestTags
+import com.bellako.kiwi.ui.ScreenRoutes
 import com.bellako.kiwi.userSettings.UserSettingsFakeViewModel
 import com.bellako.kiwi.userSettings.UserSettingsScreen
 import com.bellako.kiwi.userSettings.UserSettingsState
@@ -19,7 +23,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class UserSettingsUITest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val rule = createComposeRule()
 
     private lateinit var fakeViewModel: UserSettingsFakeViewModel
     private lateinit var state: UserSettingsState
@@ -34,10 +38,17 @@ class UserSettingsUITest {
 
         fakeViewModel = UserSettingsFakeViewModel(state)
 
-        composeTestRule.setContent {
-            UserSettingsScreen(viewModel = fakeViewModel) {}
+        rule.setContent {
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = ScreenRoutes.SETTINGS) {
+                composable(ScreenRoutes.SETTINGS) {
+                    UserSettingsScreen(
+                        fakeViewModel,
+                        rememberNavController()
+                    )
+                }
+            }
         }
-
     }
 
     @Test
@@ -46,7 +57,7 @@ class UserSettingsUITest {
 
         fakeViewModel.loadSettings()
 
-        composeTestRule.onNodeWithTag(CommonTestTags.ERROR_SCREEN).assertIsDisplayed()
+        rule.onNodeWithTag(CommonTestTags.ERROR_SCREEN).assertIsDisplayed()
     }
 
     @Test
@@ -61,6 +72,6 @@ class UserSettingsUITest {
             )
         )
 
-        composeTestRule.onNodeWithTag(CommonTestTags.ERROR_SCREEN).assertIsDisplayed()
+        rule.onNodeWithTag(CommonTestTags.ERROR_SCREEN).assertIsDisplayed()
     }
 }

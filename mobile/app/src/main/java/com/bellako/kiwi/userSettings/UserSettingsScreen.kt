@@ -8,9 +8,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.ErrorScreen
 import com.bellako.kiwi.common.LoadingScreen
 import com.bellako.kiwi.common.UIState
+import com.bellako.kiwi.ui.ScreenRoutes
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
@@ -34,7 +37,7 @@ private enum class RetryAction {
 @Composable
 fun UserSettingsScreen(
     viewModel: IUserSettingsViewModel,
-    onBackToHome: () -> Unit
+    navController: NavController
 ) {
     val state by viewModel.state.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -91,7 +94,7 @@ fun UserSettingsScreen(
             UserSettingsFields(
                 state = state,
                 viewModel = viewModel,
-                onBackToHome = onBackToHome,
+                onBackToHome = { navController.navigate(ScreenRoutes.HOME) },
                 onChange = { lastAction.value = RetryAction.SAVE }
             )
         }
@@ -184,6 +187,9 @@ fun UserSettingsScreenPreview() {
     )
 
     KiwiTheme {
-        UserSettingsScreen(UserSettingsFakeViewModel(previewState), onBackToHome = {})
+        UserSettingsScreen(
+            UserSettingsFakeViewModel(previewState),
+            navController = rememberNavController()
+        )
     }
 }

@@ -2,7 +2,6 @@ package com.bellako.kiwi.common
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,10 +26,13 @@ import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import androidx.core.net.toUri
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.ui.ScreenRoutes
 
 @Composable
 fun HelpScreen(
-    onBackToHome: () -> Unit
+    navController: NavController
 ) {
     val context = LocalContext.current
 
@@ -65,7 +67,7 @@ fun HelpScreen(
                 "Back To Home",
                 color = Color.White
             ),
-            onBackToHome
+            { navController.navigate(ScreenRoutes.HOME) }
         )
     }
 }
@@ -87,6 +89,8 @@ private fun openEmailClient(context: Context) {
 @Composable
 fun HelpScreenPreview() {
     KiwiTheme {
-        HelpScreen() {}
+        HelpScreen(
+            navController = rememberNavController()
+        )
     }
 }

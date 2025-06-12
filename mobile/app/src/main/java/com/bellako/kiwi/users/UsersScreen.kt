@@ -9,13 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.ErrorScreen
 import com.bellako.kiwi.common.UIState
+import com.bellako.kiwi.ui.ScreenRoutes
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H1
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
-import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
@@ -32,7 +34,7 @@ enum class RetryAction {
 @Composable
 fun UsersScreen(
     viewModel: IUsersViewModel,
-    onLoginSuccess: () -> Unit,
+    navController: NavController
 ) {
     val state by viewModel.state.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -48,7 +50,7 @@ fun UsersScreen(
                             RetryAction.SIGNUP -> viewModel.signup(currentState)
                             RetryAction.LOGIN -> {
                                 val result = viewModel.login(currentState)
-                                if (result.isSuccess) onLoginSuccess()
+                                if (result.isSuccess) { navController.navigate(ScreenRoutes.HOME) }
                             }
                             null -> {}
                         }
@@ -72,7 +74,7 @@ fun UsersScreen(
                     Fields(viewModel, currentState, isLoading)
                     Kiwi_Spacer()
 
-                    Buttons(viewModel, currentState, isLoading, lastAction, onLoginSuccess)
+                    Buttons(viewModel, currentState, isLoading, lastAction, { navController.navigate(ScreenRoutes.HOME) })
                     Kiwi_Spacer()
 
                     when (uiState) {
@@ -184,7 +186,7 @@ fun UsersScreenPreview() {
                 UsersState("finn@thehuman.com", "Math3matical!"),
                 isLoading = false
             ),
-            onLoginSuccess = {}
+            navController = rememberNavController()
         )
     }
 }

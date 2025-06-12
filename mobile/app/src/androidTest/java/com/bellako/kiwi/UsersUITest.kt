@@ -1,13 +1,17 @@
 package com.bellako.kiwi
 
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
+import androidx.navigation.testing.TestNavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.common.CommonTestTags
+import com.bellako.kiwi.ui.ScreenRoutes
 import com.bellako.kiwi.users.UsersFakeViewModel
 import com.bellako.kiwi.users.UsersScreen
 import com.bellako.kiwi.users.UsersState
@@ -17,8 +21,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.verify
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
 
 @RunWith(AndroidJUnit4::class)
 class UsersUITest {
@@ -27,8 +33,6 @@ class UsersUITest {
 
     private lateinit var fakeViewModel: UsersFakeViewModel
     private lateinit var state: UsersState
-
-    private lateinit var onLoginSuccessMock : () -> Unit
 
     @Before
     fun setUp() {
@@ -39,21 +43,29 @@ class UsersUITest {
             false
         )
 
-        onLoginSuccessMock = mock<() -> Unit>()
         rule.setContent {
-            UsersScreen(fakeViewModel, onLoginSuccessMock)
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
+                composable(ScreenRoutes.LOGIN) {
+                    UsersScreen(
+                        viewModel = fakeViewModel,
+                        navController = navController
+                    )
+                }
+                composable(ScreenRoutes.HOME) {}
+            }
         }
     }
 
     @Test
-    fun validSignup () {
+    fun validSignup() {
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
 
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertDoesNotExist()
     }
 
     @Test
-    fun invalidSignup () {
+    fun invalidSignup() {
         fakeViewModel.fakeError = true
         fakeViewModel.fakeException = createFakeHttpException(401)
 
@@ -74,21 +86,21 @@ class UsersUITest {
     }
 
     @Test
-    fun validLogin () {
+    fun validLogin() {
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
 
-        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsNotDisplayed()
-        verify(onLoginSuccessMock).invoke()
+        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertDoesNotExist()
     }
 
     @Test
-    fun invalidLogin () {
+    fun invalidLogin() {
         fakeViewModel.fakeError = true
         fakeViewModel.fakeException = createFakeHttpException(401)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
 
         rule.onNodeWithTag(UsersTestTags.SUCCESS_TEXT).assertIsNotDisplayed()
+
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 

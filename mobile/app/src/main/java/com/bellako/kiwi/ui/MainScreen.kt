@@ -1,53 +1,59 @@
 package com.bellako.kiwi.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.HelpScreen
 import com.bellako.kiwi.common.HomeScreen
-import com.bellako.kiwi.navigation.ScreenState
 import com.bellako.kiwi.userSettings.UserSettingsScreen
 import com.bellako.kiwi.userSettings.UserSettingsViewModel
 import com.bellako.kiwi.users.UsersScreen
 import com.bellako.kiwi.users.UsersViewModel
 
-@Composable
-fun MainScreen(viewModel: UsersViewModel = hiltViewModel()) {
-    var currentScreen by remember { mutableStateOf<ScreenState>(ScreenState.Login) }
+object ScreenRoutes {
+    const val HOME = "home"
+    const val LOGIN = "login"
+    const val SETTINGS = "settings"
+    const val HELP = "help"
+}
 
-    when (currentScreen) {
-        is ScreenState.Home -> {
+@Composable
+fun MainScreen(usersViewModel : UsersViewModel = hiltViewModel()) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
+
+        composable(ScreenRoutes.LOGIN) {
+            UsersScreen(
+                viewModel = usersViewModel,
+                navController = navController
+            )
+        }
+
+        composable(ScreenRoutes.HOME) {
             HomeScreen(
-                onNavigateToSettings = { currentScreen = ScreenState.Settings },
-                onNavigateToHelp = { currentScreen = ScreenState.Help },
+                navController = navController,
                 onLogout = {
-                    currentScreen = ScreenState.Login
-                    viewModel.logout()
+                    usersViewModel.logout()
+                    navController.navigate(ScreenRoutes.LOGIN) {
+                        popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
+                    }
                 }
             )
         }
 
-        is ScreenState.Help -> {
+        composable(ScreenRoutes.HELP) {
             HelpScreen(
-                onBackToHome = { currentScreen = ScreenState.Home}
+                navController = navController
             )
         }
 
-        is ScreenState.Login -> {
-            UsersScreen(
-                viewModel = viewModel,
-                onLoginSuccess = { currentScreen = ScreenState.Home }
-            )
-        }
-
-        is ScreenState.Settings -> {
+        composable(ScreenRoutes.SETTINGS) {
             val userSettingsViewModel : UserSettingsViewModel = hiltViewModel()
             UserSettingsScreen(
                 viewModel = userSettingsViewModel,
-                onBackToHome = { currentScreen = ScreenState.Home}
+                navController = navController
             )
         }
     }
