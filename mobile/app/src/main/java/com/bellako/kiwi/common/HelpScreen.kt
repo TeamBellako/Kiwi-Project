@@ -28,7 +28,6 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.ui.ScreenRoutes
 
 @Composable
 fun HelpScreen(
@@ -57,7 +56,7 @@ fun HelpScreen(
             MaterialTheme.colorScheme.primary,
             bold = true,
             modifier = Modifier
-                .clickable() { openEmailClient(context) }
+                .clickable { openEmailClient(context) }
                 .padding(bottom = 24.dp)
                 .testTag(CommonTestTags.HELP_SCREEN)
         ))

@@ -10,11 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.ui.ScreenRoutes
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_Image
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
@@ -30,7 +30,8 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(48.dp),
+            .padding(48.dp)
+            .testTag(CommonTestTags.HOME_SCREEN),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -76,8 +77,7 @@ fun HomeScreen(
 fun HomeScreenPreview() {
     KiwiTheme {
         HomeScreen(
-            rememberNavController(),
-            {},
-        )
+            rememberNavController()
+        ) {}
     }
 }
