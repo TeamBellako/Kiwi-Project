@@ -1,13 +1,13 @@
 package com.kiwi.users;
 
-import com.kiwi.usersettings.UserSettingsDTO;
+import com.kiwi.settings.SettingsDTO;
 
 import java.util.Objects;
 
 public class UsersDTO {
     private String email;
     private String password;
-    private UserSettingsDTO userSettingsDTO;
+    private SettingsDTO settingsDTO;
     
     public UsersDTO() {
     }
@@ -15,13 +15,13 @@ public class UsersDTO {
     public UsersDTO(String email, String password) {
         this.email = email;
         this.password = password;
-        this.userSettingsDTO = new UserSettingsDTO(getEmail());
+        this.settingsDTO = new SettingsDTO(getEmail());
     }
 
-    public UsersDTO(String email, String password, UserSettingsDTO userSettingsDTO) {
+    public UsersDTO(String email, String password, SettingsDTO settingsDTO) {
         this.email = email;
         this.password = password;
-        this.userSettingsDTO = userSettingsDTO;
+        this.settingsDTO = settingsDTO;
     }
 
     public String getEmail() {
@@ -40,12 +40,12 @@ public class UsersDTO {
         this.password = password;
     }
 
-    public UserSettingsDTO getUserSettingsDTO() {
-        return userSettingsDTO;
+    public SettingsDTO getSettingsDTO() {
+        return settingsDTO;
     }
 
-    public void setUserSettingsDTO(UserSettingsDTO userSettingsDTO) {
-        this.userSettingsDTO = userSettingsDTO;
+    public void setSettingsDTO(SettingsDTO settingsDTO) {
+        this.settingsDTO = settingsDTO;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class UsersDTO {
         return "UsersDTO{" +
                 "email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", userSettingsDTO=" + userSettingsDTO +
+                ", settingsDTO=" + settingsDTO +
                 '}';
     }
 
@@ -61,11 +61,11 @@ public class UsersDTO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UsersDTO usersDTO = (UsersDTO) o;
-        return Objects.equals(email, usersDTO.email) && Objects.equals(userSettingsDTO, usersDTO.userSettingsDTO);
+        return Objects.equals(email, usersDTO.email) && Objects.equals(settingsDTO, usersDTO.settingsDTO);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, password, userSettingsDTO);
+        return Objects.hash(email, password, settingsDTO);
     }
 }

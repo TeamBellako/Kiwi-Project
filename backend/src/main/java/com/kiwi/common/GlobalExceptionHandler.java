@@ -1,4 +1,4 @@
-package com.kiwi.exception;
+package com.kiwi.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

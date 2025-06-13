@@ -1,8 +1,9 @@
-package com.kiwi.usersettings;
+package com.kiwi.settings;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
-import com.kiwi.exception.GlobalExceptionHandler;
+import com.kiwi.common.GlobalExceptionHandler;
 import com.kiwi.security.*;
+import com.kiwi.users.CustomUserDetailsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,19 +16,19 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
-import static com.kiwi.usersettings.UserSettingsTestHTTPUtils.*;
+import static com.kiwi.settings.SettingsTestHTTPUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.when;
 
-import static com.kiwi.usersettings.UserSettingsTestFactory.*;
+import static com.kiwi.settings.SettingsTestFactory.*;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(UserSettingsController.class)
+@WebMvcTest(SettingsController.class)
 @AutoConfigureAddonsWebmvcResourceServerSecurity
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class })
-public class UserSettingsControllerTest {
+public class SettingsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,16 +41,16 @@ public class UserSettingsControllerTest {
     private AuthEntryPointJwt authEntryPointJwt;
     
     @MockitoBean
-    private UserSettingsService userSettingsService;
+    private SettingsService settingsService;
     
     private final String baseAPIUrl = "/api/user/settings";
     
     
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void getUserSettings_validInput_returnsUserSettings() throws Exception {
-        when(userSettingsService.getUserSettingsByEmail(validUserSettingsDTO().getEmail()))
-                .thenReturn(Optional.of(validUserSettingsDTO()));
+    public void getSettings_validInput_returnsSettings() throws Exception {
+        when(settingsService.getSettingsByEmail(validSettingsDTO().getEmail()))
+                .thenReturn(Optional.of(validSettingsDTO()));
         
         mockMvc.perform(get(baseAPIUrl))
                 .andExpect(status().isOk());
@@ -57,9 +58,9 @@ public class UserSettingsControllerTest {
 
     @Test
     @WithMockUser(username = "bmolovesfootball.com")
-    public void getUserSettings_invalidInput_returnsBadRequest() throws Exception {
-        when(userSettingsService.getUserSettingsByEmail(invalidUserSettingsDTO().getEmail()))
-                .thenThrow(new UserSettingsInvalidException(""));
+    public void getSettings_invalidInput_returnsBadRequest() throws Exception {
+        when(settingsService.getSettingsByEmail(invalidSettingsDTO().getEmail()))
+                .thenThrow(new SettingsInvalidException(""));
 
         mockMvc.perform(get(baseAPIUrl))
                 .andExpect(status().isBadRequest());
@@ -67,46 +68,46 @@ public class UserSettingsControllerTest {
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void getUserSettings_nonExistingUser_returnsNotFound() throws Exception {
+    public void getSettings_nonExistingUser_returnsNotFound() throws Exception {
         mockMvc.perform(get(baseAPIUrl))
             .andExpect(status().isNotFound());
     }
     
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void updateUserSettings_validInput_returnsUpdatedUserSettingsDTO() throws Exception {
-        when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
-                .thenReturn(validUserSettingsDTO());
+    public void updateSettings_validInput_returnsUpdatedSettingsDTO() throws Exception {
+        when(settingsService.updateSettings(any(SettingsDTO.class)))
+                .thenReturn(validSettingsDTO());
         
-        mockMvc.perform(getPUTRequestContent(baseAPIUrl, validUserSettingsDTO()))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, validSettingsDTO()))
                 .andExpect(status().isOk())
-                .andExpect(getUserSettingsResultMatcher(validUserSettingsDTO()));
+                .andExpect(getSettingsResultMatcher(validSettingsDTO()));
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void updateUserSettings_invalidInput_returnsBadRequest() throws Exception {
-        when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
-            .thenThrow(new UserSettingsInvalidException(""));
+    public void updateSettings_invalidInput_returnsBadRequest() throws Exception {
+        when(settingsService.updateSettings(any(SettingsDTO.class)))
+            .thenThrow(new SettingsInvalidException(""));
         
-        mockMvc.perform(getPUTRequestContent(baseAPIUrl, invalidUserSettingsDTO()))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, invalidSettingsDTO()))
             .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void updateUserSettings_nullInput_returnsBadRequest() throws Exception {
+    public void updateSettings_nullInput_returnsBadRequest() throws Exception {
         mockMvc.perform(getPUTRequestContent(baseAPIUrl, null))
             .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void updateUserSettings_nonExistingUser_returnsNotFound() throws Exception {
-        when(userSettingsService.updateUserSettings(any(UserSettingsDTO.class)))
-            .thenThrow(new UserSettingsNotFoundException(validUserSettingsDTO().getEmail()));
+    public void updateSettings_nonExistingUser_returnsNotFound() throws Exception {
+        when(settingsService.updateSettings(any(SettingsDTO.class)))
+            .thenThrow(new SettingsNotFoundException(validSettingsDTO().getEmail()));
         
-        mockMvc.perform(getPUTRequestContent(baseAPIUrl, validUserSettingsDTO()))
+        mockMvc.perform(getPUTRequestContent(baseAPIUrl, validSettingsDTO()))
             .andExpect(status().isNotFound());
     }
 }

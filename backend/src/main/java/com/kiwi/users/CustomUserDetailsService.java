@@ -1,7 +1,5 @@
-package com.kiwi.security;
+package com.kiwi.users;
 
-import com.kiwi.users.UsersPersistence;
-import com.kiwi.users.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;

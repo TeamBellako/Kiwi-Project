@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Person3
 import androidx.compose.material.icons.filled.Preview
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -37,17 +36,10 @@ object ScreenRoutes {
 @Composable
 fun MainScreen(loginViewModel : LoginViewModel = hiltViewModel()) {
     val navController = rememberNavController()
-    var currentRoute = navController.currentBackStackEntry?.destination?.route
-
-    LaunchedEffect(key1 = navController) {
-        if (navController.currentBackStackEntry?.destination?.route == ScreenRoutes.LOGIN) {
-            currentRoute = navController.currentBackStackEntry?.destination?.route
-        }
-    }
 
     Scaffold(
         bottomBar = {
-            if (currentRoute != ScreenRoutes.LOGIN) {
+            if (navController.currentDestination != null && navController.currentDestination?.route != ScreenRoutes.LOGIN) {
                 BottomAppBar(navController = navController)
             }
         },
@@ -126,4 +118,5 @@ fun BottomAppBar(
             Icon(Icons.Filled.Person3, contentDescription = "Settings")
         }
     }
+
 }

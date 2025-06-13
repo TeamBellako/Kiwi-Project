@@ -1,4 +1,4 @@
-package com.kiwi.usersettings;
+package com.kiwi.settings;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
-import static com.kiwi.utils.HTTPUtils.createErrorResponseBody;
+import static com.kiwi.common.HTTPUtils.createErrorResponseBody;
 
 @RestControllerAdvice
-public class UserSettingsExceptionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(UserSettingsExceptionHandler.class);
+public class SettingsExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(SettingsExceptionHandler.class);
 
-    @ExceptionHandler(UserSettingsNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleUserSettingsNotFound(UserSettingsNotFoundException ex) {
+    @ExceptionHandler(SettingsNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleSettingsNotFound(SettingsNotFoundException ex) {
         logger.error("Users settings not found: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -25,8 +25,8 @@ public class UserSettingsExceptionHandler {
                 .body(createErrorResponseBody("Users settings not found"));
     }
 
-    @ExceptionHandler(UserSettingsInvalidException.class)
-    public ResponseEntity<Map<String, String>> handleUserSettingsInvalid(UserSettingsInvalidException ex) {
+    @ExceptionHandler(SettingsInvalidException.class)
+    public ResponseEntity<Map<String, String>> handleSettingsInvalid(SettingsInvalidException ex) {
         logger.error("Invalid user settings: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -34,8 +34,8 @@ public class UserSettingsExceptionHandler {
                 .body(createErrorResponseBody(ex.getMessage()));
     }
 
-    @ExceptionHandler(UserSettingsConflictException.class)
-    public ResponseEntity<Map<String, String>> handleUserSettingsConflict(UserSettingsConflictException ex) {
+    @ExceptionHandler(SettingsConflictException.class)
+    public ResponseEntity<Map<String, String>> handleSettingsConflict(SettingsConflictException ex) {
         logger.error("User settings conflict: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.CONFLICT)

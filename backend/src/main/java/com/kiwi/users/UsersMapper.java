@@ -6,7 +6,7 @@ public class UsersMapper {
         return new Users(
                 entity.getEmail(),
                 null,
-                entity.getUserSettings()
+                entity.getSettings()
         );
     }
 
@@ -15,7 +15,7 @@ public class UsersMapper {
         return new UsersPersistence(
                 domain.getEmail(),
                 hashedPassword,
-                domain.getUserSettings()
+                domain.getSettings()
         );
     }
 
@@ -24,7 +24,7 @@ public class UsersMapper {
         return new Users(
                 new Email(dto.getEmail()),
                 dto.getPassword() != null ? new Password(dto.getPassword()) : null,
-                dto.getUserSettingsDTO().toDomainObject()
+                dto.getSettingsDTO().toDomainObject()
         );
     }
 
@@ -33,7 +33,7 @@ public class UsersMapper {
         return new UsersDTO(
                 domain.getEmail().value(),
                 null,
-                domain.getUserSettings().toDTO()
+                domain.getSettings().toDTO()
         );
     }
 
@@ -42,7 +42,7 @@ public class UsersMapper {
         return new UsersDTO(
                 entity.getEmail().value(),
                 null,
-                entity.getUserSettings().toDTO()
+                entity.getSettings().toDTO()
         );
     }
 }

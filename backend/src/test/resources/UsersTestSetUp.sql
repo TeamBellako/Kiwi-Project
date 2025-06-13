@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS user_settings;
+DROP TABLE IF EXISTS settings;
 
-CREATE TABLE IF NOT EXISTS user_settings (
+CREATE TABLE IF NOT EXISTS settings (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
 
@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
 
-    CONSTRAINT fk_user_email_to_settings FOREIGN KEY (email) REFERENCES user_settings(email) ON DELETE CASCADE
+    CONSTRAINT fk_user_email_to_settings FOREIGN KEY (email) REFERENCES settings(email) ON DELETE CASCADE
 );

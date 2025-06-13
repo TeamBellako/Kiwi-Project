@@ -1,25 +1,25 @@
-package com.kiwi.usersettings;
+package com.kiwi.settings;
 
-public class UserSettingsTestFactory {
+public class SettingsTestFactory {
 
-    public static UserSettingsDTO validUserSettingsDTO() {
-        return new UserSettingsDTO(
+    public static SettingsDTO validSettingsDTO() {
+        return new SettingsDTO(
                 "finn@thehuman.com",
                 70,                       
                 80
         );
     }
 
-    public static UserSettingsDTO updatedUserSettingsDTO() {
-        return new UserSettingsDTO(
+    public static SettingsDTO updatedSettingsDTO() {
+        return new SettingsDTO(
                 "finn@thehuman.com",
                 50,                       
                 40
         );
     }
 
-    public static UserSettingsDTO invalidUserSettingsDTO() {
-        return new UserSettingsDTO(
+    public static SettingsDTO invalidSettingsDTO() {
+        return new SettingsDTO(
                 "bmolovesfootball.com",   
                 150,                      
                 -10                     

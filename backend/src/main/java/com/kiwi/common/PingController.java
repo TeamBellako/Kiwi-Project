@@ -1,4 +1,4 @@
-package com.kiwi.utils;
+package com.kiwi.common;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

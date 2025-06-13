@@ -1,4 +1,4 @@
-package com.kiwi.usersettings;
+package com.kiwi.settings;
 
 import com.kiwi.users.Email;
 import com.kiwi.users.UsersPersistence;
@@ -7,8 +7,8 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "user_settings")
-public class UserSettings {
+@Table(name = "settings")
+public class Settings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -23,20 +23,20 @@ public class UserSettings {
     @Column(name = "music_volume")
     private int musicVolume;
 
-    @OneToOne(mappedBy = "userSettings")
+    @OneToOne(mappedBy = "settings")
     private UsersPersistence user;
 
-    public UserSettings() {
+    public Settings() {
     }
 
-    public UserSettings(Integer id, Email email, int soundVolume, int musicVolume) {
+    public Settings(Integer id, Email email, int soundVolume, int musicVolume) {
         setId(id);
         setEmail(email);
         setSoundVolume(soundVolume);
         setMusicVolume(musicVolume);
     }
 
-    public UserSettings(Email email, int soundVolume, int musicVolume) {
+    public Settings(Email email, int soundVolume, int musicVolume) {
         setEmail(email);
         setSoundVolume(soundVolume);
         setMusicVolume(musicVolume);
@@ -47,7 +47,7 @@ public class UserSettings {
     }
 
     public void setId(Integer id) {
-        if (id == null || id <= 0) throw new UserSettingsInvalidException("UserSettings Id's must be bigger than zero");
+        if (id == null || id <= 0) throw new SettingsInvalidException("Settings Id's must be bigger than zero");
         this.id = id;
     }
 
@@ -91,7 +91,7 @@ public class UserSettings {
 
     @Override
     public String toString() {
-        return "UserSettings{" +
+        return "Settings{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", soundVolume=" + soundVolume +
@@ -102,7 +102,7 @@ public class UserSettings {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        UserSettings that = (UserSettings) o;
+        Settings that = (Settings) o;
         return soundVolume == that.soundVolume &&
                 musicVolume == that.musicVolume &&
                 Objects.equals(email, that.email);
@@ -113,15 +113,15 @@ public class UserSettings {
         return Objects.hash(email, soundVolume, musicVolume);
     }
 
-    public UserSettingsDTO toDTO() {
-        return new UserSettingsDTO(
+    public SettingsDTO toDTO() {
+        return new SettingsDTO(
                 getEmail().value(),
                 getSoundVolume(),
                 getMusicVolume()
         );
     }
 
-    public void mergeFromDTO(UserSettingsDTO dto) {
+    public void mergeFromDTO(SettingsDTO dto) {
         this.soundVolume = dto.getSoundVolume();
         this.musicVolume = dto.getMusicVolume();
     }

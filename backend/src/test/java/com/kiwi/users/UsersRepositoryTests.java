@@ -1,6 +1,6 @@
 package com.kiwi.users;
 
-import com.kiwi.usersettings.UserSettingsRepository;
+import com.kiwi.settings.SettingsRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class UsersRepositoryTests {
     private UsersRepository usersRepository;
 
     @Autowired
-    private UserSettingsRepository userSettingsRepository;
+    private SettingsRepository settingsRepository;
     
     @Test
     public void createValidUser() {

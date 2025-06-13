@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
-import static com.kiwi.utils.HTTPUtils.createErrorResponseBody;
+import static com.kiwi.common.HTTPUtils.createErrorResponseBody;
 
 @RestControllerAdvice
 public class JwtExceptionHandler {

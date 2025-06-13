@@ -1,14 +1,14 @@
 package com.kiwi.users;
 
-import static com.kiwi.usersettings.UserSettingsTestFactory.invalidUserSettingsDTO;
-import static com.kiwi.usersettings.UserSettingsTestFactory.validUserSettingsDTO;
+import static com.kiwi.settings.SettingsTestFactory.invalidSettingsDTO;
+import static com.kiwi.settings.SettingsTestFactory.validSettingsDTO;
 
 public class UsersTestFactory {
     public static UsersDTO validUserDTO() {
         return new UsersDTO(
                 "finn@thehuman.com",
                 "Math3matical!",
-                validUserSettingsDTO()
+                validSettingsDTO()
         );
     }
     
@@ -16,7 +16,7 @@ public class UsersTestFactory {
         return new UsersDTO(
                 "bmolovesfootball",
                 "kk",
-                invalidUserSettingsDTO()
+                invalidSettingsDTO()
         );
     }
 }

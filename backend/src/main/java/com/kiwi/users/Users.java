@@ -1,18 +1,18 @@
 package com.kiwi.users;
 
-import com.kiwi.usersettings.UserSettings;
+import com.kiwi.settings.Settings;
 
 import java.util.Objects;
 
 public class Users {
     private Email email;
     private Password password;
-    private UserSettings userSettings;
+    private Settings settings;
 
-    public Users(Email email, Password password, UserSettings userSettings) {
+    public Users(Email email, Password password, Settings settings) {
         this.email = email;
         this.password = password;
-        this.userSettings = userSettings;
+        this.settings = settings;
     }
 
     public Email getEmail() {
@@ -31,12 +31,12 @@ public class Users {
         this.password = password;
     }
 
-    public UserSettings getUserSettings() {
-        return userSettings;
+    public Settings getSettings() {
+        return settings;
     }
 
-    public void setUserSettings(UserSettings userSettings) {
-        this.userSettings = userSettings;
+    public void setSettings(Settings settings) {
+        this.settings = settings;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Users {
         return "Users{" +
                 "email=" + email +
                 ", password=" + password +
-                ", userSettings=" + userSettings +
+                ", settings=" + settings +
                 '}';
     }
 
@@ -52,11 +52,11 @@ public class Users {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Users users = (Users) o;
-        return Objects.equals(email, users.email) && Objects.equals(userSettings, users.userSettings);
+        return Objects.equals(email, users.email) && Objects.equals(settings, users.settings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, password, userSettings);
+        return Objects.hash(email, password, settings);
     }
 }

@@ -1,4 +1,4 @@
-package com.kiwi.utils;
+package com.kiwi.common;
 
 
 import java.util.regex.Pattern;

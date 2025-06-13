@@ -1,4 +1,4 @@
-package com.kiwi.usersettings;
+package com.kiwi.settings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,22 +10,22 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-public class UserSettingsTestHTTPUtils {
+public class SettingsTestHTTPUtils {
     public static @NotNull MockHttpServletRequestBuilder getPUTRequestContent(
             String baseAPIUrl,
-            UserSettingsDTO userSettingsDTO
+            SettingsDTO settingsDTO
     ) throws JsonProcessingException {
         return put(baseAPIUrl)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(serializeUserSettingIntoJSON(userSettingsDTO));
+                .content(serializeUserSettingIntoJSON(settingsDTO));
     }
 
-    private static String serializeUserSettingIntoJSON(UserSettingsDTO userSettingsDTO) throws JsonProcessingException {
+    private static String serializeUserSettingIntoJSON(SettingsDTO settingsDTO) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(userSettingsDTO);
+        return objectMapper.writeValueAsString(settingsDTO);
     }
 
-    public static @NotNull ResultMatcher getUserSettingsResultMatcher(@NotNull UserSettingsDTO userSettingsDTO) {
-        return jsonPath("$.email").value(userSettingsDTO.getEmail());
+    public static @NotNull ResultMatcher getSettingsResultMatcher(@NotNull SettingsDTO settingsDTO) {
+        return jsonPath("$.email").value(settingsDTO.getEmail());
     }
 }

@@ -1,23 +1,23 @@
-package com.kiwi.usersettings;
+package com.kiwi.settings;
 
 import com.kiwi.users.Email;
 
 import java.util.Objects;
 
-public class UserSettingsDTO {
+public class SettingsDTO {
     private Integer id;
     private String email = "";
     private int soundVolume = 67;
     private int musicVolume = 67;
 
-    public UserSettingsDTO() {
+    public SettingsDTO() {
     }
 
-    public UserSettingsDTO(String email) {
+    public SettingsDTO(String email) {
         this.email = email;
     }
 
-    public UserSettingsDTO(String email, int soundVolume, int musicVolume) {
+    public SettingsDTO(String email, int soundVolume, int musicVolume) {
         this.email = email;
         this.soundVolume = soundVolume;
         this.musicVolume = musicVolume;
@@ -58,7 +58,7 @@ public class UserSettingsDTO {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        UserSettingsDTO that = (UserSettingsDTO) o;
+        SettingsDTO that = (SettingsDTO) o;
         return soundVolume == that.soundVolume &&
                 musicVolume == that.musicVolume &&
                 Objects.equals(email, that.email);
@@ -71,7 +71,7 @@ public class UserSettingsDTO {
 
     @Override
     public String toString() {
-        return "UserSettingsDTO{" +
+        return "SettingsDTO{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", soundVolume=" + soundVolume +
@@ -79,8 +79,8 @@ public class UserSettingsDTO {
                 '}';
     }
 
-    public UserSettings toDomainObject() {
-        return new UserSettings(
+    public Settings toDomainObject() {
+        return new Settings(
                 new Email(getEmail()),
                 getSoundVolume(),
                 getMusicVolume()

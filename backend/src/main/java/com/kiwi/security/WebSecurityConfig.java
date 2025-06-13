@@ -1,6 +1,5 @@
 package com.kiwi.security;
 
-import com.kiwi.config.WebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

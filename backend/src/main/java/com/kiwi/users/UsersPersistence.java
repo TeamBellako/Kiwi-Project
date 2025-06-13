@@ -1,6 +1,6 @@
 package com.kiwi.users;
 
-import com.kiwi.usersettings.UserSettings;
+import com.kiwi.settings.Settings;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -21,15 +21,15 @@ public class UsersPersistence {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "email", referencedColumnName = "email", insertable = false, updatable = false)
-    private UserSettings userSettings;
+    private Settings settings;
 
     public UsersPersistence() {
     }
 
-    public UsersPersistence(Email email, String password, UserSettings userSettings) {
+    public UsersPersistence(Email email, String password, Settings settings) {
         setEmail(email);
         this.password = password;
-        setUserSettings(userSettings);
+        setSettings(settings);
     }
 
     public Integer getId() {
@@ -58,12 +58,12 @@ public class UsersPersistence {
         this.password = password;
     }
 
-    public UserSettings getUserSettings() {
-        return userSettings;
+    public Settings getSettings() {
+        return settings;
     }
 
-    public void setUserSettings(UserSettings userSettings) {
-        this.userSettings = userSettings;
+    public void setSettings(Settings settings) {
+        this.settings = settings;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class UsersPersistence {
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", userSettings=" + userSettings +
+                ", settings=" + settings +
                 '}';
     }
 
@@ -80,11 +80,11 @@ public class UsersPersistence {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UsersPersistence that = (UsersPersistence) o;
-        return Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(userSettings, that.userSettings);
+        return Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(settings, that.settings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, password, userSettings);
+        return Objects.hash(id, email, password, settings);
     }
 }
