@@ -45,7 +45,7 @@ class SettingsUITest {
                     SettingsScreen(
                         fakeViewModel,
                         rememberNavController()
-                    )
+                    ) {}
                 }
             }
         }
