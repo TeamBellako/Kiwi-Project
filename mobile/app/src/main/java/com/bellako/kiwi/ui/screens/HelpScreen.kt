@@ -64,10 +64,10 @@ fun HelpScreen(
 
         Kiwi_Button(
             Kiwi_TextArguments(
-                "Back To Home",
+                "BACK",
                 color = Color.White
             ),
-            { navController.navigate(ScreenRoutes.HOME) }
+            { navController.navigate(ScreenRoutes.SETTINGS) }
         )
     }
 }

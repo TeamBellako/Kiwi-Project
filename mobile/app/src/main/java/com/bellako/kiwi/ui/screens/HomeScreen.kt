@@ -24,10 +24,7 @@ import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @Composable
-fun HomeScreen(
-    navController: NavController,
-    onLogout: () -> Unit
-) {
+fun HomeScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -41,36 +38,6 @@ fun HomeScreen(
             "HOME",
             bold = true
         ))
-
-        Kiwi_Spacer()
-
-        Kiwi_Button(
-            Kiwi_TextArguments(
-                "Settings",
-                color = White
-            ),
-            { navController.navigate(ScreenRoutes.SETTINGS) }
-        )
-
-        Kiwi_Spacer()
-
-        Kiwi_Button(
-            Kiwi_TextArguments(
-                "Help",
-                color = White
-            ),
-            { navController.navigate(ScreenRoutes.HELP) }
-        )
-
-        Kiwi_Spacer()
-
-        Kiwi_Button(
-            Kiwi_TextArguments(
-                "Logout",
-                color = White
-            ),
-            onLogout
-        )
     }
 }
 
@@ -78,8 +45,6 @@ fun HomeScreen(
 @Composable
 fun HomeScreenPreview() {
     KiwiTheme {
-        HomeScreen(
-            rememberNavController()
-        ) {}
+        HomeScreen()
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,7 +41,8 @@ private enum class RetryAction {
 @Composable
 fun SettingsScreen(
     viewModel: ISettingsViewModel,
-    navController: NavController
+    navController: NavController,
+    onLogout: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
@@ -97,7 +99,8 @@ fun SettingsScreen(
             SettingsFields(
                 state = state,
                 viewModel = viewModel,
-                onBackToHome = { navController.navigate(ScreenRoutes.HOME) },
+                navController = navController,
+                onLogout = onLogout,
                 onChange = { lastAction.value = RetryAction.SAVE }
             )
         }
@@ -108,7 +111,8 @@ fun SettingsScreen(
 private fun SettingsFields(
     state: SettingsState?,
     viewModel: ISettingsViewModel,
-    onBackToHome: () -> Unit,
+    navController: NavController,
+    onLogout: () -> Unit,
     onChange: () -> Unit
 ) {
     state?.let { currentState ->
@@ -177,10 +181,20 @@ private fun SettingsFields(
 
             Kiwi_Button(
                 Kiwi_TextArguments(
-                    "Back To Home",
-                    color = Color.White
+                    "SUPPORT",
+                    color = White
                 ),
-                onBackToHome
+                { navController.navigate(ScreenRoutes.HELP) }
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_Button(
+                Kiwi_TextArguments(
+                    "LOG OUT",
+                    color = White
+                ),
+                onLogout
             )
         }
     }
@@ -199,6 +213,6 @@ fun SettingsScreenPreview() {
         SettingsScreen(
             SettingsFakeViewModel(previewState),
             navController = rememberNavController()
-        )
+        ) {}
     }
 }
