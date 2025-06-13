@@ -1,6 +1,6 @@
 import {UsersDTO} from "./UsersDTO";
 import {useUsersForm} from "./UsersHook";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Kiwi_InputField, Kiwi_SensibleInputField} from "../ui/components/Kiwi_InputField";
 import {Kiwi_Button} from "../ui/components/Kiwi_Button";
 import {Kiwi_InfoBox} from "../ui/components/Kiwi_InfoBox";
@@ -18,6 +18,10 @@ const UsersPage: React.FC<UsersProps> = (props: UsersProps) => {
     
     const form = useUsersForm(props);
     const [showPassword, setShowPassword] = useState(false);
+
+    useEffect(() => {
+        localStorage.removeItem("jwtToken");
+    }, []);
     
 
     if (status === 'loading') {
