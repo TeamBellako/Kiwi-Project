@@ -1,18 +1,18 @@
 import React, {useEffect} from 'react';
-import {useUserSettingsForm} from './UserSettingsHook';
-import {UserSettingsDTO} from './UserSettingsDTO';
-import {Kiwi_InputField} from '../ui/components/Kiwi_InputField';
-import {Kiwi_Button} from '../ui/components/Kiwi_Button';
-import {useAuth} from '../navigation/Authentication';
-import {Kiwi_Slider} from "../ui/components/Kiwi_Slider";
-import {useAppDispatch, useAppSelector} from "../store/Hooks";
-import {selectUserSettingsDTO, selectUserSettingsError, selectUserSettingsStatus} from "./UserSettingsSelector";
-import {loadUserSettings} from "./UserSettingsThunks";
-import LoadingPage from "../common/LoadingPage";
-import ErrorPage from "../common/ErrorPage";
-import {TestIDs} from "../common/TestIDs";
+import {useSettingsForm} from './SettingsHook';
+import {SettingsDTO} from './SettingsDTO';
+import {selectSettingsDTO, selectSettingsError, selectSettingsStatus} from "./SettingsSelector";
+import {loadSettings} from "./SettingsThunks";
+import {useAuth} from "../../services/navigation/Authentication";
+import {useAppDispatch, useAppSelector} from "../../services/store/Hooks";
+import LoadingModal from "../../ui/modals/LoadingModal";
+import ErrorModal from "../../ui/modals/ErrorModal";
+import {Kiwi_InputField} from '../../ui/components/Kiwi_InputField';
+import {TestIDs} from "../../services/common/TestIDs";
+import {Kiwi_Slider} from "../../ui/components/Kiwi_Slider";
+import {Kiwi_Button} from "../../ui/components/Kiwi_Button";
 
-type UserSettingsProps = Partial<UserSettingsDTO>;
+type SettingsProps = Partial<SettingsDTO>;
 
 const SNAP_VALUES = [0, 33, 67, 100];
 
@@ -22,30 +22,30 @@ const snapToClosest = (value: number) => {
     );
 };
 
-const UserSettingsPage: React.FC<UserSettingsProps> = (props) => {
-    const form = useUserSettingsForm(props);
+const SettingsPage: React.FC<SettingsProps> = (props) => {
+    const form = useSettingsForm(props);
     const { logoutUser } = useAuth();
 
     const dispatch = useAppDispatch();
 
-    const userSettingsDTO = useAppSelector(selectUserSettingsDTO);
-    const status = useAppSelector(selectUserSettingsStatus);
-    const error = useAppSelector(selectUserSettingsError);
+    const settingsDTO = useAppSelector(selectSettingsDTO);
+    const status = useAppSelector(selectSettingsStatus);
+    const error = useAppSelector(selectSettingsError);
 
     useEffect(() => {
-        dispatch(loadUserSettings());
-        form.emailField.setValue(userSettingsDTO?.email!!); // we read from the DTO here because this field is read-only
+        dispatch(loadSettings());
+        form.emailField.setValue(settingsDTO?.email!!); // we read from the DTO here because this field is read-only
     }, []);
 
     if (status === 'loading') {
         return (
-            <LoadingPage />
+            <LoadingModal />
         );
     }
 
     if (status === 'failed' && error?.code && error.code >= 500) {
         return (
-            <ErrorPage
+            <ErrorModal
                 onRetry={form.handleRetry}
             />
         );
@@ -53,15 +53,15 @@ const UserSettingsPage: React.FC<UserSettingsProps> = (props) => {
 
     return (
         <div className="p-4 max-w-lg mx-auto">
-            {userSettingsDTO && (
+            {settingsDTO && (
                 <>
                     <form className="space-y-6" data-testid="settings-form">
                         <Kiwi_InputField
                             label="Email"
                             type="email"
-                            value={userSettingsDTO.email} 
+                            value={settingsDTO.email} 
                             required={false}
-                            testID={TestIDs.userSettings.email}
+                            testID={TestIDs.settings.email}
                         />
     
                         <Kiwi_Slider
@@ -74,7 +74,7 @@ const UserSettingsPage: React.FC<UserSettingsProps> = (props) => {
                             onChange={(e) =>
                                 form.soundVolumeField.setValue(snapToClosest(Number(e.target.value)))
                             }
-                            testID={TestIDs.userSettings.musicVolume}
+                            testID={TestIDs.settings.musicVolume}
                         />
     
                         <Kiwi_Slider
@@ -87,7 +87,7 @@ const UserSettingsPage: React.FC<UserSettingsProps> = (props) => {
                             onChange={(e) =>
                                 form.musicVolumeField.setValue(snapToClosest(Number(e.target.value)))
                             }
-                            testID={TestIDs.userSettings.soundVolume}
+                            testID={TestIDs.settings.soundVolume}
                         />
                     </form>
                     
@@ -100,4 +100,4 @@ const UserSettingsPage: React.FC<UserSettingsProps> = (props) => {
     )
 };
 
-export default UserSettingsPage;
+export default SettingsPage;

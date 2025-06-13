@@ -1,6 +1,5 @@
 export class Password {
     private static readonly PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
     private constructor(public readonly value: string) {}
 
     static isValid(password: string): boolean {

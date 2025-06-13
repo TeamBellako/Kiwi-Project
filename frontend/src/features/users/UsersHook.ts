@@ -1,13 +1,13 @@
 import {toDomainObject, UsersDTO} from "./UsersDTO";
-import {AppDispatch} from "../store/Store";
 import {useDispatch} from "react-redux";
 import {useState} from "react";
 import {login, signup} from "./UsersThunks";
 import {useNavigate} from "react-router-dom";
-import {ROUTES} from "../navigation/Routes";
 import {RetryAction} from "./UsersState";
-import {useAppSelector} from "../store/Hooks";
 import {selectUsersRetryAction} from "./UsersSelector";
+import {AppDispatch} from "../../services/store/Store";
+import {useAppSelector} from "../../services/store/Hooks";
+import {ROUTES} from "../../services/navigation/Routes";
 
 type UsersFormProps = Partial<UsersDTO>;
 

@@ -1,38 +1,38 @@
 import {createSlice} from '@reduxjs/toolkit';
-import {loadUserSettings, updateUserSettings} from './UserSettingsThunks';
-import {initialState, RetryAction} from "./UserSettingsState";
-import {ErrorDetails} from "../services/api";
+import {loadSettings, updateSettings} from './SettingsThunks';
+import {initialState, RetryAction} from "./SettingsState";
+import {ErrorDetails} from "../../services/network/API";
 
-const userSettingsSlice = createSlice({
-    name: 'userSettings',
+const settingsSlice = createSlice({
+    name: 'settings',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(loadUserSettings.pending, (state) => {
+            .addCase(loadSettings.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
                 state.retryAction = null;
             })
-            .addCase(loadUserSettings.fulfilled, (state, action) => {
+            .addCase(loadSettings.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.userSettingsDTO = action.payload;
+                state.settingsDTO = action.payload;
                 state.error = null;
                 state.retryAction = null;
             })
-            .addCase(loadUserSettings.rejected, (state, action) => {
+            .addCase(loadSettings.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as ErrorDetails;
                 state.retryAction = RetryAction.LOAD;
             })
             
-            .addCase(updateUserSettings.fulfilled, (state, action) => {
+            .addCase(updateSettings.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.error = null;
-                state.userSettingsDTO = action.payload;
+                state.settingsDTO = action.payload;
                 state.retryAction = null;
             })
-            .addCase(updateUserSettings.rejected, (state, action) => {
+            .addCase(updateSettings.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as ErrorDetails;
                 state.retryAction = null;
@@ -41,4 +41,4 @@ const userSettingsSlice = createSlice({
             });
     },
 });
-export const userSettingsReducer = userSettingsSlice.reducer;
+export const settingsReducer = settingsSlice.reducer;

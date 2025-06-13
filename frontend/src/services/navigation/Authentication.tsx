@@ -3,7 +3,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {Navigate, useLocation, useNavigate} from 'react-router-dom';
 import {AppDispatch, RootState} from "../store/Store";
 import {ROUTES} from "./Routes";
-import {logout} from "../users/UsersSlice";
+import {logout} from "../../features/users/UsersSlice";
 
 interface RequireAuthProps {
     children: ReactNode;

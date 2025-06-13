@@ -1,8 +1,8 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RetryAction, usersInitialState} from './UsersState';
 import {login, signup} from './UsersThunks';
-import {tryGetJWTToken} from '../utils/StorageUtils';
-import {ErrorDetails} from "../services/api";
+import {tryGetJWTToken} from "../../services/common/StorageUtils";
+import {ErrorDetails} from "../../services/network/API";
 
 const usersSlice = createSlice({
     name: 'users',

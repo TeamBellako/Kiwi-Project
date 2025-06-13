@@ -1,44 +1,44 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {debounce, isEqual} from 'lodash';
 import {useDispatch} from 'react-redux';
-import {AppDispatch} from '../store/Store';
-import {Logger} from '../utils/Logger';
-import {UserSettingsDTO} from './UserSettingsDTO';
-import {loadUserSettings, updateUserSettings} from './UserSettingsThunks';
-import {RetryAction} from "./UserSettingsState";
-import {useAppSelector} from "../store/Hooks";
-import {selectUserSettingsRetryAction} from "./UserSettingsSelector";
+import {SettingsDTO} from './SettingsDTO';
+import {loadSettings, updateSettings} from './SettingsThunks';
+import {RetryAction} from "./SettingsState";
+import {selectSettingsRetryAction} from "./SettingsSelector";
+import {AppDispatch} from "../../services/store/Store";
+import {useAppSelector} from "../../services/store/Hooks";
+import {Logger} from "../../services/common/Logger";
 
-type UserSettingsFormProps = Partial<UserSettingsDTO>;
+type SettingsFormProps = Partial<SettingsDTO>;
 
-export const useUserSettingsForm = ({
+export const useSettingsForm = ({
     email = '',
     soundVolume = 67,
     musicVolume = 67,
-}: UserSettingsFormProps) => {
+}: SettingsFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
     
-    const retryAction = useAppSelector(selectUserSettingsRetryAction);
+    const retryAction = useAppSelector(selectSettingsRetryAction);
 
-    const [formState, setFormState] = useState<UserSettingsDTO>({
+    const [formState, setFormState] = useState<SettingsDTO>({
         email,
         soundVolume,
         musicVolume,
     });
 
-    const prevValueRef = useRef<UserSettingsDTO | null>(null);
+    const prevValueRef = useRef<SettingsDTO | null>(null);
     const isFirstRender = useRef(true);
 
     const [error, setError] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
     const saveSettings = useCallback(
-        debounce(async (updatedSettings: UserSettingsDTO) => {
+        debounce(async (updatedSettings: SettingsDTO) => {
             try {
                 setIsSaving(true);
                 Logger.info('Saving settings');
 
-                await dispatch(updateUserSettings(updatedSettings));
+                await dispatch(updateSettings(updatedSettings));
 
                 setIsSaving(false);
             } catch (err: any) {
@@ -70,7 +70,7 @@ export const useUserSettingsForm = ({
 
     const handleRetry = async () => {
         if (retryAction === RetryAction.LOAD) {
-            dispatch(loadUserSettings());
+            dispatch(loadSettings());
         } else if (retryAction === RetryAction.UPDATE) {
             prevValueRef.current = null
             queueSaveSettings();

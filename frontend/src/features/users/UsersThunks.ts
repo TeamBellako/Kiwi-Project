@@ -1,7 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {UsersDTO} from "./UsersDTO";
-import api, {ErrorDetails} from "../services/api";
-import {getServerErrorMessage} from "../utils/HTTPUtils";
+import API, {ErrorDetails} from "../../services/network/API";
+import {getServerErrorMessage} from "../../services/common/HTTPUtils";
 
 export const signup = createAsyncThunk<
     void,             
@@ -11,7 +11,7 @@ export const signup = createAsyncThunk<
     'users/signup',
     async (userData, { rejectWithValue }) => {
         try {
-            await api.post('api/public/signup', userData);
+            await API.post('api/public/signup', userData);
         } catch (error: any) {
             return rejectWithValue(getServerErrorMessage(error, 'Failed to signup'));
         }
@@ -26,7 +26,7 @@ export const login = createAsyncThunk<
     'users/login',
     async (userData, { rejectWithValue }) => {
         try {
-            const response = await api.post<{ jwt: string }>('api/public/login', userData);
+            const response = await API.post<{ jwt: string }>('api/public/login', userData);
             return response.data.jwt; 
         } catch (error: any) {
             return rejectWithValue(getServerErrorMessage(error, 'Failed to login'));

@@ -1,14 +1,15 @@
 import {UsersDTO} from "./UsersDTO";
 import {useUsersForm} from "./UsersHook";
 import React, {useEffect, useState} from "react";
-import {Kiwi_InputField, Kiwi_SensibleInputField} from "../ui/components/Kiwi_InputField";
-import {Kiwi_Button} from "../ui/components/Kiwi_Button";
-import {Kiwi_InfoBox} from "../ui/components/Kiwi_InfoBox";
-import {useAppSelector} from "../store/Hooks";
 import {selectUsersError, selectUsersStatus} from "./UsersSelector";
-import LoadingPage from "../common/LoadingPage";
-import ErrorPage from "../common/ErrorPage";
-import {TestIDs} from "../common/TestIDs";
+import {useAppSelector} from "../../services/store/Hooks";
+import ErrorModal from "../../ui/modals/ErrorModal";
+import {Kiwi_InputField, Kiwi_SensibleInputField} from "../../ui/components/Kiwi_InputField";
+import {TestIDs} from "../../services/common/TestIDs";
+import {Kiwi_Button} from "../../ui/components/Kiwi_Button";
+import {Kiwi_InfoBox} from "../../ui/components/Kiwi_InfoBox";
+import LoadingModal from "../../ui/modals/LoadingModal";
+import {clearJWTToken} from "../../services/common/StorageUtils";
 
 type UsersProps = Partial<UsersDTO>;
 
@@ -20,19 +21,19 @@ const UsersPage: React.FC<UsersProps> = (props: UsersProps) => {
     const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
-        localStorage.removeItem("jwtToken");
+        clearJWTToken();
     }, []);
     
 
     if (status === 'loading') {
         return (
-            <LoadingPage />
+            <LoadingModal />
         );
     }
 
     if (status === 'failed' && error?.code && error.code >= 500) {
         return (
-            <ErrorPage
+            <ErrorModal
                 onRetry={form.handleRetry}
             />
         );

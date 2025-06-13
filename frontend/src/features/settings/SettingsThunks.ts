@@ -1,18 +1,17 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
-import api, {ErrorDetails} from '../services/api';
-import {pingServer} from '../services/pingServer';
-import {UserSettingsDTO} from "./UserSettingsDTO";
-import {getServerErrorMessage} from "../utils/HTTPUtils";
+import {SettingsDTO} from "./SettingsDTO";
+import API, {ErrorDetails, pingServer} from "../../services/network/API";
+import {getServerErrorMessage} from "../../services/common/HTTPUtils";
 
-export const loadUserSettings = createAsyncThunk<
-    UserSettingsDTO,
+export const loadSettings = createAsyncThunk<
+    SettingsDTO,
     void,
     { rejectValue: ErrorDetails }
 >(
-    'userSettings/loadUserSettings',
+    'settings/loadSettings',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await api.get<UserSettingsDTO>('/api/user/settings');
+            const response = await API.get<SettingsDTO>('/api/user/settings');
             return response.data;
         } catch (error: any) {
             return rejectWithValue(getServerErrorMessage(error, 'Failed to load user settings'));
@@ -20,12 +19,12 @@ export const loadUserSettings = createAsyncThunk<
     }
 );
 
-export const updateUserSettings = createAsyncThunk<
-    UserSettingsDTO,
-    UserSettingsDTO,
+export const updateSettings = createAsyncThunk<
+    SettingsDTO,
+    SettingsDTO,
     { rejectValue: ErrorDetails }
 >(
-    'userSettings/updateUserSettingsDTO',
+    'settings/updateSettingsDTO',
     async (settingsDTO, { rejectWithValue }) => {
         const isServerAlive = await pingServer();
         if (!isServerAlive) {
@@ -33,7 +32,7 @@ export const updateUserSettings = createAsyncThunk<
         }
 
         try {
-            const response = await api.put<UserSettingsDTO>('/api/user/settings', settingsDTO);
+            const response = await API.put<SettingsDTO>('/api/user/settings', settingsDTO);
             return response.data;
         } catch (error: any) {
             return rejectWithValue(getServerErrorMessage(error, 'Failed to update user settings'));

@@ -1,16 +1,16 @@
 import React from "react";
-import {TestIDs} from "./TestIDs";
+import {TestIDs} from "../../services/common/TestIDs";
 
-interface ErrorPageProps {
+interface ErrorModalProps {
     message?: string;
     onRetry?: () => void;
 }
 
-const ErrorPage: React.FC<ErrorPageProps> = ({ message = "Something went wrong. Please try again later.", onRetry }) => {
+const ErrorModal: React.FC<ErrorModalProps> = ({ message = "Something went wrong. Please try again later.", onRetry }) => {
     return (
         <div className="flex flex-col justify-center items-center h-screen bg-white">
             <p className="text-2xl text-red-500 font-semibold mb-2">Oops!</p>
-            <p className="text-xl text-red-500 mb-4" data-testid={TestIDs.common.errorPage}>{message}</p>
+            <p className="text-xl text-red-500 mb-4" data-testid={TestIDs.common.errorModal}>{message}</p>
             {
                 onRetry &&
                 <button
@@ -24,4 +24,4 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ message = "Something went wrong. 
     );
 };
 
-export default ErrorPage;
+export default ErrorModal;

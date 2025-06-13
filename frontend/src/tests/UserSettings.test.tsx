@@ -1,28 +1,28 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {Provider} from 'react-redux';
 import {configureStore, Store, UnknownAction} from '@reduxjs/toolkit';
-import api from '../services/api';
 import {BrowserRouter} from 'react-router-dom';
-import {UserSettingsDTO} from "../userSettings/UserSettingsDTO";
-import {userSettingsReducer} from "../userSettings/UserSettingsSlice";
-import UserSettingsPage from "../userSettings/UserSettingsPage";
-import {TestIDs} from "../common/TestIDs";
+import {SettingsDTO} from '../features/settings/SettingsDTO';
+import {settingsReducer} from '../features/settings/SettingsSlice';
+import SettingsPage from '../features/settings/SettingsPage';
+import {TestIDs} from '../services/common/TestIDs';
+import API from "../services/network/API";
 
-jest.mock('../services/api');
+jest.mock('../services/network/API');
 
-const validUserSettingsDTO: UserSettingsDTO = {
+const validSettingsDTO: SettingsDTO = {
     email: 'finn@thehuman.com',
     musicVolume: 40,
     soundVolume: 50,
 };
 
-const updateUserSettingsDTO: UserSettingsDTO = {
+const updateSettingsDTO: SettingsDTO = {
     email: 'finn@thehuman.com',
     musicVolume: 80,
     soundVolume: 90,
 };
 
-describe('UserSettings Tests', () => {
+describe('Settings Tests', () => {
     let mockStore: Store<unknown, UnknownAction, unknown>;
 
     beforeEach(() => {
@@ -31,97 +31,97 @@ describe('UserSettings Tests', () => {
 
         mockStore = configureStore({
             reducer: {
-                userSettings: userSettingsReducer,
+                settings: settingsReducer,
             },
         });
     });
 
-    const renderUserSettingsPage = async (
+    const renderSettingsPage = async (
         store = mockStore,
     ) => {
         render(
             <BrowserRouter>
                 <Provider store={store}>
-                    <UserSettingsPage/>
+                    <SettingsPage/>
                 </Provider>
             </BrowserRouter>
         );
 
-        await waitFor(() => expect(screen.queryByTestId(TestIDs.common.loadingPage)).toBeNull());
+        await waitFor(() => expect(screen.queryByTestId(TestIDs.common.loadingModal)).toBeNull());
     };
 
     const mockApiGetRequest = (response: any) => {
-        api.get = jest.fn().mockResolvedValue({ data: response });
+        API.get = jest.fn().mockResolvedValue({ data: response });
     };
 
     const mockApiPutRequest = (response: any) => {
-        api.put = jest.fn().mockResolvedValue({ data: response });
+        API.put = jest.fn().mockResolvedValue({ data: response });
     };
 
     test('load data', () => {
-        api.get = jest.fn().mockImplementation(() => new Promise(() => {}));
+        API.get = jest.fn().mockImplementation(() => new Promise(() => {}));
 
-        renderUserSettingsPage();
+        renderSettingsPage();
 
-        expect(screen.getByTestId(TestIDs.common.loadingPage)).toBeVisible();
+        expect(screen.getByTestId(TestIDs.common.loadingModal)).toBeVisible();
     });
 
     test('shows read-only email', async () => {
-        mockApiGetRequest(validUserSettingsDTO);
+        mockApiGetRequest(validSettingsDTO);
         
-        await renderUserSettingsPage();
+        await renderSettingsPage();
 
-        expect(screen.getByTestId(TestIDs.userSettings.email).value).toBe(validUserSettingsDTO.email);
+        expect(screen.getByTestId(TestIDs.settings.email).value).toBe(validSettingsDTO.email);
     });
     
     test('error on load', async () => {
-        api.get = jest.fn().mockRejectedValue({
+        API.get = jest.fn().mockRejectedValue({
             response: {
                 status: 500,
                 data: { message: "Server Error" },
             },
         });
 
-        await renderUserSettingsPage();
+        await renderSettingsPage();
 
-        expect(screen.getByTestId(TestIDs.common.errorPage)).toBeVisible();
+        expect(screen.getByTestId(TestIDs.common.errorModal)).toBeVisible();
     });
 
     test('saveSettings', async () => {
-        mockApiGetRequest(validUserSettingsDTO);
-        mockApiPutRequest(updateUserSettingsDTO);
-        await renderUserSettingsPage();
+        mockApiGetRequest(validSettingsDTO);
+        mockApiPutRequest(updateSettingsDTO);
+        await renderSettingsPage();
         
         fireEvent.change(
-            screen.getByTestId(TestIDs.userSettings.soundVolume),
-            { target: { value: updateUserSettingsDTO.soundVolume } }
+            screen.getByTestId(TestIDs.settings.soundVolume),
+            { target: { value: updateSettingsDTO.soundVolume } }
         );
 
         await waitFor(() => {
-            expect(api.put).toHaveBeenCalledTimes(1);
+            expect(API.put).toHaveBeenCalledTimes(1);
         });
     });
 
     test('saveSettings with no changes', async () => {
-        mockApiGetRequest(validUserSettingsDTO);
-        mockApiPutRequest(validUserSettingsDTO);
-        await renderUserSettingsPage();
+        mockApiGetRequest(validSettingsDTO);
+        mockApiPutRequest(validSettingsDTO);
+        await renderSettingsPage();
 
         fireEvent.change(
-            screen.getByTestId(TestIDs.userSettings.soundVolume),
-            { target: { value: validUserSettingsDTO.soundVolume } }
+            screen.getByTestId(TestIDs.settings.soundVolume),
+            { target: { value: validSettingsDTO.soundVolume } }
         );
 
         await waitFor(() => {
-            expect(api.put).toHaveBeenCalledTimes(0);
+            expect(API.put).toHaveBeenCalledTimes(0);
         });
     });
 
     test('saveSettings throttled on rapid slider changes', async () => {
-        mockApiGetRequest(validUserSettingsDTO);
-        await renderUserSettingsPage();
+        mockApiGetRequest(validSettingsDTO);
+        await renderSettingsPage();
 
-        const soundSlider = screen.getByTestId(TestIDs.userSettings.soundVolume);
+        const soundSlider = screen.getByTestId(TestIDs.settings.soundVolume);
 
         fireEvent.change(soundSlider, { target: { value: 30 } });
         fireEvent.change(soundSlider, { target: { value: 35 } });
@@ -130,7 +130,7 @@ describe('UserSettings Tests', () => {
         jest.advanceTimersByTime(500);
 
         await waitFor(() => {
-            expect(api.put).toHaveBeenCalledTimes(1);
+            expect(API.put).toHaveBeenCalledTimes(1);
         });
     });
 });

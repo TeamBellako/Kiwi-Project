@@ -1,4 +1,4 @@
-import {ErrorDetails} from "../services/api";
+import {ErrorDetails} from "../network/API";
 
 export const getServerErrorMessage = (error: any, fallbackMessage: string): ErrorDetails => {
     const message = error?.response?.data?.message || fallbackMessage;

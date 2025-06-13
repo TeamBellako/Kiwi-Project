@@ -1,5 +1,5 @@
 import {UsersDTO} from "./UsersDTO";
-import {ErrorDetails} from "../services/api";
+import {ErrorDetails} from "../../services/network/API";
 
 export enum RetryAction {
     LOGIN = 'LOGIN',

@@ -1,7 +1,7 @@
 export const TestIDs = {
     common: {
-        errorPage: 'common_error_page',
-        loadingPage: 'common_loading_page',
+        errorModal: 'common_error_modal',
+        loadingModal: 'common_loading_modal',
     },
     users: {
         email: 'users_email',
@@ -11,9 +11,9 @@ export const TestIDs = {
         errorAlert: 'users_error_alert',
         resultAlert: 'users_result_alert',
     },
-    userSettings: {
-        email: 'usersettings_email',
-        musicVolume: 'usersettings_music_volume',
-        soundVolume: 'usersettings_sound_volume',
+    settings: {
+        email: 'settings_email',
+        musicVolume: 'settings_music_volume',
+        soundVolume: 'settings_sound_volume',
     }
 }
