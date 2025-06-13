@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -27,6 +28,7 @@ import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.services.common.Logger
 import com.bellako.kiwi.ui.components.Kiwi_H1
+import com.bellako.kiwi.ui.components.Kiwi_P1
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,7 +92,7 @@ fun SettingsScreen(
         is UIState.Error -> {
             Kiwi_InfoBox(
                 message = (uiState as UIState.Error).message,
-                color = Color.Red,
+                color = MaterialTheme.colorScheme.error,
                 testTag = SettingsTestTags.SERVER_ERROR
             )
         }
@@ -126,7 +128,7 @@ private fun SettingsFields(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp)
                 .testTag(CommonTestTags.SETTINGS_SCREEN)
         ) {
@@ -139,7 +141,13 @@ private fun SettingsFields(
                 enabled = false,
                 value = currentState.email,
                 onValueChange = {},
-                label = { Text("Email") },
+                label = {
+                    Kiwi_P1(Kiwi_TextArguments(
+                        "Email",
+                        color = MaterialTheme.colorScheme.inversePrimary
+                    ))
+                },
+                textColor = MaterialTheme.colorScheme.inversePrimary,
                 testTag = UsersTestTags.EMAIL_FIELD,
                 shouldHideInput = false
             )
@@ -182,7 +190,8 @@ private fun SettingsFields(
             Kiwi_Button(
                 Kiwi_TextArguments(
                     "SUPPORT",
-                    color = White
+                    color = White,
+                    bold = true
                 ),
                 { navController.navigate(ScreenRoutes.HELP) }
             )
@@ -192,7 +201,8 @@ private fun SettingsFields(
             Kiwi_Button(
                 Kiwi_TextArguments(
                     "LOG OUT",
-                    color = White
+                    color = White,
+                    bold = true
                 ),
                 onLogout
             )

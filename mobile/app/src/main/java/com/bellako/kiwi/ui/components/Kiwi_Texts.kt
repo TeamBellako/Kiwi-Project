@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 data class Kiwi_TextArguments(
     val text: String,
     val textAlign: TextAlign = TextAlign.Left,
-    val color: Color = Color.Black,
+    val color: Color = Color.White,
     val bold: Boolean = false,
     val italic: Boolean = false,
     val modifier: Modifier = Modifier
@@ -38,7 +38,7 @@ fun Kiwi_H1(arguments: Kiwi_TextArguments) {
 }
 
 @Composable
-fun Kiwi_H2 (arguments: Kiwi_TextArguments) {
+fun Kiwi_H2(arguments: Kiwi_TextArguments) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
@@ -52,7 +52,7 @@ fun Kiwi_H2 (arguments: Kiwi_TextArguments) {
 }
 
 @Composable
-fun Kiwi_H3 (arguments: Kiwi_TextArguments) {
+fun Kiwi_H3(arguments: Kiwi_TextArguments) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
@@ -66,7 +66,7 @@ fun Kiwi_H3 (arguments: Kiwi_TextArguments) {
 }
 
 @Composable
-fun Kiwi_P1 (arguments: Kiwi_TextArguments) {
+fun Kiwi_P1(arguments: Kiwi_TextArguments) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
@@ -80,7 +80,7 @@ fun Kiwi_P1 (arguments: Kiwi_TextArguments) {
 }
 
 @Composable
-fun Kiwi_P2 (arguments: Kiwi_TextArguments) {
+fun Kiwi_P2(arguments: Kiwi_TextArguments) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
@@ -94,13 +94,26 @@ fun Kiwi_P2 (arguments: Kiwi_TextArguments) {
 }
 
 @Composable
-fun Kiwi_P3 (arguments: Kiwi_TextArguments) {
+fun Kiwi_P3(arguments: Kiwi_TextArguments) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
         color = arguments.color,
         modifier = arguments.modifier,
         style = MaterialTheme.typography.bodySmall.copy(
+            fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
+            fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
+        )
+    )
+}
+
+@Composable
+fun Kiwi_Label(arguments: Kiwi_TextArguments) {
+    Text(
+        text = arguments.text,
+        textAlign = arguments.textAlign,
+        color = arguments.color,
+        style = MaterialTheme.typography.labelLarge.copy(
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
         )

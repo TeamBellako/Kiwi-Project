@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -30,30 +31,30 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 @Composable
 fun ErrorModal(
     modifier: Modifier = Modifier,
-    errorMessage: String = "Something went wrong. Please try again later.",
+    errorMessage: String = "Uh-oh! It seems a careless scribe forgot to write this part of the story. \n\n Let's get back on track!",
     onRetry: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp)
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
 
     ) {
         Icon(
-            imageVector = Icons.Default.ErrorOutline,
+            imageVector = Icons.Filled.Warning,
             contentDescription = "Error icon",
-            tint = Color.Red,
+            tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(64.dp)
         )
 
         Kiwi_Spacer()
 
         Kiwi_H1(Kiwi_TextArguments(
-            "Oops!",
-            color = MaterialTheme.colorScheme.error
+            "Wild Error Appeared!",
+            color = MaterialTheme.colorScheme.inversePrimary
         ))
 
         Kiwi_Spacer(0.5F)
@@ -65,15 +66,14 @@ fun ErrorModal(
         ))
 
         if (onRetry != null) {
-            Kiwi_Spacer()
-
             Box(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Kiwi_Button(
                     Kiwi_TextArguments(
-                        "Retry",
-                        color = Color.White
+                        "RETRY",
+                        color = Color.White,
+                        bold = true
                     ),
                     onRetry
                 )

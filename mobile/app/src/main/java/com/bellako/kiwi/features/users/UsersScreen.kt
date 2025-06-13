@@ -3,11 +3,13 @@ package com.bellako.kiwi.features.users
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -24,6 +26,8 @@ import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.services.common.Logger
+import com.bellako.kiwi.ui.components.Kiwi_H2
+import com.bellako.kiwi.ui.components.Kiwi_P1
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,13 +68,15 @@ fun UsersScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.White)
+                        .background(MaterialTheme.colorScheme.background)
                         .padding(16.dp)
                         .testTag(CommonTestTags.USERS_SCREEN),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Kiwi_H1(Kiwi_TextArguments(
-                        "Welcome!"
+                        "Welcome Back, Knight",
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.inversePrimary
                     ))
                     Kiwi_Spacer()
 
@@ -84,7 +90,7 @@ fun UsersScreen(
                         is UIState.Error -> {
                             Kiwi_InfoBox(
                                 message = (uiState as UIState.Error).message,
-                                color = Color.Red,
+                                color = MaterialTheme.colorScheme.error,
                                 testTag = UsersTestTags.ERROR_TEXT
                             )
                         }
@@ -107,8 +113,14 @@ private fun Fields(
         enabled = !isLoading,
         value = currentState.email,
         onValueChange = { viewModel.onEmailChanged(it) },
-        label = { Text("Email") },
+        label = {
+            Kiwi_P1(Kiwi_TextArguments(
+                "Email",
+                color = MaterialTheme.colorScheme.inversePrimary
+            ))
+        },
         shouldHideInput = false,
+        textColor = MaterialTheme.colorScheme.inversePrimary,
         testTag = UsersTestTags.EMAIL_FIELD
     )
 
@@ -118,8 +130,14 @@ private fun Fields(
         enabled = !isLoading,
         value = currentState.password,
         onValueChange = { viewModel.onPasswordChanged(it) },
-        label = { Text("Password") },
+        label = {
+            Kiwi_P1(Kiwi_TextArguments(
+                "Password",
+                color = MaterialTheme.colorScheme.inversePrimary
+            ))
+        },
         shouldHideInput = true,
+        textColor = MaterialTheme.colorScheme.inversePrimary,
         testTag = UsersTestTags.PASSWORD_FIELD
     )
 }
@@ -138,8 +156,9 @@ private fun Buttons(
     ) {
         Kiwi_Button(
             Kiwi_TextArguments(
-                "Sign Up",
-                color = Color.White
+                "SIGN UP",
+                color = MaterialTheme.colorScheme.inversePrimary,
+                bold = true
             ),
             onClick = {
                 lastAction.value = RetryAction.SIGNUP
@@ -160,8 +179,9 @@ private fun Buttons(
 
         Kiwi_Button(
             Kiwi_TextArguments(
-                "Log In",
-                color = Color.White
+                "LOG IN",
+                color = MaterialTheme.colorScheme.inversePrimary,
+                bold = true
             ),
             onClick = {
                 lastAction.value = RetryAction.LOGIN

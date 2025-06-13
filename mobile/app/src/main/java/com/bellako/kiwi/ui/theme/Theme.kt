@@ -7,15 +7,25 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val LightColors = lightColorScheme(
-    primary = KiwiPrimary,
-    secondary = KiwiSecondary,
-    tertiary = KiwiTertiary
+    primary = kiwiPrimaryColor,
+    inversePrimary = kiwiInversePrimaryColor,
+    secondary = kiwiSecondaryColor,
+    tertiary = kiwiTertiaryColor,
+    background = kiwiBackgroundColor,
+    surface = kiwiSurfaceColor,
+    outline = kiwiOutlineColor,
+    error = kiwiErrorColor
 )
 
 private val DarkColors = darkColorScheme(
-    primary = KiwiPrimary,
-    secondary = KiwiSecondary,
-    tertiary = KiwiTertiary
+    primary = kiwiPrimaryColor,
+    inversePrimary = kiwiInversePrimaryColor,
+    secondary = kiwiSecondaryColor,
+    tertiary = kiwiTertiaryColor,
+    background = kiwiBackgroundColor,
+    surface = kiwiSurfaceColor,
+    outline = kiwiOutlineColor,
+    error = kiwiErrorColor
 )
 
 @Composable
@@ -27,7 +37,7 @@ fun KiwiTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography(),
+        typography = kiwiTypography,
         content = content
     )
 }

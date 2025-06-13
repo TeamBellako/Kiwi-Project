@@ -40,21 +40,26 @@ fun HelpScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H1(Kiwi_TextArguments("Need Help?"))
+        Kiwi_H1(Kiwi_TextArguments(
+            "SUPPORT",
+            color = MaterialTheme.colorScheme.inversePrimary,
+            bold = true
+        ))
 
-        Kiwi_P1(Kiwi_TextArguments (
+        Kiwi_P1(Kiwi_TextArguments(
             "If you have any questions or need support, feel free to reach out to us at:",
-            TextAlign.Center
+            TextAlign.Center,
+            color = MaterialTheme.colorScheme.inversePrimary
         ))
 
         Kiwi_P2(Kiwi_TextArguments(
             BuildConfig.MOBILE_COMPANY_EMAIL,
             TextAlign.Center,
-            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.secondary,
             bold = true,
             modifier = Modifier
                 .clickable { openEmailClient(context) }
@@ -65,7 +70,8 @@ fun HelpScreen(
         Kiwi_Button(
             Kiwi_TextArguments(
                 "BACK",
-                color = Color.White
+                color = MaterialTheme.colorScheme.inversePrimary,
+                bold = true
             ),
             { navController.navigate(ScreenRoutes.SETTINGS) }
         )
