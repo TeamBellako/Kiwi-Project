@@ -119,6 +119,7 @@ dependencies {
 
     // Compose UI
     implementation(libs.ui)
+    implementation(libs.material)
     implementation(libs.material3)
     implementation(libs.ui.tooling.preview)
     implementation(libs.androidx.material.icons.extended)

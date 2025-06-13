@@ -33,7 +33,7 @@ public class UsersService {
         UsersPersistence usersPersistence = new UsersPersistence(
                 user.getEmail(),
                 hashedPassword,
-                user.getUserSettings()
+                user.getSettings()
         );
         usersRepository.saveAndFlush(usersPersistence);
     }

@@ -1,8 +1,7 @@
 package com.kiwi.users;
 
-import com.kiwi.exception.GlobalExceptionHandler;
+import com.kiwi.common.GlobalExceptionHandler;
 import com.kiwi.security.AuthEntryPointJwt;
-import com.kiwi.security.CustomUserDetailsService;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.security.WebSecurityConfig;
 import org.junit.Test;
@@ -10,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;

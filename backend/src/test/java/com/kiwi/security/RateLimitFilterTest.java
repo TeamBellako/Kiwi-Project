@@ -1,6 +1,7 @@
 package com.kiwi.security;
 
-import com.kiwi.utils.PingController;
+import com.kiwi.common.PingController;
+import com.kiwi.users.CustomUserDetailsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

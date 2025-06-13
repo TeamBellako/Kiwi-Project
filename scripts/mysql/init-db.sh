@@ -16,14 +16,14 @@ CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
 
 USE ${MYSQL_DATABASE};
 
-CREATE TABLE IF NOT EXISTS user_settings (
+CREATE TABLE IF NOT EXISTS settings (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
 
     sound_volume INT NOT NULL CHECK (sound_volume >= 0 AND sound_volume <= 100),
     music_volume INT NOT NULL CHECK (music_volume >= 0 AND music_volume <= 100),
 
-    CONSTRAINT user_settings_check_email_format CHECK (
+    CONSTRAINT settings_check_email_format CHECK (
         email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'
     )
 );
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
         email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'
     ),
 
-    CONSTRAINT fk_user_email_to_settings FOREIGN KEY (email) REFERENCES user_settings(email)
+    CONSTRAINT fk_user_email_to_settings FOREIGN KEY (email) REFERENCES settings(email)
 );
 
 CREATE USER '${BACKEND_DB_USERNAME}'@'%' IDENTIFIED BY '${BACKEND_DB_PASSWORD}';
