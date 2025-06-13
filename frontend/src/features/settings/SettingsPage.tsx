@@ -34,8 +34,11 @@ const SettingsPage: React.FC<SettingsProps> = (props) => {
 
     useEffect(() => {
         dispatch(loadSettings());
-        form.emailField.setValue(settingsDTO?.email!!); // we read from the DTO here because this field is read-only
     }, []);
+
+    useEffect(() => {
+        form.emailField.setValue(settingsDTO?.email!!); // we read from the DTO because the email is read-only
+    }, [settingsDTO]);
 
     if (status === 'loading') {
         return (

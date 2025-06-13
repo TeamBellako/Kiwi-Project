@@ -6,7 +6,7 @@ import {SettingsDTO} from '../features/settings/SettingsDTO';
 import {settingsReducer} from '../features/settings/SettingsSlice';
 import SettingsPage from '../features/settings/SettingsPage';
 import {TestIDs} from '../services/common/TestIDs';
-import API from "../services/network/API";
+import API, {pingServer} from "../services/network/API";
 
 jest.mock('../services/network/API');
 
@@ -88,10 +88,11 @@ describe('Settings Tests', () => {
     });
 
     test('saveSettings', async () => {
+        pingServer.mockResolvedValue(true);
         mockApiGetRequest(validSettingsDTO);
         mockApiPutRequest(updateSettingsDTO);
         await renderSettingsPage();
-        
+
         fireEvent.change(
             screen.getByTestId(TestIDs.settings.soundVolume),
             { target: { value: updateSettingsDTO.soundVolume } }
@@ -103,6 +104,7 @@ describe('Settings Tests', () => {
     });
 
     test('saveSettings with no changes', async () => {
+        pingServer.mockResolvedValue(true);
         mockApiGetRequest(validSettingsDTO);
         mockApiPutRequest(validSettingsDTO);
         await renderSettingsPage();
@@ -118,6 +120,7 @@ describe('Settings Tests', () => {
     });
 
     test('saveSettings throttled on rapid slider changes', async () => {
+        pingServer.mockResolvedValue(true);
         mockApiGetRequest(validSettingsDTO);
         await renderSettingsPage();
 
