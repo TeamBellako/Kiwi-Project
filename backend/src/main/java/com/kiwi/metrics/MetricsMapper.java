@@ -46,7 +46,7 @@ public class MetricsMapper {
         );
     }
 
-    public static Set<Metrics> toDomainSet(Set<MetricsDTO> dtoSet) {
+    public static Set<Metrics> toDomainSetFromDtoSet(Set<MetricsDTO> dtoSet) {
         if (dtoSet == null) return null;
         
         Set<Metrics> domainSet = new HashSet<>();
@@ -55,6 +55,28 @@ public class MetricsMapper {
         }
         
         return domainSet;
+    }
+
+    public static Set<Metrics> toDomainSetFromPersistenceSet(Set<MetricsPersistence> persistenceSet) {
+        if (persistenceSet == null) return null;
+
+        Set<Metrics> domainSet = new HashSet<>();
+        for (MetricsPersistence persistence : persistenceSet) {
+            domainSet.add(toDomain(persistence));
+        }
+
+        return domainSet;
+    }
+
+    public static Set<MetricsPersistence> toPersistenceSet(Set<Metrics> domainSet) {
+        if (domainSet == null) return null;
+
+        Set<MetricsPersistence> persistenceSet = new HashSet<>();
+        for (Metrics domain : domainSet) {
+            persistenceSet.add(toPersistence(domain));
+        }
+
+        return persistenceSet;
     }
 
     public static Set<MetricsDTO> toDTOSet(Set<Metrics> domainSet) {

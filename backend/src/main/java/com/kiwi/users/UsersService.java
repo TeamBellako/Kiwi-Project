@@ -1,5 +1,7 @@
 package com.kiwi.users;
 
+import com.kiwi.metrics.MetricsFactory;
+import com.kiwi.metrics.MetricsMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,8 @@ public class UsersService {
         UsersPersistence usersPersistence = new UsersPersistence(
                 user.getEmail(),
                 hashedPassword,
-                user.getSettings()
+                user.getSettings(),
+                MetricsMapper.toPersistenceSet(user.getMetrics())
         );
         usersRepository.saveAndFlush(usersPersistence);
     }

@@ -55,7 +55,7 @@ public class Users {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Users users = (Users) o;
-        return Objects.equals(email, users.email) && Objects.equals(password, users.password) && Objects.equals(settings, users.settings) && Objects.equals(metrics, users.metrics);
+        return Objects.equals(email, users.email);
     }
 
     @Override

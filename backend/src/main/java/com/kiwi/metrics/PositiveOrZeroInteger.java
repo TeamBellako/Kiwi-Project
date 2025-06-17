@@ -5,5 +5,5 @@ public record PositiveOrZeroInteger(Integer value) {
         if (!isValid(value)) throw new IllegalArgumentException("Invalid positive integer value");
     }
 
-    private boolean isValid(Integer value) { return value > 0;}
+    private boolean isValid(Integer value) { return value >= 0;}
 }

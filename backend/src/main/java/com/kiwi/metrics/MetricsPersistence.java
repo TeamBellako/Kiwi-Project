@@ -1,6 +1,7 @@
 package com.kiwi.metrics;
 
 import com.kiwi.users.Users;
+import com.kiwi.users.UsersPersistence;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -26,8 +27,8 @@ public class MetricsPersistence {
     private Duration screenTime;
 
     @ManyToOne
-    @JoinColumn(name = "user")
-    private Users user;
+    @JoinColumn(name = "user_id")
+    private UsersPersistence user;
 
     public MetricsPersistence() {
     }

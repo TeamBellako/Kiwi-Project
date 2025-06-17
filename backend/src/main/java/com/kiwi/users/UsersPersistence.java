@@ -1,6 +1,7 @@
 package com.kiwi.users;
 
 import com.kiwi.metrics.Metrics;
+import com.kiwi.metrics.MetricsPersistence;
 import com.kiwi.settings.Settings;
 import jakarta.persistence.*;
 
@@ -27,12 +28,12 @@ public class UsersPersistence {
     private Settings settings;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Metrics> metrics = new HashSet<>();
+    private Set<MetricsPersistence> metrics = new HashSet<>();
 
     public UsersPersistence() {
     }
 
-    public UsersPersistence(Email email, String password, Settings settings, Set<Metrics> metrics) {
+    public UsersPersistence(Email email, String password, Settings settings, Set<MetricsPersistence> metrics) {
         setEmail(email);
         this.password = password;
         setSettings(settings);
@@ -73,11 +74,11 @@ public class UsersPersistence {
         this.settings = settings;
     }
 
-    public Set<Metrics> getMetrics() {
+    public Set<MetricsPersistence> getMetrics() {
         return metrics;
     }
 
-    public void setMetrics(Set<Metrics> metrics) {
+    public void setMetrics(Set<MetricsPersistence> metrics) {
         this.metrics = metrics;
     }
 
@@ -85,7 +86,7 @@ public class UsersPersistence {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UsersPersistence that = (UsersPersistence) o;
-        return Objects.equals(email, that.email) && Objects.equals(password, that.password) && Objects.equals(settings, that.settings) && Objects.equals(metrics, that.metrics);
+        return Objects.equals(email, that.email) && Objects.equals(settings, that.settings) && Objects.equals(metrics, that.metrics);
     }
 
     @Override

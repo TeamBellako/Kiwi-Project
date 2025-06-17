@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(scripts = "/UsersTestSetUp.sql")
+@Sql(scripts = "/DBTestSetUp.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @AutoConfigureAddonsWebmvcResourceServerSecurity

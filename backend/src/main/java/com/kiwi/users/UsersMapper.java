@@ -9,7 +9,7 @@ public class UsersMapper {
                 entity.getEmail(),
                 null,
                 entity.getSettings(),
-                entity.getMetrics()
+                MetricsMapper.toDomainSetFromPersistenceSet(entity.getMetrics())
         );
     }
 
@@ -19,7 +19,7 @@ public class UsersMapper {
                 domain.getEmail(),
                 hashedPassword,
                 domain.getSettings(),
-                domain.getMetrics()
+                MetricsMapper.toPersistenceSet(domain.getMetrics())
         );
     }
 
@@ -29,7 +29,7 @@ public class UsersMapper {
                 new Email(dto.getEmail()),
                 dto.getPassword() != null ? new Password(dto.getPassword()) : null,
                 dto.getSettingsDTO().toDomainObject(),
-                MetricsMapper.toDomainSet(dto.getMetricsDTOs())
+                MetricsMapper.toDomainSetFromDtoSet(dto.getMetricsDTOs())
         );
     }
 
