@@ -1,12 +1,15 @@
 package com.kiwi.users;
 
+import com.kiwi.metrics.MetricsMapper;
+
 public class UsersMapper {
     // Persistence → Domain
     public static Users toDomain(UsersPersistence entity) {
         return new Users(
                 entity.getEmail(),
                 null,
-                entity.getSettings()
+                entity.getSettings(),
+                entity.getMetrics()
         );
     }
 
@@ -15,7 +18,8 @@ public class UsersMapper {
         return new UsersPersistence(
                 domain.getEmail(),
                 hashedPassword,
-                domain.getSettings()
+                domain.getSettings(),
+                domain.getMetrics()
         );
     }
 
@@ -24,7 +28,8 @@ public class UsersMapper {
         return new Users(
                 new Email(dto.getEmail()),
                 dto.getPassword() != null ? new Password(dto.getPassword()) : null,
-                dto.getSettingsDTO().toDomainObject()
+                dto.getSettingsDTO().toDomainObject(),
+                MetricsMapper.toDomainSet(dto.getMetricsDTOs())
         );
     }
 
@@ -33,16 +38,8 @@ public class UsersMapper {
         return new UsersDTO(
                 domain.getEmail().value(),
                 null,
-                domain.getSettings().toDTO()
-        );
-    }
-
-    // Persistence → DTO
-    public static UsersDTO toDTO(UsersPersistence entity) {
-        return new UsersDTO(
-                entity.getEmail().value(),
-                null,
-                entity.getSettings().toDTO()
+                domain.getSettings().toDTO(),
+                MetricsMapper.toDTOSet(domain.getMetrics())
         );
     }
 }
