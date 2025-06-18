@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
@@ -36,7 +37,7 @@ public class MetricsServiceTest {
     }
     
     @Test
-    public void createValidMetric() {
+    public void createValidMetrics() {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
         metricsService.createMetric(metricsDTO);
         
@@ -47,18 +48,18 @@ public class MetricsServiceTest {
     }
 
     @Test(expected = MetricsInvalidException.class)
-    public void createInvalidMetric() {
+    public void createInvalidMetrics() {
         MetricsDTO invalidMetricsDTO = MetricsFactory.generateRandomInvalidMetricDTO();
         metricsService.createMetric(invalidMetricsDTO);
     }
 
     @Test(expected = NullPointerException.class)
-    public void createNullMetric() {
+    public void createNullMetrics() {
         metricsService.createMetric(null);
     }
 
     @Test(expected = MetricsConflictException.class)
-    public void createDuplicatedMetric() {
+    public void createDuplicatedMetrics() {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
         
         metricsService.createMetric(metricsDTO);
@@ -66,32 +67,44 @@ public class MetricsServiceTest {
     }
 
     @Test
-    public void updateValidMetric() {
+    public void updateValidMetrics() {
         
     }
 
     @Test
-    public void updateInvalidMetric() {
+    public void updateInvalidMetrics() {
 
     }
 
     @Test
-    public void updateNullMetric() {
+    public void updateNullMetrics() {
 
     }
 
     @Test
-    public void updateNonExistingMetric() {
+    public void updateNonExistingMetrics() {
 
     }
-
+    
     @Test
-    public void getExistingMetric() {
-
+    public void getExistingMetrics() {
+        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        Metrics metrics = MetricsMapper.toDomain(metricsDTO);
+        metricsRepositoryInMemory.saveAndFlush(MetricsMapper.toPersistence(validUsersPersistence, metrics));
+        
+        Optional<MetricsPersistence> savedMetricsPersistence =
+                metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, metrics.getDate());
+        assert(savedMetricsPersistence.isPresent());
+        
+        Optional<MetricsDTO> retrievedMetricsDTO =
+                metricsService.getMetricsByEmailAndDate(validUsersPersistence.getEmail(), metrics.getDate());
+        assert(retrievedMetricsDTO.isPresent());
+        
+        assertEquals(metrics, MetricsMapper.toDomain(retrievedMetricsDTO.get()));
     }
 
     @Test
     public void getNonExistingMetric() {
-
+        assertEquals(Optional.empty(), metricsService.getMetricsByEmailAndDate(validUsersPersistence.getEmail(), LocalDate.now()));
     }
 }
