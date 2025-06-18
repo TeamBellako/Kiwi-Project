@@ -2,11 +2,9 @@ package com.kiwi.metrics;
 
 import com.kiwi.users.Email;
 import com.kiwi.users.UsersPersistence;
-import com.kiwi.users.UsersRepository;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Optional;
 
 public class MetricsMapper {
     // Persistence -> Domain
@@ -36,12 +34,20 @@ public class MetricsMapper {
     // DTO -> Domain
     public static Metrics toDomain(MetricsDTO dto) {
         if (dto == null) return null;
-        return new Metrics(
-                new Email(dto.getEmail()),
-                dto.getDate(),
-                new PositiveOrZeroInteger(dto.getSteps()),
-                new PositiveDuration(dto.getScreenTime())
-        );
+        
+        Metrics metrics;
+        try {
+            metrics = new Metrics(
+                    new Email(dto.getEmail()),
+                    dto.getDate(),
+                    new PositiveOrZeroInteger(dto.getSteps()),
+                    new PositiveDuration(dto.getScreenTime())
+            );
+        } catch (Exception e) {
+            throw new MetricsInvalidException(e.getMessage());
+        }
+        
+        return metrics;
     }
 
     // Domain -> DTO

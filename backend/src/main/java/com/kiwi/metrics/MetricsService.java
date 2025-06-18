@@ -27,49 +27,33 @@ public class MetricsService {
 
     @Transactional
     public void createMetric(@Valid @NotNull MetricsDTO metricsDTO) {
-        Metrics metrics;
-        try {
-            metrics = MetricsMapper.toDomain(metricsDTO);
-        } catch (IllegalArgumentException e) {
-            throw new MetricsInvalidException(e.getMessage());
-        }
-        
-        Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(metrics.getEmail());
-        if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(metrics.getEmail().value());
-        
-        if (metricsRepository.findByUserAndDate(targetUserPersistence.get(), metrics.getDate()).isPresent()) {
+        Metrics metrics = MetricsMapper.toDomain(metricsDTO);
+
+        UsersPersistence targetUserPersistence = getTargetUserPersistence(metrics.getEmail());
+        if (metricsRepository.findByUserAndDate(targetUserPersistence, metrics.getDate()).isPresent()) {
             throw new MetricsConflictException(metrics.getEmail(), metrics.getDate());
         }
 
-        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence.get(), metrics));
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence, metrics));
     }
     
     @Transactional
     public void updateMetric(@Valid @NotNull MetricsDTO metricsDTO) {
-        Metrics metrics;
-        try {
-            metrics = MetricsMapper.toDomain(metricsDTO);
-        } catch (IllegalArgumentException e) {
-            throw new MetricsInvalidException(e.getMessage());
-        }
-
-        Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(metrics.getEmail());
-        if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(metrics.getEmail().value());
+        Metrics metrics = MetricsMapper.toDomain(metricsDTO);
         
-        Optional<MetricsPersistence> targetMetricsPersistence = 
-                metricsRepository.findByUserAndDate(targetUserPersistence.get(), metrics.getDate());
+        UsersPersistence targetUserPersistence = getTargetUserPersistence(metrics.getEmail());
+        Optional<MetricsPersistence> targetMetricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, metrics.getDate());
         if (targetMetricsPersistence.isEmpty()) {
             throw new MetricsNotFoundException(metrics.getEmail(), metrics.getDate());
         }
 
-        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence.get(), metrics));
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence, metrics));
     }
     
     public Optional<MetricsDTO> getMetricsByEmailAndDate(@Valid @NotNull Email email, @NotNull LocalDate date) {
-        Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(email);
-        if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(email.value());
+        UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         
-        Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence.get(), date);
+        Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, date);
         if (metricsPersistence.isEmpty()) {
             logger.warn("Trying to retrieve non-existing metric with email {} and date {}", email.value(), date.toString());
             return Optional.empty();
@@ -79,5 +63,10 @@ public class MetricsService {
         return Optional.of(MetricsMapper.toDTO(metrics));
     }
     
-    
+    private UsersPersistence getTargetUserPersistence(Email email) {
+        Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(email);
+        if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(email.value());
+        
+        return targetUserPersistence.get();
+    }
 }

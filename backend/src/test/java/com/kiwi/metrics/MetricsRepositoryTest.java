@@ -1,6 +1,5 @@
 package com.kiwi.metrics;
 
-import com.kiwi.settings.SettingsRepository;
 import com.kiwi.users.UsersPersistence;
 import com.kiwi.users.UsersRepository;
 import org.junit.Before;
