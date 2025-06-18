@@ -46,7 +46,23 @@ public class MetricsService {
     
     @Transactional
     public void updateMetric(@Valid @NotNull MetricsDTO metricsDTO) {
-        // TODO
+        Metrics metrics;
+        try {
+            metrics = MetricsMapper.toDomain(metricsDTO);
+        } catch (IllegalArgumentException e) {
+            throw new MetricsInvalidException(e.getMessage());
+        }
+
+        Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(metrics.getEmail());
+        if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(metrics.getEmail().value());
+        
+        Optional<MetricsPersistence> targetMetricsPersistence = 
+                metricsRepository.findByUserAndDate(targetUserPersistence.get(), metrics.getDate());
+        if (targetMetricsPersistence.isEmpty()) {
+            throw new MetricsNotFoundException(metrics.getEmail(), metrics.getDate());
+        }
+
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence.get(), metrics));
     }
     
     public Optional<MetricsDTO> getMetricsByEmailAndDate(@Valid @NotNull Email email, @NotNull LocalDate date) {

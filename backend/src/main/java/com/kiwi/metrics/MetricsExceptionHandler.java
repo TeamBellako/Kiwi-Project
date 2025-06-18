@@ -31,6 +31,15 @@ public class MetricsExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(createErrorResponseBody("A metric with that information already exists"));
+                .body(createErrorResponseBody("Metrics with that information already exists"));
+    }
+
+    @ExceptionHandler(MetricsNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleMetricsNotFound(MetricsNotFoundException ex) {
+        logger.error("Not found metrics: {}", ex.getMessage(), ex);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(createErrorResponseBody("Metrics with that information doesn't exist"));
     }
 }

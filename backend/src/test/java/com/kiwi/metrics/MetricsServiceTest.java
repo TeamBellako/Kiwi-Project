@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class MetricsServiceTest {
     private final UsersRepositoryInMemory usersRepositoryInMemory = new UsersRepositoryInMemory();
@@ -68,22 +69,38 @@ public class MetricsServiceTest {
 
     @Test
     public void updateValidMetrics() {
+        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        Metrics metrics = MetricsMapper.toDomain(metricsDTO);
+        metricsRepositoryInMemory.saveAndFlush(MetricsMapper.toPersistence(validUsersPersistence, metrics));
+
+        metricsDTO.setSteps(metricsDTO.getSteps() + 1);
+        metricsService.updateMetric(metricsDTO);
         
+        Optional<MetricsPersistence> retrievedMetricsPersistence = 
+                metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, metrics.getDate());
+        assert(retrievedMetricsPersistence.isPresent());
+        
+        assertNotEquals(metrics, MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(metricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
     }
 
-    @Test
+    @Test(expected = MetricsInvalidException.class)
     public void updateInvalidMetrics() {
+        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        Metrics metrics = MetricsMapper.toDomain(metricsDTO);
+        metricsRepositoryInMemory.saveAndFlush(MetricsMapper.toPersistence(validUsersPersistence, metrics));
 
+        metricsService.updateMetric(MetricsFactory.generateRandomInvalidMetricDTO());
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void updateNullMetrics() {
-
+        metricsService.updateMetric(null);
     }
 
-    @Test
+    @Test(expected = MetricsNotFoundException.class)
     public void updateNonExistingMetrics() {
-
+        metricsService.updateMetric(MetricsFactory.generateRandomValidMetricDTO());
     }
     
     @Test
