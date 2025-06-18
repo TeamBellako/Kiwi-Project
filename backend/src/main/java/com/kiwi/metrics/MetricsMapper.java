@@ -1,15 +1,20 @@
 package com.kiwi.metrics;
 
+import com.kiwi.users.Email;
+import com.kiwi.users.UsersPersistence;
+import com.kiwi.users.UsersRepository;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Optional;
 
 public class MetricsMapper {
     // Persistence -> Domain
     public static Metrics toDomain(MetricsPersistence persistence) {
         if (persistence == null) return null;
-        
+
         return new Metrics(
+                persistence.getUser().getEmail(),
                 persistence.getDate(),
                 persistence.getSteps(),
                 persistence.getScreenTime()
@@ -17,9 +22,11 @@ public class MetricsMapper {
     }
 
     // Domain -> Persistence
-    public static MetricsPersistence toPersistence(Metrics domain) {
+    public static MetricsPersistence toPersistence(UsersPersistence usersPersistence, Metrics domain) {
         if (domain == null) return null;
+        
         return new MetricsPersistence(
+                usersPersistence,
                 domain.getDate(),
                 domain.getSteps(),
                 domain.getScreenTime()
@@ -30,6 +37,7 @@ public class MetricsMapper {
     public static Metrics toDomain(MetricsDTO dto) {
         if (dto == null) return null;
         return new Metrics(
+                new Email(dto.getEmail()),
                 dto.getDate(),
                 new PositiveOrZeroInteger(dto.getSteps()),
                 new PositiveDuration(dto.getScreenTime())
@@ -40,6 +48,7 @@ public class MetricsMapper {
     public static MetricsDTO toDTO(Metrics domain) {
         if (domain == null) return null;
         return new MetricsDTO(
+                domain.getEmail().value(),
                 domain.getDate(),
                 domain.getSteps().value(),
                 domain.getScreenTime().value()
@@ -48,12 +57,12 @@ public class MetricsMapper {
 
     public static Set<Metrics> toDomainSetFromDtoSet(Set<MetricsDTO> dtoSet) {
         if (dtoSet == null) return null;
-        
+
         Set<Metrics> domainSet = new HashSet<>();
         for (MetricsDTO dto : dtoSet) {
-            domainSet.add(toDomain(dto)); 
+            domainSet.add(toDomain(dto));
         }
-        
+
         return domainSet;
     }
 
@@ -68,12 +77,12 @@ public class MetricsMapper {
         return domainSet;
     }
 
-    public static Set<MetricsPersistence> toPersistenceSet(Set<Metrics> domainSet) {
+    public static Set<MetricsPersistence> toPersistenceSet(UsersPersistence usersPersistence, Set<Metrics> domainSet) {
         if (domainSet == null) return null;
 
         Set<MetricsPersistence> persistenceSet = new HashSet<>();
         for (Metrics domain : domainSet) {
-            persistenceSet.add(toPersistence(domain));
+            persistenceSet.add(toPersistence(usersPersistence, domain));
         }
 
         return persistenceSet;
@@ -81,12 +90,12 @@ public class MetricsMapper {
 
     public static Set<MetricsDTO> toDTOSet(Set<Metrics> domainSet) {
         if (domainSet == null) return null;
-        
+
         Set<MetricsDTO> dtoSet = new HashSet<>();
         for (Metrics domain : domainSet) {
             dtoSet.add(toDTO(domain));
         }
-        
+
         return dtoSet;
     }
 }

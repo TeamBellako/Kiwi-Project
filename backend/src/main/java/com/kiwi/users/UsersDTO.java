@@ -26,6 +26,7 @@ public class UsersDTO {
         this.settingsDTO = new SettingsDTO(getEmail());
         this.metricsDTOs = new HashSet<>();
         this.metricsDTOs.add(new MetricsDTO(
+                email,
                 LocalDate.now(),
                 0,
                 Duration.ofSeconds(0)

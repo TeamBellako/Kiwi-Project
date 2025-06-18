@@ -24,4 +24,13 @@ public class MetricsExceptionHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(createErrorResponseBody(ex.getMessage()));
     }
+
+    @ExceptionHandler(MetricsConflictException.class)
+    public ResponseEntity<Map<String, String>> handleMetricsConflict(MetricsConflictException ex) {
+        logger.error("Conflict metrics: {}", ex.getMessage(), ex);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(createErrorResponseBody("A metric with that information already exists"));
+    }
 }

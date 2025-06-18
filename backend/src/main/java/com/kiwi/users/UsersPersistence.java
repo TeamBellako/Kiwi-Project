@@ -33,6 +33,12 @@ public class UsersPersistence {
     public UsersPersistence() {
     }
 
+    public UsersPersistence(Email email, String password, Settings settings) {
+        setEmail(email);
+        this.password = password;
+        setSettings(settings);
+    }
+
     public UsersPersistence(Email email, String password, Settings settings, Set<MetricsPersistence> metrics) {
         setEmail(email);
         this.password = password;

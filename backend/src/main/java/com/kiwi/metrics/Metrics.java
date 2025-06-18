@@ -1,17 +1,29 @@
 package com.kiwi.metrics;
 
+import com.kiwi.users.Email;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class Metrics {
+    private Email email;
     private LocalDate date;
     private PositiveOrZeroInteger steps;
     private PositiveDuration screenTime;
-
-    public Metrics(LocalDate date, PositiveOrZeroInteger steps, PositiveDuration screenTime) {
+    
+    public Metrics(Email email, LocalDate date, PositiveOrZeroInteger steps, PositiveDuration screenTime) {
+        this.email = email;
         this.date = date;
         this.steps = steps;
         this.screenTime = screenTime;
+    }
+
+    public Email getEmail() {
+        return email;
+    }
+
+    public void setEmail(Email email) {
+        this.email = email;
     }
 
     public LocalDate getDate() {
@@ -42,18 +54,19 @@ public class Metrics {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Metrics metrics = (Metrics) o;
-        return Objects.equals(date, metrics.date) && Objects.equals(steps, metrics.steps) && Objects.equals(screenTime, metrics.screenTime);
+        return Objects.equals(email, metrics.email) && Objects.equals(date, metrics.date) && Objects.equals(steps, metrics.steps) && Objects.equals(screenTime, metrics.screenTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, steps, screenTime);
+        return Objects.hash(email, date, steps, screenTime);
     }
 
     @Override
     public String toString() {
         return "Metrics{" +
-                "date=" + date +
+                "email=" + email +
+                ", date=" + date +
                 ", steps=" + steps +
                 ", screenTime=" + screenTime +
                 '}';

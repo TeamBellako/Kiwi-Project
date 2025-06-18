@@ -18,8 +18,7 @@ public class UsersMapper {
         return new UsersPersistence(
                 domain.getEmail(),
                 hashedPassword,
-                domain.getSettings(),
-                MetricsMapper.toPersistenceSet(domain.getMetrics())
+                domain.getSettings()
         );
     }
 

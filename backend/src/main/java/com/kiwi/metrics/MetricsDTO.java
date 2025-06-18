@@ -5,14 +5,28 @@ import java.time.Duration;
 import java.util.Objects;
 
 public class MetricsDTO {
-    private LocalDate date;
-    private Integer steps;
-    private Duration screenTime;
+    private String email = "";
+    private LocalDate date = LocalDate.now();
+    private Integer steps = 0;
+    private Duration screenTime = Duration.ofSeconds(0);
 
-    public MetricsDTO(LocalDate date, Integer steps, Duration screenTime) {
+    public MetricsDTO(String email) {
+        this.email = email;
+    }
+
+    public MetricsDTO(String email, LocalDate date, Integer steps, Duration screenTime) {
+        this.email = email;
         this.date = date;
         this.steps = steps;
         this.screenTime = screenTime;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public LocalDate getDate() {
@@ -43,18 +57,19 @@ public class MetricsDTO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MetricsDTO that = (MetricsDTO) o;
-        return Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTime, that.screenTime);
+        return Objects.equals(email, that.email) && Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTime, that.screenTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, steps, screenTime);
+        return Objects.hash(email, date, steps, screenTime);
     }
 
     @Override
     public String toString() {
         return "MetricsDTO{" +
-                "date=" + date +
+                "email='" + email + '\'' +
+                ", date=" + date +
                 ", steps=" + steps +
                 ", screenTime=" + screenTime +
                 '}';

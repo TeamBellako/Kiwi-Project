@@ -1,5 +1,6 @@
 package com.kiwi.metrics;
 
+import com.kiwi.users.Email;
 import com.kiwi.users.Users;
 import com.kiwi.users.UsersPersistence;
 import jakarta.persistence.*;
@@ -9,12 +10,16 @@ import java.time.Duration;
 import java.util.Objects;
 
 @Entity
-@Table(name = "metrics")
+@Table(name = "metrics", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "date"}))
 public class MetricsPersistence {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UsersPersistence user;
 
     @Column(name = "date", nullable = false, unique = true)
     private LocalDate date;
@@ -26,14 +31,17 @@ public class MetricsPersistence {
     @Convert(converter = DurationConverter.class)
     private Duration screenTime;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UsersPersistence user;
-
     public MetricsPersistence() {
     }
 
     public MetricsPersistence(LocalDate date, PositiveOrZeroInteger steps, PositiveDuration screenTime) {
+        this.date = date;
+        setSteps(steps);
+        setScreenTime(screenTime);
+    }
+
+    public MetricsPersistence(UsersPersistence user, LocalDate date, PositiveOrZeroInteger steps, PositiveDuration screenTime) {
+        this.user = user;
         this.date = date;
         setSteps(steps);
         setScreenTime(screenTime);
@@ -71,6 +79,14 @@ public class MetricsPersistence {
 
     public void setScreenTime(PositiveDuration screenTime) {
         this.screenTime = screenTime.value();
+    }
+
+    public void setUser(UsersPersistence user) {
+        this.user = user;
+    }
+
+    public UsersPersistence getUser() {
+        return user;
     }
 
     @Override
