@@ -1,7 +1,6 @@
 package com.kiwi.metrics;
 
-import com.kiwi.users.Email;
-import com.kiwi.users.Users;
+import com.kiwi.users.*;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -14,26 +13,31 @@ import java.util.Optional;
 @Service
 public class MetricsService {
     private final MetricsRepository metricsRepository;
+    private final UsersService usersService;
     
     @Autowired
-    public MetricsService(MetricsRepository metricsRepository) {
+    public MetricsService(MetricsRepository metricsRepository, UsersService usersService) {
         this.metricsRepository = metricsRepository;
+        this.usersService = usersService;
     }
-    
+
     @Transactional
     public void createMetric(@Valid @NotNull MetricsDTO metricsDTO) {
-//        Metrics metrics;
-//        try {
-//            metrics = MetricsMapper.toDomain(metricsDTO);
-//        } catch (IllegalArgumentException e) {
-//            throw new MetricsInvalidException(e.getMessage());
-//        }
-//        
-////        if (metricsRepository.findByUserAndDate(new Users(metrics.getEmail()), metrics.getDate())) {
-////            throw new MetricsConflictException(metrics.getEmail(), metrics.getDate());
-////        }
-//        
-//        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(metrics));
+        Metrics metrics;
+        try {
+            metrics = MetricsMapper.toDomain(metricsDTO);
+        } catch (IllegalArgumentException e) {
+            throw new MetricsInvalidException(e.getMessage());
+        }
+        
+        Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(metrics.getEmail());
+        if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(metrics.getEmail().value());
+        
+        if (metricsRepository.findByUserAndDate(targetUserPersistence.get(), metrics.getDate()).isPresent()) {
+            throw new MetricsConflictException(metrics.getEmail(), metrics.getDate());
+        }
+
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence.get(), metrics));
     }
     
     @Transactional
