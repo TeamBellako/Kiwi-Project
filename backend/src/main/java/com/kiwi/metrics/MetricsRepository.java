@@ -1,4 +1,12 @@
 package com.kiwi.metrics;
 
-public class MetricsRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+@Repository
+public interface MetricsRepository extends JpaRepository<MetricsPersistence, Long> {
+    Optional<MetricsPersistence> findByDate(LocalDate date);
 }
