@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
-import static com.kiwi.users.UsersTestHTTPUtils.getPostRequestBuilder;
+import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;

@@ -23,7 +23,7 @@ import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
-import static com.kiwi.users.UsersTestHTTPUtils.getPostRequestBuilder;
+import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
