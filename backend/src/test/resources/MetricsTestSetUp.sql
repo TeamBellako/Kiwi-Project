@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS metrics (
     user_id BIGINT NOT NULL,  -- Foreign key to users
     date DATE NOT NULL,
     steps INT NOT NULL CHECK (steps >= 0),  -- Steps must be non-negative
-    screen_time INT NOT NULL CHECK (screen_time >= 0),  -- Screen time must be non-negative, stored in seconds
+    screen_time_seconds INT NOT NULL CHECK (screen_time_seconds >= 0),  -- Screen time must be non-negative, stored in seconds
 
     -- Foreign key to users table
     CONSTRAINT fk_metrics_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

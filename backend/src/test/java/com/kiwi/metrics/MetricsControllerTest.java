@@ -9,7 +9,6 @@ import com.kiwi.security.WebSecurityConfig;
 import com.kiwi.users.CustomUserDetailsService;
 import com.kiwi.users.Email;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,10 +24,7 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static com.kiwi.utils.HTTPTestUtils.getPutRequestBuilder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(MetricsController.class)
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class, JacksonConfig.class})
 public class MetricsControllerTest {
-    
     @Autowired
     private MockMvc mockMvc;
 
