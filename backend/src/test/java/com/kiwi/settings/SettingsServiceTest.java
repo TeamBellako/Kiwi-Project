@@ -1,6 +1,7 @@
 package com.kiwi.settings;
 
-import com.kiwi.users.UsersInvalidException;
+import com.kiwi.features.settings.*;
+import com.kiwi.features.users.UsersInvalidException;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -54,8 +55,8 @@ public class SettingsServiceTest {
         verify(settingsRepository, Mockito.times(1)).saveAndFlush(SettingsServiceTest.this.updatedSettings);
     }
 
-    @Test(expected = UsersInvalidException.class)
-    public void updateSettings_invalidInput_throwsUsersInvalidException() throws UsersInvalidException {
+    @Test(expected = SettingsInvalidException.class)
+    public void updateSettings_invalidInput_throwsUsersInvalidException() throws SettingsInvalidException {
         when(settingsRepository.existsByEmail(invalidSettingsDTO().getEmail())).thenReturn(true);
         
         settingsService.updateSettings(invalidSettingsDTO());

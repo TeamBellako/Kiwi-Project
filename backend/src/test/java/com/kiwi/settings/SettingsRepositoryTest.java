@@ -1,5 +1,7 @@
 package com.kiwi.settings;
 
+import com.kiwi.features.settings.Settings;
+import com.kiwi.features.settings.SettingsRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@Sql(scripts = "/SettingsTestSetUp.sql")
+@Sql(scripts = "/UsersTestSetUp.sql")
 @ActiveProfiles("test")
 public class SettingsRepositoryTest {
     

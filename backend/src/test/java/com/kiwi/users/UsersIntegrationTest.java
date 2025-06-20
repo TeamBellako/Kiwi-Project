@@ -2,9 +2,10 @@ package com.kiwi.users;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.common.GlobalExceptionHandler;
+import com.kiwi.features.users.*;
+import com.kiwi.utils.GlobalExceptionHandler;
 import com.kiwi.security.JwtUtils;
-import com.kiwi.security.WebSecurityConfig;
+import com.kiwi.config.WebSecurityConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
-import static com.kiwi.users.UsersTestHTTPUtils.getPostRequestBuilder;
+import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -1,9 +1,11 @@
 package com.kiwi.settings;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
-import com.kiwi.common.GlobalExceptionHandler;
+import com.kiwi.features.settings.SettingsRepository;
+import com.kiwi.features.settings.SettingsService;
+import com.kiwi.utils.GlobalExceptionHandler;
 import com.kiwi.security.JwtUtils;
-import com.kiwi.security.WebSecurityConfig;
+import com.kiwi.config.WebSecurityConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(scripts = "/SettingsTestSetUp.sql")
+@Sql(scripts = "/UsersTestSetUp.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc 
 @AutoConfigureAddonsWebmvcResourceServerSecurity

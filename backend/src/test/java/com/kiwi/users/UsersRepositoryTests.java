@@ -1,6 +1,10 @@
 package com.kiwi.users;
 
-import com.kiwi.settings.SettingsRepository;
+import com.kiwi.features.settings.SettingsRepository;
+import com.kiwi.features.users.Users;
+import com.kiwi.features.users.UsersMapper;
+import com.kiwi.features.users.UsersPersistence;
+import com.kiwi.features.users.UsersRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

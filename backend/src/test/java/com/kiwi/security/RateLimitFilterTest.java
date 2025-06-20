@@ -1,7 +1,7 @@
 package com.kiwi.security;
 
-import com.kiwi.common.PingController;
-import com.kiwi.users.CustomUserDetailsService;
+import com.kiwi.utils.PingController;
+import com.kiwi.features.users.CustomUserDetailsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class RateLimitFilterTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void shouldEnforceRateLimitAfterTooManyRequests() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             mockMvc.perform(get("/api/ping"))
                     .andExpect(status().isOk());
         }

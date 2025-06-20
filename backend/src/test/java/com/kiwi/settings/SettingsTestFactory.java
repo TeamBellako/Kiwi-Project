@@ -1,5 +1,7 @@
 package com.kiwi.settings;
 
+import com.kiwi.features.settings.SettingsDTO;
+
 public class SettingsTestFactory {
 
     public static SettingsDTO validSettingsDTO() {
