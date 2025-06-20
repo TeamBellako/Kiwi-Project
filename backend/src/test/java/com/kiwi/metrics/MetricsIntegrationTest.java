@@ -2,12 +2,13 @@ package com.kiwi.metrics;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.common.GlobalExceptionHandler;
-import com.kiwi.common.JacksonConfig;
+import com.kiwi.features.metrics.*;
+import com.kiwi.features.users.UsersPersistence;
+import com.kiwi.features.users.UsersRepository;
+import com.kiwi.utils.GlobalExceptionHandler;
+import com.kiwi.config.JacksonConfig;
 import com.kiwi.security.JwtUtils;
-import com.kiwi.security.RateLimitFilter;
-import com.kiwi.security.WebSecurityConfig;
-import com.kiwi.users.*;
+import com.kiwi.config.WebSecurityConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +19,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -125,7 +125,6 @@ public class MetricsIntegrationTest {
 
         Optional<MetricsPersistence> retrievedMetricsPersistence =
                 metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
-
         assert(retrievedMetricsPersistence.isPresent());
         assertNotEquals(MetricsMapper.toDomain(duplicatedUpdatedMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
         assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));

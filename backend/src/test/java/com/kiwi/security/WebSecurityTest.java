@@ -1,9 +1,10 @@
 package com.kiwi.security;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
-import com.kiwi.common.GlobalExceptionHandler;
-import com.kiwi.common.PingController;
-import com.kiwi.users.CustomUserDetailsService;
+import com.kiwi.config.WebSecurityConfig;
+import com.kiwi.utils.GlobalExceptionHandler;
+import com.kiwi.utils.PingController;
+import com.kiwi.features.users.CustomUserDetailsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

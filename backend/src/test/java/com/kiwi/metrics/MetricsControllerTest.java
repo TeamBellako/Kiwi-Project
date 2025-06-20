@@ -1,13 +1,17 @@
 package com.kiwi.metrics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.common.GlobalExceptionHandler;
-import com.kiwi.common.JacksonConfig;
+import com.kiwi.features.metrics.MetricsController;
+import com.kiwi.features.metrics.MetricsDTO;
+import com.kiwi.features.metrics.MetricsFactory;
+import com.kiwi.features.metrics.MetricsService;
+import com.kiwi.utils.GlobalExceptionHandler;
+import com.kiwi.config.JacksonConfig;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
-import com.kiwi.security.WebSecurityConfig;
-import com.kiwi.users.CustomUserDetailsService;
-import com.kiwi.users.Email;
+import com.kiwi.config.WebSecurityConfig;
+import com.kiwi.features.users.CustomUserDetailsService;
+import com.kiwi.types.Email;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

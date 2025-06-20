@@ -2,9 +2,10 @@ package com.kiwi.users;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.common.GlobalExceptionHandler;
+import com.kiwi.features.users.*;
+import com.kiwi.utils.GlobalExceptionHandler;
 import com.kiwi.security.JwtUtils;
-import com.kiwi.security.WebSecurityConfig;
+import com.kiwi.config.WebSecurityConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,9 @@
 package com.kiwi.metrics;
 
-import com.kiwi.users.UsersPersistence;
-import com.kiwi.users.UsersRepository;
+import com.kiwi.features.metrics.*;
+import com.kiwi.types.PositiveOrZeroInteger;
+import com.kiwi.features.users.UsersPersistence;
+import com.kiwi.features.users.UsersRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

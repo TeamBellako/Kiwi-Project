@@ -1,5 +1,7 @@
 package com.kiwi.users;
 
+import com.kiwi.features.users.*;
+import com.kiwi.types.Email;
 import org.junit.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -38,7 +40,7 @@ public class UsersServiceTest {
         usersService.createUser(invalidUserDTO());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = UsersInvalidException.class)
     public void createNullUser() {
         usersService.createUser(null);
     }

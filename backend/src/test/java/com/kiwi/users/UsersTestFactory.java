@@ -1,6 +1,7 @@
 package com.kiwi.users;
 
-import com.kiwi.metrics.MetricsFactory;
+import com.kiwi.features.metrics.MetricsFactory;
+import com.kiwi.features.users.UsersDTO;
 
 import static com.kiwi.settings.SettingsTestFactory.invalidSettingsDTO;
 import static com.kiwi.settings.SettingsTestFactory.validSettingsDTO;

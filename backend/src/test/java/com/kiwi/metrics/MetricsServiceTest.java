@@ -1,6 +1,10 @@
 package com.kiwi.metrics;
 
-import com.kiwi.users.*;
+import com.kiwi.features.metrics.*;
+import com.kiwi.features.users.UsersPersistence;
+import com.kiwi.features.users.UsersRepositoryInMemory;
+import com.kiwi.features.users.UsersService;
+import com.kiwi.types.Email;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -2,7 +2,6 @@ package com.kiwi.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.users.LoginDTO;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -14,7 +13,7 @@ public class HTTPTestUtils {
         ObjectMapper objectMapper = new ObjectMapper();
         return post(uri)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(content));
+                .content(new ObjectMapper().writeValueAsString(content));
     }
 
     public static MockHttpServletRequestBuilder getPutRequestBuilder(String uri, Object content) throws JsonProcessingException {
