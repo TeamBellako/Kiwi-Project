@@ -46,7 +46,7 @@ public class MetricsDTO {
         this.steps = steps;
     }
 
-    public Integer getScreenTimeSeconds() {
+    public Integer getscreenTimeSeconds() {
         return screenTimeSeconds;
     }
 
@@ -81,7 +81,7 @@ public class MetricsDTO {
                 getEmail(),
                 getDate(),
                 getSteps(),
-                getScreenTimeSeconds()
+                getscreenTimeSeconds()
         );
     }
 }

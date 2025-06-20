@@ -38,7 +38,7 @@ public class MetricsExceptionHandler {
     public ResponseEntity<Map<String, String>> handleMetricsNotFound(MetricsNotFoundException ex) {
         logger.error("Not found metrics: {}", ex.getMessage(), ex);
 
-        return ResponseEntity.status(HttpStatus.CONFLICT)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(createErrorResponseBody("Metrics with that information doesn't exist"));
     }

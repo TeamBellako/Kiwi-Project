@@ -69,7 +69,7 @@ public class MetricsPersistence {
         this.steps = steps.value();
     }
 
-    public PositiveOrZeroInteger getScreenTime() {
+    public PositiveOrZeroInteger getScreenTimeSeconds() {
         return new PositiveOrZeroInteger(this.screenTimeSeconds);
     }
 
@@ -105,5 +105,10 @@ public class MetricsPersistence {
                 ", steps=" + steps +
                 ", screenTimeSeconds=" + screenTimeSeconds +
                 '}';
+    }
+    
+    public void mergeFromDomain(Metrics domain) {
+        setSteps(domain.getSteps());
+        setScreenTime(domain.getScreenTimeSeconds());
     }
 }

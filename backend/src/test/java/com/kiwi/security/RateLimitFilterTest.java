@@ -33,7 +33,7 @@ public class RateLimitFilterTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void shouldEnforceRateLimitAfterTooManyRequests() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             mockMvc.perform(get("/api/ping"))
                     .andExpect(status().isOk());
         }

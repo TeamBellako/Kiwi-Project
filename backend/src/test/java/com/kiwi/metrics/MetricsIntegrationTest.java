@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.common.GlobalExceptionHandler;
 import com.kiwi.common.JacksonConfig;
 import com.kiwi.security.JwtUtils;
+import com.kiwi.security.RateLimitFilter;
 import com.kiwi.security.WebSecurityConfig;
 import com.kiwi.users.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,9 +29,10 @@ import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -84,62 +85,172 @@ public class MetricsIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void createInvalidMetrics() throws Exception {
+        mockMvc.perform(post(APIURL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidMetricsDTO)))
+                .andExpect(status().isBadRequest());
 
+        Optional<MetricsPersistence> retrievedMetricsPersistence =
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(invalidMetricsDTO.getDate()));
+        
+        assert(retrievedMetricsPersistence.isEmpty());
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void createNullMetrics() throws Exception {
+        mockMvc.perform(post(APIURL))
+                .andExpect(status().isBadRequest());
 
+        Optional<MetricsPersistence> retrievedMetricsPersistence =
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
+
+        assert(retrievedMetricsPersistence.isEmpty());
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void createDuplicatedMetrics() throws Exception {
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
+        
+        MetricsDTO duplicatedUpdatedMetricsDTO = validMetricsDTO.copy();
+        duplicatedUpdatedMetricsDTO.setSteps(validMetricsDTO.getSteps() + 1);
+        
+        mockMvc.perform(post(APIURL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(duplicatedUpdatedMetricsDTO)))
+                .andExpect(status().isConflict());
 
+        Optional<MetricsPersistence> retrievedMetricsPersistence =
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
+
+        assert(retrievedMetricsPersistence.isPresent());
+        assertNotEquals(MetricsMapper.toDomain(duplicatedUpdatedMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
     }
 
     @Test
+    @WithMockUser(username = "jake@thedog.com")
     public void createMetricsWithImpersonatedUser() throws Exception {
-
+        mockMvc.perform(post(APIURL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validMetricsDTO)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void updateValidMetrics() throws Exception {
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
+        MetricsDTO updatedMetricsDTO = validMetricsDTO.copy();
+        updatedMetricsDTO.setSteps(validMetricsDTO.getSteps() + 1);
 
+        mockMvc.perform(put(APIURL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedMetricsDTO)))
+                .andExpect(status().isOk());
+
+        Optional<MetricsPersistence> retrievedMetricsPersistence =
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
+        assert(retrievedMetricsPersistence.isPresent());
+        assertNotEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void updateInvalidMetrics() throws Exception {
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
+        MetricsDTO updatedMetricsDTO = invalidMetricsDTO.copy();
+        updatedMetricsDTO.setSteps(validMetricsDTO.getSteps() - 1);
+        
+        mockMvc.perform(put(APIURL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedMetricsDTO)))
+                .andExpect(status().isBadRequest());
 
+        Optional<MetricsPersistence> retrievedMetricsPersistence =
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
+        assert(retrievedMetricsPersistence.isPresent());
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void updateNullMetrics() throws Exception {
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
 
+        mockMvc.perform(put(APIURL))
+                .andExpect(status().isBadRequest());
+
+        Optional<MetricsPersistence> retrievedMetricsPersistence =
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
+        assert(retrievedMetricsPersistence.isPresent());
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void updateNonExistingMetrics() throws Exception {
+        mockMvc.perform(put(APIURL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validMetricsDTO)))
+                .andExpect(status().isNotFound());
 
+        Optional<MetricsPersistence> retrievedMetricsPersistence =
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
+        assert(retrievedMetricsPersistence.isEmpty());
     }
 
     @Test
+    @WithMockUser(username = "jake@thedog.com")
     public void updateMetricsWithImpersonatedUser() throws Exception {
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
 
+        MetricsDTO updatedMetricsDTO = validMetricsDTO.copy();
+        updatedMetricsDTO.setSteps(validMetricsDTO.getSteps() + 1);
+
+        mockMvc.perform(put(APIURL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedMetricsDTO)))
+                .andExpect(status().isUnauthorized());
+
+        Optional<MetricsPersistence> retrievedMetricsPersistence =
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
+        assert(retrievedMetricsPersistence.isPresent());
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertNotEquals(MetricsMapper.toDomain(updatedMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void getExistingMetrics() throws Exception {
+        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
 
+        mockMvc.perform(get(APIURL)
+                        .param("email", validMetricsDTO.getEmail())
+                        .param("date", validMetricsDTO.getDate()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.steps").value(validMetricsDTO.getSteps()));
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void getNonExistingMetrics() throws Exception {
-
+        mockMvc.perform(get(APIURL)
+                        .param("email", validMetricsDTO.getEmail())
+                        .param("date", validMetricsDTO.getDate()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
+    @WithMockUser(username = "jake@thedog.com")
     public void getMetricsWithImpersonatedUser() throws Exception {
-
+        mockMvc.perform(get(APIURL)
+                        .param("email", validMetricsDTO.getEmail())
+                        .param("date", validMetricsDTO.getDate()))
+                .andExpect(status().isUnauthorized());
     }
 }

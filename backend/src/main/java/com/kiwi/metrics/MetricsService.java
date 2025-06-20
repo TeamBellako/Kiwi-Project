@@ -39,15 +39,16 @@ public class MetricsService {
     
     @Transactional
     public void updateMetric(@Valid @NotNull MetricsDTO metricsDTO) {
-        Metrics metrics = MetricsMapper.toDomain(metricsDTO);
+        Metrics updateMetrics = MetricsMapper.toDomain(metricsDTO);
         
-        UsersPersistence targetUserPersistence = getTargetUserPersistence(metrics.getEmail());
-        Optional<MetricsPersistence> targetMetricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, metrics.getDate());
+        UsersPersistence targetUserPersistence = getTargetUserPersistence(updateMetrics.getEmail());
+        Optional<MetricsPersistence> targetMetricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, updateMetrics.getDate());
         if (targetMetricsPersistence.isEmpty()) {
-            throw new MetricsNotFoundException(metrics.getEmail(), metrics.getDate());
+            throw new MetricsNotFoundException(updateMetrics.getEmail(), updateMetrics.getDate());
         }
 
-        metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence, metrics));
+        targetMetricsPersistence.get().mergeFromDomain(updateMetrics);
+        metricsRepository.saveAndFlush(targetMetricsPersistence.get());
     }
     
     public Optional<MetricsDTO> getMetricsByEmailAndDate(@Valid @NotNull Email email, @NotNull LocalDate date) {

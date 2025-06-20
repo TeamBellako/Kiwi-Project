@@ -42,7 +42,7 @@ public class Metrics {
         this.steps = steps;
     }
 
-    public PositiveOrZeroInteger getScreenTime() {
+    public PositiveOrZeroInteger getScreenTimeSeconds() {
         return screenTimeSeconds;
     }
 
@@ -70,5 +70,10 @@ public class Metrics {
                 ", steps=" + steps +
                 ", screenTimeSeconds=" + screenTimeSeconds +
                 '}';
+    }
+    
+    public void merge(Metrics other) {
+        this.steps = other.getSteps();
+        this.screenTimeSeconds = other.getScreenTimeSeconds();
     }
 }

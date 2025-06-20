@@ -18,7 +18,7 @@ public class MetricsMapper {
                 persistence.getUser().getEmail(),
                 persistence.getDate(),
                 persistence.getSteps(),
-                persistence.getScreenTime()
+                persistence.getScreenTimeSeconds()
         );
     }
 
@@ -30,7 +30,7 @@ public class MetricsMapper {
                 usersPersistence,
                 domain.getDate(),
                 domain.getSteps(),
-                domain.getScreenTime()
+                domain.getScreenTimeSeconds()
         );
     }
 
@@ -44,7 +44,7 @@ public class MetricsMapper {
                     new Email(dto.getEmail()),
                     LocalDate.parse(dto.getDate()),
                     new PositiveOrZeroInteger(dto.getSteps()),
-                    new PositiveOrZeroInteger(dto.getScreenTimeSeconds())
+                    new PositiveOrZeroInteger(dto.getscreenTimeSeconds())
             );
         } catch (Exception e) {
             throw new MetricsInvalidException(e.getMessage());
@@ -60,7 +60,7 @@ public class MetricsMapper {
                 domain.getEmail().value(),
                 formatDate(domain.getDate()),
                 domain.getSteps().value(),
-                domain.getScreenTime().value()
+                domain.getScreenTimeSeconds().value()
         );
     }
 
