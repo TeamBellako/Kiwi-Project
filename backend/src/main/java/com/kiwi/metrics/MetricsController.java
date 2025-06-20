@@ -38,17 +38,17 @@ public class MetricsController {
         
         metricsService.updateMetric(metricsDTO);
         
-        return ResponseEntity.status(204).body("Metrics updated");
+        return ResponseEntity.ok().body("Metrics updated");
     }
     
     @GetMapping
     public ResponseEntity<MetricsDTO> getMetrics(
             @RequestParam("email") String email,
-            @RequestParam("date") LocalDate date
+            @RequestParam("date") String date
     ) {
         if (isUserImpersonating(email)) return ResponseEntity.status(401).body(null);
 
-        return metricsService.getMetricsByEmailAndDate(new Email(email), date)
+        return metricsService.getMetricsByEmailAndDate(new Email(email), LocalDate.parse(date))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

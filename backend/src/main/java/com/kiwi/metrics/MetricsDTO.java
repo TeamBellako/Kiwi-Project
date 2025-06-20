@@ -8,6 +8,9 @@ public class MetricsDTO {
     private Integer steps;
     private Integer screenTimeSeconds;
 
+    public MetricsDTO() {
+    }
+
     public MetricsDTO(String email) {
         this.email = email;
     }
@@ -71,5 +74,14 @@ public class MetricsDTO {
                 ", steps=" + steps +
                 ", screenTimeSeconds=" + screenTimeSeconds +
                 '}';
+    }
+    
+    public MetricsDTO copy() {
+        return new MetricsDTO(
+                getEmail(),
+                getDate(),
+                getSteps(),
+                getScreenTimeSeconds()
+        );
     }
 }

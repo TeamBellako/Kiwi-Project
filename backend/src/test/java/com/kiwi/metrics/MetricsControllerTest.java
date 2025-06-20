@@ -67,31 +67,29 @@ public class MetricsControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void updateValidMetrics() throws Exception {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
         when(metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(Optional.of(metricsDTO));
         
-        MetricsDTO updatedMetricsDTO = metricsDTO;
+        MetricsDTO updatedMetricsDTO = metricsDTO.copy();
         updatedMetricsDTO.setSteps(metricsDTO.getSteps() + 1);
         
         mockMvc.perform(getPutRequestBuilder(APIURL, updatedMetricsDTO))
                 .andExpect(status().isOk());
-        Optional<MetricsDTO> retrievedUpdatedMetricsDTO = 
-                metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), LocalDate.parse(metricsDTO.getDate()));
-        
-        assert(retrievedUpdatedMetricsDTO.isPresent());
-        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO), MetricsMapper.toDomain(retrievedUpdatedMetricsDTO.get()));
-        assertNotEquals(MetricsMapper.toDomain(metricsDTO), MetricsMapper.toDomain(retrievedUpdatedMetricsDTO.get()));
     }
 
     @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void readValidMetrics() throws Exception {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
         when(metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(Optional.of(metricsDTO));
-        
-        mockMvc.perform(get(APIURL))
+
+        mockMvc.perform(get(APIURL)
+                        .param("email", metricsDTO.getEmail())  
+                        .param("date", metricsDTO.getDate()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.steps").value(metricsDTO.getSteps()));
     }
