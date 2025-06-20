@@ -43,7 +43,7 @@ public class MetricsServiceTest {
         metricsService.createMetric(metricsDTO);
         
         Optional<MetricsPersistence> savedMetricsPersistence = 
-                metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, metricsDTO.getDate());
+                metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, LocalDate.parse(metricsDTO.getDate()));
         assert(savedMetricsPersistence.isPresent());
         assertEquals(MetricsMapper.toDomain(metricsDTO), MetricsMapper.toDomain(savedMetricsPersistence.get()));
     }

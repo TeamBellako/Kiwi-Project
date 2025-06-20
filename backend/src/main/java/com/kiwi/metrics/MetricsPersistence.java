@@ -1,12 +1,9 @@
 package com.kiwi.metrics;
 
-import com.kiwi.users.Email;
-import com.kiwi.users.Users;
 import com.kiwi.users.UsersPersistence;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.time.Duration;
 import java.util.Objects;
 
 @Entity
@@ -27,24 +24,23 @@ public class MetricsPersistence {
     @Column(name = "steps", nullable = false)
     private Integer steps;
     
-    @Column(name = "screen_time", nullable = false)
-    @Convert(converter = DurationConverter.class)
-    private Duration screenTime;
+    @Column(name = "screen_time_seconds", nullable = false)
+    private Integer screenTimeSeconds;
 
     public MetricsPersistence() {
     }
 
-    public MetricsPersistence(LocalDate date, PositiveOrZeroInteger steps, PositiveDuration screenTime) {
+    public MetricsPersistence(LocalDate date, PositiveOrZeroInteger steps, PositiveOrZeroInteger screenTimeSeconds) {
         this.date = date;
         setSteps(steps);
-        setScreenTime(screenTime);
+        setScreenTime(screenTimeSeconds);
     }
 
-    public MetricsPersistence(UsersPersistence user, LocalDate date, PositiveOrZeroInteger steps, PositiveDuration screenTime) {
+    public MetricsPersistence(UsersPersistence user, LocalDate date, PositiveOrZeroInteger steps, PositiveOrZeroInteger screenTimeSeconds) {
         this.user = user;
         this.date = date;
         setSteps(steps);
-        setScreenTime(screenTime);
+        setScreenTime(screenTimeSeconds);
     }
 
     public Integer getId() {
@@ -73,12 +69,12 @@ public class MetricsPersistence {
         this.steps = steps.value();
     }
 
-    public PositiveDuration getScreenTime() {
-        return new PositiveDuration(this.screenTime);
+    public PositiveOrZeroInteger getScreenTime() {
+        return new PositiveOrZeroInteger(this.screenTimeSeconds);
     }
 
-    public void setScreenTime(PositiveDuration screenTime) {
-        this.screenTime = screenTime.value();
+    public void setScreenTime(PositiveOrZeroInteger screenTimeSeconds) {
+        this.screenTimeSeconds = screenTimeSeconds.value();
     }
 
     public void setUser(UsersPersistence user) {
@@ -93,12 +89,12 @@ public class MetricsPersistence {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MetricsPersistence that = (MetricsPersistence) o;
-        return Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTime, that.screenTime);
+        return Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTimeSeconds, that.screenTimeSeconds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, steps, screenTime);
+        return Objects.hash(id, date, steps, screenTimeSeconds);
     }
 
     @Override
@@ -107,7 +103,7 @@ public class MetricsPersistence {
                 "id=" + id +
                 ", date=" + date +
                 ", steps=" + steps +
-                ", screenTime=" + screenTime +
+                ", screenTimeSeconds=" + screenTimeSeconds +
                 '}';
     }
 }

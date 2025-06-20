@@ -13,6 +13,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
@@ -71,7 +72,7 @@ public class MetricsRepositoryTest {
     public void getNonExistingMetrics() {
         assertEquals(
                 Optional.empty(),
-                metricsRepository.findByUserAndDate(validUserPersistence, MetricsFactory.generateRandomValidMetricDTO().getDate())
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(MetricsFactory.generateRandomValidMetricDTO().getDate()))
         );
     }
 }

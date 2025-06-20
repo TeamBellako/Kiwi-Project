@@ -3,8 +3,11 @@ package com.kiwi.metrics;
 import com.kiwi.users.Email;
 import com.kiwi.users.UsersPersistence;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.kiwi.common.FormatUtils.formatDate;
 
 public class MetricsMapper {
     // Persistence -> Domain
@@ -39,9 +42,9 @@ public class MetricsMapper {
         try {
             metrics = new Metrics(
                     new Email(dto.getEmail()),
-                    dto.getDate(),
+                    LocalDate.parse(dto.getDate()),
                     new PositiveOrZeroInteger(dto.getSteps()),
-                    new PositiveDuration(dto.getScreenTime())
+                    new PositiveOrZeroInteger(dto.getScreenTimeSeconds())
             );
         } catch (Exception e) {
             throw new MetricsInvalidException(e.getMessage());
@@ -55,7 +58,7 @@ public class MetricsMapper {
         if (domain == null) return null;
         return new MetricsDTO(
                 domain.getEmail().value(),
-                domain.getDate(),
+                formatDate(domain.getDate()),
                 domain.getSteps().value(),
                 domain.getScreenTime().value()
         );

@@ -9,13 +9,13 @@ public class Metrics {
     private Email email;
     private LocalDate date;
     private PositiveOrZeroInteger steps;
-    private PositiveDuration screenTime;
+    private PositiveOrZeroInteger screenTimeSeconds;
     
-    public Metrics(Email email, LocalDate date, PositiveOrZeroInteger steps, PositiveDuration screenTime) {
+    public Metrics(Email email, LocalDate date, PositiveOrZeroInteger steps, PositiveOrZeroInteger screenTimeSeconds) {
         this.email = email;
         this.date = date;
         this.steps = steps;
-        this.screenTime = screenTime;
+        this.screenTimeSeconds = screenTimeSeconds;
     }
 
     public Email getEmail() {
@@ -42,24 +42,24 @@ public class Metrics {
         this.steps = steps;
     }
 
-    public PositiveDuration getScreenTime() {
-        return screenTime;
+    public PositiveOrZeroInteger getScreenTime() {
+        return screenTimeSeconds;
     }
 
-    public void setScreenTime(PositiveDuration screenTime) {
-        this.screenTime = screenTime;
+    public void setScreenTime(PositiveOrZeroInteger screenTimeSeconds) {
+        this.screenTimeSeconds = screenTimeSeconds;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Metrics metrics = (Metrics) o;
-        return Objects.equals(email, metrics.email) && Objects.equals(date, metrics.date) && Objects.equals(steps, metrics.steps) && Objects.equals(screenTime, metrics.screenTime);
+        return Objects.equals(email, metrics.email) && Objects.equals(date, metrics.date) && Objects.equals(steps, metrics.steps) && Objects.equals(screenTimeSeconds, metrics.screenTimeSeconds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, date, steps, screenTime);
+        return Objects.hash(email, date, steps, screenTimeSeconds);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class Metrics {
                 "email=" + email +
                 ", date=" + date +
                 ", steps=" + steps +
-                ", screenTime=" + screenTime +
+                ", screenTimeSeconds=" + screenTimeSeconds +
                 '}';
     }
 }

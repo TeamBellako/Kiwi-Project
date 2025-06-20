@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.kiwi.common.FormatUtils.formatDate;
+
 public class UsersDTO {
     private String email;
     private String password;
@@ -27,9 +29,9 @@ public class UsersDTO {
         this.metricsDTOs = new HashSet<>();
         this.metricsDTOs.add(new MetricsDTO(
                 email,
-                LocalDate.now(),
+                formatDate(LocalDate.now()),
                 0,
-                Duration.ofSeconds(0)
+                0
         ));
     }
 

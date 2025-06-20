@@ -1,20 +1,21 @@
 package com.kiwi.metrics;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import static com.kiwi.common.FormatUtils.formatDate;
+
 public class MetricsFactory {
     private static final Random RANDOM = new Random();
 
     public static MetricsDTO generateRandomValidMetricDTO() {
-        return new MetricsDTO("finn@thehuman.com", getRandomDate(), getRandomSteps(), getRandomScreenTime());
+        return new MetricsDTO("finn@thehuman.com", getRandomDate(), getRandomSteps(), getRandomScreenTimeSeconds());
     }
 
     public static MetricsDTO generateRandomInvalidMetricDTO() {
-        return new MetricsDTO("finn@thehuman.com", getRandomDate(), -getRandomSteps(), getRandomScreenTime().multipliedBy(-1));
+        return new MetricsDTO("finn@thehuman.com", getRandomDate(), -getRandomSteps(), -getRandomScreenTimeSeconds());
     }
     
     public static Set<MetricsDTO> generateRandomMetricsSet(int size, boolean getValidValues) {
@@ -25,7 +26,7 @@ public class MetricsFactory {
         return metricsDTOSet;
     }
     
-    private static LocalDate getRandomDate() {
+    private static String getRandomDate() {
         int startYear = 2025;
         int endYear = 2026;
 
@@ -33,16 +34,15 @@ public class MetricsFactory {
         int month = RANDOM.nextInt(12) + 1;
         int dayOfMonth = RANDOM.nextInt(28) + 1;
 
-        return LocalDate.of(year, month, dayOfMonth);
+        return formatDate(LocalDate.of(year, month, dayOfMonth));
     }
     
     private static Integer getRandomSteps() {
         return RANDOM.nextInt(10001);
     }
     
-    private static Duration getRandomScreenTime() {
-        long minutes = RANDOM.nextInt(231) + 10;
-        return Duration.ofMinutes(minutes);
+    private static Integer getRandomScreenTimeSeconds() {
+        return RANDOM.nextInt(4 * 60 * 60) + 60;
     }
 }
 

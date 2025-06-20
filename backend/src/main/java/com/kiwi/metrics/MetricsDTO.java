@@ -1,24 +1,22 @@
 package com.kiwi.metrics;
 
-import java.time.LocalDate;
-import java.time.Duration;
 import java.util.Objects;
 
 public class MetricsDTO {
-    private String email = "";
-    private LocalDate date = LocalDate.now();
-    private Integer steps = 0;
-    private Duration screenTime = Duration.ofSeconds(0);
+    private String email;
+    private String date;
+    private Integer steps;
+    private Integer screenTimeSeconds;
 
     public MetricsDTO(String email) {
         this.email = email;
     }
 
-    public MetricsDTO(String email, LocalDate date, Integer steps, Duration screenTime) {
+    public MetricsDTO(String email, String date, Integer steps, Integer screenTimeSeconds) {
         this.email = email;
         this.date = date;
         this.steps = steps;
-        this.screenTime = screenTime;
+        this.screenTimeSeconds = screenTimeSeconds;
     }
 
     public String getEmail() {
@@ -29,11 +27,11 @@ public class MetricsDTO {
         this.email = email;
     }
 
-    public LocalDate getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
@@ -45,33 +43,33 @@ public class MetricsDTO {
         this.steps = steps;
     }
 
-    public Duration getScreenTime() {
-        return screenTime;
+    public Integer getScreenTimeSeconds() {
+        return screenTimeSeconds;
     }
 
-    public void setScreenTime(Duration screenTime) {
-        this.screenTime = screenTime;
+    public void setScreenTimeSeconds(Integer screenTimeSeconds) {
+        this.screenTimeSeconds = screenTimeSeconds;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MetricsDTO that = (MetricsDTO) o;
-        return Objects.equals(email, that.email) && Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTime, that.screenTime);
+        return Objects.equals(email, that.email) && Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTimeSeconds, that.screenTimeSeconds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, date, steps, screenTime);
+        return Objects.hash(email, date, steps, screenTimeSeconds);
     }
 
     @Override
     public String toString() {
         return "MetricsDTO{" +
                 "email='" + email + '\'' +
-                ", date=" + date +
+                ", date='" + date + '\'' +
                 ", steps=" + steps +
-                ", screenTime=" + screenTime +
+                ", screenTimeSeconds=" + screenTimeSeconds +
                 '}';
     }
 }

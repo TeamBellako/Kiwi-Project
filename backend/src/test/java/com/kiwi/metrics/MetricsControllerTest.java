@@ -20,6 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
@@ -68,7 +69,7 @@ public class MetricsControllerTest {
     @Test
     public void updateValidMetrics() throws Exception {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
-        when(metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), metricsDTO.getDate()))
+        when(metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(Optional.of(metricsDTO));
         
         MetricsDTO updatedMetricsDTO = metricsDTO;
@@ -77,7 +78,7 @@ public class MetricsControllerTest {
         mockMvc.perform(getPutRequestBuilder(APIURL, updatedMetricsDTO))
                 .andExpect(status().isOk());
         Optional<MetricsDTO> retrievedUpdatedMetricsDTO = 
-                metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), metricsDTO.getDate());
+                metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), LocalDate.parse(metricsDTO.getDate()));
         
         assert(retrievedUpdatedMetricsDTO.isPresent());
         assertEquals(MetricsMapper.toDomain(updatedMetricsDTO), MetricsMapper.toDomain(retrievedUpdatedMetricsDTO.get()));
@@ -87,7 +88,7 @@ public class MetricsControllerTest {
     @Test
     public void readValidMetrics() throws Exception {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
-        when(metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), metricsDTO.getDate()))
+        when(metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(Optional.of(metricsDTO));
         
         mockMvc.perform(get(APIURL))
