@@ -1,6 +1,6 @@
-package com.bellako.kiwi.features.dashboard
+package com.bellako.kiwi.features.metrics
 
-data class MetricsDTO (
+data class MetricsState (
     val email: String,
     val date: String,
     val steps: Int,

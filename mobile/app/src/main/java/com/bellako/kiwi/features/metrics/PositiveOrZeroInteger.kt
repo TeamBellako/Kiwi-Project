@@ -1,4 +1,4 @@
-package com.bellako.kiwi.features.dashboard
+package com.bellako.kiwi.features.metrics
 
 
 @JvmInline

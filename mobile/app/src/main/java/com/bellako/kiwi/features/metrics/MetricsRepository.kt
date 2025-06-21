@@ -1,7 +1,9 @@
-package com.bellako.kiwi.features.dashboard
+package com.bellako.kiwi.features.metrics
 
+import com.bellako.kiwi.features.users.Email
 import retrofit2.HttpException
 import retrofit2.Response
+import java.time.LocalDate
 
 class MetricsRepository(private val api: IMetricsAPI) {
     suspend fun createMetrics(dto: MetricsDTO): Result<Unit> {
@@ -32,9 +34,9 @@ class MetricsRepository(private val api: IMetricsAPI) {
         }
     }
 
-    suspend fun getMetricsByDateAndUser(email: String, date: String) : Result<MetricsDTO?> {
+    suspend fun getMetricsByDateAndUser(email: Email, date: LocalDate) : Result<MetricsDTO?> {
         return try {
-            val response: Response<MetricsDTO> = api.getMetricsByDateAndUser(email, date)
+            val response: Response<MetricsDTO> = api.getMetricsByDateAndUser(email.value, date.toString())
             if (response.isSuccessful) {
                 Result.success(response.body())
             } else {

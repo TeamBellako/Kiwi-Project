@@ -1,4 +1,4 @@
-package com.bellako.kiwi.features.dashboard
+package com.bellako.kiwi.features.metrics
 
 import retrofit2.Response
 import retrofit2.http.Body

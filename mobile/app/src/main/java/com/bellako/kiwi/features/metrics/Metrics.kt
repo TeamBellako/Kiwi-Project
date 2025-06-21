@@ -1,4 +1,4 @@
-package com.bellako.kiwi.features.dashboard
+package com.bellako.kiwi.features.metrics
 
 import com.bellako.kiwi.features.users.Email
 import java.time.LocalDate
