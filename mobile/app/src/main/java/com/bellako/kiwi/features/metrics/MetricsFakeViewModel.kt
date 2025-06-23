@@ -29,8 +29,22 @@ class MetricsFakeViewModel(
     override suspend fun loadMetrics(
         email: String,
         date: String
-    ): Result<MetricsDTO> {
-        return fakeQuery(email, date)
+    ): Result<Unit> {
+        _uiState.value = UIState.Loading
+
+        return if (fakeError) {
+            _uiState.value = mapExceptionToUIState(fakeException)
+
+            Result.failure(fakeException)
+        } else {
+            _uiState.value = UIState.Success(Unit)
+
+            if (fakeDefaultQueryResult) {
+                _state.value = _state.value?.copy(steps = 0, screenTimeSeconds = 0)
+            }
+
+            Result.success(Unit)
+        }
     }
 
     private fun fakeCommand() : Result<Unit> {
@@ -42,29 +56,6 @@ class MetricsFakeViewModel(
         } else {
             _uiState.value = UIState.Success(Unit)
             Result.success(Unit)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun fakeQuery(
-        email: String,
-        date: String
-    ): Result<MetricsDTO> {
-        _uiState.value = UIState.Loading
-
-        return if (fakeError) {
-            _uiState.value = mapExceptionToUIState(fakeException)
-            Result.failure(fakeException)
-        } else {
-            _uiState.value = UIState.Success(Unit)
-
-            val result: MetricsDTO = if (fakeDefaultQueryResult) {
-                MetricsDTO(email, date, 0, 0)
-            } else {
-                MetricsFactory.generateRandomValidMetricDTO()
-            }
-
-            Result.success(result)
         }
     }
 }

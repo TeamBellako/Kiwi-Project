@@ -49,7 +49,7 @@ class MetricsViewModel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun loadMetrics(email: String, date: String): Result<MetricsDTO> {
+    override suspend fun loadMetrics(email: String, date: String): Result<Unit> {
         val parsedEmail = Email.of(email).getOrNull() ?: return failureWithError(invalidDataMessage())
 
         val parsedDate = try {
@@ -63,7 +63,8 @@ class MetricsViewModel @Inject constructor(
         return repository.getMetricsByDateAndUser(parsedEmail, parsedDate).fold(
             onSuccess = { dto ->
                 _uiState.value = UIState.Success(Unit)
-                Result.success(dto ?: MetricsDTO(parsedEmail.value, parsedDate.toString(), 0, 0))
+                _state.value = MetricsMapper.toState(dto ?: MetricsDTO(parsedEmail.value, parsedDate.toString(), 0, 0))
+                Result.success(Unit)
             },
             onFailure = { throwable -> failureWithMappedError(throwable) }
         )

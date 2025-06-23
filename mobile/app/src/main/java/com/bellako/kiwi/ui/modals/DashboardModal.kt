@@ -16,6 +16,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -28,6 +31,7 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.MetricsState
+import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_H3
 import com.bellako.kiwi.ui.components.Kiwi_Image
@@ -36,27 +40,42 @@ import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun DashboardModal(
     viewModel: IMetricsViewModel
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Kiwi_H2(Kiwi_TextArguments(
-            "Daily Progress",
-            TextAlign.Center,
-            MaterialTheme.colorScheme.inversePrimary
-        ))
+    val state by viewModel.state.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-        DaysIndicators()
-        Kiwi_Spacer()
-        ProgressBox()
+    LaunchedEffect(Unit) {
+        viewModel.loadMetrics(
+            "finn@thehuman.com",
+            LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        )
+    }
+
+    state?.let { currentState ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 128.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Kiwi_H2(Kiwi_TextArguments(
+                "Daily Progress",
+                TextAlign.Center,
+                MaterialTheme.colorScheme.inversePrimary
+            ))
+
+            DaysIndicators()
+            ProgressBox(currentState, uiState)
+        }
     }
 }
 
@@ -102,8 +121,6 @@ private fun DayIndicator(
             color = MaterialTheme.colorScheme.inversePrimary
         ))
 
-        Kiwi_Spacer(0.2F)
-
         val imageResource = if (isSelected) {
             R.drawable.ph_dashboard_day_filled
         } else {
@@ -120,7 +137,10 @@ private fun DayIndicator(
 }
 
 @Composable
-private fun ProgressBox() {
+private fun ProgressBox(
+    currentState: MetricsState,
+    uiState: UIState<Unit>
+) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(40.dp))
@@ -128,34 +148,49 @@ private fun ProgressBox() {
             .background(MaterialTheme.colorScheme.surface)
             .padding(32.dp)
     ) {
-        Column {
-            MetricsProgress()
-            Kiwi_Spacer()
-            QuestsProgress()
+        if (uiState == UIState.Loading) {
+            LoadingModal()
+        }
+        else {
+            Column {
+                MetricsProgress(currentState)
+                QuestsProgress()
+            }
         }
     }
 }
 
 @Composable
-private fun MetricsProgress() {
+private fun MetricsProgress(
+    currentState: MetricsState
+) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier.fillMaxWidth()
     ) {
         MetricProgress(
             "Steps",
-            "1,173",
+            currentState.steps.toString(),
             "8,000",
             Modifier.weight(1.0F)
         )
-        Kiwi_Spacer()
         MetricProgress(
             "Screen Time",
-            "2h 45min",
+            parseScreenTimeSeconds(currentState.screenTimeSeconds),
             "3 hours",
             Modifier.weight(1.0F)
         )
     }
+}
+
+private fun parseScreenTimeSeconds(screenTimeSeconds: Int): String {
+    val hours = screenTimeSeconds / 3600
+    val minutes = (screenTimeSeconds % 3600) / 60
+
+    return buildString {
+        if (hours >= 0) append("${hours}h ")
+        if (minutes >= 0) append("${minutes}min")
+    }.trim()
 }
 
 @Composable

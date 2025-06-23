@@ -11,5 +11,5 @@ interface IMetricsViewModel {
 
     suspend fun createMetrics(state: MetricsState): Result<Unit>
     suspend fun updateMetrics(state: MetricsState): Result<Unit>
-    suspend fun loadMetrics(email: String, date: String): Result<MetricsDTO>
+    suspend fun loadMetrics(email: String, date: String): Result<Unit>
 }
