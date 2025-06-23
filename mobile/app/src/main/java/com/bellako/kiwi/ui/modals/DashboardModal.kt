@@ -1,43 +1,41 @@
 package com.bellako.kiwi.ui.modals
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.ui.components.Kiwi_H2
+import com.bellako.kiwi.ui.components.Kiwi_H3
 import com.bellako.kiwi.ui.components.Kiwi_Image
+import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
-import com.bellako.kiwi.R
-import com.bellako.kiwi.ui.components.Kiwi_H3
-import com.bellako.kiwi.ui.components.Kiwi_P1
-import com.bellako.kiwi.ui.components.Kiwi_P2
 
 @Composable
 fun DashboardModal(
@@ -56,14 +54,16 @@ fun DashboardModal(
             MaterialTheme.colorScheme.inversePrimary
         ))
 
-        DaysRow()
+        DaysIndicators()
         Kiwi_Spacer()
         ProgressBox()
     }
 }
 
 @Composable
-private fun DaysRow() {
+private fun DaysIndicators() {
+    val selectedDayIndex = rememberSaveable { mutableIntStateOf(3) }
+
     Kiwi_Image(
         R.drawable.ph_dashboard_heart,
         "Current day indicator",
@@ -75,23 +75,47 @@ private fun DaysRow() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .wrapContentWidth(Alignment.CenterHorizontally)
     ) {
         val days = listOf("S", "M", "T", "W", "T", "F", "S")
-        days.forEach { day ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Kiwi_P1(Kiwi_TextArguments(
-                    day,
-                    color = MaterialTheme.colorScheme.inversePrimary
-                ))
-
-                Kiwi_Spacer(0.2F)
-
-                Kiwi_Image(
-                    R.drawable.ph_dashboard_day_filled,
-                    "Dashboard day indicator"
-                )
-            }
+        days.forEachIndexed { index, day ->
+            DayIndicator(
+                day,
+                selectedDayIndex.intValue == index,
+                { selectedDayIndex.intValue = index }
+            )
         }
+    }
+}
+
+@Composable
+private fun DayIndicator(
+    dayName: String,
+    isSelected: Boolean,
+    onClicked: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Kiwi_P1(Kiwi_TextArguments(
+            dayName,
+            color = MaterialTheme.colorScheme.inversePrimary
+        ))
+
+        Kiwi_Spacer(0.2F)
+
+        val imageResource = if (isSelected) {
+            R.drawable.ph_dashboard_day_filled
+        } else {
+            R.drawable.ph_dashboard_day_empty
+        }
+        Kiwi_Image(
+            imageResource,
+            "Dashboard day indicator",
+            Modifier
+                .size(40.dp)
+                .clickable { onClicked }
+        )
     }
 }
 
@@ -118,55 +142,55 @@ private fun MetricsProgress() {
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier.fillMaxWidth()
     ) {
+        MetricProgress(
+            "Steps",
+            "1,173",
+            "8,000",
+            Modifier.weight(1.0F)
+        )
+        Kiwi_Spacer()
+        MetricProgress(
+            "Screen Time",
+            "2h 45min",
+            "3 hours",
+            Modifier.weight(1.0F)
+        )
+    }
+}
+
+@Composable
+private fun MetricProgress(
+    metricName: String,
+    currentValue: String,
+    targetValue: String,
+    rowModifier: Modifier = Modifier,
+) {
+    Box(rowModifier) {
         Column(
             modifier = Modifier
-                .weight(1f)
                 .padding(8.dp)
         ){
             Kiwi_H3(Kiwi_TextArguments(
-                "Steps",
+                metricName,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.inversePrimary,
                 modifier = Modifier.fillMaxWidth()
             ))
             Kiwi_P1(Kiwi_TextArguments(
-                "1,173",
+                currentValue,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.inversePrimary,
                 modifier = Modifier.fillMaxWidth()
             ))
             Kiwi_P2(Kiwi_TextArguments(
-                "/8,000",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F),
-                modifier = Modifier.fillMaxWidth()
-            ))
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(8.dp)
-        ){
-            Kiwi_H3(Kiwi_TextArguments(
-                "Screen Time",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.inversePrimary,
-                modifier = Modifier.fillMaxWidth()
-            ))
-            Kiwi_P1(Kiwi_TextArguments(
-                "2h 45min",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.inversePrimary,
-                modifier = Modifier.fillMaxWidth()
-            ))
-            Kiwi_P2(Kiwi_TextArguments(
-                "/3 hours",
+                "/$targetValue",
                 TextAlign.Center,
                 MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F),
                 modifier = Modifier.fillMaxWidth()
             ))
         }
     }
+
 }
 
 @Composable
@@ -180,83 +204,66 @@ private fun QuestsProgress() {
             MaterialTheme.colorScheme.inversePrimary,
             modifier = Modifier.fillMaxWidth()
         ))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.secondary),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.tertiary, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    progress = 0.5F,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
-                        .align(Alignment.Center),
-                    strokeWidth = 4.dp,
-                    color = MaterialTheme.colorScheme.inversePrimary,
-                )
-                Kiwi_Image(
-                    R.drawable.ph_quest_01,
-                    "Quest Indicator 1",
-                    Modifier.size(20.dp)
-                )
-            }
-            Kiwi_P1(Kiwi_TextArguments(
-                "Use Duolingo For 20 Minutes",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.inversePrimary,
-                modifier = Modifier.padding(8.dp)
-            ))
-        }
+
+        QuestProgress(
+            "Use Duolingo For 20 Minutes",
+            R.drawable.ph_quest_01,
+            0.5F
+        )
         Kiwi_Spacer()
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.secondary),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.tertiary, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    progress = 0.8F,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
-                        .align(Alignment.Center),
-                    strokeWidth = 4.dp,
-                    color = MaterialTheme.colorScheme.inversePrimary,
-                )
-                Kiwi_Image(
-                    R.drawable.ph_quest_02,
-                    "Quest Indicator 1",
-                    Modifier.size(20.dp)
-                )
-            }
-            Kiwi_P1(Kiwi_TextArguments(
-                "Do 3 Sets Of 10 Push-Ups",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.inversePrimary,
-                modifier = Modifier.padding(8.dp)
-            ))
-        }
+        QuestProgress(
+            "Do 3 Sets Of 10 Push-Ups",
+            R.drawable.ph_quest_02,
+            0.8F
+        )
     }
 }
 
-@Preview(showBackground = true)
+@Composable
+private fun QuestProgress(
+    questTitle: String,
+    questImageResourceId: Int,
+    currentProgress: Float
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.secondary),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.tertiary, shape = CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                progress = {currentProgress},
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .align(Alignment.Center),
+                strokeWidth = 4.dp,
+                color = MaterialTheme.colorScheme.inversePrimary,
+            )
+            Kiwi_Image(
+                questImageResourceId,
+                "Quest Indicator For: $questTitle",
+                Modifier.size(20.dp)
+            )
+        }
+        Kiwi_P1(Kiwi_TextArguments(
+            questTitle,
+            TextAlign.Center,
+            MaterialTheme.colorScheme.inversePrimary,
+            modifier = Modifier.padding(8.dp)
+        ))
+    }
+}
+
+@Preview
 @Composable
 fun DashboardModalPreview() {
     KiwiTheme {
