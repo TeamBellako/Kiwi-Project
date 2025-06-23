@@ -17,7 +17,7 @@ import java.time.format.DateTimeParseException
 
 @HiltViewModel
 class MetricsViewModel @Inject constructor(
-    private val repository: MetricsRepository,
+    private val repository: MetricsRepository
 ) : ViewModel(), IMetricsViewModel {
     private val _state = MutableStateFlow<MetricsState?>(MetricsState("", "", 0, 0))
     override val state: StateFlow<MetricsState?> = _state.asStateFlow()
@@ -25,133 +25,85 @@ class MetricsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     override val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
-    override suspend fun createMetrics(state: MetricsState): Result<Unit> {
-        val domainResult = MetricsMapper.toDomain(state)
-        if (domainResult.isFailure) {
-            val message = getInvalidDataMessage()
-            _uiState.value = UIState.Error(message)
-            return Result.failure(Exception(message))
-        }
 
-        val domain = domainResult.getOrThrow()
+    override suspend fun createMetrics(state: MetricsState): Result<Unit> {
+        val domain = validateAndMapToDomain(state) ?: return failureWithError(invalidDataMessage())
+
         _uiState.value = UIState.Loading
 
-        val existingMetrics = repository.getMetricsByDateAndUser(domain.email, domain.date).getOrNull()
-        if (existingMetrics != null) {
-            val message = "A metrics entry already exists with that user and date"
-            _uiState.value = UIState.Error(message)
-            return Result.failure(Exception(message));
-        }
+        val exists = repository.getMetricsByDateAndUser(domain.email, domain.date).getOrNull()
+        if (exists != null) return failureWithError("A metrics entry already exists with that user and date")
 
-        val result = repository.createMetrics(MetricsMapper.toDTO(domain))
-        return result.fold(
-            onSuccess = {
-                _uiState.value = UIState.Success(Unit)
-                Result.success(Unit)
-            },
-            onFailure = { throwable ->
-                _uiState.value = when (throwable) {
-                    is HttpException -> {
-                        if (throwable.code() >= 500) UIState.GeneralError
-                        else UIState.Error(extractHttpExceptionMessage(throwable))
-                    }
-                    else -> UIState.GeneralError
-                }
-                Result.failure(throwable)
-            }
-        )
+        return handleResult(repository.createMetrics(MetricsMapper.toDTO(domain)))
     }
 
     override suspend fun updateMetrics(state: MetricsState): Result<Unit> {
-        val domainResult = MetricsMapper.toDomain(state)
-        if (domainResult.isFailure) {
-            val message = getInvalidDataMessage()
-            _uiState.value = UIState.Error(message)
-            return Result.failure(Exception(message))
-        }
+        val domain = validateAndMapToDomain(state) ?: return failureWithError(invalidDataMessage())
 
-        val domain = domainResult.getOrThrow()
         _uiState.value = UIState.Loading
 
-        val existingMetrics = repository.getMetricsByDateAndUser(domain.email, domain.date).getOrNull()
-        if (existingMetrics == null) {
-            val message = "There is no metrics entry with that user and date"
-            _uiState.value = UIState.Error(message)
-            return Result.failure(Exception(message));
-        }
+        val existing = repository.getMetricsByDateAndUser(domain.email, domain.date).getOrNull()
+        if (existing == null) return failureWithError("There is no metrics entry with that user and date")
 
-        val result = repository.updateMetrics(MetricsMapper.toDTO(domain))
-        return result.fold(
-            onSuccess = {
-                _uiState.value = UIState.Success(Unit)
-                Result.success(Unit)
-            },
-            onFailure = { throwable ->
-                _uiState.value = when (throwable) {
-                    is HttpException -> {
-                        if (throwable.code() >= 500) UIState.GeneralError
-                        else UIState.Error(extractHttpExceptionMessage(throwable))
-                    }
-                    else -> UIState.GeneralError
-                }
-                Result.failure(throwable)
-            }
-        )
+        return handleResult(repository.updateMetrics(MetricsMapper.toDTO(domain)))
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun loadMetrics(email: String, date: String): Result<MetricsDTO> {
-        val emailResult = Email.of(email)
-        if (emailResult.isFailure) {
-            val message = getInvalidDataMessage()
-            _uiState.value = UIState.Error(message)
-            return Result.failure(Exception(message))
-        }
+        val parsedEmail = Email.of(email).getOrNull() ?: return failureWithError(invalidDataMessage())
 
-        val dateResult : LocalDate
-        try {
-            dateResult = LocalDate.parse(date)
+        val parsedDate = try {
+            LocalDate.parse(date)
         } catch (e: DateTimeParseException) {
-            val message = getInvalidDataMessage()
-            _uiState.value = UIState.Error(message)
-            return Result.failure(Exception(message))
+            return failureWithError(invalidDataMessage())
         }
 
         _uiState.value = UIState.Loading
 
-        val result = repository.getMetricsByDateAndUser(emailResult.getOrNull()!!, dateResult)
-        return result.fold(
-            onSuccess = {
+        return repository.getMetricsByDateAndUser(parsedEmail, parsedDate).fold(
+            onSuccess = { dto ->
                 _uiState.value = UIState.Success(Unit)
-
-                val resultMetricsDTO = result.getOrNull()
-                if (resultMetricsDTO == null) {
-                    val defaultMetricsDTO: MetricsDTO = MetricsDTO(emailResult.getOrNull()?.value!!, dateResult.toString(), 0, 0)
-                    Result.success(defaultMetricsDTO)
-                }
-                else {
-                    Result.success(resultMetricsDTO)
-                }
+                Result.success(dto ?: MetricsDTO(parsedEmail.value, parsedDate.toString(), 0, 0))
             },
-            onFailure = { throwable ->
-                _uiState.value = when (throwable) {
-                    is HttpException -> {
-                        if (throwable.code() >= 500) UIState.GeneralError
-                        else UIState.Error(extractHttpExceptionMessage(throwable))
-                    }
-                    else -> UIState.GeneralError
-                }
-                Result.failure(throwable)
-            }
+            onFailure = { throwable -> failureWithMappedError(throwable) }
         )
     }
 
-    private fun getInvalidDataMessage(): String {
-        return """
-            Invalid metrics. Metrics must:
-            - Have a valid email format
-            - Have a positive number of steps
-            - Have a positive number of screenTimeSeconds
-        """.trimIndent()
+
+    private fun validateAndMapToDomain(state: MetricsState): Metrics? {
+        return MetricsMapper.toDomain(state).getOrNull()
+    }
+
+    private fun invalidDataMessage(): String = """
+        Invalid metrics. Metrics must:
+        - Have a valid email format
+        - Have a positive number of steps
+        - Have a positive number of screenTimeSeconds
+    """.trimIndent()
+
+    private fun <T> failureWithError(message: String): Result<T> {
+        _uiState.value = UIState.Error(message)
+        return Result.failure(Exception(message))
+    }
+
+    private fun <T> failureWithMappedError(throwable: Throwable): Result<T> {
+        _uiState.value = when (throwable) {
+            is HttpException -> {
+                if (throwable.code() >= 500) UIState.GeneralError
+                else UIState.Error(extractHttpExceptionMessage(throwable))
+            }
+            else -> UIState.GeneralError
+        }
+        return Result.failure(throwable)
+    }
+
+    private fun handleResult(result: Result<Unit>): Result<Unit> {
+        return result.fold(
+            onSuccess = {
+                _uiState.value = UIState.Success(Unit)
+                Result.success(Unit)
+            },
+            onFailure = { throwable -> failureWithMappedError(throwable) }
+        )
     }
 }
