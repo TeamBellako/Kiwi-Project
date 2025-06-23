@@ -129,7 +129,9 @@ class MetricsViewModel @Inject constructor(
                     val defaultMetricsDTO: MetricsDTO = MetricsDTO(emailResult.getOrNull()?.value!!, dateResult.toString(), 0, 0)
                     Result.success(defaultMetricsDTO)
                 }
-                Result.success(resultMetricsDTO!!)
+                else {
+                    Result.success(resultMetricsDTO)
+                }
             },
             onFailure = { throwable ->
                 _uiState.value = when (throwable) {

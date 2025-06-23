@@ -70,7 +70,7 @@ class MetricsIntegrationTest {
 
         val result : Result<MetricsDTO> = viewModel.loadMetrics(validMetricsDTO.email, validMetricsDTO.date)
         assertTrue(result.isSuccess)
-        val expectedMetricsDTO = validMetricsDTO.copy(steps = 0, screenTimeSeconds = 0)
-        assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(expectedMetricsDTO))
+        val expectedMetricsDTO = validMetricsDTO.copy(steps = 0, screenTimeSeconds = 0) // This is the default value
+        assertEquals(MetricsMapper.toDomain(result.getOrNull()!!), MetricsMapper.toDomain(expectedMetricsDTO))
     }
 }
