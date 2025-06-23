@@ -2,7 +2,6 @@ package com.bellako.kiwi
 
 import com.bellako.kiwi.features.metrics.IMetricsAPI
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
-import com.bellako.kiwi.features.metrics.MetricsDTO
 import com.bellako.kiwi.features.metrics.MetricsFactory
 import com.bellako.kiwi.features.metrics.MetricsMapper
 import com.bellako.kiwi.features.metrics.MetricsRepository
@@ -14,7 +13,6 @@ import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import retrofit2.Response
-import kotlin.test.assertEquals
 
 class MetricsIntegrationTest {
     private lateinit var api: IMetricsAPI
@@ -58,9 +56,8 @@ class MetricsIntegrationTest {
         whenever(api.getMetricsByDateAndUser(validMetricsDTO.email, validMetricsDTO.date))
             .thenReturn(Response.success(validMetricsDTO))
 
-        val result : Result<MetricsDTO> = viewModel.loadMetrics(validMetricsDTO.email, validMetricsDTO.date)
+        val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.email, validMetricsDTO.date)
         assertTrue(result.isSuccess)
-        assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(result.getOrNull()!!))
     }
 
     @Test
@@ -68,9 +65,7 @@ class MetricsIntegrationTest {
         whenever(api.getMetricsByDateAndUser(validMetricsDTO.email, validMetricsDTO.date))
             .thenReturn(Response.success(null))
 
-        val result : Result<MetricsDTO> = viewModel.loadMetrics(validMetricsDTO.email, validMetricsDTO.date)
+        val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.email, validMetricsDTO.date)
         assertTrue(result.isSuccess)
-        val expectedMetricsDTO = validMetricsDTO.copy(steps = 0, screenTimeSeconds = 0) // This is the default value
-        assertEquals(MetricsMapper.toDomain(result.getOrNull()!!), MetricsMapper.toDomain(expectedMetricsDTO))
     }
 }
