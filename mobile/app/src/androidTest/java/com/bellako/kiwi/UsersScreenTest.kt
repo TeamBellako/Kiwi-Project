@@ -22,7 +22,7 @@ import com.bellako.kiwi.features.users.UsersTestTags
 
 
 @RunWith(AndroidJUnit4::class)
-class UsersUITest {
+class UsersScreenTest {
     @get:Rule
     val rule = createComposeRule()
 

@@ -43,7 +43,7 @@ object MetricsFactory {
     }
 
     private fun getRandomSteps(): Int {
-        return Random.nextInt(0, 10001)
+        return Random.nextInt(1, 10001)
     }
 
     private fun getRandomScreenTimeSeconds(): Int {

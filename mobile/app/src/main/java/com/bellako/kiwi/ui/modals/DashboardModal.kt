@@ -24,6 +24,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,8 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.MetricsState
+import com.bellako.kiwi.features.metrics.MetricsUtils
+import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_H3
@@ -39,6 +42,7 @@ import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
+import com.bellako.kiwi.ui.tags.DashboardModalTestTags
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -55,6 +59,10 @@ fun DashboardModal(
             "finn@thehuman.com",
             LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         )
+
+        if (state?.isDefault() == true) {
+            viewModel.createMetrics(state!!)
+        }
     }
 
     state?.let { currentState ->
@@ -64,7 +72,8 @@ fun DashboardModal(
                 .padding(top = 128.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.primary)
-                .padding(16.dp),
+                .padding(16.dp)
+                .testTag(CommonTestTags.DASHBOARD_MODAL),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Kiwi_H2(Kiwi_TextArguments(
@@ -101,7 +110,8 @@ private fun DaysIndicators() {
             DayIndicator(
                 day,
                 selectedDayIndex.intValue == index,
-                { selectedDayIndex.intValue = index }
+                { selectedDayIndex.intValue = index },
+                DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
             )
         }
     }
@@ -111,7 +121,8 @@ private fun DaysIndicators() {
 private fun DayIndicator(
     dayName: String,
     isSelected: Boolean,
-    onClicked: () -> Unit
+    onClicked: () -> Unit,
+    testTag: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -132,6 +143,7 @@ private fun DayIndicator(
             Modifier
                 .size(40.dp)
                 .clickable { onClicked }
+                .testTag(testTag)
         )
     }
 }
@@ -172,26 +184,20 @@ private fun MetricsProgress(
             "Steps",
             currentState.steps.toString(),
             "8,000",
-            Modifier.weight(1.0F)
+            Modifier.weight(1.0F),
+            DashboardModalTestTags.STEPS
         )
         MetricProgress(
             "Screen Time",
-            parseScreenTimeSeconds(currentState.screenTimeSeconds),
+            MetricsUtils.parseScreenTimeSeconds(currentState.screenTimeSeconds),
             "3 hours",
-            Modifier.weight(1.0F)
+            Modifier.weight(1.0F),
+            DashboardModalTestTags.SCREEN_TIME
         )
     }
 }
 
-private fun parseScreenTimeSeconds(screenTimeSeconds: Int): String {
-    val hours = screenTimeSeconds / 3600
-    val minutes = (screenTimeSeconds % 3600) / 60
 
-    return buildString {
-        if (hours >= 0) append("${hours}h ")
-        if (minutes >= 0) append("${minutes}min")
-    }.trim()
-}
 
 @Composable
 private fun MetricProgress(
@@ -199,6 +205,7 @@ private fun MetricProgress(
     currentValue: String,
     targetValue: String,
     rowModifier: Modifier = Modifier,
+    testTag: String,
 ) {
     Box(rowModifier) {
         Column(
@@ -215,7 +222,9 @@ private fun MetricProgress(
                 currentValue,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.inversePrimary,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(testTag)
             ))
             Kiwi_P2(Kiwi_TextArguments(
                 "/$targetValue",

@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RunWith(AndroidJUnit4::class)
-class SettingsUITest {
+class SettingsScreenTest {
     @get:Rule
     val rule = createComposeRule()
 
