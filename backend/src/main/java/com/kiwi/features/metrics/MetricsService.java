@@ -54,7 +54,7 @@ public class MetricsService {
         metricsRepository.saveAndFlush(targetMetricsPersistence.get());
     }
     
-    public Optional<MetricsDTO> getMetricsByEmailAndDate(@Valid @NotNull Email email, @NotNull LocalDate date) {
+    public Optional<MetricsDTO> getMetricsOrEmpty(@Valid @NotNull Email email, @NotNull LocalDate date) {
         UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         
         Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, date);

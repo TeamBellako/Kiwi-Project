@@ -9,7 +9,13 @@ public class MetricsDTO {
 
     public MetricsDTO() {
     }
-    
+
+    public MetricsDTO(String date) {
+        this.date = date;
+        steps = 0;
+        screenTimeSeconds = 0;
+    }
+
     public MetricsDTO(String date, Integer steps, Integer screenTimeSeconds) {
         this.date = date;
         this.steps = steps;

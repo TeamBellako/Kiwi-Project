@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user/metrics")
@@ -37,10 +38,11 @@ public class MetricsController {
     }
     
     @GetMapping
-    public ResponseEntity<MetricsDTO> getMetricsByDate(@RequestParam("date") String date) {
-        return metricsService.getMetricsByEmailAndDate(tryGetJWTEmail(), LocalDate.parse(date))
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<MetricsDTO> getMetricsOrDefault(@RequestParam("date") String date) {
+        Optional<MetricsDTO> existingMetricsDTO = metricsService.getMetricsOrEmpty(tryGetJWTEmail(), LocalDate.parse(date));
+        return existingMetricsDTO.map(
+                metricsDTO -> ResponseEntity.ok().body(metricsDTO))
+                .orElseGet(() -> ResponseEntity.ok().body(new MetricsDTO(date)));
     }
     
     private Email tryGetJWTEmail() {

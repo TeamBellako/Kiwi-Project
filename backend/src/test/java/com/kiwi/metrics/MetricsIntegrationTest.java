@@ -210,6 +210,7 @@ public class MetricsIntegrationTest {
     public void getNonExistingMetrics() throws Exception {
         mockMvc.perform(get(APIURL)
                         .param("date", validMetricsDTO.getDate()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.steps").value(0)); // Default value
     }
 }
