@@ -26,44 +26,45 @@ class DashboardModalTest {
 
     private lateinit var fakeViewModel: MetricsFakeViewModel
     private lateinit var state: MetricsState
-    private lateinit var fakeNewMetricsDTO: MetricsDTO
-    private lateinit var fakePastMetricsDTO: MetricsDTO
+
+    private lateinit var futureMetricsDTO: MetricsDTO
+    private lateinit var todayMetricsDTO: MetricsDTO
+    private lateinit var pastMetricsDTO: MetricsDTO
 
     @Before
     fun setUp() {
-        state = MetricsMapper.toState(MetricsFactory.generateRandomValidMetricDTO())
+        val todayLocalDate = LocalDate.now()
+        todayMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.toString())
+        pastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.minusDays(1).toString())
+        futureMetricsDTO = todayMetricsDTO.copy(date = todayLocalDate.plusDays(1).toString(), steps = 0, screenTimeSeconds = 0)
 
-        fakeNewMetricsDTO = MetricsFactory.generateRandomValidMetricDTO()
-        fakePastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO()
-
+        state = MetricsMapper.toState(todayMetricsDTO.copy(steps = 0, screenTimeSeconds = 0))
         fakeViewModel = MetricsFakeViewModel(
             state,
-            fakeNewMetricsDTO,
-            fakePastMetricsDTO
+            todayMetricsDTO,
+            pastMetricsDTO,
+            futureMetricsDTO
         )
+
+        rule.setContent {
+            DashboardModal(fakeViewModel)
+        }
     }
 
     @Test
     fun loadTodayMetrics() {
-        fakeViewModel.fakeNonExistingMetrics = true
-
-        rule.setContent {
-            DashboardModal(fakeViewModel)
-        }
-
-        // TODO: Day indicator
-
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .assertTextEquals(fakeNewMetricsDTO.steps.toString())
+            .assertTextEquals(todayMetricsDTO.steps.toString())
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(fakeNewMetricsDTO.screenTimeSeconds))
+            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(todayMetricsDTO.screenTimeSeconds))
     }
 
     @Test
     fun loadPastMetrics() {
-        rule.setContent {
-            DashboardModal(fakeViewModel)
-        }
+        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
+            .assertTextEquals(todayMetricsDTO.steps.toString())
+        rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
+            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(todayMetricsDTO.screenTimeSeconds))
 
         val yesterdayTestTag =
             DashboardModalTestTags.DAY_INDICATOR_PREFIX + MetricsUtils.getDayOfWeekNumber(
@@ -71,23 +72,18 @@ class DashboardModalTest {
             ).toString()
         rule.onNodeWithTag(yesterdayTestTag).performClick()
 
-        // TODO: Day indicator
-
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .assertTextEquals(fakePastMetricsDTO.steps.toString())
+            .assertTextEquals(pastMetricsDTO.steps.toString())
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(fakePastMetricsDTO.screenTimeSeconds))
+            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(pastMetricsDTO.screenTimeSeconds))
     }
-
-
 
     @Test
     fun loadFutureMetrics() {
-        fakeViewModel.fakeNonExistingMetrics = true
-
-        rule.setContent {
-            DashboardModal(fakeViewModel)
-        }
+        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
+            .assertTextEquals(todayMetricsDTO.steps.toString())
+        rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
+            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(todayMetricsDTO.screenTimeSeconds))
 
         val tomorrowTestTag =
             DashboardModalTestTags.DAY_INDICATOR_PREFIX + MetricsUtils.getDayOfWeekNumber(
@@ -95,12 +91,9 @@ class DashboardModalTest {
             ).toString()
         rule.onNodeWithTag(tomorrowTestTag).performClick()
 
-        // TODO: Day indicator
-
-        // We check that a default metrics entry has been created
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .assertTextEquals("0")
+            .assertTextEquals(futureMetricsDTO.steps.toString())
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextEquals("0h 0min")
+            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(futureMetricsDTO.screenTimeSeconds))
     }
 }

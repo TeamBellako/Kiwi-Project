@@ -12,8 +12,9 @@ import java.time.LocalDate
 @RequiresApi(Build.VERSION_CODES.O)
 class MetricsFakeViewModel  constructor(
     initialState: MetricsState,
-    private val fakeNewMetricsDTO: MetricsDTO = MetricsFactory.generateRandomValidMetricDTO(),
-    private val fakePastMetricsDTO: MetricsDTO = MetricsFactory.generateRandomValidMetricDTO(),
+    private val todayMetricsDTO: MetricsDTO = MetricsFactory.generateRandomValidMetricDTO(),
+    private val pastMetricsDTO: MetricsDTO = MetricsFactory.generateRandomValidMetricDTO(),
+    private val futureMetricsDTO: MetricsDTO = MetricsFactory.generateRandomValidMetricDTO(),
     private val currentDate: LocalDate = LocalDate.now()
 ): ViewModel(), IMetricsViewModel {
     private val _state = MutableStateFlow<MetricsState?>(initialState)
@@ -23,7 +24,6 @@ class MetricsFakeViewModel  constructor(
     override val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
     var fakeError: Boolean = false
-    var fakeNonExistingMetrics: Boolean = false
     var fakeException: Exception = Exception("Fake exception message")
 
 
@@ -36,7 +36,7 @@ class MetricsFakeViewModel  constructor(
             Result.failure(fakeException)
         } else {
             _uiState.value = UIState.Success(Unit)
-            _state.value = MetricsMapper.toState(fakeNewMetricsDTO.copy(date = currentDate.toString()))
+            _state.value = MetricsMapper.toState(todayMetricsDTO)
             Result.success(Unit)
         }
     }
@@ -49,6 +49,7 @@ class MetricsFakeViewModel  constructor(
             Result.failure(fakeException)
         } else {
             _uiState.value = UIState.Success(Unit)
+            _state.value = state
             Result.success(Unit)
         }
     }
@@ -66,10 +67,12 @@ class MetricsFakeViewModel  constructor(
         } else {
             _uiState.value = UIState.Success(Unit)
 
-            if (fakeNonExistingMetrics) {
-                _state.value = _state.value?.copy(steps = 0, screenTimeSeconds = 0)
+            if (LocalDate.parse(date).isEqual(currentDate)) {
+                _state.value = MetricsMapper.toState(todayMetricsDTO)
+            } else if (LocalDate.parse(date).isAfter(currentDate)) {
+                _state.value = MetricsMapper.toState(futureMetricsDTO)
             } else {
-                _state.value = MetricsMapper.toState(fakePastMetricsDTO)
+                _state.value = MetricsMapper.toState(pastMetricsDTO)
             }
 
             Result.success(Unit)

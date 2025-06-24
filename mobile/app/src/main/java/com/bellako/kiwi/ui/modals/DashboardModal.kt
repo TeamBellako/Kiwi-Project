@@ -20,10 +20,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +36,7 @@ import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.features.metrics.MetricsUtils
 import com.bellako.kiwi.services.common.CommonTestTags
+import com.bellako.kiwi.services.common.Logger
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_H3
@@ -44,6 +47,7 @@ import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.tags.DashboardModalTestTags
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -62,6 +66,9 @@ fun DashboardModal(
 
         if (state?.isDefault() == true) {
             viewModel.createMetrics(state!!)
+        } else {
+            // TODO: Update state
+            viewModel.updateMetrics(state!!)
         }
     }
 
@@ -82,15 +89,21 @@ fun DashboardModal(
                 MaterialTheme.colorScheme.inversePrimary
             ))
 
-            DaysIndicators()
+            DaysIndicators(viewModel)
             ProgressBox(currentState, uiState)
         }
     }
 }
 
 @Composable
-private fun DaysIndicators() {
-    val selectedDayIndex = rememberSaveable { mutableIntStateOf(3) }
+private fun DaysIndicators(
+    viewModel: IMetricsViewModel
+) {
+    val currentDate = LocalDate.now()
+    val currentDayIndex = MetricsUtils.getDayOfWeekNumber(currentDate)
+    val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayIndex) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     Kiwi_Image(
         R.drawable.ph_dashboard_heart,
@@ -110,7 +123,19 @@ private fun DaysIndicators() {
             DayIndicator(
                 day,
                 selectedDayIndex.intValue == index,
-                { selectedDayIndex.intValue = index },
+                {
+                    selectedDayIndex.intValue = index
+
+                    val daysBetween = selectedDayIndex.intValue - currentDayIndex
+                    val selectedDate = currentDate.plusDays(daysBetween.toLong())
+
+                    coroutineScope.launch {
+                        viewModel.loadMetrics(
+                            "finn@thehuman.com",
+                            selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                        )
+                    }
+                },
                 DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
             )
         }
@@ -142,7 +167,7 @@ private fun DayIndicator(
             "Dashboard day indicator",
             Modifier
                 .size(40.dp)
-                .clickable { onClicked }
+                .clickable { onClicked() }
                 .testTag(testTag)
         )
     }

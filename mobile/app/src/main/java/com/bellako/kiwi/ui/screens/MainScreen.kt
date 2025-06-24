@@ -76,6 +76,7 @@ fun MainScreen(usersViewModel : UsersViewModel = hiltViewModel()) {
                         )
                     }
                 }
+
                 if (!isLoginScreen) {
                     val metricsViewModel : MetricsViewModel = hiltViewModel()
                     DashboardModal(metricsViewModel)
