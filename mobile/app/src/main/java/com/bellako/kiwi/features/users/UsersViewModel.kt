@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.users
 
 
+import androidx.compose.runtime.mutableStateOf
 import com.bellako.kiwi.services.common.BaseViewModel
 import com.bellako.kiwi.services.network.AuthRepository
 import com.bellako.kiwi.services.common.UIState
@@ -18,6 +19,9 @@ class UsersViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UsersState("", ""))
     override val state: StateFlow<UsersState> = _state.asStateFlow()
+
+    private val _isLoginCompleted = MutableStateFlow(false);
+    val isLoginCompleted : StateFlow<Boolean> = _isLoginCompleted.asStateFlow();
 
     override fun onEmailChanged(email: String) {
         _state.value = _state.value.copy(email = email)
@@ -68,6 +72,7 @@ class UsersViewModel @Inject constructor(
 
         return handleResultSuspend(result) {
             authRepository.setJwtToken(result.getOrThrow())
+            _isLoginCompleted.value = true
         }
     }
 

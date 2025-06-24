@@ -29,7 +29,7 @@ object ScreenRoutes {
 }
 
 @Composable
-fun MainScreen(usersViewModel : UsersViewModel = hiltViewModel()) {
+fun MainScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
     val navController = rememberNavController()
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -37,7 +37,7 @@ fun MainScreen(usersViewModel : UsersViewModel = hiltViewModel()) {
 
     Scaffold(
         bottomBar = {
-            if (!isLoginScreen) {
+            if (!isLoginScreen && usersViewModel.isLoginCompleted.value) {
                 AppBarModal(navController = navController)
             }
         },
@@ -77,8 +77,8 @@ fun MainScreen(usersViewModel : UsersViewModel = hiltViewModel()) {
                     }
                 }
 
-                if (!isLoginScreen) {
-                    val metricsViewModel : MetricsViewModel = hiltViewModel()
+                if (!isLoginScreen && usersViewModel.isLoginCompleted.value) {
+                    val metricsViewModel: MetricsViewModel = hiltViewModel()
                     DashboardModal(metricsViewModel)
                 }
             }
