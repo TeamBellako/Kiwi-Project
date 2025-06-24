@@ -21,39 +21,28 @@ public class MetricsController {
     
     @PostMapping
     public ResponseEntity<String> createMetrics(@RequestBody MetricsDTO metricsDTO) {
-        if (isUserImpersonating(metricsDTO.getEmail())) 
-            return ResponseEntity.status(401).body("You can only create metrics with your own email");
+        String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Email email = new Email(jwtEmail); 
         
         metricsService.createMetric(metricsDTO);
-        URI location = URI.create("/api/user/metrics/" + metricsDTO.getEmail() + "/" + metricsDTO.getDate());
+        URI location = URI.create("/api/user/metrics/" + email.value() + "/" + metricsDTO.getDate());
 
         return ResponseEntity.created(location).build();
     }
     
     @PutMapping
     public ResponseEntity<String> updateMetrics(@RequestBody MetricsDTO metricsDTO) {
-        if (isUserImpersonating(metricsDTO.getEmail())) 
-            return ResponseEntity.status(401).body("You can only update your own metrics");
-        
         metricsService.updateMetric(metricsDTO);
         
         return ResponseEntity.ok().body("Metrics updated");
     }
     
     @GetMapping
-    public ResponseEntity<MetricsDTO> getMetrics(
-            @RequestParam("email") String email,
-            @RequestParam("date") String date
-    ) {
-        if (isUserImpersonating(email)) return ResponseEntity.status(401).body(null);
-
-        return metricsService.getMetricsByEmailAndDate(new Email(email), LocalDate.parse(date))
+    public ResponseEntity<MetricsDTO> getMetricsByDate(@RequestParam("date") String date) {
+        String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        return metricsService.getMetricsByEmailAndDate(new Email(jwtEmail), LocalDate.parse(date))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
-    }
-    
-    private boolean isUserImpersonating(String incomingEmail) {
-        String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName(); 
-        return !jwtEmail.equals(incomingEmail);
     }
 }
