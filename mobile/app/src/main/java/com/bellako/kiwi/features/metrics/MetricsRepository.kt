@@ -34,9 +34,9 @@ class MetricsRepository(private val api: IMetricsAPI) {
         }
     }
 
-    suspend fun getMetricsByDateAndUser(email: Email, date: LocalDate) : Result<MetricsDTO?> {
+    suspend fun getMetricsByDate(date: LocalDate) : Result<MetricsDTO?> {
         return try {
-            val response: Response<MetricsDTO> = api.getMetricsByDateAndUser(email.value, date.toString())
+            val response: Response<MetricsDTO> = api.getMetricsByDate(date.toString())
             if (response.isSuccessful) {
                 Result.success(response.body())
             } else {

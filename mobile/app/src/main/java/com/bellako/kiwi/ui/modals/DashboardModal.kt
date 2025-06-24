@@ -60,7 +60,6 @@ fun DashboardModal(
 
     LaunchedEffect(Unit) {
         viewModel.loadMetrics(
-            "finn@thehuman.com",
             LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         )
 
@@ -131,7 +130,6 @@ private fun DaysIndicators(
 
                     coroutineScope.launch {
                         viewModel.loadMetrics(
-                            "finn@thehuman.com",
                             selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         )
                     }
@@ -339,7 +337,6 @@ fun DashboardModalPreview() {
         DashboardModal(
             MetricsFakeViewModel(
                 MetricsState(
-                    "finn@thehuman.com",
                     "2025-06-12",
                     1173,
                     9900

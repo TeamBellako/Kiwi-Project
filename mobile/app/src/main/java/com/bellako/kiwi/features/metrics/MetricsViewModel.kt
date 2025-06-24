@@ -3,7 +3,6 @@ package com.bellako.kiwi.features.metrics
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
-import com.bellako.kiwi.features.users.Email
 import com.bellako.kiwi.services.common.HTTPUtils.extractHttpExceptionMessage
 import com.bellako.kiwi.services.common.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +18,7 @@ import java.time.format.DateTimeParseException
 class MetricsViewModel @Inject constructor(
     private val repository: MetricsRepository
 ) : ViewModel(), IMetricsViewModel {
-    private val _state = MutableStateFlow<MetricsState?>(MetricsState("", "", 0, 0))
+    private val _state = MutableStateFlow<MetricsState?>(MetricsState("", 0, 0))
     override val state: StateFlow<MetricsState?> = _state.asStateFlow()
 
     private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
@@ -31,7 +30,7 @@ class MetricsViewModel @Inject constructor(
 
         _uiState.value = UIState.Loading
 
-        val exists = repository.getMetricsByDateAndUser(domain.email, domain.date).getOrNull()
+        val exists = repository.getMetricsByDate(domain.date).getOrNull()
         if (exists != null) return failureWithError("A metrics entry already exists with that user and date")
 
         return handleResult(repository.createMetrics(MetricsMapper.toDTO(domain)))
@@ -42,16 +41,14 @@ class MetricsViewModel @Inject constructor(
 
         _uiState.value = UIState.Loading
 
-        val existing = repository.getMetricsByDateAndUser(domain.email, domain.date).getOrNull()
+        val existing = repository.getMetricsByDate(domain.date).getOrNull()
         if (existing == null) return failureWithError("There is no metrics entry with that user and date")
 
         return handleResult(repository.updateMetrics(MetricsMapper.toDTO(domain)))
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun loadMetrics(email: String, date: String): Result<Unit> {
-        val parsedEmail = Email.of(email).getOrNull() ?: return failureWithError(invalidDataMessage())
-
+    override suspend fun loadMetrics(date: String): Result<Unit> {
         val parsedDate = try {
             LocalDate.parse(date)
         } catch (e: DateTimeParseException) {
@@ -60,10 +57,10 @@ class MetricsViewModel @Inject constructor(
 
         _uiState.value = UIState.Loading
 
-        return repository.getMetricsByDateAndUser(parsedEmail, parsedDate).fold(
+        return repository.getMetricsByDate(parsedDate).fold(
             onSuccess = { dto ->
                 _uiState.value = UIState.Success(Unit)
-                _state.value = MetricsMapper.toState(dto ?: MetricsDTO(parsedEmail.value, parsedDate.toString(), 0, 0))
+                _state.value = MetricsMapper.toState(dto ?: MetricsDTO( parsedDate.toString(), 0, 0))
                 Result.success(Unit)
             },
             onFailure = { throwable -> failureWithMappedError(throwable) }

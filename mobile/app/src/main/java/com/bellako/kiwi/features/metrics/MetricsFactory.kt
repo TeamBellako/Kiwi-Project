@@ -12,7 +12,6 @@ object MetricsFactory {
 
     fun generateRandomValidMetricDTO(): MetricsDTO {
         return MetricsDTO(
-            email = "finn@thehuman.com",
             date = getRandomDate(),
             steps = getRandomSteps(),
             screenTimeSeconds = getRandomScreenTimeSeconds()
@@ -21,7 +20,6 @@ object MetricsFactory {
 
     fun generateRandomInvalidMetricDTO(): MetricsDTO {
         return MetricsDTO(
-            email = "finn@thehuman.com",
             date = getRandomDate(),
             steps = -getRandomSteps(),
             screenTimeSeconds = -getRandomScreenTimeSeconds()

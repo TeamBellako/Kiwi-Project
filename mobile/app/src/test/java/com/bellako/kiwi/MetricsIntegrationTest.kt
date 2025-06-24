@@ -32,7 +32,7 @@ class MetricsIntegrationTest {
     fun `create valid metrics`() = runTest {
         whenever(api.createMetrics(validMetricsDTO))
             .thenReturn(Response.success(Unit))
-        whenever(api.getMetricsByDateAndUser(validMetricsDTO.email, validMetricsDTO.date))
+        whenever(api.getMetricsByDate(validMetricsDTO.date))
             .thenReturn(Response.success(null))
 
         val result : Result<Unit> = viewModel.createMetrics(MetricsMapper.toState(validMetricsDTO))
@@ -44,7 +44,7 @@ class MetricsIntegrationTest {
         val updatedMetricsDTO = validMetricsDTO.copy(steps = validMetricsDTO.steps + 1)
         whenever(api.updateMetrics(updatedMetricsDTO))
             .thenReturn(Response.success(Unit))
-        whenever(api.getMetricsByDateAndUser(validMetricsDTO.email, validMetricsDTO.date))
+        whenever(api.getMetricsByDate(validMetricsDTO.date))
             .thenReturn(Response.success(validMetricsDTO))
 
         val result : Result<Unit> = viewModel.updateMetrics(MetricsMapper.toState(updatedMetricsDTO))
@@ -53,19 +53,19 @@ class MetricsIntegrationTest {
 
     @Test
     fun `load valid metrics`() = runTest {
-        whenever(api.getMetricsByDateAndUser(validMetricsDTO.email, validMetricsDTO.date))
+        whenever(api.getMetricsByDate(validMetricsDTO.date))
             .thenReturn(Response.success(validMetricsDTO))
 
-        val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.email, validMetricsDTO.date)
+        val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
         assertTrue(result.isSuccess)
     }
 
     @Test
     fun `load non-existing metrics`() = runTest {
-        whenever(api.getMetricsByDateAndUser(validMetricsDTO.email, validMetricsDTO.date))
+        whenever(api.getMetricsByDate(validMetricsDTO.date))
             .thenReturn(Response.success(null))
 
-        val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.email, validMetricsDTO.date)
+        val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
         assertTrue(result.isSuccess)
     }
 }

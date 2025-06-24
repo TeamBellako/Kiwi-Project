@@ -1,5 +1,7 @@
 package com.bellako.kiwi.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,6 +57,7 @@ fun HomeScreen() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview
 @Composable
 fun HomeScreenPreview() {
@@ -69,7 +72,6 @@ fun HomeScreenPreview() {
                     DashboardModal(
                         MetricsFakeViewModel(
                             MetricsState(
-                                "finn@thehuman.com",
                                 "2025-06-12",
                                 1173,
                                 9900

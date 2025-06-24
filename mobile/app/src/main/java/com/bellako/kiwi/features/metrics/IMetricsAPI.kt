@@ -15,8 +15,5 @@ interface IMetricsAPI {
     suspend fun updateMetrics(@Body dto: MetricsDTO): Response<Unit>
 
     @GET("api/user/metrics")
-    suspend fun getMetricsByDateAndUser(
-        @Query("email") email: String,
-        @Query("date") date: String
-    ): Response<MetricsDTO>
+    suspend fun getMetricsByDate(@Query("date") date: String): Response<MetricsDTO>
 }

@@ -54,10 +54,7 @@ class MetricsFakeViewModel  constructor(
         }
     }
 
-    override suspend fun loadMetrics(
-        email: String,
-        date: String
-    ): Result<Unit> {
+    override suspend fun loadMetrics(date: String): Result<Unit> {
         _uiState.value = UIState.Loading
 
         return if (fakeError) {
