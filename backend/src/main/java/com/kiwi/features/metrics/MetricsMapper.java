@@ -1,6 +1,5 @@
 package com.kiwi.features.metrics;
 
-import com.kiwi.types.Email;
 import com.kiwi.types.PositiveOrZeroInteger;
 import com.kiwi.features.users.UsersPersistence;
 
@@ -16,7 +15,6 @@ public class MetricsMapper {
         if (persistence == null) return null;
 
         return new Metrics(
-                persistence.getUser().getEmail(),
                 persistence.getDate(),
                 persistence.getSteps(),
                 persistence.getScreenTimeSeconds()
@@ -42,10 +40,9 @@ public class MetricsMapper {
         Metrics metrics;
         try {
             metrics = new Metrics(
-                    new Email(dto.getEmail()),
                     LocalDate.parse(dto.getDate()),
                     new PositiveOrZeroInteger(dto.getSteps()),
-                    new PositiveOrZeroInteger(dto.getscreenTimeSeconds())
+                    new PositiveOrZeroInteger(dto.getScreenTimeSeconds())
             );
         } catch (Exception e) {
             throw new MetricsInvalidException(e.getMessage());
@@ -58,7 +55,6 @@ public class MetricsMapper {
     public static MetricsDTO toDTO(Metrics domain) {
         if (domain == null) return null;
         return new MetricsDTO(
-                domain.getEmail().value(),
                 formatDate(domain.getDate()),
                 domain.getSteps().value(),
                 domain.getScreenTimeSeconds().value()

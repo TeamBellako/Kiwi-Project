@@ -200,7 +200,6 @@ public class MetricsIntegrationTest {
         metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
 
         mockMvc.perform(get(APIURL)
-                        .param("email", validMetricsDTO.getEmail())
                         .param("date", validMetricsDTO.getDate()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.steps").value(validMetricsDTO.getSteps()));
@@ -210,7 +209,6 @@ public class MetricsIntegrationTest {
     @WithMockUser(username = "finn@thehuman.com")
     public void getNonExistingMetrics() throws Exception {
         mockMvc.perform(get(APIURL)
-                        .param("email", validMetricsDTO.getEmail())
                         .param("date", validMetricsDTO.getDate()))
                 .andExpect(status().isNotFound());
     }

@@ -29,25 +29,25 @@ public class MetricsService {
     }
 
     @Transactional
-    public void createMetric(@Valid @NotNull MetricsDTO metricsDTO) {
+    public void createMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
         Metrics metrics = MetricsMapper.toDomain(metricsDTO);
 
-        UsersPersistence targetUserPersistence = getTargetUserPersistence(metrics.getEmail());
+        UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         if (metricsRepository.findByUserAndDate(targetUserPersistence, metrics.getDate()).isPresent()) {
-            throw new MetricsConflictException(metrics.getEmail(), metrics.getDate());
+            throw new MetricsConflictException(email, metrics.getDate());
         }
 
         metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence, metrics));
     }
     
     @Transactional
-    public void updateMetric(@Valid @NotNull MetricsDTO metricsDTO) {
+    public void updateMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
         Metrics updateMetrics = MetricsMapper.toDomain(metricsDTO);
         
-        UsersPersistence targetUserPersistence = getTargetUserPersistence(updateMetrics.getEmail());
+        UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         Optional<MetricsPersistence> targetMetricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, updateMetrics.getDate());
         if (targetMetricsPersistence.isEmpty()) {
-            throw new MetricsNotFoundException(updateMetrics.getEmail(), updateMetrics.getDate());
+            throw new MetricsNotFoundException(email, updateMetrics.getDate());
         }
 
         targetMetricsPersistence.get().mergeFromDomain(updateMetrics);

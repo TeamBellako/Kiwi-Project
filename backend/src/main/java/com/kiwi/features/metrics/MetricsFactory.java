@@ -11,11 +11,11 @@ public class MetricsFactory {
     private static final Random RANDOM = new Random();
 
     public static MetricsDTO generateRandomValidMetricDTO() {
-        return new MetricsDTO("finn@thehuman.com", getRandomDate(), getRandomSteps(), getRandomScreenTimeSeconds());
+        return new MetricsDTO(getRandomDate(), getRandomSteps(), getRandomScreenTimeSeconds());
     }
 
     public static MetricsDTO generateRandomInvalidMetricDTO() {
-        return new MetricsDTO("finn@thehuman.com", getRandomDate(), -getRandomSteps(), -getRandomScreenTimeSeconds());
+        return new MetricsDTO(getRandomDate(), -getRandomSteps(), -getRandomScreenTimeSeconds());
     }
     
     public static Set<MetricsDTO> generateRandomMetricsSet(int size, boolean getValidValues) {

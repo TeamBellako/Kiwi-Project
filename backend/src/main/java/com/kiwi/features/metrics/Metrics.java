@@ -1,30 +1,19 @@
 package com.kiwi.features.metrics;
 
-import com.kiwi.types.Email;
 import com.kiwi.types.PositiveOrZeroInteger;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class Metrics {
-    private Email email;
     private LocalDate date;
     private PositiveOrZeroInteger steps;
     private PositiveOrZeroInteger screenTimeSeconds;
     
-    public Metrics(Email email, LocalDate date, PositiveOrZeroInteger steps, PositiveOrZeroInteger screenTimeSeconds) {
-        this.email = email;
+    public Metrics(LocalDate date, PositiveOrZeroInteger steps, PositiveOrZeroInteger screenTimeSeconds) {
         this.date = date;
         this.steps = steps;
         this.screenTimeSeconds = screenTimeSeconds;
-    }
-
-    public Email getEmail() {
-        return email;
-    }
-
-    public void setEmail(Email email) {
-        this.email = email;
     }
 
     public LocalDate getDate() {
@@ -55,18 +44,17 @@ public class Metrics {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Metrics metrics = (Metrics) o;
-        return Objects.equals(email, metrics.email) && Objects.equals(date, metrics.date) && Objects.equals(steps, metrics.steps) && Objects.equals(screenTimeSeconds, metrics.screenTimeSeconds);
+        return Objects.equals(date, metrics.date) && Objects.equals(steps, metrics.steps) && Objects.equals(screenTimeSeconds, metrics.screenTimeSeconds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, date, steps, screenTimeSeconds);
+        return Objects.hash(date, steps, screenTimeSeconds);
     }
 
     @Override
     public String toString() {
         return "Metrics{" +
-                "email=" + email +
                 ", date=" + date +
                 ", steps=" + steps +
                 ", screenTimeSeconds=" + screenTimeSeconds +

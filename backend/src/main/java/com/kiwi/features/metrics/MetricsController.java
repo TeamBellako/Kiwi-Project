@@ -21,28 +21,29 @@ public class MetricsController {
     
     @PostMapping
     public ResponseEntity<String> createMetrics(@RequestBody MetricsDTO metricsDTO) {
-        String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Email email = new Email(jwtEmail); 
+        Email jwtEmail = tryGetJWTEmail();
         
-        metricsService.createMetric(metricsDTO);
-        URI location = URI.create("/api/user/metrics/" + email.value() + "/" + metricsDTO.getDate());
+        metricsService.createMetric(jwtEmail, metricsDTO);
+        URI location = URI.create("/api/user/metrics/" + jwtEmail.value() + "/" + metricsDTO.getDate());
 
         return ResponseEntity.created(location).build();
     }
     
     @PutMapping
     public ResponseEntity<String> updateMetrics(@RequestBody MetricsDTO metricsDTO) {
-        metricsService.updateMetric(metricsDTO);
+        metricsService.updateMetric(tryGetJWTEmail(), metricsDTO);
         
         return ResponseEntity.ok().body("Metrics updated");
     }
     
     @GetMapping
     public ResponseEntity<MetricsDTO> getMetricsByDate(@RequestParam("date") String date) {
-        String jwtEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        
-        return metricsService.getMetricsByEmailAndDate(new Email(jwtEmail), LocalDate.parse(date))
+        return metricsService.getMetricsByEmailAndDate(tryGetJWTEmail(), LocalDate.parse(date))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+    
+    private Email tryGetJWTEmail() {
+        return new Email(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 }
