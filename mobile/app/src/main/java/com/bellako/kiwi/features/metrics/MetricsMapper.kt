@@ -2,7 +2,7 @@ package com.bellako.kiwi.features.metrics
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.bellako.kiwi.features.users.Email
+import com.bellako.kiwi.types.PositiveOrZeroInteger
 import java.time.LocalDate
 
 object MetricsMapper {

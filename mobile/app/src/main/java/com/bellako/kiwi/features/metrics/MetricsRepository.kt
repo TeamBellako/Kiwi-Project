@@ -1,6 +1,5 @@
 package com.bellako.kiwi.features.metrics
 
-import com.bellako.kiwi.features.users.Email
 import retrofit2.HttpException
 import retrofit2.Response
 import java.time.LocalDate

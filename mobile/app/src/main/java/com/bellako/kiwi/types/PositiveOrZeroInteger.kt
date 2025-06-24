@@ -1,5 +1,4 @@
-package com.bellako.kiwi.features.metrics
-
+package com.bellako.kiwi.types
 
 @JvmInline
 value class PositiveOrZeroInteger private constructor(val value: Int) {

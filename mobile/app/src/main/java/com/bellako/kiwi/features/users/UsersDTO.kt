@@ -1,5 +1,8 @@
 package com.bellako.kiwi.features.users
 
+import com.bellako.kiwi.types.Email
+import com.bellako.kiwi.types.Password
+
 data class UsersDTO (
     val email : String,
     val password : String

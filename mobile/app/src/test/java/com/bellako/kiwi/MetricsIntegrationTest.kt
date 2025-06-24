@@ -63,7 +63,7 @@ class MetricsIntegrationTest {
     @Test
     fun `load non-existing metrics`() = runTest {
         whenever(api.getMetricsByDate(validMetricsDTO.date))
-            .thenReturn(Response.success(null))
+            .thenReturn(Response.success(validMetricsDTO.copy(steps = 0, screenTimeSeconds = 0)))
 
         val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
         assertTrue(result.isSuccess)
