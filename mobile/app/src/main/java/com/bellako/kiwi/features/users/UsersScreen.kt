@@ -207,7 +207,6 @@ fun UsersScreenPreview() {
         UsersScreen(
             UsersFakeViewModel(
                 UsersState("finn@thehuman.com", "Math3matical!"),
-                isLoading = false
             ),
             navController = rememberNavController()
         )

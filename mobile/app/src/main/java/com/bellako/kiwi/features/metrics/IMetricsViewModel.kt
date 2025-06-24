@@ -1,12 +1,8 @@
 package com.bellako.kiwi.features.metrics
 
-import com.bellako.kiwi.services.common.UIState
-import kotlinx.coroutines.flow.StateFlow
+import com.bellako.kiwi.features.common.IBaseViewModel
 
-interface IMetricsViewModel {
-    val state: StateFlow<MetricsState?>
-    val uiState: StateFlow<UIState<Unit>>
-
+interface IMetricsViewModel : IBaseViewModel<MetricsState> {
     suspend fun createMetrics(state: MetricsState): Result<Unit>
     suspend fun updateMetrics(state: MetricsState): Result<Unit>
     suspend fun loadMetrics(date: String): Result<Unit>

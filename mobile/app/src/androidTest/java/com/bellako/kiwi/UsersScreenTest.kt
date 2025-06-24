@@ -34,8 +34,7 @@ class UsersScreenTest {
         state = UsersState("finn@thehuman.com", "Math3matical!")
 
         fakeViewModel = UsersFakeViewModel(
-            state,
-            false
+            state
         )
 
         rule.setContent {
