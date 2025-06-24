@@ -33,11 +33,11 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
+import com.bellako.kiwi.features.metrics.MetricsMapper
+import com.bellako.kiwi.features.metrics.MetricsReader
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.features.metrics.MetricsUtils
 import com.bellako.kiwi.services.common.CommonTestTags
-import com.bellako.kiwi.services.common.Logger
-import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_H3
 import com.bellako.kiwi.ui.components.Kiwi_Image
@@ -56,7 +56,6 @@ fun DashboardModal(
     viewModel: IMetricsViewModel
 ) {
     val state by viewModel.state.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadMetrics(
@@ -66,8 +65,8 @@ fun DashboardModal(
         if (state?.isDefault() == true) {
             viewModel.createMetrics(state!!)
         } else {
-            // TODO: Update state
-            viewModel.updateMetrics(state!!)
+            val updatedMetrics = MetricsReader.getCurrentMetrics()
+            viewModel.updateMetrics(MetricsMapper.toState(updatedMetrics))
         }
     }
 
@@ -89,7 +88,7 @@ fun DashboardModal(
             ))
 
             DaysIndicators(viewModel)
-            ProgressBox(currentState, uiState)
+            ProgressBox(currentState)
         }
     }
 }
@@ -174,7 +173,6 @@ private fun DayIndicator(
 @Composable
 private fun ProgressBox(
     currentState: MetricsState,
-    uiState: UIState<Unit>
 ) {
     Box(
         modifier = Modifier
@@ -183,14 +181,9 @@ private fun ProgressBox(
             .background(MaterialTheme.colorScheme.surface)
             .padding(32.dp)
     ) {
-        if (uiState == UIState.Loading) {
-            LoadingModal()
-        }
-        else {
-            Column {
-                MetricsProgress(currentState)
-                QuestsProgress()
-            }
+        Column {
+            MetricsProgress(currentState)
+            QuestsProgress()
         }
     }
 }

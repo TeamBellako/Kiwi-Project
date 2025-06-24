@@ -60,7 +60,7 @@ class MetricsViewModel @Inject constructor(
         return repository.getMetricsByDate(parsedDate).fold(
             onSuccess = { dto ->
                 _uiState.value = UIState.Success(Unit)
-                _state.value = MetricsMapper.toState(dto ?: MetricsDTO( parsedDate.toString(), 0, 0))
+                _state.value = MetricsMapper.toState(dto!!)
                 Result.success(Unit)
             },
             onFailure = { throwable -> failureWithMappedError(throwable) }
@@ -74,7 +74,6 @@ class MetricsViewModel @Inject constructor(
 
     private fun invalidDataMessage(): String = """
         Invalid metrics. Metrics must:
-        - Have a valid email format
         - Have a positive number of steps
         - Have a positive number of screenTimeSeconds
     """.trimIndent()
