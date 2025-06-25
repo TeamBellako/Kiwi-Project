@@ -12,6 +12,7 @@ import com.bellako.kiwi.features.metrics.MetricsMapper
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.features.metrics.MetricsUtils
 import com.bellako.kiwi.ui.modals.DashboardModal
+import com.bellako.kiwi.ui.modals.DashboardModalState
 import com.bellako.kiwi.ui.tags.DashboardModalTestTags
 import org.junit.Before
 import org.junit.Rule
@@ -47,7 +48,7 @@ class DashboardModalTest {
         )
 
         rule.setContent {
-            DashboardModal(fakeViewModel)
+            DashboardModal(fakeViewModel, DashboardModalState.EXPANDED)
         }
     }
 

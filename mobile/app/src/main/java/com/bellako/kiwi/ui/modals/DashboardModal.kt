@@ -10,17 +10,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -90,27 +87,33 @@ fun DashboardModalPreview() {
 
 @Composable
 fun DashboardModal(
-    viewModel: IMetricsViewModel
+    viewModel: IMetricsViewModel,
+    dashboardModalState: DashboardModalState = DashboardModalState.COLLAPSED
 ) {
-    val state by viewModel.state.collectAsState()
-    LaunchedEffect(Unit) {
-        viewModel.loadMetrics(
-            LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-        )
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        val state by viewModel.state.collectAsState()
+        LaunchedEffect(Unit) {
+            viewModel.loadMetrics(
+                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            )
 
-        if (state?.isDefault() == true) {
-            viewModel.createMetrics(state!!)
-        } else {
-            val updatedMetrics = MetricsReader.getCurrentMetrics()
-            viewModel.updateMetrics(MetricsMapper.toState(updatedMetrics))
+            if (state?.isDefault() == true) {
+                viewModel.createMetrics(state!!)
+            } else {
+                val updatedMetrics = MetricsReader.getCurrentMetrics()
+                viewModel.updateMetrics(MetricsMapper.toState(updatedMetrics))
+            }
         }
-    }
 
-    val dashboardState  = rememberSaveable { mutableStateOf(DashboardModalState.COLLAPSED) }
-    when (dashboardState.value) {
-        DashboardModalState.EXPANDED -> ExpandedDashboardModal(viewModel, state)
-        DashboardModalState.COLLAPSED -> CollapsedDashboard(state, false)
-        DashboardModalState.HIDDEN -> CollapsedDashboard(state, true)
+        val dashboardState  = rememberSaveable { mutableStateOf(dashboardModalState) }
+        when (dashboardState.value) {
+            DashboardModalState.EXPANDED -> ExpandedDashboardModal(viewModel, state)
+            DashboardModalState.COLLAPSED -> CollapsedDashboard(state, false)
+            DashboardModalState.HIDDEN -> CollapsedDashboard(state, true)
+        }
     }
 }
 
