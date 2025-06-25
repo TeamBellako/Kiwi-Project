@@ -13,6 +13,14 @@ object MetricsUtils {
         }.trim()
     }
 
+    fun parseScreenTimeSecondsToMinutes(screenTimeSeconds: Int): String {
+        val minutes = (screenTimeSeconds % 3600) / 60
+
+        return buildString {
+            if (minutes >= 0) append("${minutes}min")
+        }.trim()
+    }
+
     fun getDayOfWeekNumber(date: LocalDate): Int {
         val dayOfWeek = date.dayOfWeek
         return (dayOfWeek.ordinal + 1) % 7

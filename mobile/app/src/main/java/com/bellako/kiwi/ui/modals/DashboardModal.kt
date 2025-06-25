@@ -1,5 +1,7 @@
 package com.bellako.kiwi.ui.modals
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,16 +14,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -29,8 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
@@ -40,6 +49,8 @@ import com.bellako.kiwi.features.metrics.MetricsReader
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.features.metrics.MetricsUtils
 import com.bellako.kiwi.services.common.CommonTestTags
+import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
+import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_H3
 import com.bellako.kiwi.ui.components.Kiwi_HorizontalLine
@@ -54,12 +65,34 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+enum class DashboardModalState {
+    EXPANDED,
+    COLLAPSED,
+    HIDDEN
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview
+@Composable
+fun DashboardModalPreview() {
+    KiwiTheme {
+        DashboardModal(
+            MetricsFakeViewModel(
+                MetricsState(
+                    "2025-06-12",
+                    1173,
+                    9900
+                )
+            )
+        )
+    }
+}
+
 @Composable
 fun DashboardModal(
     viewModel: IMetricsViewModel
 ) {
     val state by viewModel.state.collectAsState()
-
     LaunchedEffect(Unit) {
         viewModel.loadMetrics(
             LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
@@ -73,6 +106,105 @@ fun DashboardModal(
         }
     }
 
+    val dashboardState  = rememberSaveable { mutableStateOf(DashboardModalState.COLLAPSED) }
+    when (dashboardState.value) {
+        DashboardModalState.EXPANDED -> ExpandedDashboardModal(viewModel, state)
+        DashboardModalState.COLLAPSED -> CollapsedDashboard(state, false)
+        DashboardModalState.HIDDEN -> CollapsedDashboard(state, true)
+    }
+}
+
+@Composable
+private fun CollapsedDashboard(
+    state: MetricsState?,
+    isHidden: Boolean
+) {
+    state?.let { currentState ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Header()
+
+            if (!isHidden) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(40.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .wrapContentSize()
+                    ) {
+                        CurrentDayIndicator(120.dp)
+
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .wrapContentSize()
+                        ) {
+                            val stepsText = buildAnnotatedString {
+                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
+                                    append(state.steps.toString())
+                                }
+                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F))) {
+                                    append("/8,000 steps")
+                                }
+                            }
+                            Kiwi_AnnotatedString(
+                                Kiwi_AnnotatedStringArguments(
+                                    stepsText,
+                                    TextAlign.Left,
+                                    modifier = Modifier
+                                        .testTag(DashboardModalTestTags.STEPS)
+                                )
+                            )
+
+                            val screenTimeText = buildAnnotatedString {
+                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
+                                    append((state.screenTimeSeconds / 60).toString())
+                                }
+                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F))) {
+                                    append("/60 screen mins")
+                                }
+                            }
+                            Kiwi_AnnotatedString(
+                                Kiwi_AnnotatedStringArguments(
+                                    screenTimeText,
+                                    TextAlign.Left,
+                                    modifier = Modifier
+                                        .testTag(DashboardModalTestTags.SCREEN_TIME)
+                                )
+                            )
+                        }
+                        Kiwi_Image(
+                            R.drawable.calendar,
+                            "Calendar View Button",
+                            Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .padding(8.dp)
+                                .size(30.dp)
+                                .background(MaterialTheme.colorScheme.background)
+
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExpandedDashboardModal(
+    viewModel: IMetricsViewModel,
+    state: MetricsState?
+) {
     state?.let { currentState ->
         Column(
             modifier = Modifier
@@ -84,27 +216,30 @@ fun DashboardModal(
                 .testTag(CommonTestTags.DASHBOARD_MODAL),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Kiwi_HorizontalLine(
-                40.dp,
-                2.dp,
-                Color.LightGray,
-                Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 8.dp)
-            )
-
-            Kiwi_Spacer()
-
-            Kiwi_H2(Kiwi_TextArguments(
-                "Daily Progress",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.inversePrimary
-            ))
-
+            Header()
             DaysIndicators(viewModel)
             ProgressBox(currentState)
         }
     }
+}
+
+@Composable
+private fun Header() {
+    Kiwi_HorizontalLine(
+        40.dp,
+        2.dp,
+        Color.LightGray,
+        Modifier
+            .padding(top = 8.dp)
+    )
+
+    Kiwi_Spacer()
+
+    Kiwi_H2(Kiwi_TextArguments(
+        "Daily Progress",
+        TextAlign.Center,
+        MaterialTheme.colorScheme.inversePrimary
+    ))
 }
 
 @Composable
@@ -117,11 +252,7 @@ private fun DaysIndicators(
 
     val coroutineScope = rememberCoroutineScope()
 
-    Kiwi_Image(
-        R.drawable.ph_dashboard_heart,
-        "Current day indicator",
-        Modifier.size(240.dp)
-    )
+    CurrentDayIndicator(240.dp)
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -151,6 +282,17 @@ private fun DaysIndicators(
             )
         }
     }
+}
+
+@Composable
+private fun CurrentDayIndicator(
+    size: Dp
+) {
+    Kiwi_Image(
+        R.drawable.ph_dashboard_heart,
+        "Current day indicator",
+        Modifier.size(size)
+    )
 }
 
 @Composable
@@ -196,7 +338,16 @@ private fun ProgressBox(
             .padding(32.dp)
     ) {
         Column {
-            MetricsProgress(currentState)
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                MetricsProgress(
+                    currentState,
+                    Modifier.weight(1.0F)
+                )
+            }
+
             QuestsProgress()
         }
     }
@@ -204,40 +355,34 @@ private fun ProgressBox(
 
 @Composable
 private fun MetricsProgress(
-    currentState: MetricsState
+    currentState: MetricsState,
+    modifier: Modifier
 ) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        MetricProgress(
-            "Steps",
-            currentState.steps.toString(),
-            "8,000",
-            Modifier.weight(1.0F),
-            DashboardModalTestTags.STEPS
-        )
-        MetricProgress(
-            "Screen Time",
-            MetricsUtils.parseScreenTimeSeconds(currentState.screenTimeSeconds),
-            "3 hours",
-            Modifier.weight(1.0F),
-            DashboardModalTestTags.SCREEN_TIME
-        )
-    }
+    MetricProgress(
+        "Steps",
+        currentState.steps.toString(),
+        "8,000",
+        modifier,
+        DashboardModalTestTags.STEPS
+    )
+    MetricProgress(
+        "Screen Time",
+        MetricsUtils.parseScreenTimeSeconds(currentState.screenTimeSeconds),
+        "3 hours",
+        modifier,
+        DashboardModalTestTags.SCREEN_TIME
+    )
 }
-
-
 
 @Composable
 private fun MetricProgress(
     metricName: String,
     currentValue: String,
     targetValue: String,
-    rowModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     testTag: String,
 ) {
-    Box(rowModifier) {
+    Box(modifier) {
         Column(
             modifier = Modifier
                 .padding(8.dp)
@@ -248,23 +393,35 @@ private fun MetricProgress(
                 MaterialTheme.colorScheme.inversePrimary,
                 modifier = Modifier.fillMaxWidth()
             ))
-            Kiwi_P1(Kiwi_TextArguments(
+            MetricsProgressText(
                 currentValue,
-                TextAlign.Center,
-                MaterialTheme.colorScheme.inversePrimary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(testTag)
-            ))
-            Kiwi_P2(Kiwi_TextArguments(
-                "/$targetValue",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F),
-                modifier = Modifier.fillMaxWidth()
-            ))
+                targetValue,
+                testTag
+            )
         }
     }
+}
 
+@Composable
+private fun MetricsProgressText(
+    currentValue: String,
+    targetValue: String,
+    testTag: String,
+) {
+    Kiwi_P1(Kiwi_TextArguments(
+        currentValue,
+        TextAlign.Center,
+        MaterialTheme.colorScheme.inversePrimary,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(testTag)
+    ))
+    Kiwi_P2(Kiwi_TextArguments(
+        "/$targetValue",
+        TextAlign.Center,
+        MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F),
+        modifier = Modifier.fillMaxWidth()
+    ))
 }
 
 @Composable
@@ -334,21 +491,5 @@ private fun QuestProgress(
             MaterialTheme.colorScheme.inversePrimary,
             modifier = Modifier.padding(8.dp)
         ))
-    }
-}
-
-@Preview
-@Composable
-fun DashboardModalPreview() {
-    KiwiTheme {
-        DashboardModal(
-            MetricsFakeViewModel(
-                MetricsState(
-                    "2025-06-12",
-                    1173,
-                    9900
-                )
-            )
-        )
     }
 }
