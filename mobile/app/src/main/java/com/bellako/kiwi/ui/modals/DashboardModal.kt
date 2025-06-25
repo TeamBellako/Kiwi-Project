@@ -95,34 +95,28 @@ fun DashboardModal(
         contentAlignment = Alignment.BottomCenter
     ) {
         val state by viewModel.state.collectAsState()
-        LaunchedEffect(Unit) {
-            viewModel.loadMetrics(
-                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            )
 
-            if (state?.isDefault() == true) {
-                viewModel.createMetrics(state!!)
-            } else {
-                val updatedMetrics = MetricsReader.getCurrentMetrics()
-                viewModel.updateMetrics(MetricsMapper.toState(updatedMetrics))
+        LaunchedEffect(Unit) {
+            viewModel.loadMetrics(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+            state?.let {
+                if (it.isDefault()) viewModel.createMetrics(it)
+                else viewModel.updateMetrics(MetricsMapper.toState(MetricsReader.getCurrentMetrics()))
             }
         }
 
-        val dashboardState  = rememberSaveable { mutableStateOf(dashboardModalState) }
-        when (dashboardState.value) {
-            DashboardModalState.EXPANDED -> ExpandedDashboardModal(viewModel, state)
-            DashboardModalState.COLLAPSED -> CollapsedDashboard(state, false)
-            DashboardModalState.HIDDEN -> CollapsedDashboard(state, true)
+        val currentState = rememberSaveable { mutableStateOf(dashboardModalState) }
+
+        when (currentState.value) {
+            DashboardModalState.EXPANDED -> ExpandedContent(viewModel, state)
+            DashboardModalState.COLLAPSED -> CollapsedContent(state, isHidden = false)
+            DashboardModalState.HIDDEN -> CollapsedContent(state, isHidden = true)
         }
     }
 }
 
 @Composable
-private fun CollapsedDashboard(
-    state: MetricsState?,
-    isHidden: Boolean
-) {
-    state?.let { currentState ->
+private fun CollapsedContent(state: MetricsState?, isHidden: Boolean) {
+    state?.let {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -134,81 +128,15 @@ private fun CollapsedDashboard(
             Header()
 
             if (!isHidden) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(40.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .wrapContentSize()
-                    ) {
-                        CurrentDayIndicator(120.dp)
-
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .wrapContentSize()
-                        ) {
-                            val stepsText = buildAnnotatedString {
-                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
-                                    append(state.steps.toString())
-                                }
-                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F))) {
-                                    append("/8,000 steps")
-                                }
-                            }
-                            Kiwi_AnnotatedString(
-                                Kiwi_AnnotatedStringArguments(
-                                    stepsText,
-                                    TextAlign.Left,
-                                    modifier = Modifier
-                                        .testTag(DashboardModalTestTags.STEPS)
-                                )
-                            )
-
-                            val screenTimeText = buildAnnotatedString {
-                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
-                                    append((state.screenTimeSeconds / 60).toString())
-                                }
-                                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F))) {
-                                    append("/60 screen mins")
-                                }
-                            }
-                            Kiwi_AnnotatedString(
-                                Kiwi_AnnotatedStringArguments(
-                                    screenTimeText,
-                                    TextAlign.Left,
-                                    modifier = Modifier
-                                        .testTag(DashboardModalTestTags.SCREEN_TIME)
-                                )
-                            )
-                        }
-                        Kiwi_Image(
-                            R.drawable.calendar,
-                            "Calendar View Button",
-                            Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .padding(8.dp)
-                                .size(30.dp)
-                                .background(MaterialTheme.colorScheme.background)
-
-                        )
-                    }
-                }
+                CollapsedSummaryCard(it)
             }
         }
     }
 }
 
 @Composable
-private fun ExpandedDashboardModal(
-    viewModel: IMetricsViewModel,
-    state: MetricsState?
-) {
-    state?.let { currentState ->
+private fun ExpandedContent(viewModel: IMetricsViewModel, state: MetricsState?) {
+    state?.let {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -220,8 +148,8 @@ private fun ExpandedDashboardModal(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Header()
-            DaysIndicators(viewModel)
-            ProgressBox(currentState)
+            ExpandedDaysIndicators(viewModel)
+            ExpandedProgressBox(it)
         }
     }
 }
@@ -232,8 +160,7 @@ private fun Header() {
         40.dp,
         2.dp,
         Color.LightGray,
-        Modifier
-            .padding(top = 8.dp)
+        Modifier.padding(top = 8.dp)
     )
 
     Kiwi_Spacer()
@@ -241,18 +168,25 @@ private fun Header() {
     Kiwi_H2(Kiwi_TextArguments(
         "Daily Progress",
         TextAlign.Center,
-        MaterialTheme.colorScheme.inversePrimary
-    ))
+        MaterialTheme.colorScheme.inversePrimary)
+    )
 }
 
 @Composable
-private fun DaysIndicators(
-    viewModel: IMetricsViewModel
-) {
+private fun CurrentDayIndicator(size: Dp) {
+    Kiwi_Image(
+        R.drawable.ph_dashboard_heart,
+        "Current day indicator",
+        Modifier.size(size)
+    )
+}
+
+
+@Composable
+private fun ExpandedDaysIndicators(viewModel: IMetricsViewModel) {
     val currentDate = LocalDate.now()
     val currentDayIndex = MetricsUtils.getDayOfWeekNumber(currentDate)
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayIndex) }
-
     val coroutineScope = rememberCoroutineScope()
 
     CurrentDayIndicator(240.dp)
@@ -264,75 +198,44 @@ private fun DaysIndicators(
             .padding(16.dp)
             .wrapContentWidth(Alignment.CenterHorizontally)
     ) {
-        val days = listOf("S", "M", "T", "W", "T", "F", "S")
-        days.forEachIndexed { index, day ->
-            DayIndicator(
-                day,
-                selectedDayIndex.intValue == index,
-                {
+        listOf("S", "M", "T", "W", "T", "F", "S").forEachIndexed { index, day ->
+            ExpandedDayIndicator(
+                dayName = day,
+                isSelected = selectedDayIndex.intValue == index,
+                onClicked = {
                     selectedDayIndex.intValue = index
 
-                    val daysBetween = selectedDayIndex.intValue - currentDayIndex
-                    val selectedDate = currentDate.plusDays(daysBetween.toLong())
+                    val selectedDate = currentDate.plusDays((index - currentDayIndex).toLong())
 
                     coroutineScope.launch {
-                        viewModel.loadMetrics(
-                            selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                        )
+                        viewModel.loadMetrics(selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                     }
                 },
-                DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
+                testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
             )
         }
     }
 }
 
-@Composable
-private fun CurrentDayIndicator(
-    size: Dp
-) {
-    Kiwi_Image(
-        R.drawable.ph_dashboard_heart,
-        "Current day indicator",
-        Modifier.size(size)
-    )
-}
 
 @Composable
-private fun DayIndicator(
-    dayName: String,
-    isSelected: Boolean,
-    onClicked: () -> Unit,
-    testTag: String
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+private fun ExpandedDayIndicator(dayName: String, isSelected: Boolean, onClicked: () -> Unit, testTag: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Kiwi_P1(Kiwi_TextArguments(
             dayName,
-            color = MaterialTheme.colorScheme.inversePrimary
-        ))
+            color = MaterialTheme.colorScheme.inversePrimary)
+        )
 
-        val imageResource = if (isSelected) {
-            R.drawable.ph_dashboard_day_filled
-        } else {
-            R.drawable.ph_dashboard_day_empty
-        }
         Kiwi_Image(
-            imageResource,
+            if (isSelected) R.drawable.ph_dashboard_day_filled else R.drawable.ph_dashboard_day_empty,
             "Dashboard day indicator",
-            Modifier
-                .size(40.dp)
-                .clickable { onClicked() }
-                .testTag(testTag)
+            Modifier.size(40.dp).clickable { onClicked() }.testTag(testTag)
         )
     }
 }
 
 @Composable
-private fun ProgressBox(
-    currentState: MetricsState,
-) {
+private fun ExpandedProgressBox(state: MetricsState) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(40.dp))
@@ -341,158 +244,177 @@ private fun ProgressBox(
             .padding(32.dp)
     ) {
         Column {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                MetricsProgress(
-                    currentState,
-                    Modifier.weight(1.0F)
-                )
-            }
-
-            QuestsProgress()
+            ExpandedMetricsProgress(state)
+            ExpandedSummaryCard()
         }
     }
 }
 
 @Composable
-private fun MetricsProgress(
-    currentState: MetricsState,
-    modifier: Modifier
-) {
-    MetricProgress(
-        "Steps",
-        currentState.steps.toString(),
-        "8,000",
-        modifier,
-        DashboardModalTestTags.STEPS
-    )
-    MetricProgress(
-        "Screen Time",
-        MetricsUtils.parseScreenTimeSeconds(currentState.screenTimeSeconds),
-        "3 hours",
-        modifier,
-        DashboardModalTestTags.SCREEN_TIME
-    )
+private fun ExpandedMetricsProgress(state: MetricsState) {
+    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+        MetricProgress(
+            "Steps",
+            state.steps.toString(),
+            "8,000",
+            Modifier.weight(1f),
+            DashboardModalTestTags.STEPS
+        )
+        MetricProgress(
+            "Screen Time",
+            MetricsUtils.parseScreenTimeSeconds(state.screenTimeSeconds),
+            "3 hours",
+            Modifier.weight(1f),
+            DashboardModalTestTags.SCREEN_TIME
+        )
+    }
 }
 
 @Composable
-private fun MetricProgress(
-    metricName: String,
-    currentValue: String,
-    targetValue: String,
-    modifier: Modifier = Modifier,
-    testTag: String,
-) {
+private fun MetricProgress(title: String, value: String, target: String, modifier: Modifier, testTag: String) {
     Box(modifier) {
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-        ){
+        Column(modifier = Modifier.padding(8.dp)) {
             Kiwi_H3(Kiwi_TextArguments(
-                metricName,
+                title,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.inversePrimary,
-                modifier = Modifier.fillMaxWidth()
-            ))
-            MetricsProgressText(
-                currentValue,
-                targetValue,
-                testTag
+                modifier = Modifier.fillMaxWidth())
+            )
+            Kiwi_P1(Kiwi_TextArguments(
+                value,
+                TextAlign.Center,
+                MaterialTheme.colorScheme.inversePrimary,
+                modifier = Modifier.fillMaxWidth().testTag(testTag))
+            )
+            Kiwi_P2(Kiwi_TextArguments(
+                "/$target",
+                TextAlign.Center,
+                MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f),
+                modifier = Modifier.fillMaxWidth())
             )
         }
     }
 }
 
 @Composable
-private fun MetricsProgressText(
-    currentValue: String,
-    targetValue: String,
-    testTag: String,
-) {
-    Kiwi_P1(Kiwi_TextArguments(
-        currentValue,
-        TextAlign.Center,
-        MaterialTheme.colorScheme.inversePrimary,
+private fun CollapsedSummaryCard(state: MetricsState) {
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .testTag(testTag)
-    ))
-    Kiwi_P2(Kiwi_TextArguments(
-        "/$targetValue",
-        TextAlign.Center,
-        MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3F),
-        modifier = Modifier.fillMaxWidth()
-    ))
+            .clip(RoundedCornerShape(40.dp))
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(16.dp)
+                .wrapContentSize()
+        ) {
+            CurrentDayIndicator(120.dp)
+
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .wrapContentSize()
+            ) {
+                val stepsText = buildAnnotatedString {
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
+                        append(state.steps.toString())
+                    }
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f))) {
+                        append("/8,000 steps")
+                    }
+                }
+                Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
+                    stepsText,
+                    TextAlign.Left,
+                    Modifier
+                        .testTag(DashboardModalTestTags.STEPS)))
+
+                val screenTimeText = buildAnnotatedString {
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
+                        append((state.screenTimeSeconds / 60).toString())
+                    }
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f))) {
+                        append("/60 screen mins")
+                    }
+                }
+                Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
+                    screenTimeText,
+                    TextAlign.Left,
+                    Modifier
+                        .testTag(DashboardModalTestTags.SCREEN_TIME))
+                )
+            }
+
+            Kiwi_Image(
+                R.drawable.calendar,
+                "Calendar View Button",
+                Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .padding(8.dp)
+                    .size(30.dp)
+                    .background(MaterialTheme.colorScheme.background))
+        }
+    }
 }
 
 @Composable
-private fun QuestsProgress() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+private fun ExpandedSummaryCard() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Kiwi_H3(Kiwi_TextArguments(
             "Challenges",
             TextAlign.Center,
             MaterialTheme.colorScheme.inversePrimary,
-            modifier = Modifier.fillMaxWidth()
-        ))
+            modifier = Modifier.fillMaxWidth())
+        )
 
-        QuestProgress(
+        ExpandedQuestProgress(
             "Use Duolingo For 20 Minutes",
             R.drawable.ph_quest_01,
-            0.5F
+            0.5f
         )
         Kiwi_Spacer()
-        QuestProgress(
+        ExpandedQuestProgress(
             "Do 3 Sets Of 10 Push-Ups",
             R.drawable.ph_quest_02,
-            0.8F
+            0.8f
         )
     }
 }
 
 @Composable
-private fun QuestProgress(
-    questTitle: String,
-    questImageResourceId: Int,
-    currentProgress: Float
-) {
+private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
             .background(MaterialTheme.colorScheme.secondary),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary, shape = CircleShape),
+                .background(MaterialTheme.colorScheme.tertiary),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                progress = {currentProgress},
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .align(Alignment.Center),
+                progress = { progress },
+                modifier = Modifier.fillMaxSize(),
                 strokeWidth = 4.dp,
-                color = MaterialTheme.colorScheme.inversePrimary,
+                color = MaterialTheme.colorScheme.inversePrimary
             )
+
             Kiwi_Image(
-                questImageResourceId,
-                "Quest Indicator For: $questTitle",
+                imageRes,
+                "Quest Indicator For: $title",
                 Modifier.size(20.dp)
             )
         }
         Kiwi_P1(Kiwi_TextArguments(
-            questTitle,
-            TextAlign.Center,
+            title, TextAlign.Center,
             MaterialTheme.colorScheme.inversePrimary,
-            modifier = Modifier.padding(8.dp)
-        ))
+            modifier = Modifier.padding(8.dp))
+        )
     }
 }
