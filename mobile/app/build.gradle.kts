@@ -29,7 +29,7 @@ android {
 
     defaultConfig {
         applicationId = "com.bellako.kiwi"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 35
         android.buildFeatures.buildConfig = true
 
@@ -108,6 +108,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.room.runtime.android)
+    implementation(libs.androidx.compose.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.navigation.testing)
@@ -177,6 +178,7 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
 
     implementation(libs.hilt.android)
+    implementation(libs.androidx.foundation.v105)
     ksp(libs.hilt.compiler)
     androidTestImplementation(libs.androidx.foundation)
 

@@ -2,8 +2,15 @@ package com.bellako.kiwi.ui.modals
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,13 +30,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -38,6 +46,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
@@ -85,13 +94,42 @@ fun DashboardModalPreview() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalWearMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun DashboardModal(
     viewModel: IMetricsViewModel,
-    dashboardModalState: DashboardModalState = DashboardModalState.COLLAPSED
+    initialState: DashboardModalState = DashboardModalState.COLLAPSED
 ) {
+    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
+    val snapAnimationSpec = remember { tween<Float>(300) }
+    val velocityThreshold = with(LocalDensity.current) { 100.dp.toPx() }
+    val anchoredDraggableState = remember {
+        AnchoredDraggableState(
+            initialValue = initialState,
+            positionalThreshold = { distance: Float -> distance * 0.5f },
+            velocityThreshold = { velocityThreshold },
+            snapAnimationSpec = snapAnimationSpec,
+            decayAnimationSpec = decayAnimationSpec,
+            confirmValueChange = { true }
+        ).apply {
+            updateAnchors(
+                DraggableAnchors {
+                    DashboardModalState.EXPANDED at 0f
+                    DashboardModalState.COLLAPSED at 50f
+                    DashboardModalState.HIDDEN at 200f
+                }
+            )
+        }
+    }
+
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .anchoredDraggable(
+                state = anchoredDraggableState,
+                orientation = Orientation.Vertical
+            ),
         contentAlignment = Alignment.BottomCenter
     ) {
         val state by viewModel.state.collectAsState()
@@ -104,9 +142,7 @@ fun DashboardModal(
             }
         }
 
-        val currentState = rememberSaveable { mutableStateOf(dashboardModalState) }
-
-        when (currentState.value) {
+        when (anchoredDraggableState.currentValue) {
             DashboardModalState.EXPANDED -> ExpandedContent(viewModel, state)
             DashboardModalState.COLLAPSED -> CollapsedContent(state, isHidden = false)
             DashboardModalState.HIDDEN -> CollapsedContent(state, isHidden = true)
@@ -134,6 +170,7 @@ private fun CollapsedContent(state: MetricsState?, isHidden: Boolean) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ExpandedContent(viewModel: IMetricsViewModel, state: MetricsState?) {
     state?.let {
@@ -182,6 +219,7 @@ private fun CurrentDayIndicator(size: Dp) {
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ExpandedDaysIndicators(viewModel: IMetricsViewModel) {
     val currentDate = LocalDate.now()
