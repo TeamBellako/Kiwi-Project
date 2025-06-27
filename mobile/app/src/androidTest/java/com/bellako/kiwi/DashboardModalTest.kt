@@ -127,26 +127,14 @@ class DashboardModalTest {
 
     @Test
     fun dragFromHiddenToCollapsed() {
-        val screenHeightDpState = mutableStateOf(0)
-        rule.setContent {
-            val config = LocalConfiguration.current
-            screenHeightDpState.value = config.screenHeightDp
-
-            DashboardModal(
-                fakeViewModel,
-                DashboardModalState.COLLAPSED
-            )
-        }
-        rule.waitUntil {
-            screenHeightDpState.value > 0
-        }
+        val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.HIDDEN)
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
             .isNotDisplayed()
 
         rule.swipeDashboardModal(
             fromState = DashboardModalState.HIDDEN,
             toState = DashboardModalState.COLLAPSED,
-            screenHeightDp = screenHeightDpState.value
+            screenHeightDp = screenHeightDpState
         )
 
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
@@ -155,26 +143,14 @@ class DashboardModalTest {
 
     @Test
     fun dragFromHiddenToExpanded() {
-        val screenHeightDpState = mutableStateOf(0)
-        rule.setContent {
-            val config = LocalConfiguration.current
-            screenHeightDpState.value = config.screenHeightDp
-
-            DashboardModal(
-                fakeViewModel,
-                DashboardModalState.COLLAPSED
-            )
-        }
-        rule.waitUntil {
-            screenHeightDpState.value > 0
-        }
+        val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.HIDDEN)
         rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
             .isNotDisplayed()
 
         rule.swipeDashboardModal(
             fromState = DashboardModalState.HIDDEN,
             toState = DashboardModalState.EXPANDED,
-            screenHeightDp = screenHeightDpState.value
+            screenHeightDp = screenHeightDpState
         )
 
         rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
@@ -183,19 +159,7 @@ class DashboardModalTest {
 
     @Test
     fun dragFromCollapsedToExpanded() {
-        val screenHeightDpState = mutableStateOf(0)
-        rule.setContent {
-            val config = LocalConfiguration.current
-            screenHeightDpState.value = config.screenHeightDp
-
-            DashboardModal(
-                fakeViewModel,
-                DashboardModalState.COLLAPSED
-            )
-        }
-        rule.waitUntil {
-            screenHeightDpState.value > 0
-        }
+        val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.COLLAPSED)
 
         rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
             .isNotDisplayed()
@@ -203,14 +167,35 @@ class DashboardModalTest {
         rule.swipeDashboardModal(
             fromState = DashboardModalState.COLLAPSED,
             toState = DashboardModalState.EXPANDED,
-            screenHeightDp = screenHeightDpState.value
+            screenHeightDp = screenHeightDpState
         )
 
         rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
             .isDisplayed()
     }
 
-    fun ComposeTestRule.swipeDashboardModal(
+    private fun setContentAndGetScreenHeight(
+        dashboardModalState: DashboardModalState
+    ) : Int {
+        val screenHeightDpState = mutableStateOf(0)
+
+        rule.setContent {
+            val config = LocalConfiguration.current
+            screenHeightDpState.value = config.screenHeightDp
+
+            DashboardModal(
+                fakeViewModel,
+                dashboardModalState
+            )
+        }
+
+        rule.waitUntil {
+            screenHeightDpState.value > 0
+        }
+        return screenHeightDpState.value
+    }
+
+    private fun ComposeTestRule.swipeDashboardModal(
         fromState: DashboardModalState,
         toState: DashboardModalState,
         screenHeightDp: Int
@@ -239,5 +224,7 @@ class DashboardModalTest {
                 )
             }
     }
+
+
 
 }

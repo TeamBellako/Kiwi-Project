@@ -117,9 +117,10 @@ fun DashboardModal(
         configuration.screenHeightDp.dp.toPx()
     }
 
+    val appBarOffsetPx = with(density) { 120.dp.toPx() }
     val expandedHeight = screenHeightPx
-    val collapsedHeight = with(density) { 300.dp.toPx() }
-    val hiddenHeight = with(density) { 150.dp.toPx() }
+    val collapsedHeight = with(density) { 300.dp.toPx() + appBarOffsetPx }
+    val hiddenHeight = with(density) { 120.dp.toPx() + appBarOffsetPx }
 
     val anchors = listOf(
         DashboardModalState.EXPANDED to expandedHeight,
@@ -218,7 +219,7 @@ private fun ExpandedContent(viewModel: IMetricsViewModel, state: MetricsState?) 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 128.dp)
+                .padding(top = 86.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.primary)
                 .padding(16.dp)
