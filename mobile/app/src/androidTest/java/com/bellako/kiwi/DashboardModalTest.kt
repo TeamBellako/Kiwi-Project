@@ -3,6 +3,8 @@ package com.bellako.kiwi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
@@ -29,6 +31,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 @RunWith(AndroidJUnit4::class)
 class DashboardModalTest {
@@ -212,6 +216,41 @@ class DashboardModalTest {
 
         rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
             .isDisplayed()
+    }
+
+    @Test
+    fun navigateToPastMonthInCalendarView() {
+        rule.setContent {
+            DashboardModal(
+                fakeViewModel,
+                DashboardModalState.EXPANDED,
+                true
+            )
+        }
+        val originalMonthYearText = rule.onNodeWithTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
+            .fetchSemanticsNode()
+            .config
+            .getOrNull(SemanticsProperties.Text)
+            ?.joinToString("") ?: ""
+
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
+            .performTouchInput {
+                swipe(
+                    start = center,
+                    end = Offset(center.x + 150F, center.y),
+                    durationMillis = 300
+                )
+            }
+        val newMonthYearText = rule.onNodeWithTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
+            .fetchSemanticsNode()
+            .config
+            .getOrNull(SemanticsProperties.Text)
+            ?.joinToString("") ?: ""
+
+        val originalDate = YearMonth.parse(originalMonthYearText, DateTimeFormatter.ofPattern("MM-yyyy"))
+        val newDate = YearMonth.parse(newMonthYearText, DateTimeFormatter.ofPattern("MM-yyyy"))
+        assert(originalDate.isAfter(newDate))
+
     }
 
     private fun setContentAndGetScreenHeight(

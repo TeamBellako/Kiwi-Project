@@ -11,22 +11,17 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitHorizontalDragOrCancellation
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -114,7 +110,8 @@ fun DashboardModalPreview() {
 @Composable
 fun DashboardModal(
     viewModel: IMetricsViewModel,
-    initialState: DashboardModalState = DashboardModalState.EXPANDED
+    initialState: DashboardModalState = DashboardModalState.COLLAPSED,
+    showCalendarView: Boolean = false
 ) {
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
@@ -142,7 +139,8 @@ fun DashboardModal(
         }
     }
 
-    val shouldShowCalendarView = remember { mutableStateOf(true) }
+    val shouldShowCalendarView = remember { mutableStateOf(showCalendarView) }
+    val selectedDay = remember { mutableStateOf(LocalDate.now()) }
 
     Kiwi_AnchoredDraggable(
         initialState = initialState,
@@ -158,6 +156,7 @@ fun DashboardModal(
             DashboardModalState.EXPANDED -> ExpandedContent(
                 viewModel,
                 metricsState,
+                selectedDay,
                 shouldShowCalendarView
             )
 
@@ -211,6 +210,7 @@ private fun CollapsedContent(
 private fun ExpandedContent(
     viewModel: IMetricsViewModel,
     state: MetricsState?,
+    selectedDay: MutableState<LocalDate>,
     shouldShowCalendarView: MutableState<Boolean>
 ) {
     state?.let {
@@ -227,9 +227,16 @@ private fun ExpandedContent(
             Header()
 
             if (shouldShowCalendarView.value) {
-                CalendarView(viewModel)
+                CalendarView(
+                    viewModel,
+                    shouldShowCalendarView = shouldShowCalendarView,
+                    selectedDay = selectedDay
+                )
             } else {
-                WeekView(viewModel) {
+                WeekView(
+                    viewModel,
+                    selectedDay = selectedDay
+                ) {
                     shouldShowCalendarView.value = true
                 }
             }
@@ -270,13 +277,13 @@ private fun CurrentDayIndicator(size: Dp) {
 @Composable
 private fun WeekView(
     viewModel: IMetricsViewModel,
+    selectedDay: MutableState<LocalDate>,
     onCalendarViewClicked: () -> Unit
 ) {
-    val currentDate = LocalDate.now()
-    val currentDayOfWeek = currentDate.dayOfWeek.value % 7
+    val currentDayOfWeek = selectedDay.value.dayOfWeek.value % 7
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
     val coroutineScope = rememberCoroutineScope()
-    val startOfWeek = currentDate.minusDays(currentDayOfWeek.toLong())
+    val startOfWeek = selectedDay.value.minusDays(currentDayOfWeek.toLong())
 
     CurrentDayIndicator(240.dp)
 
@@ -307,12 +314,15 @@ private fun WeekView(
                             isSelected = isSelected,
                             onClicked = {
                                 selectedDayIndex.intValue = index
+                                selectedDay.value = startOfWeek.plusDays(index.toLong())
+
                                 coroutineScope.launch {
                                     viewModel.loadMetrics(
                                         day.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                                     )
                                 }
                             },
+                            isInFuture = day.isAfter(LocalDate.now()),
                             testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
                         )
                     }
@@ -328,12 +338,14 @@ private fun WeekView(
 private fun CalendarView(
     viewModel: IMetricsViewModel,
     modifier: Modifier = Modifier,
-    totalHeight: Dp = 300.dp
+    totalHeight: Dp = 300.dp,
+    selectedDay: MutableState<LocalDate>,
+    shouldShowCalendarView: MutableState<Boolean>
 ) {
     var currentYearMonth by rememberSaveable(stateSaver = Saver(
         save = { it.toString() },
         restore = { YearMonth.parse(it) }
-    )) { mutableStateOf(YearMonth.now()) }
+    )) { mutableStateOf(YearMonth.from(selectedDay.value)) }
 
     var transitionDirection by remember { mutableStateOf(0) } // -1 = previous, 1 = next
     var totalDragOffsetX by remember { mutableStateOf(0f) }
@@ -376,7 +388,9 @@ private fun CalendarView(
             Kiwi_TextArguments(
                 currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.inversePrimary
+                color = MaterialTheme.colorScheme.inversePrimary,
+                modifier = Modifier
+                    .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
             )
         )
 
@@ -423,6 +437,10 @@ private fun CalendarView(
                                         dayName = dayDate.dayOfMonth.toString(),
                                         isSelected = isSelected,
                                         onClicked = {
+                                            if (selectedDay.value == dayDate) {
+                                                shouldShowCalendarView.value = false
+                                            }
+
                                             selectedDay.value = dayDate
                                             coroutineScope.launch {
                                                 viewModel.loadMetrics(
@@ -430,6 +448,7 @@ private fun CalendarView(
                                                 )
                                             }
                                         },
+                                        isInFuture = dayDate.isAfter(LocalDate.now()),
                                         testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth
                                     )
                                 } else {
@@ -444,12 +463,12 @@ private fun CalendarView(
     }
 }
 
-
 @Composable
 private fun ExpandedDayIndicator(
     dayName: String,
     isSelected: Boolean,
     onClicked: () -> Unit,
+    isInFuture: Boolean,
     testTag: String
 ) {
     Box(
@@ -468,12 +487,14 @@ private fun ExpandedDayIndicator(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            val contentAlpha = if (isInFuture) 0.4f else 1f
             Kiwi_P1(
                 Kiwi_TextArguments(
                     dayName,
                     color = MaterialTheme.colorScheme.inversePrimary,
                     modifier = Modifier
                         .padding(top = 8.dp)
+                        .alpha(contentAlpha)
                 )
             )
 
@@ -482,7 +503,9 @@ private fun ExpandedDayIndicator(
                 "Dashboard day indicator",
                 modifier = Modifier
                     .size(50.dp)
+                    .alpha(contentAlpha)
             )
+
         }
     }
 }
