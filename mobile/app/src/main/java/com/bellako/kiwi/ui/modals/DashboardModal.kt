@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -22,11 +25,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +73,7 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.math.ceil
 
 enum class DashboardModalState {
     EXPANDED,
@@ -123,24 +131,50 @@ fun DashboardModal(
         }
     }
 
+    val shouldShowCalendarView = remember { mutableStateOf(false) }
+
     Kiwi_AnchoredDraggable(
         initialState = initialState,
         anchors = anchors,
-        onStateChange = { },
+        onStateChange = { targetState ->
+            if (targetState != DashboardModalState.EXPANDED) {
+                shouldShowCalendarView.value = false
+            }
+        },
         modifier = Modifier.testTag(DashboardModalTestTags.DRAGGABLE_NODE)
-    ) { modalState ->
+    ) { modalState, requestStateChange ->
         when (modalState) {
-            DashboardModalState.EXPANDED -> ExpandedContent(viewModel, metricsState)
-            DashboardModalState.COLLAPSED -> CollapsedContent(metricsState, isHidden = false)
-            DashboardModalState.HIDDEN -> CollapsedContent(metricsState, isHidden = true)
+            DashboardModalState.EXPANDED -> ExpandedContent(
+                viewModel,
+                metricsState,
+                shouldShowCalendarView
+            )
+
+            DashboardModalState.COLLAPSED -> CollapsedContent(
+                metricsState,
+                false,
+            ) {
+                shouldShowCalendarView.value = true
+                requestStateChange(DashboardModalState.EXPANDED)
+            }
+
+            DashboardModalState.HIDDEN -> CollapsedContent(
+                 metricsState,
+                true
+            ) {}
         }
     }
 }
 
 
+
 @Composable
-private fun CollapsedContent(state: MetricsState?, isHidden: Boolean) {
-    state?.let {
+private fun CollapsedContent(
+    state: MetricsState?,
+    isHidden: Boolean,
+    onCalendarViewClicked: () -> Unit
+) {
+    state?.let { currentState ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -152,7 +186,10 @@ private fun CollapsedContent(state: MetricsState?, isHidden: Boolean) {
             Header()
 
             if (!isHidden) {
-                CollapsedSummaryCard(it)
+                CollapsedSummaryCard(
+                    currentState,
+                    onCalendarViewClicked
+                )
             }
         }
     }
@@ -160,7 +197,11 @@ private fun CollapsedContent(state: MetricsState?, isHidden: Boolean) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun ExpandedContent(viewModel: IMetricsViewModel, state: MetricsState?) {
+private fun ExpandedContent(
+    viewModel: IMetricsViewModel,
+    state: MetricsState?,
+    shouldShowCalendarView: MutableState<Boolean>
+) {
     state?.let {
         Column(
             modifier = Modifier
@@ -173,7 +214,15 @@ private fun ExpandedContent(viewModel: IMetricsViewModel, state: MetricsState?) 
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Header()
-            ExpandedDaysIndicators(viewModel)
+
+            if (shouldShowCalendarView.value) {
+                CalendarView(viewModel)
+            } else {
+                WeekView(viewModel) {
+                    shouldShowCalendarView.value = true
+                }
+            }
+
             ExpandedProgressBox(it)
         }
     }
@@ -208,7 +257,10 @@ private fun CurrentDayIndicator(size: Dp) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun ExpandedDaysIndicators(viewModel: IMetricsViewModel) {
+private fun WeekView(
+    viewModel: IMetricsViewModel,
+    onCalendarViewClicked: () -> Unit
+) {
     val currentDate = LocalDate.now()
     val currentDayOfWeek = currentDate.dayOfWeek.value % 7
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
@@ -217,54 +269,133 @@ private fun ExpandedDaysIndicators(viewModel: IMetricsViewModel) {
 
     CurrentDayIndicator(240.dp)
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .height(100.dp)
     ) {
         Row(
             modifier = Modifier
-                .weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            (0..6).forEach { index ->
-                val day = startOfWeek.plusDays(index.toLong())
-                val dayNumber = day.dayOfMonth
-                val isSelected = selectedDayIndex.intValue == index
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                (0..6).forEach { index ->
+                    val day = startOfWeek.plusDays(index.toLong())
+                    val dayNumber = day.dayOfMonth
+                    val isSelected = selectedDayIndex.intValue == index
 
-                Box(modifier = Modifier.weight(1f)) {
-                    ExpandedDayIndicator(
-                        dayName = dayNumber.toString(),
-                        isSelected = isSelected,
-                        onClicked = {
-                            selectedDayIndex.intValue = index
-                            coroutineScope.launch {
-                                viewModel.loadMetrics(
-                                    day.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    Box(modifier = Modifier.weight(1f)) {
+                        ExpandedDayIndicator(
+                            dayName = dayNumber.toString(),
+                            isSelected = isSelected,
+                            onClicked = {
+                                selectedDayIndex.intValue = index
+                                coroutineScope.launch {
+                                    viewModel.loadMetrics(
+                                        day.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                    )
+                                }
+                            },
+                            testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
+                        )
+                    }
+                }
+            }
+
+            Kiwi_Image(
+                R.drawable.calendar,
+                "Calendar View Button",
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        onCalendarViewClicked()
+                    }
+            )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun CalendarView(
+    viewModel: IMetricsViewModel,
+    modifier: Modifier = Modifier,
+    totalHeight: Dp = 300.dp
+) {
+    val today = LocalDate.now()
+    val selectedDay = rememberSaveable { mutableStateOf(today) }
+    val coroutineScope = rememberCoroutineScope()
+
+    val startOfMonth = today.withDayOfMonth(1)
+    val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
+
+    val startDayOfWeek = startOfMonth.dayOfWeek.value % 7 // 0 = Sunday
+    val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
+    val totalWeeks = ceil(totalDays / 7f).toInt()
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(totalHeight)
+    ) {
+        (0 until totalWeeks).forEach { weekIndex ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                (0..6).forEach { dayOfWeek ->
+                    val dayIndex = weekIndex * 7 + dayOfWeek
+                    val dayOffset = dayIndex - startDayOfWeek
+                    val dayDate = startOfMonth.plusDays(dayOffset.toLong())
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when {
+                            dayDate in startOfMonth..endOfMonth -> {
+                                val isSelected = selectedDay.value == dayDate
+
+                                ExpandedDayIndicator(
+                                    dayName = dayDate.dayOfMonth.toString(),
+                                    isSelected = isSelected,
+                                    onClicked = {
+                                        selectedDay.value = dayDate
+                                        coroutineScope.launch {
+                                            viewModel.loadMetrics(
+                                                dayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                            )
+                                        }
+                                    },
+                                    testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth
                                 )
                             }
-                        },
-                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
-                    )
+
+                            else -> {
+                                Kiwi_Spacer()
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        Kiwi_Image(
-            R.drawable.calendar,
-            "Calendar View Button",
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .size(32.dp)
-                .clip(RoundedCornerShape(8.dp))
-        )
     }
 }
 
 @Composable
-private fun ExpandedDayIndicator(
+fun ExpandedDayIndicator(
     dayName: String,
     isSelected: Boolean,
     onClicked: () -> Unit,
@@ -272,19 +403,23 @@ private fun ExpandedDayIndicator(
 ) {
     Box(
         modifier = Modifier
-            .padding(4.dp)
+            .padding(2.dp)
+            .aspectRatio(1f) // square cells help balance icon + text
             .clip(RoundedCornerShape(12.dp))
             .border(
                 width = if (isSelected) 2.dp else 0.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.inversePrimary else Color.Transparent,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable { onClicked() }
             .testTag(testTag)
-            .padding(vertical = 12.dp),
+            .padding(4.dp), // internal padding to prevent clipping
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Kiwi_P1(
                 Kiwi_TextArguments(
                     dayName,
@@ -296,11 +431,12 @@ private fun ExpandedDayIndicator(
                 R.drawable.ph_dashboard_day_empty,
                 "Dashboard day indicator",
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(32.dp) // reduced to fit smaller cells
             )
         }
     }
 }
+
 
 
 @Composable
@@ -366,7 +502,10 @@ private fun MetricProgress(title: String, value: String, target: String, modifie
 }
 
 @Composable
-private fun CollapsedSummaryCard(state: MetricsState) {
+private fun CollapsedSummaryCard(
+    state: MetricsState,
+    onCalendarViewClicked: () -> Unit?
+) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(40.dp))
@@ -422,7 +561,11 @@ private fun CollapsedSummaryCard(state: MetricsState) {
                     .clip(RoundedCornerShape(20.dp))
                     .padding(8.dp)
                     .size(30.dp)
-                    .background(MaterialTheme.colorScheme.background))
+                    .background(MaterialTheme.colorScheme.background)
+                    .clickable {
+                        onCalendarViewClicked()
+                    }
+            )
         }
     }
 }

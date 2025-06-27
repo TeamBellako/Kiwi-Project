@@ -31,12 +31,26 @@ fun <T> Kiwi_AnchoredDraggable(
     initialState: T,
     anchors: List<Pair<T, Float>>,
     onStateChange: (T) -> Unit,
-    content: @Composable (T) -> Unit
+    content: @Composable (T, (T) -> Unit) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val offsetY = remember { Animatable(anchors.first { it.first == initialState }.second) }
     var currentState by remember { mutableStateOf(initialState) }
     val screenHeightPx = with(LocalDensity.current) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
+
+    val requestStateChange: (T) -> Unit = { targetState ->
+        val targetOffset = anchors.firstOrNull { it.first == targetState }?.second
+        if (targetOffset != null) {
+            coroutineScope.launch {
+                currentState = targetState
+                onStateChange(targetState)
+                offsetY.animateTo(
+                    targetOffset,
+                    animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                )
+            }
+        }
+    }
 
     Box(
         modifier = modifier
@@ -64,10 +78,7 @@ fun <T> Kiwi_AnchoredDraggable(
                         onStateChange(nearestState)
                         offsetY.animateTo(
                             targetValue = nearestOffset,
-                            animationSpec = tween(
-                                durationMillis = 300,
-                                easing = FastOutSlowInEasing
-                            )
+                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
                         )
                     }
                 }
@@ -78,7 +89,7 @@ fun <T> Kiwi_AnchoredDraggable(
                 .fillMaxWidth()
                 .height(with(LocalDensity.current) { offsetY.value.toDp() })
         ) {
-            content(currentState)
+            content(currentState, requestStateChange)
         }
     }
 }
