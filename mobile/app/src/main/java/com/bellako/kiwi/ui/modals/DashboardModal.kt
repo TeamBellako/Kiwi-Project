@@ -272,7 +272,6 @@ private fun WeekView(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
     ) {
         Row(
             modifier = Modifier
@@ -308,18 +307,7 @@ private fun WeekView(
                     }
                 }
             }
-
-            Kiwi_Image(
-                R.drawable.calendar,
-                "Calendar View Button",
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable {
-                        onCalendarViewClicked()
-                    }
-            )
+            ShowCalendarViewButton(onCalendarViewClicked)
         }
     }
 }
@@ -343,10 +331,18 @@ fun CalendarView(
     val totalWeeks = ceil(totalDays / 7f).toInt()
 
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()
             .height(totalHeight)
+            .testTag(DashboardModalTestTags.CALENDAR_VIEW)
     ) {
+        Kiwi_P2(Kiwi_TextArguments(
+            today.format(DateTimeFormatter.ofPattern("MM-yyyy")),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.inversePrimary
+        ))
+
         (0 until totalWeeks).forEach { weekIndex ->
             Row(
                 modifier = Modifier
@@ -403,17 +399,14 @@ fun ExpandedDayIndicator(
 ) {
     Box(
         modifier = Modifier
-            .padding(2.dp)
-            .aspectRatio(1f) // square cells help balance icon + text
             .clip(RoundedCornerShape(12.dp))
             .border(
                 width = if (isSelected) 2.dp else 0.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                color = if (isSelected) MaterialTheme.colorScheme.inversePrimary else Color.Transparent,
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable { onClicked() }
-            .testTag(testTag)
-            .padding(4.dp), // internal padding to prevent clipping
+            .testTag(testTag),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -423,7 +416,9 @@ fun ExpandedDayIndicator(
             Kiwi_P1(
                 Kiwi_TextArguments(
                     dayName,
-                    color = MaterialTheme.colorScheme.inversePrimary
+                    color = MaterialTheme.colorScheme.inversePrimary,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
                 )
             )
 
@@ -431,13 +426,11 @@ fun ExpandedDayIndicator(
                 R.drawable.ph_dashboard_day_empty,
                 "Dashboard day indicator",
                 modifier = Modifier
-                    .size(32.dp) // reduced to fit smaller cells
+                    .size(50.dp)
             )
         }
     }
 }
-
-
 
 @Composable
 private fun ExpandedProgressBox(state: MetricsState) {
@@ -504,7 +497,7 @@ private fun MetricProgress(title: String, value: String, target: String, modifie
 @Composable
 private fun CollapsedSummaryCard(
     state: MetricsState,
-    onCalendarViewClicked: () -> Unit?
+    onCalendarViewClicked: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -553,21 +546,28 @@ private fun CollapsedSummaryCard(
                         .testTag(DashboardModalTestTags.SCREEN_TIME))
                 )
             }
-
-            Kiwi_Image(
-                R.drawable.calendar,
-                "Calendar View Button",
-                Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .padding(8.dp)
-                    .size(30.dp)
-                    .background(MaterialTheme.colorScheme.background)
-                    .clickable {
-                        onCalendarViewClicked()
-                    }
-            )
+            ShowCalendarViewButton(onCalendarViewClicked)
         }
     }
+}
+
+@Composable
+private fun ShowCalendarViewButton(
+    onCalendarViewClicked: () -> Unit
+) {
+    Kiwi_Image(
+        R.drawable.calendar,
+        "Show Calendar View Button",
+        Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .padding(8.dp)
+            .size(30.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .clickable {
+                onCalendarViewClicked()
+            }
+            .testTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
+    )
 }
 
 @Composable

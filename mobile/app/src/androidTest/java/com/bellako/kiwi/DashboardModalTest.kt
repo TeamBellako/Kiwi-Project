@@ -174,6 +174,46 @@ class DashboardModalTest {
             .isDisplayed()
     }
 
+    @Test
+    fun showCalendarViewFromCollapsedAndThenHideIt() {
+        val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.COLLAPSED)
+
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
+            .performClick()
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
+            .isDisplayed()
+
+        rule.swipeDashboardModal(
+            fromState = DashboardModalState.EXPANDED,
+            toState = DashboardModalState.COLLAPSED,
+            screenHeightDp = screenHeightDpState
+        )
+        rule.swipeDashboardModal(
+            fromState = DashboardModalState.COLLAPSED,
+            toState = DashboardModalState.EXPANDED,
+            screenHeightDp = screenHeightDpState
+        )
+
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
+            .isNotDisplayed()
+    }
+
+    @Test
+    fun showCalendarViewFromExpanded() {
+        rule.setContent {
+            DashboardModal(
+                fakeViewModel,
+                DashboardModalState.EXPANDED
+            )
+        }
+
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
+            .performClick()
+
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
+            .isDisplayed()
+    }
+
     private fun setContentAndGetScreenHeight(
         dashboardModalState: DashboardModalState
     ) : Int {
