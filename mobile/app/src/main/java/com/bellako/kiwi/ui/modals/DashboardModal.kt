@@ -62,6 +62,7 @@ import com.bellako.kiwi.features.metrics.MetricsReader
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.features.metrics.MetricsUtils
 import com.bellako.kiwi.services.common.CommonTestTags
+import com.bellako.kiwi.ui.components.Kiwi_AnchoredDraggable
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_H2
@@ -109,15 +110,12 @@ fun DashboardModal(
     viewModel: IMetricsViewModel,
     initialState: DashboardModalState = DashboardModalState.COLLAPSED
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
 
-    val screenHeightPx = with(density) {
-        configuration.screenHeightDp.dp.toPx()
-    }
-
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
     val appBarOffsetPx = with(density) { 120.dp.toPx() }
+
     val expandedHeight = screenHeightPx
     val collapsedHeight = with(density) { 300.dp.toPx() + appBarOffsetPx }
     val hiddenHeight = with(density) { 120.dp.toPx() + appBarOffsetPx }
@@ -127,9 +125,6 @@ fun DashboardModal(
         DashboardModalState.COLLAPSED to collapsedHeight,
         DashboardModalState.HIDDEN to hiddenHeight
     )
-
-    val offsetY = remember { Animatable(anchors.first { it.first == initialState }.second) }
-    var modalState by remember { mutableStateOf(initialState) }
 
     val metricsState by viewModel.state.collectAsState()
 
@@ -141,56 +136,20 @@ fun DashboardModal(
         }
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .offset {
-                    IntOffset(x = 0, y = (screenHeightPx - offsetY.value).toInt())
-                }
-                .draggable(
-                    orientation = Orientation.Vertical,
-                    state = rememberDraggableState { delta ->
-                        coroutineScope.launch {
-                            offsetY.snapTo(
-                                (offsetY.value - delta).coerceIn(hiddenHeight, expandedHeight)
-                            )
-                        }
-                    },
-                    onDragStopped = {
-                        coroutineScope.launch {
-                            val (nearestState, nearestOffset) = anchors.minByOrNull { abs(it.second - offsetY.value) }!!
-                            modalState = nearestState
-                            offsetY.animateTo(
-                                targetValue = nearestOffset,
-                                animationSpec = tween(
-                                    durationMillis = 300,
-                                    easing = FastOutSlowInEasing
-                                )
-                            )
-                        }
-                    }
-                )
-                .testTag(DashboardModalTestTags.DRAGGABLE_NODE)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(with(density) { offsetY.value.toDp() })
-            ) {
-                when (modalState) {
-                    DashboardModalState.EXPANDED -> ExpandedContent(viewModel, metricsState)
-                    DashboardModalState.COLLAPSED -> CollapsedContent(metricsState, isHidden = false)
-                    DashboardModalState.HIDDEN -> CollapsedContent(metricsState, isHidden = true)
-                }
-            }
+    Kiwi_AnchoredDraggable(
+        initialState = initialState,
+        anchors = anchors,
+        onStateChange = { },
+        modifier = Modifier.testTag(DashboardModalTestTags.DRAGGABLE_NODE)
+    ) { modalState ->
+        when (modalState) {
+            DashboardModalState.EXPANDED -> ExpandedContent(viewModel, metricsState)
+            DashboardModalState.COLLAPSED -> CollapsedContent(metricsState, isHidden = false)
+            DashboardModalState.HIDDEN -> CollapsedContent(metricsState, isHidden = true)
         }
     }
 }
+
 
 @Composable
 private fun CollapsedContent(state: MetricsState?, isHidden: Boolean) {
