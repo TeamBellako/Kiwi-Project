@@ -280,6 +280,7 @@ private fun ExpandedDayIndicator(
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable { onClicked() }
+            .testTag(testTag)
             .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -296,7 +297,6 @@ private fun ExpandedDayIndicator(
                 "Dashboard day indicator",
                 modifier = Modifier
                     .size(40.dp)
-                    .testTag(testTag)
             )
         }
     }

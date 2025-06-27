@@ -1,5 +1,7 @@
 package com.bellako.kiwi.features.metrics
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import java.time.LocalDate
 
 object MetricsUtils {
@@ -21,6 +23,7 @@ object MetricsUtils {
         }.trim()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getDayOfWeekNumber(date: LocalDate): Int {
         val dayOfWeek = date.dayOfWeek
         return (dayOfWeek.ordinal + 1) % 7
