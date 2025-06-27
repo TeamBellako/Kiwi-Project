@@ -2,10 +2,18 @@ package com.bellako.kiwi.ui.modals
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitHorizontalDragOrCancellation
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,12 +40,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -72,6 +82,7 @@ import com.bellako.kiwi.ui.tags.DashboardModalTestTags
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 
@@ -131,7 +142,7 @@ fun DashboardModal(
         }
     }
 
-    val shouldShowCalendarView = remember { mutableStateOf(false) }
+    val shouldShowCalendarView = remember { mutableStateOf(true) }
 
     Kiwi_AnchoredDraggable(
         initialState = initialState,
@@ -314,73 +325,116 @@ private fun WeekView(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CalendarView(
+private fun CalendarView(
     viewModel: IMetricsViewModel,
     modifier: Modifier = Modifier,
     totalHeight: Dp = 300.dp
 ) {
-    val today = LocalDate.now()
-    val selectedDay = rememberSaveable { mutableStateOf(today) }
+    var currentYearMonth by rememberSaveable(stateSaver = Saver(
+        save = { it.toString() },
+        restore = { YearMonth.parse(it) }
+    )) { mutableStateOf(YearMonth.now()) }
+
+    var transitionDirection by remember { mutableStateOf(0) } // -1 = previous, 1 = next
+    var totalDragOffsetX by remember { mutableStateOf(0f) }
+
+    val gestureModifier = Modifier.pointerInput(currentYearMonth) {
+        detectDragGestures(
+            onDragEnd = {
+                val dragThreshold = 100f
+                when {
+                    totalDragOffsetX > dragThreshold -> {
+                        transitionDirection = -1
+                        currentYearMonth = currentYearMonth.minusMonths(1)
+                    }
+                    totalDragOffsetX < -dragThreshold -> {
+                        transitionDirection = 1
+                        currentYearMonth = currentYearMonth.plusMonths(1)
+                    }
+                }
+                totalDragOffsetX = 0f
+            },
+            onDrag = { change, dragAmount ->
+                change.consume()
+                totalDragOffsetX += dragAmount.x
+            }
+        )
+    }
+
+    val selectedDay = rememberSaveable { mutableStateOf(LocalDate.now()) }
     val coroutineScope = rememberCoroutineScope()
-
-    val startOfMonth = today.withDayOfMonth(1)
-    val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
-
-    val startDayOfWeek = startOfMonth.dayOfWeek.value % 7 // 0 = Sunday
-    val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
-    val totalWeeks = ceil(totalDays / 7f).toInt()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()
             .height(totalHeight)
+            .then(gestureModifier)
             .testTag(DashboardModalTestTags.CALENDAR_VIEW)
     ) {
-        Kiwi_P2(Kiwi_TextArguments(
-            today.format(DateTimeFormatter.ofPattern("MM-yyyy")),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.inversePrimary
-        ))
+        Kiwi_P2(
+            Kiwi_TextArguments(
+                currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.inversePrimary
+            )
+        )
 
-        (0 until totalWeeks).forEach { weekIndex ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                (0..6).forEach { dayOfWeek ->
-                    val dayIndex = weekIndex * 7 + dayOfWeek
-                    val dayOffset = dayIndex - startDayOfWeek
-                    val dayDate = startOfMonth.plusDays(dayOffset.toLong())
+        AnimatedContent(
+            targetState = currentYearMonth,
+            transitionSpec = {
+                slideInHorizontally(
+                    animationSpec = tween(300),
+                    initialOffsetX = { fullWidth -> fullWidth * transitionDirection }
+                ) togetherWith slideOutHorizontally(
+                    animationSpec = tween(300),
+                    targetOffsetX = { fullWidth -> -fullWidth * transitionDirection }
+                )
+            },
+            label = "CalendarMonthTransition"
+        ) { displayedMonth ->
+            val startOfMonth = displayedMonth.atDay(1)
+            val endOfMonth = displayedMonth.atEndOfMonth()
+            val startDayOfWeek = startOfMonth.dayOfWeek.value % 7
+            val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
+            val totalWeeks = ceil(totalDays / 7f).toInt()
 
-                    Box(
+            Column {
+                (0 until totalWeeks).forEach { weekIndex ->
+                    Row(
                         modifier = Modifier
+                            .fillMaxWidth()
                             .weight(1f),
-                        contentAlignment = Alignment.Center
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        when {
-                            dayDate in startOfMonth..endOfMonth -> {
-                                val isSelected = selectedDay.value == dayDate
+                        (0..6).forEach { dayOfWeek ->
+                            val dayIndex = weekIndex * 7 + dayOfWeek
+                            val dayOffset = dayIndex - startDayOfWeek
+                            val dayDate = startOfMonth.plusDays(dayOffset.toLong())
 
-                                ExpandedDayIndicator(
-                                    dayName = dayDate.dayOfMonth.toString(),
-                                    isSelected = isSelected,
-                                    onClicked = {
-                                        selectedDay.value = dayDate
-                                        coroutineScope.launch {
-                                            viewModel.loadMetrics(
-                                                dayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                                            )
-                                        }
-                                    },
-                                    testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth
-                                )
-                            }
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (dayDate in startOfMonth..endOfMonth) {
+                                    val isSelected = selectedDay.value == dayDate
 
-                            else -> {
-                                Kiwi_Spacer()
+                                    ExpandedDayIndicator(
+                                        dayName = dayDate.dayOfMonth.toString(),
+                                        isSelected = isSelected,
+                                        onClicked = {
+                                            selectedDay.value = dayDate
+                                            coroutineScope.launch {
+                                                viewModel.loadMetrics(
+                                                    dayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                                )
+                                            }
+                                        },
+                                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth
+                                    )
+                                } else {
+                                    Kiwi_Spacer()
+                                }
                             }
                         }
                     }
@@ -390,8 +444,9 @@ fun CalendarView(
     }
 }
 
+
 @Composable
-fun ExpandedDayIndicator(
+private fun ExpandedDayIndicator(
     dayName: String,
     isSelected: Boolean,
     onClicked: () -> Unit,
