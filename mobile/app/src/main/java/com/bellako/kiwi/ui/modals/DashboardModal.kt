@@ -2,21 +2,24 @@ package com.bellako.kiwi.ui.modals
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -30,13 +33,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
@@ -45,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import com.bellako.kiwi.R
@@ -70,6 +77,7 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 
 enum class DashboardModalState {
     EXPANDED,
@@ -101,51 +109,83 @@ fun DashboardModal(
     viewModel: IMetricsViewModel,
     initialState: DashboardModalState = DashboardModalState.COLLAPSED
 ) {
-    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
-    val snapAnimationSpec = remember { tween<Float>(300) }
-    val velocityThreshold = with(LocalDensity.current) { 100.dp.toPx() }
-    val anchoredDraggableState = remember {
-        AnchoredDraggableState(
-            initialValue = initialState,
-            positionalThreshold = { distance: Float -> distance * 0.5f },
-            velocityThreshold = { velocityThreshold },
-            snapAnimationSpec = snapAnimationSpec,
-            decayAnimationSpec = decayAnimationSpec,
-            confirmValueChange = { true }
-        ).apply {
-            updateAnchors(
-                DraggableAnchors {
-                    DashboardModalState.EXPANDED at 0f
-                    DashboardModalState.COLLAPSED at 50f
-                    DashboardModalState.HIDDEN at 200f
-                }
-            )
+    val coroutineScope = rememberCoroutineScope()
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+
+    val screenHeightPx = with(density) {
+        configuration.screenHeightDp.dp.toPx()
+    }
+
+    val expandedHeight = screenHeightPx
+    val collapsedHeight = with(density) { 300.dp.toPx() }
+    val hiddenHeight = with(density) { 150.dp.toPx() }
+
+    val anchors = listOf(
+        DashboardModalState.EXPANDED to expandedHeight,
+        DashboardModalState.COLLAPSED to collapsedHeight,
+        DashboardModalState.HIDDEN to hiddenHeight
+    )
+
+    val offsetY = remember { Animatable(anchors.first { it.first == initialState }.second) }
+    var modalState by remember { mutableStateOf(initialState) }
+
+    val metricsState by viewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadMetrics(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+        metricsState?.let {
+            if (it.isDefault()) viewModel.createMetrics(it)
+            else viewModel.updateMetrics(MetricsMapper.toState(MetricsReader.getCurrentMetrics()))
         }
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .anchoredDraggable(
-                state = anchoredDraggableState,
-                orientation = Orientation.Vertical
-            ),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
-        val state by viewModel.state.collectAsState()
-
-        LaunchedEffect(Unit) {
-            viewModel.loadMetrics(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-            state?.let {
-                if (it.isDefault()) viewModel.createMetrics(it)
-                else viewModel.updateMetrics(MetricsMapper.toState(MetricsReader.getCurrentMetrics()))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .offset {
+                    IntOffset(x = 0, y = (screenHeightPx - offsetY.value).toInt())
+                }
+                .draggable(
+                    orientation = Orientation.Vertical,
+                    state = rememberDraggableState { delta ->
+                        coroutineScope.launch {
+                            offsetY.snapTo(
+                                (offsetY.value - delta).coerceIn(hiddenHeight, expandedHeight)
+                            )
+                        }
+                    },
+                    onDragStopped = {
+                        coroutineScope.launch {
+                            val (nearestState, nearestOffset) = anchors.minByOrNull { abs(it.second - offsetY.value) }!!
+                            modalState = nearestState
+                            offsetY.animateTo(
+                                targetValue = nearestOffset,
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
+                        }
+                    }
+                )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(with(density) { offsetY.value.toDp() })
+            ) {
+                when (modalState) {
+                    DashboardModalState.EXPANDED -> ExpandedContent(viewModel, metricsState)
+                    DashboardModalState.COLLAPSED -> CollapsedContent(metricsState, isHidden = false)
+                    DashboardModalState.HIDDEN -> CollapsedContent(metricsState, isHidden = true)
+                }
             }
-        }
-
-        when (anchoredDraggableState.currentValue) {
-            DashboardModalState.EXPANDED -> ExpandedContent(viewModel, state)
-            DashboardModalState.COLLAPSED -> CollapsedContent(state, isHidden = false)
-            DashboardModalState.HIDDEN -> CollapsedContent(state, isHidden = true)
         }
     }
 }
@@ -155,7 +195,7 @@ private fun CollapsedContent(state: MetricsState?, isHidden: Boolean) {
     state?.let {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
                 .background(MaterialTheme.colorScheme.primary)
                 .padding(vertical = 16.dp),
