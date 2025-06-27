@@ -2,24 +2,16 @@ package com.bellako.kiwi.ui.modals
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -33,11 +25,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import com.bellako.kiwi.R
@@ -78,7 +66,6 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlin.math.abs
 
 enum class DashboardModalState {
     EXPANDED,
@@ -108,7 +95,7 @@ fun DashboardModalPreview() {
 @Composable
 fun DashboardModal(
     viewModel: IMetricsViewModel,
-    initialState: DashboardModalState = DashboardModalState.COLLAPSED
+    initialState: DashboardModalState = DashboardModalState.EXPANDED
 ) {
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
@@ -219,59 +206,102 @@ private fun CurrentDayIndicator(size: Dp) {
     )
 }
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ExpandedDaysIndicators(viewModel: IMetricsViewModel) {
     val currentDate = LocalDate.now()
-    val currentDayIndex = MetricsUtils.getDayOfWeekNumber(currentDate)
-    val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayIndex) }
+    val currentDayOfWeek = currentDate.dayOfWeek.value % 7
+    val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
     val coroutineScope = rememberCoroutineScope()
+    val startOfWeek = currentDate.minusDays(currentDayOfWeek.toLong())
 
     CurrentDayIndicator(240.dp)
 
     Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .wrapContentWidth(Alignment.CenterHorizontally)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        listOf("S", "M", "T", "W", "T", "F", "S").forEachIndexed { index, day ->
-            ExpandedDayIndicator(
-                dayName = day,
-                isSelected = selectedDayIndex.intValue == index,
-                onClicked = {
-                    selectedDayIndex.intValue = index
+        Row(
+            modifier = Modifier
+                .weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            (0..6).forEach { index ->
+                val day = startOfWeek.plusDays(index.toLong())
+                val dayNumber = day.dayOfMonth
+                val isSelected = selectedDayIndex.intValue == index
 
-                    val selectedDate = currentDate.plusDays((index - currentDayIndex).toLong())
+                Box(modifier = Modifier.weight(1f)) {
+                    ExpandedDayIndicator(
+                        dayName = dayNumber.toString(),
+                        isSelected = isSelected,
+                        onClicked = {
+                            selectedDayIndex.intValue = index
+                            coroutineScope.launch {
+                                viewModel.loadMetrics(
+                                    day.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                )
+                            }
+                        },
+                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
+                    )
+                }
+            }
+        }
 
-                    coroutineScope.launch {
-                        viewModel.loadMetrics(selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                    }
-                },
-                testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
+        Kiwi_Image(
+            R.drawable.calendar,
+            "Calendar View Button",
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .size(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
+    }
+}
+
+@Composable
+private fun ExpandedDayIndicator(
+    dayName: String,
+    isSelected: Boolean,
+    onClicked: () -> Unit,
+    testTag: String
+) {
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.inversePrimary else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable { onClicked() }
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Kiwi_P1(
+                Kiwi_TextArguments(
+                    dayName,
+                    color = MaterialTheme.colorScheme.inversePrimary
+                )
+            )
+
+            Kiwi_Image(
+                R.drawable.ph_dashboard_day_empty,
+                "Dashboard day indicator",
+                modifier = Modifier
+                    .size(40.dp)
+                    .testTag(testTag)
             )
         }
     }
 }
 
-
-@Composable
-private fun ExpandedDayIndicator(dayName: String, isSelected: Boolean, onClicked: () -> Unit, testTag: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Kiwi_P1(Kiwi_TextArguments(
-            dayName,
-            color = MaterialTheme.colorScheme.inversePrimary)
-        )
-
-        Kiwi_Image(
-            if (isSelected) R.drawable.ph_dashboard_day_filled else R.drawable.ph_dashboard_day_empty,
-            "Dashboard day indicator",
-            Modifier.size(40.dp).clickable { onClicked() }.testTag(testTag)
-        )
-    }
-}
 
 @Composable
 private fun ExpandedProgressBox(state: MetricsState) {
