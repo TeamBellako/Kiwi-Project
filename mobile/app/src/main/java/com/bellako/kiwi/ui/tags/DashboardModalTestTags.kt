@@ -4,4 +4,5 @@ object DashboardModalTestTags {
     const val DAY_INDICATOR_PREFIX = "dashboard_day_indicator_"
     const val STEPS = "dashboard_steps"
     const val SCREEN_TIME = "dashboard_screen_time"
+    const val DRAGGABLE_NODE = "dashboard_draggable_node"
 }

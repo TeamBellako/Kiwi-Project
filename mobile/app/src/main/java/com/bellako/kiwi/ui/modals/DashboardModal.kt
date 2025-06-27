@@ -174,6 +174,7 @@ fun DashboardModal(
                         }
                     }
                 )
+                .testTag(DashboardModalTestTags.DRAGGABLE_NODE)
         ) {
             Box(
                 modifier = Modifier

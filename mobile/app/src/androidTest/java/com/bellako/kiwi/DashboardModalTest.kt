@@ -1,9 +1,19 @@
 package com.bellako.kiwi
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.isNotDisplayed
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.features.metrics.MetricsDTO
 import com.bellako.kiwi.features.metrics.MetricsFactory
@@ -46,14 +56,17 @@ class DashboardModalTest {
             pastMetricsDTO,
             futureMetricsDTO
         )
-
-        rule.setContent {
-            DashboardModal(fakeViewModel, DashboardModalState.EXPANDED)
-        }
     }
 
     @Test
     fun loadTodayMetrics() {
+        rule.setContent {
+            DashboardModal(
+                fakeViewModel,
+                DashboardModalState.EXPANDED
+            )
+        }
+
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
             .assertTextEquals(todayMetricsDTO.steps.toString())
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
@@ -62,6 +75,13 @@ class DashboardModalTest {
 
     @Test
     fun loadPastMetrics() {
+        rule.setContent {
+            DashboardModal(
+                fakeViewModel,
+                DashboardModalState.EXPANDED
+            )
+        }
+
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
             .assertTextEquals(todayMetricsDTO.steps.toString())
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
@@ -81,6 +101,13 @@ class DashboardModalTest {
 
     @Test
     fun loadFutureMetrics() {
+        rule.setContent {
+            DashboardModal(
+                fakeViewModel,
+                DashboardModalState.EXPANDED
+            )
+        }
+
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
             .assertTextEquals(todayMetricsDTO.steps.toString())
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
@@ -97,4 +124,120 @@ class DashboardModalTest {
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
             .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(futureMetricsDTO.screenTimeSeconds))
     }
+
+    @Test
+    fun dragFromHiddenToCollapsed() {
+        val screenHeightDpState = mutableStateOf(0)
+        rule.setContent {
+            val config = LocalConfiguration.current
+            screenHeightDpState.value = config.screenHeightDp
+
+            DashboardModal(
+                fakeViewModel,
+                DashboardModalState.COLLAPSED
+            )
+        }
+        rule.waitUntil {
+            screenHeightDpState.value > 0
+        }
+        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
+            .isNotDisplayed()
+
+        rule.swipeDashboardModal(
+            fromState = DashboardModalState.HIDDEN,
+            toState = DashboardModalState.COLLAPSED,
+            screenHeightDp = screenHeightDpState.value
+        )
+
+        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
+            .isDisplayed()
+    }
+
+    @Test
+    fun dragFromHiddenToExpanded() {
+        val screenHeightDpState = mutableStateOf(0)
+        rule.setContent {
+            val config = LocalConfiguration.current
+            screenHeightDpState.value = config.screenHeightDp
+
+            DashboardModal(
+                fakeViewModel,
+                DashboardModalState.COLLAPSED
+            )
+        }
+        rule.waitUntil {
+            screenHeightDpState.value > 0
+        }
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
+            .isNotDisplayed()
+
+        rule.swipeDashboardModal(
+            fromState = DashboardModalState.HIDDEN,
+            toState = DashboardModalState.EXPANDED,
+            screenHeightDp = screenHeightDpState.value
+        )
+
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
+            .isDisplayed()
+    }
+
+    @Test
+    fun dragFromCollapsedToExpanded() {
+        val screenHeightDpState = mutableStateOf(0)
+        rule.setContent {
+            val config = LocalConfiguration.current
+            screenHeightDpState.value = config.screenHeightDp
+
+            DashboardModal(
+                fakeViewModel,
+                DashboardModalState.COLLAPSED
+            )
+        }
+        rule.waitUntil {
+            screenHeightDpState.value > 0
+        }
+
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
+            .isNotDisplayed()
+
+        rule.swipeDashboardModal(
+            fromState = DashboardModalState.COLLAPSED,
+            toState = DashboardModalState.EXPANDED,
+            screenHeightDp = screenHeightDpState.value
+        )
+
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
+            .isDisplayed()
+    }
+
+    fun ComposeTestRule.swipeDashboardModal(
+        fromState: DashboardModalState,
+        toState: DashboardModalState,
+        screenHeightDp: Int
+    ) {
+        val density = Density(1f, 1f)
+        val hidden = with(density) { 150.dp.toPx() }
+        val collapsed = with(density) { 300.dp.toPx() }
+        val expanded = with(density) { screenHeightDp.dp.toPx() }
+
+        val anchorMap = mapOf(
+            DashboardModalState.HIDDEN to hidden,
+            DashboardModalState.COLLAPSED to collapsed,
+            DashboardModalState.EXPANDED to expanded
+        )
+
+        val fromY = with(density) { screenHeightDp.dp.toPx() - anchorMap[fromState]!! }
+        val toY = with(density) { screenHeightDp.dp.toPx() - anchorMap[toState]!! }
+        val dragDistance = fromY - toY
+
+        onNodeWithTag(DashboardModalTestTags.DRAGGABLE_NODE)
+            .performTouchInput {
+                swipe(
+                    start = center,
+                    end = Offset(center.x, center.y - dragDistance),
+                    durationMillis = 300
+                )
+            }
+    }
+
 }
