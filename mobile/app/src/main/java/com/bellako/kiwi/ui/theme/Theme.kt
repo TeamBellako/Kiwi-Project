@@ -1,36 +1,35 @@
 package com.bellako.kiwi.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val LightColors = lightColorScheme(
-    primary = kiwiPrimaryColor,
-    inversePrimary = kiwiInversePrimaryColor,
-    secondary = kiwiSecondaryColor,
-    tertiary = kiwiTertiaryColor,
-    background = kiwiBackgroundColor,
-    surface = kiwiSurfaceColor,
-    outline = kiwiOutlineColor,
-    error = kiwiErrorColor
+    primary = KiwiPrimary,
+    inversePrimary = KiwiInversePrimary,
+    secondary = KiwiSecondary,
+    tertiary = KiwiTertiary,
+    background = KiwiBackground,
+    surface = KiwiSurface,
+    outline = KiwiOutline,
+    error = KiwiError
 )
 
 private val DarkColors = darkColorScheme(
-    primary = kiwiPrimaryColor,
-    inversePrimary = kiwiInversePrimaryColor,
-    secondary = kiwiSecondaryColor,
-    tertiary = kiwiTertiaryColor,
-    background = kiwiBackgroundColor,
-    surface = kiwiSurfaceColor,
-    outline = kiwiOutlineColor,
-    error = kiwiErrorColor
+    primary = KiwiPrimary,
+    inversePrimary = KiwiInversePrimary,
+    secondary = KiwiSecondary,
+    tertiary = KiwiTertiary,
+    background = KiwiBackground,
+    surface = KiwiSurface,
+    outline = KiwiOutline,
+    error = KiwiError
 )
 
 @Composable
 fun KiwiTheme(
-    useDarkTheme: Boolean = false,
+    useDarkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (useDarkTheme) DarkColors else LightColors
