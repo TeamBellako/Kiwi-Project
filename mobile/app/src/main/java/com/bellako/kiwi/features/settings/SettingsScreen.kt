@@ -216,7 +216,7 @@ private fun SettingsFields(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(device = "spec:width=411dp,height=891dp,dpi=420")
 @Composable
 fun SettingsScreenPreview() {
     val previewState = SettingsState(

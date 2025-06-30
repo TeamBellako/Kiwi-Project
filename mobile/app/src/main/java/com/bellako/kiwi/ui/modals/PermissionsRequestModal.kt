@@ -51,15 +51,6 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-@Preview
-fun PermissionsRequestModalPreview() {
-    KiwiTheme {
-        PermissionsRequestModal() {}
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.Q)
-@Composable
 fun PermissionsRequestModal(
     onPermissionsGranted: @Composable () -> Unit
 ) {
@@ -184,4 +175,13 @@ private fun hasActivityRecognitionPermission(context: Context): Boolean {
             Manifest.permission.ACTIVITY_RECOGNITION
         ) == PackageManager.PERMISSION_GRANTED
     } else true
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+@Composable
+@Preview(device = "spec:width=411dp,height=891dp,dpi=420")
+fun PermissionsRequestModalPreview() {
+    KiwiTheme {
+        PermissionsRequestModal() {}
+    }
 }
