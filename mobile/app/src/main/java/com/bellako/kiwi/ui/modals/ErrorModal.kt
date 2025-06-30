@@ -57,7 +57,7 @@ fun ErrorModal(
             color = MaterialTheme.colorScheme.inversePrimary
         ))
 
-        Kiwi_Spacer(0.5F)
+        Kiwi_Spacer()
 
         Kiwi_P1(Kiwi_TextArguments(
             errorMessage,

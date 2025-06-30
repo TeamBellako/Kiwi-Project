@@ -4,12 +4,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.times
-import com.bellako.kiwi.ui.theme.SEPARATOR_HEIGHT
+import androidx.compose.ui.unit.Dp
+import com.bellako.kiwi.ui.theme.Spacing
 
 @Composable
 fun Kiwi_Spacer(
-    heightMultiplier: Float = 1.0F
+    height: Dp = Spacing.medium
 ) {
-    Spacer(Modifier.height(heightMultiplier * SEPARATOR_HEIGHT))
+    Spacer(
+        Modifier
+            .height(height)
+    )
 }

@@ -10,7 +10,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.ui.theme.Spacing
 
 data class Kiwi_TextArguments(
     val text: String,
@@ -33,11 +33,8 @@ fun Kiwi_H1(arguments: Kiwi_TextArguments) {
         text = arguments.text,
         textAlign = arguments.textAlign,
         color = arguments.color,
-        modifier = arguments.modifier.padding(bottom = 24.dp),
+        modifier = arguments.modifier.then(Modifier.padding(bottom = Spacing.large)),
         style = MaterialTheme.typography.headlineLarge.copy(
-            fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
-            fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
-        ).copy(
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
         )
@@ -50,7 +47,7 @@ fun Kiwi_H2(arguments: Kiwi_TextArguments) {
         text = arguments.text,
         textAlign = arguments.textAlign,
         color = arguments.color,
-        modifier = arguments.modifier.padding(bottom = 16.dp),
+        modifier = arguments.modifier.then(Modifier.padding(bottom = Spacing.medium)),
         style = MaterialTheme.typography.headlineMedium.copy(
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
@@ -64,7 +61,7 @@ fun Kiwi_H3(arguments: Kiwi_TextArguments) {
         text = arguments.text,
         textAlign = arguments.textAlign,
         color = arguments.color,
-        modifier = arguments.modifier.padding(bottom = 8.dp),
+        modifier = arguments.modifier.then(Modifier.padding(bottom = Spacing.small)),
         style = MaterialTheme.typography.headlineSmall.copy(
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
@@ -78,7 +75,7 @@ fun Kiwi_P1(arguments: Kiwi_TextArguments) {
         text = arguments.text,
         textAlign = arguments.textAlign,
         color = arguments.color,
-        modifier = arguments.modifier.padding(bottom = 4.dp),
+        modifier = arguments.modifier.then(Modifier.padding(bottom = Spacing.small)),
         style = MaterialTheme.typography.bodyLarge.copy(
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
@@ -92,7 +89,7 @@ fun Kiwi_P2(arguments: Kiwi_TextArguments) {
         text = arguments.text,
         textAlign = arguments.textAlign,
         color = arguments.color,
-        modifier = arguments.modifier.padding(bottom = 2.dp),
+        modifier = arguments.modifier.then(Modifier.padding(bottom = Spacing.xSmall)),
         style = MaterialTheme.typography.bodyMedium.copy(
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
@@ -119,7 +116,7 @@ fun Kiwi_AnnotatedString(arguments: Kiwi_AnnotatedStringArguments) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
-        modifier = arguments.modifier.padding(bottom = 4.dp),
+        modifier = arguments.modifier.then(Modifier.padding(bottom = Spacing.small))
     )
 }
 
@@ -129,6 +126,7 @@ fun Kiwi_Label(arguments: Kiwi_TextArguments) {
         text = arguments.text,
         textAlign = arguments.textAlign,
         color = arguments.color,
+        modifier = arguments.modifier,
         style = MaterialTheme.typography.labelLarge.copy(
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal

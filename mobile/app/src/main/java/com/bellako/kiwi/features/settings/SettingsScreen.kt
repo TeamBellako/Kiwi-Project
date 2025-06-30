@@ -191,7 +191,7 @@ private fun SettingsFields(
                 steps = 2,
                 testTag = SettingsTestTags.MUSIC_VOLUME_SLIDER
             )
-            Kiwi_Spacer(2F)
+            Kiwi_Spacer()
 
             Kiwi_Button(
                 Kiwi_TextArguments(
