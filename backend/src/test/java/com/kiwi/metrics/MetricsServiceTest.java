@@ -119,7 +119,7 @@ public class MetricsServiceTest {
         assert(savedMetricsPersistence.isPresent());
         
         Optional<MetricsDTO> retrievedMetricsDTO =
-                metricsService.getMetricsOrEmpty(validUsersPersistence.getEmail(), metrics.getDate());
+                metricsService.getMetrics(validUsersPersistence.getEmail(), metrics.getDate());
         assert(retrievedMetricsDTO.isPresent());
         
         assertEquals(metrics, MetricsMapper.toDomain(retrievedMetricsDTO.get()));
@@ -127,6 +127,6 @@ public class MetricsServiceTest {
 
     @Test
     public void getNonExistingMetric() {
-        assertEquals(Optional.empty(), metricsService.getMetricsOrEmpty(validUsersPersistence.getEmail(), LocalDate.now()));
+        assertEquals(Optional.empty(), metricsService.getMetrics(validUsersPersistence.getEmail(), LocalDate.now()));
     }
 }

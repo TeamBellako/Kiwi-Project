@@ -1,5 +1,7 @@
 package com.bellako.kiwi.features.metrics
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.bellako.kiwi.services.common.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -22,7 +24,11 @@ class MetricsViewModel @Inject constructor(
         val exists = repository.getMetricsByDate(domain.date).getOrNull()
         if (exists != null) return failureWithError("A metrics entry already exists with that user and date")
 
-        return handleResult(repository.createMetrics(MetricsMapper.toDTO(domain))) {}
+        return handleResult(
+            repository.createMetrics(MetricsMapper.toDTO(domain))
+        ) {
+            _state.value = MetricsMapper.toState(domain)
+        }
     }
 
     override suspend fun updateMetrics(state: MetricsState): Result<Unit> {
@@ -31,22 +37,29 @@ class MetricsViewModel @Inject constructor(
         val existing = repository.getMetricsByDate(domain.date).getOrNull()
         if (existing == null) return failureWithError("There is no metrics entry with that user and date")
 
-        return handleResult(repository.updateMetrics(MetricsMapper.toDTO(domain))) {}
+        return handleResult(
+            repository.updateMetrics(MetricsMapper.toDTO(domain))
+        ) {
+            _state.value = MetricsMapper.toState(domain)
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun loadMetrics(date: String): Result<Unit> {
         val parsedDate = try {
             LocalDate.parse(date)
         } catch (e: DateTimeParseException) {
             return failureWithError(invalidDataMessage())
         }
+        _state.value = MetricsState(date)
 
-        val result = repository.getMetricsByDate(parsedDate)
-
-        return handleResult(result) {
-            _state.value = MetricsMapper.toState(result.getOrNull()!!)
-            Result.success(Unit)
+        val result = repository.getMetricsByDate(parsedDate).getOrNull()
+        if (result == null) {
+            return Result.failure(Exception("No metrics found"))
         }
+
+        _state.value = MetricsMapper.toState(result)
+        return Result.success(Unit)
     }
 
     private fun validateAndMapToDomain(state: MetricsState): Metrics? {

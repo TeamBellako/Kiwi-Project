@@ -38,11 +38,8 @@ public class MetricsController {
     }
     
     @GetMapping
-    public ResponseEntity<MetricsDTO> getMetricsOrDefault(@RequestParam("date") String date) {
-        Optional<MetricsDTO> existingMetricsDTO = metricsService.getMetricsOrEmpty(tryGetJWTEmail(), LocalDate.parse(date));
-        return existingMetricsDTO.map(
-                metricsDTO -> ResponseEntity.ok().body(metricsDTO))
-                .orElseGet(() -> ResponseEntity.ok().body(new MetricsDTO(date)));
+    public ResponseEntity<Optional<MetricsDTO>> readMetrics(@RequestParam("date") String date) {
+        return ResponseEntity.ok().body(metricsService.getMetrics(tryGetJWTEmail(), LocalDate.parse(date)));
     }
     
     private Email tryGetJWTEmail() {

@@ -19,8 +19,6 @@ import java.util.Optional;
 public class MetricsService {
     private final MetricsRepository metricsRepository;
     private final UsersService usersService;
-
-    private static final Logger logger = LoggerFactory.getLogger(MetricsService.class);
     
     @Autowired
     public MetricsService(MetricsRepository metricsRepository, UsersService usersService) {
@@ -54,12 +52,11 @@ public class MetricsService {
         metricsRepository.saveAndFlush(targetMetricsPersistence.get());
     }
     
-    public Optional<MetricsDTO> getMetricsOrEmpty(@Valid @NotNull Email email, @NotNull LocalDate date) {
+    public Optional<MetricsDTO> getMetrics(@Valid @NotNull Email email, @NotNull LocalDate date) {
         UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         
         Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, date);
         if (metricsPersistence.isEmpty()) {
-            logger.warn("Trying to retrieve non-existing metric with email {} and date {}", email.value(), date.toString());
             return Optional.empty();
         } 
         

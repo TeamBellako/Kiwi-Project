@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
@@ -59,7 +60,7 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.MetricsMapper
-import com.bellako.kiwi.features.metrics.MetricsReader
+import com.bellako.kiwi.features.metrics.MetricsProvider
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.features.metrics.MetricsUtils
 import com.bellako.kiwi.services.common.CommonTestTags
@@ -131,11 +132,17 @@ fun DashboardModal(
 
     val metricsState by viewModel.state.collectAsState()
 
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
-        viewModel.loadMetrics(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+        val loadResult = viewModel.loadMetrics(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
         metricsState?.let {
-            if (it.isDefault()) viewModel.createMetrics(it)
-            else viewModel.updateMetrics(MetricsMapper.toState(MetricsReader.getCurrentMetrics()))
+            if (loadResult.isFailure) viewModel.createMetrics(it)
+
+            val currentMetrics = MetricsProvider.getMetrics(context, LocalDate.now())
+            if (currentMetrics == null) {
+                // TODO: Ask for permissions
+            }
+            else viewModel.updateMetrics(MetricsMapper.toState(currentMetrics))
         }
     }
 
