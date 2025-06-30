@@ -139,10 +139,9 @@ fun DashboardModal(
             if (loadResult.isFailure) viewModel.createMetrics(it)
 
             val currentMetrics = MetricsProvider.getMetrics(context, LocalDate.now())
-            if (currentMetrics == null) {
-                // TODO: Ask for permissions
+            if (currentMetrics != null) {
+                viewModel.updateMetrics(MetricsMapper.toState(currentMetrics))
             }
-            else viewModel.updateMetrics(MetricsMapper.toState(currentMetrics))
         }
     }
 

@@ -170,7 +170,7 @@ private fun Buttons(
                     }
                 }
             },
-            isLoading = isLoading,
+            enabled = !isLoading,
             testTag = UsersTestTags.SIGNUP_BUTTON,
             rowModifier = Modifier.weight(1f)
         )
@@ -193,7 +193,7 @@ private fun Buttons(
                     }
                 }
             },
-            isLoading = isLoading,
+            enabled = !isLoading,
             testTag = UsersTestTags.LOGIN_BUTTON,
             rowModifier = Modifier.weight(1f)
         )

@@ -29,12 +29,12 @@ object MetricsProvider {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
-        var steps = -1
+        var steps = 0
         val latch = CountDownLatch(1)
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
-                steps = event?.values?.get(0)?.toInt() ?: -1
+                steps = event?.values?.get(0)?.toInt() ?: 0
                 sensorManager.unregisterListener(this)
                 latch.countDown()
             }
@@ -50,7 +50,6 @@ object MetricsProvider {
 
         return steps
     }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getScreenTimeInSeconds(context: Context, localDate: LocalDate): Int {

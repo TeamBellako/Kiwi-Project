@@ -1,5 +1,7 @@
 package com.bellako.kiwi.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -20,6 +22,7 @@ import com.bellako.kiwi.features.users.UsersScreen
 import com.bellako.kiwi.features.users.UsersViewModel
 import com.bellako.kiwi.ui.modals.AppBarModal
 import com.bellako.kiwi.ui.modals.DashboardModal
+import com.bellako.kiwi.ui.modals.PermissionsRequestModal
 
 object ScreenRoutes {
     const val HOME = "home"
@@ -28,8 +31,16 @@ object ScreenRoutes {
     const val HELP = "help"
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
+    PermissionsRequestModal {
+        AppScreen(usersViewModel)
+    }
+}
+
+@Composable
+private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
     val navController = rememberNavController()
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
