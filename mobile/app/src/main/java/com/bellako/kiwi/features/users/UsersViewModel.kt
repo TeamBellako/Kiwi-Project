@@ -51,7 +51,7 @@ class UsersViewModel @Inject constructor(
         _isLoading.value = false
 
         return handleResultSuspend(result) {
-            login(state)
+            //login(state)
         }
     }
 
