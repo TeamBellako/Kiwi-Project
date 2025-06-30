@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -55,7 +55,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
@@ -90,24 +89,6 @@ enum class DashboardModalState {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-@Preview
-@Composable
-fun DashboardModalPreview() {
-    KiwiTheme {
-        DashboardModal(
-            MetricsFakeViewModel(
-                MetricsState(
-                    "2025-06-12",
-                    1173,
-                    9900
-                )
-            )
-        )
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalWearMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun DashboardModal(
     viewModel: IMetricsViewModel,
@@ -115,31 +96,33 @@ fun DashboardModal(
     showCalendarView: Boolean = false
 ) {
     val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val appBarOffset = 120.dp
+
+    val expandedHeight = screenHeight
+    val collapsedHeight = 300.dp + appBarOffset
+    val hiddenHeight = 120.dp + appBarOffset
+
     val density = LocalDensity.current
 
-    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
-    val appBarOffsetPx = with(density) { 120.dp.toPx() }
-
-    val expandedHeight = screenHeightPx
-    val collapsedHeight = with(density) { 300.dp.toPx() + appBarOffsetPx }
-    val hiddenHeight = with(density) { 120.dp.toPx() + appBarOffsetPx }
+    val expandedHeightPx = with(density) { screenHeight.toPx() }
+    val collapsedHeightPx = with(density) { (300.dp + appBarOffset).toPx() }
+    val hiddenHeightPx = with(density) { (120.dp + appBarOffset).toPx() }
 
     val anchors = listOf(
-        DashboardModalState.EXPANDED to expandedHeight,
-        DashboardModalState.COLLAPSED to collapsedHeight,
-        DashboardModalState.HIDDEN to hiddenHeight
+        DashboardModalState.EXPANDED to expandedHeightPx,
+        DashboardModalState.COLLAPSED to collapsedHeightPx,
+        DashboardModalState.HIDDEN to hiddenHeightPx
     )
 
     val metricsState by viewModel.state.collectAsState()
-
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         val loadResult = viewModel.loadMetrics(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
         metricsState?.let {
             if (loadResult.isFailure) viewModel.createMetrics(it)
 
-            val currentMetrics = MetricsProvider.getMetrics(context, LocalDate.now())
-            if (currentMetrics != null) {
+            MetricsProvider.getMetrics(context, LocalDate.now())?.let { currentMetrics ->
                 viewModel.updateMetrics(MetricsMapper.toState(currentMetrics))
             }
         }
@@ -154,35 +137,52 @@ fun DashboardModal(
         onStateChange = { targetState ->
             if (targetState != DashboardModalState.EXPANDED) {
                 shouldShowCalendarView.value = false
+                selectedDay.value = LocalDate.now()
             }
         },
         modifier = Modifier.testTag(DashboardModalTestTags.DRAGGABLE_NODE)
     ) { modalState, requestStateChange ->
         when (modalState) {
-            DashboardModalState.EXPANDED -> ExpandedContent(
-                viewModel,
-                metricsState,
-                selectedDay,
-                shouldShowCalendarView
-            )
-
-            DashboardModalState.COLLAPSED -> CollapsedContent(
-                metricsState,
-                false,
+            DashboardModalState.EXPANDED -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = expandedHeight)
             ) {
-                shouldShowCalendarView.value = true
-                requestStateChange(DashboardModalState.EXPANDED)
+                ExpandedContent(
+                    viewModel = viewModel,
+                    state = metricsState,
+                    selectedDay = selectedDay,
+                    shouldShowCalendarView = shouldShowCalendarView
+                )
             }
-
-            DashboardModalState.HIDDEN -> CollapsedContent(
-                 metricsState,
-                true
-            ) {}
+            DashboardModalState.COLLAPSED -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = collapsedHeight)
+            ) {
+                CollapsedContent(
+                    state = metricsState,
+                    isHidden = false,
+                    onCalendarViewClicked = {
+                        shouldShowCalendarView.value = true
+                        requestStateChange(DashboardModalState.EXPANDED)
+                    }
+                )
+            }
+            DashboardModalState.HIDDEN -> Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = hiddenHeight)
+            ) {
+                CollapsedContent(
+                    state = metricsState,
+                    isHidden = true,
+                    onCalendarViewClicked = {}
+                )
+            }
         }
     }
 }
-
-
 
 @Composable
 private fun CollapsedContent(
@@ -193,8 +193,7 @@ private fun CollapsedContent(
     state?.let { currentState ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.primary)
                 .padding(vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -222,8 +221,8 @@ private fun ExpandedContent(
     state?.let {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 86.dp)
+                .fillMaxWidth()
+                .padding(top = 86.dp, bottom = 24.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.primary)
                 .padding(16.dp)
@@ -234,13 +233,13 @@ private fun ExpandedContent(
 
             if (shouldShowCalendarView.value) {
                 CalendarView(
-                    viewModel,
+                    viewModel = viewModel,
                     shouldShowCalendarView = shouldShowCalendarView,
                     selectedDay = selectedDay
                 )
             } else {
                 WeekView(
-                    viewModel,
+                    viewModel = viewModel,
                     selectedDay = selectedDay
                 ) {
                     shouldShowCalendarView.value = true
@@ -263,10 +262,12 @@ private fun Header() {
 
     Kiwi_Spacer()
 
-    Kiwi_H2(Kiwi_TextArguments(
-        "Daily Progress",
-        TextAlign.Center,
-        MaterialTheme.colorScheme.inversePrimary)
+    Kiwi_H2(
+        Kiwi_TextArguments(
+            "Daily Progress",
+            TextAlign.Center,
+            MaterialTheme.colorScheme.inversePrimary
+        )
     )
 }
 
@@ -534,17 +535,29 @@ private fun ExpandedProgressBox(state: MetricsState) {
 
 @Composable
 private fun ExpandedMetricsProgress(state: MetricsState) {
+    val maxSteps = 100000
+    val currentSteps =
+        if (state.steps < maxSteps)
+            state.steps.toString()
+        else "+99,999"
+
+    val maxScreenTimeSeconds = 10 * 60 * 60
+    val currentScreenTimeSeconds =
+        if (state.screenTimeSeconds < maxScreenTimeSeconds)
+            MetricsUtils.parseScreenTimeSeconds(state.screenTimeSeconds)
+        else "+10 hours\n(are you serious?)"
+
     Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
         MetricProgress(
             "Steps",
-            state.steps.toString(),
+            currentSteps,
             "8,000",
             Modifier.weight(1f),
             DashboardModalTestTags.STEPS
         )
         MetricProgress(
             "Screen Time",
-            MetricsUtils.parseScreenTimeSeconds(state.screenTimeSeconds),
+            currentScreenTimeSeconds,
             "3 hours",
             Modifier.weight(1f),
             DashboardModalTestTags.SCREEN_TIME
@@ -553,7 +566,13 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
 }
 
 @Composable
-private fun MetricProgress(title: String, value: String, target: String, modifier: Modifier, testTag: String) {
+private fun MetricProgress(
+    title: String,
+    value: String,
+    target: String,
+    modifier: Modifier,
+    testTag: String
+) {
     Box(modifier) {
         Column(modifier = Modifier.padding(8.dp)) {
             Kiwi_H3(Kiwi_TextArguments(
@@ -601,9 +620,21 @@ private fun CollapsedSummaryCard(
                     .padding(16.dp)
                     .wrapContentSize()
             ) {
+                val maxSteps = 100000
+                val currentSteps =
+                    if (state.steps < maxSteps)
+                        state.steps.toString()
+                    else "+99,999"
+
+                val maxScreenTimeSeconds = 60
+                val currentScreenTimeSeconds =
+                    if (state.screenTimeSeconds < maxScreenTimeSeconds)
+                        (state.screenTimeSeconds / 60).toString()
+                    else "+60"
+
                 val stepsText = buildAnnotatedString {
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
-                        append(state.steps.toString())
+                        append(currentSteps)
                     }
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f))) {
                         append("/8,000 steps")
@@ -617,7 +648,7 @@ private fun CollapsedSummaryCard(
 
                 val screenTimeText = buildAnnotatedString {
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
-                        append((state.screenTimeSeconds / 60).toString())
+                        append(currentScreenTimeSeconds)
                     }
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f))) {
                         append("/60 screen mins")
@@ -712,5 +743,53 @@ private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float)
             MaterialTheme.colorScheme.inversePrimary,
             modifier = Modifier.padding(8.dp))
         )
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(name = "Calendar", device = "spec:width=411dp,height=891dp,dpi=420")
+@Composable
+fun DashboardModalCalendarPreview_Regular() {
+    KiwiTheme {
+        val viewModel = MetricsFakeViewModel(
+            MetricsState("2025-06-12", 1765, 2 * 60 * 34)
+        )
+        DashboardModal(viewModel, initialState = DashboardModalState.EXPANDED, true)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(name = "Expanded", device = "spec:width=411dp,height=891dp,dpi=420")
+@Composable
+fun DashboardModalExpandedPreview_Regular() {
+    KiwiTheme {
+        val viewModel = MetricsFakeViewModel(
+            MetricsState("2025-06-12", 1765, 2 * 60 * 34)
+        )
+        DashboardModal(viewModel, initialState = DashboardModalState.EXPANDED)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(name = "Collapsed", device = "spec:width=411dp,height=891dp,dpi=420")
+@Composable
+fun DashboardModalCollapsedPreview_Regular() {
+    KiwiTheme {
+        val viewModel = MetricsFakeViewModel(
+            MetricsState("2025-06-12", 1765, 2 * 60 * 34)
+        )
+        DashboardModal(viewModel, initialState = DashboardModalState.COLLAPSED)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(name = "Hidden", device = "spec:width=411dp,height=891dp,dpi=420")
+@Composable
+fun DashboardModalHiddenPreview_Regular() {
+    KiwiTheme {
+        val viewModel = MetricsFakeViewModel(
+            MetricsState("2025-06-12", 1765, 2 * 60 * 34)
+        )
+        DashboardModal(viewModel, initialState = DashboardModalState.HIDDEN)
     }
 }

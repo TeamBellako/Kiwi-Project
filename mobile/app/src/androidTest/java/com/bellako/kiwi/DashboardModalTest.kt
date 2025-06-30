@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
@@ -49,7 +50,11 @@ class DashboardModalTest {
     @Before
     fun setUp() {
         val todayLocalDate = LocalDate.now()
-        todayMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.toString())
+        todayMetricsDTO = MetricsDTO(
+            LocalDate.now().toString(),
+            100000,
+            2*60*60
+        )
         pastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.minusDays(1).toString())
         futureMetricsDTO = todayMetricsDTO.copy(date = todayLocalDate.plusDays(1).toString(), steps = 0, screenTimeSeconds = 0)
 
@@ -63,18 +68,18 @@ class DashboardModalTest {
     }
 
     @Test
-    fun loadTodayMetrics() {
+    fun loadTodayMetricsWithOverflowedMetrics() {
         rule.setContent {
             DashboardModal(
-                fakeViewModel,
-                DashboardModalState.EXPANDED
+                fakeViewModel
             )
         }
 
+        rule.isInCollapsedState()
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .assertTextEquals(todayMetricsDTO.steps.toString())
+            .assertTextContains("+99,999", true)
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(todayMetricsDTO.screenTimeSeconds))
+            .assertTextContains("+60", true)
     }
 
     @Test
@@ -85,11 +90,6 @@ class DashboardModalTest {
                 DashboardModalState.EXPANDED
             )
         }
-
-        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .assertTextEquals(todayMetricsDTO.steps.toString())
-        rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(todayMetricsDTO.screenTimeSeconds))
 
         val yesterdayTestTag =
             DashboardModalTestTags.DAY_INDICATOR_PREFIX + MetricsUtils.getDayOfWeekNumber(
@@ -112,11 +112,6 @@ class DashboardModalTest {
             )
         }
 
-        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .assertTextEquals(todayMetricsDTO.steps.toString())
-        rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(todayMetricsDTO.screenTimeSeconds))
-
         val tomorrowTestTag =
             DashboardModalTestTags.DAY_INDICATOR_PREFIX + MetricsUtils.getDayOfWeekNumber(
                 LocalDate.now().plusDays(1)
@@ -132,8 +127,7 @@ class DashboardModalTest {
     @Test
     fun dragFromHiddenToCollapsed() {
         val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.HIDDEN)
-        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .isNotDisplayed()
+        rule.isInHiddenState()
 
         rule.swipeDashboardModal(
             fromState = DashboardModalState.HIDDEN,
@@ -141,15 +135,13 @@ class DashboardModalTest {
             screenHeightDp = screenHeightDpState
         )
 
-        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .isDisplayed()
+        rule.isInCollapsedState()
     }
 
     @Test
     fun dragFromHiddenToExpanded() {
         val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.HIDDEN)
-        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
-            .isNotDisplayed()
+        rule.isInHiddenState()
 
         rule.swipeDashboardModal(
             fromState = DashboardModalState.HIDDEN,
@@ -157,16 +149,13 @@ class DashboardModalTest {
             screenHeightDp = screenHeightDpState
         )
 
-        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
-            .isDisplayed()
+        rule.isInExpandedState()
     }
 
     @Test
     fun dragFromCollapsedToExpanded() {
         val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.COLLAPSED)
-
-        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
-            .isNotDisplayed()
+        rule.isInCollapsedState()
 
         rule.swipeDashboardModal(
             fromState = DashboardModalState.COLLAPSED,
@@ -174,8 +163,7 @@ class DashboardModalTest {
             screenHeightDp = screenHeightDpState
         )
 
-        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
-            .isDisplayed()
+        rule.isInExpandedState()
     }
 
     @Test
@@ -203,7 +191,7 @@ class DashboardModalTest {
     }
 
     @Test
-    fun showCalendarViewFromExpanded() {
+    fun showCalendarViewFromExpandedAndThenHideIt() {
         rule.setContent {
             DashboardModal(
                 fakeViewModel,
@@ -213,9 +201,15 @@ class DashboardModalTest {
 
         rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
             .performClick()
-
         rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
             .isDisplayed()
+
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "2")
+            .performClick()
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "2")
+            .performClick()
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
+            .isNotDisplayed()
     }
 
     @Test
@@ -253,9 +247,7 @@ class DashboardModalTest {
 
     }
 
-    private fun setContentAndGetScreenHeight(
-        dashboardModalState: DashboardModalState
-    ) : Int {
+    private fun setContentAndGetScreenHeight(dashboardModalState: DashboardModalState) : Int {
         val screenHeightDpState = mutableStateOf(0)
 
         rule.setContent {
@@ -304,6 +296,25 @@ class DashboardModalTest {
             }
     }
 
+    private fun ComposeTestRule.isInExpandedState() {
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
+            .isDisplayed()
+    }
 
+    private fun ComposeTestRule.isInCollapsedState() {
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
+            .isNotDisplayed()
+
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
+            .isDisplayed()
+    }
+
+    private fun ComposeTestRule.isInHiddenState() {
+        rule.onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
+            .isNotDisplayed()
+
+        rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
+            .isNotDisplayed()
+    }
 
 }

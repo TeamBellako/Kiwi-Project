@@ -91,7 +91,7 @@ private fun openEmailClient(context: Context) {
     }
 }
 
-@Preview
+@Preview(device = "spec:width=411dp,height=891dp,dpi=420")
 @Composable
 fun HelpScreenPreview() {
     KiwiTheme {

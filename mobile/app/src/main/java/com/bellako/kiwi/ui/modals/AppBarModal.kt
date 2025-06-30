@@ -96,7 +96,7 @@ fun AppBarModal(
     }
 }
 
-@Preview
+@Preview(device = "spec:width=411dp,height=891dp,dpi=420")
 @Composable
 fun AppBarModalPreview() {
     val navController = rememberNavController()

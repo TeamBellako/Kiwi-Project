@@ -58,7 +58,7 @@ fun HomeScreen() {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-@Preview
+@Preview(device = "spec:width=411dp,height=891dp,dpi=420")
 @Composable
 fun HomeScreenPreview() {
     KiwiTheme {

@@ -200,7 +200,7 @@ private fun Buttons(
     }
 }
 
-@Preview
+@Preview(device = "spec:width=411dp,height=891dp,dpi=420")
 @Composable
 fun UsersScreenPreview() {
     KiwiTheme {
