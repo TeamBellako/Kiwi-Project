@@ -69,7 +69,7 @@ public class MetricsControllerTest {
     @WithMockUser(username = "finn@thehuman.com")
     public void updateValidMetrics() throws Exception {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
-        when(metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), LocalDate.parse(metricsDTO.getDate())))
+        when(metricsService.getMetrics(new Email("finn@thehuman.com"), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(Optional.of(metricsDTO));
         
         MetricsDTO updatedMetricsDTO = metricsDTO.copy();
@@ -83,11 +83,10 @@ public class MetricsControllerTest {
     @WithMockUser(username = "finn@thehuman.com")
     public void readValidMetrics() throws Exception {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
-        when(metricsService.getMetricsByEmailAndDate(new Email(metricsDTO.getEmail()), LocalDate.parse(metricsDTO.getDate())))
+        when(metricsService.getMetrics(new Email("finn@thehuman.com"), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(Optional.of(metricsDTO));
 
         mockMvc.perform(get(APIURL)
-                        .param("email", metricsDTO.getEmail())  
                         .param("date", metricsDTO.getDate()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.steps").value(metricsDTO.getSteps()));

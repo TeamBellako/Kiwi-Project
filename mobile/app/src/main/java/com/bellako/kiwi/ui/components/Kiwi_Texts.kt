@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -17,6 +18,12 @@ data class Kiwi_TextArguments(
     val color: Color = Color.White,
     val bold: Boolean = false,
     val italic: Boolean = false,
+    val modifier: Modifier = Modifier
+)
+
+data class Kiwi_AnnotatedStringArguments(
+    val text: AnnotatedString,
+    val textAlign: TextAlign = TextAlign.Left,
     val modifier: Modifier = Modifier
 )
 
@@ -104,6 +111,15 @@ fun Kiwi_P3(arguments: Kiwi_TextArguments) {
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal
         )
+    )
+}
+
+@Composable
+fun Kiwi_AnnotatedString(arguments: Kiwi_AnnotatedStringArguments) {
+    Text(
+        text = arguments.text,
+        textAlign = arguments.textAlign,
+        modifier = arguments.modifier.padding(bottom = 4.dp),
     )
 }
 

@@ -20,7 +20,6 @@ fun LoadingModal() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .testTag(CommonTestTags.LOADING_MODAL),
         contentAlignment = Alignment.Center
     ) {

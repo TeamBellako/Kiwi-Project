@@ -17,7 +17,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object SettingsModule {
-
     @Provides
     @Singleton
     fun provideJwtAuthInterceptor(authRepository: AuthRepository): JwtAuthInterceptor {

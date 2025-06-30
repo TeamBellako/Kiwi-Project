@@ -1,4 +1,4 @@
-package com.bellako.kiwi.features.users
+package com.bellako.kiwi.types
 
 @JvmInline
 value class Email private constructor(val value: String) {

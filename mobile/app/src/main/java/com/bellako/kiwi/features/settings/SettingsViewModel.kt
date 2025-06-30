@@ -1,28 +1,24 @@
 package com.bellako.kiwi.features.settings
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.services.common.UIState
-import com.bellako.kiwi.services.common.HTTPUtils.mapExceptionToUIState
-import com.bellako.kiwi.services.common.Logger
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.collectLatest
+import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.services.common.BaseViewModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import javax.inject.Inject
+import kotlinx.coroutines.delay
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -31,29 +27,23 @@ object DispatcherModule {
     fun provideCoroutineDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
-    private val dispatcher: CoroutineDispatcher,
-) : ViewModel(), ISettingsViewModel {
+    private val dispatcher: CoroutineDispatcher
+) : BaseViewModel(), ISettingsViewModel {
 
     private val _state = MutableStateFlow<SettingsState?>(null)
     override val state: StateFlow<SettingsState?> = _state.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
+    override val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
-    override val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
     private var previousValidDomainSettings: Settings? = null
     private var previousDomainSettings: Settings? = null
-    private val _pendingSave = MutableSharedFlow<Settings>(extraBufferCapacity = 1)
-    private var debounceJob: Job? = null
 
-    init {
-        observeDebouncedChanges()
-    }
+    private val _pendingSave = MutableStateFlow<Settings?>(null)
 
     override fun reset() {
         previousValidDomainSettings = null
@@ -63,22 +53,28 @@ class SettingsViewModel @Inject constructor(
         _isLoading.value = true
         _uiState.value = UIState.Loading
 
-        viewModelScope.launch {
-            val result = repository.getSettings()
-            result.onSuccess { dto ->
-                dto.toDomainObject()
-                    .onSuccess { domain ->
-                        _state.value = domain.toState()
-                        previousDomainSettings = domain
-                        _uiState.value = UIState.Success(Unit)
+        viewModelScope.launch(dispatcher) {
+            try {
+                val result = repository.getSettings()
+                result.fold(
+                    onSuccess = { dto ->
+                        dto.toDomainObject().onSuccess { domain ->
+                            _state.value = domain.toState()
+                            previousDomainSettings = domain
+                            _uiState.value = UIState.Success(Unit)
+                        }.onFailure { ex ->
+                            _uiState.value = mapExceptionToUIState(ex)
+                        }
+                    },
+                    onFailure = { throwable ->
+                        _uiState.value = mapExceptionToUIState(throwable)
                     }
-                    .onFailure { ex ->
-                        _uiState.value = mapExceptionToUIState(ex)
-                    }
-            }.onFailure { ex ->
+                )
+            } catch (ex: Exception) {
                 _uiState.value = mapExceptionToUIState(ex)
+            } finally {
+                _isLoading.value = false
             }
-            _isLoading.value = false
         }
     }
 
@@ -88,42 +84,40 @@ class SettingsViewModel @Inject constructor(
         state.toDomainObject().onSuccess { domain ->
             if (previousValidDomainSettings == domain) return
 
-            Logger.info("Queueing settings save")
             previousValidDomainSettings = domain
-            _pendingSave.tryEmit(domain)
+            _pendingSave.value = domain
         }
     }
 
-    @OptIn(FlowPreview::class)
-    private fun observeDebouncedChanges() {
-        debounceJob?.cancel()
-        debounceJob = viewModelScope.launch {
+    init {
+        viewModelScope.launch {
             _pendingSave
                 .debounce(500)
                 .collectLatest { domain ->
-                    saveSettings(domain)
+                    domain?.let {
+                        saveSettings(it)
+                    }
                 }
         }
     }
 
-    private suspend fun saveSettings(domain: Settings) {
-        withContext(dispatcher) {
-            repository.pingServer()
-                .onSuccess {
-                    Logger.info("Saving user settings")
-
-                    repository.updateSettings(domain.toDTO())
-                        .onSuccess {
-                            _uiState.value = UIState.Success(Unit)
-                        }
-                        .onFailure { throwable ->
-                            _uiState.value = mapExceptionToUIState(throwable)
-                        }
-                }
-                .onFailure { throwable ->
+    private fun saveSettings(domain: Settings) {
+        viewModelScope.launch(dispatcher) {
+            try {
+                // Ping server before updating settings
+                repository.pingServer().onSuccess {
+                    // Proceed with the update after the ping is successful
+                    repository.updateSettings(domain.toDTO()).onSuccess {
+                        _uiState.value = UIState.Success(Unit)
+                    }.onFailure { throwable ->
+                        _uiState.value = mapExceptionToUIState(throwable)
+                    }
+                }.onFailure { throwable ->
                     _uiState.value = mapExceptionToUIState(throwable)
                 }
+            } catch (ex: Exception) {
+                _uiState.value = mapExceptionToUIState(ex)
+            }
         }
     }
-
 }

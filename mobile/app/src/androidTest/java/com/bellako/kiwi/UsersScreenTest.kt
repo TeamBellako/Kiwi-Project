@@ -22,7 +22,7 @@ import com.bellako.kiwi.features.users.UsersTestTags
 
 
 @RunWith(AndroidJUnit4::class)
-class UsersUITest {
+class UsersScreenTest {
     @get:Rule
     val rule = createComposeRule()
 
@@ -34,8 +34,7 @@ class UsersUITest {
         state = UsersState("finn@thehuman.com", "Math3matical!")
 
         fakeViewModel = UsersFakeViewModel(
-            state,
-            false
+            state
         )
 
         rule.setContent {

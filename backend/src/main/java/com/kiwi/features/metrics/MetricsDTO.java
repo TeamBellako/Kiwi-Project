@@ -3,7 +3,6 @@ package com.kiwi.features.metrics;
 import java.util.Objects;
 
 public class MetricsDTO {
-    private String email;
     private String date;
     private Integer steps;
     private Integer screenTimeSeconds;
@@ -11,23 +10,16 @@ public class MetricsDTO {
     public MetricsDTO() {
     }
 
-    public MetricsDTO(String email) {
-        this.email = email;
+    public MetricsDTO(String date) {
+        this.date = date;
+        steps = 0;
+        screenTimeSeconds = 0;
     }
 
-    public MetricsDTO(String email, String date, Integer steps, Integer screenTimeSeconds) {
-        this.email = email;
+    public MetricsDTO(String date, Integer steps, Integer screenTimeSeconds) {
         this.date = date;
         this.steps = steps;
         this.screenTimeSeconds = screenTimeSeconds;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getDate() {
@@ -46,7 +38,7 @@ public class MetricsDTO {
         this.steps = steps;
     }
 
-    public Integer getscreenTimeSeconds() {
+    public Integer getScreenTimeSeconds() {
         return screenTimeSeconds;
     }
 
@@ -58,18 +50,17 @@ public class MetricsDTO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MetricsDTO that = (MetricsDTO) o;
-        return Objects.equals(email, that.email) && Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTimeSeconds, that.screenTimeSeconds);
+        return Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTimeSeconds, that.screenTimeSeconds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, date, steps, screenTimeSeconds);
+        return Objects.hash(date, steps, screenTimeSeconds);
     }
 
     @Override
     public String toString() {
         return "MetricsDTO{" +
-                "email='" + email + '\'' +
                 ", date='" + date + '\'' +
                 ", steps=" + steps +
                 ", screenTimeSeconds=" + screenTimeSeconds +
@@ -78,10 +69,9 @@ public class MetricsDTO {
     
     public MetricsDTO copy() {
         return new MetricsDTO(
-                getEmail(),
                 getDate(),
                 getSteps(),
-                getscreenTimeSeconds()
+                getScreenTimeSeconds()
         );
     }
 }

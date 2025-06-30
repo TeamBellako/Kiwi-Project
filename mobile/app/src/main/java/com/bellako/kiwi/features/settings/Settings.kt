@@ -1,6 +1,6 @@
 package com.bellako.kiwi.features.settings
 
-import com.bellako.kiwi.features.users.Email
+import com.bellako.kiwi.types.Email
 
 data class Settings(
     val email: Email,

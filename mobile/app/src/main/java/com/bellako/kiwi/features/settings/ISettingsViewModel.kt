@@ -1,14 +1,11 @@
 package com.bellako.kiwi.features.settings
 
-import com.bellako.kiwi.services.common.UIState
-import kotlinx.coroutines.flow.StateFlow
+import com.bellako.kiwi.features.common.IBaseViewModel
 
-interface ISettingsViewModel {
-    val state: StateFlow<SettingsState?>
-    val isLoading: StateFlow<Boolean>
-    val uiState: StateFlow<UIState<Unit>>
-
-    fun reset()
+interface ISettingsViewModel : IBaseViewModel<SettingsState> {
     fun loadSettings()
     fun updateSettings(state: SettingsState)
+
+    fun reset()
 }
+

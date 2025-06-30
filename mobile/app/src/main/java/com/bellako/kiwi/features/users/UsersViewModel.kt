@@ -1,37 +1,34 @@
 package com.bellako.kiwi.features.users
 
-import androidx.lifecycle.ViewModel
-import com.bellako.kiwi.services.common.UIState
+
+import androidx.compose.runtime.mutableStateOf
+import com.bellako.kiwi.services.common.BaseViewModel
 import com.bellako.kiwi.services.network.AuthRepository
-import com.bellako.kiwi.services.common.HTTPUtils.extractHttpExceptionMessage
+import com.bellako.kiwi.services.common.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import retrofit2.HttpException
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
     private val repository: UsersRepository,
-    private val authRepository: AuthRepository,
-) : ViewModel(), IUsersViewModel {
+    private val authRepository: AuthRepository
+) : BaseViewModel(), IUsersViewModel {
 
-    private val _state = MutableStateFlow<UsersState?>(UsersState("", ""))
-    override val state: StateFlow<UsersState?> = _state.asStateFlow()
+    private val _state = MutableStateFlow(UsersState("", ""))
+    override val state: StateFlow<UsersState> = _state.asStateFlow()
 
-    private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
-    override val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(false)
-    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _isLoginCompleted = MutableStateFlow(false);
+    val isLoginCompleted : StateFlow<Boolean> = _isLoginCompleted.asStateFlow();
 
     override fun onEmailChanged(email: String) {
-        _state.value = _state.value?.copy(email = email)
+        _state.value = _state.value.copy(email = email)
     }
 
     override fun onPasswordChanged(password: String) {
-        _state.value = _state.value?.copy(password = password)
+        _state.value = _state.value.copy(password = password)
     }
 
     override fun logout() {
@@ -53,22 +50,9 @@ class UsersViewModel @Inject constructor(
         val result = repository.signup(user.toDTO())
         _isLoading.value = false
 
-        return result.fold(
-            onSuccess = {
-                _uiState.value = UIState.Success(Unit)
-                login(state)
-            },
-            onFailure = { throwable ->
-                _uiState.value = when (throwable) {
-                    is HttpException -> {
-                        if (throwable.code() >= 500) UIState.GeneralError
-                        else UIState.Error(extractHttpExceptionMessage(throwable))
-                    }
-                    else -> UIState.GeneralError
-                }
-                Result.failure(throwable)
-            }
-        )
+        return handleResultSuspend(result) {
+            //login(state)
+        }
     }
 
     override suspend fun login(state: UsersState): Result<Unit> {
@@ -86,32 +70,17 @@ class UsersViewModel @Inject constructor(
         val result = repository.login(user.toDTO())
         _isLoading.value = false
 
-        return result.fold(
-            onSuccess = {
-                authRepository.setJwtToken(it)
-                _uiState.value = UIState.Success(Unit)
-                Result.success(Unit)
-            },
-            onFailure = { throwable ->
-                _uiState.value = when (throwable) {
-                    is HttpException -> {
-                        if (throwable.code() >= 500) UIState.GeneralError
-                        else UIState.Error(extractHttpExceptionMessage(throwable))
-                    }
-                    else -> UIState.GeneralError
-                }
-                Result.failure(throwable)
-            }
-        )
+        return handleResultSuspend(result) {
+            authRepository.setJwtToken(result.getOrThrow())
+            _isLoginCompleted.value = true
+        }
     }
 
-    private fun getInvalidDataMessage(): String {
-        return """
-            Invalid email or password. Password must:
-            - Be at least 8 characters long
-            - Include both uppercase and lowercase letters
-            - Contain at least one number
-            - Contain at least one special character
-        """.trimIndent()
-    }
+    private fun getInvalidDataMessage(): String = """
+        Invalid email or password. Password must:
+        - Be at least 8 characters long
+        - Include both uppercase and lowercase letters
+        - Contain at least one number
+        - Contain at least one special character
+    """.trimIndent()
 }

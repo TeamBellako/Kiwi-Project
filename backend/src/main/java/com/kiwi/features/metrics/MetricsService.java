@@ -19,8 +19,6 @@ import java.util.Optional;
 public class MetricsService {
     private final MetricsRepository metricsRepository;
     private final UsersService usersService;
-
-    private static final Logger logger = LoggerFactory.getLogger(MetricsService.class);
     
     @Autowired
     public MetricsService(MetricsRepository metricsRepository, UsersService usersService) {
@@ -29,37 +27,36 @@ public class MetricsService {
     }
 
     @Transactional
-    public void createMetric(@Valid @NotNull MetricsDTO metricsDTO) {
+    public void createMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
         Metrics metrics = MetricsMapper.toDomain(metricsDTO);
 
-        UsersPersistence targetUserPersistence = getTargetUserPersistence(metrics.getEmail());
+        UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         if (metricsRepository.findByUserAndDate(targetUserPersistence, metrics.getDate()).isPresent()) {
-            throw new MetricsConflictException(metrics.getEmail(), metrics.getDate());
+            throw new MetricsConflictException(email, metrics.getDate());
         }
 
         metricsRepository.saveAndFlush(MetricsMapper.toPersistence(targetUserPersistence, metrics));
     }
     
     @Transactional
-    public void updateMetric(@Valid @NotNull MetricsDTO metricsDTO) {
+    public void updateMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
         Metrics updateMetrics = MetricsMapper.toDomain(metricsDTO);
         
-        UsersPersistence targetUserPersistence = getTargetUserPersistence(updateMetrics.getEmail());
+        UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         Optional<MetricsPersistence> targetMetricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, updateMetrics.getDate());
         if (targetMetricsPersistence.isEmpty()) {
-            throw new MetricsNotFoundException(updateMetrics.getEmail(), updateMetrics.getDate());
+            throw new MetricsNotFoundException(email, updateMetrics.getDate());
         }
 
         targetMetricsPersistence.get().mergeFromDomain(updateMetrics);
         metricsRepository.saveAndFlush(targetMetricsPersistence.get());
     }
     
-    public Optional<MetricsDTO> getMetricsByEmailAndDate(@Valid @NotNull Email email, @NotNull LocalDate date) {
+    public Optional<MetricsDTO> getMetrics(@Valid @NotNull Email email, @NotNull LocalDate date) {
         UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         
         Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, date);
         if (metricsPersistence.isEmpty()) {
-            logger.warn("Trying to retrieve non-existing metric with email {} and date {}", email.value(), date.toString());
             return Optional.empty();
         } 
         

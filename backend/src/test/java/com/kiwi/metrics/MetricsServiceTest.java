@@ -34,6 +34,7 @@ public class MetricsServiceTest {
     private final MetricsService metricsService = new MetricsService(metricsRepositoryInMemory, usersService);
     
     private UsersPersistence validUsersPersistence;
+    private final Email validEmail = new Email("finn@thehuman.com");
     
     @Before
     public void setUp() {
@@ -44,7 +45,7 @@ public class MetricsServiceTest {
     @Test
     public void createValidMetrics() {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
-        metricsService.createMetric(metricsDTO);
+        metricsService.createMetric(validEmail, metricsDTO);
         
         Optional<MetricsPersistence> savedMetricsPersistence = 
                 metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, LocalDate.parse(metricsDTO.getDate()));
@@ -55,20 +56,20 @@ public class MetricsServiceTest {
     @Test(expected = MetricsInvalidException.class)
     public void createInvalidMetrics() {
         MetricsDTO invalidMetricsDTO = MetricsFactory.generateRandomInvalidMetricDTO();
-        metricsService.createMetric(invalidMetricsDTO);
+        metricsService.createMetric(validEmail, invalidMetricsDTO);
     }
 
     @Test(expected = NullPointerException.class)
     public void createNullMetrics() {
-        metricsService.createMetric(null);
+        metricsService.createMetric(validEmail, null);
     }
 
     @Test(expected = MetricsConflictException.class)
     public void createDuplicatedMetrics() {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
         
-        metricsService.createMetric(metricsDTO);
-        metricsService.createMetric(metricsDTO);
+        metricsService.createMetric(validEmail, metricsDTO);
+        metricsService.createMetric(validEmail, metricsDTO);
     }
 
     @Test
@@ -78,7 +79,7 @@ public class MetricsServiceTest {
         metricsRepositoryInMemory.saveAndFlush(MetricsMapper.toPersistence(validUsersPersistence, metrics));
 
         metricsDTO.setSteps(metricsDTO.getSteps() + 1);
-        metricsService.updateMetric(metricsDTO);
+        metricsService.updateMetric(validEmail, metricsDTO);
         
         Optional<MetricsPersistence> retrievedMetricsPersistence = 
                 metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, metrics.getDate());
@@ -94,17 +95,17 @@ public class MetricsServiceTest {
         Metrics metrics = MetricsMapper.toDomain(metricsDTO);
         metricsRepositoryInMemory.saveAndFlush(MetricsMapper.toPersistence(validUsersPersistence, metrics));
 
-        metricsService.updateMetric(MetricsFactory.generateRandomInvalidMetricDTO());
+        metricsService.updateMetric(validEmail, MetricsFactory.generateRandomInvalidMetricDTO());
     }
 
     @Test(expected = NullPointerException.class)
     public void updateNullMetrics() {
-        metricsService.updateMetric(null);
+        metricsService.updateMetric(validEmail, null);
     }
 
     @Test(expected = MetricsNotFoundException.class)
     public void updateNonExistingMetrics() {
-        metricsService.updateMetric(MetricsFactory.generateRandomValidMetricDTO());
+        metricsService.updateMetric(validEmail, MetricsFactory.generateRandomValidMetricDTO());
     }
     
     @Test
@@ -118,7 +119,7 @@ public class MetricsServiceTest {
         assert(savedMetricsPersistence.isPresent());
         
         Optional<MetricsDTO> retrievedMetricsDTO =
-                metricsService.getMetricsByEmailAndDate(validUsersPersistence.getEmail(), metrics.getDate());
+                metricsService.getMetrics(validUsersPersistence.getEmail(), metrics.getDate());
         assert(retrievedMetricsDTO.isPresent());
         
         assertEquals(metrics, MetricsMapper.toDomain(retrievedMetricsDTO.get()));
@@ -126,6 +127,6 @@ public class MetricsServiceTest {
 
     @Test
     public void getNonExistingMetric() {
-        assertEquals(Optional.empty(), metricsService.getMetricsByEmailAndDate(validUsersPersistence.getEmail(), LocalDate.now()));
+        assertEquals(Optional.empty(), metricsService.getMetrics(validUsersPersistence.getEmail(), LocalDate.now()));
     }
 }
