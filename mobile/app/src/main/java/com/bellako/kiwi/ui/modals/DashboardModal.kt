@@ -747,9 +747,11 @@ private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-@Preview(name = "Calendar", device = "spec:width=411dp,height=891dp,dpi=420")
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalCalendarPreview_Regular() {
+fun DashboardModalCalendarPreview() {
     KiwiTheme {
         val viewModel = MetricsFakeViewModel(
             MetricsState("2025-06-12", 1765, 2 * 60 * 34)
@@ -759,9 +761,11 @@ fun DashboardModalCalendarPreview_Regular() {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-@Preview(name = "Expanded", device = "spec:width=411dp,height=891dp,dpi=420")
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalExpandedPreview_Regular() {
+fun DashboardModalExpandedPreview() {
     KiwiTheme {
         val viewModel = MetricsFakeViewModel(
             MetricsState("2025-06-12", 1765, 2 * 60 * 34)
@@ -771,9 +775,11 @@ fun DashboardModalExpandedPreview_Regular() {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-@Preview(name = "Collapsed", device = "spec:width=411dp,height=891dp,dpi=420")
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalCollapsedPreview_Regular() {
+fun DashboardModalCollapsedPreview() {
     KiwiTheme {
         val viewModel = MetricsFakeViewModel(
             MetricsState("2025-06-12", 1765, 2 * 60 * 34)
@@ -783,9 +789,11 @@ fun DashboardModalCollapsedPreview_Regular() {
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-@Preview(name = "Hidden", device = "spec:width=411dp,height=891dp,dpi=420")
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalHiddenPreview_Regular() {
+fun DashboardModalHiddenPreview() {
     KiwiTheme {
         val viewModel = MetricsFakeViewModel(
             MetricsState("2025-06-12", 1765, 2 * 60 * 34)

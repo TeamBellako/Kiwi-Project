@@ -30,7 +30,9 @@ fun LoadingModal() {
     }
 }
 
-@Preview(device = "spec:width=411dp,height=891dp,dpi=420")
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 fun LoadingModalPreview() {
     KiwiTheme {
