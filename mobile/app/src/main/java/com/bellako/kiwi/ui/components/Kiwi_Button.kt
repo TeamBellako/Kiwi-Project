@@ -21,20 +21,20 @@ fun Kiwi_Button(
     testTag: String = "",
     rowModifier: Modifier = Modifier,
 ) {
-    var buttonColor = color
-    if(!enabled) {
-        buttonColor = buttonColor.copy(alpha = 0.75F)
-    }
-
     Box(modifier = rowModifier) {
         Button(
             onClick = onClick,
-            colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
+            enabled = enabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = color,
+                disabledContainerColor = color.copy(alpha = 0.1f),
+                contentColor = MaterialTheme.colorScheme.onSecondary,
+                disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
+            ),
             contentPadding = PaddingValues(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag(testTag),
-            enabled = enabled
+                .testTag(testTag)
         ) {
             Kiwi_Label(textArguments)
         }

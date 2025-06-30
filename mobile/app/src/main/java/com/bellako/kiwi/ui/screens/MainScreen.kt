@@ -39,6 +39,7 @@ fun MainScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
     val navController = rememberNavController()

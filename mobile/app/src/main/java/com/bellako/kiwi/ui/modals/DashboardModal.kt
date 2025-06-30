@@ -98,8 +98,8 @@ fun DashboardModalPreview() {
             MetricsFakeViewModel(
                 MetricsState(
                     "2025-06-12",
-                    1173,
-                    9900
+                    1765,
+                    2*60*34
                 )
             )
         )
@@ -154,6 +154,7 @@ fun DashboardModal(
         onStateChange = { targetState ->
             if (targetState != DashboardModalState.EXPANDED) {
                 shouldShowCalendarView.value = false
+                selectedDay.value = LocalDate.now()
             }
         },
         modifier = Modifier.testTag(DashboardModalTestTags.DRAGGABLE_NODE)
@@ -534,17 +535,29 @@ private fun ExpandedProgressBox(state: MetricsState) {
 
 @Composable
 private fun ExpandedMetricsProgress(state: MetricsState) {
+    val maxSteps = 100000
+    val currentSteps =
+        if (state.steps < maxSteps)
+            state.steps.toString()
+        else "+99,999"
+
+    val maxScreenTimeSeconds = 10 * 60 * 60
+    val currentScreenTimeSeconds =
+        if (state.screenTimeSeconds < maxScreenTimeSeconds)
+            MetricsUtils.parseScreenTimeSeconds(state.screenTimeSeconds)
+        else "+10 hours\n(are you serious?)"
+
     Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
         MetricProgress(
             "Steps",
-            state.steps.toString(),
+            currentSteps,
             "8,000",
             Modifier.weight(1f),
             DashboardModalTestTags.STEPS
         )
         MetricProgress(
             "Screen Time",
-            MetricsUtils.parseScreenTimeSeconds(state.screenTimeSeconds),
+            currentScreenTimeSeconds,
             "3 hours",
             Modifier.weight(1f),
             DashboardModalTestTags.SCREEN_TIME
@@ -553,7 +566,13 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
 }
 
 @Composable
-private fun MetricProgress(title: String, value: String, target: String, modifier: Modifier, testTag: String) {
+private fun MetricProgress(
+    title: String,
+    value: String,
+    target: String,
+    modifier: Modifier,
+    testTag: String
+) {
     Box(modifier) {
         Column(modifier = Modifier.padding(8.dp)) {
             Kiwi_H3(Kiwi_TextArguments(
@@ -601,9 +620,21 @@ private fun CollapsedSummaryCard(
                     .padding(16.dp)
                     .wrapContentSize()
             ) {
+                val maxSteps = 100000
+                val currentSteps =
+                    if (state.steps < maxSteps)
+                        state.steps.toString()
+                    else "+99,999"
+
+                val maxScreenTimeSeconds = 60
+                val currentScreenTimeSeconds =
+                    if (state.screenTimeSeconds < maxScreenTimeSeconds)
+                        (state.screenTimeSeconds / 60).toString()
+                    else "+60"
+
                 val stepsText = buildAnnotatedString {
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
-                        append(state.steps.toString())
+                        append(currentSteps)
                     }
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f))) {
                         append("/8,000 steps")
@@ -617,7 +648,7 @@ private fun CollapsedSummaryCard(
 
                 val screenTimeText = buildAnnotatedString {
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
-                        append((state.screenTimeSeconds / 60).toString())
+                        append(currentScreenTimeSeconds)
                     }
                     withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f))) {
                         append("/60 screen mins")

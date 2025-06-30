@@ -45,6 +45,6 @@ object MetricsFactory {
     }
 
     private fun getRandomScreenTimeSeconds(): Int {
-        return Random.nextInt(60, 4 * 60 * 60 + 1)
+        return Random.nextInt(60, 10 * 60 * 60 + 1) // 60 to 36,000 seconds
     }
 }
