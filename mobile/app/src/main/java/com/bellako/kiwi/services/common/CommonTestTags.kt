@@ -7,6 +7,7 @@ object CommonTestTags {
     const val ERROR_MODAL = "common_error_modal"
 
     const val DASHBOARD_MODAL = "common_dashboard_modal"
+    const val PERMISSIONS_REQUEST_MODAL = "common_permissions_request_modal"
 
     const val HOME_SCREEN = "common_home_screen"
     const val USERS_SCREEN = "common_login_screen"

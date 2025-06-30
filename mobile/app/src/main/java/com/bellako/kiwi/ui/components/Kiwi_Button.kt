@@ -1,14 +1,11 @@
 package com.bellako.kiwi.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,14 +16,14 @@ import androidx.compose.ui.unit.dp
 fun Kiwi_Button(
     textArguments: Kiwi_TextArguments,
     onClick: () -> Unit,
-    isLoading: Boolean = false,
+    enabled: Boolean = true,
     color: Color = MaterialTheme.colorScheme.secondary,
     testTag: String = "",
     rowModifier: Modifier = Modifier,
 ) {
     var buttonColor = color
-    if(isLoading) {
-        buttonColor = buttonColor.copy(alpha = 0.3F)
+    if(!enabled) {
+        buttonColor = buttonColor.copy(alpha = 0.75F)
     }
 
     Box(modifier = rowModifier) {
@@ -37,7 +34,7 @@ fun Kiwi_Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(testTag),
-            enabled = !isLoading
+            enabled = enabled
         ) {
             Kiwi_Label(textArguments)
         }
