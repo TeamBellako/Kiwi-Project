@@ -5,8 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Warning
@@ -27,6 +30,7 @@ import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.ui.theme.Spacing
 
 @Composable
 fun ErrorModal(
@@ -34,11 +38,31 @@ fun ErrorModal(
     errorMessage: String = "Uh-oh! It seems a careless scribe forgot to write this part of the story. \n\n Let's get back on track!",
     onRetry: (() -> Unit)? = null
 ) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        ErrorModalLayout(
+            modifier,
+            errorMessage,
+            onRetry
+        )
+    }
+}
+
+@Composable
+private fun ErrorModalLayout(
+    modifier: Modifier = Modifier,
+    errorMessage: String = "Uh-oh! It seems a careless scribe forgot to write this part of the story. \n Let's get back on track!",
+    onRetry: (() -> Unit)? = null
+) {
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp)
-            .background(MaterialTheme.colorScheme.background),
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(Spacing.medium),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -47,37 +71,36 @@ fun ErrorModal(
             imageVector = Icons.Filled.Warning,
             contentDescription = "Error icon",
             tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier
+                .size(Spacing.xLarge)
         )
 
-        Kiwi_Spacer()
+        Kiwi_Spacer(Spacing.small)
 
         Kiwi_H1(Kiwi_TextArguments(
-            "Wild Error Appeared!",
-            color = MaterialTheme.colorScheme.inversePrimary
+            "Wild Error\n Appeared!",
+            color = MaterialTheme.colorScheme.secondary,
+            textAlign = TextAlign.Center,
+            bold = true
         ))
-
-        Kiwi_Spacer()
 
         Kiwi_P1(Kiwi_TextArguments(
             errorMessage,
             TextAlign.Center,
-            modifier = Modifier.testTag(CommonTestTags.ERROR_MODAL)
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier
+                .testTag(CommonTestTags.ERROR_MODAL)
         ))
 
         if (onRetry != null) {
-            Box(
-                modifier = Modifier.padding(24.dp)
-            ) {
-                Kiwi_Button(
-                    Kiwi_TextArguments(
-                        "RETRY",
-                        color = Color.White,
-                        bold = true
-                    ),
-                    onRetry
-                )
-            }
+            Kiwi_Button(
+                Kiwi_TextArguments(
+                    "RETRY",
+                    color = MaterialTheme.colorScheme.secondary),
+                onRetry,
+                rowModifier = Modifier
+                    .padding(Spacing.large)
+            )
         }
     }
 }
@@ -88,6 +111,6 @@ fun ErrorModal(
 @Composable
 fun ErrorModalPreview() {
     KiwiTheme {
-        ErrorModal(onRetry = {})
+        ErrorModal() {}
     }
 }
