@@ -17,7 +17,7 @@ fun Kiwi_Button(
     textArguments: Kiwi_TextArguments,
     onClick: () -> Unit,
     enabled: Boolean = true,
-    color: Color = MaterialTheme.colorScheme.secondary,
+    color: Color = MaterialTheme.colorScheme.primaryContainer,
     testTag: String = "",
     rowModifier: Modifier = Modifier,
 ) {
