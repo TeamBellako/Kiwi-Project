@@ -15,17 +15,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -42,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
@@ -55,6 +60,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
@@ -74,8 +80,12 @@ import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
+import com.bellako.kiwi.ui.screens.HomeScreen
 import com.bellako.kiwi.ui.tags.DashboardModalTestTags
+import com.bellako.kiwi.ui.theme.DeviceSize
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.ui.theme.Spacing
+import com.bellako.kiwi.ui.theme.getDeviceSize
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
@@ -97,17 +107,15 @@ fun DashboardModal(
 ) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
-    val appBarOffset = 120.dp
 
-    val expandedHeight = screenHeight
-    val collapsedHeight = 300.dp + appBarOffset
-    val hiddenHeight = 120.dp + appBarOffset
+    val expandedHeight = screenHeight * 0.9F
+    val collapsedHeight = 250.dp
+    val hiddenHeight = 160.dp
 
     val density = LocalDensity.current
-
-    val expandedHeightPx = with(density) { screenHeight.toPx() }
-    val collapsedHeightPx = with(density) { (300.dp + appBarOffset).toPx() }
-    val hiddenHeightPx = with(density) { (120.dp + appBarOffset).toPx() }
+    val expandedHeightPx = with(density) { expandedHeight.toPx() }
+    val collapsedHeightPx = with(density) { collapsedHeight.toPx() }
+    val hiddenHeightPx = with(density) { hiddenHeight.toPx() }
 
     val anchors = listOf(
         DashboardModalState.EXPANDED to expandedHeightPx,
@@ -184,6 +192,7 @@ fun DashboardModal(
     }
 }
 
+
 @Composable
 private fun CollapsedContent(
     state: MetricsState?,
@@ -193,9 +202,14 @@ private fun CollapsedContent(
     state?.let { currentState ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(vertical = 16.dp),
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                    clip = false
+                )
+                .testTag(CommonTestTags.DASHBOARD_MODAL),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Header()
@@ -221,11 +235,13 @@ private fun ExpandedContent(
     state?.let {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 86.dp, bottom = 24.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                    clip = false
+                )
                 .testTag(CommonTestTags.DASHBOARD_MODAL),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -257,26 +273,25 @@ private fun Header() {
         40.dp,
         2.dp,
         Color.LightGray,
-        Modifier.padding(top = 8.dp)
+        Modifier.padding(top = Spacing.medium)
     )
 
     Kiwi_Spacer()
 
-    Kiwi_H2(
+    Kiwi_H3(
         Kiwi_TextArguments(
             "Daily Progress",
             TextAlign.Center,
-            MaterialTheme.colorScheme.inversePrimary
+            MaterialTheme.colorScheme.secondary
         )
     )
 }
 
 @Composable
-private fun CurrentDayIndicator(size: Dp) {
+private fun CurrentDayIndicator() {
     Kiwi_Image(
         R.drawable.ph_dashboard_heart,
         "Current day indicator",
-        Modifier.size(size)
     )
 }
 
@@ -292,7 +307,7 @@ private fun WeekView(
     val coroutineScope = rememberCoroutineScope()
     val startOfWeek = selectedDay.value.minusDays(currentDayOfWeek.toLong())
 
-    CurrentDayIndicator(240.dp)
+    CurrentDayIndicator()
 
     Column(
         modifier = Modifier
@@ -604,64 +619,79 @@ private fun CollapsedSummaryCard(
 ) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(40.dp))
+            .padding(horizontal = Spacing.xLarge)
             .background(MaterialTheme.colorScheme.surface)
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .clip(RoundedCornerShape(40.dp))
+            .padding(Spacing.medium)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(16.dp)
-                .wrapContentSize()
+
         ) {
-            CurrentDayIndicator(120.dp)
-
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .wrapContentSize()
+            Box(
+                Modifier
+                    .weight(0.2F)
             ) {
-                val maxSteps = 100000
-                val currentSteps =
-                    if (state.steps < maxSteps)
-                        state.steps.toString()
-                    else "+99,999"
-
-                val maxScreenTimeSeconds = 60
-                val currentScreenTimeSeconds =
-                    if (state.screenTimeSeconds < maxScreenTimeSeconds)
-                        (state.screenTimeSeconds / 60).toString()
-                    else "+60"
-
-                val stepsText = buildAnnotatedString {
-                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
-                        append(currentSteps)
-                    }
-                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f))) {
-                        append("/8,000 steps")
-                    }
-                }
-                Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
-                    stepsText,
-                    TextAlign.Left,
-                    Modifier
-                        .testTag(DashboardModalTestTags.STEPS)))
-
-                val screenTimeText = buildAnnotatedString {
-                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary)) {
-                        append(currentScreenTimeSeconds)
-                    }
-                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.3f))) {
-                        append("/60 screen mins")
-                    }
-                }
-                Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
-                    screenTimeText,
-                    TextAlign.Left,
-                    Modifier
-                        .testTag(DashboardModalTestTags.SCREEN_TIME))
-                )
+                CurrentDayIndicator()
             }
-            ShowCalendarViewButton(onCalendarViewClicked)
+            Box(
+                Modifier
+                    .weight(0.6F)
+                    .padding(horizontal = Spacing.small)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    val maxSteps = 100000
+                    val currentSteps =
+                        if (state.steps < maxSteps)
+                            state.steps.toString()
+                        else "+99,999"
+
+                    val maxScreenTimeSeconds = 60
+                    val currentScreenTimeSeconds =
+                        if (state.screenTimeSeconds < maxScreenTimeSeconds)
+                            (state.screenTimeSeconds / 60).toString()
+                        else "+60"
+
+                    val stepsText = buildAnnotatedString {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                            append(currentSteps)
+                        }
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+                            append("/8,000 steps")
+                        }
+                    }
+                    Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
+                        stepsText,
+                        TextAlign.Left,
+                        Modifier
+                            .testTag(DashboardModalTestTags.STEPS)))
+
+                    val screenTimeText = buildAnnotatedString {
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                            append(currentScreenTimeSeconds)
+                        }
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+                            append("/60 screen mins")
+                        }
+                    }
+                    Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
+                        screenTimeText,
+                        TextAlign.Left,
+                        Modifier
+                            .testTag(DashboardModalTestTags.SCREEN_TIME))
+                    )
+                }
+            }
+            Box(
+                Modifier
+                    .weight(0.1F)
+            ) {
+                ShowCalendarViewButton(onCalendarViewClicked)
+            }
         }
     }
 }
@@ -752,12 +782,10 @@ private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 fun DashboardModalCalendarPreview() {
-    KiwiTheme {
-        val viewModel = MetricsFakeViewModel(
-            MetricsState("2025-06-12", 1765, 2 * 60 * 34)
-        )
-        DashboardModal(viewModel, initialState = DashboardModalState.EXPANDED, true)
-    }
+    DashboardModalPreview(
+        DashboardModalState.EXPANDED,
+        true
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -766,12 +794,10 @@ fun DashboardModalCalendarPreview() {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 fun DashboardModalExpandedPreview() {
-    KiwiTheme {
-        val viewModel = MetricsFakeViewModel(
-            MetricsState("2025-06-12", 1765, 2 * 60 * 34)
-        )
-        DashboardModal(viewModel, initialState = DashboardModalState.EXPANDED)
-    }
+    DashboardModalPreview(
+        DashboardModalState.EXPANDED,
+        false
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -780,12 +806,10 @@ fun DashboardModalExpandedPreview() {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 fun DashboardModalCollapsedPreview() {
-    KiwiTheme {
-        val viewModel = MetricsFakeViewModel(
-            MetricsState("2025-06-12", 1765, 2 * 60 * 34)
-        )
-        DashboardModal(viewModel, initialState = DashboardModalState.COLLAPSED)
-    }
+    DashboardModalPreview(
+        DashboardModalState.COLLAPSED,
+        false
+    )
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -794,10 +818,40 @@ fun DashboardModalCollapsedPreview() {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 fun DashboardModalHiddenPreview() {
+    DashboardModalPreview(
+        DashboardModalState.HIDDEN,
+        false
+    )
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+private fun DashboardModalPreview(
+    dashboardModalState: DashboardModalState,
+    showCalendarView: Boolean
+) {
     KiwiTheme {
-        val viewModel = MetricsFakeViewModel(
-            MetricsState("2025-06-12", 1765, 2 * 60 * 34)
+        Scaffold(
+            bottomBar = {
+                AppBarModal(navController = rememberNavController())
+            },
+            content = { paddingValues ->
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    HomeScreen()
+                    DashboardModal(
+                        MetricsFakeViewModel(
+                            MetricsState(
+                                "2025-06-12",
+                                1173,
+                                9900
+                            )
+                        ),
+                        dashboardModalState,
+                        showCalendarView
+                    )
+
+                }
+            }
         )
-        DashboardModal(viewModel, initialState = DashboardModalState.HIDDEN)
     }
 }

@@ -116,7 +116,7 @@ fun Kiwi_AnnotatedString(arguments: Kiwi_AnnotatedStringArguments) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
-        modifier = arguments.modifier.then(Modifier.padding(bottom = Spacing.small))
+        style = MaterialTheme.typography.bodyMedium
     )
 }
 
