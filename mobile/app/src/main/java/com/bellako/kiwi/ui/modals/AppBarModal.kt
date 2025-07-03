@@ -1,7 +1,10 @@
 package com.bellako.kiwi.ui.modals
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Adjust
@@ -19,8 +22,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,10 +37,12 @@ import androidx.navigation.createGraph
 import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.screens.ScreenRoutes
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.ui.theme.Spacing
 
 data class NavigationItem(
     val icon: ImageVector,
-    val route: String
+    val route: String,
+    val enabled: Boolean = true
 )
 
 val navigationItems = listOf(
@@ -53,7 +60,8 @@ val navigationItems = listOf(
     ),
     NavigationItem(
         icon = Icons.Filled.Adjust,
-        route = ScreenRoutes.HOME
+        route = ScreenRoutes.HOME,
+        enabled = false
     ),
     NavigationItem(
         icon = Icons.Filled.Person3,
@@ -65,16 +73,34 @@ val navigationItems = listOf(
 fun AppBarModal(
     navController: NavController
 ) {
+    Box(
+        modifier = Modifier
+            .wrapContentSize()
+    ) {
+        AppBarModalLayout(
+            navController
+        )
+    }
+}
+
+
+@Composable
+fun AppBarModalLayout(
+    navController: NavController
+) {
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
 
     NavigationBar(
         modifier = Modifier
-            .clip(RoundedCornerShape(24.dp, 24.dp, 0.dp, 0.dp))
+            .clip(RoundedCornerShape(40.dp, 40.dp, 0.dp, 0.dp))
             .testTag(CommonTestTags.BOTTOM_APPBAR),
-        contentColor = MaterialTheme.colorScheme.inversePrimary,
+        contentColor = MaterialTheme.colorScheme.secondary,
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         navigationItems.forEachIndexed { index, item ->
+            val tint = MaterialTheme.colorScheme.secondary.copy(
+                alpha = if (item.enabled) 1f else 0.4f
+            )
             NavigationBarItem(
                 selected = selectedNavigationIndex.intValue == index,
                 onClick = {
@@ -82,14 +108,27 @@ fun AppBarModal(
                     navController.navigate(item.route)
                 },
                 icon = {
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = "",
-                        tint = MaterialTheme.colorScheme.inversePrimary
-                    )
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color =
+                                    if (selectedNavigationIndex.intValue == index)
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    else
+                                        Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(Spacing.small)
+                    ) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = "",
+                            tint = tint
+                        )
+                    }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.primary
+                    indicatorColor = Color.Transparent // Override default container color behavior
                 )
             )
         }
