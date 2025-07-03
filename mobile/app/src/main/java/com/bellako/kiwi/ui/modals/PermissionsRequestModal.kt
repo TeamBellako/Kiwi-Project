@@ -18,16 +18,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,9 +47,11 @@ import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H1
 import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.ui.theme.Spacing
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -82,21 +86,27 @@ fun PermissionsRequestModal(
         }
     }
 
-    if (hasUsageAccess.value && hasStepPermission.value) {
+    if (!hasUsageAccess.value && hasStepPermission.value) {
         onPermissionsGranted()
     } else {
-        PermissionRequestBox(
-            context,
-            launcher,
-            hasUsageAccess,
-            hasStepPermission
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            PermissionRequestLayout(
+                context,
+                launcher,
+                hasUsageAccess,
+                hasStepPermission
+            )
+        }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-private fun PermissionRequestBox(
+private fun PermissionRequestLayout(
     context: Context,
     launcher: ManagedActivityResultLauncher<String, Boolean>,
     hasUsageAccess: MutableState<Boolean>,
@@ -110,29 +120,54 @@ private fun PermissionRequestBox(
         contentAlignment = Alignment.Center
     ) {
         Column(
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.background)
-                .padding(24.dp)
-                .fillMaxWidth(0.85f)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(Spacing.medium),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Kiwi_P1(
-                Kiwi_TextArguments(
-                    "GrowTale requires permissions to access metrics such as steps and screen time. " +
-                            "Please click below to activate them before proceeding.",
-                    TextAlign.Center,
-                    color = MaterialTheme.colorScheme.inversePrimary
-                )
+            Icon(
+                imageVector = Icons.Filled.Warning,
+                contentDescription = "Error icon",
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .size(Spacing.xLarge)
             )
 
             Kiwi_Spacer()
 
-            Kiwi_Button(
+            Kiwi_H1(Kiwi_TextArguments(
+                "Permissions\n Required",
+                color = MaterialTheme.colorScheme.secondary,
+                textAlign = TextAlign.Center,
+                bold = true
+            ))
+
+            Kiwi_P2(
                 Kiwi_TextArguments(
-                    "Enable Usage Access",
-                    color = MaterialTheme.colorScheme.inversePrimary,
+                "GrowTale requires permissions to access metrics such as steps and screen time.",
+                    TextAlign.Center,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            )
+
+            Kiwi_Spacer(Spacing.small)
+
+            Kiwi_P2(
+                Kiwi_TextArguments(
+                    "Please click below to activate them before proceeding.",
+                    TextAlign.Center,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            )
+
+            Kiwi_Spacer(Spacing.large)
+
+            Kiwi_Button(Kiwi_TextArguments(
+                    "ENABLE USAGE ACCESS",
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center,
                     bold = true
                 ),
                 onClick = {
@@ -141,10 +176,12 @@ private fun PermissionRequestBox(
                 enabled = !hasUsageAccess.value
             )
 
-            Kiwi_Button(
-                Kiwi_TextArguments(
-                    "Enable Activity Recognition",
-                    color = MaterialTheme.colorScheme.inversePrimary,
+            Kiwi_Spacer(Spacing.small)
+
+            Kiwi_Button(Kiwi_TextArguments(
+                    "ENABLE ACTIVITY RECOGNITION",
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center,
                     bold = true
                 ),
                 onClick = {

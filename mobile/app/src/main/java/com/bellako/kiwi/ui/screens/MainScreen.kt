@@ -13,8 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
-import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.features.metrics.MetricsViewModel
 import com.bellako.kiwi.features.settings.SettingsScreen
 import com.bellako.kiwi.features.settings.SettingsViewModel
