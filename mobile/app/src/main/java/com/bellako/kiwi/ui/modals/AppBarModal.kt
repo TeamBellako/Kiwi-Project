@@ -102,6 +102,7 @@ fun AppBarModalLayout(
                 alpha = if (item.enabled) 1f else 0.4f
             )
             NavigationBarItem(
+                enabled = item.enabled,
                 selected = selectedNavigationIndex.intValue == index,
                 onClick = {
                     selectedNavigationIndex.intValue = index

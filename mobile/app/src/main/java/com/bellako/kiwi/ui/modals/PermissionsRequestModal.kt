@@ -86,7 +86,7 @@ fun PermissionsRequestModal(
         }
     }
 
-    if (!hasUsageAccess.value && hasStepPermission.value) {
+    if (hasUsageAccess.value && hasStepPermission.value) {
         onPermissionsGranted()
     } else {
         Box(
