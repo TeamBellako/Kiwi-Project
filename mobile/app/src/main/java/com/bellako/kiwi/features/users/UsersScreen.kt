@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -28,6 +29,7 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.services.common.Logger
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.theme.Spacing
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,6 +41,25 @@ enum class RetryAction {
 
 @Composable
 fun UsersScreen(
+    viewModel: IUsersViewModel,
+    navController: NavController
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(Spacing.medium),
+        contentAlignment = Alignment.Center
+    ) {
+        UsersScreenLayout(
+            viewModel,
+            navController
+        )
+    }
+}
+
+@Composable
+private fun UsersScreenLayout(
     viewModel: IUsersViewModel,
     navController: NavController
 ) {
@@ -67,23 +88,35 @@ fun UsersScreen(
             else -> {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
                         .testTag(CommonTestTags.USERS_SCREEN),
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Kiwi_H1(Kiwi_TextArguments(
-                        "Welcome Back, Knight",
+                        "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.inversePrimary
+                        color = MaterialTheme.colorScheme.secondary
                     ))
+
+                    Fields(
+                        viewModel,
+                        currentState,
+                        isLoading
+                    )
+
                     Kiwi_Spacer()
 
-                    Fields(viewModel, currentState, isLoading)
-                    Kiwi_Spacer()
+                    Buttons(
+                        viewModel,
+                        currentState,
+                        isLoading,
+                        lastAction,
+                    ) {
+                        navController.navigate(ScreenRoutes.HOME)
+                    }
 
-                    Buttons(viewModel, currentState, isLoading, lastAction, { navController.navigate(ScreenRoutes.HOME) })
                     Kiwi_Spacer()
 
                     when (uiState) {
@@ -157,7 +190,7 @@ private fun Buttons(
         Kiwi_Button(
             Kiwi_TextArguments(
                 "SIGN UP",
-                color = MaterialTheme.colorScheme.inversePrimary,
+                color = MaterialTheme.colorScheme.secondary,
                 bold = true
             ),
             onClick = {
@@ -172,15 +205,17 @@ private fun Buttons(
             },
             enabled = !isLoading,
             testTag = UsersTestTags.SIGNUP_BUTTON,
-            rowModifier = Modifier.weight(1f)
+            rowModifier = Modifier
+                .padding(end = Spacing.medium)
+                .weight(1f)
         )
 
-        Box(modifier = Modifier.padding(24.dp))
+
 
         Kiwi_Button(
             Kiwi_TextArguments(
                 "LOG IN",
-                color = MaterialTheme.colorScheme.inversePrimary,
+                color = MaterialTheme.colorScheme.secondary,
                 bold = true
             ),
             onClick = {
@@ -195,7 +230,9 @@ private fun Buttons(
             },
             enabled = !isLoading,
             testTag = UsersTestTags.LOGIN_BUTTON,
-            rowModifier = Modifier.weight(1f)
+            rowModifier = Modifier
+                .padding(start = Spacing.medium)
+                .weight(1f)
         )
     }
 }
