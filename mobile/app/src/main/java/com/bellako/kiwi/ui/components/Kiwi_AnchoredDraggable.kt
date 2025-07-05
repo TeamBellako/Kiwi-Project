@@ -8,6 +8,7 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -28,6 +30,7 @@ import kotlin.math.abs
 @Composable
 fun <T> Kiwi_AnchoredDraggable(
     modifier: Modifier = Modifier,
+    contentAlignment: Alignment,
     initialState: T,
     anchors: List<Pair<T, Float>>,
     onStateChange: (T) -> Unit,
@@ -53,12 +56,9 @@ fun <T> Kiwi_AnchoredDraggable(
     }
 
     Box(
+        contentAlignment = contentAlignment,
         modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .offset {
-                IntOffset(x = 0, y = (screenHeightPx - offsetY.value).toInt())
-            }
+            .fillMaxSize()
             .draggable(
                 orientation = Orientation.Vertical,
                 state = rememberDraggableState { delta ->
@@ -82,12 +82,12 @@ fun <T> Kiwi_AnchoredDraggable(
                         )
                     }
                 }
-            )
+            ),
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(with(LocalDensity.current) { offsetY.value.toDp() })
+                .fillMaxWidth(),
+            contentAlignment = contentAlignment
         ) {
             content(currentState, requestStateChange)
         }
