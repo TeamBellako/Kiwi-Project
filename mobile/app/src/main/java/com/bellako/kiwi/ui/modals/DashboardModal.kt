@@ -138,50 +138,48 @@ fun DashboardModal(
     val shouldShowCalendarView = remember { mutableStateOf(showCalendarView) }
     val selectedDay = remember { mutableStateOf(LocalDate.now()) }
 
-    Kiwi_AnchoredDraggable(
-        initialState = initialState,
-        anchors = anchors,
-        onStateChange = { targetState ->
-            if (targetState != DashboardModalState.EXPANDED) {
-                shouldShowCalendarView.value = false
-                selectedDay.value = LocalDate.now()
-            }
-        },
+    Box(
         modifier = Modifier
-            .testTag(DashboardModalTestTags.DRAGGABLE_NODE),
+            .fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
-    ) { modalState, requestStateChange ->
-        when (modalState) {
-            DashboardModalState.EXPANDED -> Box(
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                ExpandedContent(
-                    viewModel = viewModel,
-                    state = metricsState,
-                    selectedDay = selectedDay,
-                    shouldShowCalendarView = shouldShowCalendarView
-                )
-            }
-            DashboardModalState.COLLAPSED -> Box(
-                modifier = Modifier
-            ) {
-                CollapsedContent(
-                    state = metricsState,
-                    isHidden = false,
-                    onCalendarViewClicked = {
-                        shouldShowCalendarView.value = true
-                        requestStateChange(DashboardModalState.EXPANDED)
-                    }
-                )
-            }
-            DashboardModalState.HIDDEN -> Box(
-                modifier = Modifier
-            ) {
-                CollapsedContent(
-                    state = metricsState,
-                    isHidden = true,
-                    onCalendarViewClicked = {}
-                )
+    ) {
+        Kiwi_AnchoredDraggable(
+            initialState = initialState,
+            anchors = anchors,
+            onStateChange = { targetState ->
+                if (targetState != DashboardModalState.EXPANDED) {
+                    shouldShowCalendarView.value = false
+                    selectedDay.value = LocalDate.now()
+                }
+            },
+            modifier = Modifier
+                .testTag(DashboardModalTestTags.DRAGGABLE_NODE)
+        ) { modalState, requestStateChange ->
+            when (modalState) {
+                DashboardModalState.EXPANDED ->
+                    ExpandedContent(
+                        viewModel = viewModel,
+                        state = metricsState,
+                        selectedDay = selectedDay,
+                        shouldShowCalendarView = shouldShowCalendarView
+                    )
+
+                DashboardModalState.COLLAPSED ->
+                    CollapsedContent(
+                        state = metricsState,
+                        isHidden = false,
+                        onCalendarViewClicked = {
+                            shouldShowCalendarView.value = true
+                            requestStateChange(DashboardModalState.EXPANDED)
+                        }
+                    )
+
+                DashboardModalState.HIDDEN ->
+                    CollapsedContent(
+                        state = metricsState,
+                        isHidden = true,
+                        onCalendarViewClicked = {}
+                    )
             }
         }
     }
