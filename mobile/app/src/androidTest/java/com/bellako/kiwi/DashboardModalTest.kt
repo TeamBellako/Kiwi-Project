@@ -53,7 +53,7 @@ class DashboardModalTest {
         todayMetricsDTO = MetricsDTO(
             LocalDate.now().toString(),
             100000,
-            2*60*60
+            2*60
         )
         pastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.minusDays(1).toString())
         futureMetricsDTO = todayMetricsDTO.copy(date = todayLocalDate.plusDays(1).toString(), steps = 0, screenTimeSeconds = 0)
@@ -71,7 +71,8 @@ class DashboardModalTest {
     fun loadTodayMetricsWithOverflowedMetrics() {
         rule.setContent {
             DashboardModal(
-                fakeViewModel
+                fakeViewModel,
+                DashboardModalState.EXPANDED
             )
         }
 
@@ -79,7 +80,7 @@ class DashboardModalTest {
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
             .assertTextContains("+99,999", true)
         rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextContains("+60", true)
+            .assertTextContains(MetricsUtils.parseScreenTimeSeconds(todayMetricsDTO.screenTimeSeconds), true)
     }
 
     @Test
