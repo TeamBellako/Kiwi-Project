@@ -48,6 +48,10 @@ jobs:
       - name: Run tests
         run: ./gradlew test
         working-directory: ./mobile
+        
+      - name: Run android tests
+        run: ./gradlew connectedAndroidTest
+        working-directory: ./mobile
 
       - name: Generate version tag, push it, and export version info
         id: version
