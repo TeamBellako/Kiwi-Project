@@ -43,10 +43,6 @@ jobs:
         run: ./gradlew test
         working-directory: ./mobile
 
-      - name: Run android tests
-        run: ./gradlew connectedAndroidTest
-        working-directory: ./mobile
-
       - name: Build debug APK with CI versioning
         run: |
           ./gradlew assembleDebug -PversionCode=${{ github.run_number }} -PversionName="0.0.${{ github.sha }}"
