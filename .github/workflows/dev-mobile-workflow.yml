@@ -35,19 +35,6 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Set up Android Emulator
-        run: |
-          echo "y" | sdkmanager --licenses
-          sdkmanager "system-images;android-29;google_apis;x86_64"
-          avdmanager create avd --name test_device --package "system-images;android-29;google_apis;x86_64" --device "pixel" --force
-          nohup emulator -avd test_device -no-audio -no-window -gpu swiftshader_indirect &
-
-      - name: Wait for Emulator to boot
-        run: |
-          # Wait for the emulator to start
-          adb wait-for-device
-          adb shell input keyevent 82
-
       - name: Grant Gradle permissions
         run: chmod +x ./gradlew
         working-directory: ./mobile
