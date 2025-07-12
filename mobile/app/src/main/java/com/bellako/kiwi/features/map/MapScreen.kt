@@ -54,7 +54,6 @@ fun HomeScreen() {
             bold = true
         ))
 
-        // Use the ZoomableMap component instead of static image
         Kiwi_ZoomableMap(
             mapResourceId = R.drawable.ph_home_map,
             contentDescription = "Interactive World Map",
@@ -82,13 +81,11 @@ fun MapScreen() {
             )
         }
     ) { paddingValues ->
-        // Main content
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Use the ZoomableMap component
             Kiwi_ZoomableMap(
                 mapResourceId = R.drawable.ph_home_map,
                 contentDescription = "Interactive Map",

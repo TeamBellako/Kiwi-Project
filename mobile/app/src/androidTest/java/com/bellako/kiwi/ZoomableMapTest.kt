@@ -26,7 +26,7 @@ class ZoomableMapTest {
         // Set up the ZoomableMap composable for testing
         composeTestRule.setContent {
             Kiwi_ZoomableMap(
-                mapResourceId = R.drawable.ph_home_map, // Use existing map image
+                mapResourceId = R.drawable.ph_home_map,
                 contentDescription = "Test Map",
                 viewModel = viewModel
             )
@@ -131,12 +131,9 @@ class ZoomableMapTest {
         )
 
         // Calculate the maximum allowed offset
-        val maxOffsetX = (500f * viewModel.state.value.scale - 300f) / 2 // (mapWidth * scale - viewportWidth) / 2
-        val maxOffsetY = (500f * viewModel.state.value.scale - 300f) / 2 // (mapHeight * scale - viewportHeight) / 2
+        val maxOffsetX = (500f * viewModel.state.value.scale - 300f) / 2
+        val maxOffsetY = (500f * viewModel.state.value.scale - 300f) / 2
 
-        System.out.println("[DEBUG_LOG] Initial scale: ${viewModel.state.value.scale}")
-        System.out.println("[DEBUG_LOG] Initial offset: ${viewModel.state.value.offset}")
-        System.out.println("[DEBUG_LOG] Max offset X: $maxOffsetX, Y: $maxOffsetY")
 
         // Perform a large drag gesture that would go out of bounds
         composeTestRule.onRoot().performTouchInput {
@@ -145,12 +142,10 @@ class ZoomableMapTest {
 
         // Get the current offset after the drag
         val currentOffset = viewModel.state.value.offset
-        System.out.println("[DEBUG_LOG] After drag offset: $currentOffset")
 
         // Recalculate max offset with current scale
         val currentMaxOffsetX = (500f * viewModel.state.value.scale - 300f) / 2
         val currentMaxOffsetY = (500f * viewModel.state.value.scale - 300f) / 2
-        System.out.println("[DEBUG_LOG] Current max offset X: $currentMaxOffsetX, Y: $currentMaxOffsetY")
 
         // Verify that the offset is constrained within the boundaries
         assert(currentOffset.x <= currentMaxOffsetX) {

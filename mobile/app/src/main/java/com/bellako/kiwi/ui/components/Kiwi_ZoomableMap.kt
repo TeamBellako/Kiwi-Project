@@ -40,13 +40,13 @@ fun Kiwi_ZoomableMap(
     // Container for the map
     Box(
         modifier = modifier
-            .clipToBounds() // Prevent drawing outside bounds
+            .clipToBounds()
             .onGloballyPositioned { coordinates ->
                 // Measure the viewport size and inform the ViewModel
                 with(density) {
                     viewModel.updateDimensions(
-                        mapWidth = mapState.mapWidthPx, // Keep existing map width
-                        mapHeight = mapState.mapHeightPx, // Keep existing map height
+                        mapWidth = mapState.mapWidthPx,
+                        mapHeight = mapState.mapHeightPx,
                         viewportWidth = coordinates.size.width.toFloat(),
                         viewportHeight = coordinates.size.height.toFloat()
                     )
@@ -69,8 +69,6 @@ fun Kiwi_ZoomableMap(
             },
         contentAlignment = Alignment.Center
     ) {
-        // Use direct values without animation for immediate movement
-
         // The map image with zoom and pan transformations
         Kiwi_Image(
             painterResourceId = mapResourceId,
@@ -89,8 +87,8 @@ fun Kiwi_ZoomableMap(
                         viewModel.updateDimensions(
                             mapWidth = coordinates.size.width.toFloat(),
                             mapHeight = coordinates.size.height.toFloat(),
-                            viewportWidth = mapState.viewportWidthPx, // Keep existing viewport width
-                            viewportHeight = mapState.viewportHeightPx // Keep existing viewport height
+                            viewportWidth = mapState.viewportWidthPx,
+                            viewportHeight = mapState.viewportHeightPx
                         )
                     }
                 }
