@@ -82,7 +82,7 @@ import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_P3
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
-import com.bellako.kiwi.ui.screens.HomeScreen
+import com.bellako.kiwi.features.map.HomeScreen
 import com.bellako.kiwi.ui.tags.DashboardModalTestTags
 import com.bellako.kiwi.ui.theme.DeviceSize
 import com.bellako.kiwi.ui.theme.KiwiTheme

@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.features.map.HomeScreen
 import com.bellako.kiwi.features.metrics.MetricsViewModel
 import com.bellako.kiwi.features.settings.SettingsScreen
 import com.bellako.kiwi.features.settings.SettingsViewModel
@@ -55,7 +56,7 @@ private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
             Box(Modifier.padding(paddingValues)) {
                 NavHost(
                     navController = navController,
-                    startDestination = ScreenRoutes.USERS,
+                    startDestination = ScreenRoutes.HOME,
                 ) {
                     composable(ScreenRoutes.USERS) {
                         UsersScreen(
