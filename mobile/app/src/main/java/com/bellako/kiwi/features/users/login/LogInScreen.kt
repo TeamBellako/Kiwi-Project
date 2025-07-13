@@ -53,9 +53,6 @@ fun LogInScreen(
     navController: NavController
 ) {
 
-    viewModel.onEmailChanged("")
-    viewModel.onPasswordChanged("")
-
     val state by viewModel.state.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
@@ -212,12 +209,8 @@ private fun LogIn(
 
             var errorMessage by remember { mutableStateOf("") }
             errorMessage = when (uiState) {
-                is UIState.Error -> {
-                    (uiState as UIState.Error).message
-                }
-                else -> {
-                    ""
-                }
+                is UIState.Error -> { (uiState as UIState.Error).message }
+                else -> { "" }
             }
 
             Box(

@@ -72,6 +72,7 @@ private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
 
                     composable(ScreenRoutes.SIGNUP_WELCOME) {
                         SignUpWelcomeScreen(
+                            viewModel = usersViewModel,
                             navController = navController
                         )
                     }

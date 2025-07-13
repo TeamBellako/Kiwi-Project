@@ -27,6 +27,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.withLink
+import com.bellako.kiwi.features.users.IUsersViewModel
+import com.bellako.kiwi.features.users.UsersFakeViewModel
+import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_Button
@@ -34,6 +37,7 @@ import com.bellako.kiwi.ui.components.Kiwi_Button
 
 @Composable
 fun SignUpWelcomeScreen(
+    viewModel: IUsersViewModel,
     navController: NavController
 ) {
     Box(
@@ -58,6 +62,7 @@ fun SignUpWelcomeScreen(
             contentAlignment = Alignment.Center
         ) {
             Welcome(
+                viewModel,
                 navController
             )
 
@@ -79,6 +84,7 @@ fun SignUpWelcomeScreen(
 
 @Composable
 private fun Welcome(
+    viewModel: IUsersViewModel,
     navController: NavController
 ) {
     Column(
@@ -102,6 +108,9 @@ private fun Welcome(
                 bold = true
             ),
             onClick = {
+                viewModel.onEmailChanged("")
+                viewModel.onPasswordChanged("")
+                viewModel.resetUiState()
                 navController.navigate(ScreenRoutes.SIGNUP)
             },
         )
@@ -151,6 +160,9 @@ private fun BackLogIn(
 fun SignUpWelcomeScreenPreview() {
     KiwiTheme {
         SignUpWelcomeScreen(
+            UsersFakeViewModel(
+                UsersState("finn@thehuman.com", "Math3matical!"),
+            ),
             navController = rememberNavController()
         )
     }
