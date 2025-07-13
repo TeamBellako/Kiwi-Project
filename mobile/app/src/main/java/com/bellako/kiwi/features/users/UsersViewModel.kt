@@ -1,10 +1,10 @@
 package com.bellako.kiwi.features.users
 
-
-import androidx.compose.runtime.mutableStateOf
 import com.bellako.kiwi.services.common.BaseViewModel
 import com.bellako.kiwi.services.network.AuthRepository
 import com.bellako.kiwi.services.common.UIState
+import com.bellako.kiwi.types.Email
+import com.bellako.kiwi.types.Password
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,14 +31,10 @@ class UsersViewModel @Inject constructor(
         _state.value = _state.value.copy(password = password)
     }
 
-    override fun logout() {
-        authRepository.setJwtToken("")
-    }
-
     override suspend fun signup(state: UsersState): Result<Unit> {
         val domainResult = state.toDomainObject()
         if (domainResult.isFailure) {
-            val message = getInvalidDataMessage()
+            val message = getInvalidSignUpMessage(state)
             _uiState.value = UIState.Error(message)
             return Result.failure(Exception(message))
         }
@@ -58,7 +54,7 @@ class UsersViewModel @Inject constructor(
     override suspend fun login(state: UsersState): Result<Unit> {
         val domainResult = state.toDomainObject()
         if (domainResult.isFailure) {
-            val message = getInvalidDataMessage()
+            val message = getInvalidLoginMessage()
             _uiState.value = UIState.Error(message)
             return Result.failure(Exception(message))
         }
@@ -76,11 +72,19 @@ class UsersViewModel @Inject constructor(
         }
     }
 
-    private fun getInvalidDataMessage(): String = """
-        Invalid email or password. Password must:
-        - Be at least 8 characters long
-        - Include both uppercase and lowercase letters
-        - Contain at least one number
-        - Contain at least one special character
-    """.trimIndent()
+    override fun logout() {
+        authRepository.setJwtToken("")
+    }
+
+    private fun getInvalidSignUpMessage(state: UsersState): String {
+        Email.of(state.email).onFailure { ex ->
+           return ex.message.orEmpty()
+        }
+        Password.of(state.password).onFailure { ex ->
+           return ex.message.orEmpty()
+        }
+        return "Invalid email or password".trimIndent()
+    }
+
+    private fun getInvalidLoginMessage(): String = "Invalid email or password".trimIndent()
 }

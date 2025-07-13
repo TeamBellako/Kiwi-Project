@@ -16,15 +16,21 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.features.metrics.MetricsViewModel
 import com.bellako.kiwi.features.settings.SettingsScreen
 import com.bellako.kiwi.features.settings.SettingsViewModel
-import com.bellako.kiwi.features.users.UsersScreen
 import com.bellako.kiwi.features.users.UsersViewModel
+import com.bellako.kiwi.features.users.login.LogInScreen
+import com.bellako.kiwi.features.users.signup.SignUpScreen
+import com.bellako.kiwi.features.users.signup.SignUpTestScreen
+import com.bellako.kiwi.features.users.signup.SignUpWelcomeScreen
 import com.bellako.kiwi.ui.modals.AppBarModal
 import com.bellako.kiwi.ui.modals.DashboardModal
 import com.bellako.kiwi.ui.modals.PermissionsRequestModal
 
 object ScreenRoutes {
+    const val LOGIN = "login"
+    const val SIGNUP_WELCOME = "signup_welcome"
+    const val SIGNUP = "signup"
+    const val SIGNUP_TEST = "signup_test"
     const val HOME = "home"
-    const val USERS = "users"
     const val SETTINGS = "settings"
     const val HELP = "help"
 }
@@ -43,7 +49,7 @@ private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
     val navController = rememberNavController()
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val isLoginScreen = currentBackStackEntry?.destination?.route == ScreenRoutes.USERS
+    val isLoginScreen = currentBackStackEntry?.destination?.route == ScreenRoutes.LOGIN
 
     Scaffold(
         bottomBar = {
@@ -55,10 +61,30 @@ private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
             Box(Modifier.padding(paddingValues)) {
                 NavHost(
                     navController = navController,
-                    startDestination = ScreenRoutes.USERS,
+                    startDestination = ScreenRoutes.LOGIN,
                 ) {
-                    composable(ScreenRoutes.USERS) {
-                        UsersScreen(
+                    composable(ScreenRoutes.LOGIN) {
+                        LogInScreen(
+                            viewModel = usersViewModel,
+                            navController = navController
+                        )
+                    }
+
+                    composable(ScreenRoutes.SIGNUP_WELCOME) {
+                        SignUpWelcomeScreen(
+                            navController = navController
+                        )
+                    }
+
+                    composable(ScreenRoutes.SIGNUP) {
+                        SignUpScreen(
+                            viewModel = usersViewModel,
+                            navController = navController
+                        )
+                    }
+
+                    composable(ScreenRoutes.SIGNUP_TEST) {
+                        SignUpTestScreen(
                             viewModel = usersViewModel,
                             navController = navController
                         )
@@ -79,8 +105,8 @@ private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
                             navController = navController,
                             onLogout = {
                                 usersViewModel.logout()
-                                navController.navigate(ScreenRoutes.USERS) {
-                                    popUpTo(ScreenRoutes.USERS) { inclusive = true }
+                                navController.navigate(ScreenRoutes.LOGIN) {
+                                    popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                 }
                             }
                         )
