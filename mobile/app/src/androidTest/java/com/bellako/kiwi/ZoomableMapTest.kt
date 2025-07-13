@@ -65,8 +65,8 @@ class ZoomableMapTest {
         }
 
         // Verify that the scale is within the allowed limits
-        assert(viewModel.state.value.scale <= 4f) {
-            "Scale should not exceed the maximum limit of 4f"
+        assert(viewModel.state.value.scale <= 8f) {
+            "Scale should not exceed the maximum limit"
         }
     }
 
@@ -99,8 +99,8 @@ class ZoomableMapTest {
         }
 
         // Verify that the scale is within the allowed limits
-        assert(viewModel.state.value.scale <= 4f) {
-            "Scale should not exceed the maximum limit of 4f"
+        assert(viewModel.state.value.scale >= 2f) {
+            "Scale should not be lower than the minimum limit"
         }
     }
 

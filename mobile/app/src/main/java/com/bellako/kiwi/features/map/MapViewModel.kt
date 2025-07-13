@@ -17,14 +17,14 @@ import kotlin.math.min
 @HiltViewModel
 class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
     // Initial zoom level for the map
-    private val INITIAL_SCALE = 2.0f
+    private val INITIAL_SCALE = 4.0f
 
     private val _state = MutableStateFlow(MapUiState(scale = INITIAL_SCALE))
     override val state: StateFlow<MapUiState> = _state.asStateFlow()
 
     // Constants for zoom limits
-    private val MIN_SCALE = 1f
-    private val MAX_SCALE = 4f
+    private val MIN_SCALE = 2f
+    private val MAX_SCALE = 8f
 
     // Flag to track if initial position has been set
     private var initialPositionSet = false
@@ -67,10 +67,10 @@ class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
         val maxOffsetX = (scaledMapWidth - currentState.viewportWidthPx) / 2
         val maxOffsetY = (scaledMapHeight - currentState.viewportHeightPx) / 2
 
-        // Set offset to upper right corner (positive X, negative Y)
+        // Set offset to upper left corner (negative X, negative Y)
         // Use 80% of max offset to avoid being right at the edge
         val newOffset = Offset(
-            x = maxOffsetX * 0.8f,
+            x = -maxOffsetX * 0.8f,
             y = -maxOffsetY * 0.8f
         )
 
