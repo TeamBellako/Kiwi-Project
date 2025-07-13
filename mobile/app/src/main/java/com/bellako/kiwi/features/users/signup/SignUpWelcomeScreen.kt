@@ -107,6 +107,7 @@ private fun Welcome(
                 color = MaterialTheme.colorScheme.secondary,
                 bold = true
             ),
+            color = MaterialTheme.colorScheme.primary,
             onClick = {
                 viewModel.onEmailChanged("")
                 viewModel.onPasswordChanged("")

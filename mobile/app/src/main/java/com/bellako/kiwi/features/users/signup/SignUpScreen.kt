@@ -226,6 +226,7 @@ private fun SignUp(
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true
                         ),
+                        color = MaterialTheme.colorScheme.tertiary,
                         onClick = {
                             CoroutineScope(Dispatchers.Main).launch {
                                 if (viewModel.login(currentState).isSuccess) {

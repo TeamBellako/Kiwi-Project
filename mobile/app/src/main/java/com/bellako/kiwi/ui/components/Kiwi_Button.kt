@@ -10,7 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.ui.theme.KiwiTheme
 
 @Composable
 fun Kiwi_Button(
@@ -38,5 +40,22 @@ fun Kiwi_Button(
         ) {
             Kiwi_Label(textArguments)
         }
+    }
+}
+
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Composable
+fun SignUpWelcomeScreenPreview() {
+    KiwiTheme {
+        Kiwi_Button(
+            Kiwi_TextArguments(
+                "BUTTON",
+                color = MaterialTheme.colorScheme.secondary,
+                bold = true
+            ),
+            onClick = {},
+        )
     }
 }
