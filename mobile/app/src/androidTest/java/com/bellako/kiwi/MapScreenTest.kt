@@ -97,13 +97,14 @@ class MapScreenTest {
         val maxOffsetX = (500f * viewModel.state.value.scale - 300f) / 2
         val maxOffsetY = (500f * viewModel.state.value.scale - 300f) / 2
         composeTestRule.onRoot().performTouchInput {
-            swipe(start = Offset(200f, 200f), end = Offset(0f, 0f))
+            swipe(
+                start = Offset(0f, 0f),
+                end = Offset(1000f, 1000f)
+            )
         }
 
         val currentOffset = viewModel.state.value.offset
-        val currentMaxOffsetX = (500f * viewModel.state.value.scale - 300f) / 2
-        val currentMaxOffsetY = (500f * viewModel.state.value.scale - 300f) / 2
-        assert(currentOffset.x <= currentMaxOffsetX)
-        assert(currentOffset.y <= currentMaxOffsetY)
+        assert(currentOffset.x <= maxOffsetX)
+        assert(currentOffset.y <= maxOffsetY)
     }
 }

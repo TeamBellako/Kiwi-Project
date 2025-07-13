@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
+import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.sign
 
 @HiltViewModel
 class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
@@ -45,15 +47,23 @@ class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
         viewportWidth: Float,
         viewportHeight: Float
     ) {
-        _state.value = _state.value.copy(
-            mapWidthPx = mapWidth,
-            mapHeightPx = mapHeight,
-            viewportWidthPx = viewportWidth,
-            viewportHeightPx = viewportHeight
+        // Only update dimensions if they are valid (greater than 0)
+        // This prevents overwriting valid dimensions with invalid ones
+        val currentState = _state.value
+        val newMapWidth = if (mapWidth > 0) mapWidth else currentState.mapWidthPx
+        val newMapHeight = if (mapHeight > 0) mapHeight else currentState.mapHeightPx
+        val newViewportWidth = if (viewportWidth > 0) viewportWidth else currentState.viewportWidthPx
+        val newViewportHeight = if (viewportHeight > 0) viewportHeight else currentState.viewportHeightPx
+
+        _state.value = currentState.copy(
+            mapWidthPx = newMapWidth,
+            mapHeightPx = newMapHeight,
+            viewportWidthPx = newViewportWidth,
+            viewportHeightPx = newViewportHeight
         )
 
-        if (!initialPositionSet && mapWidth > 0 && mapHeight > 0 && 
-            viewportWidth > 0 && viewportHeight > 0) {
+        if (!initialPositionSet && newMapWidth > 0 && newMapHeight > 0 && 
+            newViewportWidth > 0 && newViewportHeight > 0) {
             setInitialPosition()
             initialPositionSet = true
         }
@@ -144,9 +154,23 @@ class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
         val restrictedMaxOffsetX = effectiveMaxOffsetX * dragLimitFactor
         val restrictedMaxOffsetY = effectiveMaxOffsetY * dragLimitFactor
 
-        return Offset(
-            x = offset.x.coerceIn(-restrictedMaxOffsetX, restrictedMaxOffsetX),
-            y = offset.y.coerceIn(-restrictedMaxOffsetY, restrictedMaxOffsetY)
-        )
+        // When dragging beyond the maximum allowed offset, set the offset to exactly the maximum allowed value
+        // This is the key fix for the dragging limit issue
+
+        // If the absolute value of the offset exceeds the restricted maximum,
+        // set it to exactly the restricted maximum with the appropriate sign
+        val resultX = if (abs(offset.x) > restrictedMaxOffsetX) {
+            sign(offset.x) * restrictedMaxOffsetX
+        } else {
+            offset.x
+        }
+
+        val resultY = if (abs(offset.y) > restrictedMaxOffsetY) {
+            sign(offset.y) * restrictedMaxOffsetY
+        } else {
+            offset.y
+        }
+
+        return Offset(resultX, resultY)
     }
 }
