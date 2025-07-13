@@ -4,11 +4,11 @@ package com.bellako.kiwi.types
 value class Password private constructor(val value: String) {
     companion object {
         private val PASSWORD_REGEX_FULL = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")
-        private val PASSWORD_REGEX_LENGTH = Regex("^.{8,}\$")
-        private val PASSWORD_REGEX_UPPER = Regex("[A-Z]")
-        private val PASSWORD_REGEX_LOWER = Regex("[a-z]")
-        private val PASSWORD_REGEX_NUMBER = Regex("\\d")
-        private val PASSWORD_REGEX_SPECIAL = Regex("[@\$!%*?&]")
+        private val PASSWORD_REGEX_LENGTH = Regex("^.{8,}$")
+        private val PASSWORD_REGEX_UPPER = Regex(".*[A-Z].*")
+        private val PASSWORD_REGEX_LOWER = Regex(".*[a-z].*")
+        private val PASSWORD_REGEX_NUMBER = Regex(".*\\d.*")
+        private val PASSWORD_REGEX_SPECIAL = Regex(".*[@$!%*?&].*")
 
         fun isValid(password: String): Boolean {
             return PASSWORD_REGEX_FULL.matches(password)
