@@ -56,7 +56,7 @@ private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
             Box(Modifier.padding(paddingValues)) {
                 NavHost(
                     navController = navController,
-                    startDestination = ScreenRoutes.HOME,
+                    startDestination = ScreenRoutes.USERS,
                 ) {
                     composable(ScreenRoutes.USERS) {
                         UsersScreen(
