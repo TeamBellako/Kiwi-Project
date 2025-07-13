@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.features.metrics.MetricsViewModel
+import com.bellako.kiwi.features.personality.PersonalityViewModel
 import com.bellako.kiwi.features.settings.SettingsScreen
 import com.bellako.kiwi.features.settings.SettingsViewModel
 import com.bellako.kiwi.features.users.UsersViewModel
@@ -37,15 +38,24 @@ object ScreenRoutes {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun MainScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
+fun MainScreen(
+    usersViewModel: UsersViewModel = hiltViewModel(),
+    personalityViewModel: PersonalityViewModel = hiltViewModel()
+) {
+
     PermissionsRequestModal {
-        AppScreen(usersViewModel)
+        AppScreen(usersViewModel, personalityViewModel)
     }
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
+private fun AppScreen(
+    usersViewModel: UsersViewModel = hiltViewModel(),
+    personalityViewModel: PersonalityViewModel = hiltViewModel()
+) {
+
     val navController = rememberNavController()
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -79,7 +89,8 @@ private fun AppScreen(usersViewModel: UsersViewModel = hiltViewModel()) {
 
                     composable(ScreenRoutes.SIGNUP) {
                         SignUpScreen(
-                            viewModel = usersViewModel,
+                            usersViewModel = usersViewModel,
+                            personalityViewModel = personalityViewModel,
                             navController = navController
                         )
                     }

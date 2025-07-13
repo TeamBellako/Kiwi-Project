@@ -15,7 +15,6 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.screens.ScreenRoutes
-import com.bellako.kiwi.ui.components.Kiwi_H1
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.components.Kiwi_Image
@@ -33,6 +32,8 @@ import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_Button
+import com.bellako.kiwi.ui.components.Kiwi_H2
+import com.bellako.kiwi.ui.components.Kiwi_Spacer
 
 
 @Composable
@@ -40,6 +41,7 @@ fun SignUpWelcomeScreen(
     viewModel: IUsersViewModel,
     navController: NavController
 ) {
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -73,7 +75,7 @@ fun SignUpWelcomeScreen(
                 contentAlignment = Alignment.BottomCenter
             ) {
 
-                BackLogIn() {
+                GoToLogIn() {
                     navController.navigate(ScreenRoutes.LOGIN)
                 }
 
@@ -95,11 +97,14 @@ private fun Welcome(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H1(Kiwi_TextArguments(
+        Kiwi_H2(Kiwi_TextArguments(
             "Your Legend is About\nTo Be Forged...",
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.secondary,
+            bold = true
         ))
+
+        Kiwi_Spacer(Spacing.xLarge)
 
         Kiwi_Button(
             Kiwi_TextArguments(
@@ -119,7 +124,7 @@ private fun Welcome(
 }
 
 @Composable
-private fun BackLogIn(
+private fun GoToLogIn(
     onSignUp: () -> Unit
 ) {
     val annotatedString = buildAnnotatedString {

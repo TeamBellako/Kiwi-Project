@@ -19,8 +19,6 @@ import com.bellako.kiwi.ui.modals.ErrorModal
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.screens.ScreenRoutes
 import com.bellako.kiwi.ui.components.Kiwi_H1
-import com.bellako.kiwi.ui.components.Kiwi_InfoBox
-import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.components.Kiwi_Image
@@ -29,18 +27,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.withLink
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
-import com.bellako.kiwi.features.users.UsersTestTags
-import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
-import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 
 
 @Composable
@@ -48,9 +37,6 @@ fun SignUpTestScreen(
     viewModel: IUsersViewModel,
     navController: NavController
 ) {
-
-    viewModel.onEmailChanged("");
-    viewModel.onPasswordChanged("");
 
     Box(
         modifier = Modifier
@@ -73,34 +59,20 @@ fun SignUpTestScreen(
                 .padding(Spacing.medium),
             contentAlignment = Alignment.Center
         ) {
-            SignUp(
+            Question(
                 viewModel,
                 navController
             )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = Spacing.medium),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-
-                LogIn() {
-                    navController.navigate(ScreenRoutes.LOGIN)
-                }
-
-            }
         }
     }
 }
 
 @Composable
-private fun SignUp(
+private fun Question(
     viewModel: IUsersViewModel,
     navController: NavController
 ) {
     val state by viewModel.state.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
     state?.let { currentState ->
@@ -117,6 +89,7 @@ private fun SignUp(
                 })
             }
             else -> {
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -126,63 +99,16 @@ private fun SignUp(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Kiwi_H1(Kiwi_TextArguments(
-                        "Welcome Back, \nKnight",
+                        "When you face a tough choice,\nwhat do you trust most?",
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.secondary
                     ))
 
-                    when (uiState) {
-                        is UIState.Error -> {
-                            Kiwi_Spacer()
-                            Kiwi_InfoBox(
-                                message = (uiState as UIState.Error).message,
-                                color = MaterialTheme.colorScheme.error,
-                                testTag = UsersTestTags.ERROR_TEXT
-                            )
-                        }
 
-                        else -> {}
-                    }
                 }
             }
         }
     }
-}
-
-@Composable
-private fun LogIn(
-    onSignUp: () -> Unit
-) {
-    val annotatedString = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(
-                color = MaterialTheme.colorScheme.secondary,
-            )
-        ) {
-            append("Not Your First Time?\nContinue Your Adventure By\n")
-        }
-
-        withLink(link = LinkAnnotation.Clickable(
-            tag = "HERE",
-            linkInteractionListener = {
-                onSignUp()
-            },
-        )) {
-            withStyle(
-                style = SpanStyle(
-                    color = MaterialTheme.colorScheme.inversePrimary,
-                    textDecoration = TextDecoration.Underline
-                )
-            ) {
-                append("Logging In")
-            }
-        }
-    }
-
-    Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
-        annotatedString,
-        TextAlign.Center,
-    ))
 }
 
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
