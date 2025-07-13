@@ -82,7 +82,7 @@ import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_P3
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
-import com.bellako.kiwi.features.map.HomeScreen
+import com.bellako.kiwi.features.map.MapScreen
 import com.bellako.kiwi.ui.tags.DashboardModalTestTags
 import com.bellako.kiwi.ui.theme.DeviceSize
 import com.bellako.kiwi.ui.theme.KiwiTheme
@@ -900,7 +900,7 @@ private fun DashboardModalPreview(
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
-                    HomeScreen()
+                    MapScreen()
                     DashboardModal(
                         MetricsFakeViewModel(
                             MetricsState(
