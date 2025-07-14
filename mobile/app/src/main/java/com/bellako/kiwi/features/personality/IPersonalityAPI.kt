@@ -13,4 +13,7 @@ interface IPersonalityAPI {
 
     @PUT("api/user/personality/knightName")
     suspend fun updateKnightName(@Body dto: PersonalityUserNameDTO)
+
+    @PUT("api/user/personality/build")
+    suspend fun updateBuild(@Body dto: PersonalityBuildDTO)
 }

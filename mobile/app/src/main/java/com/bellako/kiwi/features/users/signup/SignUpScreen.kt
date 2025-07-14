@@ -36,6 +36,7 @@ import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.features.users.UsersTestTags
+import com.bellako.kiwi.types.BERSERKER
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
@@ -239,7 +240,7 @@ private fun SignUp(
                                 }
                             },
                             enabled = !usersIsLoading,
-                            testTag = UsersTestTags.LOGIN_BUTTON,
+                            testTag = UsersTestTags.SIGNUP_BUTTON,
                         )
 
                         Kiwi_Spacer()
@@ -287,7 +288,7 @@ fun SignUpScreenPreview() {
                 UsersState("finn@thehuman.com", "Math3matical!"),
             ),
             PersonalityFakeViewModel(
-                PersonalityState("Finn", "Human"),
+                PersonalityState("Finn", "Human", BERSERKER),
             ),
             navController = rememberNavController()
         )

@@ -4,6 +4,9 @@ import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.services.common.BaseViewModel
 import com.bellako.kiwi.services.network.AuthRepository
 import com.bellako.kiwi.services.common.UIState
+import com.bellako.kiwi.types.BERSERKER
+import com.bellako.kiwi.types.MONK
+import com.bellako.kiwi.types.SHAMAN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -22,7 +25,7 @@ class PersonalityViewModel @Inject constructor(
     private val dispatcher: CoroutineDispatcher
 ) : BaseViewModel(), IPersonalityViewModel {
 
-    private val _state = MutableStateFlow(PersonalityState("", ""))
+    private val _state = MutableStateFlow(PersonalityState("", "", ""))
     override val state: StateFlow<PersonalityState?> = _state.asStateFlow()
 
     override val _isLoading = MutableStateFlow(false)
@@ -68,7 +71,7 @@ class PersonalityViewModel @Inject constructor(
     override fun checkValid(state: PersonalityState): Result<Personality> {
         return state.toDomainObject().fold(
             onSuccess = { validState ->
-                Result.success(Personality(validState.realName, validState.knightName))
+                Result.success(Personality(validState.realName, validState.knightName, validState.build))
             },
             onFailure = { err ->
                 _uiState.value = UIState.Error(err.message.orEmpty())
@@ -95,6 +98,27 @@ class PersonalityViewModel @Inject constructor(
 
     override fun onKnightNameChanged(name: String) {
         _state.value = _state.value.copy(knightName = name)
+    }
+
+    private fun deduceBuild(state: PersonalityState) {
+        _state.value = _state.value.copy(build =
+            when (state.answers.last()) {
+                0 -> BERSERKER
+                1 -> SHAMAN
+                else -> MONK
+            }
+        )
+    }
+
+    override suspend fun updateBuild(state: PersonalityState): Result<Unit> {
+        _isLoading.value = true
+        _uiState.value = UIState.Loading
+
+        deduceBuild(state)
+        return handleResultSuspend(repository.updateBuild(PersonalityBuildDTO(state.build))) {
+            _uiState.value = UIState.Success(Unit)
+            _isLoading.value = false
+        }
     }
 
 }

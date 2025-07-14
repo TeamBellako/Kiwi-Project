@@ -27,14 +27,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
+import com.bellako.kiwi.features.personality.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.PersonalityState
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
+import com.bellako.kiwi.types.BERSERKER
+import com.bellako.kiwi.ui.components.Kiwi_Button
+import com.bellako.kiwi.ui.components.Kiwi_Spacer
 
 
 @Composable
 fun SignUpTestScreen(
-    viewModel: IUsersViewModel,
+    usersViewModel: IUsersViewModel,
+    personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
 
@@ -60,7 +67,8 @@ fun SignUpTestScreen(
             contentAlignment = Alignment.Center
         ) {
             Question(
-                viewModel,
+                usersViewModel,
+                personalityViewModel,
                 navController
             )
         }
@@ -69,42 +77,78 @@ fun SignUpTestScreen(
 
 @Composable
 private fun Question(
-    viewModel: IUsersViewModel,
+    usersViewModel: IUsersViewModel,
+    personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
-    val state by viewModel.state.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val usersState by usersViewModel.state.collectAsState()
+    val uiState by usersViewModel.uiState.collectAsState()
+    val personalityState by personalityViewModel.state.collectAsState()
 
-    state?.let { currentState ->
+    usersState?.let { currentUsersState ->
+        personalityState?.let { currentPersonalityState ->
 
-        when (uiState) {
-            is UIState.GeneralError -> {
-                ErrorModal(onRetry = {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        val result = viewModel.login(currentState)
-                        if (result.isSuccess) {
-                            navController.navigate(ScreenRoutes.HOME)
+            when (uiState) {
+                is UIState.GeneralError -> {
+                    ErrorModal(onRetry = {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            val result = usersViewModel.login(currentUsersState)
+                            if (result.isSuccess) {
+                                navController.navigate(ScreenRoutes.HOME)
+                            }
                         }
+                    })
+                }
+
+                else -> {
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .testTag(CommonTestTags.USERS_SCREEN),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
+
+                        Kiwi_H1(
+                            Kiwi_TextArguments(
+                                currentPersonalityState.questions[currentQuestion].question,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        )
+
+                        currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
+
+                            Kiwi_Button(
+                                Kiwi_TextArguments(
+                                    option,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                ),
+                                color = MaterialTheme.colorScheme.primary,
+                                onClick = {
+                                    currentPersonalityState.answers[currentQuestion] = index
+                                    if (currentQuestion + 1 < currentPersonalityState.questions.size) {
+                                        ++currentQuestion
+                                    } else {
+                                        navController.navigate(ScreenRoutes.HOME)
+                                        CoroutineScope(Dispatchers.Main).launch {
+                                            if (personalityViewModel.updateBuild(currentPersonalityState).isSuccess) {
+                                                navController.navigate(ScreenRoutes.HOME)
+                                            }
+                                        }
+                                    }
+                                },
+                            )
+
+                            Kiwi_Spacer()
+
+                        }
+
                     }
-                })
-            }
-            else -> {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .testTag(CommonTestTags.USERS_SCREEN),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Kiwi_H1(Kiwi_TextArguments(
-                        "When you face a tough choice,\nwhat do you trust most?",
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.secondary
-                    ))
-
-
                 }
             }
         }
@@ -120,6 +164,9 @@ fun SignUpTestScreenPreview() {
         SignUpTestScreen(
             UsersFakeViewModel(
                 UsersState("finn@thehuman.com", "Math3matical!"),
+            ),
+            PersonalityFakeViewModel(
+                PersonalityState("Finn", "Human", BERSERKER),
             ),
             navController = rememberNavController()
         )

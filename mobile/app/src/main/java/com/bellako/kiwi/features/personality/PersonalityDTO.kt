@@ -4,12 +4,14 @@ import com.bellako.kiwi.types.UserName
 
 data class PersonalityDTO (
     val realName: String,
-    val knightName: String
+    val knightName: String,
+    val build: String
 ){
     fun toState() : PersonalityState {
         return PersonalityState(
             realName = realName,
-            knightName = knightName
+            knightName = knightName,
+            build = build
         )
     }
 
@@ -20,7 +22,7 @@ data class PersonalityDTO (
                 val knightNameResult = UserName.of(knightName)
                 knightNameResult.fold(
                     onSuccess = { validKnightName ->
-                        Result.success(Personality(validRealName, validKnightName))
+                        Result.success(Personality(validRealName, validKnightName, build))
                     },
                     onFailure = { err -> Result.failure(err) }
                 )

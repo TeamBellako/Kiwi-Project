@@ -16,4 +16,7 @@ class PersonalityRepository(
     suspend fun updateKnightName(dto: PersonalityUserNameDTO): Result<Unit> =
         runCatching { api.updateKnightName(dto) }
 
+    suspend fun updateBuild(dto: PersonalityBuildDTO): Result<Unit> =
+        runCatching { api.updateBuild(dto) }
+
 }

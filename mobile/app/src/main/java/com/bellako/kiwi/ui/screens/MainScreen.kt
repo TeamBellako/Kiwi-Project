@@ -97,7 +97,8 @@ private fun AppScreen(
 
                     composable(ScreenRoutes.SIGNUP_TEST) {
                         SignUpTestScreen(
-                            viewModel = usersViewModel,
+                            usersViewModel = usersViewModel,
+                            personalityViewModel = personalityViewModel,
                             navController = navController
                         )
                     }
