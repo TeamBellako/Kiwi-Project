@@ -36,10 +36,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.withLink
+import com.bellako.kiwi.features.personality.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.PersonalityState
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.features.users.UsersTestTags
+import com.bellako.kiwi.types.BERSERKER
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_Button
@@ -49,12 +53,13 @@ import com.bellako.kiwi.ui.components.Kiwi_P1
 
 @Composable
 fun LogInScreen(
-    viewModel: IUsersViewModel,
+    usersViewModel: IUsersViewModel,
+    personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
 
-    val state by viewModel.state.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val state by usersViewModel.state.collectAsState()
+    val uiState by usersViewModel.uiState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -68,7 +73,7 @@ fun LogInScreen(
                 is UIState.GeneralError -> {
                     ErrorModal(onRetry = {
                         CoroutineScope(Dispatchers.Main).launch {
-                            val result = viewModel.login(currentState)
+                            val result = usersViewModel.login(currentState)
                             if (result.isSuccess) {
                                 navController.navigate(ScreenRoutes.HOME)
                             }
@@ -94,7 +99,8 @@ fun LogInScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         LogIn(
-                            viewModel,
+                            usersViewModel,
+                            personalityViewModel,
                             navController
                         )
 
@@ -119,12 +125,13 @@ fun LogInScreen(
 
 @Composable
 private fun LogIn(
-    viewModel: IUsersViewModel,
+    usersViewModel: IUsersViewModel,
+    personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
-    val state by viewModel.state.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val state by usersViewModel.state.collectAsState()
+    val isLoading by usersViewModel.isLoading.collectAsState()
+    val uiState by usersViewModel.uiState.collectAsState()
 
     state?.let { currentState ->
 
@@ -151,7 +158,7 @@ private fun LogIn(
             Kiwi_InputField(
                 enabled = !isLoading,
                 value = currentState.email,
-                onValueChange = { viewModel.onEmailChanged(it) },
+                onValueChange = { usersViewModel.onEmailChanged(it) },
                 label = {
                     Kiwi_P1(
                         Kiwi_TextArguments(
@@ -170,7 +177,7 @@ private fun LogIn(
             Kiwi_InputField(
                 enabled = !isLoading,
                 value = currentState.password,
-                onValueChange = { viewModel.onPasswordChanged(it) },
+                onValueChange = { usersViewModel.onPasswordChanged(it) },
                 label = {
                     Kiwi_P1(
                         Kiwi_TextArguments(
@@ -194,8 +201,15 @@ private fun LogIn(
                 ),
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        if (viewModel.login(currentState).isSuccess) {
-                            navController.navigate(ScreenRoutes.HOME)
+                        if (usersViewModel.login(currentState).isSuccess) {
+                            personalityViewModel.loadPersonality().fold(
+                                onSuccess = {
+                                    navController.navigate(ScreenRoutes.HOME)
+                                },
+                                onFailure = {
+                                    navController.navigate(ScreenRoutes.SIGNUP_TEST)
+                                }
+                            )
                         }
                     }
                 },
@@ -272,6 +286,9 @@ fun LogInScreenPreview() {
         LogInScreen(
             UsersFakeViewModel(
                 UsersState("finn@thehuman.com", "Math3matical!"),
+            ),
+            PersonalityFakeViewModel(
+                PersonalityState("Finn", "Human", BERSERKER),
             ),
             navController = rememberNavController()
         )

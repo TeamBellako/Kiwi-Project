@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.personality
 
 import com.bellako.kiwi.features.common.BaseFakeViewModel
 import com.bellako.kiwi.services.common.UIState
+import com.bellako.kiwi.types.BERSERKER
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,8 +17,8 @@ class PersonalityFakeViewModel(
     override fun reset() {
     }
 
-    override fun loadPersonality() {
-        handleSuccess()
+    override suspend fun loadPersonality(): Result<Unit> {
+        return Result.success(Unit)
     }
 
     override fun checkValid(): Result<Personality> {

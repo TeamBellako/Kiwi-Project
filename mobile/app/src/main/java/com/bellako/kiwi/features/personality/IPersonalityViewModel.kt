@@ -6,7 +6,7 @@ interface IPersonalityViewModel : IBaseViewModel<PersonalityState> {
 
     fun reset()
 
-    fun loadPersonality()
+    suspend fun loadPersonality(): Result<Unit>
 
     fun checkValid(): Result<Personality>
 

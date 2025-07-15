@@ -78,7 +78,8 @@ private fun AppScreen(
                 ) {
                     composable(ScreenRoutes.LOGIN) {
                         LogInScreen(
-                            viewModel = usersViewModel,
+                            usersViewModel = usersViewModel,
+                            personalityViewModel = personalityViewModel,
                             navController = navController
                         )
                     }

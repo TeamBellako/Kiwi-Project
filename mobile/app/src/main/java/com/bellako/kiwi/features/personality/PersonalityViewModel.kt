@@ -1,6 +1,5 @@
 package com.bellako.kiwi.features.personality
 
-import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.services.common.BaseViewModel
 import com.bellako.kiwi.services.network.AuthRepository
 import com.bellako.kiwi.services.common.UIState
@@ -10,12 +9,9 @@ import com.bellako.kiwi.types.SHAMAN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 
 @HiltViewModel
@@ -39,32 +35,17 @@ class PersonalityViewModel @Inject constructor(
         previousValidDomain = null
     }
 
-    override fun loadPersonality() {
+    override suspend fun loadPersonality(): Result<Unit> {
         _isLoading.value = true
         _uiState.value = UIState.Loading
 
-        viewModelScope.launch(dispatcher) {
-            try {
-                val result = repository.getPersonality()
-                result.fold(
-                    onSuccess = { dto ->
-                        dto.toDomainObject().onSuccess { domain ->
-                            _state.value = domain.toState()
-                            previousDomain = domain
-                            _uiState.value = UIState.Success(Unit)
-                        }.onFailure { ex ->
-                            _uiState.value = mapExceptionToUIState(ex)
-                        }
-                    },
-                    onFailure = { throwable ->
-                        _uiState.value = mapExceptionToUIState(throwable)
-                    }
-                )
-            } catch (ex: Exception) {
-                _uiState.value = mapExceptionToUIState(ex)
-            } finally {
-                _isLoading.value = false
-            }
+        return repository.getPersonality().map { dto ->
+            val state = dto.toState()
+            _state.value = _state.value.copy(realName = state.realName, knightName = state.knightName, build = state.build)
+            _isLoading.value = false
+        } .onFailure { throwable ->
+            _isLoading.value = false
+            _uiState.value = mapExceptionToUIState(throwable)
         }
     }
 
