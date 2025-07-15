@@ -232,9 +232,9 @@ private fun SignUp(
                             color = MaterialTheme.colorScheme.tertiary,
                             onClick = {
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    if (personalityViewModel.checkValid(currentPersonalityState).isSuccess && usersViewModel.signup(currentUsersState).isSuccess) {
-                                        personalityViewModel.updateRealName(currentPersonalityState)
-                                        personalityViewModel.updateKnightName(currentPersonalityState)
+                                    if (personalityViewModel.checkValid().isSuccess && usersViewModel.signup(currentUsersState).isSuccess) {
+                                        personalityViewModel.updateRealName()
+                                        personalityViewModel.updateKnightName()
                                         navController.navigate(ScreenRoutes.SIGNUP_TEST)
                                     }
                                 }

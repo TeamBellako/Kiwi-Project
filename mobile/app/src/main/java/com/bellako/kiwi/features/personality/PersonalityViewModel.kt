@@ -68,8 +68,8 @@ class PersonalityViewModel @Inject constructor(
         }
     }
 
-    override fun checkValid(state: PersonalityState): Result<Personality> {
-        return state.toDomainObject().fold(
+    override fun checkValid(): Result<Personality> {
+        return _state.value.toDomainObject().fold(
             onSuccess = { validState ->
                 Result.success(Personality(validState.realName, validState.knightName, validState.build))
             },
@@ -80,16 +80,12 @@ class PersonalityViewModel @Inject constructor(
         )
     }
 
-    override fun updateRealName(state: PersonalityState) {
-        CoroutineScope(Dispatchers.Main).launch {
-            repository.updateRealName(PersonalityUserNameDTO(state.realName))
-        }
+    override suspend fun updateRealName(): Result<Unit> {
+        return handleResultSuspend(repository.updateRealName(PersonalityUserNameDTO(_state.value.realName))) {}
     }
 
-    override fun updateKnightName(state: PersonalityState) {
-        CoroutineScope(Dispatchers.Main).launch {
-            repository.updateKnightName(PersonalityUserNameDTO(state.knightName))
-        }
+    override suspend fun updateKnightName(): Result<Unit> {
+        return handleResultSuspend(repository.updateKnightName(PersonalityUserNameDTO(_state.value.knightName))) {}
     }
 
     override fun onRealNameChanged(name: String) {
@@ -100,22 +96,20 @@ class PersonalityViewModel @Inject constructor(
         _state.value = _state.value.copy(knightName = name)
     }
 
-    private fun deduceBuild(state: PersonalityState) {
-        _state.value = _state.value.copy(build =
-            when (state.answers.last()) {
-                0 -> BERSERKER
-                1 -> SHAMAN
-                else -> MONK
-            }
-        )
+    private fun deduceBuild(): String {
+        return when (_state.value.answers.last()) {
+            0 -> BERSERKER
+            1 -> SHAMAN
+            else -> MONK
+        }
     }
 
-    override suspend fun updateBuild(state: PersonalityState): Result<Unit> {
+    override suspend fun updateBuild(): Result<Unit> {
         _isLoading.value = true
         _uiState.value = UIState.Loading
 
-        deduceBuild(state)
-        return handleResultSuspend(repository.updateBuild(PersonalityBuildDTO(state.build))) {
+        _state.value = _state.value.copy(build = deduceBuild())
+        return handleResultSuspend(repository.updateBuild(PersonalityBuildDTO(_state.value.build))) {
             _uiState.value = UIState.Success(Unit)
             _isLoading.value = false
         }

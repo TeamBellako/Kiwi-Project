@@ -136,7 +136,7 @@ private fun Question(
                                     } else {
                                         navController.navigate(ScreenRoutes.HOME)
                                         CoroutineScope(Dispatchers.Main).launch {
-                                            if (personalityViewModel.updateBuild(currentPersonalityState).isSuccess) {
+                                            if (personalityViewModel.updateBuild().isSuccess) {
                                                 navController.navigate(ScreenRoutes.HOME)
                                             }
                                         }

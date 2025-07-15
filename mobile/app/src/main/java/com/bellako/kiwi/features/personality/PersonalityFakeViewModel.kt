@@ -20,8 +20,8 @@ class PersonalityFakeViewModel(
         handleSuccess()
     }
 
-    override fun checkValid(state: PersonalityState): Result<Personality> {
-        return state.toDomainObject().fold(
+    override fun checkValid(): Result<Personality> {
+        return _state.value?.toDomainObject()?.fold(
             onSuccess = { validState ->
                 Result.success(Personality(validState.realName, validState.knightName, validState.build))
             },
@@ -29,15 +29,15 @@ class PersonalityFakeViewModel(
                 _uiState.value = UIState.Error(err.message.orEmpty())
                 Result.failure(err)
             }
-        )
+        ) ?: Result.failure(Exception("Invalid state"))
     }
 
-    override fun updateRealName(state: PersonalityState) {
-        handleSuccess()
+    override suspend fun updateRealName(): Result<Unit> {
+        return Result.success(Unit)
     }
 
-    override fun updateKnightName(state: PersonalityState) {
-        handleSuccess()
+    override suspend fun updateKnightName(): Result<Unit> {
+        return Result.success(Unit)
     }
 
     override fun onRealNameChanged(name: String) {
@@ -48,7 +48,7 @@ class PersonalityFakeViewModel(
         _state.value = _state.value?.copy(knightName = name)
     }
 
-    override suspend fun updateBuild(state: PersonalityState): Result<Unit> {
+    override suspend fun updateBuild(): Result<Unit> {
         return Result.success(Unit)
     }
 }

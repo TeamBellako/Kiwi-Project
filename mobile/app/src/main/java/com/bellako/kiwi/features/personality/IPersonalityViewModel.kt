@@ -8,13 +8,13 @@ interface IPersonalityViewModel : IBaseViewModel<PersonalityState> {
 
     fun loadPersonality()
 
-    fun checkValid(state: PersonalityState): Result<Personality>
+    fun checkValid(): Result<Personality>
 
-    fun updateRealName(state: PersonalityState)
-    fun updateKnightName(state: PersonalityState)
+    suspend fun updateRealName(): Result<Unit>
+    suspend fun updateKnightName(): Result<Unit>
 
     fun onRealNameChanged(name: String)
     fun onKnightNameChanged(name: String)
 
-    suspend fun updateBuild(state: PersonalityState): Result<Unit>
+    suspend fun updateBuild(): Result<Unit>
 }
