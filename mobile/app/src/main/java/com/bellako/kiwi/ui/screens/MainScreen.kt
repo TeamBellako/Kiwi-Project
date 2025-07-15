@@ -60,7 +60,9 @@ private fun AppScreen(
     val navController = rememberNavController()
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val isLoginScreen = currentBackStackEntry?.destination?.route == ScreenRoutes.LOGIN
+    val route = currentBackStackEntry?.destination?.route
+    val isLoginScreen = route == ScreenRoutes.LOGIN || route == ScreenRoutes.SIGNUP_WELCOME ||
+            route == ScreenRoutes.SIGNUP || route == ScreenRoutes.SIGNUP_TEST
 
     Scaffold(
         bottomBar = {
