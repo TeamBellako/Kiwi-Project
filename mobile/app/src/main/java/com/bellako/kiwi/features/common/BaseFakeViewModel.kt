@@ -49,6 +49,10 @@ open class BaseFakeViewModel : ViewModel() {
         )
     }
 
+    fun resetUiState() {
+        _uiState.value = UIState.Idle
+    }
+
     suspend fun <T> handleResultSuspend(result: Result<T>, successAction: suspend () -> Unit): Result<Unit> {
         return result.fold(
             onSuccess = {

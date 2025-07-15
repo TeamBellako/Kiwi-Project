@@ -56,6 +56,10 @@ abstract class BaseViewModel : ViewModel() {
         }
     }
 
+    fun resetUiState() {
+        _uiState.value = UIState.Idle
+    }
+
     protected fun extractHttpExceptionMessage(exception: HttpException): String {
         val errorBody = exception.response()?.errorBody()?.string()
         return HTTPUtils.parseErrorMessage(errorBody) ?: "Something went wrong"

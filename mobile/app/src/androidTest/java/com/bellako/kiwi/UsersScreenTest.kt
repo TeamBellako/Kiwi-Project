@@ -39,8 +39,8 @@ class UsersScreenTest {
 
         rule.setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.USERS) {
-                composable(ScreenRoutes.USERS) {
+            NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
+                composable(ScreenRoutes.LOGIN) {
                     UsersScreen(
                         viewModel = fakeViewModel,
                         navController = navController

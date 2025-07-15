@@ -19,9 +19,10 @@ USE ${MYSQL_DATABASE};
 USE kiwi_db_dev;
 
 -- Drop tables if they exist
+DROP TABLE IF EXISTS metrics;
+DROP TABLE IF EXISTS personality;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS settings;
-DROP TABLE IF EXISTS metrics;
 
 -- Create settings table
 CREATE TABLE IF NOT EXISTS settings (
@@ -55,6 +56,17 @@ CREATE TABLE IF NOT EXISTS metrics (
 
     -- Add a unique constraint for each date for each user to avoid multiple entries per day
     CONSTRAINT unique_user_date UNIQUE (user_id, date)
+);
+
+-- Create personality table
+CREATE TABLE IF NOT EXISTS personality (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    real_name VARCHAR(255),
+    knight_name VARCHAR(255),
+    build VARCHAR(255),
+    -- Foreign key to users table
+    user_id BIGINT NOT NULL,
+    CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 
