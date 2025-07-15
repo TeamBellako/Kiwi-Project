@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.features.map.MapScreen
 import com.bellako.kiwi.features.metrics.MetricsViewModel
 import com.bellako.kiwi.features.personality.PersonalityViewModel
 import com.bellako.kiwi.features.settings.SettingsScreen
@@ -104,7 +105,7 @@ private fun AppScreen(
                     }
 
                     composable(ScreenRoutes.HOME) {
-                        HomeScreen()
+                        MapScreen()
                     }
 
                     composable(ScreenRoutes.HELP) {
