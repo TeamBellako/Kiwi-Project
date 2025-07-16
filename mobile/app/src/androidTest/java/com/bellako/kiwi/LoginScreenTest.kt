@@ -15,34 +15,41 @@ import org.junit.runner.RunWith
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.PersonalityState
+import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.UsersFakeViewModel
-import com.bellako.kiwi.features.users.UsersScreen
 import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.features.users.UsersTestTags
+import com.bellako.kiwi.features.users.login.LogInScreen
 
 
 @RunWith(AndroidJUnit4::class)
-class UsersScreenTest {
+class LoginScreenTest {
     @get:Rule
     val rule = createComposeRule()
 
-    private lateinit var fakeViewModel: UsersFakeViewModel
-    private lateinit var state: UsersState
+    private lateinit var usersFakeViewModel: UsersFakeViewModel
+    private lateinit var usersState: UsersState
+
+    private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
+    private lateinit var personalityState: PersonalityState
 
     @Before
     fun setUp() {
-        state = UsersState("finn@thehuman.com", "Math3matical!")
+        usersState = UsersState("finn@thehuman.com", "Math3matical!")
+        personalityState = PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)
 
-        fakeViewModel = UsersFakeViewModel(
-            state
-        )
+        usersFakeViewModel = UsersFakeViewModel(usersState)
+        personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
         rule.setContent {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
                 composable(ScreenRoutes.LOGIN) {
-                    UsersScreen(
-                        viewModel = fakeViewModel,
+                    LogInScreen(
+                        usersViewModel = usersFakeViewModel,
+                        personalityViewModel = personalityFakeViewModel,
                         navController = navController
                     )
                 }
@@ -52,56 +59,26 @@ class UsersScreenTest {
     }
 
     @Test
-    fun validSignup() {
-        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
-
-        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertDoesNotExist()
-    }
-
-    @Test
-    fun invalidSignup() {
-        fakeViewModel.fakeError = true
-        fakeViewModel.fakeException = createFakeHttpException(401)
-
-        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
-
-        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
-    }
-
-    @Test
-    fun errorOnSignup() {
-        fakeViewModel.fakeError = true
-        fakeViewModel.fakeException = createFakeHttpException(500)
-
-        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
-
-        rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()
-    }
-
-    @Test
     fun validLogin() {
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
-
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertDoesNotExist()
     }
 
     @Test
     fun invalidLogin() {
-        fakeViewModel.fakeError = true
-        fakeViewModel.fakeException = createFakeHttpException(401)
+        usersFakeViewModel.fakeError = true
+        usersFakeViewModel.fakeException = createFakeHttpException(401)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
-
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 
     @Test
     fun errorOnLogin() {
-        fakeViewModel.fakeError = true
-        fakeViewModel.fakeException = createFakeHttpException(500)
+        usersFakeViewModel.fakeError = true
+        usersFakeViewModel.fakeException = createFakeHttpException(500)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
-
         rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()
     }
 }

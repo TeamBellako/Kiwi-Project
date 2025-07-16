@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import com.bellako.kiwi.features.personality.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.PersonalityState
+import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
@@ -166,7 +167,7 @@ fun SignUpTestScreenPreview() {
                 UsersState("finn@thehuman.com", "Math3matical!"),
             ),
             PersonalityFakeViewModel(
-                PersonalityState("Finn", "Human", BERSERKER),
+                PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build),
             ),
             navController = rememberNavController()
         )

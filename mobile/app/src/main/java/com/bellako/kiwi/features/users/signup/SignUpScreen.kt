@@ -32,11 +32,11 @@ import androidx.compose.ui.draw.alpha
 import com.bellako.kiwi.features.personality.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.PersonalityState
+import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.features.users.UsersTestTags
-import com.bellako.kiwi.types.BERSERKER
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
@@ -288,7 +288,7 @@ fun SignUpScreenPreview() {
                 UsersState("finn@thehuman.com", "Math3matical!"),
             ),
             PersonalityFakeViewModel(
-                PersonalityState("Finn", "Human", BERSERKER),
+                PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build),
             ),
             navController = rememberNavController()
         )
