@@ -43,6 +43,14 @@ jobs:
         run: ./gradlew test
         working-directory: ./mobile
 
+      - name: Run connected tests
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          script: ./gradlew connectedCheck
+
       - name: Build debug APK with CI versioning
         run: |
           ./gradlew assembleDebug -PversionCode=${{ github.run_number }} -PversionName="0.0.${{ github.sha }}"

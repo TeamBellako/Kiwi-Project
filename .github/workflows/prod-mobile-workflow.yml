@@ -46,6 +46,14 @@ jobs:
         run: ./gradlew test
         working-directory: ./mobile
 
+      - name: Run connected tests
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          script: ./gradlew connectedCheck
+
       - name: Generate version tag, push it, and export version info
         id: version
         run: |
