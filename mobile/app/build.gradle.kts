@@ -97,7 +97,8 @@ tasks.withType<Test> {
 
 
 dependencies {
-    implementation(libs.firebase.bom)
+    implementation(platform(libs.firebase.bom))
+    implementation(platform(libs.firebase.bom.v3400))
     implementation(libs.firebase.analytics)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -109,6 +110,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.room.runtime.android)
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.security.crypto.ktx)
+    implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.navigation.testing)
@@ -168,7 +171,9 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.core.testing.v210)
 
-    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+    implementation(libs.coil)
+    implementation(libs.coil.gif)
+    implementation(libs.coil.compose)
 
     implementation(libs.firebase.crashlytics)
     implementation(libs.google.firebase.analytics)

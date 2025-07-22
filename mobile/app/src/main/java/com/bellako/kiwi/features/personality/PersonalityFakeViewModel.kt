@@ -2,7 +2,6 @@ package com.bellako.kiwi.features.personality
 
 import com.bellako.kiwi.features.common.BaseFakeViewModel
 import com.bellako.kiwi.services.common.UIState
-import com.bellako.kiwi.types.BERSERKER
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
