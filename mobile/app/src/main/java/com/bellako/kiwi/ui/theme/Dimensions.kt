@@ -1,19 +1,24 @@
 package com.bellako.kiwi.ui.theme
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
-enum class DeviceSize { SMALL, MEDIUM, LARGE }
-
-object Dimensions {
-    val smallFontSize = 12.sp
-    val mediumFontSize = 16.sp
-    val largeFontSize = 20.sp
+@Composable
+private fun getWindowScale(): Float {
+    val defaultWidthDp = 392.0f
+    val defaultHeightDp = 800.0f
+    val configuration = LocalConfiguration.current
+    return (configuration.screenWidthDp / defaultWidthDp + configuration.screenHeightDp / defaultHeightDp) / 2.0f
 }
 
-fun getDeviceSize(maxWidth: Dp): DeviceSize = when {
-    maxWidth < 360.dp -> DeviceSize.SMALL
-    maxWidth < 480.dp -> DeviceSize.MEDIUM
-    else -> DeviceSize.LARGE
+@Composable
+fun getResponsiveRelativeSize(size: Int): Int {
+    return (size * getWindowScale()).toInt()
+}
+
+@Composable
+fun getResponsiveRelativeSize(size: Dp): Dp {
+    return getResponsiveRelativeSize(size.value.toInt()).dp
 }

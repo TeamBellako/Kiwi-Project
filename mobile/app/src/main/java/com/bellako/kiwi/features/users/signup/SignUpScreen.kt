@@ -42,6 +42,7 @@ import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
 @Composable
@@ -69,7 +70,7 @@ fun SignUpScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(Spacing.medium),
+                .padding(getResponsiveRelativeSize(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
             SignUp(

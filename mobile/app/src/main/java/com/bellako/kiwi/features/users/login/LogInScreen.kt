@@ -18,7 +18,6 @@ import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.modals.ErrorModal
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.screens.ScreenRoutes
-import com.bellako.kiwi.ui.components.Kiwi_H1
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
@@ -31,6 +30,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -45,12 +45,14 @@ import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.features.users.UsersTestTags
-import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
+import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_Gif
+import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
-import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.components.Kiwi_Label2
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
 @Composable
@@ -121,6 +123,8 @@ private fun LogIn(
     var initializing by remember { mutableStateOf(true) }
     val isLoading by remember { derivedStateOf { initializing || usersIsLoading || personalityIsLoading } }
 
+    val isPreview = LocalInspectionMode.current
+
 
     // check stored credentials for auto login
     LaunchedEffect(Unit) {
@@ -142,13 +146,13 @@ private fun LogIn(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(Spacing.medium),
+                .padding(getResponsiveRelativeSize(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
 
-            if (isLoading) {
+            if (isLoading || isPreview) {
                 Kiwi_Gif(
-                    "gf_loading",
+                    R.drawable.gf_loading,
                     "Loading"
                 )
             }
@@ -164,17 +168,18 @@ private fun LogIn(
 
                 // TEXT WELCOME
 
-                Kiwi_H1(
+                Kiwi_H2(
                     Kiwi_TextArguments(
                         "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(bottom = getResponsiveRelativeSize(Spacing.large))
                     )
                 )
 
                 Column(
                     modifier = Modifier
-                        .alpha(if (isLoading) 0f else 1f)
+                        .alpha(if (!isLoading || isPreview) 1f else 0f)
                 ) {
                     // CREDENTIALS
 
@@ -183,7 +188,7 @@ private fun LogIn(
                         value = currentState.email,
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
-                            Kiwi_P1(
+                            Kiwi_Label2(
                                 Kiwi_TextArguments(
                                     "Email",
                                     color = MaterialTheme.colorScheme.inversePrimary
@@ -202,7 +207,7 @@ private fun LogIn(
                         value = currentState.password,
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
-                            Kiwi_P1(
+                            Kiwi_Label2(
                                 Kiwi_TextArguments(
                                     "Password",
                                     color = MaterialTheme.colorScheme.inversePrimary
@@ -274,8 +279,8 @@ private fun LogIn(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = Spacing.medium)
-                .alpha(if (isLoading) 0f else 1f),
+                .padding(bottom = getResponsiveRelativeSize(Spacing.medium))
+                .alpha(if (!isLoading || isPreview) 1f else 0f),
             contentAlignment = Alignment.BottomCenter
         ) {
 
@@ -317,9 +322,9 @@ private fun SignUp(
         }
     }
 
-    Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
+    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
         annotatedString,
-        TextAlign.Center,
+        TextAlign.Center
     ))
 }
 

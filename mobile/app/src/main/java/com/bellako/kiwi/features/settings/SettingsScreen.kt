@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.features.users.UsersTestTags
@@ -28,10 +27,10 @@ import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.services.common.Logger
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_Button
-import com.bellako.kiwi.ui.components.Kiwi_H1
+import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_InputField
-import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.components.Kiwi_Label2
 import com.bellako.kiwi.ui.components.Kiwi_Slider
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
@@ -40,6 +39,7 @@ import com.bellako.kiwi.ui.modals.LoadingModal
 import com.bellako.kiwi.ui.screens.ScreenRoutes
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.theme.Spacing
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,7 +61,7 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(Spacing.medium)
+            .padding(getResponsiveRelativeSize(Spacing.medium))
     ) {
         SettingsScreenLayout(
             viewModel,
@@ -163,17 +163,19 @@ private fun SettingsFields(
                 .testTag(CommonTestTags.SETTINGS_SCREEN),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Kiwi_H1(Kiwi_TextArguments(
+            Kiwi_H2(Kiwi_TextArguments(
                 "SETTINGS",
                 bold = true
             ))
+
+            Kiwi_Spacer()
 
             Kiwi_InputField(
                 enabled = false,
                 value = currentState.email,
                 onValueChange = {},
                 label = {
-                    Kiwi_P1(Kiwi_TextArguments(
+                    Kiwi_Label2(Kiwi_TextArguments(
                         "Email",
                         color = MaterialTheme.colorScheme.inversePrimary
                     ))
@@ -182,7 +184,8 @@ private fun SettingsFields(
                 testTag = UsersTestTags.EMAIL_FIELD,
                 shouldHideInput = false
             )
-            Kiwi_Spacer()
+
+            Kiwi_Spacer(Spacing.large)
 
             Kiwi_Slider(
                 Kiwi_TextArguments("Sound Volume"),
@@ -199,6 +202,7 @@ private fun SettingsFields(
                 steps = 2,
                 testTag = SettingsTestTags.SOUND_VOLUME_SLIDER
             )
+
             Kiwi_Spacer()
 
             Kiwi_Slider(
@@ -216,7 +220,8 @@ private fun SettingsFields(
                 steps = 2,
                 testTag = SettingsTestTags.MUSIC_VOLUME_SLIDER
             )
-            Kiwi_Spacer()
+
+            Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
                 Kiwi_TextArguments(

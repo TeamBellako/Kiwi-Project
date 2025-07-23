@@ -12,15 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -33,7 +30,7 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.services.common.CommonTestTags
-import com.bellako.kiwi.ui.components.Kiwi_H1
+import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_Image
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.modals.AppBarModal
@@ -70,7 +67,7 @@ fun MapScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H1(Kiwi_TextArguments(
+        Kiwi_H2(Kiwi_TextArguments(
             title,
             color = MaterialTheme.colorScheme.inversePrimary,
             bold = true

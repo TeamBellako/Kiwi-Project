@@ -33,6 +33,7 @@ import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.theme.Spacing
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
 @Composable
@@ -59,7 +60,7 @@ private fun HelpScreenLayout(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(Spacing.large),
+            .padding(getResponsiveRelativeSize(Spacing.large)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

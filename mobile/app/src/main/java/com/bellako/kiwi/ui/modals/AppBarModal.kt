@@ -38,6 +38,7 @@ import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.screens.ScreenRoutes
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.theme.Spacing
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 data class NavigationItem(
     val icon: ImageVector,
@@ -92,7 +93,7 @@ fun AppBarModalLayout(
 
     NavigationBar(
         modifier = Modifier
-            .clip(RoundedCornerShape(40.dp, 40.dp, 0.dp, 0.dp))
+            .clip(RoundedCornerShape(getResponsiveRelativeSize(40.dp), getResponsiveRelativeSize(40.dp), 0.dp, 0.dp))
             .testTag(CommonTestTags.BOTTOM_APPBAR),
         contentColor = MaterialTheme.colorScheme.secondary,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -117,9 +118,9 @@ fun AppBarModalLayout(
                                         MaterialTheme.colorScheme.primaryContainer
                                     else
                                         Color.Transparent,
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(getResponsiveRelativeSize(12.dp))
                             )
-                            .padding(Spacing.small)
+                            .padding(getResponsiveRelativeSize(Spacing.small))
                     ) {
                         Icon(
                             imageVector = item.icon,
