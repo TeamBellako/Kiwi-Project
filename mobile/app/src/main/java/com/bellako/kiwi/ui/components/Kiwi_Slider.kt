@@ -2,11 +2,9 @@ package com.bellako.kiwi.ui.components
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
@@ -38,7 +37,15 @@ fun Kiwi_Slider(
 ) {
     Kiwi_H3(textArguments)
 
-    val trackColor = if (enabled) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
+    val trackColorEnabled = MaterialTheme.colorScheme.secondary
+    val trackColorDisabledMultiplier = 0.4f
+    val trackColor =
+        if (enabled) trackColorEnabled
+        else trackColorEnabled.copy(
+            red = trackColorEnabled.red * trackColorDisabledMultiplier,
+            green = trackColorEnabled.green * trackColorDisabledMultiplier,
+            blue = trackColorEnabled.blue * trackColorDisabledMultiplier
+        )
 
     Slider(
         value = value,
@@ -54,7 +61,7 @@ fun Kiwi_Slider(
                 colors = SliderDefaults.colors().copy(
                     thumbColor = trackColor,
                 ),
-                modifier = Modifier.padding(0.dp)
+                modifier = Modifier.padding(getResponsiveRelativeSize(0.dp))
             )
         },
         track = { sliderState ->
@@ -63,11 +70,12 @@ fun Kiwi_Slider(
                     .height(getResponsiveRelativeSize(16.dp)),
                 sliderState = sliderState,
                 colors = SliderDefaults.colors().copy(
-                    activeTickColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.0f),
+                    activeTickColor = Color.Transparent,
                     activeTrackColor = trackColor,
-                    inactiveTickColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.0f),
+                    inactiveTickColor = Color.Transparent,
                     inactiveTrackColor = MaterialTheme.colorScheme.primary,
                 ),
+                thumbTrackGapSize = getResponsiveRelativeSize(0.dp)
             )
         },
     )

@@ -46,7 +46,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -67,15 +66,14 @@ import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.components.Kiwi_AnchoredDraggable
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_H3
-import com.bellako.kiwi.ui.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.ui.components.Kiwi_Image
-import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_P3
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.features.map.MapScreen
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString_P2
+import com.bellako.kiwi.ui.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.ui.tags.DashboardModalTestTags
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.theme.Spacing
@@ -99,19 +97,10 @@ fun DashboardModal(
     initialState: DashboardModalState = DashboardModalState.COLLAPSED,
     showCalendarView: Boolean = false
 ) {
-    val expandedHeight = 900.dp
-    val collapsedHeight = 270.dp
-    val hiddenHeight = 160.dp
-
-    val density = LocalDensity.current
-    val expandedHeightPx = with(density) { expandedHeight.toPx() }
-    val collapsedHeightPx = with(density) { collapsedHeight.toPx() }
-    val hiddenHeightPx = with(density) { hiddenHeight.toPx() }
-
     val anchors = listOf(
-        DashboardModalState.EXPANDED to expandedHeightPx,
-        DashboardModalState.COLLAPSED to collapsedHeightPx,
-        DashboardModalState.HIDDEN to hiddenHeightPx
+        DashboardModalState.EXPANDED to getResponsiveRelativeSize(900).toFloat(),
+        DashboardModalState.COLLAPSED to getResponsiveRelativeSize(270).toFloat(),
+        DashboardModalState.HIDDEN to getResponsiveRelativeSize(160).toFloat()
     )
 
     val metricsState by viewModel.state.collectAsState()
@@ -189,7 +178,7 @@ private fun CollapsedContent(
             modifier = Modifier
                 .clip(RoundedCornerShape(getResponsiveRelativeSize(20.dp)))
                 .background(MaterialTheme.colorScheme.background)
-                .padding(bottom = getResponsiveRelativeSize(Spacing.medium))
+                .padding(getResponsiveRelativeSize(Spacing.medium))
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .testTag(CommonTestTags.DASHBOARD_MODAL),
@@ -220,7 +209,7 @@ private fun ExpandedContent(
             modifier = Modifier
                 .clip(RoundedCornerShape(getResponsiveRelativeSize(20.dp)))
                 .background(MaterialTheme.colorScheme.background)
-                .padding(getResponsiveRelativeSize(Spacing.xLarge))
+                .padding(getResponsiveRelativeSize(Spacing.medium))
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .testTag(CommonTestTags.DASHBOARD_MODAL),
@@ -261,13 +250,12 @@ private fun ExpandedContent(
 
 @Composable
 private fun Header() {
+
     Kiwi_HorizontalLine(
         getResponsiveRelativeSize(40.dp),
         getResponsiveRelativeSize(2.dp),
-        Color.LightGray,
-        Modifier.padding(top = getResponsiveRelativeSize(Spacing.medium))
+        MaterialTheme.colorScheme.secondary,
     )
-
     Kiwi_Spacer()
 
     Kiwi_H3(
@@ -277,6 +265,7 @@ private fun Header() {
             MaterialTheme.colorScheme.secondary
         )
     )
+    Kiwi_Spacer()
 }
 
 @Composable
@@ -399,7 +388,6 @@ private fun CalendarView(
             .fillMaxWidth()
             .height(getResponsiveRelativeSize(totalHeight))
             .then(gestureModifier)
-            .padding(getResponsiveRelativeSize(Spacing.medium))
             .testTag(DashboardModalTestTags.CALENDAR_VIEW)
     ) {
         Kiwi_P2(
@@ -411,6 +399,7 @@ private fun CalendarView(
                     .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
             )
         )
+        Kiwi_Spacer()
 
         AnimatedContent(
             targetState = currentYearMonth,
@@ -520,7 +509,7 @@ private fun ExpandedDayIndicator(
                 R.drawable.ph_dashboard_day_empty,
                 "Dashboard day indicator",
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(getResponsiveRelativeSize(50.dp))
                     .alpha(contentAlpha)
             )
 
@@ -534,7 +523,7 @@ private fun ExpandedProgressBox(state: MetricsState) {
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .clip(RoundedCornerShape(40.dp))
+            .clip(RoundedCornerShape(getResponsiveRelativeSize(40.dp)))
             .background(MaterialTheme.colorScheme.surface)
             .padding(getResponsiveRelativeSize(Spacing.medium))
     ) {
@@ -595,14 +584,14 @@ private fun MetricProgress(
 ) {
     Box(modifier) {
         Column {
-            Kiwi_P2(Kiwi_TextArguments(
+            Kiwi_H3(Kiwi_TextArguments(
                 title,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
                     .fillMaxWidth())
             )
-            Kiwi_P1(Kiwi_TextArguments(
+            Kiwi_P2(Kiwi_TextArguments(
                 value,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
@@ -632,7 +621,7 @@ private fun CollapsedSummaryCard(
             .background(MaterialTheme.colorScheme.surface)
             .fillMaxWidth()
             .wrapContentHeight()
-            .clip(RoundedCornerShape(40.dp))
+            .clip(RoundedCornerShape(getResponsiveRelativeSize(40.dp)))
             .padding(getResponsiveRelativeSize(Spacing.medium))
     ) {
         Row(
@@ -679,6 +668,8 @@ private fun CollapsedSummaryCard(
                         Modifier.testTag(DashboardModalTestTags.STEPS)
                     ))
 
+                    Kiwi_Spacer(Spacing.xSmall)
+
                     val screenTimeText = buildAnnotatedString {
                         withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
                             append(currentScreenTimeSeconds)
@@ -712,7 +703,7 @@ private fun ShowCalendarViewButton(
         R.drawable.calendar,
         "Show Calendar View Button",
         Modifier
-            .size(30.dp)
+            .size(getResponsiveRelativeSize(30.dp))
             .background(MaterialTheme.colorScheme.background)
             .clickable {
                 onCalendarViewClicked()
@@ -732,6 +723,8 @@ private fun ExpandedSummaryCard() {
                 .fillMaxWidth()
                 .wrapContentHeight())
         )
+
+        Kiwi_Spacer(Spacing.small)
 
         ExpandedQuestProgress(
             "Use Duolingo For 20 Minutes",
@@ -753,7 +746,7 @@ private fun ExpandedSummaryCard() {
 private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(getResponsiveRelativeSize(20.dp)))
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
             .background(MaterialTheme.colorScheme.inversePrimary),
@@ -767,7 +760,7 @@ private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float)
         ) {
             CircularProgressIndicator(
                 progress = { progress },
-                strokeWidth = 4.dp,
+                strokeWidth = getResponsiveRelativeSize(4.dp),
                 color = MaterialTheme.colorScheme.tertiary
             )
 
@@ -775,7 +768,7 @@ private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float)
                 imageRes,
                 "Quest Indicator For: $title",
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(getResponsiveRelativeSize(20.dp))
             )
         }
         Box (
