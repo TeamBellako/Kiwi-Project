@@ -18,7 +18,6 @@ import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.modals.ErrorModal
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.screens.ScreenRoutes
-import com.bellako.kiwi.ui.components.Kiwi_H1
 import com.bellako.kiwi.ui.components.Kiwi_InfoBox
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
@@ -46,12 +45,14 @@ import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.features.users.UsersTestTags
-import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
+import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_Gif
+import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
-import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.components.Kiwi_Label2
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
 @Composable
@@ -145,7 +146,7 @@ private fun LogIn(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(Spacing.medium),
+                .padding(getResponsiveRelativeSize(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
 
@@ -167,11 +168,12 @@ private fun LogIn(
 
                 // TEXT WELCOME
 
-                Kiwi_H1(
+                Kiwi_H2(
                     Kiwi_TextArguments(
                         "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.padding(bottom = getResponsiveRelativeSize(Spacing.large))
                     )
                 )
 
@@ -186,7 +188,7 @@ private fun LogIn(
                         value = currentState.email,
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
-                            Kiwi_P1(
+                            Kiwi_Label2(
                                 Kiwi_TextArguments(
                                     "Email",
                                     color = MaterialTheme.colorScheme.inversePrimary
@@ -205,7 +207,7 @@ private fun LogIn(
                         value = currentState.password,
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
-                            Kiwi_P1(
+                            Kiwi_Label2(
                                 Kiwi_TextArguments(
                                     "Password",
                                     color = MaterialTheme.colorScheme.inversePrimary
@@ -277,7 +279,7 @@ private fun LogIn(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = Spacing.medium)
+                .padding(bottom = getResponsiveRelativeSize(Spacing.medium))
                 .alpha(if (!isLoading || isPreview) 1f else 0f),
             contentAlignment = Alignment.BottomCenter
         ) {
@@ -320,9 +322,9 @@ private fun SignUp(
         }
     }
 
-    Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
+    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
         annotatedString,
-        TextAlign.Center,
+        TextAlign.Center
     ))
 }
 

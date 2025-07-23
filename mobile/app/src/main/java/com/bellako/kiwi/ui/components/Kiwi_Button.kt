@@ -1,6 +1,7 @@
 package com.bellako.kiwi.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
@@ -13,6 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 @Composable
 fun Kiwi_Button(
@@ -33,29 +35,45 @@ fun Kiwi_Button(
                 contentColor = MaterialTheme.colorScheme.onSecondary,
                 disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
             ),
-            contentPadding = PaddingValues(8.dp),
+            contentPadding = PaddingValues(getResponsiveRelativeSize(8).dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(testTag)
         ) {
-            Kiwi_Label(textArguments)
+            Kiwi_Label1(textArguments)
         }
     }
 }
+
+// -------------------------------------------------------------------------------------------------
 
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpWelcomeScreenPreview() {
+fun Kiwi_ButtonPreview() {
     KiwiTheme {
-        Kiwi_Button(
-            Kiwi_TextArguments(
-                "BUTTON",
-                color = MaterialTheme.colorScheme.secondary,
-                bold = true
-            ),
-            onClick = {},
-        )
+        Column {
+            Kiwi_Button(
+                Kiwi_TextArguments(
+                    "BUTTON",
+                    color = MaterialTheme.colorScheme.secondary,
+                    bold = true
+                ),
+                onClick = {},
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_Button(
+                Kiwi_TextArguments(
+                    "BUTTON",
+                    color = MaterialTheme.colorScheme.secondary,
+                    bold = true
+                ),
+                onClick = {},
+                enabled = false
+            )
+        }
     }
 }

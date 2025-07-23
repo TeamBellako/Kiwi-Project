@@ -38,6 +38,7 @@ import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.types.BERSERKER
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
 @Composable
@@ -65,7 +66,7 @@ fun SignUpTestScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(Spacing.medium),
+                .padding(getResponsiveRelativeSize(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
             Question(

@@ -1,8 +1,8 @@
 package com.bellako.kiwi.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -23,6 +23,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+import com.bellako.kiwi.features.users.UsersTestTags
+import com.bellako.kiwi.ui.theme.KiwiTheme
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 @Composable
 fun Kiwi_InputField(
@@ -78,7 +83,10 @@ fun Kiwi_InputField(
                 if (shouldHideInput) {
                     ShowPasswordTrailingIcon(shouldShowPassword)
                 }
-            }
+            },
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = getResponsiveRelativeSize(MaterialTheme.typography.bodyMedium.fontSize.value.toInt()).sp
+            )
         )
     }
 }
@@ -102,4 +110,52 @@ private fun ShowPasswordTrailingIcon(
                 )
             }
     )
+}
+
+// -------------------------------------------------------------------------------------------------
+
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Composable
+fun Kiwi_InputField_Preview() {
+    KiwiTheme {
+        Column {
+            Kiwi_InputField(
+                enabled = true,
+                value = "finn@thehuman.com",
+                onValueChange = { },
+                label = {
+                    Kiwi_Label2(
+                        Kiwi_TextArguments(
+                            "Email",
+                            color = MaterialTheme.colorScheme.inversePrimary
+                        )
+                    )
+                },
+                shouldHideInput = false,
+                textColor = MaterialTheme.colorScheme.inversePrimary,
+                testTag = UsersTestTags.EMAIL_FIELD,
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_InputField(
+                enabled = false,
+                value = "finn@thehuman.com",
+                onValueChange = { },
+                label = {
+                    Kiwi_Label2(
+                        Kiwi_TextArguments(
+                            "Email",
+                            color = MaterialTheme.colorScheme.inversePrimary
+                        )
+                    )
+                },
+                shouldHideInput = false,
+                textColor = MaterialTheme.colorScheme.inversePrimary,
+                testTag = UsersTestTags.EMAIL_FIELD,
+            )
+        }
+    }
 }

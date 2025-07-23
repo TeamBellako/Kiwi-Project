@@ -6,13 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.bellako.kiwi.ui.theme.Spacing
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 @Composable
 fun Kiwi_Spacer(
-    height: Dp = Spacing.medium
+    height: Dp = getResponsiveRelativeSize(Spacing.medium)
 ) {
-    Spacer(
-        Modifier
-            .height(height)
-    )
+    Spacer(Modifier.height(getResponsiveRelativeSize(height)))
 }

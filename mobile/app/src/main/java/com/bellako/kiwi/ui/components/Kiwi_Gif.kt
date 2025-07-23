@@ -39,5 +39,4 @@ fun Kiwi_Gif (
             contentScale = contentScale,
         )
     }
-
 }

@@ -29,11 +29,12 @@ import androidx.compose.ui.text.withLink
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
-import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
+import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
+import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
 @Composable
@@ -60,7 +61,7 @@ fun SignUpWelcomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(Spacing.medium),
+                .padding(getResponsiveRelativeSize(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
             Welcome(
@@ -71,7 +72,7 @@ fun SignUpWelcomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = Spacing.medium),
+                    .padding(bottom = getResponsiveRelativeSize(Spacing.medium)),
                 contentAlignment = Alignment.BottomCenter
             ) {
 
@@ -153,7 +154,7 @@ private fun GoToLogIn(
         }
     }
 
-    Kiwi_AnnotatedString(Kiwi_AnnotatedStringArguments(
+    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
         annotatedString,
         TextAlign.Center,
     ))
