@@ -41,7 +41,9 @@ import com.bellako.kiwi.features.users.UsersTestTags
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
+import com.bellako.kiwi.ui.components.Kiwi_Label2
 import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
@@ -125,7 +127,7 @@ private fun SignUp(
 
                         // TEXT WELCOME
 
-                        Kiwi_P1(
+                        Kiwi_P2(
                             Kiwi_TextArguments(
                                 "Initial Setup Will Take\nApproximately 3 Minutes",
                                 textAlign = TextAlign.Center,
@@ -133,7 +135,8 @@ private fun SignUp(
                             )
                         )
 
-                        Kiwi_Spacer()
+                        Kiwi_Spacer(Spacing.large)
+                        Kiwi_Spacer(Spacing.large)
 
                         Kiwi_H2(
                             Kiwi_TextArguments(
@@ -144,7 +147,7 @@ private fun SignUp(
                             )
                         )
 
-                        Kiwi_Spacer()
+                        Kiwi_Spacer(Spacing.large)
 
 
                         // INPUT
@@ -154,7 +157,7 @@ private fun SignUp(
                             value = currentPersonalityState.realName,
                             onValueChange = { personalityViewModel.onRealNameChanged(it) },
                             label = {
-                                Kiwi_P1(
+                                Kiwi_Label2(
                                     Kiwi_TextArguments(
                                         "Real Name",
                                         color = MaterialTheme.colorScheme.inversePrimary
@@ -173,7 +176,7 @@ private fun SignUp(
                             value = currentPersonalityState.knightName,
                             onValueChange = { personalityViewModel.onKnightNameChanged(it) },
                             label = {
-                                Kiwi_P1(
+                                Kiwi_Label2(
                                     Kiwi_TextArguments(
                                         "Knight Name",
                                         color = MaterialTheme.colorScheme.inversePrimary
@@ -192,7 +195,7 @@ private fun SignUp(
                             value = currentUsersState.email,
                             onValueChange = { usersViewModel.onEmailChanged(it) },
                             label = {
-                                Kiwi_P1(
+                                Kiwi_Label2(
                                     Kiwi_TextArguments(
                                         "Email",
                                         color = MaterialTheme.colorScheme.inversePrimary
@@ -223,7 +226,8 @@ private fun SignUp(
                             testTag = UsersTestTags.PASSWORD_FIELD
                         )
 
-                        Kiwi_Spacer()
+                        Kiwi_Spacer(Spacing.large)
+                        Kiwi_Spacer(Spacing.large)
 
 
                         // BUTTON

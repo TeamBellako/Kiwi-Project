@@ -18,7 +18,6 @@ import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.modals.ErrorModal
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.screens.ScreenRoutes
-import com.bellako.kiwi.ui.components.Kiwi_H1
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.components.Kiwi_Image
@@ -35,8 +34,8 @@ import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersona
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
-import com.bellako.kiwi.types.BERSERKER
 import com.bellako.kiwi.ui.components.Kiwi_Button
+import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
@@ -115,13 +114,15 @@ private fun Question(
 
                     var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-                    Kiwi_H1(
+                    Kiwi_H2(
                         Kiwi_TextArguments(
                             currentPersonalityState.questions[currentQuestion].question,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.secondary
                         )
                     )
+
+                    Kiwi_Spacer(Spacing.large)
 
                     currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
 

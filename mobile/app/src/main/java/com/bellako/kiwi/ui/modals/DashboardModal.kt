@@ -599,7 +599,7 @@ private fun MetricProgress(
                     .fillMaxWidth()
                     .testTag(testTag))
             )
-            Kiwi_P3(Kiwi_TextArguments(
+            Kiwi_P2(Kiwi_TextArguments(
                 "/$target",
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
