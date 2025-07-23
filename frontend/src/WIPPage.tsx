@@ -2,7 +2,7 @@ import React from "react";
 
 const WIPPage: React.FC = () => {
     return (
-        <div className={'relative flex flex-col w-screen h-screen items-center justify-center bg-[#122F36] text-[#FCFCF6]'}>
+        <div className={'relative flex flex-col w-screen h-screen items-center justify-center bg-[#122F36] text-[#FCFCF6] p-2 text-center'}>
             <img alt={'background image'} src={'/background.png'} className={'absolute inset-0 w-full h-full object-cover'} />
             <h1 className={'text-4xl font-bold z-10'}>Welcome to GrowTale</h1>
             <h2 className={'text-2xl mb-6 z-10'}>Your Legend Is About To Be Forged...</h2>
