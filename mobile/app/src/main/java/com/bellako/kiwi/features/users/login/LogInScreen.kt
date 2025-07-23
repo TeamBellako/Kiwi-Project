@@ -62,7 +62,6 @@ fun LogInScreen(
     val context = LocalContext.current
 
     val uiState by usersViewModel.uiState.collectAsState()
-    val isLoading by usersViewModel.isLoading.collectAsState()
 
     Box(
         modifier = Modifier
@@ -78,6 +77,7 @@ fun LogInScreen(
                         val result = usersViewModel.login(context)
                         if (result.isSuccess) {
                             navController.navigate(ScreenRoutes.HOME)
+                            usersViewModel.onLoginSuccess()
                         }
                     }
                 })
@@ -94,45 +94,12 @@ fun LogInScreen(
                     contentScale = ContentScale.Crop
                 )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(Spacing.medium),
-                    contentAlignment = Alignment.Center
-                ) {
+                LogIn(
+                    usersViewModel,
+                    personalityViewModel,
+                    navController
+                )
 
-                    // check stored credentials for auto login
-                    LaunchedEffect(Unit) {
-                        val (username, password) = usersViewModel.getLocalCredentials(context)
-                        if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
-                            usersViewModel.onEmailChanged(username)
-                            usersViewModel.onPasswordChanged(password)
-                            if (usersViewModel.login(context).isSuccess) {
-                                navController.navigate(ScreenRoutes.HOME)
-                            }
-                        }
-                    }
-
-                    LogIn(
-                        usersViewModel,
-                        personalityViewModel,
-                        navController
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = Spacing.medium)
-                            .alpha(if (isLoading) 0f else 1f),
-                        contentAlignment = Alignment.BottomCenter
-                    ) {
-
-                        SignUp() {
-                            navController.navigate(ScreenRoutes.SIGNUP_WELCOME)
-                        }
-
-                    }
-                }
             }
         }
     }
@@ -148,130 +115,174 @@ private fun LogIn(
 
     val state by usersViewModel.state.collectAsState()
     val uiState by usersViewModel.uiState.collectAsState()
-    val isLoading by usersViewModel.isLoading.collectAsState()
+
+    val usersIsLoading by usersViewModel.isLoading.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+    var initializing by remember { mutableStateOf(true) }
+    val isLoading by remember { derivedStateOf { initializing || usersIsLoading || personalityIsLoading } }
+
+
+    // check stored credentials for auto login
+    LaunchedEffect(Unit) {
+        initializing = false
+        val (username, password) = usersViewModel.getLocalCredentials(context)
+        if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
+            usersViewModel.onEmailChanged(username)
+            usersViewModel.onPasswordChanged(password)
+            if (usersViewModel.login(context).isSuccess) {
+                navController.navigate(ScreenRoutes.HOME)
+                usersViewModel.onLoginSuccess()
+            }
+        }
+    }
+
 
     state?.let { currentState ->
 
-        if (isLoading)
-        {
-            Kiwi_Gif(
-                "gf_loading",
-                "Loading"
-            )
-        }
-
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .testTag(CommonTestTags.USERS_SCREEN),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(Spacing.medium),
+            contentAlignment = Alignment.Center
         ) {
 
-            // TEXT WELCOME
-
-            Kiwi_H1(Kiwi_TextArguments(
-                "Welcome Back, \nKnight",
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary
-            ))
+            if (isLoading) {
+                Kiwi_Gif(
+                    "gf_loading",
+                    "Loading"
+                )
+            }
 
             Column(
                 modifier = Modifier
-                    .alpha(if (isLoading) 0f else 1f)
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .testTag(CommonTestTags.USERS_SCREEN),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // CREDENTIALS
 
-                Kiwi_InputField(
-                    enabled = !isLoading,
-                    value = currentState.email,
-                    onValueChange = { usersViewModel.onEmailChanged(it) },
-                    label = {
-                        Kiwi_P1(
-                            Kiwi_TextArguments(
-                                "Email",
-                                color = MaterialTheme.colorScheme.inversePrimary
-                            )
-                        )
-                    },
-                    shouldHideInput = false,
-                    textColor = MaterialTheme.colorScheme.inversePrimary,
-                    testTag = UsersTestTags.EMAIL_FIELD,
-                )
+                // TEXT WELCOME
 
-                Kiwi_Spacer()
-
-                Kiwi_InputField(
-                    enabled = !isLoading,
-                    value = currentState.password,
-                    onValueChange = { usersViewModel.onPasswordChanged(it) },
-                    label = {
-                        Kiwi_P1(
-                            Kiwi_TextArguments(
-                                "Password",
-                                color = MaterialTheme.colorScheme.inversePrimary
-                            )
-                        )
-                    },
-                    shouldHideInput = true,
-                    textColor = MaterialTheme.colorScheme.inversePrimary,
-                    testTag = UsersTestTags.PASSWORD_FIELD
-                )
-
-                Kiwi_Spacer()
-
-                Kiwi_Button(
+                Kiwi_H1(
                     Kiwi_TextArguments(
-                        "LOG IN",
-                        color = MaterialTheme.colorScheme.secondary,
-                        bold = true
-                    ),
-                    onClick = {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            if (usersViewModel.login(context).isSuccess) {
-                                // check personality registered, navigate to Home or Test depending on that
-                                personalityViewModel.loadPersonality().fold(
-                                    onSuccess = {
-                                        navController.navigate(ScreenRoutes.HOME)
-                                    },
-                                    onFailure = {
-                                        navController.navigate(ScreenRoutes.SIGNUP_TEST)
-                                    }
-                                )
-                            }
-                        }
-                    },
-                    enabled = !isLoading,
-                    testTag = UsersTestTags.LOGIN_BUTTON,
+                        "Welcome Back, \nKnight",
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 )
 
-                Kiwi_Spacer()
-
-                // LOGIN ERROR  MESSAGE
-
-                var errorMessage by remember { mutableStateOf("") }
-                errorMessage = when (uiState) {
-                    is UIState.Error -> {
-                        (uiState as UIState.Error).message
-                    }
-
-                    else -> {
-                        ""
-                    }
-                }
-
-                Box(
+                Column(
                     modifier = Modifier
-                        .alpha(if (errorMessage.isEmpty()) 0f else 1f)
+                        .alpha(if (isLoading) 0f else 1f)
                 ) {
-                    Kiwi_InfoBox(
-                        message = errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        testTag = UsersTestTags.ERROR_TEXT
+                    // CREDENTIALS
+
+                    Kiwi_InputField(
+                        enabled = !isLoading,
+                        value = currentState.email,
+                        onValueChange = { usersViewModel.onEmailChanged(it) },
+                        label = {
+                            Kiwi_P1(
+                                Kiwi_TextArguments(
+                                    "Email",
+                                    color = MaterialTheme.colorScheme.inversePrimary
+                                )
+                            )
+                        },
+                        shouldHideInput = false,
+                        textColor = MaterialTheme.colorScheme.inversePrimary,
+                        testTag = UsersTestTags.EMAIL_FIELD,
                     )
+
+                    Kiwi_Spacer()
+
+                    Kiwi_InputField(
+                        enabled = !isLoading,
+                        value = currentState.password,
+                        onValueChange = { usersViewModel.onPasswordChanged(it) },
+                        label = {
+                            Kiwi_P1(
+                                Kiwi_TextArguments(
+                                    "Password",
+                                    color = MaterialTheme.colorScheme.inversePrimary
+                                )
+                            )
+                        },
+                        shouldHideInput = true,
+                        textColor = MaterialTheme.colorScheme.inversePrimary,
+                        testTag = UsersTestTags.PASSWORD_FIELD
+                    )
+
+                    Kiwi_Spacer()
+
+                    Kiwi_Button(
+                        Kiwi_TextArguments(
+                            "LOG IN",
+                            color = MaterialTheme.colorScheme.secondary,
+                            bold = true
+                        ),
+                        onClick = {
+                            CoroutineScope(Dispatchers.Main).launch {
+                                if (usersViewModel.login(context).isSuccess) {
+                                    // check personality registered, navigate to Home or Test depending on that
+                                    personalityViewModel.loadPersonality().fold(
+                                        onSuccess = {
+                                            navController.navigate(ScreenRoutes.HOME)
+                                        },
+                                        onFailure = {
+                                            navController.navigate(ScreenRoutes.SIGNUP_TEST)
+                                        }
+                                    )
+                                    usersViewModel.onLoginSuccess()
+                                }
+                            }
+                        },
+                        enabled = !isLoading,
+                        testTag = UsersTestTags.LOGIN_BUTTON,
+                    )
+
+                    Kiwi_Spacer()
+
+                    // LOGIN ERROR  MESSAGE
+
+                    var errorMessage by remember { mutableStateOf("") }
+                    errorMessage = when (uiState) {
+                        is UIState.Error -> {
+                            (uiState as UIState.Error).message
+                        }
+
+                        else -> {
+                            ""
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .alpha(if (errorMessage.isEmpty()) 0f else 1f)
+                    ) {
+                        Kiwi_InfoBox(
+                            message = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            testTag = UsersTestTags.ERROR_TEXT
+                        )
+                    }
                 }
             }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = Spacing.medium)
+                .alpha(if (isLoading) 0f else 1f),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+
+            SignUp() {
+                navController.navigate(ScreenRoutes.SIGNUP_WELCOME)
+            }
+
         }
     }
 }

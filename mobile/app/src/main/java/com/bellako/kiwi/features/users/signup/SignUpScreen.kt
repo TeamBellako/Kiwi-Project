@@ -103,9 +103,10 @@ private fun SignUp(
                 is UIState.GeneralError -> {
                     ErrorModal(onRetry = {
                         CoroutineScope(Dispatchers.Main).launch {
-                            val result = usersViewModel.login(context)
-                            if (result.isSuccess) {
-                                navController.navigate(ScreenRoutes.HOME)
+                            if (personalityViewModel.checkValid().isSuccess && usersViewModel.signup(context).isSuccess) {
+                                personalityViewModel.updateRealName()
+                                personalityViewModel.updateKnightName()
+                                navController.navigate(ScreenRoutes.SIGNUP_TEST)
                             }
                         }
                     })

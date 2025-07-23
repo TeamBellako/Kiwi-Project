@@ -35,7 +35,6 @@ class PersonalityIntegrationTest {
     private lateinit var repository: PersonalityRepository
     private lateinit var viewModel: IPersonalityViewModel
     private lateinit var healthApi: HealthApiService
-    private lateinit var authRepository: AuthRepository
 
     @Before
     fun setUp() {
@@ -44,8 +43,7 @@ class PersonalityIntegrationTest {
         api = mock(IPersonalityAPI::class.java)
         healthApi = mock(HealthApiService::class.java)
         repository = PersonalityRepository(api, healthApi)
-        authRepository = AuthRepository()
-        viewModel = PersonalityViewModel(repository, authRepository, testDispatcher)
+        viewModel = PersonalityViewModel(repository)
     }
 
     @Test

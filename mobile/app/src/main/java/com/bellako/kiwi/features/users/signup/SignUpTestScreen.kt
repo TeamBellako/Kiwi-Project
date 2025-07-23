@@ -94,8 +94,7 @@ private fun Question(
             is UIState.GeneralError -> {
                 ErrorModal(onRetry = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        val result = usersViewModel.login(context)
-                        if (result.isSuccess) {
+                        if (personalityViewModel.updateBuild().isSuccess) {
                             navController.navigate(ScreenRoutes.HOME)
                         }
                     }

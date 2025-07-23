@@ -46,6 +46,8 @@ class UsersFakeViewModel(
         }
     }
 
+    override suspend fun onLoginSuccess() {}
+
     override suspend fun logout(context: Context) {}
 
     override suspend fun saveLocalCredentials(context: Context) {}
@@ -55,4 +57,5 @@ class UsersFakeViewModel(
     }
 
     override suspend fun clearLocalCredentials(context: Context) {}
+
 }

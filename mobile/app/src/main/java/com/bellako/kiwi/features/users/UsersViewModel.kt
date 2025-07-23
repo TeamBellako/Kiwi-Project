@@ -18,6 +18,7 @@ import com.google.crypto.tink.aead.AeadKeyTemplates
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -77,6 +78,12 @@ class UsersViewModel @Inject constructor(
     override suspend fun logout(context: Context) {
         clearLocalCredentials(context)
         authRepository.setJwtToken("")
+    }
+
+    override suspend fun onLoginSuccess() {
+        setIsLoading(true)
+        delay(2000)
+        setIsLoading(false)
     }
 
     // ---------------------------------------------------------------------------------------------
