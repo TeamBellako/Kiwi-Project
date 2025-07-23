@@ -102,11 +102,11 @@ fun LogInScreen(
                 ) {
 
                     // check stored credentials for auto login
-                    val (username, password) = usersViewModel.getLocalCredentials(context)
-                    if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
-                        usersViewModel.onEmailChanged(username)
-                        usersViewModel.onPasswordChanged(password)
-                        LaunchedEffect(Unit) {
+                    LaunchedEffect(Unit) {
+                        val (username, password) = usersViewModel.getLocalCredentials(context)
+                        if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
+                            usersViewModel.onEmailChanged(username)
+                            usersViewModel.onPasswordChanged(password)
                             if (usersViewModel.login(context).isSuccess) {
                                 navController.navigate(ScreenRoutes.HOME)
                             }

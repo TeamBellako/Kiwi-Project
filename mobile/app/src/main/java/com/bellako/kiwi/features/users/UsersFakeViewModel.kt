@@ -48,11 +48,11 @@ class UsersFakeViewModel(
 
     override suspend fun logout(context: Context) {}
 
-    override fun saveLocalCredentials(context: Context) {}
+    override suspend fun saveLocalCredentials(context: Context) {}
 
-    override fun getLocalCredentials(context: Context): Pair<String?, String?> {
+    override suspend fun getLocalCredentials(context: Context): Pair<String?, String?> {
         return Pair("", "")
     }
 
-    override fun clearLocalCredentials(context: Context) {}
+    override suspend fun clearLocalCredentials(context: Context) {}
 }

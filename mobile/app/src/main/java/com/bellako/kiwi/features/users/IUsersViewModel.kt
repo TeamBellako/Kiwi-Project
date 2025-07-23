@@ -12,7 +12,7 @@ interface IUsersViewModel : IBaseViewModel<UsersState> {
     suspend fun login(context: Context): Result<Unit>
     suspend fun logout(context: Context)
 
-    fun saveLocalCredentials(context: Context)
-    fun getLocalCredentials(context: Context): Pair<String?, String?>
-    fun clearLocalCredentials(context: Context)
+    suspend fun saveLocalCredentials(context: Context)
+    suspend fun getLocalCredentials(context: Context): Pair<String?, String?>
+    suspend fun clearLocalCredentials(context: Context)
 }
