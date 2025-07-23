@@ -1,14 +1,12 @@
 package com.bellako.kiwi.features.personality
 
 import com.bellako.kiwi.services.common.BaseViewModel
-import com.bellako.kiwi.services.network.AuthRepository
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.types.BERSERKER
 import com.bellako.kiwi.types.MONK
 import com.bellako.kiwi.types.SHAMAN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,9 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class PersonalityViewModel @Inject constructor(
-    private val repository: PersonalityRepository,
-    private val authRepository: AuthRepository,
-    private val dispatcher: CoroutineDispatcher
+    private val repository: PersonalityRepository
 ) : BaseViewModel(), IPersonalityViewModel {
 
     private val _state = MutableStateFlow(PersonalityState("", "", ""))
@@ -27,24 +23,21 @@ class PersonalityViewModel @Inject constructor(
     override val _isLoading = MutableStateFlow(false)
     override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private var previousValidDomain: Personality? = null
-    private var previousDomain: Personality? = null
-
-
-    override fun reset() {
-        previousValidDomain = null
+    private fun setIsLoading(isLoading: Boolean) {
+        _isLoading.value = isLoading
+        _uiState.value = if (isLoading) UIState.Loading else UIState.Idle
     }
 
-    override suspend fun loadPersonality(): Result<Unit> {
-        _isLoading.value = true
-        _uiState.value = UIState.Loading
+    // ---------------------------------------------------------------------------------------------
 
+    override suspend fun loadPersonality(): Result<Unit> {
+        setIsLoading(true)
         return repository.getPersonality().map { dto ->
             val state = dto.toState()
             _state.value = _state.value.copy(realName = state.realName, knightName = state.knightName, build = state.build)
-            _isLoading.value = false
+            setIsLoading(false)
         } .onFailure { throwable ->
-            _isLoading.value = false
+            setIsLoading(false)
             _uiState.value = mapExceptionToUIState(throwable)
         }
     }
@@ -86,13 +79,11 @@ class PersonalityViewModel @Inject constructor(
     }
 
     override suspend fun updateBuild(): Result<Unit> {
-        _isLoading.value = true
-        _uiState.value = UIState.Loading
-
+        setIsLoading(true)
         _state.value = _state.value.copy(build = deduceBuild())
         return handleResultSuspend(repository.updateBuild(PersonalityBuildDTO(_state.value.build))) {
+            setIsLoading(false)
             _uiState.value = UIState.Success(Unit)
-            _isLoading.value = false
         }
     }
 

@@ -29,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.features.personality.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.PersonalityState
@@ -86,6 +87,8 @@ private fun SignUp(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
+    val context = LocalContext.current
+
     val usersState by usersViewModel.state.collectAsState()
     val usersUiState by usersViewModel.uiState.collectAsState()
     val usersIsLoading by usersViewModel.isLoading.collectAsState()
@@ -100,9 +103,10 @@ private fun SignUp(
                 is UIState.GeneralError -> {
                     ErrorModal(onRetry = {
                         CoroutineScope(Dispatchers.Main).launch {
-                            val result = usersViewModel.login(currentUsersState)
-                            if (result.isSuccess) {
-                                navController.navigate(ScreenRoutes.HOME)
+                            if (personalityViewModel.checkValid().isSuccess && usersViewModel.signup(context).isSuccess) {
+                                personalityViewModel.updateRealName()
+                                personalityViewModel.updateKnightName()
+                                navController.navigate(ScreenRoutes.SIGNUP_TEST)
                             }
                         }
                     })
@@ -232,7 +236,7 @@ private fun SignUp(
                             color = MaterialTheme.colorScheme.tertiary,
                             onClick = {
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    if (personalityViewModel.checkValid().isSuccess && usersViewModel.signup(currentUsersState).isSuccess) {
+                                    if (personalityViewModel.checkValid().isSuccess && usersViewModel.signup(context).isSuccess) {
                                         personalityViewModel.updateRealName()
                                         personalityViewModel.updateKnightName()
                                         navController.navigate(ScreenRoutes.SIGNUP_TEST)

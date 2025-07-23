@@ -4,8 +4,6 @@ import com.bellako.kiwi.features.common.IBaseViewModel
 
 interface IPersonalityViewModel : IBaseViewModel<PersonalityState> {
 
-    fun reset()
-
     suspend fun loadPersonality(): Result<Unit>
 
     fun checkValid(): Result<Personality>

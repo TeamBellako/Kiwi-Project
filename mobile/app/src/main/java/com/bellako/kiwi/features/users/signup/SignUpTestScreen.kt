@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.features.personality.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.PersonalityState
@@ -82,74 +83,72 @@ private fun Question(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
-    val usersState by usersViewModel.state.collectAsState()
+    val context = LocalContext.current
+
     val uiState by usersViewModel.uiState.collectAsState()
     val personalityState by personalityViewModel.state.collectAsState()
 
-    usersState?.let { currentUsersState ->
-        personalityState?.let { currentPersonalityState ->
+    personalityState?.let { currentPersonalityState ->
 
-            when (uiState) {
-                is UIState.GeneralError -> {
-                    ErrorModal(onRetry = {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            val result = usersViewModel.login(currentUsersState)
-                            if (result.isSuccess) {
-                                navController.navigate(ScreenRoutes.HOME)
-                            }
+        when (uiState) {
+            is UIState.GeneralError -> {
+                ErrorModal(onRetry = {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        if (personalityViewModel.updateBuild().isSuccess) {
+                            navController.navigate(ScreenRoutes.HOME)
                         }
-                    })
-                }
+                    }
+                })
+            }
 
-                else -> {
+            else -> {
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .testTag(CommonTestTags.USERS_SCREEN),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .testTag(CommonTestTags.USERS_SCREEN),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
-                        var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
+                    var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-                        Kiwi_H1(
-                            Kiwi_TextArguments(
-                                currentPersonalityState.questions[currentQuestion].question,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
+                    Kiwi_H1(
+                        Kiwi_TextArguments(
+                            currentPersonalityState.questions[currentQuestion].question,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.secondary
                         )
+                    )
 
-                        currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
+                    currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
 
-                            Kiwi_Button(
-                                Kiwi_TextArguments(
-                                    option,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                ),
-                                color = MaterialTheme.colorScheme.primary,
-                                onClick = {
-                                    currentPersonalityState.answers[currentQuestion] = index
-                                    if (currentQuestion + 1 < currentPersonalityState.questions.size) {
-                                        ++currentQuestion
-                                    } else {
-                                        navController.navigate(ScreenRoutes.HOME)
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            if (personalityViewModel.updateBuild().isSuccess) {
-                                                navController.navigate(ScreenRoutes.HOME)
-                                            }
+                        Kiwi_Button(
+                            Kiwi_TextArguments(
+                                option,
+                                color = MaterialTheme.colorScheme.secondary,
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
+                            onClick = {
+                                currentPersonalityState.answers[currentQuestion] = index
+                                if (currentQuestion + 1 < currentPersonalityState.questions.size) {
+                                    ++currentQuestion
+                                } else {
+                                    navController.navigate(ScreenRoutes.HOME)
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        if (personalityViewModel.updateBuild().isSuccess) {
+                                            navController.navigate(ScreenRoutes.HOME)
                                         }
                                     }
-                                },
-                            )
+                                }
+                            },
+                        )
 
-                            Kiwi_Spacer()
-
-                        }
+                        Kiwi_Spacer()
 
                     }
+
                 }
             }
         }

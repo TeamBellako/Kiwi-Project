@@ -2,7 +2,6 @@ package com.bellako.kiwi.features.personality
 
 import com.bellako.kiwi.features.common.BaseFakeViewModel
 import com.bellako.kiwi.services.common.UIState
-import com.bellako.kiwi.types.BERSERKER
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,9 +12,6 @@ class PersonalityFakeViewModel(
 
     private val _state = MutableStateFlow<PersonalityState?>(initialState)
     override val state: StateFlow<PersonalityState?> = _state.asStateFlow()
-
-    override fun reset() {
-    }
 
     override suspend fun loadPersonality(): Result<Unit> {
         return Result.success(Unit)

@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,6 +28,9 @@ import com.bellako.kiwi.features.users.signup.SignUpWelcomeScreen
 import com.bellako.kiwi.ui.modals.AppBarModal
 import com.bellako.kiwi.ui.modals.DashboardModal
 import com.bellako.kiwi.ui.modals.PermissionsRequestModal
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object ScreenRoutes {
     const val LOGIN = "login"
@@ -56,17 +61,18 @@ private fun AppScreen(
     usersViewModel: UsersViewModel = hiltViewModel(),
     personalityViewModel: PersonalityViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
 
     val navController = rememberNavController()
-
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val route = currentBackStackEntry?.destination?.route
+    val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val isLoginScreen = route == ScreenRoutes.LOGIN || route == ScreenRoutes.SIGNUP_WELCOME ||
             route == ScreenRoutes.SIGNUP || route == ScreenRoutes.SIGNUP_TEST
 
     Scaffold(
         bottomBar = {
-            if (!isLoginScreen && usersViewModel.isLoginCompleted.value) {
+            if (!isLoginScreen && isLoginCompleted) {
                 AppBarModal(navController = navController)
             }
         },
@@ -121,16 +127,18 @@ private fun AppScreen(
                             viewModel = settingsViewModel,
                             navController = navController,
                             onLogout = {
-                                usersViewModel.logout()
-                                navController.navigate(ScreenRoutes.LOGIN) {
-                                    popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    usersViewModel.logout(context)
+                                    navController.navigate(ScreenRoutes.LOGIN) {
+                                        popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
+                                    }
                                 }
                             }
                         )
                     }
                 }
 
-                if (!isLoginScreen && usersViewModel.isLoginCompleted.value) {
+                if (!isLoginScreen && isLoginCompleted) {
                     val metricsViewModel: MetricsViewModel = hiltViewModel()
                     DashboardModal(metricsViewModel)
                 }
