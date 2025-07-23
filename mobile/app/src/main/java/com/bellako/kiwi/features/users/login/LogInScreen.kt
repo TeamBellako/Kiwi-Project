@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -121,6 +122,8 @@ private fun LogIn(
     var initializing by remember { mutableStateOf(true) }
     val isLoading by remember { derivedStateOf { initializing || usersIsLoading || personalityIsLoading } }
 
+    val isPreview = LocalInspectionMode.current
+
 
     // check stored credentials for auto login
     LaunchedEffect(Unit) {
@@ -146,9 +149,9 @@ private fun LogIn(
             contentAlignment = Alignment.Center
         ) {
 
-            if (isLoading) {
+            if (isLoading || isPreview) {
                 Kiwi_Gif(
-                    "gf_loading",
+                    R.drawable.gf_loading,
                     "Loading"
                 )
             }
@@ -174,7 +177,7 @@ private fun LogIn(
 
                 Column(
                     modifier = Modifier
-                        .alpha(if (isLoading) 0f else 1f)
+                        .alpha(if (!isLoading || isPreview) 1f else 0f)
                 ) {
                     // CREDENTIALS
 
@@ -275,7 +278,7 @@ private fun LogIn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = Spacing.medium)
-                .alpha(if (isLoading) 0f else 1f),
+                .alpha(if (!isLoading || isPreview) 1f else 0f),
             contentAlignment = Alignment.BottomCenter
         ) {
 
