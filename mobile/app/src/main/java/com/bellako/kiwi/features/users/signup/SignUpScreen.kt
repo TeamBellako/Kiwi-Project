@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.users.signup
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,6 @@ import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Label2
-import com.bellako.kiwi.ui.components.Kiwi_P1
 import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
@@ -53,6 +53,7 @@ fun SignUpScreen(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
+    BackHandler(enabled = true) { } // Do nothing, ignore native back
 
     Box(
         modifier = Modifier
@@ -214,7 +215,7 @@ private fun SignUp(
                             value = currentUsersState.password,
                             onValueChange = { usersViewModel.onPasswordChanged(it) },
                             label = {
-                                Kiwi_P1(
+                                Kiwi_Label2(
                                     Kiwi_TextArguments(
                                         "Password",
                                         color = MaterialTheme.colorScheme.inversePrimary

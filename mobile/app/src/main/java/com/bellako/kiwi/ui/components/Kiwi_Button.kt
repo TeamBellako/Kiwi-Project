@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +39,8 @@ fun Kiwi_Button(
             contentPadding = PaddingValues(getResponsiveRelativeSize(8).dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag(testTag)
+                .testTag(testTag),
+            shape = RoundedCornerShape(getResponsiveRelativeSize(10.dp))
         ) {
             Kiwi_Label1(textArguments)
         }

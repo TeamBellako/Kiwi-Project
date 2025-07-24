@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.users.signup
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +47,7 @@ fun SignUpTestScreen(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
+    BackHandler(enabled = true) { } // Do nothing, ignore native back
 
     Box(
         modifier = Modifier
