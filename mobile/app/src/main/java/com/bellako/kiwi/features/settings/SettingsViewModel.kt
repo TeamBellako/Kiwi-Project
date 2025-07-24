@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.collectLatest
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.services.common.BaseViewModel
 import dagger.Module
 import dagger.Provides
@@ -18,7 +19,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -49,6 +49,18 @@ class SettingsViewModel @Inject constructor(
         previousValidDomainSettings = null
     }
 
+    init {
+        viewModelScope.launch {
+            _pendingSave
+                .debounce(500)
+                .collectLatest { domain ->
+                    domain?.let {
+                        saveSettings(it)
+                    }
+                }
+        }
+    }
+
     override fun loadSettings() {
         _isLoading.value = true
         _uiState.value = UIState.Loading
@@ -60,6 +72,7 @@ class SettingsViewModel @Inject constructor(
                     onSuccess = { dto ->
                         dto.toDomainObject().onSuccess { domain ->
                             _state.value = domain.toState()
+                            //updateVolume()
                             previousDomainSettings = domain
                             _uiState.value = UIState.Success(Unit)
                         }.onFailure { ex ->
@@ -80,24 +93,13 @@ class SettingsViewModel @Inject constructor(
 
     override fun updateSettings(state: SettingsState) {
         _state.value = state
-
+        updateVolume()
         state.toDomainObject().onSuccess { domain ->
-            if (previousValidDomainSettings == domain) return
-
+            if (previousValidDomainSettings == domain) {
+                return
+            }
             previousValidDomainSettings = domain
             _pendingSave.value = domain
-        }
-    }
-
-    init {
-        viewModelScope.launch {
-            _pendingSave
-                .debounce(500)
-                .collectLatest { domain ->
-                    domain?.let {
-                        saveSettings(it)
-                    }
-                }
         }
     }
 
@@ -120,4 +122,12 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun updateVolume() {
+        _state.value?.let {
+            AudioManager.updateGlobalVolumeSFX(it.soundVolume)
+            AudioManager.updateGlobalVolumeMusic(it.musicVolume)
+        }
+    }
+
 }

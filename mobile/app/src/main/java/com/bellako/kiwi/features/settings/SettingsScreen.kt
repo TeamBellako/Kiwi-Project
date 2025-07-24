@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -22,6 +23,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.users.UsersTestTags
 import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.services.common.Logger
@@ -44,12 +46,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-private val volumeLevels = listOf(0, 33, 67, 100)
-
 private enum class RetryAction {
     LOAD,
     SAVE
 }
+
 
 @Composable
 fun SettingsScreen(
@@ -127,8 +128,8 @@ private fun SettingsScreenLayout(
                 testTag = SettingsTestTags.SERVER_ERROR
             )
         }
-
         else -> {
+
             SettingsFields(
                 state = state,
                 viewModel = viewModel,
@@ -150,10 +151,10 @@ private fun SettingsFields(
 ) {
     state?.let { currentState ->
         var soundSliderPosition by remember {
-            mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.soundVolume }.coerceAtLeast(0))
+            mutableFloatStateOf(currentState.soundVolume.coerceIn(0f, 1f))
         }
         var musicSliderPosition by remember {
-            mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.musicVolume }.coerceAtLeast(0))
+            mutableFloatStateOf(currentState.musicVolume.coerceIn(0f, 1f))
         }
 
         Column(
@@ -188,18 +189,14 @@ private fun SettingsFields(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Slider(
-                Kiwi_TextArguments("Sound Volume"),
-                value = soundSliderPosition.toFloat(),
+                Kiwi_TextArguments("SFX Volume"),
+                value = soundSliderPosition,
                 onValueChange = { newValue ->
-                    val intPos = newValue.toInt()
-                    if (intPos != soundSliderPosition) {
-                        soundSliderPosition = intPos
-                        onChange()
-                        viewModel.updateSettings(currentState.copy(soundVolume = volumeLevels[intPos]))
-                    }
+                    soundSliderPosition = newValue
+                    viewModel.updateSettings(currentState.copy(soundVolume = newValue))
                 },
-                valueRange = 0f..3f,
-                steps = 2,
+                valueRange = 0f..1f,
+                steps = 0,
                 testTag = SettingsTestTags.SOUND_VOLUME_SLIDER
             )
 
@@ -207,17 +204,13 @@ private fun SettingsFields(
 
             Kiwi_Slider(
                 Kiwi_TextArguments("Music Volume"),
-                value = musicSliderPosition.toFloat(),
+                value = musicSliderPosition,
                 onValueChange = { newValue ->
-                    val intPos = newValue.toInt()
-                    if (intPos != musicSliderPosition) {
-                        musicSliderPosition = intPos
-                        onChange()
-                        viewModel.updateSettings(currentState.copy(musicVolume = volumeLevels[intPos]))
-                    }
+                    musicSliderPosition = newValue
+                    viewModel.updateSettings(currentState.copy(musicVolume = newValue))
                 },
-                valueRange = 0f..3f,
-                steps = 2,
+                valueRange = 0f..1f,
+                steps = 0,
                 testTag = SettingsTestTags.MUSIC_VOLUME_SLIDER
             )
 
@@ -253,8 +246,8 @@ private fun SettingsFields(
 fun SettingsScreenPreview() {
     val previewState = SettingsState(
         email = "finn@thehuman.com",
-        soundVolume = 67,
-        musicVolume = 33,
+        soundVolume = 0.67f,
+        musicVolume = 0.33f,
     )
 
     KiwiTheme {
