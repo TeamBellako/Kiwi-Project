@@ -50,10 +50,10 @@ import com.bellako.kiwi.features.users.UsersTestTags
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.ui.components.Kiwi_Button
-import com.bellako.kiwi.ui.components.Kiwi_Gif
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Label2
+import com.bellako.kiwi.ui.modals.LoadingModal
 import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
@@ -160,10 +160,7 @@ private fun LogIn(
         ) {
 
             if (isLoading || isPreview) {
-                Kiwi_Gif(
-                    R.drawable.gf_loading,
-                    "Loading"
-                )
+                LoadingModal()
             }
 
             Column(

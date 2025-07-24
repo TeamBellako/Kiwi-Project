@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -23,10 +21,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.users.UsersTestTags
 import com.bellako.kiwi.services.common.CommonTestTags
-import com.bellako.kiwi.services.common.Logger
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
@@ -36,7 +32,6 @@ import com.bellako.kiwi.ui.components.Kiwi_Label2
 import com.bellako.kiwi.ui.components.Kiwi_Slider
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
-import com.bellako.kiwi.ui.modals.ErrorModal
 import com.bellako.kiwi.ui.modals.LoadingModal
 import com.bellako.kiwi.ui.screens.ScreenRoutes
 import com.bellako.kiwi.ui.theme.KiwiTheme
@@ -45,11 +40,6 @@ import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-private enum class RetryAction {
-    LOAD,
-    SAVE
-}
 
 
 @Composable
@@ -81,46 +71,8 @@ private fun SettingsScreenLayout(
     val state by viewModel.state.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
-    val lastAction = remember { mutableStateOf<RetryAction?>(null) }
-
-    LaunchedEffect(Unit) {
-        lastAction.value = RetryAction.LOAD
-        Logger.info("Retry action set to " + lastAction.value.toString())
-
-        viewModel.loadSettings()
-    }
-
     when (uiState) {
         is UIState.Loading -> LoadingModal()
-
-        is UIState.GeneralError -> {
-            ErrorModal(
-                onRetry = {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        when (lastAction.value) {
-                            RetryAction.LOAD -> {
-                                lastAction.value = RetryAction.LOAD
-                                Logger.info("Retry action set to " + lastAction.value.toString())
-
-                                viewModel.loadSettings()
-                            }
-                            RetryAction.SAVE -> {
-                                viewModel.reset()
-
-                                state?.let {
-                                    lastAction.value = RetryAction.SAVE
-                                    Logger.info("Retry action set to " + lastAction.value.toString())
-
-                                    viewModel.updateSettings(it)
-                                }
-                            }
-                            null -> {}
-                        }
-                    }
-                }
-            )
-        }
-
         is UIState.Error -> {
             Kiwi_InfoBox(
                 message = (uiState as UIState.Error).message,
@@ -129,13 +81,11 @@ private fun SettingsScreenLayout(
             )
         }
         else -> {
-
             SettingsFields(
                 state = state,
                 viewModel = viewModel,
                 navController = navController,
-                onLogout = onLogout,
-                onChange = { lastAction.value = RetryAction.SAVE }
+                onLogout = onLogout
             )
         }
     }
@@ -146,8 +96,7 @@ private fun SettingsFields(
     state: SettingsState?,
     viewModel: ISettingsViewModel,
     navController: NavController,
-    onLogout: () -> Unit,
-    onChange: () -> Unit
+    onLogout: () -> Unit
 ) {
     state?.let { currentState ->
         var soundSliderPosition by remember {
@@ -193,7 +142,9 @@ private fun SettingsFields(
                 value = soundSliderPosition,
                 onValueChange = { newValue ->
                     soundSliderPosition = newValue
-                    viewModel.updateSettings(currentState.copy(soundVolume = newValue))
+                    CoroutineScope(Dispatchers.Main).launch {
+                        viewModel.updateSettings(currentState.copy(soundVolume = newValue))
+                    }
                 },
                 valueRange = 0f..1f,
                 steps = 0,
@@ -207,7 +158,9 @@ private fun SettingsFields(
                 value = musicSliderPosition,
                 onValueChange = { newValue ->
                     musicSliderPosition = newValue
-                    viewModel.updateSettings(currentState.copy(musicVolume = newValue))
+                    CoroutineScope(Dispatchers.Main).launch {
+                        viewModel.updateSettings(currentState.copy(musicVolume = newValue))
+                    }
                 },
                 valueRange = 0f..1f,
                 steps = 0,
