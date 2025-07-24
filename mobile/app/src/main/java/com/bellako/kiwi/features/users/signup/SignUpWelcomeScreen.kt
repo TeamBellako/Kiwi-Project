@@ -21,12 +21,16 @@ import com.bellako.kiwi.ui.theme.KiwiTheme
 import com.bellako.kiwi.ui.components.Kiwi_Image
 import com.bellako.kiwi.ui.theme.Spacing
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.withLink
+import com.bellako.kiwi.audio.AudioLayer
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
@@ -43,7 +47,17 @@ fun SignUpWelcomeScreen(
     viewModel: IUsersViewModel,
     navController: NavController
 ) {
+    val context = LocalContext.current
+
     BackHandler(enabled = true) { } // Do nothing, ignore native back
+
+    LaunchedEffect(Unit) {
+        AudioManager.playMusic(context, listOf(
+            AudioLayer(R.raw.music_stepswithin, false),
+            AudioLayer(R.raw.music_stepswithin_enigma, true)
+        ))
+    }
+
 
     Box(
         modifier = Modifier

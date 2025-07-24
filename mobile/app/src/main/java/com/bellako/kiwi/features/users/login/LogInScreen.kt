@@ -37,6 +37,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.withLink
+import com.bellako.kiwi.audio.AudioLayer
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.personality.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.PersonalityState
@@ -62,8 +64,15 @@ fun LogInScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
-
     val uiState by usersViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        AudioManager.playMusic(context, listOf(
+            AudioLayer(R.raw.music_stepswithin, true),
+            AudioLayer(R.raw.music_stepswithin_enigma, false)
+        ))
+    }
+
 
     Box(
         modifier = Modifier
