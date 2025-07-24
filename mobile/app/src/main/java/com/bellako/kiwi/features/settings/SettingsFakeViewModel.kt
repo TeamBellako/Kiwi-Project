@@ -1,11 +1,9 @@
 package com.bellako.kiwi.features.settings
 
-import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.features.common.BaseFakeViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class SettingsFakeViewModel(
     backingState: SettingsState
@@ -20,48 +18,42 @@ class SettingsFakeViewModel(
     var simulateUpdateError: Boolean = false
     var simulatedException: Exception = Exception("Something went wrong")
 
-    override fun reset() {}
-
-    override fun loadSettings() {
+    override suspend fun loadSettings() {
         setLoading(true)
 
         // Simulate an error or successful loading asynchronously
-        viewModelScope.launch {
-            if (simulateLoadError) {
-                handleError(simulatedException)
-            } else {
-                handleSuccess()
-            }
-
-            setLoading(false)
+        if (simulateLoadError) {
+            handleError(simulatedException)
+        } else {
+            handleSuccess()
         }
+
+        setLoading(false)
     }
 
-    override fun updateSettings(state: SettingsState) {
+    override suspend fun updateSettings(state: SettingsState) {
         setLoading(true)
 
         // Simulate an error or successful update asynchronously
-        viewModelScope.launch {
-            if (simulateUpdateError) {
-                handleError(simulatedException)
-                setLoading(false)
-                return@launch
-            }
-
-            val result = state.toDomainObject()
-
-            result.onFailure {
-                handleError(simulatedException)
-            }.onSuccess { domain ->
-                if (currentDomainSettings != domain) {
-                    currentDomainSettings = domain
-                    _state.value = domain.toState()
-                    handleSuccess()
-                }
-            }
-
+        if (simulateUpdateError) {
+            handleError(simulatedException)
             setLoading(false)
+            return
         }
+
+        val result = state.toDomainObject()
+
+        result.onFailure {
+            handleError(simulatedException)
+        }.onSuccess { domain ->
+            if (currentDomainSettings != domain) {
+                currentDomainSettings = domain
+                _state.value = domain.toState()
+                handleSuccess()
+            }
+        }
+
+        setLoading(false)
     }
 }
 

@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.settings
 
+import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.services.common.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.collectLatest
-import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.services.common.BaseViewModel
 import dagger.Module
 import dagger.Provides
@@ -18,7 +19,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -30,8 +30,7 @@ object DispatcherModule {
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val repository: SettingsRepository,
-    private val dispatcher: CoroutineDispatcher
+    private val repository: SettingsRepository
 ) : BaseViewModel(), ISettingsViewModel {
 
     private val _state = MutableStateFlow<SettingsState?>(null)
@@ -45,79 +44,65 @@ class SettingsViewModel @Inject constructor(
 
     private val _pendingSave = MutableStateFlow<Settings?>(null)
 
-    override fun reset() {
-        previousValidDomainSettings = null
-    }
+    // ---------------------------------------------------------------------------------------------
 
-    override fun loadSettings() {
+    override suspend fun loadSettings() {
         _isLoading.value = true
         _uiState.value = UIState.Loading
 
-        viewModelScope.launch(dispatcher) {
-            try {
-                val result = repository.getSettings()
-                result.fold(
-                    onSuccess = { dto ->
-                        dto.toDomainObject().onSuccess { domain ->
-                            _state.value = domain.toState()
-                            previousDomainSettings = domain
-                            _uiState.value = UIState.Success(Unit)
-                        }.onFailure { ex ->
-                            _uiState.value = mapExceptionToUIState(ex)
-                        }
-                    },
-                    onFailure = { throwable ->
-                        _uiState.value = mapExceptionToUIState(throwable)
+        try {
+            val result = repository.getSettings()
+            result.fold(
+                onSuccess = { dto ->
+                    dto.toDomainObject().onSuccess { domain ->
+                        _state.value = domain.toState()
+                        previousDomainSettings = domain
+                        _uiState.value = UIState.Success(Unit)
+                    }.onFailure { ex ->
+                        _uiState.value = mapExceptionToUIState(ex)
                     }
-                )
-            } catch (ex: Exception) {
-                _uiState.value = mapExceptionToUIState(ex)
-            } finally {
-                _isLoading.value = false
-            }
+                },
+                onFailure = { throwable ->
+                    _uiState.value = mapExceptionToUIState(throwable)
+                }
+            )
+        } catch (ex: Exception) {
+            _uiState.value = mapExceptionToUIState(ex)
+        } finally {
+            updateVolume()
+            _isLoading.value = false
         }
     }
 
-    override fun updateSettings(state: SettingsState) {
+    override suspend fun updateSettings(state: SettingsState) {
         _state.value = state
-
+        updateVolume()
         state.toDomainObject().onSuccess { domain ->
-            if (previousValidDomainSettings == domain) return
-
+            if (previousValidDomainSettings == domain) {
+                return
+            }
             previousValidDomainSettings = domain
             _pendingSave.value = domain
         }
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     init {
         viewModelScope.launch {
-            _pendingSave
-                .debounce(500)
-                .collectLatest { domain ->
-                    domain?.let {
-                        saveSettings(it)
-                    }
+            _pendingSave.debounce(1000).collectLatest { domain ->
+                domain?.let {
+                    repository.updateSettings(domain.toDTO())
                 }
-        }
-    }
-
-    private fun saveSettings(domain: Settings) {
-        viewModelScope.launch(dispatcher) {
-            try {
-                // Ping server before updating settings
-                repository.pingServer().onSuccess {
-                    // Proceed with the update after the ping is successful
-                    repository.updateSettings(domain.toDTO()).onSuccess {
-                        _uiState.value = UIState.Success(Unit)
-                    }.onFailure { throwable ->
-                        _uiState.value = mapExceptionToUIState(throwable)
-                    }
-                }.onFailure { throwable ->
-                    _uiState.value = mapExceptionToUIState(throwable)
-                }
-            } catch (ex: Exception) {
-                _uiState.value = mapExceptionToUIState(ex)
             }
         }
     }
+
+    private fun updateVolume() {
+        _state.value?.let {
+            AudioManager.updateGlobalVolumeSFX(it.soundVolume)
+            AudioManager.updateGlobalVolumeMusic(it.musicVolume)
+        }
+    }
+
 }

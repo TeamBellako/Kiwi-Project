@@ -9,10 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -24,7 +23,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.features.users.UsersTestTags
 import com.bellako.kiwi.services.common.CommonTestTags
-import com.bellako.kiwi.services.common.Logger
 import com.bellako.kiwi.services.common.UIState
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
@@ -34,7 +32,6 @@ import com.bellako.kiwi.ui.components.Kiwi_Label2
 import com.bellako.kiwi.ui.components.Kiwi_Slider
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
-import com.bellako.kiwi.ui.modals.ErrorModal
 import com.bellako.kiwi.ui.modals.LoadingModal
 import com.bellako.kiwi.ui.screens.ScreenRoutes
 import com.bellako.kiwi.ui.theme.KiwiTheme
@@ -44,12 +41,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-private val volumeLevels = listOf(0, 33, 67, 100)
-
-private enum class RetryAction {
-    LOAD,
-    SAVE
-}
 
 @Composable
 fun SettingsScreen(
@@ -80,46 +71,8 @@ private fun SettingsScreenLayout(
     val state by viewModel.state.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
-    val lastAction = remember { mutableStateOf<RetryAction?>(null) }
-
-    LaunchedEffect(Unit) {
-        lastAction.value = RetryAction.LOAD
-        Logger.info("Retry action set to " + lastAction.value.toString())
-
-        viewModel.loadSettings()
-    }
-
     when (uiState) {
         is UIState.Loading -> LoadingModal()
-
-        is UIState.GeneralError -> {
-            ErrorModal(
-                onRetry = {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        when (lastAction.value) {
-                            RetryAction.LOAD -> {
-                                lastAction.value = RetryAction.LOAD
-                                Logger.info("Retry action set to " + lastAction.value.toString())
-
-                                viewModel.loadSettings()
-                            }
-                            RetryAction.SAVE -> {
-                                viewModel.reset()
-
-                                state?.let {
-                                    lastAction.value = RetryAction.SAVE
-                                    Logger.info("Retry action set to " + lastAction.value.toString())
-
-                                    viewModel.updateSettings(it)
-                                }
-                            }
-                            null -> {}
-                        }
-                    }
-                }
-            )
-        }
-
         is UIState.Error -> {
             Kiwi_InfoBox(
                 message = (uiState as UIState.Error).message,
@@ -127,14 +80,12 @@ private fun SettingsScreenLayout(
                 testTag = SettingsTestTags.SERVER_ERROR
             )
         }
-
         else -> {
             SettingsFields(
                 state = state,
                 viewModel = viewModel,
                 navController = navController,
-                onLogout = onLogout,
-                onChange = { lastAction.value = RetryAction.SAVE }
+                onLogout = onLogout
             )
         }
     }
@@ -145,15 +96,14 @@ private fun SettingsFields(
     state: SettingsState?,
     viewModel: ISettingsViewModel,
     navController: NavController,
-    onLogout: () -> Unit,
-    onChange: () -> Unit
+    onLogout: () -> Unit
 ) {
     state?.let { currentState ->
         var soundSliderPosition by remember {
-            mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.soundVolume }.coerceAtLeast(0))
+            mutableFloatStateOf(currentState.soundVolume.coerceIn(0f, 1f))
         }
         var musicSliderPosition by remember {
-            mutableStateOf(volumeLevels.indexOfFirst { it >= currentState.musicVolume }.coerceAtLeast(0))
+            mutableFloatStateOf(currentState.musicVolume.coerceIn(0f, 1f))
         }
 
         Column(
@@ -188,18 +138,16 @@ private fun SettingsFields(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Slider(
-                Kiwi_TextArguments("Sound Volume"),
-                value = soundSliderPosition.toFloat(),
+                Kiwi_TextArguments("SFX Volume"),
+                value = soundSliderPosition,
                 onValueChange = { newValue ->
-                    val intPos = newValue.toInt()
-                    if (intPos != soundSliderPosition) {
-                        soundSliderPosition = intPos
-                        onChange()
-                        viewModel.updateSettings(currentState.copy(soundVolume = volumeLevels[intPos]))
+                    soundSliderPosition = newValue
+                    CoroutineScope(Dispatchers.Main).launch {
+                        viewModel.updateSettings(currentState.copy(soundVolume = newValue))
                     }
                 },
-                valueRange = 0f..3f,
-                steps = 2,
+                valueRange = 0f..1f,
+                steps = 0,
                 testTag = SettingsTestTags.SOUND_VOLUME_SLIDER
             )
 
@@ -207,17 +155,15 @@ private fun SettingsFields(
 
             Kiwi_Slider(
                 Kiwi_TextArguments("Music Volume"),
-                value = musicSliderPosition.toFloat(),
+                value = musicSliderPosition,
                 onValueChange = { newValue ->
-                    val intPos = newValue.toInt()
-                    if (intPos != musicSliderPosition) {
-                        musicSliderPosition = intPos
-                        onChange()
-                        viewModel.updateSettings(currentState.copy(musicVolume = volumeLevels[intPos]))
+                    musicSliderPosition = newValue
+                    CoroutineScope(Dispatchers.Main).launch {
+                        viewModel.updateSettings(currentState.copy(musicVolume = newValue))
                     }
                 },
-                valueRange = 0f..3f,
-                steps = 2,
+                valueRange = 0f..1f,
+                steps = 0,
                 testTag = SettingsTestTags.MUSIC_VOLUME_SLIDER
             )
 
@@ -253,8 +199,8 @@ private fun SettingsFields(
 fun SettingsScreenPreview() {
     val previewState = SettingsState(
         email = "finn@thehuman.com",
-        soundVolume = 67,
-        musicVolume = 33,
+        soundVolume = 0.67f,
+        musicVolume = 0.33f,
     )
 
     KiwiTheme {

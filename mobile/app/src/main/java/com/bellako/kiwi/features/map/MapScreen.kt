@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.map
 
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -13,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,12 +23,15 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioLayer
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.MetricsState
 import com.bellako.kiwi.services.common.CommonTestTags
@@ -49,7 +54,18 @@ fun MapScreen(
     title: String = "WORLD MAP",
     viewModel: MapViewModel? = null // Optional parameter for testing
 ) {
+    val context = LocalContext.current
     val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
+
+    BackHandler(enabled = true) { } // Do nothing, ignore native back
+
+    LaunchedEffect(Unit) {
+        AudioManager.playMusic(context, listOf(
+            AudioLayer(R.raw.music_stepswithin, true),
+            AudioLayer(R.raw.music_stepswithin_enigma, false)
+        ))
+    }
+
 
     mapViewModel.setParameters(
         initialScale = initialZoom,

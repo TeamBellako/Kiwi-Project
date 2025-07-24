@@ -7,24 +7,24 @@ public class SettingsTestFactory {
     public static SettingsDTO validSettingsDTO() {
         return new SettingsDTO(
                 "finn@thehuman.com",
-                70,                       
-                80
+                .7f,
+                .8f
         );
     }
 
     public static SettingsDTO updatedSettingsDTO() {
         return new SettingsDTO(
                 "finn@thehuman.com",
-                50,                       
-                40
+                .5f,
+                .4f
         );
     }
 
     public static SettingsDTO invalidSettingsDTO() {
         return new SettingsDTO(
                 "bmolovesfootball.com",   
-                150,                      
-                -10                     
+                1.5f,
+                -0.1f
         );
     }
 }

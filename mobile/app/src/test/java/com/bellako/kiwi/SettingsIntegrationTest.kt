@@ -39,7 +39,7 @@ class SettingsIntegrationTest {
         api = mock(ISettingsAPI::class.java)
         healthApi = mock(HealthApiService::class.java)
         repository = SettingsRepository(api, healthApi)
-        viewModel = SettingsViewModel(repository, testDispatcher)
+        viewModel = SettingsViewModel(repository)
     }
 
     @After

@@ -4,8 +4,8 @@ import com.bellako.kiwi.types.Email
 
 data class SettingsDTO(
     val email: String,
-    val soundVolume: Int,
-    val musicVolume: Int
+    val soundVolume: Float,
+    val musicVolume: Float
 ) {
     fun toState(): SettingsState {
         return SettingsState(

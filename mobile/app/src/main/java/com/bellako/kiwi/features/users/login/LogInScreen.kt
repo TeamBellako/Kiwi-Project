@@ -37,6 +37,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.withLink
+import com.bellako.kiwi.audio.AudioLayer
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.personality.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.PersonalityState
@@ -48,10 +50,10 @@ import com.bellako.kiwi.features.users.UsersTestTags
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.ui.components.Kiwi_Button
-import com.bellako.kiwi.ui.components.Kiwi_Gif
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Label2
+import com.bellako.kiwi.ui.modals.LoadingModal
 import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
 
 
@@ -62,8 +64,15 @@ fun LogInScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
-
     val uiState by usersViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        AudioManager.playMusic(context, listOf(
+            AudioLayer(R.raw.music_stepswithin, true),
+            AudioLayer(R.raw.music_stepswithin_enigma, false)
+        ))
+    }
+
 
     Box(
         modifier = Modifier
@@ -151,10 +160,7 @@ private fun LogIn(
         ) {
 
             if (isLoading || isPreview) {
-                Kiwi_Gif(
-                    R.drawable.gf_loading,
-                    "Loading"
-                )
+                LoadingModal()
             }
 
             Column(

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -17,7 +18,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.features.map.MapScreen
 import com.bellako.kiwi.features.metrics.MetricsViewModel
+import com.bellako.kiwi.features.personality.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.PersonalityViewModel
+import com.bellako.kiwi.features.settings.ISettingsViewModel
 import com.bellako.kiwi.features.settings.SettingsScreen
 import com.bellako.kiwi.features.settings.SettingsViewModel
 import com.bellako.kiwi.features.users.UsersViewModel
@@ -46,11 +49,13 @@ object ScreenRoutes {
 @Composable
 fun MainScreen(
     usersViewModel: UsersViewModel = hiltViewModel(),
-    personalityViewModel: PersonalityViewModel = hiltViewModel()
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    personalityViewModel: PersonalityViewModel = hiltViewModel(),
+    metricsViewModel: MetricsViewModel = hiltViewModel()
 ) {
 
     PermissionsRequestModal {
-        AppScreen(usersViewModel, personalityViewModel)
+        AppScreen(usersViewModel, settingsViewModel, personalityViewModel, metricsViewModel)
     }
 
 }
@@ -59,7 +64,9 @@ fun MainScreen(
 @Composable
 private fun AppScreen(
     usersViewModel: UsersViewModel = hiltViewModel(),
-    personalityViewModel: PersonalityViewModel = hiltViewModel()
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    personalityViewModel: PersonalityViewModel = hiltViewModel(),
+    metricsViewModel: MetricsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
@@ -122,7 +129,6 @@ private fun AppScreen(
                     }
 
                     composable(ScreenRoutes.SETTINGS) {
-                        val settingsViewModel: SettingsViewModel = hiltViewModel()
                         SettingsScreen(
                             viewModel = settingsViewModel,
                             navController = navController,
@@ -139,10 +145,29 @@ private fun AppScreen(
                 }
 
                 if (!isLoginScreen && isLoginCompleted) {
-                    val metricsViewModel: MetricsViewModel = hiltViewModel()
                     DashboardModal(metricsViewModel)
+                }
+
+                if (!isLoginScreen && isLoginCompleted) {
+                    LoggedInScreen(
+                        settingsViewModel = settingsViewModel,
+                        personalityViewModel = personalityViewModel,
+                    )
                 }
             }
         }
     )
+}
+
+@Composable
+fun LoggedInScreen(
+    settingsViewModel: ISettingsViewModel,
+    personalityViewModel: IPersonalityViewModel,
+) {
+    LaunchedEffect(Unit) {
+        settingsViewModel.loadSettings()
+    }
+    LaunchedEffect(Unit) {
+        personalityViewModel.loadPersonality()
+    }
 }
