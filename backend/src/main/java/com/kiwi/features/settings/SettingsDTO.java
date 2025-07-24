@@ -7,8 +7,8 @@ import java.util.Objects;
 public class SettingsDTO {
     private Integer id;
     private String email = "";
-    private int soundVolume = 67;
-    private int musicVolume = 67;
+    private float soundVolume = 1;
+    private float musicVolume = 1;
 
     public SettingsDTO() {
     }
@@ -17,7 +17,7 @@ public class SettingsDTO {
         this.email = email;
     }
 
-    public SettingsDTO(String email, int soundVolume, int musicVolume) {
+    public SettingsDTO(String email, float soundVolume, float musicVolume) {
         this.email = email;
         this.soundVolume = soundVolume;
         this.musicVolume = musicVolume;
@@ -39,19 +39,19 @@ public class SettingsDTO {
         this.email = email;
     }
 
-    public int getSoundVolume() {
+    public float getSoundVolume() {
         return soundVolume;
     }
 
-    public void setSoundVolume(int soundVolume) {
+    public void setSoundVolume(float soundVolume) {
         this.soundVolume = soundVolume;
     }
 
-    public int getMusicVolume() {
+    public float getMusicVolume() {
         return musicVolume;
     }
 
-    public void setMusicVolume(int musicVolume) {
+    public void setMusicVolume(float musicVolume) {
         this.musicVolume = musicVolume;
     }
 

@@ -18,10 +18,10 @@ public class Settings {
     private String email;
 
     @Column(name = "sound_volume")
-    private int soundVolume;
+    private float soundVolume;
 
     @Column(name = "music_volume")
-    private int musicVolume;
+    private float musicVolume;
 
     @OneToOne(mappedBy = "settings")
     private UsersPersistence user;
@@ -29,14 +29,14 @@ public class Settings {
     public Settings() {
     }
 
-    public Settings(Integer id, Email email, int soundVolume, int musicVolume) {
+    public Settings(Integer id, Email email, float soundVolume, float musicVolume) {
         setId(id);
         setEmail(email);
         setSoundVolume(soundVolume);
         setMusicVolume(musicVolume);
     }
 
-    public Settings(Email email, int soundVolume, int musicVolume) {
+    public Settings(Email email, float soundVolume, float musicVolume) {
         setEmail(email);
         setSoundVolume(soundVolume);
         setMusicVolume(musicVolume);
@@ -59,24 +59,24 @@ public class Settings {
         this.email = email.value();
     }
 
-    public int getSoundVolume() {
+    public float getSoundVolume() {
         return soundVolume;
     }
 
-    public void setSoundVolume(int soundVolume) {
-        if (soundVolume < 0 || soundVolume > 100) {
-            throw new IllegalArgumentException("Sound volume must be between 0 and 100");
+    public void setSoundVolume(float soundVolume) {
+        if (soundVolume < 0 || soundVolume > 1) {
+            throw new IllegalArgumentException("Sound volume must be between 0 and 1");
         }
         this.soundVolume = soundVolume;
     }
 
-    public int getMusicVolume() {
+    public float getMusicVolume() {
         return musicVolume;
     }
 
-    public void setMusicVolume(int musicVolume) {
-        if (musicVolume < 0 || musicVolume > 100) {
-            throw new IllegalArgumentException("Music volume must be between 0 and 100");
+    public void setMusicVolume(float musicVolume) {
+        if (musicVolume < 0 || musicVolume > 1) {
+            throw new IllegalArgumentException("Music volume must be between 0 and 1");
         }
         this.musicVolume = musicVolume;
     }
