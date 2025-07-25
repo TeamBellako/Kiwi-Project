@@ -3,14 +3,12 @@ package com.bellako.kiwi.ui.screens
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -18,17 +16,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.BuildConfig
 import com.bellako.kiwi.services.common.CommonTestTags
+import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
+import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.ui.components.Kiwi_Button
-import com.bellako.kiwi.ui.components.Kiwi_H1
-import com.bellako.kiwi.ui.components.Kiwi_P1
-import com.bellako.kiwi.ui.components.Kiwi_P2
+import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
@@ -64,38 +68,56 @@ private fun HelpScreenLayout(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H1(Kiwi_TextArguments(
+        Kiwi_H2(Kiwi_TextArguments(
             "SUPPORT",
             color = MaterialTheme.colorScheme.secondary,
             bold = true
         ))
 
-        Kiwi_P1(Kiwi_TextArguments(
-            "If you have any questions or need support, feel free to reach out to us at:",
-            TextAlign.Center,
-            color = MaterialTheme.colorScheme.outline
-        ))
+        Kiwi_Spacer(Spacing.xLarge)
 
-        Kiwi_P2(Kiwi_TextArguments(
-            BuildConfig.MOBILE_COMPANY_EMAIL,
-            TextAlign.Center,
-            MaterialTheme.colorScheme.inversePrimary,
-            bold = true,
-            modifier = Modifier
-                .clickable { openEmailClient(context) }
-                .testTag(CommonTestTags.HELP_SCREEN)
+        val annotatedString = buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            ) {
+                append("If you have any questions or need support, feel free to reach out to us at ")
+            }
+
+            withLink(link = LinkAnnotation.Clickable(
+                tag = "EMAIL",
+                linkInteractionListener = {
+                    openEmailClient(context)
+                },
+            )) {
+                withStyle(
+                    style = SpanStyle(
+                        color = MaterialTheme.colorScheme.inversePrimary,
+                        textDecoration = TextDecoration.Underline
+                    )
+                ) {
+                    append(BuildConfig.MOBILE_COMPANY_EMAIL)
+                }
+            }
+        }
+
+        Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
+            annotatedString,
+            TextAlign.Center
         ))
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        Kiwi_Button(
-            Kiwi_TextArguments(
-                "BACK",
-                color = MaterialTheme.colorScheme.secondary,
-                bold = true
-            ),
-            { navController.navigate(ScreenRoutes.SETTINGS) }
-        )
+        Kiwi_Button(Kiwi_TextArguments(
+            "BACK",
+            color = MaterialTheme.colorScheme.secondary,
+            bold = true,
+            modifier = Modifier
+                .testTag(CommonTestTags.HELP_SCREEN)
+        ), {
+            navController.navigate(ScreenRoutes.SETTINGS)
+        })
     }
 }
 

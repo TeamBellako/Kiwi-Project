@@ -9,24 +9,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.components.Kiwi_Button
-import com.bellako.kiwi.ui.components.Kiwi_H1
-import com.bellako.kiwi.ui.components.Kiwi_P1
+import com.bellako.kiwi.ui.components.Kiwi_H2
+import com.bellako.kiwi.ui.components.Kiwi_P2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.theme.KiwiTheme
@@ -78,14 +74,16 @@ private fun ErrorModalLayout(
 
         Kiwi_Spacer(Spacing.small)
 
-        Kiwi_H1(Kiwi_TextArguments(
-            "Wild Error\n Appeared!",
+        Kiwi_H2(Kiwi_TextArguments(
+            "Wild Error Appeared!",
             color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center,
             bold = true
         ))
 
-        Kiwi_P1(Kiwi_TextArguments(
+        Kiwi_Spacer(Spacing.xLarge)
+
+        Kiwi_P2(Kiwi_TextArguments(
             errorMessage,
             TextAlign.Center,
             color = MaterialTheme.colorScheme.outline,
