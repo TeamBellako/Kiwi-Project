@@ -67,8 +67,11 @@ class SignUpScreenTest {
 
     @Test
     fun validSignup() {
+        usersFakeViewModel.fakeError = false
+
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
-        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertDoesNotExist()
+        Thread.sleep(500)
+        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).assertDoesNotExist()
     }
 
     @Test

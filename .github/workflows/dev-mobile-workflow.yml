@@ -17,9 +17,6 @@ jobs:
     environment:
       name: dev
 
-    env:
-      ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 300
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

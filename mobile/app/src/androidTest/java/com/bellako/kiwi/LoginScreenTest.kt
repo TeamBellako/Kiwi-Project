@@ -15,6 +15,8 @@ import org.junit.runner.RunWith
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.features.map.MapScreen
+import com.bellako.kiwi.features.map.MapViewModel
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.PersonalityState
 import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityDTO
@@ -22,25 +24,25 @@ import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.features.users.UsersTestTags
 import com.bellako.kiwi.features.users.login.LogInScreen
-
+import com.bellako.kiwi.features.users.signup.SignUpTestScreen
 
 @RunWith(AndroidJUnit4::class)
 class LoginScreenTest {
     @get:Rule
     val rule = createComposeRule()
 
-    private lateinit var usersFakeViewModel: UsersFakeViewModel
     private lateinit var usersState: UsersState
+    private lateinit var usersFakeViewModel: UsersFakeViewModel
 
-    private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
     private lateinit var personalityState: PersonalityState
+    private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
 
     @Before
     fun setUp() {
         usersState = UsersState("finn@thehuman.com", "Math3matical!")
-        personalityState = PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)
-
         usersFakeViewModel = UsersFakeViewModel(usersState)
+
+        personalityState = PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
         rule.setContent {
@@ -53,15 +55,27 @@ class LoginScreenTest {
                         navController = navController
                     )
                 }
-                composable(ScreenRoutes.HOME) {}
+                composable(ScreenRoutes.HOME) {
+                    MapScreen(viewModel = MapViewModel())
+                }
+                composable(ScreenRoutes.SIGNUP_TEST) {
+                    SignUpTestScreen(
+                        usersViewModel = usersFakeViewModel,
+                        personalityViewModel = personalityFakeViewModel,
+                        navController = navController
+                    )
+                }
             }
         }
     }
 
     @Test
     fun validLogin() {
+        usersFakeViewModel.fakeError = false
+
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
-        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertDoesNotExist()
+        Thread.sleep(500)
+        rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).assertDoesNotExist()
     }
 
     @Test
