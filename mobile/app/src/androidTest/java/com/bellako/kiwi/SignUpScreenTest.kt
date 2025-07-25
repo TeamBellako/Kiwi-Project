@@ -15,6 +15,7 @@ import org.junit.runner.RunWith
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.PersonalityState
 import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityDTO
@@ -38,6 +39,8 @@ class SignUpScreenTest {
 
     @Before
     fun setUp() {
+        AudioManager.setEnabled(false)
+
         usersState = UsersState("finn@thehuman.com", "Math3matical!")
         personalityState = PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)
 

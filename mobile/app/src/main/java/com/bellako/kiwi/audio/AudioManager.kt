@@ -29,24 +29,30 @@ private class AudioLayerPlayer(var isActive: Boolean, val player: ExoPlayer, var
 
 object AudioManager {
 
-    private var globalVolumeMusic: Float = 1f // 0f..1f
+    private var _isEnabled: Boolean = true
 
-    private var globalVolumeSFX: Float = 1f // 0f..1f
+    private var _globalVolumeMusic: Float = 1f // 0f..1f
+
+    private var _globalVolumeSFX: Float = 1f // 0f..1f
 
     // Music currently playing. Can be several layers at the same time, inactive ones with volume 0
-    private val currentMusic: MutableMap<Int, AudioLayerPlayer> = mutableMapOf()
+    private val _currentMusic: MutableMap<Int, AudioLayerPlayer> = mutableMapOf()
 
-    val handler = Handler(Looper.getMainLooper())
+    private val _handler = Handler(Looper.getMainLooper())
 
     // ---------------------------------------------------------------------------------------------
 
+    fun setEnabled(isEnabled: Boolean) {
+        _isEnabled = isEnabled
+    }
+
     fun updateGlobalVolumeMusic(newGlobalVolumeMusic: Float) {
-        globalVolumeMusic = newGlobalVolumeMusic.coerceIn(0f, 1f)
+        _globalVolumeMusic = newGlobalVolumeMusic.coerceIn(0f, 1f)
         updateCurrentMusicVolume()
     }
 
     fun updateGlobalVolumeSFX(newGlobalVolumeSFX: Float) {
-        globalVolumeSFX = newGlobalVolumeSFX.coerceIn(0f, 1f)
+        _globalVolumeSFX = newGlobalVolumeSFX.coerceIn(0f, 1f)
     }
 
     fun playMusic(context: Context, resIds: List<AudioLayer>, fadeDuration: Long = 3000) {
@@ -54,8 +60,8 @@ object AudioManager {
     }
 
     fun stopMusic(resId: Int, fadeDuration: Long = 3000) {
-        if (currentMusic.contains(resId)) {
-            stop(currentMusic[resId]!!, fadeDuration)
+        if (_currentMusic.contains(resId)) {
+            stop(_currentMusic[resId]!!, fadeDuration)
         }
     }
 
@@ -66,9 +72,12 @@ object AudioManager {
     // ---------------------------------------------------------------------------------------------
 
     private fun play(context: Context, layers: List<AudioLayer>, type: AudioType, fadeDuration: Long) {
+        if (!_isEnabled) {
+            return
+        }
         // Remove all currently playing musics not found in the new music
         if (type == AudioType.MUSIC) {
-            for ((currentMusicResId, currentMusicPlayer) in currentMusic) {
+            for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
                 if (!layers.contains(AudioLayer(currentMusicResId, true))) {
                     stop(currentMusicPlayer, fadeDuration)
                 }
@@ -76,10 +85,10 @@ object AudioManager {
         }
         for (layer in layers) {
             // Enable/disable layers if already active music
-            if (type == AudioType.MUSIC && currentMusic.contains(layer.resId)) {
-                val player = currentMusic[layer.resId]!!
-                val fromVolume = if (layer.isActive) 0f else globalVolumeMusic
-                val toVolume = if (layer.isActive) globalVolumeMusic else 0f
+            if (type == AudioType.MUSIC && _currentMusic.contains(layer.resId)) {
+                val player = _currentMusic[layer.resId]!!
+                val fromVolume = if (layer.isActive) 0f else _globalVolumeMusic
+                val toVolume = if (layer.isActive) _globalVolumeMusic else 0f
                 if (player.isActive != layer.isActive) {
                     player.isActive = layer.isActive
                     fade(player, fromVolume, toVolume, fadeDuration)
@@ -97,11 +106,11 @@ object AudioManager {
         player.setMediaItem(MediaItem.fromUri(uri))
         player.repeatMode = if (type == AudioType.MUSIC) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
         player.prepare()
-        val actualToVolume = if (type == AudioType.MUSIC) globalVolumeMusic else globalVolumeSFX
+        val actualToVolume = if (type == AudioType.MUSIC) _globalVolumeMusic else _globalVolumeSFX
         val layerPlayer = AudioLayerPlayer(layer.isActive, player, null)
         fade(layerPlayer, 0f, if (layer.isActive) actualToVolume else 0f, if (layer.isActive) fadeDuration else 0, null)
         player.play()
-        currentMusic[layer.resId] = layerPlayer
+        _currentMusic[layer.resId] = layerPlayer
     }
 
     private fun stop(player: AudioLayerPlayer, fadeDuration: Long) {
@@ -113,7 +122,7 @@ object AudioManager {
     private fun fade(player: AudioLayerPlayer, fromVolume: Float, toVolume: Float, duration: Long, onComplete: (() -> Unit)? = null) {
         // Stop previous fade if any
         if (player.fade != null) {
-            handler.removeCallbacks(player.fade!!)
+            _handler.removeCallbacks(player.fade!!)
             onComplete?.invoke()
         }
         // Check and clamp values
@@ -136,20 +145,20 @@ object AudioManager {
                 if (currentStep <= steps) {
                     player.player.volume = actualFromVolume + volumeDelta * currentStep
                     currentStep++
-                    handler.postDelayed(this, stepDuration)
+                    _handler.postDelayed(this, stepDuration)
                 } else {
                     onComplete?.invoke()
                 }
             }
         }
-        handler.post(runnable)
+        _handler.post(runnable)
         player.fade = runnable
     }
 
     private fun updateCurrentMusicVolume() {
-        for ((currentMusicResId, currentMusicPlayer) in currentMusic) {
+        for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
             if (currentMusicPlayer.isActive) {
-                fade(currentMusicPlayer, currentMusicPlayer.player.volume, globalVolumeMusic, 250)
+                fade(currentMusicPlayer, currentMusicPlayer.player.volume, _globalVolumeMusic, 250)
             }
         }
     }

@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.map.MapScreen
 import com.bellako.kiwi.features.map.MapViewModel
 import org.junit.Before
@@ -20,6 +21,8 @@ class MapScreenTest {
 
     @Before
     fun setUp() {
+        AudioManager.setEnabled(false)
+
         viewModel = MapViewModel()
 
         viewModel.setParameters(

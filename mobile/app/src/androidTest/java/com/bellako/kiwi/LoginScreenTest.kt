@@ -15,6 +15,7 @@ import org.junit.runner.RunWith
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.map.MapScreen
 import com.bellako.kiwi.features.map.MapViewModel
 import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
@@ -39,6 +40,8 @@ class LoginScreenTest {
 
     @Before
     fun setUp() {
+        AudioManager.setEnabled(false)
+
         usersState = UsersState("finn@thehuman.com", "Math3matical!")
         usersFakeViewModel = UsersFakeViewModel(usersState)
 

@@ -18,6 +18,7 @@ import androidx.compose.ui.test.swipe
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.metrics.MetricsDTO
 import com.bellako.kiwi.features.metrics.MetricsFactory
 import com.bellako.kiwi.features.metrics.MetricsFakeViewModel
@@ -49,6 +50,8 @@ class DashboardModalTest {
 
     @Before
     fun setUp() {
+        AudioManager.setEnabled(false)
+
         val todayLocalDate = LocalDate.now()
         todayMetricsDTO = MetricsDTO(
             LocalDate.now().toString(),
