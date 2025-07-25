@@ -70,6 +70,7 @@ roomRuntimeAndroid = "2.7.0"
 composeMaterial = "1.4.1"
 coreKtxVersion = "1.6.1"
 media3Exoplayer = "1.7.1"
+lifecycleProcess = "2.9.2"
 
 [libraries]
 androidx-activity-compose-v181 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
@@ -158,6 +159,7 @@ androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3Exoplayer" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

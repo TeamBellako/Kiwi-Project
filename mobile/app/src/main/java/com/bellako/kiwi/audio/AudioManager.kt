@@ -29,15 +29,20 @@ private class AudioLayerPlayer(var isActive: Boolean, val player: ExoPlayer, var
 
 object AudioManager {
 
+    private const val DEFAULT_FADE_DURATION: Long = 3000
+    private const val DEFAULT_FADE_DURATION_FAST: Long = 200
+
+    // Enabled
     private var _isEnabled: Boolean = true
 
+    // Volume
     private var _globalVolumeMusic: Float = 1f // 0f..1f
-
     private var _globalVolumeSFX: Float = 1f // 0f..1f
 
     // Music currently playing. Can be several layers at the same time, inactive ones with volume 0
     private val _currentMusic: MutableMap<Int, AudioLayerPlayer> = mutableMapOf()
 
+    // Event handlers
     private val _handler = Handler(Looper.getMainLooper())
 
     // ---------------------------------------------------------------------------------------------
@@ -55,18 +60,30 @@ object AudioManager {
         _globalVolumeSFX = newGlobalVolumeSFX.coerceIn(0f, 1f)
     }
 
-    fun playMusic(context: Context, resIds: List<AudioLayer>, fadeDuration: Long = 3000) {
+    fun playMusic(context: Context, resIds: List<AudioLayer>, fadeDuration: Long = DEFAULT_FADE_DURATION) {
         play(context, resIds, AudioType.MUSIC, fadeDuration)
     }
 
-    fun stopMusic(resId: Int, fadeDuration: Long = 3000) {
+    fun stopMusic(resId: Int, fadeDuration: Long = DEFAULT_FADE_DURATION) {
         if (_currentMusic.contains(resId)) {
-            stop(_currentMusic[resId]!!, fadeDuration)
+            stopPlayer(_currentMusic[resId]!!, fadeDuration)
         }
     }
 
     fun playSFX(context: Context, resId: Int, fadeDuration: Long = 0) {
         play(context, listOf(AudioLayer(resId, true)), AudioType.SFX, fadeDuration)
+    }
+
+    fun onBackgroundResume() {
+        for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
+            playPlayer(currentMusicPlayer, AudioType.MUSIC, DEFAULT_FADE_DURATION_FAST)
+        }
+    }
+
+    fun onBackgroundEnter() {
+        for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
+            pausePlayer(currentMusicPlayer, DEFAULT_FADE_DURATION_FAST)
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -79,7 +96,7 @@ object AudioManager {
         if (type == AudioType.MUSIC) {
             for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
                 if (!layers.contains(AudioLayer(currentMusicResId, true))) {
-                    stop(currentMusicPlayer, fadeDuration)
+                    stopPlayer(currentMusicPlayer, fadeDuration)
                 }
             }
         }
@@ -106,14 +123,24 @@ object AudioManager {
         player.setMediaItem(MediaItem.fromUri(uri))
         player.repeatMode = if (type == AudioType.MUSIC) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
         player.prepare()
-        val actualToVolume = if (type == AudioType.MUSIC) _globalVolumeMusic else _globalVolumeSFX
         val layerPlayer = AudioLayerPlayer(layer.isActive, player, null)
-        fade(layerPlayer, 0f, if (layer.isActive) actualToVolume else 0f, if (layer.isActive) fadeDuration else 0, null)
-        player.play()
+        playPlayer(layerPlayer, type, fadeDuration)
         _currentMusic[layer.resId] = layerPlayer
     }
 
-    private fun stop(player: AudioLayerPlayer, fadeDuration: Long) {
+    private fun playPlayer(player: AudioLayerPlayer, type: AudioType, fadeDuration: Long) {
+        val actualToVolume = if (type == AudioType.MUSIC) _globalVolumeMusic else _globalVolumeSFX
+        fade(player, 0f, if (player.isActive) actualToVolume else 0f, if (player.isActive) fadeDuration else 0, null)
+        player.player.play()
+    }
+
+    private fun pausePlayer(player: AudioLayerPlayer, fadeDuration: Long) {
+        fade(player, 1f, 0f, fadeDuration) {
+            player.player.pause()
+        }
+    }
+
+    private fun stopPlayer(player: AudioLayerPlayer, fadeDuration: Long) {
         fade(player, 1f, 0f, fadeDuration) {
             player.player.stop()
         }
@@ -158,7 +185,7 @@ object AudioManager {
     private fun updateCurrentMusicVolume() {
         for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
             if (currentMusicPlayer.isActive) {
-                fade(currentMusicPlayer, currentMusicPlayer.player.volume, _globalVolumeMusic, 250)
+                fade(currentMusicPlayer, currentMusicPlayer.player.volume, _globalVolumeMusic, DEFAULT_FADE_DURATION_FAST)
             }
         }
     }

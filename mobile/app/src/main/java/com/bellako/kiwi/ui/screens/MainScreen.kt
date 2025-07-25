@@ -6,16 +6,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.map.MapScreen
 import com.bellako.kiwi.features.metrics.MetricsViewModel
 import com.bellako.kiwi.features.personality.IPersonalityViewModel
@@ -53,11 +59,11 @@ fun MainScreen(
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel()
 ) {
+    AudioHandler()
 
     PermissionsRequestModal {
         AppScreen(usersViewModel, settingsViewModel, personalityViewModel, metricsViewModel)
     }
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -169,5 +175,28 @@ fun LoggedInScreen(
     }
     LaunchedEffect(Unit) {
         personalityViewModel.loadPersonality()
+    }
+}
+
+@Composable
+private fun AudioHandler() {
+
+    val lifecycleOwner = remember { ProcessLifecycleOwner.get() }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> {
+                    AudioManager.onBackgroundResume()
+                }
+                Lifecycle.Event.ON_STOP -> {
+                    AudioManager.onBackgroundEnter()
+                }
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 }
