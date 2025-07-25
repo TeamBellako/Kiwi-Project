@@ -12,19 +12,26 @@ import androidx.media3.common.Player
 private enum class AudioType { MUSIC, SFX }
 
 class AudioLayer(val resId: Int, val isActive: Boolean) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AudioLayer) return false
         return resId == other.resId
     }
-
     override fun hashCode(): Int {
         return resId.hashCode()
     }
 }
 
-private class AudioLayerPlayer(var isActive: Boolean, val player: ExoPlayer, var fade: Runnable?)
+private class AudioLayerPlayer(val resId: Int, var isActive: Boolean, val player: ExoPlayer, var fade: Runnable?) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AudioLayer) return false
+        return resId == other.resId
+    }
+    override fun hashCode(): Int {
+        return resId.hashCode()
+    }
+}
 
 
 object AudioManager {
@@ -39,8 +46,12 @@ object AudioManager {
     private var _globalVolumeMusic: Float = 1f // 0f..1f
     private var _globalVolumeSFX: Float = 1f // 0f..1f
 
-    // Music currently playing. Can be several layers at the same time, inactive ones with volume 0
+    // Music currently playing (looping). There may be only one music playing simultaneously.
+    // But a music can have several layers, all playing at the same time, inactive ones with volume 0
     private val _currentMusic: MutableMap<Int, AudioLayerPlayer> = mutableMapOf()
+
+    // SFXs currently playing
+    private val _currentSFXs: MutableSet<AudioLayerPlayer> = mutableSetOf()
 
     // Event handlers
     private val _handler = Handler(Looper.getMainLooper())
@@ -58,6 +69,7 @@ object AudioManager {
 
     fun updateGlobalVolumeSFX(newGlobalVolumeSFX: Float) {
         _globalVolumeSFX = newGlobalVolumeSFX.coerceIn(0f, 1f)
+        updateCurrentSFXsVolume()
     }
 
     fun playMusic(context: Context, resIds: List<AudioLayer>, fadeDuration: Long = DEFAULT_FADE_DURATION) {
@@ -66,12 +78,12 @@ object AudioManager {
 
     fun stopMusic(resId: Int, fadeDuration: Long = DEFAULT_FADE_DURATION) {
         if (_currentMusic.contains(resId)) {
-            stopPlayer(_currentMusic[resId]!!, fadeDuration)
+            stopPlayer(_currentMusic[resId]!!, AudioType.MUSIC, fadeDuration)
         }
     }
 
-    fun playSFX(context: Context, resId: Int, fadeDuration: Long = 0) {
-        play(context, listOf(AudioLayer(resId, true)), AudioType.SFX, fadeDuration)
+    fun playSFX(context: Context, resId: Int) {
+        play(context, listOf(AudioLayer(resId, true)), AudioType.SFX, 0)
     }
 
     fun onBackgroundResume() {
@@ -83,6 +95,9 @@ object AudioManager {
     fun onBackgroundEnter() {
         for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
             pausePlayer(currentMusicPlayer, DEFAULT_FADE_DURATION_FAST)
+        }
+        for (currentSFXPlayer in _currentSFXs) {
+            stopPlayer(currentSFXPlayer, AudioType.SFX, DEFAULT_FADE_DURATION_FAST)
         }
     }
 
@@ -96,7 +111,7 @@ object AudioManager {
         if (type == AudioType.MUSIC) {
             for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
                 if (!layers.contains(AudioLayer(currentMusicResId, true))) {
-                    stopPlayer(currentMusicPlayer, fadeDuration)
+                    stopPlayer(currentMusicPlayer, AudioType.MUSIC, fadeDuration)
                 }
             }
         }
@@ -110,7 +125,7 @@ object AudioManager {
                     player.isActive = layer.isActive
                     fade(player, fromVolume, toVolume, fadeDuration)
                 }
-            // Start new music
+            // Start new music or SFX
             } else {
                 addLayer(context, layer, type, fadeDuration)
             }
@@ -123,9 +138,21 @@ object AudioManager {
         player.setMediaItem(MediaItem.fromUri(uri))
         player.repeatMode = if (type == AudioType.MUSIC) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
         player.prepare()
-        val layerPlayer = AudioLayerPlayer(layer.isActive, player, null)
+        val layerPlayer = AudioLayerPlayer(layer.resId, layer.isActive, player, null)
         playPlayer(layerPlayer, type, fadeDuration)
-        _currentMusic[layer.resId] = layerPlayer
+
+        if (type == AudioType.MUSIC) {
+            _currentMusic[layer.resId] = layerPlayer
+        } else {
+            _currentSFXs.add(layerPlayer)
+            player.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    if (state == Player.STATE_ENDED) {
+                        stopPlayer(layerPlayer, AudioType.SFX, 0)
+                    }
+                }
+            })
+        }
     }
 
     private fun playPlayer(player: AudioLayerPlayer, type: AudioType, fadeDuration: Long) {
@@ -140,9 +167,15 @@ object AudioManager {
         }
     }
 
-    private fun stopPlayer(player: AudioLayerPlayer, fadeDuration: Long) {
+    private fun stopPlayer(player: AudioLayerPlayer, type: AudioType, fadeDuration: Long) {
         fade(player, 1f, 0f, fadeDuration) {
             player.player.stop()
+
+            if (type == AudioType.MUSIC) {
+                _currentMusic.remove(player.resId)
+            } else {
+                _currentSFXs.remove(player)
+            }
         }
     }
 
@@ -183,10 +216,16 @@ object AudioManager {
     }
 
     private fun updateCurrentMusicVolume() {
-        for ((currentMusicResId, currentMusicPlayer) in _currentMusic) {
-            if (currentMusicPlayer.isActive) {
-                fade(currentMusicPlayer, currentMusicPlayer.player.volume, _globalVolumeMusic, DEFAULT_FADE_DURATION_FAST)
+        for ((id, player) in _currentMusic) {
+            if (player.isActive) {
+                fade(player, player.player.volume, _globalVolumeMusic, DEFAULT_FADE_DURATION_FAST)
             }
+        }
+    }
+
+    private fun updateCurrentSFXsVolume() {
+        for (player in _currentSFXs) {
+            fade(player, player.player.volume, _globalVolumeSFX, DEFAULT_FADE_DURATION_FAST)
         }
     }
 
