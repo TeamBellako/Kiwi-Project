@@ -55,6 +55,7 @@ import com.bellako.kiwi.ui.components.Kiwi_InputField
 import com.bellako.kiwi.ui.components.Kiwi_Label2
 import com.bellako.kiwi.ui.modals.LoadingModal
 import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 
 @Composable
@@ -133,7 +134,6 @@ private fun LogIn(
     val isLoading by remember { derivedStateOf { initializing || usersIsLoading || personalityIsLoading } }
 
     val isPreview = LocalInspectionMode.current
-
 
     // check stored credentials for auto login
     LaunchedEffect(Unit) {

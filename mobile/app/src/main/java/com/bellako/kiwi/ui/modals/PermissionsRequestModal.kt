@@ -43,6 +43,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.bellako.kiwi.services.analytics.FirebaseEventLogger
+import com.bellako.kiwi.services.analytics.FirebaseEventNames
 import com.bellako.kiwi.services.common.CommonTestTags
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H1
@@ -88,6 +90,8 @@ fun PermissionsRequestModal(
     }
 
     if (hasUsageAccess.value && hasStepPermission.value) {
+        FirebaseEventLogger.logEvent(FirebaseEventNames.PERMISSION_GRANTED)
+
         onPermissionsGranted()
     } else {
         Box(

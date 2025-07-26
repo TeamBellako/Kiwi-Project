@@ -34,12 +34,15 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
+import com.bellako.kiwi.services.analytics.FirebaseEventLogger
+import com.bellako.kiwi.services.analytics.FirebaseEventNames
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedStringArguments
 import com.bellako.kiwi.ui.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_Spacer
 import com.bellako.kiwi.ui.theme.getResponsiveRelativeSize
+import com.google.firebase.analytics.FirebaseAnalytics
 
 
 @Composable
@@ -131,6 +134,8 @@ private fun Welcome(
             ),
             color = MaterialTheme.colorScheme.primary,
             onClick = {
+                FirebaseEventLogger.logEvent(FirebaseEventNames.ONBOARDING_STARTED)
+
                 viewModel.onEmailChanged("")
                 viewModel.onPasswordChanged("")
                 viewModel.resetUiState()
