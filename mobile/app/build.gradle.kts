@@ -8,11 +8,11 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
-    id("com.google.gms.google-services") version "4.4.2" apply false
 
     kotlin("kapt")
     id("dagger.hilt.android.plugin")
-
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -178,7 +178,6 @@ dependencies {
     implementation(libs.coil.gif)
     implementation(libs.coil.compose)
 
-    implementation(libs.firebase.crashlytics)
     implementation(libs.google.firebase.analytics)
     testImplementation(kotlin("test"))
 
