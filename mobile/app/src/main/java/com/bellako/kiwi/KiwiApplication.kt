@@ -17,7 +17,7 @@ class KiwiApplication : Application() {
 
         FirebaseEventLogger.logEvent(FirebaseEventNames.APP_OPENED)
 
-        if (BuildConfig.DEBUG) {
+        if (!BuildConfig.DEBUG) {
             Firebase.analytics.setAnalyticsCollectionEnabled(true)
         }
     }
