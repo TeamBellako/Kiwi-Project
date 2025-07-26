@@ -17,6 +17,7 @@ espressoIntents = "3.6.1"
 firebaseBom = "33.12.0"
 firebaseBomVersion = "34.0.0"
 firebaseCrashlyticsGradle = "2.9.9"
+firebaseCrashlyticsKtxVersion = "18.5.1"
 foundation = "1.7.8"
 foundationGestures = "1.0.5"
 foundationVersion = "1.0.5"
@@ -111,6 +112,7 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-bom-v3400 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
 firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebaseCrashlyticsGradle" }
+firebase-crashlytics-ktx-v1851 = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtxVersion" }
 google-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }

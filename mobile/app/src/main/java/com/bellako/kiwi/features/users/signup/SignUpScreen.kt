@@ -41,6 +41,8 @@ import com.bellako.kiwi.features.users.IUsersViewModel
 import com.bellako.kiwi.features.users.UsersFakeViewModel
 import com.bellako.kiwi.features.users.UsersState
 import com.bellako.kiwi.features.users.UsersTestTags
+import com.bellako.kiwi.services.analytics.FirebaseEventLogger
+import com.bellako.kiwi.services.analytics.FirebaseEventNames
 import com.bellako.kiwi.ui.components.Kiwi_Button
 import com.bellako.kiwi.ui.components.Kiwi_H2
 import com.bellako.kiwi.ui.components.Kiwi_InputField
@@ -255,6 +257,8 @@ private fun SignUp(
                             onClick = {
                                 CoroutineScope(Dispatchers.Main).launch {
                                     if (personalityViewModel.checkValid().isSuccess && usersViewModel.signup(context).isSuccess) {
+                                        FirebaseEventLogger.logEvent(FirebaseEventNames.ONBOARDING_COMPLETED)
+
                                         personalityViewModel.updateRealName()
                                         personalityViewModel.updateKnightName()
                                         navController.navigate(ScreenRoutes.SIGNUP_TEST)
