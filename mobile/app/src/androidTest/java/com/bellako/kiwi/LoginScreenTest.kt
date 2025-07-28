@@ -5,9 +5,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.bellako.kiwi.services.common.CommonTestTags
-import com.bellako.kiwi.ui.screens.ScreenRoutes
-import com.bellako.kiwi.services.common.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.model.HTTPUtils.createFakeHttpException
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -16,16 +16,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.features.map.MapScreen
-import com.bellako.kiwi.features.map.MapViewModel
-import com.bellako.kiwi.features.personality.PersonalityFakeViewModel
-import com.bellako.kiwi.features.personality.PersonalityState
-import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.users.UsersFakeViewModel
-import com.bellako.kiwi.features.users.UsersState
-import com.bellako.kiwi.features.users.UsersTestTags
-import com.bellako.kiwi.features.users.login.LogInScreen
-import com.bellako.kiwi.features.users.signup.SignUpTestScreen
+import com.bellako.kiwi.features.map.screens.MapScreen
+import com.bellako.kiwi.features.map.model.MapViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.tests.UsersTestTags
+import com.bellako.kiwi.features.users.screens.LogInScreen
+import com.bellako.kiwi.features.users.screens.SignUpTestScreen
 
 @RunWith(AndroidJUnit4::class)
 class LoginScreenTest {
