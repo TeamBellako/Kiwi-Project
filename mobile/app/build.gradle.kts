@@ -116,6 +116,7 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.lifecycle.process)
+    implementation(libs.annotations)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.navigation.testing)
