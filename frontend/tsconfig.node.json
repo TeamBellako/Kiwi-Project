@@ -2,7 +2,7 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2022",
-    "lib": ["ES2023"],
+    "lib": ["DOM", "ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
     "jsx": "react-jsx",
@@ -25,6 +25,7 @@
     "declaration": true,           
     "emitDeclarationOnly": true,  
     "esModuleInterop": true,
+    "types": ["@testing-library/jest-dom"]
   },
   "include": ["src/**/*", "vite.config.ts"],
   "exclude": ["node_modules"]

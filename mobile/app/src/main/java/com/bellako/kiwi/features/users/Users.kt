@@ -1,0 +1,23 @@
+package com.bellako.kiwi.features.users
+
+import com.bellako.kiwi.types.Email
+import com.bellako.kiwi.types.Password
+
+data class Users (
+    val email: Email,
+    val password: Password
+){
+    fun toDTO() : UsersDTO {
+        return UsersDTO(
+            email = email.value,
+            password = password.value
+        )
+    }
+
+    fun toState() : UsersState {
+        return UsersState(
+            email = email.value,
+            password = password.value
+        )
+    }
+}

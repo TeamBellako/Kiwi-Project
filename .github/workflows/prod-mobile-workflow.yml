@@ -9,14 +9,6 @@ on:
     paths:
       - 'mobile/**'
       - '.github/workflows/prod-mobile-workflow.yml'
-  pull_request:
-    branches:
-      - main
-    tags:
-        - 'v*'
-    paths:
-      - 'mobile/**'
-      - '.github/workflows/prod-mobile-workflow.yml'
 
 jobs:
   mobile-ci:
@@ -39,6 +31,7 @@ jobs:
       - name: Write .env file
         run: |
           echo "${{ secrets.MOBILE_API_URL }}" > mobile/.env.prod
+          echo "${{ secrets.MOBILE_COMPANY_EMAIL }}" > mobile/.env.prod
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -47,12 +40,56 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: ./mobile
 
-      - name: Setup Gradle Cache
-        uses: gradle/gradle-build-action@v2
-        with:
-          gradle-home-cache-cleanup: true
+       - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
-      - name: Run tests
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+        
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-29
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          working-directory: ./mobile
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Configure Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            # Ensure the emulator is started correctly
+            echo "Configuring the emulator."
+
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          working-directory: ./mobile
+          script: ./gradlew connectedCheck
+
+      - name: Run unit tests
         run: ./gradlew test
         working-directory: ./mobile
 

@@ -79,3 +79,6 @@ vite
 init-db.sql
 env.*
 .env*
+
+*/.kotlin
+docs

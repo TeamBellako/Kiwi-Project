@@ -1,0 +1,33 @@
+package com.bellako.kiwi.features.users
+
+import com.bellako.kiwi.types.Email
+import com.bellako.kiwi.types.Password
+
+data class UsersState (
+    val email: String,
+    val password: String
+){
+    fun toDTO() : UsersDTO {
+        return UsersDTO(
+            email = email,
+            password = password
+        )
+    }
+
+    fun toDomainObject(): Result<Users> {
+        val emailResult = Email.of(email)
+        val passwordResult = Password.of(password)
+
+        return emailResult.fold(
+            onSuccess = { validEmail ->
+                passwordResult.fold(
+                    onSuccess = { validPassword ->
+                        Result.success(Users(validEmail, validPassword))
+                    },
+                    onFailure = { err -> Result.failure(err) }
+                )
+            },
+            onFailure = { err -> Result.failure(err) }
+        )
+    }
+}

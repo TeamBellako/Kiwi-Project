@@ -12,17 +12,6 @@ on:
       - 'k8s/prod/prod-mysql-service.yaml'
       - 'k8s/prod/prod-mysql-configmap.yaml'
       - 'k8s/prod/prod-mysql-pvc.yaml'
-  pull_request:
-    branches:
-      - main
-    tags:
-      - 'v*'
-    paths:
-      - '.github/workflows/prod-mysql-workflow.yml'
-      - 'k8s/prod/prod-mysql-deployment.yaml'
-      - 'k8s/prod/prod-mysql-service.yaml'
-      - 'k8s/prod/prod-mysql-configmap.yaml'
-      - 'k8s/prod/prod-mysql-pvc.yaml'
 
 jobs:
   mysql-cd:

@@ -1,13 +1,21 @@
-﻿import React from 'react';
-import HelloCard from "./components/HelloCard";
+import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
+import WIPPage from "./WIPPage";
 
-const App: React.FC = () => {
+function App() {
     return (
-        <div className="App">
-            <h1>Front-End Message Display</h1>
-            <HelloCard id={1} />
-        </div>
+        <BrowserRouter>
+            <Routes>
+                <Route 
+                    path={'/'}
+                    element={
+                        <WIPPage />
+                    } 
+                />
+
+                <Route path="*" element={<Navigate to={'/'} replace />} />
+            </Routes>
+        </BrowserRouter>
     );
-};
+}
 
 export default App;

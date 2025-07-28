@@ -9,14 +9,6 @@ on:
       - '.github/workflows/dev-backend-workflow.yml'
       - 'k8s/dev/dev-backend-deployment.yaml'
       - 'k8s/dev/dev-backend-service.yaml'
-  pull_request:
-    branches:
-      - develop
-    paths:
-      - 'backend/**'
-      - '.github/workflows/dev-backend-workflow.yml'
-      - 'k8s/dev/dev-backend-deployment.yaml'
-      - 'k8s/dev/dev-backend-service.yaml'
 
 jobs:
   backend-ci-cd:
@@ -30,6 +22,7 @@ jobs:
       BACKEND_DB_URL: ${{ secrets.BACKEND_DB_URL }}
       BACKEND_DB_USERNAME: ${{ secrets.BACKEND_DB_USERNAME }}
       BACKEND_DB_PASSWORD: ${{ secrets.BACKEND_DB_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
     steps:
       - name: Checkout code
@@ -75,6 +68,7 @@ jobs:
       - name: Create Kubernetes secrets for backend
         run: |
           kubectl create secret generic backend-secret \
+            --from-literal=JWT_SECRET=${{ secrets.JWT_SECRET }} \
             --from-literal=BACKEND_DB_URL_K8S=${{ secrets.BACKEND_DB_URL_K8S }} \
             --from-literal=BACKEND_DB_USERNAME=${{ secrets.BACKEND_DB_USERNAME }} \
             --from-literal=BACKEND_DB_PASSWORD=${{ secrets.BACKEND_DB_PASSWORD }} \
