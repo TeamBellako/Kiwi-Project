@@ -1,15 +1,14 @@
 package com.bellako.kiwi
 
-import com.bellako.kiwi.features.personality.IPersonalityAPI
-import com.bellako.kiwi.features.personality.IPersonalityViewModel
-import com.bellako.kiwi.features.personality.PersonalityRepository
-import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityBuildDTO
-import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityKnightNameDTO
-import com.bellako.kiwi.features.personality.PersonalityTestFactory.validPersonalityRealNameDTO
-import com.bellako.kiwi.features.personality.PersonalityViewModel
-import com.bellako.kiwi.services.network.AuthRepository
-import com.bellako.kiwi.services.network.HealthApiService
+import com.bellako.kiwi.features.personality.model.IPersonalityAPI
+import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.model.PersonalityRepository
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityBuildDTO
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityKnightNameDTO
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityRealNameDTO
+import com.bellako.kiwi.features.personality.model.PersonalityViewModel
+import com.bellako.kiwi.common.model.HealthApiService
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

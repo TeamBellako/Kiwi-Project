@@ -2,8 +2,8 @@ package com.bellako.kiwi
 
 import android.app.Application
 import androidx.compose.ui.platform.LocalContext
-import com.bellako.kiwi.services.analytics.FirebaseEventLogger
-import com.bellako.kiwi.services.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.FirebaseEventLogger
+import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.analytics

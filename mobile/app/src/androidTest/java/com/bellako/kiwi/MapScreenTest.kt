@@ -5,8 +5,8 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.features.map.MapScreen
-import com.bellako.kiwi.features.map.MapViewModel
+import com.bellako.kiwi.features.map.screens.MapScreen
+import com.bellako.kiwi.features.map.model.MapViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
