@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-      - develop
+    tags:
+      - 'v*'
     paths:
       - 'frontend/**'
       - '.github/workflows/prod-frontend-workflow.yml'
