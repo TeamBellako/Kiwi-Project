@@ -1,11 +1,11 @@
 package com.bellako.kiwi
 
-import com.bellako.kiwi.features.metrics.IMetricsAPI
-import com.bellako.kiwi.features.metrics.IMetricsViewModel
-import com.bellako.kiwi.features.metrics.MetricsFactory
-import com.bellako.kiwi.features.metrics.MetricsMapper
-import com.bellako.kiwi.features.metrics.MetricsRepository
-import com.bellako.kiwi.features.metrics.MetricsViewModel
+import com.bellako.kiwi.features.metrics.model.IMetricsAPI
+import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
+import com.bellako.kiwi.features.metrics.model.MetricsFactory
+import com.bellako.kiwi.features.metrics.model.MetricsMapper
+import com.bellako.kiwi.features.metrics.model.MetricsRepository
+import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

@@ -16,12 +16,9 @@ data class AudioLayer(val resId: Int, val isActive: Boolean)
 private class AudioLayerPlayer(val resId: Int, var isActive: Boolean, val player: ExoPlayer, var fade: Runnable?)
 
 
-/**
- * For centralized audio management. Music, SFXs and volume.
- */
 object AudioManager {
 
-    private const val DEFAULT_FADE_DURATION = 2000L
+    private const val DEFAULT_FADE_DURATION = 3000L
     private const val DEFAULT_FADE_DURATION_FAST = 200L
 
     // Enabled
@@ -31,10 +28,11 @@ object AudioManager {
     private var _globalVolumeMusic: Float = 1f // 0f..1f
     private var _globalVolumeSFX: Float = 1f // 0f..1f
 
-    // Music (layers) currently playing. See @playMusic()
+    // Music currently playing (looping). There may be only one music playing simultaneously.
+    // But a music can have several layers, all playing at the same time, inactive ones with volume 0
     private val _currentMusic: MutableMap<Int, AudioLayerPlayer> = mutableMapOf()
 
-    // SFXs currently playing. See @playSFX()
+    // SFXs currently playing
     private val _currentSFXs: MutableSet<AudioLayerPlayer> = mutableSetOf()
 
     // Event handlers
@@ -42,60 +40,40 @@ object AudioManager {
 
     // ---------------------------------------------------------------------------------------------
 
-    /** Disables the whole audio. Used for android tests. */
     fun setEnabled(isEnabled: Boolean) {
         _isEnabled = isEnabled
     }
 
-    /** Updates the music volume of the whole app. */
     fun updateGlobalVolumeMusic(newGlobalVolumeMusic: Float) {
         _globalVolumeMusic = newGlobalVolumeMusic.coerceIn(0f, 1f)
         updateCurrentMusicVolume()
     }
 
-    /** Updates the SFXs volume of the whole app. */
     fun updateGlobalVolumeSFX(newGlobalVolumeSFX: Float) {
         _globalVolumeSFX = newGlobalVolumeSFX.coerceIn(0f, 1f)
         updateCurrentSFXsVolume()
     }
 
-    /**
-     * Plays a new music looping.
-     * There may be only one music playing simultaneously, so if there is any already,
-     * it will fade out while the new one is fading in.
-     * A music can have several layers, all playing at the same time, inactive ones with volume 0.
-     * Use this function also to enable/disable layers.
-     */
     fun playMusic(context: Context, resIds: List<AudioLayer>, fadeDuration: Long = DEFAULT_FADE_DURATION) {
         play(context, resIds, AudioType.MUSIC, fadeDuration)
     }
 
-    /** Stops the music currently playing (every layer) */
-    fun stopMusic(fadeDuration: Long = DEFAULT_FADE_DURATION) {
-        for ((_, player) in _currentMusic) {
+    fun stopMusic(resId: Int, fadeDuration: Long = DEFAULT_FADE_DURATION) {
+        _currentMusic[resId]?.let { player ->
             stopPlayer(player, AudioType.MUSIC, fadeDuration)
         }
     }
 
-    /** Plays a new SFX once */
     fun playSFX(context: Context, resId: Int) {
         play(context, listOf(AudioLayer(resId, true)), AudioType.SFX, 0)
     }
 
-    /**
-     * Should be called when the app comes to foreground.
-     * Resume the music if any.
-     */
     fun onBackgroundResume() {
         for ((_, player) in _currentMusic) {
             playPlayer(player, AudioType.MUSIC, DEFAULT_FADE_DURATION_FAST)
         }
     }
 
-    /**
-     * Should be called when the app goes to background or screen turns off.
-     * Pause the music and SFXs if any.
-     */
     fun onBackgroundEnter() {
         for ((_, player) in _currentMusic) {
             pausePlayer(player, DEFAULT_FADE_DURATION_FAST)
