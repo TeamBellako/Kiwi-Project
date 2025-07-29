@@ -5,20 +5,51 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+private const val DEFAULT_WIDTH = 392.0f
+private const val DEFAULT_HEIGHT = 800.0f
+
 @Composable
-private fun getWindowScale(): Float {
-    val defaultWidthDp = 392.0f
-    val defaultHeightDp = 800.0f
-    val configuration = LocalConfiguration.current
-    return (configuration.screenWidthDp / defaultWidthDp + configuration.screenHeightDp / defaultHeightDp) / 2.0f
+fun getScreenWidth(): Float {
+    return LocalConfiguration.current.screenWidthDp.toFloat()
 }
 
 @Composable
-fun getResponsiveRelativeSize(size: Int): Int {
-    return (size * getWindowScale()).toInt()
+fun getScreenHeight(): Float {
+    return LocalConfiguration.current.screenHeightDp.toFloat()
 }
 
+/** Resize the passed size depending on the current window size. Medium screen is taken as default. */
 @Composable
-fun getResponsiveRelativeSize(size: Dp): Dp {
-    return getResponsiveRelativeSize(size.value.toInt()).dp
+fun getResponsiveSizeWidth(size: Int): Int {
+    return getResponsiveSizeWidth(size.dp).value.toInt()
+}
+
+/** Resize the passed size depending on the current window size. Medium screen is taken as default. */
+@Composable
+fun getResponsiveSizeHeight(size: Int): Int {
+    return getResponsiveSizeHeight(size.dp).value.toInt()
+}
+
+/** Resize the passed size depending on the current window size. Medium screen is taken as default. */
+@Composable
+fun getResponsiveSizeWidth(size: Dp): Dp {
+    return size * (getScreenWidth() / DEFAULT_WIDTH)
+}
+
+/** Resize the passed size depending on the current window size. Medium screen is taken as default. */
+@Composable
+fun getResponsiveSizeHeight(size: Dp): Dp {
+    return size * (getScreenHeight() / DEFAULT_HEIGHT)
+}
+
+/** Returns the passed percentage (0f..1f) of the screen size width. */
+@Composable
+fun getResponsiveSizeRelativeWidth(percentage: Float): Dp {
+    return (getScreenWidth() * percentage.coerceIn(0f, 1f)).dp
+}
+
+/** Returns the passed percentage (0f..1f) of the screen size height. */
+@Composable
+fun getResponsiveSizeRelativeHeight(percentage: Float): Dp {
+    return (getScreenHeight() * percentage.coerceIn(0f, 1f)).dp
 }

@@ -55,7 +55,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 
 @Composable
@@ -155,7 +155,7 @@ private fun LogIn(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(getResponsiveRelativeSize(Spacing.medium)),
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
 
@@ -179,7 +179,7 @@ private fun LogIn(
                         "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(bottom = getResponsiveRelativeSize(Spacing.large))
+                        modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.large))
                     )
                 )
 
@@ -285,7 +285,7 @@ private fun LogIn(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = getResponsiveRelativeSize(Spacing.medium))
+                .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
                 .alpha(if (!isLoading || isPreview) 1f else 0f),
             contentAlignment = Alignment.BottomCenter
         ) {
@@ -332,8 +332,7 @@ private fun SignUp(
         Kiwi_AnnotatedStringArguments(
         annotatedString,
         TextAlign.Center
-    )
-    )
+    ))
 }
 
 @SuppressLint("ViewModelConstructorInComposable")

@@ -19,10 +19,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.common.data.multiplyColorRgb
 import com.bellako.kiwi.features.settings.tests.SettingsTestTags
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.ui.KiwiTheme
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,37 +38,29 @@ fun Kiwi_Slider(
 ) {
     Kiwi_H3(textArguments)
 
-    val trackColorEnabled = MaterialTheme.colorScheme.secondary
-    val trackColorDisabledMultiplier = 0.4f
-    val trackColor =
-        if (enabled) trackColorEnabled
-        else trackColorEnabled.copy(
-            red = trackColorEnabled.red * trackColorDisabledMultiplier,
-            green = trackColorEnabled.green * trackColorDisabledMultiplier,
-            blue = trackColorEnabled.blue * trackColorDisabledMultiplier
-        )
+    val trackColor = multiplyColorRgb(MaterialTheme.colorScheme.secondary, if (enabled) 1f else 0.4f)
 
     Slider(
         value = value,
         onValueChange = onValueChange,
         valueRange = valueRange,
         steps = steps,
-        modifier = Modifier.testTag(testTag).height(getResponsiveRelativeSize(30.dp)),
+        modifier = Modifier.testTag(testTag).height(getResponsiveSizeHeight(30.dp)),
         enabled = enabled,
         thumb = {
             SliderDefaults.Thumb(
                 interactionSource = remember { MutableInteractionSource() },
-                thumbSize = DpSize(getResponsiveRelativeSize(20.dp), getResponsiveRelativeSize(20.dp)),
+                thumbSize = DpSize(getResponsiveSizeHeight(20.dp), getResponsiveSizeHeight(20.dp)),
                 colors = SliderDefaults.colors().copy(
                     thumbColor = trackColor,
                 ),
-                modifier = Modifier.padding(getResponsiveRelativeSize(0.dp))
+                modifier = Modifier.padding(getResponsiveSizeHeight(0.dp))
             )
         },
         track = { sliderState ->
             SliderDefaults.Track(
                 modifier = Modifier
-                    .height(getResponsiveRelativeSize(16.dp)),
+                    .height(getResponsiveSizeHeight(16.dp)),
                 sliderState = sliderState,
                 colors = SliderDefaults.colors().copy(
                     activeTickColor = Color.Transparent,
@@ -75,7 +68,7 @@ fun Kiwi_Slider(
                     inactiveTickColor = Color.Transparent,
                     inactiveTrackColor = MaterialTheme.colorScheme.primary,
                 ),
-                thumbTrackGapSize = getResponsiveRelativeSize(0.dp)
+                thumbTrackGapSize = getResponsiveSizeHeight(0.dp)
             )
         },
     )

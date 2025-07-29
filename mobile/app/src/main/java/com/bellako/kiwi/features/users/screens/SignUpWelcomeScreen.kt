@@ -45,7 +45,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 
 @Composable
@@ -83,7 +83,7 @@ fun SignUpWelcomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(getResponsiveRelativeSize(Spacing.medium)),
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
             Welcome(
@@ -94,7 +94,7 @@ fun SignUpWelcomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = getResponsiveRelativeSize(Spacing.medium)),
+                    .padding(bottom = getResponsiveSizeHeight(Spacing.medium)),
                 contentAlignment = Alignment.BottomCenter
             ) {
 
