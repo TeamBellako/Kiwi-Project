@@ -96,7 +96,7 @@ jobs:
       - name: Generate version tag, push it, and export version info
         id: version
         run: |
-          VERSION_BASE="v0.0."
+          VERSION_BASE="v0.1."
           LATEST_TAG=$(git tag --sort=-v:refname | grep '^v0.0.' | tail -n 1)
           LAST_PATCH=$(echo $LATEST_TAG | cut -d'.' -f3)
           NEXT_PATCH=$((LAST_PATCH + 1))
