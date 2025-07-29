@@ -79,23 +79,23 @@ jobs:
             # Ensure the emulator is started correctly
             echo "Configuring the emulator."
       
-      # - name: Clean Gradle
-      #   run: ./gradlew clean
-      #   working-directory: ./mobile
+      - name: Clean Gradle
+        run: ./gradlew clean
+        working-directory: ./mobile
 
-      # - name: Run unit tests
-      #   run: ./gradlew test
-      #   working-directory: ./mobile
+      - name: Run unit tests
+        run: ./gradlew test
+        working-directory: ./mobile
 
-      # - name: Run android tests
-      #   uses: reactivecircus/android-emulator-runner@v2
-      #   with:
-      #     api-level: 29
-      #     force-avd-creation: false
-      #     emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-      #     disable-animations: true
-      #     working-directory: ./mobile
-      #     script: ./gradlew connectedCheck
+      - name: Run android tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          working-directory: ./mobile
+          script: ./gradlew connectedCheck
 
       - name: Generate version tag, push it, and export version info
         id: version
