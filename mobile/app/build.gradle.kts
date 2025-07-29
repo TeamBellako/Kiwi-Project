@@ -71,6 +71,7 @@ android {
             )
            isDebuggable = false
            isJniDebuggable = false
+            isShrinkResources = true
         }
     }
     compileOptions {
@@ -97,6 +98,8 @@ tasks.withType<Test> {
 
 
 dependencies {
+    compileOnly(libs.annotations)
+
     implementation(platform(libs.firebase.bom))
     implementation(platform(libs.firebase.bom.v3400))
     implementation(libs.firebase.analytics)
@@ -116,7 +119,6 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.lifecycle.process)
-    implementation(libs.annotations)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.navigation.testing)
