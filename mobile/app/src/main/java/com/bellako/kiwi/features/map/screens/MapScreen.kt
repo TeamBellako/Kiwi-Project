@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -22,15 +21,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.audio.AudioLayer
-import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -54,16 +50,7 @@ fun MapScreen(
     title: String = "WORLD MAP",
     viewModel: MapViewModel? = null // Optional parameter for testing
 ) {
-    val context = LocalContext.current
     val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
-
-    LaunchedEffect(Unit) {
-        AudioManager.playMusic(context, listOf(
-            AudioLayer(R.raw.music_stepswithin, true),
-            AudioLayer(R.raw.music_stepswithin_enigma, false)
-        ))
-    }
-
 
     mapViewModel.setParameters(
         initialScale = initialZoom,
@@ -81,13 +68,11 @@ fun MapScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H2(
-            Kiwi_TextArguments(
+        Kiwi_H2(Kiwi_TextArguments(
             title,
             color = MaterialTheme.colorScheme.inversePrimary,
             bold = true
-        )
-        )
+        ))
 
         ZoomableMap(
             mapResourceId = mapResourceId,

@@ -24,6 +24,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.audio.Kiwi_Music_Home
+import com.bellako.kiwi.audio.Kiwi_Music_SignUp
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.screens.modals.PermissionsRequestModal
@@ -103,6 +105,7 @@ private fun AppScreen(
                 ) {
                     composable(ScreenRoutes.LOGIN) {
                         Kiwi_BackHandler()
+                        Kiwi_Music_Home()
                         LogInScreen(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
@@ -112,6 +115,7 @@ private fun AppScreen(
 
                     composable(ScreenRoutes.SIGNUP_WELCOME) {
                         Kiwi_BackHandler()
+                        Kiwi_Music_SignUp()
                         SignUpWelcomeScreen(
                             viewModel = usersViewModel,
                             navController = navController
@@ -120,6 +124,7 @@ private fun AppScreen(
 
                     composable(ScreenRoutes.SIGNUP) {
                         Kiwi_BackHandler()
+                        Kiwi_Music_SignUp()
                         SignUpScreen(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
@@ -129,6 +134,7 @@ private fun AppScreen(
 
                     composable(ScreenRoutes.SIGNUP_TEST) {
                         Kiwi_BackHandler()
+                        Kiwi_Music_SignUp()
                         SignUpTestScreen(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
@@ -138,16 +144,19 @@ private fun AppScreen(
 
                     composable(ScreenRoutes.HOME) {
                         Kiwi_BackHandler()
+                        Kiwi_Music_Home()
                         MapScreen()
                     }
 
                     composable(ScreenRoutes.HELP) {
                         Kiwi_BackHandler()
+                        Kiwi_Music_Home()
                         HelpScreen(navController = navController)
                     }
 
                     composable(ScreenRoutes.SETTINGS) {
                         Kiwi_BackHandler()
+                        Kiwi_Music_Home()
                         SettingsScreen(
                             viewModel = settingsViewModel,
                             navController = navController,
@@ -165,11 +174,13 @@ private fun AppScreen(
 
                 if (!isLoginScreen && isLoginCompleted && !isSettingsScreen) {
                     Kiwi_BackHandler()
+                    Kiwi_Music_Home()
                     DashboardModal(metricsViewModel)
                 }
 
                 if (!isLoginScreen && isLoginCompleted) {
                     Kiwi_BackHandler()
+                    Kiwi_Music_Home()
                     Kiwi_LoggedInScreen(
                         settingsViewModel = settingsViewModel,
                         personalityViewModel = personalityViewModel,
@@ -222,3 +233,4 @@ private fun Kiwi_BackHandler() {
         activity?.moveTaskToBack(true)
     }
 }
+
