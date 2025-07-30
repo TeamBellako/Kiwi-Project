@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -59,8 +58,6 @@ fun SignUpScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
-
-    BackHandler(enabled = true) { } // Do nothing, ignore native back
 
     LaunchedEffect(Unit) {
         AudioManager.playMusic(context, listOf(

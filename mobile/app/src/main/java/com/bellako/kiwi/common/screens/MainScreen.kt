@@ -1,6 +1,7 @@
 package com.bellako.kiwi.common.screens
 
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -60,6 +61,8 @@ fun MainScreen(
     metricsViewModel: MetricsViewModel = hiltViewModel()
 ) {
     AudioHandler()
+
+    BackHandler(enabled = true) { } // Do nothing, ignore native back
 
     PermissionsRequestModal {
         AppScreen(usersViewModel, settingsViewModel, personalityViewModel, metricsViewModel)

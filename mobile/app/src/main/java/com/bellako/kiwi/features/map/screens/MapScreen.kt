@@ -1,7 +1,7 @@
 package com.bellako.kiwi.features.map.screens
 
+import android.annotation.SuppressLint
 import android.os.Build
-import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -57,8 +56,6 @@ fun MapScreen(
 ) {
     val context = LocalContext.current
     val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
-
-    BackHandler(enabled = true) { } // Do nothing, ignore native back
 
     LaunchedEffect(Unit) {
         AudioManager.playMusic(context, listOf(
@@ -129,7 +126,6 @@ private fun ZoomableMap(
                     onGesture = { centroid, pan, zoom, _ ->
                         viewModel.updateScale(zoom, centroid)
                         viewModel.updateOffset(pan)
-                        true
                     }
                 )
             },
@@ -160,7 +156,9 @@ private fun ZoomableMap(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+// -------------------------------------------------------------------------------------------------
+
+@SuppressLint("ViewModelConstructorInComposable")
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
@@ -175,15 +173,7 @@ fun MapScreenPreview() {
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
-                    DashboardModal(
-                        MetricsFakeViewModel(
-                            MetricsState(
-                                "2025-06-12",
-                                1173,
-                                9900
-                            )
-                        )
-                    )
+                    DashboardModal(MetricsFakeViewModel(MetricsState("2025-06-12", 1173, 9900)))
                 }
             }
         )
