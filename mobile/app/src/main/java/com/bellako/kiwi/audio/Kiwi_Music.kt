@@ -21,8 +21,8 @@ fun Kiwi_Music_SignUp() {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         AudioManager.playMusic(context, listOf(
-            AudioLayer(R.raw.music_stepswithin, true),
-            AudioLayer(R.raw.music_stepswithin_enigma, false)
+            AudioLayer(R.raw.music_stepswithin, false),
+            AudioLayer(R.raw.music_stepswithin_enigma, true)
         ))
     }
 }
