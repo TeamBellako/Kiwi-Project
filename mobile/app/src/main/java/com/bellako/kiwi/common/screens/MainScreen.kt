@@ -82,6 +82,7 @@ private fun AppScreen(
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val isLoginScreen = route == ScreenRoutes.LOGIN || route == ScreenRoutes.SIGNUP_WELCOME ||
             route == ScreenRoutes.SIGNUP || route == ScreenRoutes.SIGNUP_TEST
+    val isSettingsScreen = route == ScreenRoutes.SETTINGS
 
     Scaffold(
         bottomBar = {
@@ -150,7 +151,7 @@ private fun AppScreen(
                     }
                 }
 
-                if (!isLoginScreen && isLoginCompleted) {
+                if (!isLoginScreen && isLoginCompleted && !isSettingsScreen) {
                     DashboardModal(metricsViewModel)
                 }
 
