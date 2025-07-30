@@ -2,6 +2,7 @@ package com.bellako.kiwi.common.screens
 
 import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -60,9 +61,7 @@ fun MainScreen(
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel()
 ) {
-    AudioHandler()
-
-    BackHandler(enabled = true) { } // Do nothing, ignore native back
+    Kiwi_AudioHandler()
 
     PermissionsRequestModal {
         AppScreen(usersViewModel, settingsViewModel, personalityViewModel, metricsViewModel)
@@ -83,8 +82,11 @@ private fun AppScreen(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val route = currentBackStackEntry?.destination?.route
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
-    val isLoginScreen = route == ScreenRoutes.LOGIN || route == ScreenRoutes.SIGNUP_WELCOME ||
-            route == ScreenRoutes.SIGNUP || route == ScreenRoutes.SIGNUP_TEST
+    val isLoginScreen =
+        route == ScreenRoutes.LOGIN ||
+        route == ScreenRoutes.SIGNUP_WELCOME ||
+        route == ScreenRoutes.SIGNUP ||
+        route == ScreenRoutes.SIGNUP_TEST
     val isSettingsScreen = route == ScreenRoutes.SETTINGS
 
     Scaffold(
@@ -100,6 +102,7 @@ private fun AppScreen(
                     startDestination = ScreenRoutes.LOGIN,
                 ) {
                     composable(ScreenRoutes.LOGIN) {
+                        Kiwi_BackHandler()
                         LogInScreen(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
@@ -108,6 +111,7 @@ private fun AppScreen(
                     }
 
                     composable(ScreenRoutes.SIGNUP_WELCOME) {
+                        Kiwi_BackHandler()
                         SignUpWelcomeScreen(
                             viewModel = usersViewModel,
                             navController = navController
@@ -115,6 +119,7 @@ private fun AppScreen(
                     }
 
                     composable(ScreenRoutes.SIGNUP) {
+                        Kiwi_BackHandler()
                         SignUpScreen(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
@@ -123,6 +128,7 @@ private fun AppScreen(
                     }
 
                     composable(ScreenRoutes.SIGNUP_TEST) {
+                        Kiwi_BackHandler()
                         SignUpTestScreen(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
@@ -131,14 +137,17 @@ private fun AppScreen(
                     }
 
                     composable(ScreenRoutes.HOME) {
+                        Kiwi_BackHandler()
                         MapScreen()
                     }
 
                     composable(ScreenRoutes.HELP) {
+                        Kiwi_BackHandler()
                         HelpScreen(navController = navController)
                     }
 
                     composable(ScreenRoutes.SETTINGS) {
+                        Kiwi_BackHandler()
                         SettingsScreen(
                             viewModel = settingsViewModel,
                             navController = navController,
@@ -155,11 +164,13 @@ private fun AppScreen(
                 }
 
                 if (!isLoginScreen && isLoginCompleted && !isSettingsScreen) {
+                    Kiwi_BackHandler()
                     DashboardModal(metricsViewModel)
                 }
 
                 if (!isLoginScreen && isLoginCompleted) {
-                    LoggedInScreen(
+                    Kiwi_BackHandler()
+                    Kiwi_LoggedInScreen(
                         settingsViewModel = settingsViewModel,
                         personalityViewModel = personalityViewModel,
                     )
@@ -170,7 +181,7 @@ private fun AppScreen(
 }
 
 @Composable
-fun LoggedInScreen(
+fun Kiwi_LoggedInScreen(
     settingsViewModel: ISettingsViewModel,
     personalityViewModel: IPersonalityViewModel,
 ) {
@@ -183,8 +194,7 @@ fun LoggedInScreen(
 }
 
 @Composable
-private fun AudioHandler() {
-
+private fun Kiwi_AudioHandler() {
     val lifecycleOwner = remember { ProcessLifecycleOwner.get() }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -202,5 +212,13 @@ private fun AudioHandler() {
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
+    }
+}
+
+@Composable
+private fun Kiwi_BackHandler() {
+    val activity = LocalActivity.current
+    BackHandler(enabled = true) {
+        activity?.moveTaskToBack(true)
     }
 }
