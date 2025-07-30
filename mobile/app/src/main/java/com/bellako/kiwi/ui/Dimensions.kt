@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.systemBars
 
 private const val DEFAULT_WIDTH = 392.0f
 private const val DEFAULT_HEIGHT = 800.0f
@@ -14,8 +17,11 @@ fun getScreenWidth(): Float {
 }
 
 @Composable
-fun getScreenHeight(): Float {
-    return LocalConfiguration.current.screenHeightDp.toFloat()
+fun getScreenHeight(withoutInsetTop: Boolean = false, withoutInsetBottom: Boolean = false): Float {
+    val insets = WindowInsets.systemBars.asPaddingValues()
+    val insetTop = if (withoutInsetTop) insets.calculateTopPadding() else 0.dp
+    val insetBottom = if (withoutInsetBottom) insets.calculateBottomPadding() else 0.dp
+    return (LocalConfiguration.current.screenHeightDp.dp - insetTop - insetBottom).value
 }
 
 /** Resize the passed size depending on the current window size. Medium screen is taken as default. */
