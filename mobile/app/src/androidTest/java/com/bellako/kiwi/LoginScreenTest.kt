@@ -1,5 +1,6 @@
 package com.bellako.kiwi
 
+import android.annotation.SuppressLint
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -38,6 +39,7 @@ class LoginScreenTest {
     private lateinit var personalityState: PersonalityState
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
 
+    @SuppressLint("ViewModelConstructorInComposable")
     @Before
     fun setUp() {
         AudioManager.setEnabled(false)

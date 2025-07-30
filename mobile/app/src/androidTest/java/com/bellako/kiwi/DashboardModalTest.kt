@@ -1,8 +1,6 @@
 package com.bellako.kiwi
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertTextContains
@@ -26,8 +24,9 @@ import com.bellako.kiwi.features.metrics.model.MetricsMapper
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.MetricsUtils
 import com.bellako.kiwi.common.screens.modals.DashboardModal
-import com.bellako.kiwi.common.screens.modals.DashboardModalState
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getScreenHeight
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,6 +46,10 @@ class DashboardModalTest {
     private lateinit var futureMetricsDTO: MetricsDTO
     private lateinit var todayMetricsDTO: MetricsDTO
     private lateinit var pastMetricsDTO: MetricsDTO
+
+    var screenHeightDp = 0.dp
+    private val states = listOf(150, 260, 650)
+    var statesBottom: List<Float> = listOf()
 
     @Before
     fun setUp() {
@@ -72,12 +75,7 @@ class DashboardModalTest {
 
     @Test
     fun loadTodayMetricsWithOverflowedMetrics() {
-        rule.setContent {
-            DashboardModal(
-                fakeViewModel,
-                DashboardModalState.EXPANDED
-            )
-        }
+        setContent(false, 2)
 
         rule.isInCollapsedState()
         rule.onNodeWithTag(DashboardModalTestTags.STEPS)
@@ -88,12 +86,7 @@ class DashboardModalTest {
 
     @Test
     fun loadPastMetrics() {
-        rule.setContent {
-            DashboardModal(
-                fakeViewModel,
-                DashboardModalState.EXPANDED
-            )
-        }
+        setContent(false, 2)
 
         val yesterdayTestTag =
             DashboardModalTestTags.DAY_INDICATOR_PREFIX + MetricsUtils.getDayOfWeekNumber(
@@ -109,12 +102,7 @@ class DashboardModalTest {
 
     @Test
     fun loadFutureMetrics() {
-        rule.setContent {
-            DashboardModal(
-                fakeViewModel,
-                DashboardModalState.EXPANDED
-            )
-        }
+        setContent(false, 2)
 
         val tomorrowTestTag =
             DashboardModalTestTags.DAY_INDICATOR_PREFIX + MetricsUtils.getDayOfWeekNumber(
@@ -130,13 +118,13 @@ class DashboardModalTest {
 
     @Test
     fun dragFromHiddenToCollapsed() {
-        val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.HIDDEN)
+        setContent(false, 0)
+
         rule.isInHiddenState()
 
         rule.swipeDashboardModal(
-            fromState = DashboardModalState.HIDDEN,
-            toState = DashboardModalState.COLLAPSED,
-            screenHeightDp = screenHeightDpState
+            fromState = 0,
+            toState = 1
         )
 
         rule.isInCollapsedState()
@@ -144,13 +132,13 @@ class DashboardModalTest {
 
     @Test
     fun dragFromHiddenToExpanded() {
-        val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.HIDDEN)
+        setContent(false, 0)
+
         rule.isInHiddenState()
 
         rule.swipeDashboardModal(
-            fromState = DashboardModalState.HIDDEN,
-            toState = DashboardModalState.EXPANDED,
-            screenHeightDp = screenHeightDpState
+            fromState = 0,
+            toState = 2
         )
 
         rule.isInExpandedState()
@@ -158,13 +146,13 @@ class DashboardModalTest {
 
     @Test
     fun dragFromCollapsedToExpanded() {
-        val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.COLLAPSED)
+        setContent(false, 1)
+
         rule.isInCollapsedState()
 
         rule.swipeDashboardModal(
-            fromState = DashboardModalState.COLLAPSED,
-            toState = DashboardModalState.EXPANDED,
-            screenHeightDp = screenHeightDpState
+            fromState = 1,
+            toState = 2
         )
 
         rule.isInExpandedState()
@@ -172,7 +160,7 @@ class DashboardModalTest {
 
     @Test
     fun showCalendarViewFromCollapsedAndThenHideIt() {
-        val screenHeightDpState = setContentAndGetScreenHeight(DashboardModalState.COLLAPSED)
+        setContent(true, 1)
 
         rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
             .performClick()
@@ -180,14 +168,12 @@ class DashboardModalTest {
             .isDisplayed()
 
         rule.swipeDashboardModal(
-            fromState = DashboardModalState.EXPANDED,
-            toState = DashboardModalState.COLLAPSED,
-            screenHeightDp = screenHeightDpState
+            fromState = 2,
+            toState = 1
         )
         rule.swipeDashboardModal(
-            fromState = DashboardModalState.COLLAPSED,
-            toState = DashboardModalState.EXPANDED,
-            screenHeightDp = screenHeightDpState
+            fromState = 1,
+            toState = 2
         )
 
         rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
@@ -196,12 +182,7 @@ class DashboardModalTest {
 
     @Test
     fun showCalendarViewFromExpandedAndThenHideIt() {
-        rule.setContent {
-            DashboardModal(
-                fakeViewModel,
-                DashboardModalState.EXPANDED
-            )
-        }
+        setContent(false, 2)
 
         rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
             .performClick()
@@ -218,13 +199,8 @@ class DashboardModalTest {
 
     @Test
     fun navigateToPastMonthInCalendarView() {
-        rule.setContent {
-            DashboardModal(
-                fakeViewModel,
-                DashboardModalState.EXPANDED,
-                true
-            )
-        }
+        setContent(true, 2)
+
         val originalMonthYearText = rule.onNodeWithTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
             .fetchSemanticsNode()
             .config
@@ -251,43 +227,13 @@ class DashboardModalTest {
 
     }
 
-    private fun setContentAndGetScreenHeight(dashboardModalState: DashboardModalState) : Int {
-        val screenHeightDpState = mutableStateOf(0)
-
-        rule.setContent {
-            val config = LocalConfiguration.current
-            screenHeightDpState.value = config.screenHeightDp
-
-            DashboardModal(
-                fakeViewModel,
-                dashboardModalState
-            )
-        }
-
-        rule.waitUntil {
-            screenHeightDpState.value > 0
-        }
-        return screenHeightDpState.value
-    }
-
     private fun ComposeTestRule.swipeDashboardModal(
-        fromState: DashboardModalState,
-        toState: DashboardModalState,
-        screenHeightDp: Int
+        fromState: Int,
+        toState: Int
     ) {
         val density = Density(1f, 1f)
-        val hidden = with(density) { 150.dp.toPx() }
-        val collapsed = with(density) { 300.dp.toPx() }
-        val expanded = with(density) { screenHeightDp.dp.toPx() }
-
-        val anchorMap = mapOf(
-            DashboardModalState.HIDDEN to hidden,
-            DashboardModalState.COLLAPSED to collapsed,
-            DashboardModalState.EXPANDED to expanded
-        )
-
-        val fromY = with(density) { screenHeightDp.dp.toPx() - anchorMap[fromState]!! }
-        val toY = with(density) { screenHeightDp.dp.toPx() - anchorMap[toState]!! }
+        val fromY = with(density) { (screenHeightDp - statesBottom[fromState].dp).toPx() }
+        val toY = with(density) { (screenHeightDp - statesBottom[toState].dp).toPx() }
         val dragDistance = fromY - toY
 
         onNodeWithTag(DashboardModalTestTags.DRAGGABLE_NODE)
@@ -319,6 +265,17 @@ class DashboardModalTest {
 
         rule.onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
             .isNotDisplayed()
+    }
+
+    private fun setContent(showCalendarView: Boolean, initialStateIndex: Int) {
+        rule.setContent {
+            screenHeightDp = getScreenHeight(withoutInsetTop = true).dp
+            statesBottom = states.map { state -> getResponsiveSizeHeight(state).toFloat() }
+            DashboardModal(fakeViewModel, showCalendarView, initialStateIndex)
+        }
+        rule.waitUntil {
+            screenHeightDp > 0.dp
+        }
     }
 
 }
