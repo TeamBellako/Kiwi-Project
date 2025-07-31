@@ -10,7 +10,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.features.metrics.data.Metrics
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
-import com.bellako.kiwi.common.model.Logger
+import com.bellako.kiwi.common.utils.Logger
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId

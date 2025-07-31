@@ -7,7 +7,7 @@ import com.bellako.kiwi.features.settings.model.SettingsRepository
 import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.updateSettings
 import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.validSettings
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
-import com.bellako.kiwi.common.model.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

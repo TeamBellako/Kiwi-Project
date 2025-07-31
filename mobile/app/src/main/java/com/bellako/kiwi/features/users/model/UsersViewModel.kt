@@ -7,7 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.bellako.kiwi.features.users.data.UsersDTO
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.common.model.BaseViewModel
-import com.bellako.kiwi.common.model.Logger.warn
+import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.features.users.data.Email
 import com.bellako.kiwi.features.users.data.Password
