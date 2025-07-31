@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +38,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
+import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
@@ -114,10 +114,13 @@ private fun InteractiveMap(
         modifier = modifier
             .clipToBounds()
             .pointerInput(Unit) {
-                detectTransformGestures(
+                detectTransformGesturesAndEnd(
                     onGesture = { centroid, pan, zoom, _ ->
                         viewModel.updateScale(zoom, centroid)
                         viewModel.updateOffset(pan)
+                    },
+                    onGestureEnd = {
+                        viewModel.startFling()
                     }
                 )
             },

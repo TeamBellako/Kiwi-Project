@@ -1,12 +1,16 @@
 package com.bellako.kiwi.features.map.model
 
 import androidx.compose.ui.geometry.Offset
+import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.features.map.data.MapState
 import com.bellako.kiwi.common.model.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
@@ -22,6 +26,15 @@ class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
 
     private val _state = MutableStateFlow(MapState(scale = initialScale))
     override val state: StateFlow<MapState> = _state.asStateFlow()
+
+    private var flingJob: Job? = null
+    private val flingFriction = 0.9f // to brake the velocity [0..1] the lower it is, the faster it stops
+    private val flingMinVelocity = 10f // threshold to stop the fling
+    private var flingLastPosition = Offset(0f, 0f)
+    private var flingLastTime = 0L
+    private var flingVelocity = Offset(0f, 0f)
+
+    // ---------------------------------------------------------------------------------------------
 
     fun setParameters(
         initialScale: Float,
@@ -69,6 +82,8 @@ class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
         _state.value = _state.value.copy(offset = newOffset)
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     override fun updateScale(scaleFactor: Float, centroid: Offset) {
         val newScale = (_state.value.scale * scaleFactor).coerceIn(minScale, maxScale)
         val newOffset = calculateOffsetForZoom(_state.value, newScale, centroid)
@@ -79,6 +94,7 @@ class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
     override fun updateOffset(delta: Offset) {
         val newOffset = calculateConstrainedOffset(_state.value.offset + delta, _state.value)
         setOffset(newOffset)
+        updateFling(delta)
     }
 
     private fun calculateOffsetForZoom(state: MapState, newScale: Float, centroid: Offset): Offset {
@@ -137,4 +153,30 @@ class MapViewModel @Inject constructor() : BaseViewModel(), IMapViewModel {
 
         return Offset(resultX, resultY)
     }
+
+    private fun updateFling(delta: Offset) {
+        val now = System.currentTimeMillis()
+        val elapsed = now - flingLastTime
+        if (elapsed > 0L) {
+            val newPos = flingLastPosition + delta
+            flingVelocity = (newPos - flingLastPosition) / (elapsed / 1000f)
+            flingLastPosition = newPos
+            flingLastTime = now
+        }
+    }
+
+    fun startFling() {
+        flingJob?.cancel() // cancel previous sling if any
+        var velocity = flingVelocity
+        flingJob = viewModelScope.launch {
+            while (abs(velocity.x) > flingMinVelocity || abs(velocity.y) > flingMinVelocity) {
+                val millis = 16L // (approx 1 frame)
+                val delta = velocity * (millis / 1000f) // Calculate displacement
+                velocity *= flingFriction // Brake
+                updateOffset(delta)
+                delay(16L)
+            }
+        }
+    }
+
 }
