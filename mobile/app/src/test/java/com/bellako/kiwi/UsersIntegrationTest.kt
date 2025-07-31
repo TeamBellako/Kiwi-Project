@@ -7,7 +7,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.model.UsersRepository
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.model.AuthRepository
-import com.bellako.kiwi.common.model.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith

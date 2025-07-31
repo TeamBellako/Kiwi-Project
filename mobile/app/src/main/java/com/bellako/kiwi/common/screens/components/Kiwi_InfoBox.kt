@@ -14,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.KiwiTheme
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun Kiwi_InfoBox(
@@ -31,7 +31,7 @@ fun Kiwi_InfoBox(
             Kiwi_TextArguments(
             message,
             modifier = Modifier
-                .padding(getResponsiveRelativeSize(10.dp))
+                .padding(getResponsiveSizeHeight(10.dp))
                 .testTag(testTag),
         )
         )

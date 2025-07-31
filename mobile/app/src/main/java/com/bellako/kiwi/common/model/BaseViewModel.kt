@@ -2,6 +2,7 @@ package com.bellako.kiwi.common.model
 
 import androidx.lifecycle.ViewModel
 import com.bellako.kiwi.common.data.UIState
+import com.bellako.kiwi.common.utils.HTTPUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

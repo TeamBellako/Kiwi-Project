@@ -11,7 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun Kiwi_HorizontalLine(
@@ -22,9 +22,9 @@ fun Kiwi_HorizontalLine(
 ) {
     Box(
         modifier = modifier
-            .width(width)
-            .height(height)
-            .clip(RoundedCornerShape(getResponsiveRelativeSize(2.dp)))
+            .width(getResponsiveSizeHeight(width))
+            .height(getResponsiveSizeHeight(height))
+            .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
             .background(color)
     )
 }

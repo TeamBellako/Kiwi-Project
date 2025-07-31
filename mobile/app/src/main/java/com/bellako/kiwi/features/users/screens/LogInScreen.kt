@@ -36,8 +36,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.withLink
-import com.bellako.kiwi.audio.AudioLayer
-import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -55,7 +53,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 
 @Composable
@@ -66,14 +64,6 @@ fun LogInScreen(
 ) {
     val context = LocalContext.current
     val uiState by usersViewModel.uiState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        AudioManager.playMusic(context, listOf(
-            AudioLayer(R.raw.music_stepswithin, true),
-            AudioLayer(R.raw.music_stepswithin_enigma, false)
-        ))
-    }
-
 
     Box(
         modifier = Modifier
@@ -155,7 +145,7 @@ private fun LogIn(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(getResponsiveRelativeSize(Spacing.medium)),
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
 
@@ -179,7 +169,7 @@ private fun LogIn(
                         "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(bottom = getResponsiveRelativeSize(Spacing.large))
+                        modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.large))
                     )
                 )
 
@@ -285,7 +275,7 @@ private fun LogIn(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = getResponsiveRelativeSize(Spacing.medium))
+                .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
                 .alpha(if (!isLoading || isPreview) 1f else 0f),
             contentAlignment = Alignment.BottomCenter
         ) {
@@ -332,8 +322,7 @@ private fun SignUp(
         Kiwi_AnnotatedStringArguments(
         annotatedString,
         TextAlign.Center
-    )
-    )
+    ))
 }
 
 @SuppressLint("ViewModelConstructorInComposable")

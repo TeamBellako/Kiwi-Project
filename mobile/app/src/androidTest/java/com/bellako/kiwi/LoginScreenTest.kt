@@ -1,5 +1,6 @@
 package com.bellako.kiwi
 
+import android.annotation.SuppressLint
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -7,7 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.model.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -38,6 +39,7 @@ class LoginScreenTest {
     private lateinit var personalityState: PersonalityState
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
 
+    @SuppressLint("ViewModelConstructorInComposable")
     @Before
     fun setUp() {
         AudioManager.setEnabled(false)

@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.KiwiTheme
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun Kiwi_Button(
@@ -36,11 +36,11 @@ fun Kiwi_Button(
                 contentColor = MaterialTheme.colorScheme.onSecondary,
                 disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
             ),
-            contentPadding = PaddingValues(getResponsiveRelativeSize(8).dp),
+            contentPadding = PaddingValues(getResponsiveSizeHeight(8).dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(testTag),
-            shape = RoundedCornerShape(getResponsiveRelativeSize(10.dp))
+            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp))
         ) {
             Kiwi_Label1(textArguments)
         }

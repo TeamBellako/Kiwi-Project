@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.map.data
 import androidx.compose.ui.geometry.Offset
 
 data class MapState(
+    val scaleBase: Float = 1f,
     val scale: Float = 1f,
     val offset: Offset = Offset.Zero,
     val mapWidthPx: Float = 0f,

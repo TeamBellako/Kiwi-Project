@@ -1,4 +1,4 @@
-package com.bellako.kiwi.common.model
+package com.bellako.kiwi.common.utils
 
 import com.bellako.kiwi.common.data.UIState
 import com.squareup.moshi.Moshi

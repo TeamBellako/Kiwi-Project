@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -29,8 +28,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.bellako.kiwi.audio.AudioLayer
-import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -41,7 +38,7 @@ import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 
 @Composable
@@ -50,18 +47,6 @@ fun SignUpTestScreen(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
-    val context = LocalContext.current
-
-    BackHandler(enabled = true) { } // Do nothing, ignore native back
-
-    LaunchedEffect(Unit) {
-        AudioManager.playMusic(context, listOf(
-            AudioLayer(R.raw.music_stepswithin, false),
-            AudioLayer(R.raw.music_stepswithin_enigma, true)
-        ))
-    }
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -80,7 +65,7 @@ fun SignUpTestScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(getResponsiveRelativeSize(Spacing.medium)),
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
             Question(

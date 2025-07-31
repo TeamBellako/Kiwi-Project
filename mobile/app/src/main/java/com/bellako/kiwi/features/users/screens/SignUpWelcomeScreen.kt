@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -22,16 +21,12 @@ import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.ui.Spacing
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.withLink
-import com.bellako.kiwi.audio.AudioLayer
-import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
@@ -42,10 +37,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.features.personality.data.PersonalityState
-import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
-import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 
 @Composable
@@ -53,18 +45,6 @@ fun SignUpWelcomeScreen(
     viewModel: IUsersViewModel,
     navController: NavController
 ) {
-    val context = LocalContext.current
-
-    BackHandler(enabled = true) { } // Do nothing, ignore native back
-
-    LaunchedEffect(Unit) {
-        AudioManager.playMusic(context, listOf(
-            AudioLayer(R.raw.music_stepswithin, false),
-            AudioLayer(R.raw.music_stepswithin_enigma, true)
-        ))
-    }
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -83,7 +63,7 @@ fun SignUpWelcomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(getResponsiveRelativeSize(Spacing.medium)),
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
             contentAlignment = Alignment.Center
         ) {
             Welcome(
@@ -94,7 +74,7 @@ fun SignUpWelcomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = getResponsiveRelativeSize(Spacing.medium)),
+                    .padding(bottom = getResponsiveSizeHeight(Spacing.medium)),
                 contentAlignment = Alignment.BottomCenter
             ) {
 

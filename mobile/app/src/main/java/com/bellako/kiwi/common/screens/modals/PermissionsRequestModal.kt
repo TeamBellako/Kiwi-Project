@@ -50,7 +50,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -124,7 +124,7 @@ private fun PermissionRequestLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(getResponsiveRelativeSize(Spacing.medium)),
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -133,7 +133,7 @@ private fun PermissionRequestLayout(
                 contentDescription = "Error icon",
                 tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier
-                    .size(getResponsiveRelativeSize(Spacing.xLarge))
+                    .size(getResponsiveSizeHeight(Spacing.xLarge))
             )
 
             Kiwi_Spacer()

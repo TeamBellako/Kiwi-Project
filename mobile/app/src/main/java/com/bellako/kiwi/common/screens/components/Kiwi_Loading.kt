@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.ui.KiwiTheme
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun LoadingModal(
@@ -26,7 +26,7 @@ fun LoadingModal(
     trackColor: Color = Color.Transparent
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Box(modifier = Modifier.size(getResponsiveRelativeSize(50.dp))) {
+        Box(modifier = Modifier.size(getResponsiveSizeHeight(50.dp))) {
             LoadingIcon(color, trackColor)
         }
     }

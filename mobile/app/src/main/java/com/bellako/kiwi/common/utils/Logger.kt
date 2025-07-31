@@ -1,4 +1,4 @@
-package com.bellako.kiwi.common.model
+package com.bellako.kiwi.common.utils
 
 import android.util.Log
 import com.bellako.kiwi.BuildConfig

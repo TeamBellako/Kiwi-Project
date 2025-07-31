@@ -36,7 +36,7 @@ import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.data.SettingsState
 import com.bellako.kiwi.features.settings.tests.SettingsFakeViewModel
@@ -56,7 +56,7 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(getResponsiveRelativeSize(Spacing.medium))
+            .padding(getResponsiveSizeHeight(Spacing.medium))
     ) {
         SettingsScreenLayout(
             viewModel,

@@ -11,7 +11,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 // -------------------------------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ private fun Kiwi_Text(arguments: Kiwi_TextArguments, bodyStyle: TextStyle) {
         style = bodyStyle.copy(
             fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal,
-            fontSize = getResponsiveRelativeSize(bodyStyle.fontSize.value.toInt()).sp
+            fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp
         )
     )
 }
@@ -106,7 +106,7 @@ private fun Kiwi_AnnotatedString_P(arguments: Kiwi_AnnotatedStringArguments, bod
         text = arguments.text,
         textAlign = arguments.textAlign,
         modifier = Modifier,
-        style = bodyStyle.copy(fontSize = getResponsiveRelativeSize(bodyStyle.fontSize.value.toInt()).sp)
+        style = bodyStyle.copy(fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp)
     )
 }
 

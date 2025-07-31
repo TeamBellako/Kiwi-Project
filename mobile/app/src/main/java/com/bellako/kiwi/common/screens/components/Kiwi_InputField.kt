@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.KiwiTheme
-import com.bellako.kiwi.ui.getResponsiveRelativeSize
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun Kiwi_InputField(
@@ -85,7 +85,7 @@ fun Kiwi_InputField(
                 }
             },
             textStyle = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = getResponsiveRelativeSize(MaterialTheme.typography.bodyMedium.fontSize.value.toInt()).sp
+                fontSize = getResponsiveSizeHeight(MaterialTheme.typography.bodyMedium.fontSize.value.toInt()).sp
             )
         )
     }
