@@ -18,12 +18,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
@@ -37,27 +40,44 @@ import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.getScreenHeight
+import com.bellako.kiwi.ui.getScreenWidth
 
+/**
+ * @param minZoom how small (zoom out) the map can be, considering 1 the full map on screen
+ * @param maxZoom how big (zoom in) the map can be, considering 1 the full map on screen
+ * @param initialZoom (minZoom..maxZoom)
+ * @param initialPosition (-1,1) relative to the center of the map
+ * @param dragLimitFactor
+ * @param mapResourceId image to show as the map
+ * @param title
+ * @param viewModel Optional parameter for testing
+ */
 @Composable
 fun MapScreen(
-    initialZoom: Float = 4.0f,
-    minZoom: Float = 2.0f,
-    maxZoom: Float = 8.0f,
-    initialPositionFactor: Float = 0.8f,
-    dragLimitFactor: Float = 0.9f,
+    minZoom: Float = 1.5f,
+    maxZoom: Float = 6f,
+    initialZoom: Float = 2f,
+    initialPosition: Offset = Offset(-0.4f, -0.4f),
+    dragLimitFactor: Float = 1f,
     mapResourceId: Int = R.drawable.ph_home_map,
-    contentDescription: String = "Interactive World Map",
     title: String = "WORLD MAP",
-    viewModel: MapViewModel? = null // Optional parameter for testing
+    viewModel: MapViewModel? = null
 ) {
     val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
+    val density = LocalDensity.current
+    val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
 
     mapViewModel.setParameters(
-        initialScale = initialZoom,
         minScale = minZoom,
         maxScale = maxZoom,
-        initialPositionFactor = initialPositionFactor,
-        dragLimitFactor = dragLimitFactor
+        initialScale = initialZoom,
+        initialPosition = initialPosition,
+        dragLimitFactor = dragLimitFactor,
+        mapWidthPx = imageBitmap.width.toFloat(),
+        mapHeightPx = imageBitmap.height.toFloat(),
+        viewportWidthPx = with(density) { getScreenWidth().dp.toPx() },
+        viewportHeightPx = with(density) { getScreenHeight(withoutInsetTop = true, withoutInsetBottom = true).dp.toPx() }
     )
 
     Column(
@@ -74,9 +94,8 @@ fun MapScreen(
             bold = true
         ))
 
-        ZoomableMap(
+        InteractiveMap(
             mapResourceId = mapResourceId,
-            contentDescription = contentDescription,
             viewModel = mapViewModel,
             modifier = Modifier.fillMaxSize()
         )
@@ -84,28 +103,16 @@ fun MapScreen(
 }
 
 @Composable
-private fun ZoomableMap(
+private fun InteractiveMap(
     mapResourceId: Int,
-    contentDescription: String,
     viewModel: MapViewModel,
     modifier: Modifier = Modifier
 ) {
     val mapState by viewModel.state.collectAsState()
-    val density = LocalDensity.current
 
     Box(
         modifier = modifier
             .clipToBounds()
-            .onGloballyPositioned { coordinates ->
-                with(density) {
-                    viewModel.updateDimensions(
-                        mapWidth = mapState.mapWidthPx,
-                        mapHeight = mapState.mapHeightPx,
-                        viewportWidth = coordinates.size.width.toFloat(),
-                        viewportHeight = coordinates.size.height.toFloat()
-                    )
-                }
-            }
             .pointerInput(Unit) {
                 detectTransformGestures(
                     onGesture = { centroid, pan, zoom, _ ->
@@ -118,25 +125,15 @@ private fun ZoomableMap(
     ) {
         Kiwi_Image(
             painterResourceId = mapResourceId,
-            alt = contentDescription,
+            alt = "Interactive Map",
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer(
-                    scaleX = mapState.scale,
-                    scaleY = mapState.scale,
+                    scaleX = mapState.scale * mapState.scaleBase,
+                    scaleY = mapState.scale * mapState.scaleBase,
                     translationX = mapState.offset.x,
                     translationY = mapState.offset.y
                 )
-                .onGloballyPositioned { coordinates ->
-                    with(density) {
-                        viewModel.updateDimensions(
-                            mapWidth = coordinates.size.width.toFloat(),
-                            mapHeight = coordinates.size.height.toFloat(),
-                            viewportWidth = mapState.viewportWidthPx,
-                            viewportHeight = mapState.viewportHeightPx
-                        )
-                    }
-                }
         )
     }
 }

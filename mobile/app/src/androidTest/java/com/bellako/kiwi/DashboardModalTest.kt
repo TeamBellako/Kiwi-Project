@@ -47,9 +47,9 @@ class DashboardModalTest {
     private lateinit var todayMetricsDTO: MetricsDTO
     private lateinit var pastMetricsDTO: MetricsDTO
 
-    var screenHeightDp = 0.dp
+    private var screenHeightDp = 0.dp
     private val states = listOf(150, 260, 650)
-    var statesBottom: List<Float> = listOf()
+    private var statesBottom: List<Float> = listOf()
 
     @Before
     fun setUp() {
