@@ -43,12 +43,13 @@ import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 
+
 /**
  * @param minZoom how small (zoom out) the map can be, considering 1 the full map on screen
  * @param maxZoom how big (zoom in) the map can be, considering 1 the full map on screen
  * @param initialZoom (minZoom..maxZoom)
  * @param initialPosition (-1,1) relative to the center of the map
- * @param dragLimitFactor
+ * @param dragLimitFactor (0,1) padding for the map limit
  * @param mapResourceId image to show as the map
  * @param title
  * @param viewModel Optional parameter for testing

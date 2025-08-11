@@ -104,12 +104,10 @@ private fun HelpScreenLayout(
             }
         }
 
-        Kiwi_AnnotatedString_P2(
-            Kiwi_AnnotatedStringArguments(
+        Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
             annotatedString,
             TextAlign.Center
-        )
-        )
+        ))
 
         Kiwi_Spacer(Spacing.xLarge)
 
@@ -137,6 +135,8 @@ private fun openEmailClient(context: Context) {
         e.printStackTrace()
     }
 }
+
+// -------------------------------------------------------------------------------------------------
 
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)

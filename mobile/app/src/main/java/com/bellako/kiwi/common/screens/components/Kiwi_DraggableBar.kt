@@ -36,6 +36,12 @@ import com.bellako.kiwi.ui.getScreenHeight
 import kotlinx.coroutines.launch
 
 
+/**
+ * @param content placed inside the bar, called with param @currentStateIndex when modified
+ * @param states list of (states) sizes the bar can have, passed as raw int (relativized internally)
+ * @param initialStateIndex index of the param list @states to set as initial state
+ * @param backgroundColor of the bar
+ */
 @Composable
 fun Kiwi_DraggableBar(
     modifier: Modifier = Modifier,
@@ -84,7 +90,7 @@ fun Kiwi_DraggableBar(
                             lastPosition = animatableOffset.value
                         },
                         onDrag = { change, dragAmount ->
-                            val dragAmountY = with(density) { dragAmount.y.toDp() }.value
+                            val dragAmountY = dragAmount.y.toDp().value
                             val now = System.currentTimeMillis()
                             val elapsed = now - lastTime
                             if (elapsed > 0) {

@@ -289,6 +289,8 @@ private fun SignUp(
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)

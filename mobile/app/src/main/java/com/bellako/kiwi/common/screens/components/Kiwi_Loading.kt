@@ -33,7 +33,7 @@ fun LoadingModal(
 }
 
 @Composable
-fun LoadingIcon(
+private fun LoadingIcon(
     color: Color = MaterialTheme.colorScheme.secondary,
     trackColor: Color = Color.Transparent
 ) {
@@ -59,6 +59,8 @@ fun LoadingIcon(
         )
     }
 }
+
+// -------------------------------------------------------------------------------------------------
 
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)

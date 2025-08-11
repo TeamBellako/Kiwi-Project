@@ -652,13 +652,11 @@ private fun CollapsedSummaryCard(
                             append("/8,000 steps")
                         }
                     }
-                    Kiwi_AnnotatedString_P2(
-                        Kiwi_AnnotatedStringArguments(
+                    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
                         stepsText,
                         TextAlign.Left,
                         Modifier.testTag(DashboardModalTestTags.STEPS)
-                    )
-                    )
+                    ))
 
                     Kiwi_Spacer(Spacing.xSmall)
 
@@ -670,13 +668,11 @@ private fun CollapsedSummaryCard(
                             append("/60 screen mins")
                         }
                     }
-                    Kiwi_AnnotatedString_P2(
-                        Kiwi_AnnotatedStringArguments(
+                    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
                         screenTimeText,
                         TextAlign.Left,
                         Modifier.testTag(DashboardModalTestTags.SCREEN_TIME)
-                    )
-                    )
+                    ))
                 }
             }
             Box(

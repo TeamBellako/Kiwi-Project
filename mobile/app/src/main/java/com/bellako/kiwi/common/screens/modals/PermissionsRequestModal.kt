@@ -217,6 +217,8 @@ private fun hasActivityRecognitionPermission(context: Context): Boolean {
     } else true
 }
 
+// -------------------------------------------------------------------------------------------------
+
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)

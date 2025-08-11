@@ -160,13 +160,13 @@ private fun GoToLogIn(
         }
     }
 
-    Kiwi_AnnotatedString_P2(
-        Kiwi_AnnotatedStringArguments(
+    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
         annotatedString,
         TextAlign.Center,
-    )
-    )
+    ))
 }
+
+// -------------------------------------------------------------------------------------------------
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
