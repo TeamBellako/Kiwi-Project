@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,6 +59,7 @@ fun PermissionsRequestModal(
     onPermissionsGranted: @Composable () -> Unit
 ) {
     val context = LocalContext.current
+    val isPreview = LocalInspectionMode.current
 
     val hasUsageAccess = remember { mutableStateOf(hasUsageStatsPermission(context)) }
     val hasStepPermission = remember { mutableStateOf(hasActivityRecognitionPermission(context)) }
@@ -85,7 +87,7 @@ fun PermissionsRequestModal(
         }
     }
 
-    if (hasUsageAccess.value && hasStepPermission.value) {
+    if (!isPreview && hasUsageAccess.value && hasStepPermission.value) {
         FirebaseEventLogger.logEvent(FirebaseEventNames.PERMISSION_GRANTED)
 
         onPermissionsGranted()
@@ -138,32 +140,26 @@ private fun PermissionRequestLayout(
 
             Kiwi_Spacer()
 
-            Kiwi_H1(
-                Kiwi_TextArguments(
+            Kiwi_H1(Kiwi_TextArguments(
                 "Permissions\n Required",
                 color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
                 bold = true
-            )
-            )
+            ))
 
-            Kiwi_P2(
-                Kiwi_TextArguments(
-                "GrowTale requires permissions to access metrics such as steps and screen time.",
-                    TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            )
+            Kiwi_P2(Kiwi_TextArguments(
+            "GrowTale requires permissions to access metrics such as steps and screen time.",
+                TextAlign.Center,
+                color = MaterialTheme.colorScheme.outline
+            ))
 
             Kiwi_Spacer(Spacing.small)
 
-            Kiwi_P2(
-                Kiwi_TextArguments(
-                    "Please click below to activate them before proceeding.",
-                    TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            )
+            Kiwi_P2(Kiwi_TextArguments(
+                "Please click below to activate them before proceeding.",
+                TextAlign.Center,
+                color = MaterialTheme.colorScheme.outline
+            ))
 
             Kiwi_Spacer(Spacing.large)
 
@@ -195,7 +191,6 @@ private fun PermissionRequestLayout(
         }
     }
 }
-
 
 @RequiresApi(Build.VERSION_CODES.Q)
 private fun hasUsageStatsPermission(context: Context): Boolean {
