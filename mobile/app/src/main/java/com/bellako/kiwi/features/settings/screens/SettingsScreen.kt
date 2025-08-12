@@ -118,12 +118,10 @@ private fun SettingsFields(
                 .testTag(CommonTestTags.SETTINGS_SCREEN),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Kiwi_H2(
-                Kiwi_TextArguments(
+            Kiwi_H2(Kiwi_TextArguments(
                 "SETTINGS",
                 bold = true
-            )
-            )
+            ))
 
             Kiwi_Spacer()
 
@@ -132,12 +130,10 @@ private fun SettingsFields(
                 value = currentState.email,
                 onValueChange = {},
                 label = {
-                    Kiwi_Label2(
-                        Kiwi_TextArguments(
+                    Kiwi_Label2(Kiwi_TextArguments(
                         "Email",
                         color = MaterialTheme.colorScheme.inversePrimary
-                    )
-                    )
+                    ))
                 },
                 textColor = MaterialTheme.colorScheme.inversePrimary,
                 testTag = UsersTestTags.EMAIL_FIELD,

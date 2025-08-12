@@ -128,25 +128,21 @@ private fun SignUp(
 
                         // TEXT WELCOME
 
-                        Kiwi_P2(
-                            Kiwi_TextArguments(
-                                "Initial Setup Will Take\nApproximately 3 Minutes",
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        )
+                        Kiwi_P2(Kiwi_TextArguments(
+                            "Initial Setup Will Take\nApproximately 3 Minutes",
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.secondary
+                        ))
 
                         Kiwi_Spacer(Spacing.large)
                         Kiwi_Spacer(Spacing.large)
 
-                        Kiwi_H2(
-                            Kiwi_TextArguments(
-                                "Let's Start With\nThe Basics",
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.secondary,
-                                bold = true
-                            )
-                        )
+                        Kiwi_H2(Kiwi_TextArguments(
+                            "Let's Start With\nThe Basics",
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.secondary,
+                            bold = true
+                        ))
 
                         Kiwi_Spacer(Spacing.large)
 
@@ -158,12 +154,10 @@ private fun SignUp(
                             value = currentPersonalityState.realName,
                             onValueChange = { personalityViewModel.onRealNameChanged(it) },
                             label = {
-                                Kiwi_Label2(
-                                    Kiwi_TextArguments(
-                                        "Real Name",
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
-                                )
+                                Kiwi_Label2(Kiwi_TextArguments(
+                                    "Real Name",
+                                    color = MaterialTheme.colorScheme.inversePrimary
+                                ))
                             },
                             shouldHideInput = false,
                             textColor = MaterialTheme.colorScheme.inversePrimary,
@@ -177,12 +171,10 @@ private fun SignUp(
                             value = currentPersonalityState.knightName,
                             onValueChange = { personalityViewModel.onKnightNameChanged(it) },
                             label = {
-                                Kiwi_Label2(
-                                    Kiwi_TextArguments(
-                                        "Knight Name",
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
-                                )
+                                Kiwi_Label2(Kiwi_TextArguments(
+                                    "Knight Name",
+                                    color = MaterialTheme.colorScheme.inversePrimary
+                                ))
                             },
                             shouldHideInput = false,
                             textColor = MaterialTheme.colorScheme.inversePrimary,
@@ -196,12 +188,10 @@ private fun SignUp(
                             value = currentUsersState.email,
                             onValueChange = { usersViewModel.onEmailChanged(it) },
                             label = {
-                                Kiwi_Label2(
-                                    Kiwi_TextArguments(
-                                        "Email",
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
-                                )
+                                Kiwi_Label2(Kiwi_TextArguments(
+                                    "Email",
+                                    color = MaterialTheme.colorScheme.inversePrimary
+                                ))
                             },
                             shouldHideInput = false,
                             textColor = MaterialTheme.colorScheme.inversePrimary,
@@ -215,12 +205,10 @@ private fun SignUp(
                             value = currentUsersState.password,
                             onValueChange = { usersViewModel.onPasswordChanged(it) },
                             label = {
-                                Kiwi_Label2(
-                                    Kiwi_TextArguments(
-                                        "Password",
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
-                                )
+                                Kiwi_Label2(Kiwi_TextArguments(
+                                    "Password",
+                                    color = MaterialTheme.colorScheme.inversePrimary
+                                ))
                             },
                             shouldHideInput = true,
                             textColor = MaterialTheme.colorScheme.inversePrimary,

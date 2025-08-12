@@ -195,13 +195,11 @@ private fun Kiwi_DraggableBar_Preview(
                         .height(getResponsiveSizeHeight(1600.dp)),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    Kiwi_H3(
-                        Kiwi_TextArguments(
-                            "Content",
-                            TextAlign.Center,
-                            MaterialTheme.colorScheme.secondary
-                        )
-                    )
+                    Kiwi_H3(Kiwi_TextArguments(
+                        "Content",
+                        TextAlign.Center,
+                        MaterialTheme.colorScheme.secondary
+                    ))
                 }
             },
             states = listOf(0, 100, 600),

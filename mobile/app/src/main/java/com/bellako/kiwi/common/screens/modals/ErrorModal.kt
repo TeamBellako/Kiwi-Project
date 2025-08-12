@@ -74,26 +74,22 @@ private fun ErrorModalLayout(
 
         Kiwi_Spacer(Spacing.small)
 
-        Kiwi_H2(
-            Kiwi_TextArguments(
+        Kiwi_H2(Kiwi_TextArguments(
             "Wild Error Appeared!",
             color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center,
             bold = true
-        )
-        )
+        ))
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        Kiwi_P2(
-            Kiwi_TextArguments(
+        Kiwi_P2(Kiwi_TextArguments(
             errorMessage,
             TextAlign.Center,
             color = MaterialTheme.colorScheme.outline,
             modifier = Modifier
                 .testTag(CommonTestTags.ERROR_MODAL)
-        )
-        )
+        ))
 
         if (onRetry != null) {
             Kiwi_Button(

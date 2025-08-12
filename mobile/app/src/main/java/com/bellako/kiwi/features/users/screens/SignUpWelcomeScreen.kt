@@ -100,14 +100,12 @@ private fun Welcome(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H2(
-            Kiwi_TextArguments(
+        Kiwi_H2(Kiwi_TextArguments(
             "Your Legend is About\nTo Be Forged...",
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.secondary,
             bold = true
-        )
-        )
+        ))
 
         Kiwi_Spacer(Spacing.xLarge)
 

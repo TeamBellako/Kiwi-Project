@@ -377,15 +377,13 @@ private fun CalendarView(
             .then(gestureModifier)
             .testTag(DashboardModalTestTags.CALENDAR_VIEW)
     ) {
-        Kiwi_P2(
-            Kiwi_TextArguments(
-                currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
-            )
-        )
+        Kiwi_P2(Kiwi_TextArguments(
+            currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier
+                .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
+        ))
         Kiwi_Spacer(Spacing.large)
 
         AnimatedContent(
@@ -483,14 +481,12 @@ private fun ExpandedDayIndicator(
             verticalArrangement = Arrangement.Center
         ) {
             val contentAlpha = if (isInFuture) 0.4f else 1f
-            Kiwi_P2(
-                Kiwi_TextArguments(
-                    dayName,
-                    color = MaterialTheme.colorScheme.inversePrimary,
-                    modifier = Modifier
-                        .alpha(contentAlpha)
-                )
-            )
+            Kiwi_P2(Kiwi_TextArguments(
+                dayName,
+                color = MaterialTheme.colorScheme.inversePrimary,
+                modifier = Modifier
+                    .alpha(contentAlpha)
+            ))
 
             Kiwi_Image(
                 R.drawable.ph_dashboard_day_empty,
@@ -571,31 +567,28 @@ private fun MetricProgress(
 ) {
     Box(modifier) {
         Column {
-            Kiwi_H3(
-                Kiwi_TextArguments(
+            Kiwi_H3(Kiwi_TextArguments(
                 title,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
-                    .fillMaxWidth())
-            )
-            Kiwi_P1(
-                Kiwi_TextArguments(
+                    .fillMaxWidth()
+            ))
+            Kiwi_P1(Kiwi_TextArguments(
                 value,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(testTag))
-            )
-            Kiwi_P2(
-                Kiwi_TextArguments(
+                    .testTag(testTag)
+            ))
+            Kiwi_P2(Kiwi_TextArguments(
                 "/$target",
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
                 modifier = Modifier
-                    .fillMaxWidth())
-            )
+                    .fillMaxWidth()
+            ))
         }
     }
 }
@@ -705,15 +698,14 @@ private fun ShowCalendarViewButton(
 @Composable
 private fun ExpandedSummaryCard() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Kiwi_H3(
-            Kiwi_TextArguments(
+        Kiwi_H3(Kiwi_TextArguments(
             "Challenges",
             TextAlign.Center,
             MaterialTheme.colorScheme.secondary,
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight())
-        )
+                .wrapContentHeight()
+        ))
 
         Kiwi_Spacer(Spacing.small)
 
@@ -767,15 +759,13 @@ private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float)
                 .weight(0.8F),
             contentAlignment = Alignment.Center
         ) {
-            Kiwi_P2(
-                Kiwi_TextArguments(
+            Kiwi_P2(Kiwi_TextArguments(
                 title,
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
                     .padding(getResponsiveSizeHeight(Spacing.small))
-            )
-            )
+            ))
         }
     }
 }

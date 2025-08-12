@@ -68,13 +68,11 @@ private fun HelpScreenLayout(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H2(
-            Kiwi_TextArguments(
+        Kiwi_H2(Kiwi_TextArguments(
             "SUPPORT",
             color = MaterialTheme.colorScheme.secondary,
             bold = true
-        )
-        )
+        ))
 
         Kiwi_Spacer(Spacing.xLarge)
 

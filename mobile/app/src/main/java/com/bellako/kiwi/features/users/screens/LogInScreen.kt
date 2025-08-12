@@ -164,14 +164,12 @@ private fun LogIn(
 
                 // TEXT WELCOME
 
-                Kiwi_H2(
-                    Kiwi_TextArguments(
-                        "Welcome Back, \nKnight",
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.large))
-                    )
-                )
+                Kiwi_H2(Kiwi_TextArguments(
+                    "Welcome Back, \nKnight",
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.large))
+                ))
 
                 Column(
                     modifier = Modifier
@@ -184,12 +182,10 @@ private fun LogIn(
                         value = currentState.email,
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
-                            Kiwi_Label2(
-                                Kiwi_TextArguments(
-                                    "Email",
-                                    color = MaterialTheme.colorScheme.inversePrimary
-                                )
-                            )
+                            Kiwi_Label2(Kiwi_TextArguments(
+                                "Email",
+                                color = MaterialTheme.colorScheme.inversePrimary
+                            ))
                         },
                         shouldHideInput = false,
                         textColor = MaterialTheme.colorScheme.inversePrimary,
@@ -203,12 +199,10 @@ private fun LogIn(
                         value = currentState.password,
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
-                            Kiwi_Label2(
-                                Kiwi_TextArguments(
-                                    "Password",
-                                    color = MaterialTheme.colorScheme.inversePrimary
-                                )
-                            )
+                            Kiwi_Label2(Kiwi_TextArguments(
+                                "Password",
+                                color = MaterialTheme.colorScheme.inversePrimary
+                            ))
                         },
                         shouldHideInput = true,
                         textColor = MaterialTheme.colorScheme.inversePrimary,

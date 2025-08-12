@@ -114,13 +114,11 @@ private fun Question(
 
                     var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-                    Kiwi_H2(
-                        Kiwi_TextArguments(
-                            currentPersonalityState.questions[currentQuestion].question,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    )
+                    Kiwi_H2(Kiwi_TextArguments(
+                        currentPersonalityState.questions[currentQuestion].question,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.secondary
+                    ))
 
                     Kiwi_Spacer(Spacing.large)
 

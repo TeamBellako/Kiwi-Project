@@ -27,14 +27,12 @@ fun Kiwi_InfoBox(
             .fillMaxWidth()
             .background(color)
     ) {
-        Kiwi_P2(
-            Kiwi_TextArguments(
+        Kiwi_P2(Kiwi_TextArguments(
             message,
             modifier = Modifier
                 .padding(getResponsiveSizeHeight(10.dp))
                 .testTag(testTag),
-        )
-        )
+        ))
     }
 }
 
