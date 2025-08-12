@@ -88,7 +88,7 @@ fun AppBarModalLayout(
 
     NavigationBar(
         modifier = Modifier
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp), getResponsiveSizeHeight(40.dp), 0.dp, 0.dp))
+            .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp), getResponsiveSizeHeight(40.dp), 0.dp, 0.dp))
             .fillMaxWidth()
             .height(getResponsiveSizeHeight(100.dp))
             .testTag(CommonTestTags.BOTTOM_APPBAR),
