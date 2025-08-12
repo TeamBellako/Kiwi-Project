@@ -32,7 +32,7 @@ fun Kiwi_Button(
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
                 containerColor = color,
-                disabledContainerColor = color.copy(alpha = 0.1f),
+                disabledContainerColor = color.copy(alpha = 0.15f),
                 contentColor = MaterialTheme.colorScheme.onSecondary,
                 disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
             ),
@@ -42,7 +42,12 @@ fun Kiwi_Button(
                 .testTag(testTag),
             shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp))
         ) {
-            Kiwi_Label1(textArguments)
+            val actualTextArguments = if (enabled) {
+                textArguments
+            } else {
+                textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+            }
+            Kiwi_Label1(actualTextArguments)
         }
     }
 }
