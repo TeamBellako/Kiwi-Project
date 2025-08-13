@@ -2,7 +2,6 @@ package com.bellako.kiwi.features.metrics.model
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.bellako.kiwi.common.data.PositiveOrZeroInteger
 import com.bellako.kiwi.features.metrics.data.Metrics
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -11,73 +10,58 @@ import java.time.LocalDate
 object MetricsMapper {
     // DTO -> Domain
     @RequiresApi(Build.VERSION_CODES.O)
-    fun toDomain(dto: MetricsDTO): Result<Metrics> {
-        val dateResult = runCatching { LocalDate.parse(dto.date) }
-        val stepsResult = PositiveOrZeroInteger.of(dto.steps)
-        val screenTimeResult = PositiveOrZeroInteger.of(dto.screenTimeSeconds)
-
-        return combineResults(dateResult, stepsResult, screenTimeResult) { date, steps, screenTime ->
-            Metrics(date, steps, screenTime)
-        }
-    }
+    fun toDomain(dto: MetricsDTO): Metrics = Metrics(
+        date = LocalDate.parse(dto.date),
+        maxGoodTimeSeconds = dto.maxGoodTimeSeconds,
+        currentGoodTimeSeconds = dto.currentGoodTimeSeconds,
+        maxBadTimeSeconds = dto.maxBadTimeSeconds,
+        currentBadTimeSeconds = dto.currentBadTimeSeconds
+    )
 
     // DTO -> State
     fun toState(dto: MetricsDTO): MetricsState = MetricsState(
         date = dto.date,
-        steps = dto.steps,
-        screenTimeSeconds = dto.screenTimeSeconds
+        maxGoodTimeSeconds = dto.maxGoodTimeSeconds,
+        currentGoodTimeSeconds = dto.currentGoodTimeSeconds,
+        maxBadTimeSeconds = dto.maxBadTimeSeconds,
+        currentBadTimeSeconds = dto.currentBadTimeSeconds
     )
 
     // Domain -> DTO
-    fun toDTO(metrics: Metrics): MetricsDTO {
-        return MetricsDTO(
-            date = metrics.date.toString(),
-            steps = metrics.steps.value,
-            screenTimeSeconds = metrics.screenTimeSeconds.value
-        )
-    }
+    fun toDTO(metrics: Metrics): MetricsDTO = MetricsDTO(
+        date = metrics.date.toString(),
+        maxGoodTimeSeconds = metrics.maxGoodTimeSeconds,
+        currentGoodTimeSeconds = metrics.currentGoodTimeSeconds,
+        maxBadTimeSeconds = metrics.maxBadTimeSeconds,
+        currentBadTimeSeconds = metrics.currentBadTimeSeconds
+    )
 
     // Domain -> State
-    fun toState(metrics: Metrics): MetricsState {
-        return MetricsState(
-            date = metrics.date.toString(),
-            steps = metrics.steps.value,
-            screenTimeSeconds = metrics.screenTimeSeconds.value
-        )
-    }
+    fun toState(metrics: Metrics): MetricsState = MetricsState(
+        date = metrics.date.toString(),
+        maxGoodTimeSeconds = metrics.maxGoodTimeSeconds,
+        currentGoodTimeSeconds = metrics.currentGoodTimeSeconds,
+        maxBadTimeSeconds = metrics.maxBadTimeSeconds,
+        currentBadTimeSeconds = metrics.currentBadTimeSeconds
+    )
 
     // State -> Domain
     @RequiresApi(Build.VERSION_CODES.O)
-    fun toDomain(state: MetricsState): Result<Metrics> {
-        val dateResult = runCatching { LocalDate.parse(state.date) }
-        val stepsResult = PositiveOrZeroInteger.of(state.steps)
-        val screenTimeResult = PositiveOrZeroInteger.of(state.screenTimeSeconds)
-
-        return combineResults(dateResult, stepsResult, screenTimeResult) { date, steps, screenTime ->
-            Metrics(date, steps, screenTime)
-        }
-    }
+    fun toDomain(state: MetricsState): Metrics = Metrics(
+        date = LocalDate.parse(state.date),
+        maxGoodTimeSeconds = state.maxGoodTimeSeconds,
+        currentGoodTimeSeconds = state.currentGoodTimeSeconds,
+        maxBadTimeSeconds = state.maxBadTimeSeconds,
+        currentBadTimeSeconds = state.currentBadTimeSeconds
+    )
 
     // State -> DTO
     fun toDTO(state: MetricsState): MetricsDTO = MetricsDTO(
         date = state.date,
-        steps = state.steps,
-        screenTimeSeconds = state.screenTimeSeconds
+        maxGoodTimeSeconds = state.maxGoodTimeSeconds,
+        currentGoodTimeSeconds = state.currentGoodTimeSeconds,
+        maxBadTimeSeconds = state.maxBadTimeSeconds,
+        currentBadTimeSeconds = state.currentBadTimeSeconds
     )
 
-    private inline fun <A, B, C, R> combineResults(
-        ra: Result<A>,
-        rb: Result<B>,
-        rc: Result<C>,
-        combine: (A, B, C) -> R
-    ): Result<R> {
-        return if (ra.isSuccess && rb.isSuccess && rc.isSuccess) {
-            Result.success(combine(ra.getOrThrow(), rb.getOrThrow(), rc.getOrThrow()))
-        } else {
-            Result.failure(
-                ra.exceptionOrNull() ?: rb.exceptionOrNull() ?: rc.exceptionOrNull()
-                ?: IllegalStateException("Unknown error in result combination")
-            )
-        }
-    }
 }

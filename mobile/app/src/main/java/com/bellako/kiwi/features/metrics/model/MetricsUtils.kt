@@ -5,21 +5,13 @@ import androidx.annotation.RequiresApi
 import java.time.LocalDate
 
 object MetricsUtils {
-    fun parseScreenTimeSeconds(screenTimeSeconds: Int): String {
+    fun parseTimeSeconds(screenTimeSeconds: Int): String {
         val hours = screenTimeSeconds / 3600
         val minutes = (screenTimeSeconds % 3600) / 60
 
         return buildString {
-            if (hours >= 0) append("${hours}h ")
-            if (minutes >= 0) append("${minutes}min")
-        }.trim()
-    }
-
-    fun parseScreenTimeSecondsToMinutes(screenTimeSeconds: Int): String {
-        val minutes = (screenTimeSeconds % 3600) / 60
-
-        return buildString {
-            if (minutes >= 0) append("${minutes}min")
+            if (hours > 0 || screenTimeSeconds <= 0) append("${hours}h ")
+            if (minutes > 0) append("${minutes}min")
         }.trim()
     }
 

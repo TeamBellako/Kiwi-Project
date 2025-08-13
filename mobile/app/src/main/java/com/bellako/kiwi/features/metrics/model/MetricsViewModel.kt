@@ -17,9 +17,10 @@ import java.time.format.DateTimeParseException
 class MetricsViewModel @Inject constructor(
     private val repository: MetricsRepository
 ) : BaseViewModel(), IMetricsViewModel {
-    private val _state = MutableStateFlow(MetricsState("", 0, 0))
+    private val _state = MutableStateFlow(MetricsState(date = "", maxGoodTimeSeconds = 0, currentGoodTimeSeconds = 0, maxBadTimeSeconds = 0, currentBadTimeSeconds = 0))
     override val state: StateFlow<MetricsState> = _state.asStateFlow()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun createMetrics(state: MetricsState): Result<Unit> {
         val domain = validateAndMapToDomain(state) ?: return failureWithError(invalidDataMessage())
 
@@ -33,6 +34,7 @@ class MetricsViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun updateMetrics(state: MetricsState): Result<Unit> {
         val domain = validateAndMapToDomain(state) ?: return failureWithError(invalidDataMessage())
 
@@ -53,7 +55,8 @@ class MetricsViewModel @Inject constructor(
         } catch (e: DateTimeParseException) {
             return failureWithError(invalidDataMessage())
         }
-        _state.value = MetricsState(date)
+
+        _state.value = MetricsState(date = "", maxGoodTimeSeconds = 0, currentGoodTimeSeconds = 0, maxBadTimeSeconds = 0, currentBadTimeSeconds = 0)
 
         val result = repository.getMetricsByDate(parsedDate).getOrNull()
         if (result == null) {
@@ -64,8 +67,9 @@ class MetricsViewModel @Inject constructor(
         return Result.success(Unit)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun validateAndMapToDomain(state: MetricsState): Metrics? {
-        return MetricsMapper.toDomain(state).getOrNull()
+        return MetricsMapper.toDomain(state)
     }
 
     private fun invalidDataMessage(): String = """

@@ -105,7 +105,7 @@ private fun Kiwi_AnnotatedString_P(arguments: Kiwi_AnnotatedStringArguments, bod
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
-        modifier = Modifier,
+        modifier = arguments.modifier,
         style = bodyStyle.copy(fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp)
     )
 }

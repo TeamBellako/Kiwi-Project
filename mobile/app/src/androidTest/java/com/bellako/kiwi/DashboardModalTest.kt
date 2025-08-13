@@ -58,30 +58,21 @@ class DashboardModalTest {
         val todayLocalDate = LocalDate.now()
         todayMetricsDTO = MetricsDTO(
             LocalDate.now().toString(),
-            100000,
-            2*60
+            6 * 60 * 60,
+            1 * 60 * 60,
+            6 * 60 * 60,
+            2 * 60
         )
         pastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.minusDays(1).toString())
-        futureMetricsDTO = todayMetricsDTO.copy(date = todayLocalDate.plusDays(1).toString(), steps = 0, screenTimeSeconds = 0)
+        futureMetricsDTO = todayMetricsDTO.copy(date = todayLocalDate.plusDays(1).toString(), currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0)
 
-        state = MetricsMapper.toState(todayMetricsDTO.copy(steps = 0, screenTimeSeconds = 0))
+        state = MetricsMapper.toState(todayMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0))
         fakeViewModel = MetricsFakeViewModel(
             state,
             todayMetricsDTO,
             pastMetricsDTO,
             futureMetricsDTO
         )
-    }
-
-    @Test
-    fun loadTodayMetricsWithOverflowedMetrics() {
-        setContent(false, 2)
-
-        rule.isInCollapsedState()
-        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .assertTextContains("+99,999", true)
-        rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextContains(MetricsUtils.parseScreenTimeSeconds(todayMetricsDTO.screenTimeSeconds), true)
     }
 
     @Test
@@ -94,10 +85,10 @@ class DashboardModalTest {
             ).toString()
         rule.onNodeWithTag(yesterdayTestTag).performClick()
 
-        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-            .assertTextEquals(pastMetricsDTO.steps.toString())
-        rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(pastMetricsDTO.screenTimeSeconds))
+        rule.onNodeWithTag(DashboardModalTestTags.GOOD_TIME)
+            .assertTextContains(MetricsUtils.parseTimeSeconds(pastMetricsDTO.currentGoodTimeSeconds), true)
+        rule.onNodeWithTag(DashboardModalTestTags.BAD_TIME)
+            .assertTextContains(MetricsUtils.parseTimeSeconds(pastMetricsDTO.currentBadTimeSeconds), true)
     }
 
     @Test
@@ -109,11 +100,11 @@ class DashboardModalTest {
                 LocalDate.now().plusDays(1)
             ).toString()
         rule.onNodeWithTag(tomorrowTestTag).performClick()
-// TODO: Fix steps tracking
-//        rule.onNodeWithTag(DashboardModalTestTags.STEPS)
-//            .assertTextEquals(futureMetricsDTO.steps.toString())
-//        rule.onNodeWithTag(DashboardModalTestTags.SCREEN_TIME)
-//            .assertTextEquals(MetricsUtils.parseScreenTimeSeconds(futureMetricsDTO.screenTimeSeconds))
+
+        rule.onNodeWithTag(DashboardModalTestTags.GOOD_TIME)
+            .assertTextContains(MetricsUtils.parseTimeSeconds(futureMetricsDTO.currentGoodTimeSeconds), true)
+        rule.onNodeWithTag(DashboardModalTestTags.BAD_TIME)
+            .assertTextContains(MetricsUtils.parseTimeSeconds(futureMetricsDTO.currentBadTimeSeconds), true)
     }
 
     @Test

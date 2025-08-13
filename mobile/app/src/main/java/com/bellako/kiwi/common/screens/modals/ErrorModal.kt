@@ -52,7 +52,7 @@ fun ErrorModal(
 @Composable
 private fun ErrorModalLayout(
     modifier: Modifier = Modifier,
-    errorMessage: String = "Uh-oh! It seems a careless scribe forgot to write this part of the story. \n Let's get back on track!",
+    errorMessage: String,
     onRetry: (() -> Unit)? = null
 ) {
     Column(

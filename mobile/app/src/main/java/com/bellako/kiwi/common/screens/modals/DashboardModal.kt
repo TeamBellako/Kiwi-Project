@@ -63,6 +63,7 @@ import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.MetricsUtils
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
@@ -93,14 +94,15 @@ fun DashboardModal(
 ) {
     val metricsState by viewModel.state.collectAsState()
     val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        val loadResult = viewModel.loadMetrics(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-        metricsState?.let {
-            if (loadResult.isFailure) viewModel.createMetrics(it)
 
-            MetricsProvider.getMetrics(context, LocalDate.now())?.let { currentMetrics ->
-                viewModel.updateMetrics(MetricsMapper.toState(currentMetrics))
+    LaunchedEffect(Unit) {
+        val dateNow = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        val loadResult = viewModel.loadMetrics(dateNow)
+        metricsState?.let { state ->
+            if (loadResult.isFailure) {
+                viewModel.createMetrics(state.copy(date = dateNow))
             }
+            viewModel.updateMetrics(MetricsProvider.getCurrentMetrics(context, LocalDate.now(), state))
         }
     }
 
@@ -520,74 +522,93 @@ private fun ExpandedProgressBox(state: MetricsState) {
 }
 
 @Composable
+private fun ExpandedMetricProgressTitle(title: String) {
+    Kiwi_H3(Kiwi_TextArguments(
+        title,
+        TextAlign.Center,
+        MaterialTheme.colorScheme.secondary,
+        modifier = Modifier
+            .fillMaxWidth()
+    ))
+}
+
+@Composable
+private fun TimeExpanded(maxSeconds: Int, currentSeconds: Int, tag: String) {
+    val text = buildAnnotatedString {
+        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+            append(MetricsUtils.parseTimeSeconds(currentSeconds))
+        }
+        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+            append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
+        }
+    }
+    Kiwi_AnnotatedString_P1(Kiwi_AnnotatedStringArguments(
+        text,
+        TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(tag)
+    ))
+}
+
+@Composable
+private fun GoodTimeExpanded(state: MetricsState) {
+    TimeExpanded(state.maxGoodTimeSeconds, state.currentGoodTimeSeconds, DashboardModalTestTags.GOOD_TIME)
+}
+
+@Composable
+private fun BadTimeExpanded(state: MetricsState) {
+    TimeExpanded(state.maxBadTimeSeconds, state.currentBadTimeSeconds, DashboardModalTestTags.BAD_TIME)
+}
+
+@Composable
+private fun TimeCollapsed(maxSeconds: Int, currentSeconds: Int, tag: String) {
+    val text = buildAnnotatedString {
+        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+            append(MetricsUtils.parseTimeSeconds(currentSeconds))
+        }
+        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+            append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
+        }
+    }
+    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
+        text,
+        TextAlign.Left,
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(tag)
+    ))
+}
+
+@Composable
+private fun GoodTimeCollapsed(state: MetricsState) {
+    TimeCollapsed(state.maxGoodTimeSeconds, state.currentGoodTimeSeconds, DashboardModalTestTags.GOOD_TIME)
+}
+
+@Composable
+private fun BadTimeCollapsed(state: MetricsState) {
+    TimeCollapsed(state.maxBadTimeSeconds, state.currentBadTimeSeconds, DashboardModalTestTags.BAD_TIME)
+}
+
+@Composable
 private fun ExpandedMetricsProgress(state: MetricsState) {
-    val maxSteps = 100000
-    val currentSteps =
-        if (state.steps < maxSteps)
-            state.steps.toString()
-        else "+99,999"
-
-    val maxScreenTimeSeconds = 10 * 60 * 60
-    val currentScreenTimeSeconds =
-        if (state.screenTimeSeconds < maxScreenTimeSeconds)
-            MetricsUtils.parseScreenTimeSeconds(state.screenTimeSeconds)
-        else "+10 hours\n(are you serious?)"
-
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
-        MetricProgress(
-            "Steps",
-            currentSteps,
-            "8,000",
-            Modifier.weight(1f),
-            DashboardModalTestTags.STEPS
-        )
-        MetricProgress(
-            "Screen Time",
-            currentScreenTimeSeconds,
-            "3 hours",
-            Modifier.weight(1f),
-            DashboardModalTestTags.SCREEN_TIME
-        )
-    }
-}
-
-@Composable
-private fun MetricProgress(
-    title: String,
-    value: String,
-    target: String,
-    modifier: Modifier,
-    testTag: String
-) {
-    Box(modifier) {
-        Column {
-            Kiwi_H3(Kiwi_TextArguments(
-                title,
-                TextAlign.Center,
-                MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ))
-            Kiwi_P1(Kiwi_TextArguments(
-                value,
-                TextAlign.Center,
-                MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(testTag)
-            ))
-            Kiwi_P2(Kiwi_TextArguments(
-                "/$target",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ))
+        Box(modifier = Modifier.weight(1f)) {
+            Column {
+                ExpandedMetricProgressTitle("Good Apps Time")
+                GoodTimeExpanded(state)
+            }
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            Column {
+                ExpandedMetricProgressTitle("Evil Apps Time")
+                BadTimeExpanded(state)
+            }
         }
     }
 }
@@ -624,47 +645,11 @@ private fun CollapsedSummaryCard(
                 Column(
                     horizontalAlignment = Alignment.Start
                 ) {
-                    val maxSteps = 100000
-                    val currentSteps =
-                        if (state.steps < maxSteps)
-                            state.steps.toString()
-                        else "+99,999"
-
-                    val maxScreenTimeSeconds = 60
-                    val currentScreenTimeSeconds =
-                        if (state.screenTimeSeconds < maxScreenTimeSeconds)
-                            (state.screenTimeSeconds / 60).toString()
-                        else "+60"
-
-                    val stepsText = buildAnnotatedString {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                            append(currentSteps)
-                        }
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                            append("/8,000 steps")
-                        }
-                    }
-                    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
-                        stepsText,
-                        TextAlign.Left,
-                        Modifier.testTag(DashboardModalTestTags.STEPS)
-                    ))
+                    GoodTimeCollapsed(state)
 
                     Kiwi_Spacer(Spacing.xSmall)
 
-                    val screenTimeText = buildAnnotatedString {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                            append(currentScreenTimeSeconds)
-                        }
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                            append("/60 screen mins")
-                        }
-                    }
-                    Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
-                        screenTimeText,
-                        TextAlign.Left,
-                        Modifier.testTag(DashboardModalTestTags.SCREEN_TIME)
-                    ))
+                    BadTimeCollapsed(state)
                 }
             }
             Box(
@@ -823,7 +808,13 @@ private fun DashboardModalPreview(
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
                     DashboardModal(
-                        MetricsFakeViewModel(MetricsState("2025-06-12", 1173, 9900)),
+                        MetricsFakeViewModel(MetricsState(
+                            date = "2025-06-12",
+                            maxGoodTimeSeconds = 6 * 60 * 60,
+                            currentGoodTimeSeconds = 1 * 60 * 60,
+                            maxBadTimeSeconds = 6 * 60 * 60,
+                            currentBadTimeSeconds = 2 * 60 * 60
+                        )),
                         showCalendarView,
                         initialStateIndex
                     )

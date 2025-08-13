@@ -42,6 +42,7 @@ import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 /**
@@ -159,7 +160,15 @@ fun MapScreenPreview() {
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
-                    DashboardModal(MetricsFakeViewModel(MetricsState("2025-06-12", 1173, 9900)))
+                    DashboardModal(
+                        MetricsFakeViewModel(MetricsState(
+                            date = "2025-06-12",
+                            maxGoodTimeSeconds = 6 * 60 * 60,
+                            currentGoodTimeSeconds = 1 * 60 * 60,
+                            maxBadTimeSeconds = 6 * 60 * 60,
+                            currentBadTimeSeconds = 2 * 60 * 60
+                        ))
+                    )
                 }
             }
         )
