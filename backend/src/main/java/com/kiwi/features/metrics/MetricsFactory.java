@@ -11,11 +11,23 @@ public class MetricsFactory {
     private static final Random RANDOM = new Random();
 
     public static MetricsDTO generateRandomValidMetricDTO() {
-        return new MetricsDTO(getRandomDate(), getRandomSteps(), getRandomScreenTimeSeconds());
+        return new MetricsDTO(
+            getRandomDate(),
+            getRandomTimeSeconds(5, 6),
+            getRandomTimeSeconds(1, 2),
+            getRandomTimeSeconds(5, 6),
+            getRandomTimeSeconds(3, 4)
+        );
     }
 
     public static MetricsDTO generateRandomInvalidMetricDTO() {
-        return new MetricsDTO(getRandomDate(), -getRandomSteps(), -getRandomScreenTimeSeconds());
+        return new MetricsDTO(
+            getRandomDate(),
+            -getRandomTimeSeconds(5, 6),
+            -getRandomTimeSeconds(1, 2),
+            -getRandomTimeSeconds(5, 6),
+            -getRandomTimeSeconds(3, 4)
+        );
     }
     
     public static Set<MetricsDTO> generateRandomMetricsSet(int size, boolean getValidValues) {
@@ -37,12 +49,8 @@ public class MetricsFactory {
         return formatDate(LocalDate.of(year, month, dayOfMonth));
     }
     
-    private static Integer getRandomSteps() {
-        return RANDOM.nextInt(10001);
-    }
-    
-    private static Integer getRandomScreenTimeSeconds() {
-        return RANDOM.nextInt(4 * 60 * 60) + 60;
+    private static Integer getRandomTimeSeconds(Integer fromHours, Integer untilHours) {
+        return RANDOM.nextInt((untilHours - fromHours) * 60 * 60) + fromHours;
     }
 }
 

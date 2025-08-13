@@ -21,27 +21,37 @@ public class MetricsPersistence {
 
     @Column(name = "date", nullable = false, unique = true)
     private LocalDate date;
+
+    @Column(name = "max_good_time_seconds", nullable = false)
+    private Integer maxGoodTimeSeconds;
     
-    @Column(name = "steps", nullable = false)
-    private Integer steps;
-    
-    @Column(name = "screen_time_seconds", nullable = false)
-    private Integer screenTimeSeconds;
+    @Column(name = "current_good_time_seconds", nullable = false)
+    private Integer currentGoodTimeSeconds;
+
+    @Column(name = "max_bad_time_seconds", nullable = false)
+    private Integer maxBadTimeSeconds;
+
+    @Column(name = "current_bad_time_seconds", nullable = false)
+    private Integer currentBadTimeSeconds;
 
     public MetricsPersistence() {
     }
 
-    public MetricsPersistence(LocalDate date, PositiveOrZeroInteger steps, PositiveOrZeroInteger screenTimeSeconds) {
+    public MetricsPersistence(LocalDate date, PositiveOrZeroInteger maxGoodTimeSeconds, PositiveOrZeroInteger currentGoodTimeSeconds, PositiveOrZeroInteger maxBadTimeSeconds, PositiveOrZeroInteger currentBadTimeSeconds) {
         this.date = date;
-        setSteps(steps);
-        setScreenTime(screenTimeSeconds);
+        setMaxGoodTimeSeconds(maxGoodTimeSeconds);
+        setCurrentGoodTimeSeconds(currentGoodTimeSeconds);
+        setMaxBadTimeSeconds(maxBadTimeSeconds);
+        setCurrentBadTimeSeconds(currentBadTimeSeconds);
     }
 
-    public MetricsPersistence(UsersPersistence user, LocalDate date, PositiveOrZeroInteger steps, PositiveOrZeroInteger screenTimeSeconds) {
+    public MetricsPersistence(UsersPersistence user, LocalDate date, PositiveOrZeroInteger maxGoodTimeSeconds, PositiveOrZeroInteger currentGoodTimeSeconds, PositiveOrZeroInteger maxBadTimeSeconds, PositiveOrZeroInteger currentBadTimeSeconds) {
         this.user = user;
         this.date = date;
-        setSteps(steps);
-        setScreenTime(screenTimeSeconds);
+        setMaxGoodTimeSeconds(maxGoodTimeSeconds);
+        setCurrentGoodTimeSeconds(currentGoodTimeSeconds);
+        setMaxBadTimeSeconds(maxBadTimeSeconds);
+        setCurrentBadTimeSeconds(currentBadTimeSeconds);
     }
 
     public Integer getId() {
@@ -50,38 +60,31 @@ public class MetricsPersistence {
 
     public void setId(Integer id) {
         if (id == null || id <= 0) throw new IllegalArgumentException("Id's must be bigger than zero");
-
         this.id = id;
     }
 
     public LocalDate getDate() {
         return date;
     }
-
     public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public PositiveOrZeroInteger getSteps() {
-        return new PositiveOrZeroInteger(this.steps);
-    }
+    public PositiveOrZeroInteger  getMaxGoodTimeSeconds() { return new PositiveOrZeroInteger(maxGoodTimeSeconds); }
+    public void setMaxGoodTimeSeconds(PositiveOrZeroInteger maxGoodTimeSeconds) { this.maxGoodTimeSeconds = maxGoodTimeSeconds.value(); }
 
-    public void setSteps(PositiveOrZeroInteger steps) {
-        this.steps = steps.value();
-    }
+    public PositiveOrZeroInteger  getCurrentGoodTimeSeconds() { return new PositiveOrZeroInteger(currentGoodTimeSeconds); }
+    public void setCurrentGoodTimeSeconds(PositiveOrZeroInteger currentGoodTimeSeconds) { this.currentGoodTimeSeconds = currentGoodTimeSeconds.value(); }
 
-    public PositiveOrZeroInteger getScreenTimeSeconds() {
-        return new PositiveOrZeroInteger(this.screenTimeSeconds);
-    }
+    public PositiveOrZeroInteger  getMaxBadTimeSeconds() { return new PositiveOrZeroInteger(maxBadTimeSeconds); }
+    public void setMaxBadTimeSeconds(PositiveOrZeroInteger maxBadTimeSeconds) { this.maxBadTimeSeconds = maxBadTimeSeconds.value(); }
 
-    public void setScreenTime(PositiveOrZeroInteger screenTimeSeconds) {
-        this.screenTimeSeconds = screenTimeSeconds.value();
-    }
+    public PositiveOrZeroInteger  getCurrentBadTimeSeconds() { return new PositiveOrZeroInteger(currentBadTimeSeconds); }
+    public void setCurrentBadTimeSeconds(PositiveOrZeroInteger currentBadTimeSeconds) { this.currentBadTimeSeconds = currentBadTimeSeconds.value(); }
 
     public void setUser(UsersPersistence user) {
         this.user = user;
     }
-
     public UsersPersistence getUser() {
         return user;
     }
@@ -90,12 +93,16 @@ public class MetricsPersistence {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MetricsPersistence that = (MetricsPersistence) o;
-        return Objects.equals(date, that.date) && Objects.equals(steps, that.steps) && Objects.equals(screenTimeSeconds, that.screenTimeSeconds);
+        return Objects.equals(date, that.date) &&
+                Objects.equals(maxGoodTimeSeconds, that.maxGoodTimeSeconds) &&
+                Objects.equals(currentGoodTimeSeconds, that.currentGoodTimeSeconds) &&
+                Objects.equals(maxBadTimeSeconds, that.maxBadTimeSeconds) &&
+                Objects.equals(currentBadTimeSeconds, that.currentBadTimeSeconds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, steps, screenTimeSeconds);
+        return Objects.hash(id, date, maxGoodTimeSeconds, currentGoodTimeSeconds, maxBadTimeSeconds, currentBadTimeSeconds);
     }
 
     @Override
@@ -103,13 +110,17 @@ public class MetricsPersistence {
         return "MetricsPersistence{" +
                 "id=" + id +
                 ", date=" + date +
-                ", steps=" + steps +
-                ", screenTimeSeconds=" + screenTimeSeconds +
+                ", maxGoodTimeSeconds=" + maxGoodTimeSeconds +
+                ", currentGoodTimeSeconds=" + currentGoodTimeSeconds +
+                ", maxBadTimeSeconds=" + maxBadTimeSeconds +
+                ", currentBadTimeSeconds=" + currentBadTimeSeconds +
                 '}';
     }
     
     public void mergeFromDomain(Metrics domain) {
-        setSteps(domain.getSteps());
-        setScreenTime(domain.getScreenTimeSeconds());
+        setMaxGoodTimeSeconds(domain.getMaxGoodTimeSeconds());
+        setCurrentGoodTimeSeconds(domain.getCurrentGoodTimeSeconds());
+        setMaxBadTimeSeconds(domain.getMaxBadTimeSeconds());
+        setCurrentBadTimeSeconds(domain.getCurrentBadTimeSeconds());
     }
 }

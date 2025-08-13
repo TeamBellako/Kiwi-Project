@@ -73,7 +73,10 @@ public class MetricsControllerTest {
                 .thenReturn(Optional.of(metricsDTO));
         
         MetricsDTO updatedMetricsDTO = metricsDTO.copy();
-        updatedMetricsDTO.setSteps(metricsDTO.getSteps() + 1);
+        updatedMetricsDTO.setMaxGoodTimeSeconds(metricsDTO.getMaxGoodTimeSeconds() + 1);
+        updatedMetricsDTO.setCurrentGoodTimeSeconds(metricsDTO.getCurrentGoodTimeSeconds() + 1);
+        updatedMetricsDTO.setMaxBadTimeSeconds(metricsDTO.getMaxBadTimeSeconds() + 1);
+        updatedMetricsDTO.setCurrentBadTimeSeconds(metricsDTO.getCurrentBadTimeSeconds() + 1);
         
         mockMvc.perform(getPutRequestBuilder(APIURL, updatedMetricsDTO))
                 .andExpect(status().isOk());
@@ -89,6 +92,9 @@ public class MetricsControllerTest {
         mockMvc.perform(get(APIURL)
                         .param("date", metricsDTO.getDate()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.steps").value(metricsDTO.getSteps()));
+                .andExpect(jsonPath("$.maxGoodTimeSeconds").value(metricsDTO.getMaxGoodTimeSeconds()))
+                .andExpect(jsonPath("$.currentGoodTimeSeconds").value(metricsDTO.getCurrentGoodTimeSeconds()))
+                .andExpect(jsonPath("$.maxBadTimeSeconds").value(metricsDTO.getMaxBadTimeSeconds()))
+                .andExpect(jsonPath("$.currentBadTimeSeconds").value(metricsDTO.getCurrentBadTimeSeconds()));
     }
 }
