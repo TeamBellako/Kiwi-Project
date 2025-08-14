@@ -19,7 +19,7 @@ class PersonalityViewModel @Inject constructor(
     private val repository: PersonalityRepository
 ) : BaseViewModel(), IPersonalityViewModel {
 
-    private val _state = MutableStateFlow(PersonalityState("", "", ""))
+    private val _state = MutableStateFlow(PersonalityState("", "", "", listOf(), listOf()))
     override val state: StateFlow<PersonalityState?> = _state.asStateFlow()
 
     override val _isLoading = MutableStateFlow(false)
@@ -36,7 +36,7 @@ class PersonalityViewModel @Inject constructor(
         setIsLoading(true)
         return repository.getPersonality().map { dto ->
             val state = dto.toState()
-            _state.value = _state.value.copy(realName = state.realName, knightName = state.knightName, build = state.build)
+            _state.value = _state.value.copy(realName = state.realName, knightName = state.knightName, build = state.build, goodApps = state.goodApps, badApps = state.badApps)
             setIsLoading(false)
         } .onFailure { throwable ->
             setIsLoading(false)
@@ -47,7 +47,7 @@ class PersonalityViewModel @Inject constructor(
     override fun checkValid(): Result<Personality> {
         return _state.value.toDomainObject().fold(
             onSuccess = { validState ->
-                Result.success(Personality(validState.realName, validState.knightName, validState.build))
+                Result.success(Personality(validState.realName, validState.knightName, validState.build, validState.goodApps, validState.badApps))
             },
             onFailure = { err ->
                 _uiState.value = UIState.Error(err.message.orEmpty())
@@ -72,6 +72,11 @@ class PersonalityViewModel @Inject constructor(
         _state.value = _state.value.copy(knightName = name)
     }
 
+    override fun onAppsChanged(goodApps: List<String>, badApps: List<String>) {
+        _state.value = _state.value.copy(goodApps = goodApps)
+        _state.value = _state.value.copy(badApps = badApps)
+    }
+
     private fun deduceBuild(): String {
         return when (_state.value.answers.last()) {
             0 -> BERSERKER
@@ -84,6 +89,14 @@ class PersonalityViewModel @Inject constructor(
         setIsLoading(true)
         _state.value = _state.value.copy(build = deduceBuild())
         return handleResultSuspend(repository.updateBuild(PersonalityBuildDTO(_state.value.build))) {
+            setIsLoading(false)
+            _uiState.value = UIState.Success(Unit)
+        }
+    }
+
+    override suspend fun updateApps(): Result<Unit> {
+        setIsLoading(true)
+        return handleResultSuspend(repository.updateApps(PersonalityAppsDTO(_state.value.goodApps, _state.value.badApps))) {
             setIsLoading(false)
             _uiState.value = UIState.Success(Unit)
         }

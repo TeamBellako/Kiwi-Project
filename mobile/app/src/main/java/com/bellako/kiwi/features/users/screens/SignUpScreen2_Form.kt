@@ -262,7 +262,13 @@ fun SignUpScreen2_FormPreview() {
     KiwiTheme {
         SignUpScreen2_Form(
             UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            PersonalityFakeViewModel(PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)),
+            personalityViewModel = PersonalityFakeViewModel(PersonalityState(
+                validPersonalityDTO().realName,
+                validPersonalityDTO().knightName,
+                validPersonalityDTO().build,
+                validPersonalityDTO().goodApps,
+                validPersonalityDTO().badApps,
+            )),
             navController = rememberNavController()
         )
     }

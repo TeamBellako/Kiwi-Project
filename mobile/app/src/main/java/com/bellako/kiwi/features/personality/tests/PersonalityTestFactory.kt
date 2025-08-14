@@ -11,7 +11,9 @@ object PersonalityTestFactory {
         PersonalityDTO(
             "Finn",
             "Human",
-            BERSERKER
+            BERSERKER,
+            listOf(),
+            listOf()
         )
 
     fun validPersonalityRealNameDTO(): PersonalityUserNameDTO =

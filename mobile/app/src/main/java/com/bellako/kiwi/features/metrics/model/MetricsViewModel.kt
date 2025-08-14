@@ -52,7 +52,7 @@ class MetricsViewModel @Inject constructor(
     override suspend fun loadMetrics(date: String): Result<Unit> {
         val parsedDate = try {
             LocalDate.parse(date)
-        } catch (e: DateTimeParseException) {
+        } catch (_: DateTimeParseException) {
             return failureWithError(invalidDataMessage())
         }
 
@@ -72,9 +72,6 @@ class MetricsViewModel @Inject constructor(
         return MetricsMapper.toDomain(state)
     }
 
-    private fun invalidDataMessage(): String = """
-        Invalid metrics. Metrics must:
-        - Have a positive number of steps
-        - Have a positive number of screenTimeSeconds
-    """.trimIndent()
+    private fun invalidDataMessage(): String = "Invalid metrics. Metrics must have a positive number of good and bad apps TimeSeconds".trimIndent()
+
 }

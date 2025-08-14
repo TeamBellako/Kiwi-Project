@@ -73,6 +73,10 @@ import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -86,21 +90,22 @@ import kotlin.math.ceil
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardModal(
-    viewModel: IMetricsViewModel,
+    metricsViewModel: IMetricsViewModel,
+    personalityViewModel: IPersonalityViewModel,
     showCalendarView: Boolean = false,
     initialStateIndex: Int = 0
 ) {
-    val metricsState by viewModel.state.collectAsState()
+    val metricsState by metricsViewModel.state.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         val dateNow = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-        val loadResult = viewModel.loadMetrics(dateNow)
+        val loadResult = metricsViewModel.loadMetrics(dateNow)
         metricsState?.let { state ->
             if (loadResult.isFailure) {
-                viewModel.createMetrics(state.copy(date = dateNow))
+                metricsViewModel.createMetrics(state.copy(date = dateNow))
             }
-            viewModel.updateMetrics(MetricsProvider.getCurrentMetrics(context, LocalDate.now(), state))
+            metricsViewModel.updateMetrics(MetricsProvider.getCurrentMetrics(context, LocalDate.now(), metricsViewModel.state.value!!, personalityViewModel.state.value!!))
         }
     }
 
@@ -127,7 +132,7 @@ fun DashboardModal(
                 )
             } else if (currentStateIndex <= 2) {
                 ExpandedContent(
-                    viewModel = viewModel,
+                    viewModel = metricsViewModel,
                     state = metricsState,
                     selectedDay = selectedDay,
                     shouldShowCalendarView = shouldShowCalendarView
@@ -812,6 +817,13 @@ private fun DashboardModalPreview(
                             currentGoodTimeSeconds = 1 * 60 * 60,
                             maxBadTimeSeconds = 6 * 60 * 60,
                             currentBadTimeSeconds = 2 * 60 * 60
+                        )),
+                        personalityViewModel = PersonalityFakeViewModel(PersonalityState(
+                            validPersonalityDTO().realName,
+                            validPersonalityDTO().knightName,
+                            validPersonalityDTO().build,
+                            validPersonalityDTO().goodApps,
+                            validPersonalityDTO().badApps,
                         )),
                         showCalendarView,
                         initialStateIndex

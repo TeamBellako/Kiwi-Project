@@ -1,8 +1,11 @@
 package com.bellako.kiwi.features.users.screens
 
+import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,24 +38,33 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 data class AppInfo(val packageName: String, val name: String, val icon: Drawable)
 
 @Composable
 fun SignUpScreen4_Apps(
+    personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
     SignUpScreen() {
-        AppClassification(navController)
+        AppClassification(personalityViewModel, navController)
     }
 }
 
 @Composable
 fun AppClassification(
+    personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
     val context = LocalContext.current
@@ -108,7 +120,7 @@ fun AppClassification(
             .padding(getResponsiveSizeHeight(Spacing.medium))
     ) {
         Kiwi_P2(Kiwi_TextArguments(
-            text = "Categorize your apps.\nTouch to switch between lists.",
+            text = "Categorize your apps.\nTap to switch between lists.",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.secondary
@@ -131,6 +143,7 @@ fun AppClassification(
                             goodApps.remove(app)
                             badApps.add(app)
                             badApps.sortBy { it.name.lowercase() }
+                            personalityViewModel.onAppsChanged(goodApps.map { it.packageName }, badApps.map { it.packageName })
                         }
                     }
                 }
@@ -148,6 +161,7 @@ fun AppClassification(
                             badApps.remove(app)
                             goodApps.add(app)
                             goodApps.sortBy { it.name.lowercase() }
+                            personalityViewModel.onAppsChanged(goodApps.map { it.packageName }, badApps.map { it.packageName })
                         }
                     }
                 }
@@ -162,7 +176,11 @@ fun AppClassification(
             ),
             rowModifier = Modifier.fillMaxWidth(),
             onClick = {
-                navController.navigate(ScreenRoutes.HOME)
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (personalityViewModel.updateApps().isSuccess) {
+                        navController.navigate(ScreenRoutes.HOME)
+                    }
+                }
             }
         )
     }
@@ -190,6 +208,8 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
 
 // -------------------------------------------------------------------------------------------------
 
+@SuppressLint("ViewModelConstructorInComposable")
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
@@ -197,6 +217,13 @@ fun AppItem(app: AppInfo, onClick: () -> Unit) {
 fun SignUpScreen4_AppsPreview() {
     KiwiTheme {
         SignUpScreen4_Apps(
+            personalityViewModel = PersonalityFakeViewModel(PersonalityState(
+                validPersonalityDTO().realName,
+                validPersonalityDTO().knightName,
+                validPersonalityDTO().build,
+                validPersonalityDTO().goodApps,
+                validPersonalityDTO().badApps,
+            )),
             navController = rememberNavController()
         )
     }

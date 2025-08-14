@@ -149,6 +149,7 @@ private fun AppScreen(
                         Kiwi_BackHandler()
                         Kiwi_Music_SignUp()
                         SignUpScreen4_Apps(
+                            personalityViewModel = personalityViewModel,
                             navController = navController
                         )
                     }
@@ -186,7 +187,7 @@ private fun AppScreen(
                 if (!isLoginScreen && isLoginCompleted && !isSettingsScreen) {
                     Kiwi_BackHandler()
                     Kiwi_Music_Home()
-                    DashboardModal(metricsViewModel)
+                    DashboardModal(metricsViewModel, personalityViewModel)
                 }
 
                 if (!isLoginScreen && isLoginCompleted) {

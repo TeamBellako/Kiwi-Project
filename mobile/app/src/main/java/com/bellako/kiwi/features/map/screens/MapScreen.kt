@@ -39,6 +39,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
@@ -161,12 +164,19 @@ fun MapScreenPreview() {
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
                     DashboardModal(
-                        MetricsFakeViewModel(MetricsState(
+                        metricsViewModel = MetricsFakeViewModel(MetricsState(
                             date = "2025-06-12",
                             maxGoodTimeSeconds = 6 * 60 * 60,
                             currentGoodTimeSeconds = 1 * 60 * 60,
                             maxBadTimeSeconds = 6 * 60 * 60,
                             currentBadTimeSeconds = 2 * 60 * 60
+                        )),
+                        personalityViewModel = PersonalityFakeViewModel(PersonalityState(
+                            validPersonalityDTO().realName,
+                            validPersonalityDTO().knightName,
+                            validPersonalityDTO().build,
+                            validPersonalityDTO().goodApps,
+                            validPersonalityDTO().badApps,
                         ))
                     )
                 }

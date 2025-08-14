@@ -17,4 +17,7 @@ interface IPersonalityViewModel : IBaseViewModel<PersonalityState> {
     fun onKnightNameChanged(name: String)
 
     suspend fun updateBuild(): Result<Unit>
+
+    fun onAppsChanged(goodApps: List<String>, badApps: List<String>)
+    suspend fun updateApps(): Result<Unit>
 }

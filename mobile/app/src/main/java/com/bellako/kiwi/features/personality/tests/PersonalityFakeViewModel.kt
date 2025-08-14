@@ -23,7 +23,7 @@ class PersonalityFakeViewModel(
     override fun checkValid(): Result<Personality> {
         return _state.value?.toDomainObject()?.fold(
             onSuccess = { validState ->
-                Result.success(Personality(validState.realName, validState.knightName, validState.build))
+                Result.success(Personality(validState.realName, validState.knightName, validState.build, validState.goodApps, validState.badApps))
             },
             onFailure = { err ->
                 _uiState.value = UIState.Error(err.message.orEmpty())
@@ -49,6 +49,15 @@ class PersonalityFakeViewModel(
     }
 
     override suspend fun updateBuild(): Result<Unit> {
+        return Result.success(Unit)
+    }
+
+    override fun onAppsChanged(goodApps: List<String>, badApps: List<String>) {
+        _state.value = _state.value?.copy(goodApps = goodApps)
+        _state.value = _state.value?.copy(badApps = badApps)
+    }
+
+    override suspend fun updateApps(): Result<Unit> {
         return Result.success(Unit)
     }
 }

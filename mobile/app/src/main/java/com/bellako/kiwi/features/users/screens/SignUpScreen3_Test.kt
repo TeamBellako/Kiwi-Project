@@ -136,7 +136,13 @@ fun SignUpScreen3_TestPreview() {
     KiwiTheme {
         SignUpScreen3_Test(
             UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            PersonalityFakeViewModel(PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)),
+            personalityViewModel = PersonalityFakeViewModel(PersonalityState(
+                validPersonalityDTO().realName,
+                validPersonalityDTO().knightName,
+                validPersonalityDTO().build,
+                validPersonalityDTO().goodApps,
+                validPersonalityDTO().badApps,
+            )),
             navController = rememberNavController()
         )
     }

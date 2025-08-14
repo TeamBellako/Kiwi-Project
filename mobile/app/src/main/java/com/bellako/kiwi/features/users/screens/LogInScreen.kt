@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -132,10 +133,7 @@ private fun LogIn(
         if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
             usersViewModel.onEmailChanged(username)
             usersViewModel.onPasswordChanged(password)
-            if (usersViewModel.login(context).isSuccess) {
-                navController.navigate(ScreenRoutes.HOME)
-                usersViewModel.onLoginSuccess()
-            }
+            performLogin(context, usersViewModel, personalityViewModel, navController)
         }
     }
 
@@ -219,18 +217,7 @@ private fun LogIn(
                         ),
                         onClick = {
                             CoroutineScope(Dispatchers.Main).launch {
-                                if (usersViewModel.login(context).isSuccess) {
-                                    // check personality registered, navigate to Home or Test depending on that
-                                    personalityViewModel.loadPersonality().fold(
-                                        onSuccess = {
-                                            navController.navigate(ScreenRoutes.HOME)
-                                        },
-                                        onFailure = {
-                                            navController.navigate(ScreenRoutes.SIGNUP3_TEST)
-                                        }
-                                    )
-                                    usersViewModel.onLoginSuccess()
-                                }
+                                performLogin(context, usersViewModel, personalityViewModel, navController)
                             }
                         },
                         enabled = !isLoading,
@@ -282,6 +269,32 @@ private fun LogIn(
     }
 }
 
+private suspend fun performLogin(
+    context: Context,
+    usersViewModel: IUsersViewModel,
+    personalityViewModel: IPersonalityViewModel,
+    navController: NavController
+) {
+    if (usersViewModel.login(context).isSuccess) {
+        // check personality registered and configured, navigate to Home or to the corresponding personality test if anything missing
+        personalityViewModel.loadPersonality().fold(
+            onSuccess = {
+                if (personalityViewModel.state.value?.build == "") {
+                    navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+                } else if (personalityViewModel.state.value?.goodApps?.isEmpty()!! && personalityViewModel.state.value?.badApps?.isEmpty()!!) {
+                    navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                } else {
+                    navController.navigate(ScreenRoutes.HOME)
+                }
+            },
+            onFailure = {
+                navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+            }
+        )
+        usersViewModel.onLoginSuccess()
+    }
+}
+
 @Composable
 private fun SignUp(
     onSignUp: () -> Unit
@@ -329,7 +342,13 @@ fun LogInScreenPreview() {
     KiwiTheme {
         LogInScreen(
             UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            PersonalityFakeViewModel(PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)),
+            personalityViewModel = PersonalityFakeViewModel(PersonalityState(
+                validPersonalityDTO().realName,
+                validPersonalityDTO().knightName,
+                validPersonalityDTO().build,
+                validPersonalityDTO().goodApps,
+                validPersonalityDTO().badApps,
+            )),
             navController = rememberNavController()
         )
     }
