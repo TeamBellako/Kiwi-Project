@@ -153,4 +153,29 @@ public class PersonalityIntegrationTest {
                         .content(objectMapper.writeValueAsString(buildDTO())))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void updateApps() throws Exception {
+        Users user = UsersMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+
+        Personality personality = validPersonality();
+        personality.setUser(savedUser);
+
+        personalityRepository.saveAndFlush(personality);
+        mockMvc.perform(post(baseAPIUrl + "/apps")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(appsDTO())))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void updateApps_unauthorized() throws Exception {
+        mockMvc.perform(post(baseAPIUrl + "/apps")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(buildDTO())))
+                .andExpect(status().isUnauthorized());
+    }
 }

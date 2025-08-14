@@ -86,4 +86,12 @@ public class PersonalityControllerTest {
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/build", buildDTO()))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void updateApps() throws Exception {
+        when(personalityService.updateApps(validUserDTO().getEmail(), appsDTO())).thenReturn(validPersonalityDTO());
+        mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/apps", appsDTO()))
+                .andExpect(status().isOk());
+    }
 }

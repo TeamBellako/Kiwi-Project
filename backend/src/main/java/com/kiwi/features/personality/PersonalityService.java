@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,7 +36,7 @@ public class PersonalityService {
         if (personality.isPresent()) {
             return personality.get();
         } else {
-            Personality newPersonality = new Personality("", "", "");
+            Personality newPersonality = new Personality("", "", "", List.of(), List.of());
             Optional<UsersPersistence> user = usersRepository.findByEmail(email);
             if (user.isPresent()) {
                 newPersonality.setUser(user.get());
@@ -64,6 +65,14 @@ public class PersonalityService {
     public PersonalityDTO updateBuild(String email, @Valid BuildDTO buildDTO) {
         Personality newPersonality = getOrCreatePersonality(email);
         newPersonality.setBuild(buildDTO.getBuild());
+        return personalityRepository.saveAndFlush(newPersonality).toDTO();
+    }
+
+    @Transactional
+    public PersonalityDTO updateApps(String email, @Valid AppsDTO appsDTO) {
+        Personality newPersonality = getOrCreatePersonality(email);
+        newPersonality.setGoodApps(appsDTO.getGoodApps());
+        newPersonality.setBadApps(appsDTO.getBadApps());
         return personalityRepository.saveAndFlush(newPersonality).toDTO();
     }
 

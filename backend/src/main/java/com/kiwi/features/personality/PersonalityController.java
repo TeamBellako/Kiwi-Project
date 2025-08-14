@@ -38,4 +38,9 @@ public class PersonalityController {
         return ResponseEntity.ok(personalityService.updateBuild(userDetails.getUsername(), buildDTO));
     }
 
+    @PostMapping("/apps")
+    public ResponseEntity<?> updateBuild(@AuthenticationPrincipal UserDetails userDetails, @RequestBody AppsDTO appsDTO) {
+        return ResponseEntity.ok(personalityService.updateApps(userDetails.getUsername(), appsDTO));
+    }
+
 }
