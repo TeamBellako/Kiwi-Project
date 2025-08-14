@@ -26,7 +26,7 @@ import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.features.users.screens.LogInScreen
-import com.bellako.kiwi.features.users.screens.SignUpTestScreen
+import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 
 @RunWith(AndroidJUnit4::class)
 class LoginScreenTest {
@@ -64,7 +64,7 @@ class LoginScreenTest {
                     MapScreen(viewModel = MapViewModel())
                 }
                 composable(ScreenRoutes.SIGNUP_TEST) {
-                    SignUpTestScreen(
+                    SignUpScreen3_Test(
                         usersViewModel = usersFakeViewModel,
                         personalityViewModel = personalityFakeViewModel,
                         navController = navController

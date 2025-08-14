@@ -22,8 +22,8 @@ import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validP
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.features.users.screens.SignUpScreen
-import com.bellako.kiwi.features.users.screens.SignUpTestScreen
+import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
+import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 
 
 @RunWith(AndroidJUnit4::class)
@@ -49,16 +49,16 @@ class SignUpScreenTest {
 
         rule.setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP) {
-                composable(ScreenRoutes.SIGNUP) {
-                    SignUpScreen(
+            NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP2_FORM) {
+                composable(ScreenRoutes.SIGNUP2_FORM) {
+                    SignUpScreen2_Form(
                         usersViewModel = usersFakeViewModel,
                         personalityViewModel = personalityFakeViewModel,
                         navController = navController
                     )
                 }
-                composable(ScreenRoutes.SIGNUP_TEST) {
-                    SignUpTestScreen(
+                composable(ScreenRoutes.SIGNUP3_TEST) {
+                    SignUpScreen3_Test(
                         usersViewModel = usersFakeViewModel,
                         personalityViewModel = personalityFakeViewModel,
                         navController = navController

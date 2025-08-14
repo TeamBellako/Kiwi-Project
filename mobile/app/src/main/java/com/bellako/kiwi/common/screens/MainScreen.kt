@@ -38,18 +38,20 @@ import com.bellako.kiwi.features.settings.screens.SettingsScreen
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.screens.LogInScreen
-import com.bellako.kiwi.features.users.screens.SignUpScreen
-import com.bellako.kiwi.features.users.screens.SignUpTestScreen
-import com.bellako.kiwi.features.users.screens.SignUpWelcomeScreen
+import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
+import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
+import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
+import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 object ScreenRoutes {
     const val LOGIN = "login"
-    const val SIGNUP_WELCOME = "signup_welcome"
-    const val SIGNUP = "signup"
-    const val SIGNUP_TEST = "signup_test"
+    const val SIGNUP1_WELCOME = "signup1_welcome"
+    const val SIGNUP2_FORM = "signup2_form"
+    const val SIGNUP3_TEST = "signup3_test"
+    const val SIGNUP4_APPS = "signup4_apps"
     const val HOME = "home"
     const val SETTINGS = "settings"
     const val HELP = "help"
@@ -86,9 +88,10 @@ private fun AppScreen(
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val isLoginScreen =
         route == ScreenRoutes.LOGIN ||
-        route == ScreenRoutes.SIGNUP_WELCOME ||
-        route == ScreenRoutes.SIGNUP ||
-        route == ScreenRoutes.SIGNUP_TEST
+        route == ScreenRoutes.SIGNUP1_WELCOME ||
+        route == ScreenRoutes.SIGNUP2_FORM ||
+        route == ScreenRoutes.SIGNUP3_TEST ||
+        route == ScreenRoutes.SIGNUP4_APPS
     val isSettingsScreen = route == ScreenRoutes.SETTINGS
 
     Scaffold(
@@ -113,31 +116,39 @@ private fun AppScreen(
                         )
                     }
 
-                    composable(ScreenRoutes.SIGNUP_WELCOME) {
+                    composable(ScreenRoutes.SIGNUP1_WELCOME) {
                         Kiwi_BackHandler()
                         Kiwi_Music_SignUp()
-                        SignUpWelcomeScreen(
+                        SignUpScreen1_Welcome(
                             viewModel = usersViewModel,
                             navController = navController
                         )
                     }
 
-                    composable(ScreenRoutes.SIGNUP) {
+                    composable(ScreenRoutes.SIGNUP2_FORM) {
                         Kiwi_BackHandler()
                         Kiwi_Music_SignUp()
-                        SignUpScreen(
+                        SignUpScreen2_Form(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
                             navController = navController
                         )
                     }
 
-                    composable(ScreenRoutes.SIGNUP_TEST) {
+                    composable(ScreenRoutes.SIGNUP3_TEST) {
                         Kiwi_BackHandler()
                         Kiwi_Music_SignUp()
-                        SignUpTestScreen(
+                        SignUpScreen3_Test(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
+                            navController = navController
+                        )
+                    }
+
+                    composable(ScreenRoutes.SIGNUP4_APPS) {
+                        Kiwi_BackHandler()
+                        Kiwi_Music_SignUp()
+                        SignUpScreen4_Apps(
                             navController = navController
                         )
                     }

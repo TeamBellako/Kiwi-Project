@@ -226,7 +226,7 @@ private fun LogIn(
                                             navController.navigate(ScreenRoutes.HOME)
                                         },
                                         onFailure = {
-                                            navController.navigate(ScreenRoutes.SIGNUP_TEST)
+                                            navController.navigate(ScreenRoutes.SIGNUP3_TEST)
                                         }
                                     )
                                     usersViewModel.onLoginSuccess()
@@ -275,7 +275,7 @@ private fun LogIn(
         ) {
 
             SignUp() {
-                navController.navigate(ScreenRoutes.SIGNUP_WELCOME)
+                navController.navigate(ScreenRoutes.SIGNUP1_WELCOME)
             }
 
         }

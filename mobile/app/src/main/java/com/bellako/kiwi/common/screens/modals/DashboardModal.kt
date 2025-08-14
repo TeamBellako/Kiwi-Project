@@ -57,7 +57,6 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
-import com.bellako.kiwi.features.metrics.model.MetricsMapper
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.MetricsUtils
@@ -73,7 +72,6 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
-import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing

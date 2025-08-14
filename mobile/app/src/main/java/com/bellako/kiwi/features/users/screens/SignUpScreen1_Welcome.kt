@@ -1,24 +1,20 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.R
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.ui.KiwiTheme
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.ui.Spacing
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.SpanStyle
@@ -41,48 +37,27 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 
 @Composable
-fun SignUpWelcomeScreen(
+fun SignUpScreen1_Welcome(
     viewModel: IUsersViewModel,
     navController: NavController
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Kiwi_Image(
-            R.drawable.ph_onboarding_bkg,
-            "Sign Up Background",
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            contentScale = ContentScale.Crop
+    SignUpScreen() {
+        Welcome(
+            viewModel,
+            navController
         )
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
-            contentAlignment = Alignment.Center
+                .padding(bottom = getResponsiveSizeHeight(Spacing.medium)),
+            contentAlignment = Alignment.BottomCenter
         ) {
-            Welcome(
-                viewModel,
-                navController
-            )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = getResponsiveSizeHeight(Spacing.medium)),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-
-                GoToLogIn() {
-                    navController.navigate(ScreenRoutes.LOGIN)
-                }
-
+            GoToLogIn() {
+                navController.navigate(ScreenRoutes.LOGIN)
             }
+
         }
     }
 }
@@ -122,7 +97,7 @@ private fun Welcome(
                 viewModel.onEmailChanged("")
                 viewModel.onPasswordChanged("")
                 viewModel.resetUiState()
-                navController.navigate(ScreenRoutes.SIGNUP)
+                navController.navigate(ScreenRoutes.SIGNUP2_FORM)
             },
         )
     }
@@ -171,9 +146,9 @@ private fun GoToLogIn(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpWelcomeScreenPreview() {
+fun SignUpScreen1_WelcomePreview() {
     KiwiTheme {
-        SignUpWelcomeScreen(
+        SignUpScreen1_Welcome(
             UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
             navController = rememberNavController()
         )
