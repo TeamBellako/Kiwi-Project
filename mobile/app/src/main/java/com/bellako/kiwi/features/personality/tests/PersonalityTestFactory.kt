@@ -9,26 +9,19 @@ object PersonalityTestFactory {
 
     fun validPersonalityDTO(): PersonalityDTO =
         PersonalityDTO(
-            "Finn",
-            "Human",
-            BERSERKER,
-            listOf(),
-            listOf()
+            validPersonalityRealNameDTO().name,
+            validPersonalityKnightNameDTO().name,
+            validPersonalityBuildDTO().build,
+            validPersonalityAppsDTO().goodApps,
+            validPersonalityAppsDTO().badApps
         )
 
-    fun validPersonalityRealNameDTO(): PersonalityUserNameDTO =
-        PersonalityUserNameDTO(
-            "Finn"
-        )
+    fun validPersonalityRealNameDTO(): PersonalityUserNameDTO = PersonalityUserNameDTO("Finn")
 
-    fun validPersonalityKnightNameDTO(): PersonalityUserNameDTO =
-        PersonalityUserNameDTO(
-            "Human"
-        )
+    fun validPersonalityKnightNameDTO(): PersonalityUserNameDTO = PersonalityUserNameDTO("Human")
 
-    fun validPersonalityBuildDTO(): PersonalityBuildDTO =
-        PersonalityBuildDTO(
-            BERSERKER
-        )
+    fun validPersonalityBuildDTO(): PersonalityBuildDTO = PersonalityBuildDTO(BERSERKER)
+
+    fun validPersonalityAppsDTO(): PersonalityAppsDTO = PersonalityAppsDTO(listOf("GrowTale"), listOf("X"))
 
 }

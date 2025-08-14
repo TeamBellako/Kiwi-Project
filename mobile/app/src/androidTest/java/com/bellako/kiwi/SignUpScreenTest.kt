@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
@@ -42,7 +43,13 @@ class SignUpScreenTest {
         AudioManager.setEnabled(false)
 
         usersState = UsersState("finn@thehuman.com", "Math3matical!")
-        personalityState = PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)
+        personalityState = PersonalityState(
+            validPersonalityDTO().realName,
+            validPersonalityDTO().knightName,
+            validPersonalityDTO().build,
+            validPersonalityAppsDTO().goodApps,
+            validPersonalityAppsDTO().badApps
+        )
 
         usersFakeViewModel = UsersFakeViewModel(usersState)
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)

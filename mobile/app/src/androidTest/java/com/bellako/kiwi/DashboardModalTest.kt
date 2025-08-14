@@ -4,7 +4,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -25,6 +24,9 @@ import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.MetricsUtils
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import org.junit.Before
@@ -40,8 +42,11 @@ class DashboardModalTest {
     @get:Rule
     val rule = createComposeRule()
 
-    private lateinit var fakeViewModel: MetricsFakeViewModel
-    private lateinit var state: MetricsState
+    private lateinit var fakeMetricsViewModel: MetricsFakeViewModel
+    private lateinit var metricsState: MetricsState
+
+    private lateinit var fakePersonalityViewModel: PersonalityFakeViewModel
+    private lateinit var personalityState: PersonalityState
 
     private lateinit var futureMetricsDTO: MetricsDTO
     private lateinit var todayMetricsDTO: MetricsDTO
@@ -66,13 +71,22 @@ class DashboardModalTest {
         pastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.minusDays(1).toString())
         futureMetricsDTO = todayMetricsDTO.copy(date = todayLocalDate.plusDays(1).toString(), currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0)
 
-        state = MetricsMapper.toState(todayMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0))
-        fakeViewModel = MetricsFakeViewModel(
-            state,
+        metricsState = MetricsMapper.toState(todayMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0))
+        fakeMetricsViewModel = MetricsFakeViewModel(
+            metricsState,
             todayMetricsDTO,
             pastMetricsDTO,
             futureMetricsDTO
         )
+
+        personalityState = PersonalityState(
+            validPersonalityDTO().realName,
+            validPersonalityDTO().knightName,
+            validPersonalityDTO().build,
+            validPersonalityDTO().goodApps,
+            validPersonalityDTO().badApps,
+        )
+        fakePersonalityViewModel = PersonalityFakeViewModel(personalityState)
     }
 
     @Test
@@ -262,7 +276,7 @@ class DashboardModalTest {
         rule.setContent {
             screenHeightDp = getScreenHeight(withoutInsetTop = true).dp
             statesBottom = states.map { state -> getResponsiveSizeHeight(state).toFloat() }
-            DashboardModal(fakeViewModel, showCalendarView, initialStateIndex)
+            DashboardModal(fakeMetricsViewModel, fakePersonalityViewModel, showCalendarView, initialStateIndex)
         }
         rule.waitUntil {
             screenHeightDp > 0.dp

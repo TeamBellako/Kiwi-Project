@@ -9,6 +9,7 @@ import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validP
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityRealNameDTO
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
 import com.bellako.kiwi.common.model.HealthApiService
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,27 +59,28 @@ class PersonalityIntegrationTest {
     @Test
     fun `update personality real name`() = runTest {
         `when`(api.updateRealName(validPersonalityRealNameDTO())).thenReturn(Unit)
-
         val result = repository.updateRealName(validPersonalityRealNameDTO())
-
         Assert.assertTrue(result.isSuccess)
     }
 
     @Test
     fun `update personality knight name`() = runTest {
         `when`(api.updateKnightName(validPersonalityRealNameDTO())).thenReturn(Unit)
-
         val result = repository.updateKnightName(validPersonalityKnightNameDTO())
-
         Assert.assertTrue(result.isSuccess)
     }
 
     @Test
     fun `update personality build`() = runTest {
         `when`(api.updateBuild(validPersonalityBuildDTO())).thenReturn(Unit)
-
         val result = repository.updateBuild(validPersonalityBuildDTO())
+        Assert.assertTrue(result.isSuccess)
+    }
 
+    @Test
+    fun `update personality apps`() = runTest {
+        `when`(api.updateApps(validPersonalityAppsDTO())).thenReturn(Unit)
+        val result = repository.updateApps(validPersonalityAppsDTO())
         Assert.assertTrue(result.isSuccess)
     }
 

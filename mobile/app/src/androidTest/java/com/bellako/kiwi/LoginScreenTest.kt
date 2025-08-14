@@ -21,6 +21,7 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
@@ -47,7 +48,13 @@ class LoginScreenTest {
         usersState = UsersState("finn@thehuman.com", "Math3matical!")
         usersFakeViewModel = UsersFakeViewModel(usersState)
 
-        personalityState = PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)
+        personalityState = PersonalityState(
+            validPersonalityDTO().realName,
+            validPersonalityDTO().knightName,
+            validPersonalityDTO().build,
+            validPersonalityAppsDTO().goodApps,
+            validPersonalityAppsDTO().badApps
+        )
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
         rule.setContent {
@@ -63,7 +70,7 @@ class LoginScreenTest {
                 composable(ScreenRoutes.HOME) {
                     MapScreen(viewModel = MapViewModel())
                 }
-                composable(ScreenRoutes.SIGNUP_TEST) {
+                composable(ScreenRoutes.SIGNUP3_TEST) {
                     SignUpScreen3_Test(
                         usersViewModel = usersFakeViewModel,
                         personalityViewModel = personalityFakeViewModel,
