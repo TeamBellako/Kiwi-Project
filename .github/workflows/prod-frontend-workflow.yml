@@ -39,11 +39,11 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm ci
+        run: npm install
 
       - name: Run unit tests
         working-directory: ./frontend
-        run: npm test -- --ci --watchAll=false --passWithNoTests
+        run: npm test --watchAll=false --passWithNoTests
 
   # ---- CD: build & deploy on pushes ----
   frontend-ci-cd:
@@ -70,7 +70,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm ci
+        run: npm install
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

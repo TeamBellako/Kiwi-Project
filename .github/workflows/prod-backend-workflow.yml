@@ -40,7 +40,7 @@ jobs:
         working-directory: ./backend
         run: |
           chmod +x mvnw
-          ./mvnw -B -ntp test
+          ./mvnw test
 
   # ---- CD: build & deploy on pushes ----
   backend-ci-cd:

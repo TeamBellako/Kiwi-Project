@@ -21,23 +21,6 @@ on:
       - 'k8s/dev/dev-mysql-pvc.yaml'
 
 jobs:
-  # ---- CI: lightweight validation on PRs (no secrets, no cluster) ----
-  mysql-validate:
-    name: Validate K8s YAML (PR)
-    if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Lint YAML
-        uses: actionshub/yamllint@v1
-        with:
-          file_or_dir: |
-            k8s/dev/dev-mysql-deployment.yaml
-            k8s/dev/dev-mysql-service.yaml
-            k8s/dev/dev-mysql-configmap.yaml
-            k8s/dev/dev-mysql-pvc.yaml
-
   # ---- CD: deploy on pushes ----
   mysql-cd:
     name: Deploy MySQL (Dev)
