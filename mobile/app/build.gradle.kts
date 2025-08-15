@@ -71,6 +71,7 @@ android {
             )
            isDebuggable = false
            isJniDebuggable = false
+            isShrinkResources = true
         }
     }
     compileOptions {
@@ -97,6 +98,8 @@ tasks.withType<Test> {
 
 
 dependencies {
+    compileOnly(libs.annotations)
+
     implementation(platform(libs.firebase.bom))
     implementation(platform(libs.firebase.bom.v3400))
     implementation(libs.firebase.analytics)
