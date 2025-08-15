@@ -72,6 +72,10 @@ jobs:
           working-directory: ./mobile
           script: echo "Generated AVD snapshot for caching."
 
+      - name: Grant Gradle permissions
+        run: chmod +x ./gradlew
+        working-directory: ./mobile
+
       - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
