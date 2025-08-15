@@ -1,5 +1,5 @@
 name: MySQL CD (Dev)
-  
+
 on:
   push:
     branches:
@@ -10,15 +10,41 @@ on:
       - 'k8s/dev/dev-mysql-service.yaml'
       - 'k8s/dev/dev-mysql-configmap.yaml'
       - 'k8s/dev/dev-mysql-pvc.yaml'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - '.github/workflows/dev-mysql-workflow.yml'
+      - 'k8s/dev/dev-mysql-deployment.yaml'
+      - 'k8s/dev/dev-mysql-service.yaml'
+      - 'k8s/dev/dev-mysql-configmap.yaml'
+      - 'k8s/dev/dev-mysql-pvc.yaml'
 
 jobs:
+  # ---- CI: lightweight validation on PRs (no secrets, no cluster) ----
+  mysql-validate:
+    name: Validate K8s YAML (PR)
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Lint YAML
+        uses: actionshub/yamllint@v1
+        with:
+          file_or_dir: |
+            k8s/dev/dev-mysql-deployment.yaml
+            k8s/dev/dev-mysql-service.yaml
+            k8s/dev/dev-mysql-configmap.yaml
+            k8s/dev/dev-mysql-pvc.yaml
+
+  # ---- CD: deploy on pushes ----
   mysql-cd:
     name: Deploy MySQL (Dev)
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
-
     environment:
       name: dev
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,28 +57,26 @@ jobs:
       - name: Create Kubernetes secrets for credentials
         run: |
           kubectl create secret generic mysql-secret \
-            --from-literal=MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} \
-            --from-literal=MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
-            --from-literal=MYSQL_INIT_TABLE=${{ secrets.MYSQL_INIT_TABLE }} \
-            --from-literal=BACKEND_DB_USERNAME=${{ secrets.BACKEND_DB_USERNAME }} \
-            --from-literal=BACKEND_DB_PASSWORD=${{ secrets.BACKEND_DB_PASSWORD }} \
-            --from-literal=TEAM_ROLE=${{ secrets.TEAM_ROLE }} \
-            --from-literal=TEAM_01_USERNAME=${{ secrets.TEAM_01_USERNAME }} \
-            --from-literal=TEAM_01_PASSWORD=${{ secrets.TEAM_01_PASSWORD }} \
-            --from-literal=TEAM_02_USERNAME=${{ secrets.TEAM_02_USERNAME }} \
-            --from-literal=TEAM_02_PASSWORD=${{ secrets.TEAM_02_PASSWORD }} \
-            --from-literal=TEAM_03_USERNAME=${{ secrets.TEAM_03_USERNAME }} \
-            --from-literal=TEAM_03_PASSWORD=${{ secrets.TEAM_03_PASSWORD }} \
+            --from-literal=MYSQL_ROOT_PASSWORD='${{ secrets.MYSQL_ROOT_PASSWORD }}' \
+            --from-literal=MYSQL_DATABASE='${{ secrets.MYSQL_DATABASE }}' \
+            --from-literal=MYSQL_INIT_TABLE='${{ secrets.MYSQL_INIT_TABLE }}' \
+            --from-literal=BACKEND_DB_USERNAME='${{ secrets.BACKEND_DB_USERNAME }}' \
+            --from-literal=BACKEND_DB_PASSWORD='${{ secrets.BACKEND_DB_PASSWORD }}' \
+            --from-literal=TEAM_ROLE='${{ secrets.TEAM_ROLE }}' \
+            --from-literal=TEAM_01_USERNAME='${{ secrets.TEAM_01_USERNAME }}' \
+            --from-literal=TEAM_01_PASSWORD='${{ secrets.TEAM_01_PASSWORD }}' \
+            --from-literal=TEAM_02_USERNAME='${{ secrets.TEAM_02_USERNAME }}' \
+            --from-literal=TEAM_02_PASSWORD='${{ secrets.TEAM_02_PASSWORD }}' \
+            --from-literal=TEAM_03_USERNAME='${{ secrets.TEAM_03_USERNAME }}' \
+            --from-literal=TEAM_03_PASSWORD='${{ secrets.TEAM_03_PASSWORD }}' \
             --namespace=dev \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy MySQL PVC for persistent storage
-        run: |
-          kubectl apply -f k8s/dev/dev-mysql-pvc.yaml
+        run: kubectl apply -f k8s/dev/dev-mysql-pvc.yaml
           
       - name: Deploy MySQL ConfigMap for initialization script
-        run: |
-          kubectl apply -f k8s/dev/dev-mysql-configmap.yaml
+        run: kubectl apply -f k8s/dev/dev-mysql-configmap.yaml
 
       - name: Deploy to Kubernetes
         run: |

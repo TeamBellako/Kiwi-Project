@@ -9,15 +9,21 @@ on:
     paths:
       - 'mobile/**'
       - '.github/workflows/prod-mobile-workflow.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/prod-mobile-workflow.yml'
 
 jobs:
-  mobile-ci:
-    name: Test and Build APK
+  # ---- CI: run tests on PRs ----
+  mobile-tests:
+    name: Run Android Tests (PR)
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
-
     environment:
       name: prod
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,28 +33,24 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      
-      - name: Write .env file
+
+      - name: Write .env (prod)
         run: |
           echo "${{ secrets.MOBILE_API_URL }}" > mobile/.env.prod
-          echo "${{ secrets.MOBILE_COMPANY_EMAIL }}" > mobile/.env.prod
+          echo "${{ secrets.MOBILE_COMPANY_EMAIL }}" >> mobile/.env.prod
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Grant Gradle permissions
-        run: chmod +x ./gradlew
-        working-directory: ./mobile
-        
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Gradle cache
-        uses: gradle/actions/setup-gradle@v3
-        
       - name: AVD cache
         uses: actions/cache@v4
         id: avd-cache
@@ -58,7 +60,7 @@ jobs:
             ~/.android/adb*
           key: avd-29
 
-      - name: create AVD and generate snapshot for caching
+      - name: Create AVD and snapshot (if needed)
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -69,17 +71,7 @@ jobs:
           working-directory: ./mobile
           script: echo "Generated AVD snapshot for caching."
 
-      - name: Configure Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 29
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: |
-            # Ensure the emulator is started correctly
-            echo "Configuring the emulator."
-
-      - name: run tests
+      - name: Run instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -93,12 +85,46 @@ jobs:
         run: ./gradlew test
         working-directory: ./mobile
 
+  # ---- CD: build, sign, and upload on pushes ----
+  mobile-ci-cd:
+    name: Build, Sign & Upload to Play (Prod)
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Write .env (prod)
+        run: |
+          echo "${{ secrets.MOBILE_API_URL }}" > mobile/.env.prod
+          echo "${{ secrets.MOBILE_COMPANY_EMAIL }}" >> mobile/.env.prod
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant Gradle permissions
+        run: chmod +x ./gradlew
+        working-directory: ./mobile
+
       - name: Generate version tag, push it, and export version info
         id: version
+        if: ${{ startsWith(github.ref, 'refs/heads/main') }}  # avoid re-tagging on tag builds
         run: |
+          set -e
           VERSION_BASE="v0.0."
-          LATEST_TAG=$(git tag --sort=-v:refname | grep '^v0.0.' | tail -n 1)
-          LAST_PATCH=$(echo $LATEST_TAG | cut -d'.' -f3)
+          LATEST_TAG=$(git tag --sort=-v:refname | grep '^v0\.0\.' | head -n 1 || true)
+          LAST_PATCH=$(echo ${LATEST_TAG:-v0.0.-1} | cut -d'.' -f3)
           NEXT_PATCH=$((LAST_PATCH + 1))
           NEW_TAG="${VERSION_BASE}${NEXT_PATCH}"
 
@@ -113,11 +139,21 @@ jobs:
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "VERSION_NAME=$TAG" >> $GITHUB_ENV
 
-      - name: Build AAb
+      - name: Fallback version info for tag builds
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          TAG="${TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$TAG"
+          VERSION_CODE=$((MAJOR * 1000000 + MINOR * 1000 + PATCH))
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "VERSION_NAME=$TAG" >> $GITHUB_ENV
+
+      - name: Build AAB
         run: ./gradlew bundleRelease -PversionCode=$VERSION_CODE -PversionName=$VERSION_NAME
         working-directory: ./mobile
 
-      - name: Sign AAb
+      - name: Sign AAB
         id: sign
         uses: r0adkll/sign-android-release@v1
         with:
@@ -132,11 +168,6 @@ jobs:
         with:
           name: app-bundle
           path: mobile/app/build/outputs/bundle/release/app-release.aab
-
-      - name: Download app bundle from artifact
-        uses: actions/download-artifact@v4.2.1
-        with:
-          name: app-bundle
 
       - name: Upload to Google Play Internal Test Track
         uses: r0adkll/upload-google-play@v1
