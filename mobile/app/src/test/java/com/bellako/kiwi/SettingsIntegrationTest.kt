@@ -1,13 +1,13 @@
 package com.bellako.kiwi
 
 import androidx.lifecycle.viewModelScope
-import com.bellako.kiwi.services.network.HealthApiService
-import com.bellako.kiwi.features.settings.ISettingsAPI
-import com.bellako.kiwi.features.settings.SettingsRepository
-import com.bellako.kiwi.features.settings.SettingsTestFactory.updateSettings
-import com.bellako.kiwi.features.settings.SettingsTestFactory.validSettings
-import com.bellako.kiwi.features.settings.SettingsViewModel
-import com.bellako.kiwi.services.common.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.common.model.HealthApiService
+import com.bellako.kiwi.features.settings.model.ISettingsAPI
+import com.bellako.kiwi.features.settings.model.SettingsRepository
+import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.updateSettings
+import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.validSettings
+import com.bellako.kiwi.features.settings.model.SettingsViewModel
+import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel

@@ -11,10 +11,41 @@ on:
       - '.github/workflows/prod-backend-workflow.yml'
       - 'k8s/prod/prod-backend-deployment.yaml'
       - 'k8s/prod/prod-backend-service.yaml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/prod-backend-workflow.yml'
 
 jobs:
+  # ---- CI: run tests on PRs ----
+  backend-tests:
+    name: Run Backend Tests (PR)
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run backend tests
+        working-directory: ./backend
+        run: |
+          chmod +x mvnw
+          ./mvnw test
+
+  # ---- CD: build & deploy on pushes ----
   backend-ci-cd:
-    name: Test, Build, and Push Backend (Prod)
+    name: Build and Deploy Backend (Prod)
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
 
     environment:
@@ -35,6 +66,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'maven'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -45,12 +77,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Run backend tests
-        working-directory: ./backend
-        run: |
-          chmod +x mvnw
-          ./mvnw test
-
       - name: Build and push Docker image (Prod)
         working-directory: ./backend
         run: |
@@ -59,7 +85,6 @@ jobs:
           VERSION_TAG=$(git describe --tags --abbrev=0 || date +'%Y-%m-%d-%H%M%S')
 
           docker build -t $IMAGE_NAME-$VERSION_TAG -t $IMAGE_NAME-latest -f Dockerfile.prod .
-
           docker push $IMAGE_NAME-$VERSION_TAG
           docker push $IMAGE_NAME-latest
 
