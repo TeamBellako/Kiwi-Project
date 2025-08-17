@@ -13,6 +13,23 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+
+    id("org.jlleitschuh.gradle.ktlint")
+    id("io.gitlab.arturbosch.detekt")
+}
+
+ktlint {
+    version.set("1.7.1")
+    android.set(true)
+    outputColorName.set("RED")
+}
+
+detekt {
+    toolVersion = "1.23.8"
+    buildUponDefaultConfig = true
+    allRules = false
+    autoCorrect = true
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
 }
 
 android {
@@ -48,12 +65,12 @@ android {
             buildConfigField(
                 "boolean",
                 "LOGGING_ENABLED",
-                "true"
+                "true",
             )
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
         release {
@@ -62,15 +79,15 @@ android {
             buildConfigField(
                 "boolean",
                 "LOGGING_ENABLED",
-                "false"
+                "false",
             )
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
-           isDebuggable = false
-           isJniDebuggable = false
+            isDebuggable = false
+            isJniDebuggable = false
             isShrinkResources = true
         }
     }
@@ -86,7 +103,7 @@ android {
     }
 }
 
-configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations"))}
+configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations")) }
 
 tasks.withType<Test> {
     testLogging {
@@ -95,7 +112,6 @@ tasks.withType<Test> {
         showStandardStreams = true
     }
 }
-
 
 dependencies {
     compileOnly(libs.annotations)
