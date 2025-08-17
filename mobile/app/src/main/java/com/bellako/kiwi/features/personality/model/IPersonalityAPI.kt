@@ -12,11 +12,17 @@ interface IPersonalityAPI {
     suspend fun getPersonality(): PersonalityDTO
 
     @POST("api/user/personality/realName")
-    suspend fun updateRealName(@Body dto: PersonalityUserNameDTO)
+    suspend fun updateRealName(
+        @Body dto: PersonalityUserNameDTO,
+    )
 
     @POST("api/user/personality/knightName")
-    suspend fun updateKnightName(@Body dto: PersonalityUserNameDTO)
+    suspend fun updateKnightName(
+        @Body dto: PersonalityUserNameDTO,
+    )
 
     @POST("api/user/personality/build")
-    suspend fun updateBuild(@Body dto: PersonalityBuildDTO)
+    suspend fun updateBuild(
+        @Body dto: PersonalityBuildDTO,
+    )
 }

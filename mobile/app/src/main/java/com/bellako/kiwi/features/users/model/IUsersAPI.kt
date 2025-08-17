@@ -7,8 +7,12 @@ import retrofit2.http.POST
 
 interface IUsersAPI {
     @POST("api/public/signup")
-    suspend fun signup(@Body dto: UsersDTO) : Response<Unit>
+    suspend fun signup(
+        @Body dto: UsersDTO,
+    ): Response<Unit>
 
     @POST("api/public/login")
-    suspend fun login(@Body dto: UsersDTO) : Map<String, String>
+    suspend fun login(
+        @Body dto: UsersDTO,
+    ): Map<String, String>
 }

@@ -1,12 +1,14 @@
 package com.bellako.kiwi
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.map.model.MapViewModel
+import com.bellako.kiwi.features.map.screens.MapScreen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,7 +37,7 @@ class MapScreenTest {
                 initialZoom = 2f,
                 initialPosition = Offset(0f, 0f),
                 dragLimitFactor = 1f,
-                viewModel = viewModel
+                viewModel = viewModel,
             )
         }
 

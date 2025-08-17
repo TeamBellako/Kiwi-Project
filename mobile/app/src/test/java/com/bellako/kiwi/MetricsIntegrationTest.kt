@@ -22,50 +22,54 @@ class MetricsIntegrationTest {
     private val validMetricsDTO = MetricsFactory.generateRandomValidMetricDTO()
 
     @Before
-    fun setUp(){
+    fun setUp() {
         api = mock(IMetricsAPI::class.java)
         repository = MetricsRepository(api)
         viewModel = MetricsViewModel(repository)
     }
 
     @Test
-    fun `create valid metrics`() = runTest {
-        whenever(api.createMetrics(validMetricsDTO))
-            .thenReturn(Response.success(Unit))
-        whenever(api.getMetricsByDate(validMetricsDTO.date))
-            .thenReturn(Response.success(null))
+    fun `create valid metrics`() =
+        runTest {
+            whenever(api.createMetrics(validMetricsDTO))
+                .thenReturn(Response.success(Unit))
+            whenever(api.getMetricsByDate(validMetricsDTO.date))
+                .thenReturn(Response.success(null))
 
-        val result : Result<Unit> = viewModel.createMetrics(MetricsMapper.toState(validMetricsDTO))
-        assertTrue(result.isSuccess)
-    }
-
-    @Test
-    fun `update valid metrics`() = runTest {
-        val updatedMetricsDTO = validMetricsDTO.copy(steps = validMetricsDTO.steps + 1)
-        whenever(api.updateMetrics(updatedMetricsDTO))
-            .thenReturn(Response.success(Unit))
-        whenever(api.getMetricsByDate(validMetricsDTO.date))
-            .thenReturn(Response.success(validMetricsDTO))
-
-        val result : Result<Unit> = viewModel.updateMetrics(MetricsMapper.toState(updatedMetricsDTO))
-        assertTrue(result.isSuccess)
-    }
+            val result: Result<Unit> = viewModel.createMetrics(MetricsMapper.toState(validMetricsDTO))
+            assertTrue(result.isSuccess)
+        }
 
     @Test
-    fun `load valid metrics`() = runTest {
-        whenever(api.getMetricsByDate(validMetricsDTO.date))
-            .thenReturn(Response.success(validMetricsDTO))
+    fun `update valid metrics`() =
+        runTest {
+            val updatedMetricsDTO = validMetricsDTO.copy(steps = validMetricsDTO.steps + 1)
+            whenever(api.updateMetrics(updatedMetricsDTO))
+                .thenReturn(Response.success(Unit))
+            whenever(api.getMetricsByDate(validMetricsDTO.date))
+                .thenReturn(Response.success(validMetricsDTO))
 
-        val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
-        assertTrue(result.isSuccess)
-    }
+            val result: Result<Unit> = viewModel.updateMetrics(MetricsMapper.toState(updatedMetricsDTO))
+            assertTrue(result.isSuccess)
+        }
 
     @Test
-    fun `load non-existing metrics`() = runTest {
-        whenever(api.getMetricsByDate(validMetricsDTO.date))
-            .thenReturn(Response.success(validMetricsDTO.copy(steps = 0, screenTimeSeconds = 0)))
+    fun `load valid metrics`() =
+        runTest {
+            whenever(api.getMetricsByDate(validMetricsDTO.date))
+                .thenReturn(Response.success(validMetricsDTO))
 
-        val result : Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
-        assertTrue(result.isSuccess)
-    }
+            val result: Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
+            assertTrue(result.isSuccess)
+        }
+
+    @Test
+    fun `load non-existing metrics`() =
+        runTest {
+            whenever(api.getMetricsByDate(validMetricsDTO.date))
+                .thenReturn(Response.success(validMetricsDTO.copy(steps = 0, screenTimeSeconds = 0)))
+
+            val result: Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
+            assertTrue(result.isSuccess)
+        }
 }

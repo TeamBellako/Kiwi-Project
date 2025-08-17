@@ -20,8 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.data.multiplyColorRgb
-import com.bellako.kiwi.features.settings.tests.SettingsTestTags
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.settings.tests.SettingsTestTags
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -34,7 +34,7 @@ fun Kiwi_Slider(
     valueRange: ClosedFloatingPointRange<Float>,
     steps: Int,
     testTag: String,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     Kiwi_H3(textArguments)
 
@@ -51,24 +51,27 @@ fun Kiwi_Slider(
             SliderDefaults.Thumb(
                 interactionSource = remember { MutableInteractionSource() },
                 thumbSize = DpSize(getResponsiveSizeHeight(20.dp), getResponsiveSizeHeight(20.dp)),
-                colors = SliderDefaults.colors().copy(
-                    thumbColor = trackColor,
-                ),
-                modifier = Modifier.padding(getResponsiveSizeHeight(0.dp))
+                colors =
+                    SliderDefaults.colors().copy(
+                        thumbColor = trackColor,
+                    ),
+                modifier = Modifier.padding(getResponsiveSizeHeight(0.dp)),
             )
         },
         track = { sliderState ->
             SliderDefaults.Track(
-                modifier = Modifier
-                    .height(getResponsiveSizeHeight(16.dp)),
+                modifier =
+                    Modifier
+                        .height(getResponsiveSizeHeight(16.dp)),
                 sliderState = sliderState,
-                colors = SliderDefaults.colors().copy(
-                    activeTickColor = Color.Transparent,
-                    activeTrackColor = trackColor,
-                    inactiveTickColor = Color.Transparent,
-                    inactiveTrackColor = MaterialTheme.colorScheme.primary,
-                ),
-                thumbTrackGapSize = getResponsiveSizeHeight(0.dp)
+                colors =
+                    SliderDefaults.colors().copy(
+                        activeTickColor = Color.Transparent,
+                        activeTrackColor = trackColor,
+                        inactiveTickColor = Color.Transparent,
+                        inactiveTrackColor = MaterialTheme.colorScheme.primary,
+                    ),
+                thumbTrackGapSize = getResponsiveSizeHeight(0.dp),
             )
         },
     )
@@ -83,11 +86,12 @@ fun Kiwi_Slider(
 fun Kiwi_SliderPreview() {
     KiwiTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .testTag(CommonTestTags.SETTINGS_SCREEN),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .testTag(CommonTestTags.SETTINGS_SCREEN),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Kiwi_Slider(
                 Kiwi_TextArguments("Sound Volume"),
@@ -95,7 +99,7 @@ fun Kiwi_SliderPreview() {
                 onValueChange = { },
                 valueRange = 0f..3f,
                 steps = 2,
-                testTag = SettingsTestTags.SOUND_VOLUME_SLIDER
+                testTag = SettingsTestTags.SOUND_VOLUME_SLIDER,
             )
 
             Kiwi_Spacer()
@@ -107,7 +111,7 @@ fun Kiwi_SliderPreview() {
                 valueRange = 0f..3f,
                 steps = 2,
                 testTag = SettingsTestTags.SOUND_VOLUME_SLIDER,
-                enabled = false
+                enabled = false,
             )
         }
     }

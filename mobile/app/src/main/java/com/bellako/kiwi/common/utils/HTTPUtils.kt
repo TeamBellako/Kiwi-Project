@@ -10,14 +10,15 @@ import java.io.IOException
 
 object HTTPUtils {
     fun createFakeHttpException(code: Int): HttpException {
-        val response = Response.error<Any>(
-            code,
-            "Error $code".toResponseBody(null)
-        )
+        val response =
+            Response.error<Any>(
+                code,
+                "Error $code".toResponseBody(null),
+            )
         return HttpException(response)
     }
 
-    fun extractHttpExceptionMessage(exception: HttpException) : String {
+    fun extractHttpExceptionMessage(exception: HttpException): String {
         val errorBody = exception.response()?.errorBody()?.string()
         val errorMessage = parseErrorMessage(errorBody)
 
@@ -38,14 +39,16 @@ object HTTPUtils {
         }
     }
 
-    fun mapExceptionToUIState(e: Throwable): UIState<Unit> {
-        return when (e) {
+    fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
+        when (e) {
             is HttpException -> {
-                if (e.code() >= 500) UIState.GeneralError
-                else UIState.Error(parseErrorMessage(e.response()?.errorBody()?.string())!!)
+                if (e.code() >= 500) {
+                    UIState.GeneralError
+                } else {
+                    UIState.Error(parseErrorMessage(e.response()?.errorBody()?.string())!!)
+                }
             }
             is IOException -> UIState.GeneralError
             else -> UIState.GeneralError
         }
-    }
 }

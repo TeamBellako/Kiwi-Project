@@ -20,8 +20,11 @@ abstract class BaseViewModel : ViewModel() {
         return Result.failure(Exception(message))
     }
 
-    fun <T> handleResult(result: Result<T>, successAction: () -> Unit): Result<Unit> {
-        return result.fold(
+    fun <T> handleResult(
+        result: Result<T>,
+        successAction: () -> Unit,
+    ): Result<Unit> =
+        result.fold(
             onSuccess = {
                 _uiState.value = UIState.Success(Unit)
                 successAction()
@@ -30,12 +33,14 @@ abstract class BaseViewModel : ViewModel() {
             onFailure = { throwable ->
                 _uiState.value = mapExceptionToUIState(throwable)
                 Result.failure(throwable)
-            }
+            },
         )
-    }
 
-    suspend fun <T> handleResultSuspend(result: Result<T>, successAction: suspend () -> Unit): Result<Unit> {
-        return result.fold(
+    suspend fun <T> handleResultSuspend(
+        result: Result<T>,
+        successAction: suspend () -> Unit,
+    ): Result<Unit> =
+        result.fold(
             onSuccess = {
                 _uiState.value = UIState.Success(Unit)
                 successAction()
@@ -44,19 +49,20 @@ abstract class BaseViewModel : ViewModel() {
             onFailure = { throwable ->
                 _uiState.value = mapExceptionToUIState(throwable)
                 Result.failure(throwable)
-            }
+            },
         )
-    }
 
-    fun mapExceptionToUIState(e: Throwable): UIState<Unit> {
-        return when (e) {
+    fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
+        when (e) {
             is HttpException -> {
-                if (e.code() >= 500) UIState.GeneralError
-                else UIState.Error(extractHttpExceptionMessage(e))
+                if (e.code() >= 500) {
+                    UIState.GeneralError
+                } else {
+                    UIState.Error(extractHttpExceptionMessage(e))
+                }
             }
             else -> UIState.GeneralError
         }
-    }
 
     fun resetUiState() {
         _uiState.value = UIState.Idle

@@ -1,17 +1,17 @@
 package com.bellako.kiwi.features.settings.tests
 
 import com.bellako.kiwi.common.model.BaseFakeViewModel
-import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.data.Settings
 import com.bellako.kiwi.features.settings.data.SettingsState
+import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class SettingsFakeViewModel(
-    backingState: SettingsState
-) : BaseFakeViewModel(), ISettingsViewModel {
-
+    backingState: SettingsState,
+) : BaseFakeViewModel(),
+    ISettingsViewModel {
     private val _state = MutableStateFlow<SettingsState?>(backingState)
     override val state: StateFlow<SettingsState?> = _state.asStateFlow()
 
@@ -46,17 +46,17 @@ class SettingsFakeViewModel(
 
         val result = state.toDomainObject()
 
-        result.onFailure {
-            handleError(simulatedException)
-        }.onSuccess { domain ->
-            if (currentDomainSettings != domain) {
-                currentDomainSettings = domain
-                _state.value = domain.toState()
-                handleSuccess()
+        result
+            .onFailure {
+                handleError(simulatedException)
+            }.onSuccess { domain ->
+                if (currentDomainSettings != domain) {
+                    currentDomainSettings = domain
+                    _state.value = domain.toState()
+                    handleSuccess()
+                }
             }
-        }
 
         setLoading(false)
     }
 }
-

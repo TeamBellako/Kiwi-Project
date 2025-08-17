@@ -6,80 +6,82 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.modals.ErrorModal
-import com.bellako.kiwi.common.data.UIState
-import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
-import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
-import com.bellako.kiwi.ui.KiwiTheme
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.ui.Spacing
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
-import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
-import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
-import com.bellako.kiwi.features.personality.data.PersonalityState
-import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.users.model.IUsersViewModel
-import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
-import com.bellako.kiwi.features.users.data.UsersState
-import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestTags
+import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
     ) {
         Kiwi_Image(
             R.drawable.ph_onboarding_bkg,
             "Sign Up Background",
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            contentScale = ContentScale.Crop
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+            contentScale = ContentScale.Crop,
         )
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(getResponsiveSizeHeight(Spacing.medium)),
+            contentAlignment = Alignment.Center,
         ) {
             SignUp(
                 usersViewModel,
                 personalityViewModel,
-                navController
+                navController,
             )
         }
     }
@@ -89,7 +91,7 @@ fun SignUpScreen(
 private fun SignUp(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     val context = LocalContext.current
 
@@ -118,22 +120,22 @@ private fun SignUp(
 
                 else -> {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .testTag(CommonTestTags.USERS_SCREEN),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .testTag(CommonTestTags.USERS_SCREEN),
                         verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-
                         // TEXT WELCOME
 
                         Kiwi_P2(
                             Kiwi_TextArguments(
                                 "Initial Setup Will Take\nApproximately 3 Minutes",
                                 textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
+                                color = MaterialTheme.colorScheme.secondary,
+                            ),
                         )
 
                         Kiwi_Spacer(Spacing.large)
@@ -144,12 +146,11 @@ private fun SignUp(
                                 "Let's Start With\nThe Basics",
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.secondary,
-                                bold = true
-                            )
+                                bold = true,
+                            ),
                         )
 
                         Kiwi_Spacer(Spacing.large)
-
 
                         // INPUT
 
@@ -161,13 +162,13 @@ private fun SignUp(
                                 Kiwi_Label2(
                                     Kiwi_TextArguments(
                                         "Real Name",
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
+                                        color = MaterialTheme.colorScheme.inversePrimary,
+                                    ),
                                 )
                             },
                             shouldHideInput = false,
                             textColor = MaterialTheme.colorScheme.inversePrimary,
-                            testTag = UsersTestTags.EMAIL_FIELD
+                            testTag = UsersTestTags.EMAIL_FIELD,
                         )
 
                         Kiwi_Spacer()
@@ -180,13 +181,13 @@ private fun SignUp(
                                 Kiwi_Label2(
                                     Kiwi_TextArguments(
                                         "Knight Name",
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
+                                        color = MaterialTheme.colorScheme.inversePrimary,
+                                    ),
                                 )
                             },
                             shouldHideInput = false,
                             textColor = MaterialTheme.colorScheme.inversePrimary,
-                            testTag = UsersTestTags.EMAIL_FIELD
+                            testTag = UsersTestTags.EMAIL_FIELD,
                         )
 
                         Kiwi_Spacer()
@@ -199,13 +200,13 @@ private fun SignUp(
                                 Kiwi_Label2(
                                     Kiwi_TextArguments(
                                         "Email",
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
+                                        color = MaterialTheme.colorScheme.inversePrimary,
+                                    ),
                                 )
                             },
                             shouldHideInput = false,
                             textColor = MaterialTheme.colorScheme.inversePrimary,
-                            testTag = UsersTestTags.EMAIL_FIELD
+                            testTag = UsersTestTags.EMAIL_FIELD,
                         )
 
                         Kiwi_Spacer()
@@ -218,18 +219,17 @@ private fun SignUp(
                                 Kiwi_Label2(
                                     Kiwi_TextArguments(
                                         "Password",
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
+                                        color = MaterialTheme.colorScheme.inversePrimary,
+                                    ),
                                 )
                             },
                             shouldHideInput = true,
                             textColor = MaterialTheme.colorScheme.inversePrimary,
-                            testTag = UsersTestTags.PASSWORD_FIELD
+                            testTag = UsersTestTags.PASSWORD_FIELD,
                         )
 
                         Kiwi_Spacer(Spacing.large)
                         Kiwi_Spacer(Spacing.large)
-
 
                         // BUTTON
 
@@ -237,7 +237,7 @@ private fun SignUp(
                             Kiwi_TextArguments(
                                 "START JOURNEY",
                                 color = MaterialTheme.colorScheme.secondary,
-                                bold = true
+                                bold = true,
                             ),
                             color = MaterialTheme.colorScheme.tertiary,
                             onClick = {
@@ -257,31 +257,37 @@ private fun SignUp(
 
                         Kiwi_Spacer()
 
-
                         // SIGNUP ERROR MESSAGE
 
                         var errorMessage by remember { mutableStateOf("") }
-                        errorMessage = when (usersUiState) {
-                            is UIState.Error -> { (usersUiState as UIState.Error).message }
-                            else -> {
-                                when (personalityUiState) {
-                                    is UIState.Error -> { (personalityUiState as UIState.Error).message }
-                                    else -> { "" }
+                        errorMessage =
+                            when (usersUiState) {
+                                is UIState.Error -> {
+                                    (usersUiState as UIState.Error).message
+                                }
+                                else -> {
+                                    when (personalityUiState) {
+                                        is UIState.Error -> {
+                                            (personalityUiState as UIState.Error).message
+                                        }
+                                        else -> {
+                                            ""
+                                        }
+                                    }
                                 }
                             }
-                        }
 
                         Box(
-                            modifier = Modifier
-                                .alpha(if (errorMessage.isEmpty()) 0f else 1f)
+                            modifier =
+                                Modifier
+                                    .alpha(if (errorMessage.isEmpty()) 0f else 1f),
                         ) {
                             Kiwi_InfoBox(
                                 message = errorMessage,
                                 color = MaterialTheme.colorScheme.error,
-                                testTag = UsersTestTags.ERROR_TEXT
+                                testTag = UsersTestTags.ERROR_TEXT,
                             )
                         }
-
                     }
                 }
             }
@@ -298,8 +304,10 @@ fun SignUpScreenPreview() {
     KiwiTheme {
         SignUpScreen(
             UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            PersonalityFakeViewModel(PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)),
-            navController = rememberNavController()
+            PersonalityFakeViewModel(
+                PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build),
+            ),
+            navController = rememberNavController(),
         )
     }
 }

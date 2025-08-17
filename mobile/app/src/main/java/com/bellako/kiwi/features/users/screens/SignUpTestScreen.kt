@@ -6,72 +6,74 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
-import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
-import com.bellako.kiwi.features.personality.data.PersonalityState
-import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.users.model.IUsersViewModel
-import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
-import com.bellako.kiwi.features.users.data.UsersState
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
-import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.ui.getResponsiveSizeHeight
-
 
 @Composable
 fun SignUpTestScreen(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
     ) {
         Kiwi_Image(
             R.drawable.ph_onboarding_bkg,
             "Sign Up Background",
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            contentScale = ContentScale.Crop
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+            contentScale = ContentScale.Crop,
         )
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(getResponsiveSizeHeight(Spacing.medium)),
+            contentAlignment = Alignment.Center,
         ) {
             Question(
                 usersViewModel,
                 personalityViewModel,
-                navController
+                navController,
             )
         }
     }
@@ -81,7 +83,7 @@ fun SignUpTestScreen(
 private fun Question(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     val context = LocalContext.current
 
@@ -102,24 +104,23 @@ private fun Question(
             }
 
             else -> {
-
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .testTag(CommonTestTags.USERS_SCREEN),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .testTag(CommonTestTags.USERS_SCREEN),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-
                     var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
                     Kiwi_H2(
                         Kiwi_TextArguments(
                             currentPersonalityState.questions[currentQuestion].question,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
+                            color = MaterialTheme.colorScheme.secondary,
+                        ),
                     )
 
                     Kiwi_Spacer(Spacing.large)
@@ -148,9 +149,7 @@ private fun Question(
                         )
 
                         Kiwi_Spacer()
-
                     }
-
                 }
             }
         }
@@ -166,8 +165,10 @@ fun SignUpTestScreenPreview() {
     KiwiTheme {
         SignUpTestScreen(
             UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            PersonalityFakeViewModel(PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)),
-            navController = rememberNavController()
+            PersonalityFakeViewModel(
+                PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build),
+            ),
+            navController = rememberNavController(),
         )
     }
 }

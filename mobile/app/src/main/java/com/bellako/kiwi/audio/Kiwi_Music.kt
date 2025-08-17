@@ -9,10 +9,13 @@ import com.bellako.kiwi.R
 fun Kiwi_Music_Home() {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        AudioManager.playMusic(context, listOf(
-            AudioLayer(R.raw.music_stepswithin, true),
-            AudioLayer(R.raw.music_stepswithin_enigma, false)
-        ))
+        AudioManager.playMusic(
+            context,
+            listOf(
+                AudioLayer(R.raw.music_stepswithin, true),
+                AudioLayer(R.raw.music_stepswithin_enigma, false),
+            ),
+        )
     }
 }
 
@@ -20,9 +23,12 @@ fun Kiwi_Music_Home() {
 fun Kiwi_Music_SignUp() {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        AudioManager.playMusic(context, listOf(
-            AudioLayer(R.raw.music_stepswithin, false),
-            AudioLayer(R.raw.music_stepswithin_enigma, true)
-        ))
+        AudioManager.playMusic(
+            context,
+            listOf(
+                AudioLayer(R.raw.music_stepswithin, false),
+                AudioLayer(R.raw.music_stepswithin_enigma, true),
+            ),
+        )
     }
 }

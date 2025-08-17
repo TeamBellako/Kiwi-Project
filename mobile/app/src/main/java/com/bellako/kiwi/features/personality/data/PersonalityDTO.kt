@@ -1,17 +1,16 @@
 package com.bellako.kiwi.features.personality.data
 
-data class PersonalityDTO (
+data class PersonalityDTO(
     val realName: String,
     val knightName: String,
-    val build: String
-){
-    fun toState() : PersonalityState {
-        return PersonalityState(
+    val build: String,
+) {
+    fun toState(): PersonalityState =
+        PersonalityState(
             realName = realName,
             knightName = knightName,
-            build = build
+            build = build,
         )
-    }
 
     fun toDomainObject(): Result<Personality> {
         val realNameResult = UserName.of(realName)
@@ -22,10 +21,10 @@ data class PersonalityDTO (
                     onSuccess = { validKnightName ->
                         Result.success(Personality(validRealName, validKnightName, build))
                     },
-                    onFailure = { err -> Result.failure(err) }
+                    onFailure = { err -> Result.failure(err) },
                 )
             },
-            onFailure = { err -> Result.failure(err) }
+            onFailure = { err -> Result.failure(err) },
         )
     }
 }

@@ -42,41 +42,41 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
-import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun PermissionsRequestModal(
-    onPermissionsGranted: @Composable () -> Unit
-) {
+fun PermissionsRequestModal(onPermissionsGranted: @Composable () -> Unit) {
     val context = LocalContext.current
 
     val hasUsageAccess = remember { mutableStateOf(hasUsageStatsPermission(context)) }
     val hasStepPermission = remember { mutableStateOf(hasActivityRecognitionPermission(context)) }
 
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        hasStepPermission.value = granted
-    }
+    val launcher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+        ) { granted ->
+            hasStepPermission.value = granted
+        }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                hasUsageAccess.value = hasUsageStatsPermission(context)
-                hasStepPermission.value = hasActivityRecognitionPermission(context)
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    hasUsageAccess.value = hasUsageStatsPermission(context)
+                    hasStepPermission.value = hasActivityRecognitionPermission(context)
+                }
             }
-        }
 
         lifecycleOwner.lifecycle.addObserver(observer)
 
@@ -91,15 +91,16 @@ fun PermissionsRequestModal(
         onPermissionsGranted()
     } else {
         Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize(),
+            contentAlignment = Alignment.Center,
         ) {
             PermissionRequestLayout(
                 context,
                 launcher,
                 hasUsageAccess,
-                hasStepPermission
+                hasStepPermission,
             )
         }
     }
@@ -111,48 +112,51 @@ private fun PermissionRequestLayout(
     context: Context,
     launcher: ManagedActivityResultLauncher<String, Boolean>,
     hasUsageAccess: MutableState<Boolean>,
-    hasStepPermission: MutableState<Boolean>
+    hasStepPermission: MutableState<Boolean>,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f))
-            .testTag(CommonTestTags.PERMISSIONS_REQUEST_MODAL),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .testTag(CommonTestTags.PERMISSIONS_REQUEST_MODAL),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(getResponsiveSizeHeight(Spacing.medium)),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = "Error icon",
                 tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier
-                    .size(getResponsiveSizeHeight(Spacing.xLarge))
+                modifier =
+                    Modifier
+                        .size(getResponsiveSizeHeight(Spacing.xLarge)),
             )
 
             Kiwi_Spacer()
 
             Kiwi_H1(
                 Kiwi_TextArguments(
-                "Permissions\n Required",
-                color = MaterialTheme.colorScheme.secondary,
-                textAlign = TextAlign.Center,
-                bold = true
-            )
+                    "Permissions\n Required",
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center,
+                    bold = true,
+                ),
             )
 
             Kiwi_P2(
                 Kiwi_TextArguments(
-                "GrowTale requires permissions to access metrics such as steps and screen time.",
+                    "GrowTale requires permissions to access metrics such as steps and screen time.",
                     TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline
-                )
+                    color = MaterialTheme.colorScheme.outline,
+                ),
             )
 
             Kiwi_Spacer(Spacing.small)
@@ -161,61 +165,64 @@ private fun PermissionRequestLayout(
                 Kiwi_TextArguments(
                     "Please click below to activate them before proceeding.",
                     TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline
-                )
+                    color = MaterialTheme.colorScheme.outline,
+                ),
             )
 
             Kiwi_Spacer(Spacing.large)
 
-            Kiwi_Button(Kiwi_TextArguments(
+            Kiwi_Button(
+                Kiwi_TextArguments(
                     "ENABLE USAGE ACCESS",
                     color = MaterialTheme.colorScheme.secondary,
                     textAlign = TextAlign.Center,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {
                     context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                 },
-                enabled = !hasUsageAccess.value
+                enabled = !hasUsageAccess.value,
             )
 
             Kiwi_Spacer(Spacing.small)
 
-            Kiwi_Button(Kiwi_TextArguments(
+            Kiwi_Button(
+                Kiwi_TextArguments(
                     "ENABLE ACTIVITY RECOGNITION",
                     color = MaterialTheme.colorScheme.secondary,
                     textAlign = TextAlign.Center,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {
                     launcher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
                 },
-                enabled = !hasStepPermission.value
+                enabled = !hasStepPermission.value,
             )
         }
     }
 }
 
-
 @RequiresApi(Build.VERSION_CODES.Q)
 private fun hasUsageStatsPermission(context: Context): Boolean {
     val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-    val mode = appOps.unsafeCheckOpNoThrow(
-        AppOpsManager.OPSTR_GET_USAGE_STATS,
-        android.os.Process.myUid(),
-        context.packageName
-    )
+    val mode =
+        appOps.unsafeCheckOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            context.packageName,
+        )
     return mode == AppOpsManager.MODE_ALLOWED
 }
 
-private fun hasActivityRecognitionPermission(context: Context): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+private fun hasActivityRecognitionPermission(context: Context): Boolean =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACTIVITY_RECOGNITION
+            Manifest.permission.ACTIVITY_RECOGNITION,
         ) == PackageManager.PERMISSION_GRANTED
-    } else true
-}
+    } else {
+        true
+    }
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -224,6 +231,6 @@ private fun hasActivityRecognitionPermission(context: Context): Boolean {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 fun PermissionsRequestModalPreview() {
     KiwiTheme {
-        PermissionsRequestModal() {}
+        PermissionsRequestModal {}
     }
 }

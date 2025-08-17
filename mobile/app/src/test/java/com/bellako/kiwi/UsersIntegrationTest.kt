@@ -2,12 +2,12 @@ package com.bellako.kiwi
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.users.model.AuthRepository
 import com.bellako.kiwi.features.users.model.IUsersAPI
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.model.UsersRepository
 import com.bellako.kiwi.features.users.model.UsersViewModel
-import com.bellako.kiwi.features.users.model.AuthRepository
-import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -39,60 +39,65 @@ class UsersIntegrationTest {
     }
 
     @Test
-    fun `signup with a valid user`() = runTest {
-        whenever(api.signup(any())).thenReturn(Response.success(Unit))
-        whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
+    fun `signup with a valid user`() =
+        runTest {
+            whenever(api.signup(any())).thenReturn(Response.success(Unit))
+            whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
 
-        viewModel.onEmailChanged("finn@thehuman.com")
-        viewModel.onPasswordChanged("Math3matical!")
-        val result : Result<Unit> = viewModel.signup(context)
+            viewModel.onEmailChanged("finn@thehuman.com")
+            viewModel.onPasswordChanged("Math3matical!")
+            val result: Result<Unit> = viewModel.signup(context)
 
-        assertTrue(result.isSuccess)
-    }
-
-    @Test
-    fun `signup with a duplicated user`() = runTest {
-        doThrow(createFakeHttpException(409)).whenever(api).signup(any())
-
-        viewModel.onEmailChanged("finn@thehuman.com")
-        viewModel.onPasswordChanged("Math3matical!")
-        val result : Result<Unit> = viewModel.signup(context)
-
-        assertTrue(result.isFailure)
-    }
+            assertTrue(result.isSuccess)
+        }
 
     @Test
-    fun `login with a valid user`() = runTest {
-        whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
+    fun `signup with a duplicated user`() =
+        runTest {
+            doThrow(createFakeHttpException(409)).whenever(api).signup(any())
 
-        viewModel.onEmailChanged("finn@thehuman.com")
-        viewModel.onPasswordChanged("Math3matical!")
-        val result : Result<Unit> = viewModel.login(context)
+            viewModel.onEmailChanged("finn@thehuman.com")
+            viewModel.onPasswordChanged("Math3matical!")
+            val result: Result<Unit> = viewModel.signup(context)
 
-        assertTrue(result.isSuccess)
-        assertTrue(authRepository.isJwtTokenSet())
-    }
-
-    @Test
-    fun `login with a valid user but jwt is missing`() = runTest {
-        whenever(api.login(any())).thenReturn(emptyMap())
-
-        viewModel.onEmailChanged("finn@thehuman.com")
-        viewModel.onPasswordChanged("Math3matical!")
-        val result : Result<Unit> = viewModel.login(context)
-
-        assertTrue(result.isFailure)
-        assertFalse(authRepository.isJwtTokenSet())
-    }
+            assertTrue(result.isFailure)
+        }
 
     @Test
-    fun `login with an incorrect password`() = runTest {
-        doThrow(createFakeHttpException(401)).whenever(api).login(any())
+    fun `login with a valid user`() =
+        runTest {
+            whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
 
-        viewModel.onEmailChanged("finn@thehuman.com")
-        viewModel.onPasswordChanged("Math3matical!1")
-        val result : Result<Unit> = viewModel.login(context)
+            viewModel.onEmailChanged("finn@thehuman.com")
+            viewModel.onPasswordChanged("Math3matical!")
+            val result: Result<Unit> = viewModel.login(context)
 
-        assertTrue(result.isFailure)
-    }
+            assertTrue(result.isSuccess)
+            assertTrue(authRepository.isJwtTokenSet())
+        }
+
+    @Test
+    fun `login with a valid user but jwt is missing`() =
+        runTest {
+            whenever(api.login(any())).thenReturn(emptyMap())
+
+            viewModel.onEmailChanged("finn@thehuman.com")
+            viewModel.onPasswordChanged("Math3matical!")
+            val result: Result<Unit> = viewModel.login(context)
+
+            assertTrue(result.isFailure)
+            assertFalse(authRepository.isJwtTokenSet())
+        }
+
+    @Test
+    fun `login with an incorrect password`() =
+        runTest {
+            doThrow(createFakeHttpException(401)).whenever(api).login(any())
+
+            viewModel.onEmailChanged("finn@thehuman.com")
+            viewModel.onPasswordChanged("Math3matical!1")
+            val result: Result<Unit> = viewModel.login(context)
+
+            assertTrue(result.isFailure)
+        }
 }

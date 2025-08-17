@@ -12,18 +12,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 @InstallIn(SingletonComponent::class)
 object UsersModule {
     @Provides
-    fun provideUsersApi(): IUsersAPI {
-        return Retrofit.Builder()
+    fun provideUsersApi(): IUsersAPI =
+        Retrofit
+            .Builder()
             .baseUrl(BuildConfig.MOBILE_API_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(IUsersAPI::class.java)
-    }
 
     @Provides
-    fun provideUsersRepository(
-        api: IUsersAPI
-    ): UsersRepository {
-        return UsersRepository(api)
-    }
+    fun provideUsersRepository(api: IUsersAPI): UsersRepository = UsersRepository(api)
 }

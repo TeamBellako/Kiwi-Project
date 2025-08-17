@@ -21,29 +21,33 @@ data class Kiwi_TextArguments(
     val color: Color = Color.White,
     val bold: Boolean = false,
     val italic: Boolean = false,
-    val modifier: Modifier = Modifier
+    val modifier: Modifier = Modifier,
 )
 
 data class Kiwi_AnnotatedStringArguments(
     val text: AnnotatedString,
     val textAlign: TextAlign = TextAlign.Left,
-    val modifier: Modifier = Modifier
+    val modifier: Modifier = Modifier,
 )
 
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-private fun Kiwi_Text(arguments: Kiwi_TextArguments, bodyStyle: TextStyle) {
+private fun Kiwi_Text(
+    arguments: Kiwi_TextArguments,
+    bodyStyle: TextStyle,
+) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
         color = arguments.color,
         modifier = arguments.modifier,
-        style = bodyStyle.copy(
-            fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
-            fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal,
-            fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp
-        )
+        style =
+            bodyStyle.copy(
+                fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
+                fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal,
+                fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp,
+            ),
     )
 }
 
@@ -101,12 +105,15 @@ fun Kiwi_Label3(arguments: Kiwi_TextArguments) {
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-private fun Kiwi_AnnotatedString_P(arguments: Kiwi_AnnotatedStringArguments, bodyStyle: TextStyle) {
+private fun Kiwi_AnnotatedString_P(
+    arguments: Kiwi_AnnotatedStringArguments,
+    bodyStyle: TextStyle,
+) {
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
         modifier = Modifier,
-        style = bodyStyle.copy(fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp)
+        style = bodyStyle.copy(fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp),
     )
 }
 

@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
             KiwiTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.surface
+                    color = MaterialTheme.colorScheme.surface,
                 ) {
                     MainScreen()
                 }

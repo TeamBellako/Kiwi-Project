@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 interface IMapViewModel : IBaseViewModel<MapState> {
     override val state: StateFlow<MapState>
 
-    fun updateScale(scaleFactor: Float, centroid: Offset)
+    fun updateScale(
+        scaleFactor: Float,
+        centroid: Offset,
+    )
+
     fun updateOffset(delta: Offset)
 }

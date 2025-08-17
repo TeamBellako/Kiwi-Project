@@ -5,22 +5,28 @@ import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 
 private enum class AudioType { MUSIC, SFX }
 
-data class AudioLayer(val resId: Int, val isActive: Boolean)
+data class AudioLayer(
+    val resId: Int,
+    val isActive: Boolean,
+)
 
-private class AudioLayerPlayer(val resId: Int, var isActive: Boolean, val player: ExoPlayer, var fade: Runnable?)
-
+private class AudioLayerPlayer(
+    val resId: Int,
+    var isActive: Boolean,
+    val player: ExoPlayer,
+    var fade: Runnable?,
+)
 
 /**
  * For centralized audio management. Music, SFXs and volume.
  */
 object AudioManager {
-
     private const val DEFAULT_FADE_DURATION = 2000L
     private const val DEFAULT_FADE_DURATION_FAST = 200L
 
@@ -66,7 +72,11 @@ object AudioManager {
      * A music can have several layers, all playing at the same time, inactive ones with volume 0.
      * Use this function also to enable/disable layers.
      */
-    fun playMusic(context: Context, resIds: List<AudioLayer>, fadeDuration: Long = DEFAULT_FADE_DURATION) {
+    fun playMusic(
+        context: Context,
+        resIds: List<AudioLayer>,
+        fadeDuration: Long = DEFAULT_FADE_DURATION,
+    ) {
         play(context, resIds, AudioType.MUSIC, fadeDuration)
     }
 
@@ -78,7 +88,10 @@ object AudioManager {
     }
 
     /** Plays a new SFX once */
-    fun playSFX(context: Context, resId: Int) {
+    fun playSFX(
+        context: Context,
+        resId: Int,
+    ) {
         play(context, listOf(AudioLayer(resId, true)), AudioType.SFX, 0)
     }
 
@@ -107,7 +120,12 @@ object AudioManager {
 
     // ---------------------------------------------------------------------------------------------
 
-    private fun play(context: Context, layers: List<AudioLayer>, type: AudioType, fadeDuration: Long) {
+    private fun play(
+        context: Context,
+        layers: List<AudioLayer>,
+        type: AudioType,
+        fadeDuration: Long,
+    ) {
         if (!_isEnabled) {
             return
         }
@@ -129,16 +147,28 @@ object AudioManager {
                     player.isActive = layer.isActive
                     fade(player, fromVolume, toVolume, fadeDuration)
                 }
-            // Start new music or SFX
+                // Start new music or SFX
             } else {
                 addLayer(context, layer, type, fadeDuration)
             }
         }
     }
 
-    private fun addLayer(context: Context, layer: AudioLayer, type: AudioType, fadeDuration: Long) {
+    private fun addLayer(
+        context: Context,
+        layer: AudioLayer,
+        type: AudioType,
+        fadeDuration: Long,
+    ) {
         val player = ExoPlayer.Builder(context).build()
-        val uri = Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).authority(context.packageName).appendPath(layer.resId.toString()).build()
+        val uri =
+            Uri
+                .Builder()
+                .scheme(
+                    ContentResolver.SCHEME_ANDROID_RESOURCE,
+                ).authority(context.packageName)
+                .appendPath(layer.resId.toString())
+                .build()
         player.setMediaItem(MediaItem.fromUri(uri))
         player.repeatMode = if (type == AudioType.MUSIC) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
         player.prepare()
@@ -149,29 +179,42 @@ object AudioManager {
             _currentMusic[layer.resId] = layerPlayer
         } else {
             _currentSFXs.add(layerPlayer)
-            player.addListener(object : Player.Listener {
-                override fun onPlaybackStateChanged(state: Int) {
-                    if (state == Player.STATE_ENDED) {
-                        stopPlayer(layerPlayer, AudioType.SFX, 0)
+            player.addListener(
+                object : Player.Listener {
+                    override fun onPlaybackStateChanged(state: Int) {
+                        if (state == Player.STATE_ENDED) {
+                            stopPlayer(layerPlayer, AudioType.SFX, 0)
+                        }
                     }
-                }
-            })
+                },
+            )
         }
     }
 
-    private fun playPlayer(player: AudioLayerPlayer, type: AudioType, fadeDuration: Long) {
+    private fun playPlayer(
+        player: AudioLayerPlayer,
+        type: AudioType,
+        fadeDuration: Long,
+    ) {
         val actualToVolume = if (type == AudioType.MUSIC) _globalVolumeMusic else _globalVolumeSFX
         fade(player, 0f, if (player.isActive) actualToVolume else 0f, if (player.isActive) fadeDuration else 0, null)
         player.player.play()
     }
 
-    private fun pausePlayer(player: AudioLayerPlayer, fadeDuration: Long) {
+    private fun pausePlayer(
+        player: AudioLayerPlayer,
+        fadeDuration: Long,
+    ) {
         fade(player, player.player.volume, 0f, fadeDuration) {
             player.player.pause()
         }
     }
 
-    private fun stopPlayer(player: AudioLayerPlayer, type: AudioType, fadeDuration: Long) {
+    private fun stopPlayer(
+        player: AudioLayerPlayer,
+        type: AudioType,
+        fadeDuration: Long,
+    ) {
         fade(player, player.player.volume, 0f, fadeDuration) {
             player.player.stop()
 
@@ -183,7 +226,13 @@ object AudioManager {
         }
     }
 
-    private fun fade(player: AudioLayerPlayer, fromVolume: Float, toVolume: Float, duration: Long, onComplete: (() -> Unit)? = null) {
+    private fun fade(
+        player: AudioLayerPlayer,
+        fromVolume: Float,
+        toVolume: Float,
+        duration: Long,
+        onComplete: (() -> Unit)? = null,
+    ) {
         // Stop previous fade if any
         player.fade?.let { fade ->
             _handler.removeCallbacks(fade)
@@ -204,17 +253,18 @@ object AudioManager {
         val stepDuration = duration / steps
         val volumeDelta = (actualToVolume - actualFromVolume) / steps
         var currentStep = 0
-        val runnable = object : Runnable {
-            override fun run() {
-                if (currentStep <= steps) {
-                    player.player.volume = (actualFromVolume + volumeDelta * currentStep).coerceIn(0f, 1f)
-                    currentStep++
-                    _handler.postDelayed(this, stepDuration)
-                } else {
-                    onComplete?.invoke()
+        val runnable =
+            object : Runnable {
+                override fun run() {
+                    if (currentStep <= steps) {
+                        player.player.volume = (actualFromVolume + volumeDelta * currentStep).coerceIn(0f, 1f)
+                        currentStep++
+                        _handler.postDelayed(this, stepDuration)
+                    } else {
+                        onComplete?.invoke()
+                    }
                 }
             }
-        }
         player.fade = runnable
         _handler.post(runnable)
     }
@@ -232,5 +282,4 @@ object AudioManager {
             fade(player, player.player.volume, _globalVolumeSFX, DEFAULT_FADE_DURATION_FAST)
         }
     }
-
 }
