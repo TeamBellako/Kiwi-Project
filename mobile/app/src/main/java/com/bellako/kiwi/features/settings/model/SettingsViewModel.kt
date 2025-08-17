@@ -46,7 +46,7 @@ class SettingsViewModel
         private var previousValidDomainSettings: Settings? = null
         private var previousDomainSettings: Settings? = null
 
-        private val _pendingSave = MutableStateFlow<Settings?>(null)
+        private val pendingSave = MutableStateFlow<Settings?>(null)
 
         // ---------------------------------------------------------------------------------------------
 
@@ -88,7 +88,7 @@ class SettingsViewModel
                     return
                 }
                 previousValidDomainSettings = domain
-                _pendingSave.value = domain
+                pendingSave.value = domain
             }
         }
 
@@ -96,7 +96,7 @@ class SettingsViewModel
 
         init {
             viewModelScope.launch {
-                _pendingSave.debounce(1000).collectLatest { domain ->
+                pendingSave.debounce(1000).collectLatest { domain ->
                     domain?.let {
                         repository.updateSettings(domain.toDTO())
                     }

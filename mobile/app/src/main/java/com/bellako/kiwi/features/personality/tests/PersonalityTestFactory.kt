@@ -1,6 +1,6 @@
 package com.bellako.kiwi.features.personality.tests
 
-import com.bellako.kiwi.features.personality.data.*
+import com.bellako.kiwi.features.personality.data.BERSERKER
 import com.bellako.kiwi.features.personality.data.PersonalityBuildDTO
 import com.bellako.kiwi.features.personality.data.PersonalityDTO
 import com.bellako.kiwi.features.personality.data.PersonalityUserNameDTO

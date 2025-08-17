@@ -28,7 +28,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Kiwi_Slider(
-    textArguments: Kiwi_TextArguments,
+    textArguments: KiwiTextArguments,
     value: Float,
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float>,
@@ -94,7 +94,7 @@ fun Kiwi_SliderPreview() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Kiwi_Slider(
-                Kiwi_TextArguments("Sound Volume"),
+                KiwiTextArguments("Sound Volume"),
                 value = 2.0f,
                 onValueChange = { },
                 valueRange = 0f..3f,
@@ -105,7 +105,7 @@ fun Kiwi_SliderPreview() {
             Kiwi_Spacer()
 
             Kiwi_Slider(
-                Kiwi_TextArguments("Sound Volume"),
+                KiwiTextArguments("Sound Volume"),
                 value = 2.0f,
                 onValueChange = { },
                 valueRange = 0f..3f,

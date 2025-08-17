@@ -2,11 +2,22 @@ package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -27,7 +38,8 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -36,7 +48,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -162,7 +173,7 @@ private fun LogIn(
                 // TEXT WELCOME
 
                 Kiwi_H2(
-                    Kiwi_TextArguments(
+                    KiwiTextArguments(
                         "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.secondary,
@@ -183,7 +194,7 @@ private fun LogIn(
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
                             Kiwi_Label2(
-                                Kiwi_TextArguments(
+                                KiwiTextArguments(
                                     "Email",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -202,7 +213,7 @@ private fun LogIn(
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
                             Kiwi_Label2(
-                                Kiwi_TextArguments(
+                                KiwiTextArguments(
                                     "Password",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -216,7 +227,7 @@ private fun LogIn(
                     Kiwi_Spacer()
 
                     Kiwi_Button(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "LOG IN",
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true,
@@ -322,7 +333,7 @@ private fun SignUp(onSignUp: () -> Unit) {
         }
 
     Kiwi_AnnotatedString_P2(
-        Kiwi_AnnotatedStringArguments(
+        KiwiAnnotatedStringArguments(
             annotatedString,
             TextAlign.Center,
         ),

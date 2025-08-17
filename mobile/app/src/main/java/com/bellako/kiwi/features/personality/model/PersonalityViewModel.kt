@@ -2,11 +2,13 @@ package com.bellako.kiwi.features.personality.model
 
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
-import com.bellako.kiwi.features.personality.data.*
+import com.bellako.kiwi.features.personality.data.BERSERKER
+import com.bellako.kiwi.features.personality.data.MONK
 import com.bellako.kiwi.features.personality.data.Personality
 import com.bellako.kiwi.features.personality.data.PersonalityBuildDTO
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.data.PersonalityUserNameDTO
+import com.bellako.kiwi.features.personality.data.SHAMAN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

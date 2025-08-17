@@ -189,7 +189,7 @@ private fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
                     contentAlignment = Alignment.TopCenter,
                 ) {
                     Kiwi_H3(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "Content",
                             TextAlign.Center,
                             MaterialTheme.colorScheme.secondary,

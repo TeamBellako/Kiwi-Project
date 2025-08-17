@@ -29,9 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -90,7 +90,7 @@ fun MapScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Kiwi_H2(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 title,
                 color = MaterialTheme.colorScheme.inversePrimary,
                 bold = true,

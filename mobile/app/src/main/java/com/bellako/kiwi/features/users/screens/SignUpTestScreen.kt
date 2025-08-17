@@ -2,11 +2,20 @@ package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -19,11 +28,11 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -116,7 +125,7 @@ private fun Question(
                     var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
                     Kiwi_H2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             currentPersonalityState.questions[currentQuestion].question,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.secondary,
@@ -128,7 +137,7 @@ private fun Question(
                     currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
 
                         Kiwi_Button(
-                            Kiwi_TextArguments(
+                            KiwiTextArguments(
                                 option,
                                 color = MaterialTheme.colorScheme.secondary,
                             ),

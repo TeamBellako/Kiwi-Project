@@ -135,7 +135,7 @@ fun Kiwi_InputField_Preview() {
                 onValueChange = { },
                 label = {
                     Kiwi_Label2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
                         ),
@@ -154,7 +154,7 @@ fun Kiwi_InputField_Preview() {
                 onValueChange = { },
                 label = {
                     Kiwi_Label2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
                         ),

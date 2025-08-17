@@ -9,9 +9,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import retrofit2.HttpException
 
 abstract class BaseViewModel : ViewModel() {
+    @Suppress("ktlint:standard:backing-property-naming")
     protected val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
+    @Suppress("ktlint:standard:backing-property-naming")
     protected open val _isLoading = MutableStateFlow(false)
     open val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 

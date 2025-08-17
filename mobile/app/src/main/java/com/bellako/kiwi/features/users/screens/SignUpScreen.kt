@@ -2,11 +2,20 @@ package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -22,6 +31,7 @@ import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -30,7 +40,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -131,7 +140,7 @@ private fun SignUp(
                         // TEXT WELCOME
 
                         Kiwi_P2(
-                            Kiwi_TextArguments(
+                            KiwiTextArguments(
                                 "Initial Setup Will Take\nApproximately 3 Minutes",
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.secondary,
@@ -142,7 +151,7 @@ private fun SignUp(
                         Kiwi_Spacer(Spacing.large)
 
                         Kiwi_H2(
-                            Kiwi_TextArguments(
+                            KiwiTextArguments(
                                 "Let's Start With\nThe Basics",
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.secondary,
@@ -160,7 +169,7 @@ private fun SignUp(
                             onValueChange = { personalityViewModel.onRealNameChanged(it) },
                             label = {
                                 Kiwi_Label2(
-                                    Kiwi_TextArguments(
+                                    KiwiTextArguments(
                                         "Real Name",
                                         color = MaterialTheme.colorScheme.inversePrimary,
                                     ),
@@ -179,7 +188,7 @@ private fun SignUp(
                             onValueChange = { personalityViewModel.onKnightNameChanged(it) },
                             label = {
                                 Kiwi_Label2(
-                                    Kiwi_TextArguments(
+                                    KiwiTextArguments(
                                         "Knight Name",
                                         color = MaterialTheme.colorScheme.inversePrimary,
                                     ),
@@ -198,7 +207,7 @@ private fun SignUp(
                             onValueChange = { usersViewModel.onEmailChanged(it) },
                             label = {
                                 Kiwi_Label2(
-                                    Kiwi_TextArguments(
+                                    KiwiTextArguments(
                                         "Email",
                                         color = MaterialTheme.colorScheme.inversePrimary,
                                     ),
@@ -217,7 +226,7 @@ private fun SignUp(
                             onValueChange = { usersViewModel.onPasswordChanged(it) },
                             label = {
                                 Kiwi_Label2(
-                                    Kiwi_TextArguments(
+                                    KiwiTextArguments(
                                         "Password",
                                         color = MaterialTheme.colorScheme.inversePrimary,
                                     ),
@@ -234,7 +243,7 @@ private fun SignUp(
                         // BUTTON
 
                         Kiwi_Button(
-                            Kiwi_TextArguments(
+                            KiwiTextArguments(
                                 "START JOURNEY",
                                 color = MaterialTheme.colorScheme.secondary,
                                 bold = true,

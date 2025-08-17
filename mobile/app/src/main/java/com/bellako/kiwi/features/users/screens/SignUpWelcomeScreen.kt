@@ -2,8 +2,13 @@ package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,13 +29,13 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
@@ -103,7 +108,7 @@ private fun Welcome(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Kiwi_H2(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 "Your Legend is About\nTo Be Forged...",
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary,
@@ -114,7 +119,7 @@ private fun Welcome(
         Kiwi_Spacer(Spacing.xLarge)
 
         Kiwi_Button(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 "LET'S DO IT",
                 color = MaterialTheme.colorScheme.secondary,
                 bold = true,
@@ -167,7 +172,7 @@ private fun GoToLogIn(onSignUp: () -> Unit) {
         }
 
     Kiwi_AnnotatedString_P2(
-        Kiwi_AnnotatedStringArguments(
+        KiwiAnnotatedStringArguments(
             annotatedString,
             TextAlign.Center,
         ),

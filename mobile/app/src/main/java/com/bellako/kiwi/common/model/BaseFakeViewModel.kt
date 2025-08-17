@@ -9,9 +9,11 @@ import retrofit2.HttpException
 import java.io.IOException
 
 open class BaseFakeViewModel : ViewModel() {
+    @Suppress("ktlint:standard:backing-property-naming")
     protected val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
+    @Suppress("ktlint:standard:backing-property-naming")
     protected val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 

@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.settings.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
@@ -30,7 +32,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.settings.data.SettingsState
@@ -119,7 +120,7 @@ private fun SettingsFields(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Kiwi_H2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "SETTINGS",
                     bold = true,
                 ),
@@ -133,7 +134,7 @@ private fun SettingsFields(
                 onValueChange = {},
                 label = {
                     Kiwi_Label2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
                         ),
@@ -147,7 +148,7 @@ private fun SettingsFields(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Slider(
-                Kiwi_TextArguments("SFX Volume"),
+                KiwiTextArguments("SFX Volume"),
                 value = soundSliderPosition,
                 onValueChange = { newValue ->
                     soundSliderPosition = newValue
@@ -163,7 +164,7 @@ private fun SettingsFields(
             Kiwi_Spacer()
 
             Kiwi_Slider(
-                Kiwi_TextArguments("Music Volume"),
+                KiwiTextArguments("Music Volume"),
                 value = musicSliderPosition,
                 onValueChange = { newValue ->
                     musicSliderPosition = newValue
@@ -179,7 +180,7 @@ private fun SettingsFields(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "SUPPORT",
                     color = White,
                     bold = true,
@@ -190,7 +191,7 @@ private fun SettingsFields(
             Kiwi_Spacer()
 
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "LOG OUT",
                     color = White,
                     bold = true,
@@ -201,6 +202,7 @@ private fun SettingsFields(
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)

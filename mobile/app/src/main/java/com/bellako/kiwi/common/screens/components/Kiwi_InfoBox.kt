@@ -29,7 +29,7 @@ fun Kiwi_InfoBox(
                 .background(color),
     ) {
         Kiwi_P2(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 message,
                 modifier =
                     Modifier
