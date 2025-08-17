@@ -1,5 +1,6 @@
 package com.bellako.kiwi.common.screens
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -35,6 +36,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.Logger
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -141,8 +143,8 @@ private fun openEmailClient(context: Context) {
 
     try {
         context.startActivity(emailIntent)
-    } catch (e: Exception) {
-        e.printStackTrace()
+    } catch (_: ActivityNotFoundException) {
+        Logger.error("No email client found in the device")
     }
 }
 

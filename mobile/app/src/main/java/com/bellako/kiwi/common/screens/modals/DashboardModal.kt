@@ -271,6 +271,7 @@ private fun WeekView(
     selectedDay: MutableState<LocalDate>,
     onCalendarViewClicked: () -> Unit,
 ) {
+    @Suppress("MagicNumber")
     val currentDayOfWeek = selectedDay.value.dayOfWeek.value % 7
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
     val coroutineScope = rememberCoroutineScope()
@@ -299,6 +300,7 @@ private fun WeekView(
                         .weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
             ) {
+                @Suppress("MagicNumber")
                 (0..6).forEach { index ->
                     val day = startOfWeek.plusDays(index.toLong())
                     val dayNumber = day.dayOfMonth

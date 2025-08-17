@@ -38,6 +38,7 @@ fun Kiwi_Slider(
 ) {
     Kiwi_H3(textArguments)
 
+    @Suppress("MagicNumber")
     val trackColor = multiplyColorRgb(MaterialTheme.colorScheme.secondary, if (enabled) 1f else 0.4f)
 
     Slider(

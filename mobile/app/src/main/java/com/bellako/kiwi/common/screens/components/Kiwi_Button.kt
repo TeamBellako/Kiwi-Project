@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Button(
     textArguments: KiwiTextArguments,

@@ -149,6 +149,7 @@ private fun InteractiveMap(
 // -------------------------------------------------------------------------------------------------
 
 @SuppressLint("ViewModelConstructorInComposable")
+@Suppress("MagicNumber")
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)

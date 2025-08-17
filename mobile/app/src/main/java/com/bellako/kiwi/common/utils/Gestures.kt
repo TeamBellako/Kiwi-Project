@@ -44,6 +44,8 @@ suspend fun PointerInputScope.detectTransformGesturesAndEnd(
 
                     val centroidSize = event.calculateCentroidSize(useCurrent = false)
                     val zoomMotion = abs(1 - zoom) * centroidSize
+
+                    @Suppress("MagicNumber")
                     val rotationMotion = abs(rotation * PI.toFloat() * centroidSize / 180f)
                     val panMotion = pan.getDistance()
 

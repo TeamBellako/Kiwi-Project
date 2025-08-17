@@ -21,6 +21,7 @@ open class BaseFakeViewModel : ViewModel() {
         _uiState.value =
             when (error) {
                 is HttpException -> {
+                    @Suppress("MagicNumber")
                     if (error.code() >= 500) {
                         UIState.GeneralError
                     } else {
@@ -78,6 +79,7 @@ open class BaseFakeViewModel : ViewModel() {
     open fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
         when (e) {
             is HttpException -> {
+                @Suppress("MagicNumber")
                 if (e.code() >= 500) {
                     UIState.GeneralError
                 } else {

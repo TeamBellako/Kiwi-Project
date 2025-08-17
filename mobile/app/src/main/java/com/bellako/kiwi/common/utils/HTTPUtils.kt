@@ -1,6 +1,7 @@
 package com.bellako.kiwi.common.utils
 
 import com.bellako.kiwi.common.data.UIState
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -34,11 +35,14 @@ object HTTPUtils {
             val adapter = moshi.adapter<Map<String, String>>(type)
             val map = adapter.fromJson(json)
             map?.get("error")
-        } catch (ex: Exception) {
+        } catch (_: JsonDataException) {
+            null
+        } catch (_: IOException) {
             null
         }
     }
 
+    @Suppress("MagicNumber")
     fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
         when (e) {
             is HttpException -> {

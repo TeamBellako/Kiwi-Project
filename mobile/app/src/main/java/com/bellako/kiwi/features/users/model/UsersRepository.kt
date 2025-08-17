@@ -15,7 +15,7 @@ class UsersRepository(
             } else {
                 Result.failure(HttpException(response))
             }
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             Result.failure(e)
         }
 
@@ -27,7 +27,7 @@ class UsersRepository(
                     Exception("Missing JWT in response"),
                 )
             Result.success(jwt)
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             Result.failure(e)
         }
     }

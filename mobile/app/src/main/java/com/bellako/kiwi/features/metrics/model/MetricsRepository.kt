@@ -17,7 +17,7 @@ class MetricsRepository(
             } else {
                 Result.failure(HttpException(response))
             }
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             Result.failure(e)
         }
 
@@ -30,7 +30,7 @@ class MetricsRepository(
             } else {
                 Result.failure(HttpException(response))
             }
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             Result.failure(e)
         }
 
@@ -42,7 +42,7 @@ class MetricsRepository(
             } else {
                 Result.failure(HttpException(response))
             }
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             Result.failure(e)
         }
 }

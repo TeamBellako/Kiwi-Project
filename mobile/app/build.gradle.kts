@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
-
 val mobileApiUrl: String = System.getenv("MOBILE_API_URL") ?: "http://10.0.2.2:8080"
 val companyEmail: String = System.getenv("MOBILE_COMPANY_EMAIL") ?: "simon@petrikov.com"
 
@@ -30,6 +28,10 @@ detekt {
     allRules = false
     autoCorrect = true
     config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+
+    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        jvmTarget = "22" // detekt only supports up to 22
+    }
 }
 
 android {
@@ -92,11 +94,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true

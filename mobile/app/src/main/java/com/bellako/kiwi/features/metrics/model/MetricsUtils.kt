@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import java.time.LocalDate
 
+@Suppress("MagicNumber")
 object MetricsUtils {
     fun parseScreenTimeSeconds(screenTimeSeconds: Int): String {
         val hours = screenTimeSeconds / 3600

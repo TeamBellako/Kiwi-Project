@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -28,6 +29,8 @@ object DispatcherModule {
     @Provides
     fun provideCoroutineDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
+
+private const val AUTO_SAVE_MILLIS: Long = 1000
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
@@ -72,7 +75,7 @@ class SettingsViewModel
                         _uiState.value = mapExceptionToUIState(throwable)
                     },
                 )
-            } catch (ex: Exception) {
+            } catch (ex: HttpException) {
                 _uiState.value = mapExceptionToUIState(ex)
             } finally {
                 updateVolume()
@@ -96,7 +99,7 @@ class SettingsViewModel
 
         init {
             viewModelScope.launch {
-                pendingSave.debounce(1000).collectLatest { domain ->
+                pendingSave.debounce(AUTO_SAVE_MILLIS).collectLatest { domain ->
                     domain?.let {
                         repository.updateSettings(domain.toDTO())
                     }

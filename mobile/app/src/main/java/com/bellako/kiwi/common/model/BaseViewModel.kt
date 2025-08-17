@@ -57,6 +57,7 @@ abstract class BaseViewModel : ViewModel() {
     fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
         when (e) {
             is HttpException -> {
+                @Suppress("MagicNumber")
                 if (e.code() >= 500) {
                     UIState.GeneralError
                 } else {

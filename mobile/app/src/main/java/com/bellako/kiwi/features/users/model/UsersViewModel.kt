@@ -7,8 +7,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
-import com.bellako.kiwi.features.users.data.Email
-import com.bellako.kiwi.features.users.data.Password
 import com.bellako.kiwi.features.users.data.UsersDTO
 import com.bellako.kiwi.features.users.data.UsersState
 import com.google.crypto.tink.Aead
@@ -24,6 +22,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import java.io.IOException
+import java.security.GeneralSecurityException
+
+private const val ON_LOGIN_SUCCESS_DELAY_MILLIS = 2000L
 
 @HiltViewModel
 class UsersViewModel
@@ -85,7 +87,7 @@ class UsersViewModel
 
         override suspend fun onLoginSuccess() {
             setIsLoading(true)
-            delay(2000)
+            delay(ON_LOGIN_SUCCESS_DELAY_MILLIS)
             setIsLoading(false)
         }
 
@@ -128,8 +130,10 @@ class UsersViewModel
                             android.util.Base64.DEFAULT,
                         )
                 }
-            } catch (e: Exception) {
-                warn(e.message.orEmpty())
+            } catch (e: GeneralSecurityException) {
+                warn("Encryption error: ${e.message}")
+            } catch (e: IOException) {
+                warn("DataStore error: ${e.message}")
             } finally {
                 setIsLoading(false)
             }
@@ -137,17 +141,33 @@ class UsersViewModel
 
         override suspend fun getLocalCredentials(context: Context): Pair<String?, String?> {
             setIsLoading(true)
-            try {
+            return try {
                 initAEAD(context)
                 val prefs = context.dataStore.data.first()
-                val emailEncrypted = prefs[usernameDataKey] ?: return Pair("", "")
-                val passwordEncrypted = prefs[passwordDataKey] ?: return Pair("", "")
-                val emailDecrypted = aEAD.decrypt(android.util.Base64.decode(emailEncrypted, android.util.Base64.DEFAULT), null)
-                val passwordDecrypted = aEAD.decrypt(android.util.Base64.decode(passwordEncrypted, android.util.Base64.DEFAULT), null)
-                return Pair(String(emailDecrypted), String(passwordDecrypted))
-            } catch (e: Exception) {
-                warn(e.message.orEmpty())
-                return Pair("", "")
+                val emailEncrypted = prefs[usernameDataKey] ?: return "" to ""
+                val passwordEncrypted = prefs[passwordDataKey] ?: return "" to ""
+
+                val emailDecrypted =
+                    aEAD.decrypt(
+                        android.util.Base64.decode(emailEncrypted, android.util.Base64.DEFAULT),
+                        null,
+                    )
+                val passwordDecrypted =
+                    aEAD.decrypt(
+                        android.util.Base64.decode(passwordEncrypted, android.util.Base64.DEFAULT),
+                        null,
+                    )
+
+                String(emailDecrypted) to String(passwordDecrypted)
+            } catch (e: GeneralSecurityException) {
+                warn("Decryption error: ${e.message}")
+                "" to ""
+            } catch (e: IOException) {
+                warn("DataStore error: ${e.message}")
+                "" to ""
+            } catch (e: IllegalArgumentException) {
+                warn("Base64 decoding error: ${e.message}")
+                "" to ""
             } finally {
                 setIsLoading(false)
             }
@@ -167,18 +187,4 @@ class UsersViewModel
                 setIsLoading(false)
             }
         }
-
-        // ---------------------------------------------------------------------------------------------
-
-        private fun getInvalidSignUpMessage(): String {
-            Email.of(_state.value.email).onFailure { ex ->
-                return ex.message.orEmpty()
-            }
-            Password.of(_state.value.password).onFailure { ex ->
-                return ex.message.orEmpty()
-            }
-            return "Invalid email or password".trimIndent()
-        }
-
-        private fun getInvalidLoginMessage(): String = "Invalid email or password".trimIndent()
     }

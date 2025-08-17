@@ -30,6 +30,8 @@ object AudioManager {
     private const val DEFAULT_FADE_DURATION = 2000L
     private const val DEFAULT_FADE_DURATION_FAST = 200L
 
+    private const val FADE_IN_INTERVAL = 50L
+
     // Enabled
     private var isEnabled: Boolean = true
 
@@ -248,7 +250,7 @@ object AudioManager {
         }
         // Start fade
         player.player.volume = actualFromVolume
-        val interval = 50L
+        val interval = FADE_IN_INTERVAL
         val steps = (duration / interval).toInt().coerceAtLeast(1)
         val stepDuration = duration / steps
         val volumeDelta = (actualToVolume - actualFromVolume) / steps

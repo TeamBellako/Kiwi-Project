@@ -35,6 +35,8 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import kotlinx.coroutines.launch
 
+private const val VELOCITY_THRESHOLD = 400f
+
 @Composable
 fun Kiwi_DraggableBar(
     modifier: Modifier = Modifier,
@@ -55,7 +57,6 @@ fun Kiwi_DraggableBar(
     var offsetY by remember { mutableFloatStateOf(statesBottom[initialStateIndex]) }
 
     // velocity
-    val velocityThreshold = 400f
     var lastPosition by remember { mutableFloatStateOf(animatableOffset.value) }
     var lastTime by remember { mutableLongStateOf(0L) }
     var dragVelocity by remember { mutableFloatStateOf(0f) }
@@ -109,11 +110,11 @@ fun Kiwi_DraggableBar(
                                 scope.launch {
                                     val target =
                                         when {
-                                            dragVelocity > velocityThreshold -> {
+                                            dragVelocity > VELOCITY_THRESHOLD -> {
                                                 // High velocity upwards, snap to next upper state
                                                 statesBottom.filter { it >= animatableOffset.value }.minOrNull() ?: statesBottom.last()
                                             }
-                                            dragVelocity < -velocityThreshold -> {
+                                            dragVelocity < -VELOCITY_THRESHOLD -> {
                                                 // High velocity downwards, snap to next lower state
                                                 statesBottom.filter { it <= animatableOffset.value }.maxOrNull() ?: statesBottom.first()
                                             }
@@ -148,6 +149,7 @@ fun Kiwi_DraggableBar(
 
 // -------------------------------------------------------------------------------------------------
 
+@Suppress("UnusedPrivateMember")
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
@@ -157,6 +159,7 @@ private fun Kiwi_DraggableBar_Preview_0() {
     Kiwi_DraggableBar_Preview(0)
 }
 
+@Suppress("UnusedPrivateMember")
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
@@ -166,6 +169,7 @@ private fun Kiwi_DraggableBar_Preview_1() {
     Kiwi_DraggableBar_Preview(1)
 }
 
+@Suppress("UnusedPrivateMember")
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
@@ -175,6 +179,7 @@ private fun Kiwi_DraggableBar_Preview_2() {
     Kiwi_DraggableBar_Preview(2)
 }
 
+@Suppress("MagicNumber")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {

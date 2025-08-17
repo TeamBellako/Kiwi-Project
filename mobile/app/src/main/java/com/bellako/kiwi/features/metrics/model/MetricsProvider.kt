@@ -30,6 +30,7 @@ object MetricsProvider {
         return MetricsMapper.toDomain(metricsDTO).getOrNull()
     }
 
+    @Suppress("MagicNumber")
     private fun getSteps(context: Context): Int {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
@@ -45,6 +46,7 @@ object MetricsProvider {
                     latch.countDown()
                 }
 
+                @Suppress("EmptyFunctionBlock")
                 override fun onAccuracyChanged(
                     sensor: Sensor?,
                     accuracy: Int,
@@ -61,6 +63,7 @@ object MetricsProvider {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
+    @Suppress("MagicNumber")
     private fun getScreenTimeInSeconds(
         context: Context,
         localDate: LocalDate,
