@@ -40,7 +40,7 @@ class PersonalityIntegrationTest {
 
         api = mock(IPersonalityAPI::class.java)
         healthApi = mock(HealthApiService::class.java)
-        repository = PersonalityRepository(api, healthApi)
+        repository = PersonalityRepository(api)
         viewModel = PersonalityViewModel(repository)
     }
 

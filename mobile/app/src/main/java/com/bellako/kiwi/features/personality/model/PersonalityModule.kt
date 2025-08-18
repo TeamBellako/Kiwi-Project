@@ -38,5 +38,5 @@ object PersonalityModule {
     fun providePersonalityRepository(
         api: IPersonalityAPI,
         healthApiService: HealthApiService,
-    ): PersonalityRepository = PersonalityRepository(api, healthApiService)
+    ): PersonalityRepository = PersonalityRepository(api)
 }

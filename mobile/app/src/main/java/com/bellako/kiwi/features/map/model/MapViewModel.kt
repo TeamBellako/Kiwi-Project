@@ -32,6 +32,8 @@ class MapViewModel
         override val state: StateFlow<MapState> = _state.asStateFlow()
 
         private var flingJob: Job? = null
+        private val flingFriction = 0.9f // to brake the velocity [0..1] the lower it is, the faster it stops
+
         private val flingMinVelocity = 10f // threshold to stop the fling
         private var flingLastPosition = Offset(0f, 0f)
         private var flingLastTime = 0L
