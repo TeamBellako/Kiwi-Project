@@ -22,29 +22,28 @@ object MetricsMapper {
     }
 
     // DTO -> State
-    fun toState(dto: MetricsDTO): MetricsState = MetricsState(
-        date = dto.date,
-        steps = dto.steps,
-        screenTimeSeconds = dto.screenTimeSeconds
-    )
+    fun toState(dto: MetricsDTO): MetricsState =
+        MetricsState(
+            date = dto.date,
+            steps = dto.steps,
+            screenTimeSeconds = dto.screenTimeSeconds,
+        )
 
     // Domain -> DTO
-    fun toDTO(metrics: Metrics): MetricsDTO {
-        return MetricsDTO(
+    fun toDTO(metrics: Metrics): MetricsDTO =
+        MetricsDTO(
             date = metrics.date.toString(),
             steps = metrics.steps.value,
-            screenTimeSeconds = metrics.screenTimeSeconds.value
+            screenTimeSeconds = metrics.screenTimeSeconds.value,
         )
-    }
 
     // Domain -> State
-    fun toState(metrics: Metrics): MetricsState {
-        return MetricsState(
+    fun toState(metrics: Metrics): MetricsState =
+        MetricsState(
             date = metrics.date.toString(),
             steps = metrics.steps.value,
-            screenTimeSeconds = metrics.screenTimeSeconds.value
+            screenTimeSeconds = metrics.screenTimeSeconds.value,
         )
-    }
 
     // State -> Domain
     @RequiresApi(Build.VERSION_CODES.O)
@@ -59,25 +58,25 @@ object MetricsMapper {
     }
 
     // State -> DTO
-    fun toDTO(state: MetricsState): MetricsDTO = MetricsDTO(
-        date = state.date,
-        steps = state.steps,
-        screenTimeSeconds = state.screenTimeSeconds
-    )
+    fun toDTO(state: MetricsState): MetricsDTO =
+        MetricsDTO(
+            date = state.date,
+            steps = state.steps,
+            screenTimeSeconds = state.screenTimeSeconds,
+        )
 
     private inline fun <A, B, C, R> combineResults(
         ra: Result<A>,
         rb: Result<B>,
         rc: Result<C>,
-        combine: (A, B, C) -> R
-    ): Result<R> {
-        return if (ra.isSuccess && rb.isSuccess && rc.isSuccess) {
+        combine: (A, B, C) -> R,
+    ): Result<R> =
+        if (ra.isSuccess && rb.isSuccess && rc.isSuccess) {
             Result.success(combine(ra.getOrThrow(), rb.getOrThrow(), rc.getOrThrow()))
         } else {
             Result.failure(
                 ra.exceptionOrNull() ?: rb.exceptionOrNull() ?: rc.exceptionOrNull()
-                ?: IllegalStateException("Unknown error in result combination")
+                    ?: IllegalStateException("Unknown error in result combination"),
             )
         }
-    }
 }

@@ -5,6 +5,6 @@ import com.bellako.kiwi.features.settings.data.SettingsState
 
 interface ISettingsViewModel : IBaseViewModel<SettingsState> {
     suspend fun loadSettings()
+
     suspend fun updateSettings(state: SettingsState)
 }
-

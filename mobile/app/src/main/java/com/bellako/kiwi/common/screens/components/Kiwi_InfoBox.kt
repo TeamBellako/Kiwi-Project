@@ -20,20 +20,22 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 fun Kiwi_InfoBox(
     message: String,
     color: Color,
-    testTag: String
+    testTag: String,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(color),
     ) {
         Kiwi_P2(
-            Kiwi_TextArguments(
-            message,
-            modifier = Modifier
-                .padding(getResponsiveSizeHeight(10.dp))
-                .testTag(testTag),
-        )
+            KiwiTextArguments(
+                message,
+                modifier =
+                    Modifier
+                        .padding(getResponsiveSizeHeight(10.dp))
+                        .testTag(testTag),
+            ),
         )
     }
 }
@@ -50,7 +52,7 @@ fun Kiwi_InfoBoxPreview() {
             Kiwi_InfoBox(
                 message = "Invalid email or password",
                 color = MaterialTheme.colorScheme.error,
-                testTag = UsersTestTags.ERROR_TEXT
+                testTag = UsersTestTags.ERROR_TEXT,
             )
         }
     }

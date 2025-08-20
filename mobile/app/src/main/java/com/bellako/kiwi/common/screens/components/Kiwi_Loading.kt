@@ -23,7 +23,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 @Composable
 fun LoadingModal(
     color: Color = MaterialTheme.colorScheme.secondary,
-    trackColor: Color = Color.Transparent
+    trackColor: Color = Color.Transparent,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Box(modifier = Modifier.size(getResponsiveSizeHeight(50.dp))) {
@@ -35,7 +35,7 @@ fun LoadingModal(
 @Composable
 fun LoadingIcon(
     color: Color = MaterialTheme.colorScheme.secondary,
-    trackColor: Color = Color.Transparent
+    trackColor: Color = Color.Transparent,
 ) {
     val isPreview = LocalInspectionMode.current
     if (isPreview) {
@@ -45,7 +45,7 @@ fun LoadingIcon(
                 color = color,
                 center = Offset(size.width / 2f, size.height / 2f),
                 radius = (size.minDimension - 11f) / 2f,
-                style = Stroke(width = 11f)
+                style = Stroke(width = 11f),
             )
         }
     } else {
@@ -53,9 +53,10 @@ fun LoadingIcon(
         CircularProgressIndicator(
             color = color,
             trackColor = trackColor,
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag(CommonTestTags.LOADING_MODAL)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .testTag(CommonTestTags.LOADING_MODAL),
         )
     }
 }

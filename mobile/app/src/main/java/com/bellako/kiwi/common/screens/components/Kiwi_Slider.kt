@@ -20,24 +20,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.data.multiplyColorRgb
-import com.bellako.kiwi.features.settings.tests.SettingsTestTags
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.settings.tests.SettingsTestTags
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Kiwi_Slider(
-    textArguments: Kiwi_TextArguments,
+    textArguments: KiwiTextArguments,
     value: Float,
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float>,
     steps: Int,
     testTag: String,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     Kiwi_H3(textArguments)
 
+    @Suppress("MagicNumber")
     val trackColor = multiplyColorRgb(MaterialTheme.colorScheme.secondary, if (enabled) 1f else 0.4f)
 
     Slider(
@@ -51,24 +52,27 @@ fun Kiwi_Slider(
             SliderDefaults.Thumb(
                 interactionSource = remember { MutableInteractionSource() },
                 thumbSize = DpSize(getResponsiveSizeHeight(20.dp), getResponsiveSizeHeight(20.dp)),
-                colors = SliderDefaults.colors().copy(
-                    thumbColor = trackColor,
-                ),
-                modifier = Modifier.padding(getResponsiveSizeHeight(0.dp))
+                colors =
+                    SliderDefaults.colors().copy(
+                        thumbColor = trackColor,
+                    ),
+                modifier = Modifier.padding(getResponsiveSizeHeight(0.dp)),
             )
         },
         track = { sliderState ->
             SliderDefaults.Track(
-                modifier = Modifier
-                    .height(getResponsiveSizeHeight(16.dp)),
+                modifier =
+                    Modifier
+                        .height(getResponsiveSizeHeight(16.dp)),
                 sliderState = sliderState,
-                colors = SliderDefaults.colors().copy(
-                    activeTickColor = Color.Transparent,
-                    activeTrackColor = trackColor,
-                    inactiveTickColor = Color.Transparent,
-                    inactiveTrackColor = MaterialTheme.colorScheme.primary,
-                ),
-                thumbTrackGapSize = getResponsiveSizeHeight(0.dp)
+                colors =
+                    SliderDefaults.colors().copy(
+                        activeTickColor = Color.Transparent,
+                        activeTrackColor = trackColor,
+                        inactiveTickColor = Color.Transparent,
+                        inactiveTrackColor = MaterialTheme.colorScheme.primary,
+                    ),
+                thumbTrackGapSize = getResponsiveSizeHeight(0.dp),
             )
         },
     )
@@ -83,31 +87,32 @@ fun Kiwi_Slider(
 fun Kiwi_SliderPreview() {
     KiwiTheme {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .testTag(CommonTestTags.SETTINGS_SCREEN),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .testTag(CommonTestTags.SETTINGS_SCREEN),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Kiwi_Slider(
-                Kiwi_TextArguments("Sound Volume"),
-                value = 2.0f,
-                onValueChange = { },
-                valueRange = 0f..3f,
-                steps = 2,
-                testTag = SettingsTestTags.SOUND_VOLUME_SLIDER
-            )
-
-            Kiwi_Spacer()
-
-            Kiwi_Slider(
-                Kiwi_TextArguments("Sound Volume"),
+                KiwiTextArguments("Sound Volume"),
                 value = 2.0f,
                 onValueChange = { },
                 valueRange = 0f..3f,
                 steps = 2,
                 testTag = SettingsTestTags.SOUND_VOLUME_SLIDER,
-                enabled = false
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_Slider(
+                KiwiTextArguments("Sound Volume"),
+                value = 2.0f,
+                onValueChange = { },
+                valueRange = 0f..3f,
+                steps = 2,
+                testTag = SettingsTestTags.SOUND_VOLUME_SLIDER,
+                enabled = false,
             )
         }
     }

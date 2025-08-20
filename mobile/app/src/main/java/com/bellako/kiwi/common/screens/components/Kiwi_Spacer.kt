@@ -9,8 +9,6 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
-fun Kiwi_Spacer(
-    height: Dp = Spacing.medium
-) {
+fun Kiwi_Spacer(height: Dp = Spacing.medium) {
     Spacer(Modifier.height(getResponsiveSizeHeight(height)))
 }

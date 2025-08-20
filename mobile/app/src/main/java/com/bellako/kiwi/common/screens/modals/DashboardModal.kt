@@ -46,7 +46,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -56,25 +55,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
-import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
-import com.bellako.kiwi.features.metrics.model.MetricsMapper
-import com.bellako.kiwi.features.metrics.model.MetricsProvider
-import com.bellako.kiwi.features.metrics.data.MetricsState
-import com.bellako.kiwi.features.metrics.model.MetricsUtils
-import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedStringArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_H3
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_P2
-import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
-import com.bellako.kiwi.features.map.screens.MapScreen
+import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
+import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P1
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.features.map.screens.MapScreen
+import com.bellako.kiwi.features.metrics.data.MetricsState
+import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
+import com.bellako.kiwi.features.metrics.model.MetricsMapper
+import com.bellako.kiwi.features.metrics.model.MetricsProvider
+import com.bellako.kiwi.features.metrics.model.MetricsUtils
+import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -84,13 +83,12 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardModal(
     viewModel: IMetricsViewModel,
     showCalendarView: Boolean = false,
-    initialStateIndex: Int = 0
+    initialStateIndex: Int = 0,
 ) {
     val metricsState by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -116,7 +114,7 @@ fun DashboardModal(
                 CollapsedContent(
                     state = metricsState,
                     isHidden = true,
-                    onCalendarViewClicked = {}
+                    onCalendarViewClicked = {},
                 )
             } else if (currentStateIndex <= 1) {
                 CollapsedContent(
@@ -124,50 +122,49 @@ fun DashboardModal(
                     isHidden = false,
                     onCalendarViewClicked = {
                         shouldShowCalendarView.value = true
-                    }
+                    },
                 )
             } else if (currentStateIndex <= 2) {
                 ExpandedContent(
                     viewModel = viewModel,
                     state = metricsState,
                     selectedDay = selectedDay,
-                    shouldShowCalendarView = shouldShowCalendarView
+                    shouldShowCalendarView = shouldShowCalendarView,
                 )
             }
         },
-        initialStateIndex = initialStateIndex
+        initialStateIndex = initialStateIndex,
     )
 }
-
 
 @Composable
 private fun CollapsedContent(
     state: MetricsState?,
     isHidden: Boolean,
-    onCalendarViewClicked: () -> Unit
+    onCalendarViewClicked: () -> Unit,
 ) {
     state?.let { currentState ->
         Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-                .background(MaterialTheme.colorScheme.background)
-                .padding(
-                    top = 0.dp,
-                    bottom = getResponsiveSizeHeight(Spacing.medium),
-                    start = getResponsiveSizeHeight(Spacing.medium),
-                    end = getResponsiveSizeHeight(Spacing.medium)
-                )
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .testTag(CommonTestTags.DASHBOARD_MODAL),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier
+                    .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(
+                        top = 0.dp,
+                        bottom = getResponsiveSizeHeight(Spacing.medium),
+                        start = getResponsiveSizeHeight(Spacing.medium),
+                        end = getResponsiveSizeHeight(Spacing.medium),
+                    ).fillMaxWidth()
+                    .wrapContentHeight()
+                    .testTag(CommonTestTags.DASHBOARD_MODAL),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Header()
 
             if (!isHidden) {
                 CollapsedSummaryCard(
                     currentState,
-                    onCalendarViewClicked
+                    onCalendarViewClicked,
                 )
             }
         }
@@ -180,22 +177,22 @@ private fun ExpandedContent(
     viewModel: IMetricsViewModel,
     state: MetricsState?,
     selectedDay: MutableState<LocalDate>,
-    shouldShowCalendarView: MutableState<Boolean>
+    shouldShowCalendarView: MutableState<Boolean>,
 ) {
     state?.let {
         Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .padding(
-                    top = 0.dp,
-                    bottom = getResponsiveSizeHeight(Spacing.medium),
-                    start = getResponsiveSizeHeight(Spacing.medium),
-                    end = getResponsiveSizeHeight(Spacing.medium)
-                )
-                .fillMaxWidth()
-                .height(getResponsiveSizeHeight(500.dp))
-                .testTag(CommonTestTags.DASHBOARD_MODAL),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(
+                        top = 0.dp,
+                        bottom = getResponsiveSizeHeight(Spacing.medium),
+                        start = getResponsiveSizeHeight(Spacing.medium),
+                        end = getResponsiveSizeHeight(Spacing.medium),
+                    ).fillMaxWidth()
+                    .height(getResponsiveSizeHeight(500.dp))
+                    .testTag(CommonTestTags.DASHBOARD_MODAL),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Header()
 
@@ -203,19 +200,19 @@ private fun ExpandedContent(
                 CalendarView(
                     viewModel = viewModel,
                     shouldShowCalendarView = shouldShowCalendarView,
-                    selectedDay = selectedDay
+                    selectedDay = selectedDay,
                 )
             } else {
                 if (shouldShowCalendarView.value) {
                     CalendarView(
                         viewModel = viewModel,
                         shouldShowCalendarView = shouldShowCalendarView,
-                        selectedDay = selectedDay
+                        selectedDay = selectedDay,
                     )
                 } else {
                     WeekView(
                         viewModel = viewModel,
-                        selectedDay = selectedDay
+                        selectedDay = selectedDay,
                     ) {
                         shouldShowCalendarView.value = true
                     }
@@ -233,9 +230,10 @@ private fun ExpandedContent(
 private fun HeaderLine() {
     val linePadding = getResponsiveSizeHeight(20.dp)
     Kiwi_HorizontalLine(
-        40.dp, 2.dp,
+        40.dp,
+        2.dp,
         MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.padding(start = linePadding, end = linePadding)
+        modifier = Modifier.padding(start = linePadding, end = linePadding),
     )
 }
 
@@ -243,14 +241,16 @@ private fun HeaderLine() {
 private fun Header() {
     Kiwi_Spacer()
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         HeaderLine()
-        Kiwi_H3(Kiwi_TextArguments(
-            "Daily Progress",
-            TextAlign.Center,
-            MaterialTheme.colorScheme.secondary
-        ))
+        Kiwi_H3(
+            KiwiTextArguments(
+                "Daily Progress",
+                TextAlign.Center,
+                MaterialTheme.colorScheme.secondary,
+            ),
+        )
         HeaderLine()
     }
     Kiwi_Spacer()
@@ -269,8 +269,9 @@ private fun CurrentDayIndicator() {
 private fun WeekView(
     viewModel: IMetricsViewModel,
     selectedDay: MutableState<LocalDate>,
-    onCalendarViewClicked: () -> Unit
+    onCalendarViewClicked: () -> Unit,
 ) {
+    @Suppress("MagicNumber")
     val currentDayOfWeek = selectedDay.value.dayOfWeek.value % 7
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
     val coroutineScope = rememberCoroutineScope()
@@ -279,23 +280,27 @@ private fun WeekView(
     CurrentDayIndicator()
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(vertical = getResponsiveSizeHeight(Spacing.medium))
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(vertical = getResponsiveSizeHeight(Spacing.medium)),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.medium))
+            horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.medium)),
         ) {
             Row(
-                modifier = Modifier
-                    .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall))
+                modifier =
+                    Modifier
+                        .weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
             ) {
+                @Suppress("MagicNumber")
                 (0..6).forEach { index ->
                     val day = startOfWeek.plusDays(index.toLong())
                     val dayNumber = day.dayOfMonth
@@ -311,12 +316,12 @@ private fun WeekView(
 
                                 coroutineScope.launch {
                                     viewModel.loadMetrics(
-                                        day.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                        day.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                                     )
                                 }
                             },
                             isInFuture = day.isAfter(LocalDate.now()),
-                            testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index
+                            testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
                         )
                     }
                 }
@@ -333,58 +338,64 @@ private fun CalendarView(
     viewModel: IMetricsViewModel,
     modifier: Modifier = Modifier,
     selectedDay: MutableState<LocalDate>,
-    shouldShowCalendarView: MutableState<Boolean>
+    shouldShowCalendarView: MutableState<Boolean>,
 ) {
-    var currentYearMonth by rememberSaveable(stateSaver = Saver(
-        save = { it.toString() },
-        restore = { YearMonth.parse(it) }
-    )) { mutableStateOf(YearMonth.from(selectedDay.value)) }
+    var currentYearMonth by rememberSaveable(
+        stateSaver =
+            Saver(
+                save = { it.toString() },
+                restore = { YearMonth.parse(it) },
+            ),
+    ) { mutableStateOf(YearMonth.from(selectedDay.value)) }
 
     var transitionDirection by remember { mutableStateOf(0) } // -1 = previous, 1 = next
     var totalDragOffsetX by remember { mutableStateOf(0f) }
 
-    val gestureModifier = Modifier.pointerInput(currentYearMonth) {
-        detectDragGestures(
-            onDragEnd = {
-                val dragThreshold = 100f
-                when {
-                    totalDragOffsetX > dragThreshold -> {
-                        transitionDirection = -1
-                        currentYearMonth = currentYearMonth.minusMonths(1)
+    val gestureModifier =
+        Modifier.pointerInput(currentYearMonth) {
+            detectDragGestures(
+                onDragEnd = {
+                    val dragThreshold = 100f
+                    when {
+                        totalDragOffsetX > dragThreshold -> {
+                            transitionDirection = -1
+                            currentYearMonth = currentYearMonth.minusMonths(1)
+                        }
+                        totalDragOffsetX < -dragThreshold -> {
+                            transitionDirection = 1
+                            currentYearMonth = currentYearMonth.plusMonths(1)
+                        }
                     }
-                    totalDragOffsetX < -dragThreshold -> {
-                        transitionDirection = 1
-                        currentYearMonth = currentYearMonth.plusMonths(1)
-                    }
-                }
-                totalDragOffsetX = 0f
-            },
-            onDrag = { change, dragAmount ->
-                change.consume()
-                totalDragOffsetX += dragAmount.x
-            }
-        )
-    }
+                    totalDragOffsetX = 0f
+                },
+                onDrag = { change, dragAmount ->
+                    change.consume()
+                    totalDragOffsetX += dragAmount.x
+                },
+            )
+        }
 
     val selectedDay = rememberSaveable { mutableStateOf(LocalDate.now()) }
     val coroutineScope = rememberCoroutineScope()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(getResponsiveSizeHeight(300.dp))
-            .then(gestureModifier)
-            .testTag(DashboardModalTestTags.CALENDAR_VIEW)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(getResponsiveSizeHeight(300.dp))
+                .then(gestureModifier)
+                .testTag(DashboardModalTestTags.CALENDAR_VIEW),
     ) {
         Kiwi_P2(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
-            )
+                modifier =
+                    Modifier
+                        .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT),
+            ),
         )
         Kiwi_Spacer(Spacing.large)
 
@@ -393,13 +404,14 @@ private fun CalendarView(
             transitionSpec = {
                 slideInHorizontally(
                     animationSpec = tween(300),
-                    initialOffsetX = { fullWidth -> fullWidth * transitionDirection }
-                ) togetherWith slideOutHorizontally(
-                    animationSpec = tween(300),
-                    targetOffsetX = { fullWidth -> -fullWidth * transitionDirection }
-                )
+                    initialOffsetX = { fullWidth -> fullWidth * transitionDirection },
+                ) togetherWith
+                    slideOutHorizontally(
+                        animationSpec = tween(300),
+                        targetOffsetX = { fullWidth -> -fullWidth * transitionDirection },
+                    )
             },
-            label = "CalendarMonthTransition"
+            label = "CalendarMonthTransition",
         ) { displayedMonth ->
             val startOfMonth = displayedMonth.atDay(1)
             val endOfMonth = displayedMonth.atEndOfMonth()
@@ -410,10 +422,11 @@ private fun CalendarView(
             Column {
                 (0 until totalWeeks).forEach { weekIndex ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp))
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp)),
                     ) {
                         (0..6).forEach { dayOfWeek ->
                             val dayIndex = weekIndex * 7 + dayOfWeek
@@ -422,7 +435,7 @@ private fun CalendarView(
 
                             Box(
                                 modifier = Modifier.weight(1f),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
                                 if (dayDate in startOfMonth..endOfMonth) {
                                     val isSelected = selectedDay.value == dayDate
@@ -438,12 +451,12 @@ private fun CalendarView(
                                             selectedDay.value = dayDate
                                             coroutineScope.launch {
                                                 viewModel.loadMetrics(
-                                                    dayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                                    dayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                                                 )
                                             }
                                         },
                                         isInFuture = dayDate.isAfter(LocalDate.now()),
-                                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth
+                                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
                                     )
                                 } else {
                                     Kiwi_Spacer()
@@ -463,43 +476,44 @@ private fun ExpandedDayIndicator(
     isSelected: Boolean,
     onClicked: () -> Unit,
     isInFuture: Boolean,
-    testTag: String
+    testTag: String,
 ) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(12.dp)))
-            .border(
-                width = if (isSelected) getResponsiveSizeHeight(2.dp) else 0.dp,
-                color = if (isSelected) MaterialTheme.colorScheme.inversePrimary else Color.Transparent,
-                shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp))
-            )
-            .padding(vertical = getResponsiveSizeHeight(Spacing.xSmall))
-            .clickable { onClicked() }
-            .testTag(testTag),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(12.dp)))
+                .border(
+                    width = if (isSelected) getResponsiveSizeHeight(2.dp) else 0.dp,
+                    color = if (isSelected) MaterialTheme.colorScheme.inversePrimary else Color.Transparent,
+                    shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp)),
+                ).padding(vertical = getResponsiveSizeHeight(Spacing.xSmall))
+                .clickable { onClicked() }
+                .testTag(testTag),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             val contentAlpha = if (isInFuture) 0.4f else 1f
             Kiwi_P2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     dayName,
                     color = MaterialTheme.colorScheme.inversePrimary,
-                    modifier = Modifier
-                        .alpha(contentAlpha)
-                )
+                    modifier =
+                        Modifier
+                            .alpha(contentAlpha),
+                ),
             )
 
             Kiwi_Image(
                 R.drawable.ph_dashboard_day_empty,
                 "Dashboard day indicator",
-                modifier = Modifier
-                    .size(getResponsiveSizeHeight(50.dp))
-                    .alpha(contentAlpha)
+                modifier =
+                    Modifier
+                        .size(getResponsiveSizeHeight(50.dp))
+                        .alpha(contentAlpha),
             )
-
         }
     }
 }
@@ -507,12 +521,13 @@ private fun ExpandedDayIndicator(
 @Composable
 private fun ExpandedProgressBox(state: MetricsState) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp)))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(getResponsiveSizeHeight(Spacing.medium))
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp)))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
         Column {
             ExpandedMetricsProgress(state)
@@ -528,35 +543,40 @@ private fun ExpandedProgressBox(state: MetricsState) {
 private fun ExpandedMetricsProgress(state: MetricsState) {
     val maxSteps = 100000
     val currentSteps =
-        if (state.steps < maxSteps)
+        if (state.steps < maxSteps) {
             state.steps.toString()
-        else "+99,999"
+        } else {
+            "+99,999"
+        }
 
     val maxScreenTimeSeconds = 10 * 60 * 60
     val currentScreenTimeSeconds =
-        if (state.screenTimeSeconds < maxScreenTimeSeconds)
+        if (state.screenTimeSeconds < maxScreenTimeSeconds) {
             MetricsUtils.parseScreenTimeSeconds(state.screenTimeSeconds)
-        else "+10 hours\n(are you serious?)"
+        } else {
+            "+10 hours\n(are you serious?)"
+        }
 
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
     ) {
         MetricProgress(
             "Steps",
             currentSteps,
             "8,000",
             Modifier.weight(1f),
-            DashboardModalTestTags.STEPS
+            DashboardModalTestTags.STEPS,
         )
         MetricProgress(
             "Screen Time",
             currentScreenTimeSeconds,
             "3 hours",
             Modifier.weight(1f),
-            DashboardModalTestTags.SCREEN_TIME
+            DashboardModalTestTags.SCREEN_TIME,
         )
     }
 }
@@ -567,34 +587,40 @@ private fun MetricProgress(
     value: String,
     target: String,
     modifier: Modifier,
-    testTag: String
+    testTag: String,
 ) {
     Box(modifier) {
         Column {
             Kiwi_H3(
-                Kiwi_TextArguments(
-                title,
-                TextAlign.Center,
-                MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .fillMaxWidth())
+                KiwiTextArguments(
+                    title,
+                    TextAlign.Center,
+                    MaterialTheme.colorScheme.secondary,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
+                ),
             )
             Kiwi_P1(
-                Kiwi_TextArguments(
-                value,
-                TextAlign.Center,
-                MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(testTag))
+                KiwiTextArguments(
+                    value,
+                    TextAlign.Center,
+                    MaterialTheme.colorScheme.secondary,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .testTag(testTag),
+                ),
             )
             Kiwi_P2(
-                Kiwi_TextArguments(
-                "/$target",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                modifier = Modifier
-                    .fillMaxWidth())
+                KiwiTextArguments(
+                    "/$target",
+                    TextAlign.Center,
+                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
+                ),
             )
         }
     }
@@ -603,85 +629,91 @@ private fun MetricProgress(
 @Composable
 private fun CollapsedSummaryCard(
     state: MetricsState,
-    onCalendarViewClicked: () -> Unit
+    onCalendarViewClicked: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .padding(horizontal = getResponsiveSizeHeight(Spacing.xLarge))
-            .background(MaterialTheme.colorScheme.surface)
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp)))
-            .padding(getResponsiveSizeHeight(Spacing.medium))
+        modifier =
+            Modifier
+                .padding(horizontal = getResponsiveSizeHeight(Spacing.xLarge))
+                .background(MaterialTheme.colorScheme.surface)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp)))
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-
         ) {
             Box(
                 Modifier
-                    .weight(0.2F)
+                    .weight(0.2F),
             ) {
                 CurrentDayIndicator()
             }
             Box(
                 Modifier
                     .weight(0.6F)
-                    .padding(horizontal = getResponsiveSizeHeight(Spacing.small))
+                    .padding(horizontal = getResponsiveSizeHeight(Spacing.small)),
             ) {
                 Column(
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.Start,
                 ) {
                     val maxSteps = 100000
                     val currentSteps =
-                        if (state.steps < maxSteps)
+                        if (state.steps < maxSteps) {
                             state.steps.toString()
-                        else "+99,999"
+                        } else {
+                            "+99,999"
+                        }
 
                     val maxScreenTimeSeconds = 60
                     val currentScreenTimeSeconds =
-                        if (state.screenTimeSeconds < maxScreenTimeSeconds)
+                        if (state.screenTimeSeconds < maxScreenTimeSeconds) {
                             (state.screenTimeSeconds / 60).toString()
-                        else "+60"
+                        } else {
+                            "+60"
+                        }
 
-                    val stepsText = buildAnnotatedString {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                            append(currentSteps)
+                    val stepsText =
+                        buildAnnotatedString {
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                                append(currentSteps)
+                            }
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+                                append("/8,000 steps")
+                            }
                         }
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                            append("/8,000 steps")
-                        }
-                    }
                     Kiwi_AnnotatedString_P2(
-                        Kiwi_AnnotatedStringArguments(
-                        stepsText,
-                        TextAlign.Left,
-                        Modifier.testTag(DashboardModalTestTags.STEPS)
-                    )
+                        KiwiAnnotatedStringArguments(
+                            stepsText,
+                            TextAlign.Left,
+                            Modifier.testTag(DashboardModalTestTags.STEPS),
+                        ),
                     )
 
                     Kiwi_Spacer(Spacing.xSmall)
 
-                    val screenTimeText = buildAnnotatedString {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                            append(currentScreenTimeSeconds)
+                    val screenTimeText =
+                        buildAnnotatedString {
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                                append(currentScreenTimeSeconds)
+                            }
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+                                append("/60 screen mins")
+                            }
                         }
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                            append("/60 screen mins")
-                        }
-                    }
                     Kiwi_AnnotatedString_P2(
-                        Kiwi_AnnotatedStringArguments(
-                        screenTimeText,
-                        TextAlign.Left,
-                        Modifier.testTag(DashboardModalTestTags.SCREEN_TIME)
-                    )
+                        KiwiAnnotatedStringArguments(
+                            screenTimeText,
+                            TextAlign.Left,
+                            Modifier.testTag(DashboardModalTestTags.SCREEN_TIME),
+                        ),
                     )
                 }
             }
             Box(
                 Modifier
-                    .weight(0.1F)
+                    .weight(0.1F),
             ) {
                 ShowCalendarViewButton(onCalendarViewClicked)
             }
@@ -690,9 +722,7 @@ private fun CollapsedSummaryCard(
 }
 
 @Composable
-private fun ShowCalendarViewButton(
-    onCalendarViewClicked: () -> Unit
-) {
+private fun ShowCalendarViewButton(onCalendarViewClicked: () -> Unit) {
     Kiwi_Image(
         R.drawable.calendar,
         "Show Calendar View Button",
@@ -701,8 +731,7 @@ private fun ShowCalendarViewButton(
             .background(MaterialTheme.colorScheme.background)
             .clickable {
                 onCalendarViewClicked()
-            }
-            .testTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
+            }.testTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON),
     )
 }
 
@@ -710,13 +739,15 @@ private fun ShowCalendarViewButton(
 private fun ExpandedSummaryCard() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Kiwi_H3(
-            Kiwi_TextArguments(
-            "Challenges",
-            TextAlign.Center,
-            MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight())
+            KiwiTextArguments(
+                "Challenges",
+                TextAlign.Center,
+                MaterialTheme.colorScheme.secondary,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+            ),
         )
 
         Kiwi_Spacer(Spacing.small)
@@ -724,7 +755,7 @@ private fun ExpandedSummaryCard() {
         ExpandedQuestProgress(
             "Use Duolingo For 20 Minutes",
             R.drawable.ph_quest_01,
-            0.5f
+            0.5f,
         )
 
         Kiwi_Spacer()
@@ -732,53 +763,62 @@ private fun ExpandedSummaryCard() {
         ExpandedQuestProgress(
             "Do 3 Sets Of 10 Push-Ups",
             R.drawable.ph_quest_02,
-            0.8f
+            0.8f,
         )
     }
 }
 
 @Composable
-private fun ExpandedQuestProgress(title: String, imageRes: Int, progress: Float) {
+private fun ExpandedQuestProgress(
+    title: String,
+    imageRes: Int,
+    progress: Float,
+) {
     Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .background(MaterialTheme.colorScheme.inversePrimary),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .background(MaterialTheme.colorScheme.inversePrimary),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface),
+            contentAlignment = Alignment.Center,
         ) {
             CircularProgressIndicator(
                 progress = { progress },
                 strokeWidth = getResponsiveSizeHeight(4.dp),
-                color = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.tertiary,
             )
 
             Kiwi_Image(
                 imageRes,
                 "Quest Indicator For: $title",
-                modifier = Modifier
-                    .size(getResponsiveSizeHeight(20.dp))
+                modifier =
+                    Modifier
+                        .size(getResponsiveSizeHeight(20.dp)),
             )
         }
-        Box (
-            modifier = Modifier
-                .weight(0.8F),
-            contentAlignment = Alignment.Center
+        Box(
+            modifier =
+                Modifier
+                    .weight(0.8F),
+            contentAlignment = Alignment.Center,
         ) {
             Kiwi_P2(
-                Kiwi_TextArguments(
-                title,
-                TextAlign.Center,
-                MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .padding(getResponsiveSizeHeight(Spacing.small))
-            )
+                KiwiTextArguments(
+                    title,
+                    TextAlign.Center,
+                    MaterialTheme.colorScheme.secondary,
+                    modifier =
+                        Modifier
+                            .padding(getResponsiveSizeHeight(Spacing.small)),
+                ),
             )
         }
     }
@@ -827,7 +867,7 @@ fun DashboardModalCalendarPreview() {
 @Composable
 private fun DashboardModalPreview(
     showCalendarView: Boolean,
-    initialStateIndex: Int = 0
+    initialStateIndex: Int = 0,
 ) {
     KiwiTheme {
         Scaffold(
@@ -840,10 +880,10 @@ private fun DashboardModalPreview(
                     DashboardModal(
                         MetricsFakeViewModel(MetricsState("2025-06-12", 1173, 9900)),
                         showCalendarView,
-                        initialStateIndex
+                        initialStateIndex,
                     )
                 }
-            }
+            },
         )
     }
 }

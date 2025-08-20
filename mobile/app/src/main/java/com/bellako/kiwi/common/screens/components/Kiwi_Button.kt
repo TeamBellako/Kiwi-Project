@@ -17,9 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Button(
-    textArguments: Kiwi_TextArguments,
+    textArguments: KiwiTextArguments,
     onClick: () -> Unit,
     enabled: Boolean = true,
     color: Color = MaterialTheme.colorScheme.primaryContainer,
@@ -30,17 +31,19 @@ fun Kiwi_Button(
         Button(
             onClick = onClick,
             enabled = enabled,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = color,
-                disabledContainerColor = color.copy(alpha = 0.1f),
-                contentColor = MaterialTheme.colorScheme.onSecondary,
-                disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
-            ),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = color,
+                    disabledContainerColor = color.copy(alpha = 0.1f),
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f),
+                ),
             contentPadding = PaddingValues(getResponsiveSizeHeight(8).dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(testTag),
-            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp))
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag(testTag),
+            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
         ) {
             Kiwi_Label1(textArguments)
         }
@@ -57,10 +60,10 @@ fun Kiwi_ButtonPreview() {
     KiwiTheme {
         Column {
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "BUTTON",
                     color = MaterialTheme.colorScheme.secondary,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {},
             )
@@ -68,13 +71,13 @@ fun Kiwi_ButtonPreview() {
             Kiwi_Spacer()
 
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "BUTTON",
                     color = MaterialTheme.colorScheme.secondary,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {},
-                enabled = false
+                enabled = false,
             )
         }
     }

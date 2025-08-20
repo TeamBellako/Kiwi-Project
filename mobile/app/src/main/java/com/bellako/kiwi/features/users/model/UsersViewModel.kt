@@ -4,13 +4,11 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.bellako.kiwi.features.users.data.UsersDTO
-import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
-import com.bellako.kiwi.common.data.UIState
-import com.bellako.kiwi.features.users.data.Email
-import com.bellako.kiwi.features.users.data.Password
+import com.bellako.kiwi.features.users.data.UsersDTO
+import com.bellako.kiwi.features.users.data.UsersState
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.ConfigurationV0
 import com.google.crypto.tink.KeysetHandle
@@ -24,156 +22,169 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import java.io.IOException
+import java.security.GeneralSecurityException
+
+private const val ON_LOGIN_SUCCESS_DELAY_MILLIS = 2000L
 
 @HiltViewModel
-class UsersViewModel @Inject constructor(
-    private val repository: UsersRepository,
-    private val authRepository: AuthRepository
-) : BaseViewModel(), IUsersViewModel {
+class UsersViewModel
+    @Inject
+    constructor(
+        private val repository: UsersRepository,
+        private val authRepository: AuthRepository,
+    ) : BaseViewModel(),
+        IUsersViewModel {
+        private val _state = MutableStateFlow(UsersState("", ""))
+        override val state: StateFlow<UsersState> = _state.asStateFlow()
 
-    private val _state = MutableStateFlow(UsersState("", ""))
-    override val state: StateFlow<UsersState> = _state.asStateFlow()
+        private val _isLoginCompleted = MutableStateFlow(false)
+        val isLoginCompleted: StateFlow<Boolean> = _isLoginCompleted.asStateFlow()
 
-    private val _isLoginCompleted = MutableStateFlow(false);
-    val isLoginCompleted : StateFlow<Boolean> = _isLoginCompleted.asStateFlow();
-
-    private fun setIsLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
-        _uiState.value = if (isLoading) UIState.Loading else UIState.Idle
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    override fun onEmailChanged(email: String) {
-        _state.value = _state.value.copy(email = email)
-    }
-
-    override fun onPasswordChanged(password: String) {
-        _state.value = _state.value.copy(password = password)
-    }
-
-    // ---------------------------------------------------------------------------------------------
-
-    override suspend fun signup(context: Context): Result<Unit> {
-        setIsLoading(true)
-        val result = repository.signup(UsersDTO(_state.value.email, _state.value.password))
-        setIsLoading(false)
-
-        return handleResultSuspend(result) {
-            login(context)
+        private fun setIsLoading(isLoading: Boolean) {
+            _isLoading.value = isLoading
+            _uiState.value = if (isLoading) UIState.Loading else UIState.Idle
         }
-    }
 
-    override suspend fun login(context: Context): Result<Unit> {
-        setIsLoading(true)
-        val result = repository.login(UsersDTO(_state.value.email, _state.value.password))
-        setIsLoading(false)
+        // ---------------------------------------------------------------------------------------------
 
-        return handleResultSuspend(result) {
-            authRepository.setJwtToken(result.getOrThrow())
-            saveLocalCredentials(context)
-            _isLoginCompleted.value = true
+        override fun onEmailChanged(email: String) {
+            _state.value = _state.value.copy(email = email)
         }
-    }
 
-    override suspend fun logout(context: Context) {
-        clearLocalCredentials(context)
-        authRepository.setJwtToken("")
-    }
+        override fun onPasswordChanged(password: String) {
+            _state.value = _state.value.copy(password = password)
+        }
 
-    override suspend fun onLoginSuccess() {
-        setIsLoading(true)
-        delay(2000)
-        setIsLoading(false)
-    }
+        // ---------------------------------------------------------------------------------------------
 
-    // ---------------------------------------------------------------------------------------------
+        override suspend fun signup(context: Context): Result<Unit> {
+            setIsLoading(true)
+            val result = repository.signup(UsersDTO(_state.value.email, _state.value.password))
+            setIsLoading(false)
 
-    private val Context.dataStore by preferencesDataStore("secure_prefs")
-    private val prefFileName = "prefs"
-    private val keysetName = "usersKeyset"
-    private val usernameDataKey = stringPreferencesKey("username_key")
-    private val passwordDataKey = stringPreferencesKey("password_key")
-
-    private lateinit var aEAD: Aead
-
-    private fun initAEAD(context: Context) {
-        AeadConfig.register()
-
-        val manager = AndroidKeysetManager.Builder()
-            .withSharedPref(context, keysetName, prefFileName)
-            .withKeyTemplate(AeadKeyTemplates.AES128_GCM)
-            .build()
-
-        val keysetHandle: KeysetHandle = manager.keysetHandle
-        aEAD = keysetHandle.getPrimitive(ConfigurationV0.get(), Aead::class.java)
-    }
-
-    override suspend fun saveLocalCredentials(context: Context) {
-        setIsLoading(true)
-        try {
-            initAEAD(context)
-            context.dataStore.edit { prefs ->
-                val emailEncrypted = aEAD.encrypt(state.value.email.toByteArray(), null)
-                prefs[usernameDataKey] =
-                    android.util.Base64.encodeToString(emailEncrypted, android.util.Base64.DEFAULT)
-                val passwordEncrypted = aEAD.encrypt(state.value.password.toByteArray(), null)
-                prefs[passwordDataKey] = android.util.Base64.encodeToString(
-                    passwordEncrypted,
-                    android.util.Base64.DEFAULT
-                )
+            return handleResultSuspend(result) {
+                login(context)
             }
-        } catch (e: Exception) {
-            warn(e.message.orEmpty())
-        } finally {
-            setIsLoading(false)
         }
-    }
 
-    override suspend fun getLocalCredentials(context: Context): Pair<String?, String?> {
-        setIsLoading(true)
-        try {
-            initAEAD(context)
-            val prefs = context.dataStore.data.first()
-            val emailEncrypted = prefs[usernameDataKey] ?: return Pair("", "")
-            val passwordEncrypted = prefs[passwordDataKey] ?: return Pair("", "")
-            val emailDecrypted = aEAD.decrypt(android.util.Base64.decode(emailEncrypted, android.util.Base64.DEFAULT), null)
-            val passwordDecrypted = aEAD.decrypt(android.util.Base64.decode(passwordEncrypted, android.util.Base64.DEFAULT), null)
-            return Pair(String(emailDecrypted), String(passwordDecrypted))
-        } catch (e: Exception) {
-            warn(e.message.orEmpty())
-            return Pair("", "")
-        } finally {
+        override suspend fun login(context: Context): Result<Unit> {
+            setIsLoading(true)
+            val result = repository.login(UsersDTO(_state.value.email, _state.value.password))
             setIsLoading(false)
-        }
-    }
 
-    override suspend fun clearLocalCredentials(context: Context) {
-        setIsLoading(true)
-        try {
-            initAEAD(context)
-            context.dataStore.edit { prefs ->
-                prefs.remove(usernameDataKey)
-                prefs.remove(passwordDataKey)
+            return handleResultSuspend(result) {
+                authRepository.setJwtToken(result.getOrThrow())
+                saveLocalCredentials(context)
+                _isLoginCompleted.value = true
             }
-        } catch (e: Exception) {
-            warn(e.message.orEmpty())
-        } finally {
+        }
+
+        override suspend fun logout(context: Context) {
+            clearLocalCredentials(context)
+            authRepository.setJwtToken("")
+        }
+
+        override suspend fun onLoginSuccess() {
+            setIsLoading(true)
+            delay(ON_LOGIN_SUCCESS_DELAY_MILLIS)
             setIsLoading(false)
         }
-    }
 
-    // ---------------------------------------------------------------------------------------------
+        // ---------------------------------------------------------------------------------------------
 
-    private fun getInvalidSignUpMessage(): String {
-        Email.of(_state.value.email).onFailure { ex ->
-           return ex.message.orEmpty()
+        private val Context.dataStore by preferencesDataStore("secure_prefs")
+        private val prefFileName = "prefs"
+        private val keysetName = "usersKeyset"
+        private val usernameDataKey = stringPreferencesKey("username_key")
+        private val passwordDataKey = stringPreferencesKey("password_key")
+
+        private lateinit var aEAD: Aead
+
+        private fun initAEAD(context: Context) {
+            AeadConfig.register()
+
+            val manager =
+                AndroidKeysetManager
+                    .Builder()
+                    .withSharedPref(context, keysetName, prefFileName)
+                    .withKeyTemplate(AeadKeyTemplates.AES128_GCM)
+                    .build()
+
+            val keysetHandle: KeysetHandle = manager.keysetHandle
+            aEAD = keysetHandle.getPrimitive(ConfigurationV0.get(), Aead::class.java)
         }
-        Password.of(_state.value.password).onFailure { ex ->
-           return ex.message.orEmpty()
-        }
-        return "Invalid email or password".trimIndent()
-    }
 
-    private fun getInvalidLoginMessage(): String = "Invalid email or password".trimIndent()
-}
+        override suspend fun saveLocalCredentials(context: Context) {
+            setIsLoading(true)
+            try {
+                initAEAD(context)
+                context.dataStore.edit { prefs ->
+                    val emailEncrypted = aEAD.encrypt(state.value.email.toByteArray(), null)
+                    prefs[usernameDataKey] =
+                        android.util.Base64.encodeToString(emailEncrypted, android.util.Base64.DEFAULT)
+                    val passwordEncrypted = aEAD.encrypt(state.value.password.toByteArray(), null)
+                    prefs[passwordDataKey] =
+                        android.util.Base64.encodeToString(
+                            passwordEncrypted,
+                            android.util.Base64.DEFAULT,
+                        )
+                }
+            } catch (e: GeneralSecurityException) {
+                warn("Encryption error: ${e.message}")
+            } catch (e: IOException) {
+                warn("DataStore error: ${e.message}")
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        override suspend fun getLocalCredentials(context: Context): Pair<String?, String?> {
+            setIsLoading(true)
+            return try {
+                initAEAD(context)
+                val prefs = context.dataStore.data.first()
+                val emailEncrypted = prefs[usernameDataKey] ?: return "" to ""
+                val passwordEncrypted = prefs[passwordDataKey] ?: return "" to ""
+
+                val emailDecrypted =
+                    aEAD.decrypt(
+                        android.util.Base64.decode(emailEncrypted, android.util.Base64.DEFAULT),
+                        null,
+                    )
+                val passwordDecrypted =
+                    aEAD.decrypt(
+                        android.util.Base64.decode(passwordEncrypted, android.util.Base64.DEFAULT),
+                        null,
+                    )
+
+                String(emailDecrypted) to String(passwordDecrypted)
+            } catch (e: GeneralSecurityException) {
+                warn("Decryption error: ${e.message}")
+                "" to ""
+            } catch (e: IOException) {
+                warn("DataStore error: ${e.message}")
+                "" to ""
+            } catch (e: IllegalArgumentException) {
+                warn("Base64 decoding error: ${e.message}")
+                "" to ""
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        override suspend fun clearLocalCredentials(context: Context) {
+            setIsLoading(true)
+            try {
+                initAEAD(context)
+                context.dataStore.edit { prefs ->
+                    prefs.remove(usernameDataKey)
+                    prefs.remove(passwordDataKey)
+                }
+            } catch (e: Exception) {
+                warn(e.message.orEmpty())
+            } finally {
+                setIsLoading(false)
+            }
+        }
+    }

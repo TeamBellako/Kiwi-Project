@@ -10,11 +10,17 @@ import retrofit2.http.Query
 
 interface IMetricsAPI {
     @POST("api/user/metrics")
-    suspend fun createMetrics(@Body dto: MetricsDTO): Response<Unit>
+    suspend fun createMetrics(
+        @Body dto: MetricsDTO,
+    ): Response<Unit>
 
     @PUT("api/user/metrics")
-    suspend fun updateMetrics(@Body dto: MetricsDTO): Response<Unit>
+    suspend fun updateMetrics(
+        @Body dto: MetricsDTO,
+    ): Response<Unit>
 
     @GET("api/user/metrics")
-    suspend fun getMetricsByDate(@Query("date") date: String): Response<MetricsDTO>
+    suspend fun getMetricsByDate(
+        @Query("date") date: String,
+    ): Response<MetricsDTO>
 }

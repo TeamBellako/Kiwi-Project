@@ -7,19 +7,17 @@ data class Settings(
     val soundVolume: Float,
     val musicVolume: Float,
 ) {
-    fun toDTO(): SettingsDTO {
-        return SettingsDTO(
+    fun toDTO(): SettingsDTO =
+        SettingsDTO(
             email = email.value,
             soundVolume = soundVolume,
-            musicVolume = musicVolume
+            musicVolume = musicVolume,
         )
-    }
 
-    fun toState(): SettingsState {
-        return SettingsState(
+    fun toState(): SettingsState =
+        SettingsState(
             email = email.value,
             soundVolume = soundVolume,
-            musicVolume = musicVolume
+            musicVolume = musicVolume,
         )
-    }
 }
