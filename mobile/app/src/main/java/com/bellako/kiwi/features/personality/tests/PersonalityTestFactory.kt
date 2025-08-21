@@ -6,14 +6,13 @@ import com.bellako.kiwi.features.personality.data.PersonalityDTO
 import com.bellako.kiwi.features.personality.data.PersonalityUserNameDTO
 
 object PersonalityTestFactory {
-
     fun validPersonalityDTO(): PersonalityDTO =
         PersonalityDTO(
             validPersonalityRealNameDTO().name,
             validPersonalityKnightNameDTO().name,
             validPersonalityBuildDTO().build,
             validPersonalityAppsDTO().goodApps,
-            validPersonalityAppsDTO().badApps
+            validPersonalityAppsDTO().badApps,
         )
 
     fun validPersonalityRealNameDTO(): PersonalityUserNameDTO = PersonalityUserNameDTO("Finn")
@@ -23,5 +22,4 @@ object PersonalityTestFactory {
     fun validPersonalityBuildDTO(): PersonalityBuildDTO = PersonalityBuildDTO(BERSERKER)
 
     fun validPersonalityAppsDTO(): PersonalityAppsDTO = PersonalityAppsDTO(listOf("GrowTale"), listOf("X"))
-
 }

@@ -37,7 +37,7 @@ fun Kiwi_InputField(
     label: @Composable (() -> Unit)?,
     shouldHideInput: Boolean,
     textColor: Color,
-    testTag: String
+    testTag: String,
 ) {
     var inputFieldColor = textColor
     if (!enabled) {
@@ -47,17 +47,19 @@ fun Kiwi_InputField(
     Box(modifier = Modifier.fillMaxWidth()) {
         val shouldShowPassword = remember { mutableStateOf(false) }
 
-        val keyboardOptions = if (shouldHideInput) {
-            KeyboardOptions(keyboardType = KeyboardType.Password)
-        } else {
-            KeyboardOptions(keyboardType = KeyboardType.Email)
-        }
+        val keyboardOptions =
+            if (shouldHideInput) {
+                KeyboardOptions(keyboardType = KeyboardType.Password)
+            } else {
+                KeyboardOptions(keyboardType = KeyboardType.Email)
+            }
 
-        val visualTransformation = if (shouldHideInput && !shouldShowPassword.value) {
-            PasswordVisualTransformation()
-        } else {
-            VisualTransformation.None
-        }
+        val visualTransformation =
+            if (shouldHideInput && !shouldShowPassword.value) {
+                PasswordVisualTransformation()
+            } else {
+                VisualTransformation.None
+            }
 
         OutlinedTextField(
             value = value,
@@ -67,48 +69,54 @@ fun Kiwi_InputField(
             enabled = enabled,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
-            colors = OutlinedTextFieldDefaults.colors().copy(
-                cursorColor = inputFieldColor,
-                focusedIndicatorColor = inputFieldColor,
-                focusedTextColor = inputFieldColor,
-                unfocusedTextColor = inputFieldColor,
-                disabledTextColor = inputFieldColor,
-                disabledLabelColor = inputFieldColor,
-                disabledIndicatorColor = inputFieldColor
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(testTag),
+            colors =
+                OutlinedTextFieldDefaults.colors().copy(
+                    cursorColor = inputFieldColor,
+                    focusedIndicatorColor = inputFieldColor,
+                    focusedTextColor = inputFieldColor,
+                    unfocusedTextColor = inputFieldColor,
+                    disabledTextColor = inputFieldColor,
+                    disabledLabelColor = inputFieldColor,
+                    disabledIndicatorColor = inputFieldColor,
+                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag(testTag),
             trailingIcon = {
                 if (shouldHideInput) {
                     ShowPasswordTrailingIcon(shouldShowPassword)
                 }
             },
-            textStyle = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = getResponsiveSizeHeight(MaterialTheme.typography.bodyMedium.fontSize.value.toInt()).sp
-            )
+            textStyle =
+                MaterialTheme.typography.bodyMedium.copy(
+                    fontSize =
+                        getResponsiveSizeHeight(
+                            MaterialTheme.typography.bodyMedium.fontSize.value
+                                .toInt(),
+                        ).sp,
+                ),
         )
     }
 }
 
 @Composable
-private fun ShowPasswordTrailingIcon(
-    shouldShowPasswordState: MutableState<Boolean>
-) {
+private fun ShowPasswordTrailingIcon(shouldShowPasswordState: MutableState<Boolean>) {
     Icon(
         imageVector = if (shouldShowPasswordState.value) Icons.Default.Visibility else Icons.Default.VisibilityOff,
         tint = MaterialTheme.colorScheme.inversePrimary,
         contentDescription = if (shouldShowPasswordState.value) "Hide password" else "Show password",
-        modifier = Modifier
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        shouldShowPasswordState.value = true
-                        tryAwaitRelease()
-                        shouldShowPasswordState.value = false
-                    }
-                )
-            }
+        modifier =
+            Modifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = {
+                            shouldShowPasswordState.value = true
+                            tryAwaitRelease()
+                            shouldShowPasswordState.value = false
+                        },
+                    )
+                },
     )
 }
 
@@ -126,10 +134,12 @@ fun Kiwi_InputField_Preview() {
                 value = "finn@thehuman.com",
                 onValueChange = { },
                 label = {
-                    Kiwi_Label2(Kiwi_TextArguments(
-                        "Email",
-                        color = MaterialTheme.colorScheme.inversePrimary
-                    ))
+                    Kiwi_Label2(
+                        Kiwi_TextArguments(
+                            "Email",
+                            color = MaterialTheme.colorScheme.inversePrimary,
+                        ),
+                    )
                 },
                 shouldHideInput = false,
                 textColor = MaterialTheme.colorScheme.inversePrimary,
@@ -143,10 +153,12 @@ fun Kiwi_InputField_Preview() {
                 value = "finn@thehuman.com",
                 onValueChange = { },
                 label = {
-                    Kiwi_Label2(Kiwi_TextArguments(
-                        "Email",
-                        color = MaterialTheme.colorScheme.inversePrimary
-                    ))
+                    Kiwi_Label2(
+                        Kiwi_TextArguments(
+                            "Email",
+                            color = MaterialTheme.colorScheme.inversePrimary,
+                        ),
+                    )
                 },
                 shouldHideInput = false,
                 textColor = MaterialTheme.colorScheme.inversePrimary,

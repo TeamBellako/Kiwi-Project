@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -12,40 +13,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.Composable
-import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
-import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
-import com.bellako.kiwi.features.personality.data.PersonalityState
-import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.users.model.IUsersViewModel
-import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
-import com.bellako.kiwi.features.users.data.UsersState
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
-import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-
 
 @Composable
 fun SignUpScreen3_Test(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
-    SignUpScreen() {
+    SignUpScreen {
         Question(
             usersViewModel,
             personalityViewModel,
-            navController
+            navController,
         )
     }
 }
@@ -54,7 +53,7 @@ fun SignUpScreen3_Test(
 private fun Question(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     val uiState by usersViewModel.uiState.collectAsState()
     val personalityState by personalityViewModel.state.collectAsState()
@@ -73,23 +72,24 @@ private fun Question(
             }
 
             else -> {
-
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .testTag(CommonTestTags.USERS_SCREEN),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .testTag(CommonTestTags.USERS_SCREEN),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-
                     var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-                    Kiwi_H2(Kiwi_TextArguments(
-                        currentPersonalityState.questions[currentQuestion].question,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.secondary
-                    ))
+                    Kiwi_H2(
+                        Kiwi_TextArguments(
+                            currentPersonalityState.questions[currentQuestion].question,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.secondary,
+                        ),
+                    )
 
                     Kiwi_Spacer(Spacing.large)
 
@@ -116,9 +116,7 @@ private fun Question(
                         )
 
                         Kiwi_Spacer()
-
                     }
-
                 }
             }
         }
@@ -136,14 +134,17 @@ fun SignUpScreen3_TestPreview() {
     KiwiTheme {
         SignUpScreen3_Test(
             UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            personalityViewModel = PersonalityFakeViewModel(PersonalityState(
-                validPersonalityDTO().realName,
-                validPersonalityDTO().knightName,
-                validPersonalityDTO().build,
-                validPersonalityDTO().goodApps,
-                validPersonalityDTO().badApps,
-            )),
-            navController = rememberNavController()
+            personalityViewModel =
+                PersonalityFakeViewModel(
+                    PersonalityState(
+                        validPersonalityDTO().realName,
+                        validPersonalityDTO().knightName,
+                        validPersonalityDTO().build,
+                        validPersonalityDTO().goodApps,
+                        validPersonalityDTO().badApps,
+                    ),
+                ),
+            navController = rememberNavController(),
         )
     }
 }

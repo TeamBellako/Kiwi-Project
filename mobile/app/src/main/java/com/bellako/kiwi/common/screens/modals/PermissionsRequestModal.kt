@@ -38,21 +38,19 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
-import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun PermissionsRequestModal(
-    onPermissionsGranted: @Composable () -> Unit
-) {
+fun PermissionsRequestModal(onPermissionsGranted: @Composable () -> Unit) {
     val context = LocalContext.current
     val isPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -60,11 +58,12 @@ fun PermissionsRequestModal(
     val hasUsageAccess = remember { mutableStateOf(hasUsageStatsPermission(context)) }
 
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                hasUsageAccess.value = hasUsageStatsPermission(context)
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    hasUsageAccess.value = hasUsageStatsPermission(context)
+                }
             }
-        }
 
         lifecycleOwner.lifecycle.addObserver(observer)
 
@@ -85,75 +84,85 @@ fun PermissionsRequestModal(
 @Composable
 private fun PermissionRequestLayout(
     context: Context,
-    hasUsageAccess: MutableState<Boolean>
+    hasUsageAccess: MutableState<Boolean>,
 ) {
     val isPreview = LocalInspectionMode.current
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .testTag(CommonTestTags.PERMISSIONS_REQUEST_MODAL),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .testTag(CommonTestTags.PERMISSIONS_REQUEST_MODAL),
+        contentAlignment = Alignment.Center,
     ) {
         Surface(
             modifier = Modifier.matchParentSize(),
-            color = Color.Black.copy(alpha = 0.25f)
+            color = Color.Black.copy(alpha = 0.25f),
         ) {}
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(getResponsiveSizeHeight(Spacing.medium)),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = "Error icon",
                 tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier
-                    .size(getResponsiveSizeHeight(Spacing.xLarge))
+                modifier =
+                    Modifier
+                        .size(getResponsiveSizeHeight(Spacing.xLarge)),
             )
 
             Kiwi_Spacer()
 
-            Kiwi_H2(Kiwi_TextArguments(
-                "Permissions Required",
-                color = MaterialTheme.colorScheme.secondary,
-                textAlign = TextAlign.Center,
-                bold = true
-            ))
+            Kiwi_H2(
+                Kiwi_TextArguments(
+                    "Permissions Required",
+                    color = MaterialTheme.colorScheme.secondary,
+                    textAlign = TextAlign.Center,
+                    bold = true,
+                ),
+            )
 
             Kiwi_Spacer(Spacing.xLarge)
 
-            Kiwi_P2(Kiwi_TextArguments(
-            "GrowTale requires permissions to access metrics such as apps usage time.",
-                TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline
-            ))
+            Kiwi_P2(
+                Kiwi_TextArguments(
+                    "GrowTale requires permissions to access metrics such as apps usage time.",
+                    TextAlign.Center,
+                    color = MaterialTheme.colorScheme.outline,
+                ),
+            )
 
             Kiwi_Spacer(Spacing.small)
 
-            Kiwi_P2(Kiwi_TextArguments(
-                "Please click below to activate them before proceeding.",
-                TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline
-            ))
+            Kiwi_P2(
+                Kiwi_TextArguments(
+                    "Please click below to activate them before proceeding.",
+                    TextAlign.Center,
+                    color = MaterialTheme.colorScheme.outline,
+                ),
+            )
 
             Kiwi_Spacer(Spacing.xLarge)
 
-            Kiwi_Button(Kiwi_TextArguments(
+            Kiwi_Button(
+                Kiwi_TextArguments(
                     "ENABLE APP USAGE ACCESS",
                     color = MaterialTheme.colorScheme.secondary,
                     textAlign = TextAlign.Center,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {
                     context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                 },
-                enabled = isPreview || !hasUsageAccess.value
+                enabled = isPreview || !hasUsageAccess.value,
             )
         }
     }
@@ -162,11 +171,12 @@ private fun PermissionRequestLayout(
 @RequiresApi(Build.VERSION_CODES.Q)
 private fun hasUsageStatsPermission(context: Context): Boolean {
     val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-    val mode = appOps.unsafeCheckOpNoThrow(
-        AppOpsManager.OPSTR_GET_USAGE_STATS,
-        android.os.Process.myUid(),
-        context.packageName
-    )
+    val mode =
+        appOps.unsafeCheckOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            context.packageName,
+        )
     return mode == AppOpsManager.MODE_ALLOWED
 }
 
@@ -179,6 +189,6 @@ private fun hasUsageStatsPermission(context: Context): Boolean {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 fun PermissionsRequestModalPreview() {
     KiwiTheme {
-        PermissionsRequestModal() {}
+        PermissionsRequestModal {}
     }
 }

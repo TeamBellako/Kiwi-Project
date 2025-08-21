@@ -35,7 +35,6 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import kotlinx.coroutines.launch
 
-
 /**
  * @param content placed inside the bar, called with param @currentStateIndex when modified
  * @param states list of (states) sizes the bar can have, passed as raw int (relativized internally)
@@ -48,15 +47,14 @@ fun Kiwi_DraggableBar(
     content: @Composable (currentStateIndex: Int) -> Unit,
     states: List<Int>,
     initialStateIndex: Int = 0,
-    backgroundColor: Color = MaterialTheme.colorScheme.background
+    backgroundColor: Color = MaterialTheme.colorScheme.background,
 ) {
     val scope = rememberCoroutineScope()
 
     // states
     val statesBottom: List<Float> = states.map { state -> getResponsiveSizeHeight(state).toFloat() }
-    fun closestState(value: Float): Float {
-        return statesBottom.minByOrNull { kotlin.math.abs(it - value) } ?: statesBottom.first()
-    }
+
+    fun closestState(value: Float): Float = statesBottom.minByOrNull { kotlin.math.abs(it - value) } ?: statesBottom.first()
 
     // offset
     val animatableOffset = remember { Animatable(statesBottom[initialStateIndex]) }
@@ -70,78 +68,83 @@ fun Kiwi_DraggableBar(
 
     val offset = getScreenHeight(withoutInsetTop = true).dp - animatableOffset.value.dp
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(statesBottom.max().dp)
-            .offset(y = offset)
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-            .background(backgroundColor)
-            .then(modifier)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(statesBottom.max().dp)
+                .offset(y = offset)
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
+                .background(backgroundColor)
+                .then(modifier),
     ) {
         // Drag area
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = {
-                            lastTime = System.currentTimeMillis()
-                            lastPosition = animatableOffset.value
-                        },
-                        onDrag = { change, dragAmount ->
-                            val dragAmountY = dragAmount.y.toDp().value
-                            val now = System.currentTimeMillis()
-                            val elapsed = now - lastTime
-                            if (elapsed > 0) {
-                                val newPos = animatableOffset.value - dragAmountY
-                                dragVelocity = (newPos - lastPosition) / (elapsed / 1000f)
-                                lastPosition = newPos
-                                lastTime = now
-                            }
-                            val newOffset = (animatableOffset.value - dragAmountY)
-                                .coerceIn(
-                                    statesBottom.minOrNull() ?: 0f,
-                                    statesBottom.maxOrNull() ?: Float.MAX_VALUE
-                                )
-                            scope.launch {
-                                animatableOffset.snapTo(newOffset)
-                            }
-                            offsetY = newOffset
-                            change.consume()
-                        },
-                        onDragEnd = {
-                            scope.launch {
-                                val target = when {
-                                    dragVelocity > velocityThreshold -> {
-                                        // High velocity upwards, snap to next upper state
-                                        statesBottom.filter { it >= animatableOffset.value }.minOrNull() ?: statesBottom.last()
-                                    }
-                                    dragVelocity < -velocityThreshold -> {
-                                        // High velocity downwards, snap to next lower state
-                                        statesBottom.filter { it <= animatableOffset.value }.maxOrNull() ?: statesBottom.first()
-                                    }
-                                    else -> {
-                                        // Low velocity, snap to closest state
-                                        closestState(animatableOffset.value)
-                                    }
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = {
+                                lastTime = System.currentTimeMillis()
+                                lastPosition = animatableOffset.value
+                            },
+                            onDrag = { change, dragAmount ->
+                                val dragAmountY = dragAmount.y.toDp().value
+                                val now = System.currentTimeMillis()
+                                val elapsed = now - lastTime
+                                if (elapsed > 0) {
+                                    val newPos = animatableOffset.value - dragAmountY
+                                    dragVelocity = (newPos - lastPosition) / (elapsed / 1000f)
+                                    lastPosition = newPos
+                                    lastTime = now
                                 }
-                                animatableOffset.animateTo(target)
-                                offsetY = target
-                            }
-                        }
-                    )
-                }
+                                val newOffset =
+                                    (animatableOffset.value - dragAmountY)
+                                        .coerceIn(
+                                            statesBottom.minOrNull() ?: 0f,
+                                            statesBottom.maxOrNull() ?: Float.MAX_VALUE,
+                                        )
+                                scope.launch {
+                                    animatableOffset.snapTo(newOffset)
+                                }
+                                offsetY = newOffset
+                                change.consume()
+                            },
+                            onDragEnd = {
+                                scope.launch {
+                                    val target =
+                                        when {
+                                            dragVelocity > velocityThreshold -> {
+                                                // High velocity upwards, snap to next upper state
+                                                statesBottom.filter { it >= animatableOffset.value }.minOrNull() ?: statesBottom.last()
+                                            }
+                                            dragVelocity < -velocityThreshold -> {
+                                                // High velocity downwards, snap to next lower state
+                                                statesBottom.filter { it <= animatableOffset.value }.maxOrNull() ?: statesBottom.first()
+                                            }
+                                            else -> {
+                                                // Low velocity, snap to closest state
+                                                closestState(animatableOffset.value)
+                                            }
+                                        }
+                                    animatableOffset.animateTo(target)
+                                    offsetY = target
+                                }
+                            },
+                        )
+                    },
         ) {
             Kiwi_Spacer(Spacing.large)
             Kiwi_Spacer(Spacing.large)
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = getResponsiveSizeHeight(Spacing.large + Spacing.large))
-                .pointerInput(Unit) { /* prevent inputs behind this */ }
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = getResponsiveSizeHeight(Spacing.large + Spacing.large))
+                    .pointerInput(Unit) { /* prevent inputs behind this */ },
         )
 
         val closestLargerIndex = statesBottom.indexOf(statesBottom.filter { it >= offsetY }.minOrNull())
@@ -156,8 +159,7 @@ fun Kiwi_DraggableBar(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_0(
-) {
+private fun Kiwi_DraggableBar_Preview_0() {
     Kiwi_DraggableBar_Preview(0)
 }
 
@@ -166,8 +168,7 @@ private fun Kiwi_DraggableBar_Preview_0(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_1(
-) {
+private fun Kiwi_DraggableBar_Preview_1() {
     Kiwi_DraggableBar_Preview(1)
 }
 
@@ -176,34 +177,34 @@ private fun Kiwi_DraggableBar_Preview_1(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_2(
-) {
+private fun Kiwi_DraggableBar_Preview_2() {
     Kiwi_DraggableBar_Preview(2)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun Kiwi_DraggableBar_Preview(
-    initialStateIndex: Int = 0,
-) {
+private fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
     KiwiTheme {
         Kiwi_DraggableBar(
             content = {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(getResponsiveSizeHeight(1600.dp)),
-                    contentAlignment = Alignment.TopCenter
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(getResponsiveSizeHeight(1600.dp)),
+                    contentAlignment = Alignment.TopCenter,
                 ) {
-                    Kiwi_H3(Kiwi_TextArguments(
-                        "Content",
-                        TextAlign.Center,
-                        MaterialTheme.colorScheme.secondary
-                    ))
+                    Kiwi_H3(
+                        Kiwi_TextArguments(
+                            "Content",
+                            TextAlign.Center,
+                            MaterialTheme.colorScheme.secondary,
+                        ),
+                    )
                 }
             },
             states = listOf(0, 100, 600),
-            initialStateIndex = initialStateIndex
+            initialStateIndex = initialStateIndex,
         )
     }
 }

@@ -8,7 +8,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 
 @Composable
-fun Kiwi_Image (
+fun Kiwi_Image(
     painter: Painter,
     alt: String,
     modifier: Modifier = Modifier,
@@ -18,12 +18,12 @@ fun Kiwi_Image (
         painter = painter,
         contentDescription = alt,
         modifier = modifier,
-        contentScale = contentScale
+        contentScale = contentScale,
     )
 }
 
 @Composable
-fun Kiwi_Image (
+fun Kiwi_Image(
     painterResourceId: Int,
     alt: String,
     modifier: Modifier = Modifier,
@@ -33,6 +33,6 @@ fun Kiwi_Image (
         painter = painterResource(id = painterResourceId),
         alt = alt,
         modifier = modifier,
-        contentScale = contentScale
+        contentScale = contentScale,
     )
 }

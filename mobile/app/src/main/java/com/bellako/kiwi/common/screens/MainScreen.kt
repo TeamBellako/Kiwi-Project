@@ -34,13 +34,13 @@ import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
-import com.bellako.kiwi.features.settings.screens.SettingsScreen
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
+import com.bellako.kiwi.features.settings.screens.SettingsScreen
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.screens.LogInScreen
+import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
-import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +63,7 @@ fun MainScreen(
     usersViewModel: UsersViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
-    metricsViewModel: MetricsViewModel = hiltViewModel()
+    metricsViewModel: MetricsViewModel = hiltViewModel(),
 ) {
     Kiwi_AudioHandler()
 
@@ -78,7 +78,7 @@ private fun AppScreen(
     usersViewModel: UsersViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
-    metricsViewModel: MetricsViewModel = hiltViewModel()
+    metricsViewModel: MetricsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
 
@@ -88,10 +88,10 @@ private fun AppScreen(
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val isLoginScreen =
         route == ScreenRoutes.LOGIN ||
-        route == ScreenRoutes.SIGNUP1_WELCOME ||
-        route == ScreenRoutes.SIGNUP2_FORM ||
-        route == ScreenRoutes.SIGNUP3_TEST ||
-        route == ScreenRoutes.SIGNUP4_APPS
+            route == ScreenRoutes.SIGNUP1_WELCOME ||
+            route == ScreenRoutes.SIGNUP2_FORM ||
+            route == ScreenRoutes.SIGNUP3_TEST ||
+            route == ScreenRoutes.SIGNUP4_APPS
     val isSettingsScreen = route == ScreenRoutes.SETTINGS
 
     Scaffold(
@@ -112,7 +112,7 @@ private fun AppScreen(
                         LogInScreen(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
-                            navController = navController
+                            navController = navController,
                         )
                     }
 
@@ -121,7 +121,7 @@ private fun AppScreen(
                         Kiwi_Music_SignUp()
                         SignUpScreen1_Welcome(
                             viewModel = usersViewModel,
-                            navController = navController
+                            navController = navController,
                         )
                     }
 
@@ -131,7 +131,7 @@ private fun AppScreen(
                         SignUpScreen2_Form(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
-                            navController = navController
+                            navController = navController,
                         )
                     }
 
@@ -141,7 +141,7 @@ private fun AppScreen(
                         SignUpScreen3_Test(
                             usersViewModel = usersViewModel,
                             personalityViewModel = personalityViewModel,
-                            navController = navController
+                            navController = navController,
                         )
                     }
 
@@ -150,7 +150,7 @@ private fun AppScreen(
                         Kiwi_Music_SignUp()
                         SignUpScreen4_Apps(
                             personalityViewModel = personalityViewModel,
-                            navController = navController
+                            navController = navController,
                         )
                     }
 
@@ -179,7 +179,7 @@ private fun AppScreen(
                                         popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                                     }
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -199,7 +199,7 @@ private fun AppScreen(
                     )
                 }
             }
-        }
+        },
     )
 }
 
@@ -220,17 +220,18 @@ fun Kiwi_LoggedInScreen(
 private fun Kiwi_AudioHandler() {
     val lifecycleOwner = remember { ProcessLifecycleOwner.get() }
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_START -> {
-                    AudioManager.onBackgroundResume()
+        val observer =
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_START -> {
+                        AudioManager.onBackgroundResume()
+                    }
+                    Lifecycle.Event.ON_STOP -> {
+                        AudioManager.onBackgroundEnter()
+                    }
+                    else -> {}
                 }
-                Lifecycle.Event.ON_STOP -> {
-                    AudioManager.onBackgroundEnter()
-                }
-                else -> {}
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
@@ -245,4 +246,3 @@ private fun Kiwi_BackHandler() {
         activity?.moveTaskToBack(true)
     }
 }
-

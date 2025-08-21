@@ -2,10 +2,10 @@ package com.bellako.kiwi.features.metrics.data
 
 import java.time.LocalDate
 
-data class Metrics (
+data class Metrics(
     val date: LocalDate,
     val maxGoodTimeSeconds: Int,
     val currentGoodTimeSeconds: Int,
     val maxBadTimeSeconds: Int,
-    val currentBadTimeSeconds: Int
+    val currentBadTimeSeconds: Int,
 )

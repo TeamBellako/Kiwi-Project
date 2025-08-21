@@ -11,31 +11,32 @@ import kotlin.random.Random
 object MetricsFactory {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
 
-    fun generateRandomValidMetricDTO(): MetricsDTO {
-        return MetricsDTO(
+    fun generateRandomValidMetricDTO(): MetricsDTO =
+        MetricsDTO(
             date = getRandomDate(),
             maxGoodTimeSeconds = getRandomTimeSeconds(5, 6),
             currentGoodTimeSeconds = getRandomTimeSeconds(1, 2),
             maxBadTimeSeconds = getRandomTimeSeconds(5, 6),
-            currentBadTimeSeconds = getRandomTimeSeconds(3, 4)
+            currentBadTimeSeconds = getRandomTimeSeconds(3, 4),
         )
-    }
 
-    fun generateRandomInvalidMetricDTO(): MetricsDTO {
-        return MetricsDTO(
+    fun generateRandomInvalidMetricDTO(): MetricsDTO =
+        MetricsDTO(
             date = getRandomDate(),
             maxGoodTimeSeconds = -getRandomTimeSeconds(5, 6),
             currentGoodTimeSeconds = -getRandomTimeSeconds(1, 2),
             maxBadTimeSeconds = -getRandomTimeSeconds(5, 6),
-            currentBadTimeSeconds = -getRandomTimeSeconds(3, 4)
+            currentBadTimeSeconds = -getRandomTimeSeconds(3, 4),
         )
-    }
 
-    fun generateRandomMetricsSet(size: Int, valid: Boolean): Set<MetricsDTO> {
-        return (1..size).map {
-            if (valid) generateRandomValidMetricDTO() else generateRandomInvalidMetricDTO()
-        }.toSet()
-    }
+    fun generateRandomMetricsSet(
+        size: Int,
+        valid: Boolean,
+    ): Set<MetricsDTO> =
+        (1..size)
+            .map {
+                if (valid) generateRandomValidMetricDTO() else generateRandomInvalidMetricDTO()
+            }.toSet()
 
     private fun getRandomDate(): String {
         val year = Random.nextInt(2025, 2027)
@@ -45,7 +46,8 @@ object MetricsFactory {
         return LocalDate.of(year, month, day).format(formatter)
     }
 
-    private fun getRandomTimeSeconds(fromHours: Int, untilHours: Int): Int {
-        return Random.nextInt(fromHours * 60 * 60, untilHours * 60 * 60)
-    }
+    private fun getRandomTimeSeconds(
+        fromHours: Int,
+        untilHours: Int,
+    ): Int = Random.nextInt(fromHours * 60 * 60, untilHours * 60 * 60)
 }
