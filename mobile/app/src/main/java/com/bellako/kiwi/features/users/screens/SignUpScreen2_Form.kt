@@ -42,6 +42,7 @@ import com.bellako.kiwi.common.screens.components.KiwiH2
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.KiwiLabel2
 import com.bellako.kiwi.common.screens.components.KiwiP2
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 
 
 @Composable
@@ -261,7 +262,7 @@ private fun SignUp(
 fun SignUpScreen2_FormPreview() {
     KiwiTheme {
         SignUpScreen2_Form(
-            UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
+            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
             personalityViewModel = PersonalityFakeViewModel(PersonalityState(
                 validPersonalityDTO().realName,
                 validPersonalityDTO().knightName,

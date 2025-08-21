@@ -23,6 +23,7 @@ import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.screens.LogInScreen
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import org.junit.Before
 import org.junit.Rule
@@ -45,7 +46,7 @@ class LoginScreenTest {
     fun setUp() {
         AudioManager.setEnabled(false)
 
-        usersState = UsersState("finn@thehuman.com", "Math3matical!")
+        usersState = UsersState(validUsersDTO().email, validUsersDTO().password)
         usersFakeViewModel = UsersFakeViewModel(usersState)
 
         personalityState =

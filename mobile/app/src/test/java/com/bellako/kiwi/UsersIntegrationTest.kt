@@ -8,6 +8,8 @@ import com.bellako.kiwi.features.users.model.IUsersAPI
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.model.UsersRepository
 import com.bellako.kiwi.features.users.model.UsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.invalidUsersDTO
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -44,8 +46,8 @@ class UsersIntegrationTest {
             whenever(api.signup(any())).thenReturn(Response.success(Unit))
             whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
 
-            viewModel.onEmailChanged("finn@thehuman.com")
-            viewModel.onPasswordChanged("Math3matical!")
+            viewModel.onEmailChanged(validUsersDTO().email)
+            viewModel.onPasswordChanged(validUsersDTO().password)
             val result: Result<Unit> = viewModel.signup(context)
 
             assertTrue(result.isSuccess)
@@ -56,8 +58,8 @@ class UsersIntegrationTest {
         runTest {
             doThrow(createFakeHttpException(409)).whenever(api).signup(any())
 
-            viewModel.onEmailChanged("finn@thehuman.com")
-            viewModel.onPasswordChanged("Math3matical!")
+            viewModel.onEmailChanged(validUsersDTO().email)
+            viewModel.onPasswordChanged(validUsersDTO().password)
             val result: Result<Unit> = viewModel.signup(context)
 
             assertTrue(result.isFailure)
@@ -68,8 +70,8 @@ class UsersIntegrationTest {
         runTest {
             whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
 
-            viewModel.onEmailChanged("finn@thehuman.com")
-            viewModel.onPasswordChanged("Math3matical!")
+            viewModel.onEmailChanged(validUsersDTO().email)
+            viewModel.onPasswordChanged(validUsersDTO().password)
             val result: Result<Unit> = viewModel.login(context)
 
             assertTrue(result.isSuccess)
@@ -81,8 +83,8 @@ class UsersIntegrationTest {
         runTest {
             whenever(api.login(any())).thenReturn(emptyMap())
 
-            viewModel.onEmailChanged("finn@thehuman.com")
-            viewModel.onPasswordChanged("Math3matical!")
+            viewModel.onEmailChanged(validUsersDTO().email)
+            viewModel.onPasswordChanged(validUsersDTO().password)
             val result: Result<Unit> = viewModel.login(context)
 
             assertTrue(result.isFailure)
@@ -94,8 +96,8 @@ class UsersIntegrationTest {
         runTest {
             doThrow(createFakeHttpException(401)).whenever(api).login(any())
 
-            viewModel.onEmailChanged("finn@thehuman.com")
-            viewModel.onPasswordChanged("Math3matical!1")
+            viewModel.onEmailChanged(validUsersDTO().email)
+            viewModel.onPasswordChanged(invalidUsersDTO().password)
             val result: Result<Unit> = viewModel.login(context)
 
             assertTrue(result.isFailure)

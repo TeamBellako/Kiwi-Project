@@ -21,6 +21,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import org.junit.Before
 import org.junit.Rule
@@ -42,7 +43,7 @@ class SignUpScreenTest {
     fun setUp() {
         AudioManager.setEnabled(false)
 
-        usersState = UsersState("finn@thehuman.com", "Math3matical!")
+        usersState = UsersState(validUsersDTO().email, validUsersDTO().password)
         personalityState =
             PersonalityState(
                 validPersonalityDTO().realName,
@@ -120,7 +121,6 @@ class SignUpScreenTest {
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).assertDoesNotExist()
     }
 
-    /*
     @Test
     fun screen4_invalidUpdateApps() {
         personalityFakeViewModel.fakeError = true
@@ -140,5 +140,4 @@ class SignUpScreenTest {
         Thread.sleep(500)
         rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()
     }
-     */
 }

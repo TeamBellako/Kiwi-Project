@@ -4,60 +4,59 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.ui.KiwiTheme
-import com.bellako.kiwi.ui.Spacing
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.withLink
-import com.bellako.kiwi.features.users.model.IUsersViewModel
-import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
-import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP2
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.KiwiH2
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
+import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-
 
 @Composable
 fun SignUpScreen1_Welcome(
     viewModel: IUsersViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
-    SignUpScreen() {
+    SignUpScreen {
         Welcome(
             viewModel,
-            navController
+            navController,
         )
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = getResponsiveSizeHeight(Spacing.medium)),
-            contentAlignment = Alignment.BottomCenter
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(bottom = getResponsiveSizeHeight(Spacing.medium)),
+            contentAlignment = Alignment.BottomCenter,
         ) {
-
-            GoToLogIn() {
+            GoToLogIn {
                 navController.navigate(ScreenRoutes.LOGIN)
             }
-
         }
     }
 }
@@ -65,22 +64,25 @@ fun SignUpScreen1_Welcome(
 @Composable
 private fun Welcome(
     viewModel: IUsersViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .testTag(CommonTestTags.USERS_SCREEN),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .testTag(CommonTestTags.USERS_SCREEN),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        KiwiH2(KiwiTextArguments(
-            "Your Legend is About\nTo Be Forged...",
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.secondary,
-            bold = true
-        ))
+        KiwiH2(
+            KiwiTextArguments(
+                "Your Legend is About\nTo Be Forged...",
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.secondary,
+                bold = true,
+            ),
+        )
 
         Kiwi_Spacer(Spacing.xLarge)
 
@@ -88,7 +90,7 @@ private fun Welcome(
             KiwiTextArguments(
                 "LET'S DO IT",
                 color = MaterialTheme.colorScheme.secondary,
-                bold = true
+                bold = true,
             ),
             color = MaterialTheme.colorScheme.primary,
             onClick = {
@@ -104,39 +106,45 @@ private fun Welcome(
 }
 
 @Composable
-private fun GoToLogIn(
-    onSignUp: () -> Unit
-) {
-    val annotatedString = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(
-                color = MaterialTheme.colorScheme.secondary,
-            )
-        ) {
-            append("Not Your First Time?\nContinue Your Adventure By\n")
-        }
-
-        withLink(link = LinkAnnotation.Clickable(
-            tag = "HERE",
-            linkInteractionListener = {
-                onSignUp()
-            },
-        )) {
+private fun GoToLogIn(onSignUp: () -> Unit) {
+    val annotatedString =
+        buildAnnotatedString {
             withStyle(
-                style = SpanStyle(
-                    color = MaterialTheme.colorScheme.inversePrimary,
-                    textDecoration = TextDecoration.Underline
-                )
+                style =
+                    SpanStyle(
+                        color = MaterialTheme.colorScheme.secondary,
+                    ),
             ) {
-                append("Logging In")
+                append("Not Your First Time?\nContinue Your Adventure By\n")
+            }
+
+            withLink(
+                link =
+                    LinkAnnotation.Clickable(
+                        tag = "HERE",
+                        linkInteractionListener = {
+                            onSignUp()
+                        },
+                    ),
+            ) {
+                withStyle(
+                    style =
+                        SpanStyle(
+                            color = MaterialTheme.colorScheme.inversePrimary,
+                            textDecoration = TextDecoration.Underline,
+                        ),
+                ) {
+                    append("Logging In")
+                }
             }
         }
-    }
 
-    KiwiAnnotatedStringP2(KiwiAnnotatedStringArguments(
-        annotatedString,
-        TextAlign.Center,
-    ))
+    KiwiAnnotatedStringP2(
+        KiwiAnnotatedStringArguments(
+            annotatedString,
+            TextAlign.Center,
+        ),
+    )
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -149,8 +157,8 @@ private fun GoToLogIn(
 fun SignUpScreen1_WelcomePreview() {
     KiwiTheme {
         SignUpScreen1_Welcome(
-            UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            navController = rememberNavController()
+            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
+            navController = rememberNavController(),
         )
     }
 }
