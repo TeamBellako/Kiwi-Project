@@ -10,7 +10,11 @@ object Logger {
     // Enum for log levels
     enum class LogLevel { DEBUG, INFO, WARN, ERROR }
 
-    private fun log(level: LogLevel, message: String, throwable: Throwable? = null) {
+    private fun log(
+        level: LogLevel,
+        message: String,
+        throwable: Throwable? = null,
+    ) {
         if (isProd && level == LogLevel.DEBUG) return
 
         val timestamp = System.currentTimeMillis()
@@ -23,8 +27,23 @@ object Logger {
         }
     }
 
-    fun debug(message: String, throwable: Throwable? = null) = log(LogLevel.DEBUG, message, throwable)
-    fun info(message: String, throwable: Throwable? = null) = log(LogLevel.INFO, message, throwable)
-    fun warn(message: String, throwable: Throwable? = null) = log(LogLevel.WARN, message, throwable)
-    fun error(message: String, throwable: Throwable? = null) = log(LogLevel.ERROR, message, throwable)
+    fun debug(
+        message: String,
+        throwable: Throwable? = null,
+    ) = log(LogLevel.DEBUG, message, throwable)
+
+    fun info(
+        message: String,
+        throwable: Throwable? = null,
+    ) = log(LogLevel.INFO, message, throwable)
+
+    fun warn(
+        message: String,
+        throwable: Throwable? = null,
+    ) = log(LogLevel.WARN, message, throwable)
+
+    fun error(
+        message: String,
+        throwable: Throwable? = null,
+    ) = log(LogLevel.ERROR, message, throwable)
 }

@@ -3,24 +3,21 @@ package com.bellako.kiwi.features.users.tests
 import com.bellako.kiwi.features.users.data.UsersDTO
 
 object UsersTestFactory {
-    fun validUsersDTO() : UsersDTO {
-        return UsersDTO(
+    fun validUsersDTO(): UsersDTO =
+        UsersDTO(
             email = "finn@thehuman.com",
-            password = "Math3matical!"
+            password = "Math3matical!",
         )
-    }
 
-    fun incorrectPasswordUsersDTO() : UsersDTO {
-        return UsersDTO(
+    fun incorrectPasswordUsersDTO(): UsersDTO =
+        UsersDTO(
             email = "finn@thehuman.com",
-            password = "Math3maticalawdawdwad!"
+            password = "Math3maticalawdawdwad!",
         )
-    }
 
-    fun invalidUsersDTO() : UsersDTO {
-        return UsersDTO(
+    fun invalidUsersDTO(): UsersDTO =
+        UsersDTO(
             email = "bmolovesfootball.com",
-            password = "kk"
+            password = "kk",
         )
-    }
 }

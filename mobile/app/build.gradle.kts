@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
-
 val mobileApiUrl: String = System.getenv("MOBILE_API_URL") ?: "http://10.0.2.2:8080"
 val companyEmail: String = System.getenv("MOBILE_COMPANY_EMAIL") ?: "simon@petrikov.com"
 
@@ -13,6 +11,27 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+
+    id("org.jlleitschuh.gradle.ktlint")
+    id("io.gitlab.arturbosch.detekt")
+}
+
+ktlint {
+    version.set("1.7.1")
+    android.set(true)
+    outputColorName.set("RED")
+}
+
+detekt {
+    toolVersion = "1.23.8"
+    buildUponDefaultConfig = true
+    allRules = false
+    autoCorrect = true
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+
+    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+        jvmTarget = "22" // detekt only supports up to 22
+    }
 }
 
 android {
@@ -48,12 +67,12 @@ android {
             buildConfigField(
                 "boolean",
                 "LOGGING_ENABLED",
-                "true"
+                "true",
             )
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
         release {
@@ -62,30 +81,31 @@ android {
             buildConfigField(
                 "boolean",
                 "LOGGING_ENABLED",
-                "false"
+                "false",
             )
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
-           isDebuggable = false
-           isJniDebuggable = false
+            isDebuggable = false
+            isJniDebuggable = false
+            isShrinkResources = true
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
     }
 }
 
-configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations"))}
+configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations")) }
 
 tasks.withType<Test> {
     testLogging {
@@ -95,8 +115,9 @@ tasks.withType<Test> {
     }
 }
 
-
 dependencies {
+    compileOnly(libs.annotations)
+
     implementation(platform(libs.firebase.bom))
     implementation(platform(libs.firebase.bom.v3400))
     implementation(libs.firebase.analytics)

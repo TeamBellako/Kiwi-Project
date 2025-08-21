@@ -5,9 +5,11 @@ import retrofit2.HttpException
 import retrofit2.Response
 import java.time.LocalDate
 
-class MetricsRepository(private val api: IMetricsAPI) {
-    suspend fun createMetrics(dto: MetricsDTO): Result<Unit> {
-        return try {
+class MetricsRepository(
+    private val api: IMetricsAPI,
+) {
+    suspend fun createMetrics(dto: MetricsDTO): Result<Unit> =
+        try {
             val response = api.createMetrics(dto)
 
             if (response.isSuccessful) {
@@ -15,13 +17,12 @@ class MetricsRepository(private val api: IMetricsAPI) {
             } else {
                 Result.failure(HttpException(response))
             }
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             Result.failure(e)
         }
-    }
 
-    suspend fun updateMetrics(dto: MetricsDTO): Result<Unit> {
-        return try {
+    suspend fun updateMetrics(dto: MetricsDTO): Result<Unit> =
+        try {
             val response = api.updateMetrics(dto)
 
             if (response.isSuccessful) {
@@ -29,21 +30,19 @@ class MetricsRepository(private val api: IMetricsAPI) {
             } else {
                 Result.failure(HttpException(response))
             }
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             Result.failure(e)
         }
-    }
 
-    suspend fun getMetricsByDate(date: LocalDate) : Result<MetricsDTO?> {
-        return try {
+    suspend fun getMetricsByDate(date: LocalDate): Result<MetricsDTO?> =
+        try {
             val response: Response<MetricsDTO> = api.getMetricsByDate(date.toString())
             if (response.isSuccessful) {
                 Result.success(response.body())
             } else {
                 Result.failure(HttpException(response))
             }
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             Result.failure(e)
         }
-    }
 }

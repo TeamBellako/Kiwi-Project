@@ -9,22 +9,28 @@ import retrofit2.HttpException
 import java.io.IOException
 
 open class BaseFakeViewModel : ViewModel() {
-
+    @Suppress("ktlint:standard:backing-property-naming")
     protected val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
+    @Suppress("ktlint:standard:backing-property-naming")
     protected val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     fun handleError(error: Throwable) {
-        _uiState.value = when (error) {
-            is HttpException -> {
-                if (error.code() >= 500) UIState.GeneralError
-                else UIState.Error("Server error: ${error.message()}")
+        _uiState.value =
+            when (error) {
+                is HttpException -> {
+                    @Suppress("MagicNumber")
+                    if (error.code() >= 500) {
+                        UIState.GeneralError
+                    } else {
+                        UIState.Error("Server error: ${error.message()}")
+                    }
+                }
+                is IOException -> UIState.GeneralError
+                else -> UIState.GeneralError
             }
-            is IOException -> UIState.GeneralError
-            else -> UIState.GeneralError
-        }
     }
 
     fun setLoading(isLoading: Boolean) {
@@ -36,8 +42,11 @@ open class BaseFakeViewModel : ViewModel() {
         _uiState.value = UIState.Success(Unit)
     }
 
-    fun <T> handleResult(result: Result<T>, successAction: () -> Unit): Result<Unit> {
-        return result.fold(
+    fun <T> handleResult(
+        result: Result<T>,
+        successAction: () -> Unit,
+    ): Result<Unit> =
+        result.fold(
             onSuccess = {
                 successAction()
                 Result.success(Unit)
@@ -45,16 +54,18 @@ open class BaseFakeViewModel : ViewModel() {
             onFailure = { throwable ->
                 handleError(throwable)
                 Result.failure(throwable)
-            }
+            },
         )
-    }
 
     fun resetUiState() {
         _uiState.value = UIState.Idle
     }
 
-    suspend fun <T> handleResultSuspend(result: Result<T>, successAction: suspend () -> Unit): Result<Unit> {
-        return result.fold(
+    suspend fun <T> handleResultSuspend(
+        result: Result<T>,
+        successAction: suspend () -> Unit,
+    ): Result<Unit> =
+        result.fold(
             onSuccess = {
                 successAction()
                 Result.success(Unit)
@@ -62,18 +73,20 @@ open class BaseFakeViewModel : ViewModel() {
             onFailure = { throwable ->
                 handleError(throwable)
                 Result.failure(throwable)
-            }
+            },
         )
-    }
 
-    open fun mapExceptionToUIState(e: Throwable): UIState<Unit> {
-        return when (e) {
+    open fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
+        when (e) {
             is HttpException -> {
-                if (e.code() >= 500) UIState.GeneralError
-                else UIState.Error("Server error: ${e.message()}")
+                @Suppress("MagicNumber")
+                if (e.code() >= 500) {
+                    UIState.GeneralError
+                } else {
+                    UIState.Error("Server error: ${e.message()}")
+                }
             }
             is IOException -> UIState.GeneralError
             else -> UIState.GeneralError
         }
-    }
 }

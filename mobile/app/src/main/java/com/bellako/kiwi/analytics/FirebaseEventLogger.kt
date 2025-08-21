@@ -5,7 +5,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
 
 object FirebaseEventLogger {
-
     private val analytics = Firebase.analytics
 
     /**
@@ -14,7 +13,10 @@ object FirebaseEventLogger {
      * @param eventName Name of the event (use constants!)
      * @param params Optional map of parameters to include with the event
      */
-    fun logEvent(eventName: String, params: Map<String, Any>? = null) {
+    fun logEvent(
+        eventName: String,
+        params: Map<String, Any>? = null,
+    ) {
         val bundle = Bundle()
 
         params?.forEach { (key, value) ->

@@ -16,14 +16,15 @@ import javax.inject.Singleton
 object MetricsModule {
     @Provides
     @Singleton
-    fun provideMetricsApi(
-        jwtAuthInterceptor: JwtAuthInterceptor
-    ): IMetricsAPI {
-        val client = OkHttpClient.Builder()
-            .addInterceptor(jwtAuthInterceptor)
-            .build()
+    fun provideMetricsApi(jwtAuthInterceptor: JwtAuthInterceptor): IMetricsAPI {
+        val client =
+            OkHttpClient
+                .Builder()
+                .addInterceptor(jwtAuthInterceptor)
+                .build()
 
-        return Retrofit.Builder()
+        return Retrofit
+            .Builder()
             .baseUrl(BuildConfig.MOBILE_API_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
@@ -31,12 +32,7 @@ object MetricsModule {
             .create(IMetricsAPI::class.java)
     }
 
-
     @Provides
     @Singleton
-    fun provideMetricsRepository(
-        api: IMetricsAPI,
-    ): MetricsRepository {
-        return MetricsRepository(api)
-    }
+    fun provideMetricsRepository(api: IMetricsAPI): MetricsRepository = MetricsRepository(api)
 }

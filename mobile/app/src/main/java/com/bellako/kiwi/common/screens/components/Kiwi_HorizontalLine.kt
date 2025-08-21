@@ -21,10 +21,11 @@ fun Kiwi_HorizontalLine(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .width(getResponsiveSizeHeight(width))
-            .height(getResponsiveSizeHeight(height))
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
-            .background(color)
+        modifier =
+            modifier
+                .width(getResponsiveSizeHeight(width))
+                .height(getResponsiveSizeHeight(height))
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
+                .background(color),
     )
 }

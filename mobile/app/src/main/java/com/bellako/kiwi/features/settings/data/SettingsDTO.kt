@@ -5,23 +5,21 @@ import com.bellako.kiwi.features.users.data.Email
 data class SettingsDTO(
     val email: String,
     val soundVolume: Float,
-    val musicVolume: Float
+    val musicVolume: Float,
 ) {
-    fun toState(): SettingsState {
-        return SettingsState(
+    fun toState(): SettingsState =
+        SettingsState(
             email = email,
             soundVolume = soundVolume,
-            musicVolume = musicVolume
+            musicVolume = musicVolume,
         )
-    }
 
-    fun toDomainObject(): Result<Settings> {
-        return Email.of(email).map { validEmail ->
+    fun toDomainObject(): Result<Settings> =
+        Email.of(email).map { validEmail ->
             Settings(
                 email = validEmail,
                 soundVolume = soundVolume,
-                musicVolume = musicVolume
+                musicVolume = musicVolume,
             )
         }
-    }
 }

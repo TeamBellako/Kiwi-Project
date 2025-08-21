@@ -15,11 +15,10 @@ import androidx.compose.ui.util.fastForEach
 import kotlin.math.PI
 import kotlin.math.abs
 
-
 suspend fun PointerInputScope.detectTransformGesturesAndEnd(
     panZoomLock: Boolean = false,
     onGesture: (centroid: Offset, pan: Offset, zoom: Float, rotation: Float) -> Unit,
-    onGestureEnd: () -> Unit
+    onGestureEnd: () -> Unit,
 ) {
     awaitEachGesture {
         var rotation = 0f
@@ -45,6 +44,8 @@ suspend fun PointerInputScope.detectTransformGesturesAndEnd(
 
                     val centroidSize = event.calculateCentroidSize(useCurrent = false)
                     val zoomMotion = abs(1 - zoom) * centroidSize
+
+                    @Suppress("MagicNumber")
                     val rotationMotion = abs(rotation * PI.toFloat() * centroidSize / 180f)
                     val panMotion = pan.getDistance()
 

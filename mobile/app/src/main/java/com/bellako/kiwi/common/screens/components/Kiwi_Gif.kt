@@ -10,7 +10,7 @@ import coil.decode.GifDecoder
 import coil.request.ImageRequest
 
 @Composable
-fun Kiwi_Gif (
+fun Kiwi_Gif(
     painterResourceId: Int,
     alt: String,
     modifier: Modifier = Modifier,
@@ -23,14 +23,16 @@ fun Kiwi_Gif (
             painterResourceId = painterResourceId,
             alt = alt,
             modifier = modifier,
-            contentScale = contentScale
+            contentScale = contentScale,
         )
     } else {
         // Actual gif in runtime
-        val imageRequest = ImageRequest.Builder(LocalContext.current)
-            .data(painterResourceId)
-            .decoderFactory(GifDecoder.Factory())
-            .build()
+        val imageRequest =
+            ImageRequest
+                .Builder(LocalContext.current)
+                .data(painterResourceId)
+                .decoderFactory(GifDecoder.Factory())
+                .build()
 
         AsyncImage(
             model = imageRequest,

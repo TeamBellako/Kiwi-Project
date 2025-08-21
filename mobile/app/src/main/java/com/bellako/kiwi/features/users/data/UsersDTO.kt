@@ -1,15 +1,14 @@
 package com.bellako.kiwi.features.users.data
 
-data class UsersDTO (
-    val email : String,
-    val password : String
+data class UsersDTO(
+    val email: String,
+    val password: String,
 ) {
-    fun toState() : UsersState {
-        return UsersState(
+    fun toState(): UsersState =
+        UsersState(
             email = email,
-            password = password
+            password = password,
         )
-    }
 
     fun toDomainObject(): Result<Users> {
         val emailResult = Email.of(email)
@@ -21,10 +20,10 @@ data class UsersDTO (
                     onSuccess = { validPassword ->
                         Result.success(Users(validEmail, validPassword))
                     },
-                    onFailure = { err -> Result.failure(err) }
+                    onFailure = { err -> Result.failure(err) },
                 )
             },
-            onFailure = { err -> Result.failure(err) }
+            onFailure = { err -> Result.failure(err) },
         )
     }
 }

@@ -15,17 +15,17 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object PersonalityModule {
-
     @Provides
     @Singleton
-    fun providePersonalityApi(
-        jwtAuthInterceptor: JwtAuthInterceptor
-    ): IPersonalityAPI {
-        val client = OkHttpClient.Builder()
-            .addInterceptor(jwtAuthInterceptor)
-            .build()
+    fun providePersonalityApi(jwtAuthInterceptor: JwtAuthInterceptor): IPersonalityAPI {
+        val client =
+            OkHttpClient
+                .Builder()
+                .addInterceptor(jwtAuthInterceptor)
+                .build()
 
-        return Retrofit.Builder()
+        return Retrofit
+            .Builder()
             .baseUrl(BuildConfig.MOBILE_API_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
@@ -37,8 +37,6 @@ object PersonalityModule {
     @Singleton
     fun providePersonalityRepository(
         api: IPersonalityAPI,
-        healthApiService: HealthApiService
-    ): PersonalityRepository {
-        return PersonalityRepository(api, healthApiService)
-    }
+        healthApiService: HealthApiService,
+    ): PersonalityRepository = PersonalityRepository(api)
 }

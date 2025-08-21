@@ -2,29 +2,40 @@ package com.bellako.kiwi
 
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.model.HealthApiService
+import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.settings.model.ISettingsAPI
 import com.bellako.kiwi.features.settings.model.SettingsRepository
+import com.bellako.kiwi.features.settings.model.SettingsViewModel
 import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.updateSettings
 import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.validSettings
-import com.bellako.kiwi.features.settings.model.SettingsViewModel
-import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.*
-import org.junit.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert
+import org.junit.Before
 import org.junit.runner.RunWith
-import org.mockito.Mockito.*
+import org.mockito.Mockito.doThrow
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import retrofit2.Response
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsIntegrationTest {
-
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var api: ISettingsAPI
@@ -49,103 +60,111 @@ class SettingsIntegrationTest {
     }
 
     @Test
-    fun `getSettings returns success when API responds`() = runTest {
-        `when`(api.getSettings()).thenReturn(validSettings())
+    fun `getSettings returns success when API responds`() =
+        runTest {
+            `when`(api.getSettings()).thenReturn(validSettings())
 
-        val result = repository.getSettings()
+            val result = repository.getSettings()
 
-        Assert.assertTrue(result.isSuccess)
-        Assert.assertEquals(validSettings(), result.getOrNull())
-    }
-
-    @Test
-    fun `getSettings returns failure when API throws exception`() = runTest {
-        `when`(api.getSettings()).thenThrow(createFakeHttpException(500))
-
-        val result = repository.getSettings()
-
-        Assert.assertTrue(result.isFailure)
-        Assert.assertNotNull(result.exceptionOrNull())
-    }
+            Assert.assertTrue(result.isSuccess)
+            Assert.assertEquals(validSettings(), result.getOrNull())
+        }
 
     @Test
-    fun `updateSettings returns success when API completes`() = runTest {
-        `when`(api.updateSettings(validSettings())).thenReturn(Unit)
+    fun `getSettings returns failure when API throws exception`() =
+        runTest {
+            `when`(api.getSettings()).thenThrow(createFakeHttpException(500))
 
-        val result = repository.updateSettings(validSettings())
+            val result = repository.getSettings()
 
-        Assert.assertTrue(result.isSuccess)
-    }
-
-    @Test
-    fun `updateSettings returns failure when API throws exception`() = runTest {
-        doThrow(createFakeHttpException(500)).`when`(api).updateSettings(validSettings())
-
-        val result = repository.updateSettings(validSettings())
-
-        Assert.assertTrue(result.isFailure)
-        Assert.assertNotNull(result.exceptionOrNull())
-    }
+            Assert.assertTrue(result.isFailure)
+            Assert.assertNotNull(result.exceptionOrNull())
+        }
 
     @Test
-    fun `loadSettings sets Settings when getSettings is successful`() = runTest {
-        whenever(api.getSettings()).thenReturn(validSettings())
+    fun `updateSettings returns success when API completes`() =
+        runTest {
+            `when`(api.updateSettings(validSettings())).thenReturn(Unit)
 
-        viewModel.loadSettings()
-        advanceUntilIdle()
+            val result = repository.updateSettings(validSettings())
 
-        val expectedState = validSettings().toState()
-
-        Assert.assertEquals(expectedState, viewModel.state.first())
-    }
+            Assert.assertTrue(result.isSuccess)
+        }
 
     @Test
-    fun `autoSave triggers updateSettings when values change`() = runTest {
-        whenever(healthApi.ping()).thenReturn(Response.success(Unit))
-        whenever(api.getSettings()).thenReturn(validSettings())
-        whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
+    fun `updateSettings returns failure when API throws exception`() =
+        runTest {
+            doThrow(createFakeHttpException(500)).`when`(api).updateSettings(validSettings())
 
-        viewModel.loadSettings()
-        advanceUntilIdle()
+            val result = repository.updateSettings(validSettings())
 
-        val newState = updateSettings().toState()
-        viewModel.updateSettings(newState)
-        advanceUntilIdle()
-
-        verify(api, times(1)).updateSettings(anyOrNull())
-    }
+            Assert.assertTrue(result.isFailure)
+            Assert.assertNotNull(result.exceptionOrNull())
+        }
 
     @Test
-    fun `autoSave does not trigger updateSettings for same state`() = runTest {
-        whenever(api.getSettings()).thenReturn(validSettings())
-        whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
+    fun `loadSettings sets Settings when getSettings is successful`() =
+        runTest {
+            whenever(api.getSettings()).thenReturn(validSettings())
 
-        viewModel.loadSettings()
-        advanceUntilIdle()
+            viewModel.loadSettings()
+            advanceUntilIdle()
 
-        val sameState = validSettings().toState()
-        viewModel.updateSettings(sameState)
-        advanceUntilIdle()
+            val expectedState = validSettings().toState()
 
-        // We expect this to be called once because the initial load syncs its content with the server
-        verify(api, times(1)).updateSettings(anyOrNull())
-    }
+            Assert.assertEquals(expectedState, viewModel.state.first())
+        }
 
     @Test
-    fun `autoSave triggers updateSettings only once for rapid changes`() = runTest {
-        whenever(api.getSettings()).thenReturn(validSettings())
-        whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
+    fun `autoSave triggers updateSettings when values change`() =
+        runTest {
+            whenever(healthApi.ping()).thenReturn(Response.success(Unit))
+            whenever(api.getSettings()).thenReturn(validSettings())
+            whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
 
-        viewModel.loadSettings()
-        advanceUntilIdle()
+            viewModel.loadSettings()
+            advanceUntilIdle()
 
-        viewModel.updateSettings(validSettings().toState())
-        advanceTimeBy(100)
-        viewModel.updateSettings(updateSettings().toState())
-        advanceTimeBy(100)
-        viewModel.updateSettings(validSettings().toState())
-        advanceUntilIdle()
+            val newState = updateSettings().toState()
+            viewModel.updateSettings(newState)
+            advanceUntilIdle()
 
-        verify(api, times(1)).updateSettings(anyOrNull())
-    }
+            verify(api, times(1)).updateSettings(anyOrNull())
+        }
+
+    @Test
+    fun `autoSave does not trigger updateSettings for same state`() =
+        runTest {
+            whenever(api.getSettings()).thenReturn(validSettings())
+            whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
+
+            viewModel.loadSettings()
+            advanceUntilIdle()
+
+            val sameState = validSettings().toState()
+            viewModel.updateSettings(sameState)
+            advanceUntilIdle()
+
+            // We expect this to be called once because the initial load syncs its content with the server
+            verify(api, times(1)).updateSettings(anyOrNull())
+        }
+
+    @Test
+    fun `autoSave triggers updateSettings only once for rapid changes`() =
+        runTest {
+            whenever(api.getSettings()).thenReturn(validSettings())
+            whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
+
+            viewModel.loadSettings()
+            advanceUntilIdle()
+
+            viewModel.updateSettings(validSettings().toState())
+            advanceTimeBy(100)
+            viewModel.updateSettings(updateSettings().toState())
+            advanceTimeBy(100)
+            viewModel.updateSettings(validSettings().toState())
+            advanceUntilIdle()
+
+            verify(api, times(1)).updateSettings(anyOrNull())
+        }
 }
