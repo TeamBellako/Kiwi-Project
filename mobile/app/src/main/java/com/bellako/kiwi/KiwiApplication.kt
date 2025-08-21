@@ -1,7 +1,6 @@
 package com.bellako.kiwi
 
 import android.app.Application
-import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.google.firebase.Firebase

@@ -112,6 +112,6 @@ private fun ErrorModalLayout(
 @Composable
 fun ErrorModalPreview() {
     KiwiTheme {
-        ErrorModal() {}
+        ErrorModal {}
     }
 }

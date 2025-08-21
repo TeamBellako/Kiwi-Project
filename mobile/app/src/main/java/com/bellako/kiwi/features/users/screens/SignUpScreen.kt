@@ -55,6 +55,6 @@ fun SignUpScreen(
 @Composable
 fun SignUpScreenPreview() {
     KiwiTheme {
-        SignUpScreen() {}
+        SignUpScreen {}
     }
 }

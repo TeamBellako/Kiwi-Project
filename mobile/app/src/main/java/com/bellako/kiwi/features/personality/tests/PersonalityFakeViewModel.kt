@@ -60,7 +60,7 @@ class PersonalityFakeViewModel(
 
     override suspend fun updateApps(): Result<Unit> = getTestResult()
 
-    suspend fun getTestResult(): Result<Unit> =
+    fun getTestResult(): Result<Unit> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)

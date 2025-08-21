@@ -29,24 +29,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.features.map.model.MapViewModel
-import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
-import com.bellako.kiwi.features.metrics.data.MetricsState
-import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
+import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.map.model.MapViewModel
+import com.bellako.kiwi.features.metrics.data.MetricsState
+import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
-import kotlinx.coroutines.flow.MutableStateFlow
-
 
 /**
  * @param minZoom how small (zoom out) the map can be, considering 1 the full map on screen
@@ -67,7 +65,7 @@ fun MapScreen(
     dragLimitFactor: Float = 1f,
     mapResourceId: Int = R.drawable.ph_home_map,
     title: String = "WORLD MAP",
-    viewModel: MapViewModel? = null
+    viewModel: MapViewModel? = null,
 ) {
     val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
     val density = LocalDensity.current
@@ -82,27 +80,30 @@ fun MapScreen(
         mapWidthPx = imageBitmap.width.toFloat(),
         mapHeightPx = imageBitmap.height.toFloat(),
         viewportWidthPx = with(density) { getScreenWidth().dp.toPx() },
-        viewportHeightPx = with(density) { getScreenHeight(withoutInsetTop = true, withoutInsetBottom = true).dp.toPx() }
+        viewportHeightPx = with(density) { getScreenHeight(withoutInsetTop = true, withoutInsetBottom = true).dp.toPx() },
     )
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .testTag(CommonTestTags.HOME_SCREEN),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .testTag(CommonTestTags.HOME_SCREEN),
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        KiwiH2(KiwiTextArguments(
-            title,
-            color = MaterialTheme.colorScheme.inversePrimary,
-            bold = true
-        ))
+        KiwiH2(
+            KiwiTextArguments(
+                title,
+                color = MaterialTheme.colorScheme.inversePrimary,
+                bold = true,
+            ),
+        )
 
         InteractiveMap(
             mapResourceId = mapResourceId,
             viewModel = mapViewModel,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }
@@ -111,37 +112,39 @@ fun MapScreen(
 private fun InteractiveMap(
     mapResourceId: Int,
     viewModel: MapViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val mapState by viewModel.state.collectAsState()
 
     Box(
-        modifier = modifier
-            .clipToBounds()
-            .pointerInput(Unit) {
-                detectTransformGesturesAndEnd(
-                    onGesture = { centroid, pan, zoom, _ ->
-                        viewModel.updateScale(zoom, centroid)
-                        viewModel.updateOffset(pan)
-                    },
-                    onGestureEnd = {
-                        viewModel.startFling()
-                    }
-                )
-            },
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .clipToBounds()
+                .pointerInput(Unit) {
+                    detectTransformGesturesAndEnd(
+                        onGesture = { centroid, pan, zoom, _ ->
+                            viewModel.updateScale(zoom, centroid)
+                            viewModel.updateOffset(pan)
+                        },
+                        onGestureEnd = {
+                            viewModel.startFling()
+                        },
+                    )
+                },
+        contentAlignment = Alignment.Center,
     ) {
         Kiwi_Image(
             painterResourceId = mapResourceId,
             alt = "Interactive Map",
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer(
-                    scaleX = mapState.scale * mapState.scaleBase,
-                    scaleY = mapState.scale * mapState.scaleBase,
-                    translationX = mapState.offset.x,
-                    translationY = mapState.offset.y
-                )
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer(
+                        scaleX = mapState.scale * mapState.scaleBase,
+                        scaleY = mapState.scale * mapState.scaleBase,
+                        translationX = mapState.offset.x,
+                        translationY = mapState.offset.y,
+                    ),
         )
     }
 }
@@ -164,23 +167,29 @@ fun MapScreenPreview() {
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
                     DashboardModal(
-                        metricsViewModel = MetricsFakeViewModel(MetricsState(
-                            date = "2025-06-12",
-                            maxGoodTimeSeconds = 6 * 60 * 60,
-                            currentGoodTimeSeconds = 1 * 60 * 60,
-                            maxBadTimeSeconds = 6 * 60 * 60,
-                            currentBadTimeSeconds = 2 * 60 * 60
-                        )),
-                        personalityViewModel = PersonalityFakeViewModel(PersonalityState(
-                            validPersonalityDTO().realName,
-                            validPersonalityDTO().knightName,
-                            validPersonalityDTO().build,
-                            validPersonalityDTO().goodApps,
-                            validPersonalityDTO().badApps,
-                        ))
+                        metricsViewModel =
+                            MetricsFakeViewModel(
+                                MetricsState(
+                                    date = "2025-06-12",
+                                    maxGoodTimeSeconds = 6 * 60 * 60,
+                                    currentGoodTimeSeconds = 1 * 60 * 60,
+                                    maxBadTimeSeconds = 6 * 60 * 60,
+                                    currentBadTimeSeconds = 2 * 60 * 60,
+                                ),
+                            ),
+                        personalityViewModel =
+                            PersonalityFakeViewModel(
+                                PersonalityState(
+                                    validPersonalityDTO().realName,
+                                    validPersonalityDTO().knightName,
+                                    validPersonalityDTO().build,
+                                    validPersonalityDTO().goodApps,
+                                    validPersonalityDTO().badApps,
+                                ),
+                            ),
                     )
                 }
-            }
+            },
         )
     }
 }

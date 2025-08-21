@@ -1,10 +1,12 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -24,6 +26,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -51,7 +58,7 @@ fun SignUpScreen2_Form(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController
 ) {
-    SignUpScreen() {
+    SignUpScreen {
         SignUp(
             usersViewModel,
             personalityViewModel,
@@ -259,7 +266,7 @@ private fun SignUp(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpScreen2_FormPreview() {
+fun SignUpScreen2FormPreview() {
     KiwiTheme {
         SignUpScreen2_Form(
             UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
