@@ -15,7 +15,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 // -------------------------------------------------------------------------------------------------
 
-data class Kiwi_TextArguments(
+data class KiwiTextArguments(
     val text: String,
     val textAlign: TextAlign = TextAlign.Left,
     val color: Color = Color.White,
@@ -24,7 +24,7 @@ data class Kiwi_TextArguments(
     val modifier: Modifier = Modifier,
 )
 
-data class Kiwi_AnnotatedStringArguments(
+data class KiwiAnnotatedStringArguments(
     val text: AnnotatedString,
     val textAlign: TextAlign = TextAlign.Left,
     val modifier: Modifier = Modifier,
@@ -33,8 +33,8 @@ data class Kiwi_AnnotatedStringArguments(
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-private fun Kiwi_Text(
-    arguments: Kiwi_TextArguments,
+private fun KiwiText(
+    arguments: KiwiTextArguments,
     bodyStyle: TextStyle,
 ) {
     Text(
@@ -54,59 +54,59 @@ private fun Kiwi_Text(
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-fun Kiwi_H1(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.headlineLarge)
+fun KiwiH1(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.headlineLarge)
 }
 
 @Composable
-fun Kiwi_H2(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.headlineMedium)
+fun KiwiH2(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.headlineMedium)
 }
 
 @Composable
-fun Kiwi_H3(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.headlineSmall)
-}
-
-// -------------------------------------------------------------------------------------------------
-
-@Composable
-fun Kiwi_P1(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.bodyLarge)
-}
-
-@Composable
-fun Kiwi_P2(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.bodyMedium)
-}
-
-@Composable
-fun Kiwi_P3(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.bodySmall)
+fun KiwiH3(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.headlineSmall)
 }
 
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-fun Kiwi_Label1(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.labelLarge)
+fun KiwiP1(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.bodyLarge)
 }
 
 @Composable
-fun Kiwi_Label2(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.labelMedium)
+fun KiwiP2(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.bodyMedium)
 }
 
 @Composable
-fun Kiwi_Label3(arguments: Kiwi_TextArguments) {
-    Kiwi_Text(arguments, MaterialTheme.typography.labelSmall)
+fun KiwiP3(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.bodySmall)
 }
 
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-private fun Kiwi_AnnotatedString_P(
-    arguments: Kiwi_AnnotatedStringArguments,
+fun KiwiLabel1(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.labelLarge)
+}
+
+@Composable
+fun KiwiLabel2(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.labelMedium)
+}
+
+@Composable
+fun KiwiLabel3(arguments: KiwiTextArguments) {
+    KiwiText(arguments, MaterialTheme.typography.labelSmall)
+}
+
+// -------------------------------------------------------------------------------------------------
+
+@Composable
+private fun KiwiAnnotatedStringP(
+    arguments: KiwiAnnotatedStringArguments,
     bodyStyle: TextStyle,
 ) {
     Text(
@@ -118,18 +118,18 @@ private fun Kiwi_AnnotatedString_P(
 }
 
 @Composable
-fun Kiwi_AnnotatedString_P1(arguments: Kiwi_AnnotatedStringArguments) {
-    Kiwi_AnnotatedString_P(arguments, MaterialTheme.typography.bodyLarge)
+fun KiwiAnnotatedStringP1(arguments: KiwiAnnotatedStringArguments) {
+    KiwiAnnotatedStringP(arguments, MaterialTheme.typography.bodyLarge)
 }
 
 @Composable
-fun Kiwi_AnnotatedString_P2(arguments: Kiwi_AnnotatedStringArguments) {
-    Kiwi_AnnotatedString_P(arguments, MaterialTheme.typography.bodyMedium)
+fun KiwiAnnotatedStringP2(arguments: KiwiAnnotatedStringArguments) {
+    KiwiAnnotatedStringP(arguments, MaterialTheme.typography.bodyMedium)
 }
 
 @Composable
-fun Kiwi_AnnotatedString_P3(arguments: Kiwi_AnnotatedStringArguments) {
-    Kiwi_AnnotatedString_P(arguments, MaterialTheme.typography.bodySmall)
+fun KiwiAnnotatedStringP3(arguments: KiwiAnnotatedStringArguments) {
+    KiwiAnnotatedStringP(arguments, MaterialTheme.typography.bodySmall)
 }
 
 // -------------------------------------------------------------------------------------------------

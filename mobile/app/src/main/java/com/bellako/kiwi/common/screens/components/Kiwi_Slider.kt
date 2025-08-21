@@ -27,7 +27,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Kiwi_Slider(
+fun KiwiSlider(
     textArguments: KiwiTextArguments,
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -36,7 +36,7 @@ fun Kiwi_Slider(
     testTag: String,
     enabled: Boolean = true,
 ) {
-    Kiwi_H3(textArguments)
+    KiwiH3(textArguments)
 
     @Suppress("MagicNumber")
     val trackColor = multiplyColorRgb(MaterialTheme.colorScheme.secondary, if (enabled) 1f else 0.4f)
@@ -84,7 +84,7 @@ fun Kiwi_Slider(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun Kiwi_SliderPreview() {
+fun KiwiSliderPreview() {
     KiwiTheme {
         Column(
             modifier =
@@ -94,7 +94,7 @@ fun Kiwi_SliderPreview() {
                     .testTag(CommonTestTags.SETTINGS_SCREEN),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Kiwi_Slider(
+            KiwiSlider(
                 KiwiTextArguments("Sound Volume"),
                 value = 2.0f,
                 onValueChange = { },
@@ -105,7 +105,7 @@ fun Kiwi_SliderPreview() {
 
             Kiwi_Spacer()
 
-            Kiwi_Slider(
+            KiwiSlider(
                 KiwiTextArguments("Sound Volume"),
                 value = 2.0f,
                 onValueChange = { },

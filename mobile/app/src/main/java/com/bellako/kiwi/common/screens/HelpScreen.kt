@@ -29,12 +29,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.BuildConfig
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedStringArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
+import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.KiwiH2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -68,7 +68,7 @@ private fun HelpScreenLayout(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H2(Kiwi_TextArguments(
+        KiwiH2(KiwiTextArguments(
             "SUPPORT",
             color = MaterialTheme.colorScheme.secondary,
             bold = true
@@ -102,14 +102,14 @@ private fun HelpScreenLayout(
             }
         }
 
-        Kiwi_AnnotatedString_P2(Kiwi_AnnotatedStringArguments(
+        KiwiAnnotatedStringP2(KiwiAnnotatedStringArguments(
             annotatedString,
             TextAlign.Center
         ))
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        Kiwi_Button(Kiwi_TextArguments(
+        Kiwi_Button(KiwiTextArguments(
             "BACK",
             color = MaterialTheme.colorScheme.secondary,
             bold = true,

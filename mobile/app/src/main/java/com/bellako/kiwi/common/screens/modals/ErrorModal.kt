@@ -21,10 +21,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
-import com.bellako.kiwi.common.screens.components.Kiwi_P2
+import com.bellako.kiwi.common.screens.components.KiwiH2
+import com.bellako.kiwi.common.screens.components.KiwiP2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -74,7 +74,7 @@ private fun ErrorModalLayout(
 
         Kiwi_Spacer(Spacing.small)
 
-        Kiwi_H2(Kiwi_TextArguments(
+        KiwiH2(KiwiTextArguments(
             "Wild Error Appeared!",
             color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center,
@@ -83,7 +83,7 @@ private fun ErrorModalLayout(
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        Kiwi_P2(Kiwi_TextArguments(
+        KiwiP2(KiwiTextArguments(
             errorMessage,
             TextAlign.Center,
             color = MaterialTheme.colorScheme.outline,
@@ -93,7 +93,7 @@ private fun ErrorModalLayout(
 
         if (onRetry != null) {
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "RETRY",
                     color = MaterialTheme.colorScheme.secondary),
                 onRetry,

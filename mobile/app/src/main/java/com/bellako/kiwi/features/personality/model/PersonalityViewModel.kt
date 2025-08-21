@@ -2,11 +2,14 @@ package com.bellako.kiwi.features.personality.model
 
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
-import com.bellako.kiwi.features.personality.data.*
+import com.bellako.kiwi.features.personality.data.BERSERKER
+import com.bellako.kiwi.features.personality.data.MONK
 import com.bellako.kiwi.features.personality.data.Personality
+import com.bellako.kiwi.features.personality.data.PersonalityAppsDTO
 import com.bellako.kiwi.features.personality.data.PersonalityBuildDTO
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.data.PersonalityUserNameDTO
+import com.bellako.kiwi.features.personality.data.SHAMAN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,7 +61,13 @@ class PersonalityViewModel
             _state.value.toDomainObject().fold(
                 onSuccess = { validState ->
                     Result.success(
-                        Personality(validState.realName, validState.knightName, validState.build, validState.goodApps, validState.badApps),
+                        Personality(
+                            validState.realName,
+                            validState.knightName,
+                            validState.build,
+                            validState.goodApps,
+                            validState.badApps,
+                        ),
                     )
                 },
                 onFailure = { err ->
@@ -109,7 +118,14 @@ class PersonalityViewModel
 
         override suspend fun updateApps(): Result<Unit> {
             setIsLoading(true)
-            return handleResultSuspend(repository.updateApps(PersonalityAppsDTO(_state.value.goodApps, _state.value.badApps))) {
+            return handleResultSuspend(
+                repository.updateApps(
+                    PersonalityAppsDTO(
+                        _state.value.goodApps,
+                        _state.value.badApps,
+                    ),
+                ),
+            ) {
                 setIsLoading(false)
                 _uiState.value = UIState.Success(Unit)
             }

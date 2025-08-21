@@ -33,9 +33,9 @@ import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.KiwiH2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
@@ -93,7 +93,7 @@ fun MapScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Kiwi_H2(Kiwi_TextArguments(
+        KiwiH2(KiwiTextArguments(
             title,
             color = MaterialTheme.colorScheme.inversePrimary,
             bold = true
