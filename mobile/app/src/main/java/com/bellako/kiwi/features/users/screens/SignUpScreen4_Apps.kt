@@ -22,6 +22,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -134,10 +135,7 @@ fun AppClassification(
                 addAll(apps.filter { it.packageName != myPackageName })
             }
         }
-    personalityViewModel.onAppsChanged(
-        goodApps.map { it.packageName },
-        badApps.map { it.packageName },
-    )
+    updateApps(goodApps, badApps, personalityViewModel)
 
     if (personalityUiState == UIState.GeneralError) {
         ErrorModal(onButtonClick = {
@@ -184,11 +182,7 @@ fun AppClassification(
                                 onClick = {
                                     goodApps.remove(app)
                                     badApps.add(app)
-                                    badApps.sortBy { it.name.lowercase() }
-                                    personalityViewModel.onAppsChanged(
-                                        goodApps.map { it.packageName },
-                                        badApps.map { it.packageName },
-                                    )
+                                    updateApps(goodApps, badApps, personalityViewModel)
                                 },
                                 enabled = !isLoading,
                             )
@@ -211,11 +205,7 @@ fun AppClassification(
                                 onClick = {
                                     badApps.remove(app)
                                     goodApps.add(app)
-                                    goodApps.sortBy { it.name.lowercase() }
-                                    personalityViewModel.onAppsChanged(
-                                        goodApps.map { it.packageName },
-                                        badApps.map { it.packageName },
-                                    )
+                                    updateApps(goodApps, badApps, personalityViewModel)
                                 },
                                 enabled = !isLoading,
                             )
@@ -243,6 +233,19 @@ fun AppClassification(
             )
         }
     }
+}
+
+private fun updateApps(
+    goodApps: SnapshotStateList<AppInfo>,
+    badApps: SnapshotStateList<AppInfo>,
+    personalityViewModel: IPersonalityViewModel,
+) {
+    goodApps.sortBy { it.name.lowercase() }
+    badApps.sortBy { it.name.lowercase() }
+    personalityViewModel.onAppsChanged(
+        goodApps.map { it.packageName },
+        badApps.map { it.packageName },
+    )
 }
 
 @Composable
