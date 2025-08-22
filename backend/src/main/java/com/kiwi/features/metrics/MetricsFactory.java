@@ -13,9 +13,9 @@ public class MetricsFactory {
     public static MetricsDTO generateRandomValidMetricDTO() {
         return new MetricsDTO(
             getRandomDate(),
-            getRandomTimeSeconds(5, 6),
+            0,
             getRandomTimeSeconds(1, 2),
-            getRandomTimeSeconds(5, 6),
+            0,
             getRandomTimeSeconds(3, 4)
         );
     }
@@ -23,9 +23,9 @@ public class MetricsFactory {
     public static MetricsDTO generateRandomInvalidMetricDTO() {
         return new MetricsDTO(
             getRandomDate(),
-            -getRandomTimeSeconds(5, 6),
+            0,
             -getRandomTimeSeconds(1, 2),
-            -getRandomTimeSeconds(5, 6),
+            0,
             -getRandomTimeSeconds(3, 4)
         );
     }

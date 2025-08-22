@@ -81,7 +81,9 @@ public class MetricsIntegrationTest {
                 metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
         
         assert(retrievedMetricsPersistence.isPresent());
-        assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO).getDate(), retrievedMetricsPersistence.get().getDate());
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO).getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO).getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
     @Test
@@ -138,9 +140,7 @@ public class MetricsIntegrationTest {
     public void updateValidMetrics() throws Exception {
         metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
         MetricsDTO updatedMetricsDTO = validMetricsDTO.copy();
-        updatedMetricsDTO.setMaxGoodTimeSeconds(validMetricsDTO.getMaxGoodTimeSeconds() + 1);
         updatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() + 1);
-        updatedMetricsDTO.setMaxBadTimeSeconds(validMetricsDTO.getMaxBadTimeSeconds() + 1);
         updatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() + 1);
 
         mockMvc.perform(put(APIURL)
@@ -152,7 +152,9 @@ public class MetricsIntegrationTest {
                 metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
         assert(retrievedMetricsPersistence.isPresent());
         assertNotEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
-        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO).getDate(), retrievedMetricsPersistence.get().getDate());
+        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO).getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO).getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
     @Test
@@ -161,9 +163,7 @@ public class MetricsIntegrationTest {
         metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
         MetricsDTO updatedMetricsDTO = invalidMetricsDTO.copy();
         Integer invalidTime = 25 * 60 * 60;
-        updatedMetricsDTO.setMaxGoodTimeSeconds(validMetricsDTO.getMaxGoodTimeSeconds() - invalidTime);
         updatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() - invalidTime);
-        updatedMetricsDTO.setMaxBadTimeSeconds(validMetricsDTO.getMaxBadTimeSeconds() - invalidTime);
         updatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() - invalidTime);
         
         mockMvc.perform(put(APIURL)

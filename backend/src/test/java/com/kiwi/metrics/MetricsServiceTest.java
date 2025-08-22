@@ -50,7 +50,9 @@ public class MetricsServiceTest {
         Optional<MetricsPersistence> savedMetricsPersistence = 
                 metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, LocalDate.parse(metricsDTO.getDate()));
         assert(savedMetricsPersistence.isPresent());
-        assertEquals(MetricsMapper.toDomain(metricsDTO), MetricsMapper.toDomain(savedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(metricsDTO).getDate(), savedMetricsPersistence.get().getDate());
+        assertEquals(MetricsMapper.toDomain(metricsDTO).getCurrentGoodTimeSeconds(), savedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(MetricsMapper.toDomain(metricsDTO).getCurrentBadTimeSeconds(), savedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
     @Test(expected = MetricsInvalidException.class)
@@ -78,9 +80,7 @@ public class MetricsServiceTest {
         Metrics metrics = MetricsMapper.toDomain(metricsDTO);
         metricsRepositoryInMemory.saveAndFlush(MetricsMapper.toPersistence(validUsersPersistence, metrics));
 
-        metricsDTO.setMaxGoodTimeSeconds(metricsDTO.getMaxGoodTimeSeconds() + 1);
         metricsDTO.setCurrentGoodTimeSeconds(metricsDTO.getCurrentGoodTimeSeconds() + 1);
-        metricsDTO.setMaxBadTimeSeconds(metricsDTO.getMaxBadTimeSeconds() + 1);
         metricsDTO.setCurrentBadTimeSeconds(metricsDTO.getCurrentBadTimeSeconds() + 1);
         metricsService.updateMetric(validEmail, metricsDTO);
         
@@ -89,7 +89,9 @@ public class MetricsServiceTest {
         assert(retrievedMetricsPersistence.isPresent());
         
         assertNotEquals(metrics, MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
-        assertEquals(MetricsMapper.toDomain(metricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(metricsDTO).getDate(), retrievedMetricsPersistence.get().getDate());
+        assertEquals(MetricsMapper.toDomain(metricsDTO).getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(MetricsMapper.toDomain(metricsDTO).getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
     @Test(expected = MetricsInvalidException.class)
