@@ -10,17 +10,7 @@ data class PersonalityState(
     val questions: List<Question> =
         listOf(
             Question(
-                question = "Test question",
-                options =
-                    listOf(
-                        "Answer 1",
-                        "Answer 2",
-                        "Answer 3",
-                        "Answer 4",
-                    ),
-            ),
-            Question(
-                question = "When you face a tough choice,\nwhat do you trust most?",
+                question = "When you face a tough choice, what do you trust most?",
                 options =
                     listOf(
                         "My gut feeling",
