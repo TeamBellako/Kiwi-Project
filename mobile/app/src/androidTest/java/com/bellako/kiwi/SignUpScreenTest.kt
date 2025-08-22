@@ -115,28 +115,19 @@ class SignUpScreenTest {
     }
 
     @Test
-    fun screen4_validUpdateApps() {
-        personalityFakeViewModel.fakeError = false
+    fun screen2_invalidSignupName() {
+        personalityFakeViewModel.fakeError = true
+        personalityFakeViewModel.fakeException = createFakeHttpException(HTTP_UNAUTHORIZED)
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
         Thread.sleep(500)
-        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).assertDoesNotExist()
+        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 
     @Test
-    fun screen4_invalidUpdateApps() {
+    fun screen2_errorOnSignupName() {
         personalityFakeViewModel.fakeError = true
         personalityFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
-
-        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
-        Thread.sleep(500)
-        rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()
-    }
-
-    @Test
-    fun screen4_errorUpdateApps() {
-        personalityFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
         Thread.sleep(500)
