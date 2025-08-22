@@ -40,15 +40,15 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
-import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP2
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiLabel2
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -61,7 +61,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -168,8 +168,8 @@ private fun LogIn(
             ) {
                 // TEXT WELCOME
 
-                KiwiH2(
-                    KiwiTextArguments(
+                Kiwi_H2(
+                    Kiwi_TextArguments(
                         "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.secondary,
@@ -189,8 +189,8 @@ private fun LogIn(
                         value = currentState.email,
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
-                            KiwiLabel2(
-                                KiwiTextArguments(
+                            Kiwi_Label2(
+                                Kiwi_TextArguments(
                                     "Email",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -208,8 +208,8 @@ private fun LogIn(
                         value = currentState.password,
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
-                            KiwiLabel2(
-                                KiwiTextArguments(
+                            Kiwi_Label2(
+                                Kiwi_TextArguments(
                                     "Password",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -223,7 +223,7 @@ private fun LogIn(
                     Kiwi_Spacer()
 
                     Kiwi_Button(
-                        KiwiTextArguments(
+                        Kiwi_TextArguments(
                             "LOG IN",
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true,
@@ -350,7 +350,7 @@ private fun SignUp(onSignUp: () -> Unit) {
             }
         }
 
-    KiwiAnnotatedStringP2(
+    Kiwi_AnnotatedString_P2(
         KiwiAnnotatedStringArguments(
             annotatedString,
             TextAlign.Center,
@@ -365,8 +365,8 @@ private fun SignUp(onSignUp: () -> Unit) {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun LogInScreenPreview() {
-    KiwiTheme {
+fun LogInScreen_Preview() {
+    Kiwi_Theme {
         LogInScreen(
             UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
             personalityViewModel =

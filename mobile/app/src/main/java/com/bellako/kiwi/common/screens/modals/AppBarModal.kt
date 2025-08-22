@@ -31,7 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -142,8 +142,8 @@ fun AppBarModalLayout(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun AppBarModalPreview() {
-    KiwiTheme {
+fun AppBarModal_Preview() {
+    Kiwi_Theme {
         Scaffold(
             bottomBar = {
                 AppBarModal(navController = rememberNavController())

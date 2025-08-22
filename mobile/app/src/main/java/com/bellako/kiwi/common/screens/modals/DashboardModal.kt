@@ -57,15 +57,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
-import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP1
-import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP2
-import com.bellako.kiwi.common.screens.components.KiwiH3
-import com.bellako.kiwi.common.screens.components.KiwiP2
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
+import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.features.map.screens.MapScreen
@@ -78,7 +78,7 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.launch
@@ -257,8 +257,8 @@ private fun Header() {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         HeaderLine()
-        KiwiH3(
-            KiwiTextArguments(
+        Kiwi_H3(
+            Kiwi_TextArguments(
                 "Daily Progress",
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
@@ -398,8 +398,8 @@ private fun CalendarView(
                 .then(gestureModifier)
                 .testTag(DashboardModalTestTags.CALENDAR_VIEW),
     ) {
-        KiwiP2(
-            KiwiTextArguments(
+        Kiwi_P2(
+            Kiwi_TextArguments(
                 currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary,
@@ -507,8 +507,8 @@ private fun ExpandedDayIndicator(
             verticalArrangement = Arrangement.Center,
         ) {
             val contentAlpha = if (isInFuture) 0.4f else 1f
-            KiwiP2(
-                KiwiTextArguments(
+            Kiwi_P2(
+                Kiwi_TextArguments(
                     dayName,
                     color = MaterialTheme.colorScheme.inversePrimary,
                     modifier =
@@ -552,8 +552,8 @@ private fun ExpandedProgressBox(state: MetricsState) {
 
 @Composable
 private fun ExpandedMetricProgressTitle(title: String) {
-    KiwiH3(
-        KiwiTextArguments(
+    Kiwi_H3(
+        Kiwi_TextArguments(
             title,
             TextAlign.Center,
             MaterialTheme.colorScheme.secondary,
@@ -579,7 +579,7 @@ private fun TimeExpanded(
                 append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
             }
         }
-    KiwiAnnotatedStringP1(
+    Kiwi_AnnotatedString_P1(
         KiwiAnnotatedStringArguments(
             text,
             TextAlign.Center,
@@ -616,7 +616,7 @@ private fun TimeCollapsed(
                 append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
             }
         }
-    KiwiAnnotatedStringP2(
+    Kiwi_AnnotatedString_P2(
         KiwiAnnotatedStringArguments(
             text,
             TextAlign.Left,
@@ -728,8 +728,8 @@ private fun ShowCalendarViewButton(onCalendarViewClicked: () -> Unit) {
 @Composable
 private fun ExpandedSummaryCard() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        KiwiH3(
-            KiwiTextArguments(
+        Kiwi_H3(
+            Kiwi_TextArguments(
                 "Challenges",
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
@@ -800,8 +800,8 @@ private fun ExpandedQuestProgress(
                     .weight(0.8F),
             contentAlignment = Alignment.Center,
         ) {
-            KiwiP2(
-                KiwiTextArguments(
+            Kiwi_P2(
+                Kiwi_TextArguments(
                     title,
                     TextAlign.Center,
                     MaterialTheme.colorScheme.secondary,
@@ -821,7 +821,7 @@ private fun ExpandedQuestProgress(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalHiddenPreview() {
+fun DashboardModalHidden_Preview() {
     DashboardModalPreview(false, 0)
 }
 
@@ -830,7 +830,7 @@ fun DashboardModalHiddenPreview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalCollapsedPreview() {
+fun DashboardModalCollapsed_Preview() {
     DashboardModalPreview(false, 1)
 }
 
@@ -839,7 +839,7 @@ fun DashboardModalCollapsedPreview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalExpandedPreview() {
+fun DashboardModalExpanded_Preview() {
     DashboardModalPreview(false, 2)
 }
 
@@ -848,7 +848,7 @@ fun DashboardModalExpandedPreview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalCalendarPreview() {
+fun DashboardModalCalendar_Preview() {
     DashboardModalPreview(true, 2)
 }
 
@@ -859,7 +859,7 @@ private fun DashboardModalPreview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
 ) {
-    KiwiTheme {
+    Kiwi_Theme {
         Scaffold(
             bottomBar = {
                 AppBarModal(navController = rememberNavController())

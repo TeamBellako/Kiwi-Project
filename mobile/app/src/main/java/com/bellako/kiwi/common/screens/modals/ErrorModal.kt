@@ -21,11 +21,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiP2
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -79,7 +79,7 @@ private fun ErrorModalLayout(
 
         Kiwi_Spacer(Spacing.small)
 
-        KiwiH2(KiwiTextArguments(
+        Kiwi_H2(Kiwi_TextArguments(
             "Wild Error Appeared!",
             color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center,
@@ -88,7 +88,7 @@ private fun ErrorModalLayout(
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        KiwiP2(KiwiTextArguments(
+        Kiwi_P2(Kiwi_TextArguments(
             errorMessage,
             TextAlign.Center,
             color = MaterialTheme.colorScheme.outline,
@@ -98,7 +98,7 @@ private fun ErrorModalLayout(
 
         if (onButtonClick != null) {
             Kiwi_Button(
-                KiwiTextArguments(
+                Kiwi_TextArguments(
                     buttonMessage,
                     color = MaterialTheme.colorScheme.secondary),
                 onButtonClick,
@@ -115,8 +115,8 @@ private fun ErrorModalLayout(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun ErrorModalPreview() {
-    KiwiTheme {
+fun ErrorModal_Preview() {
+    Kiwi_Theme {
         ErrorModal {}
     }
 }

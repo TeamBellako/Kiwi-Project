@@ -22,8 +22,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.modals.ErrorModal
@@ -36,7 +36,7 @@ import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -90,8 +90,8 @@ private fun Question(
                 ) {
                     var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-                    KiwiH2(
-                        KiwiTextArguments(
+                    Kiwi_H2(
+                        Kiwi_TextArguments(
                             currentPersonalityState.questions[currentQuestion].question,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.secondary,
@@ -103,7 +103,7 @@ private fun Question(
                     currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
 
                         Kiwi_Button(
-                            KiwiTextArguments(
+                            Kiwi_TextArguments(
                                 option,
                                 color = MaterialTheme.colorScheme.secondary,
                             ),
@@ -137,8 +137,8 @@ private fun Question(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpScreen3_TestPreview() {
-    KiwiTheme {
+fun SignUpScreen3_Test_Preview() {
+    Kiwi_Theme {
         SignUpScreen3_Test(
             UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
             personalityViewModel =

@@ -29,10 +29,10 @@ import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiLabel2
-import com.bellako.kiwi.common.screens.components.KiwiP2
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
@@ -49,7 +49,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -116,8 +116,8 @@ private fun SignUp(
                 ) {
                     // TEXT WELCOME
 
-                    KiwiP2(
-                        KiwiTextArguments(
+                    Kiwi_P2(
+                        Kiwi_TextArguments(
                             "Initial Setup Will Take\nApproximately 3 Minutes",
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.secondary,
@@ -127,8 +127,8 @@ private fun SignUp(
                     Kiwi_Spacer(Spacing.large)
                     Kiwi_Spacer(Spacing.large)
 
-                    KiwiH2(
-                        KiwiTextArguments(
+                    Kiwi_H2(
+                        Kiwi_TextArguments(
                             "Let's Start With\nThe Basics",
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.secondary,
@@ -145,8 +145,8 @@ private fun SignUp(
                         value = currentPersonalityState.realName,
                         onValueChange = { personalityViewModel.onRealNameChanged(it) },
                         label = {
-                            KiwiLabel2(
-                                KiwiTextArguments(
+                            Kiwi_Label2(
+                                Kiwi_TextArguments(
                                     "Real Name",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -164,8 +164,8 @@ private fun SignUp(
                         value = currentPersonalityState.knightName,
                         onValueChange = { personalityViewModel.onKnightNameChanged(it) },
                         label = {
-                            KiwiLabel2(
-                                KiwiTextArguments(
+                            Kiwi_Label2(
+                                Kiwi_TextArguments(
                                     "Knight Name",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -183,8 +183,8 @@ private fun SignUp(
                         value = currentUsersState.email,
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
-                            KiwiLabel2(
-                                KiwiTextArguments(
+                            Kiwi_Label2(
+                                Kiwi_TextArguments(
                                     "Email",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -202,8 +202,8 @@ private fun SignUp(
                         value = currentUsersState.password,
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
-                            KiwiLabel2(
-                                KiwiTextArguments(
+                            Kiwi_Label2(
+                                Kiwi_TextArguments(
                                     "Password",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -219,7 +219,7 @@ private fun SignUp(
                     // BUTTON
 
                     Kiwi_Button(
-                        KiwiTextArguments(
+                        Kiwi_TextArguments(
                             "START JOURNEY",
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true,
@@ -292,8 +292,8 @@ private fun SignUp(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpScreen2FormPreview() {
-    KiwiTheme {
+fun SignUpScreen2_Form_Preview() {
+    Kiwi_Theme {
         SignUpScreen2_Form(
             UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
             personalityViewModel =

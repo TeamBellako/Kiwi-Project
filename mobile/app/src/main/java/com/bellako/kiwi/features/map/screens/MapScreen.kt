@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
@@ -42,7 +42,7 @@ import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 
@@ -92,8 +92,8 @@ fun MapScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        KiwiH2(
-            KiwiTextArguments(
+        Kiwi_H2(
+            Kiwi_TextArguments(
                 title,
                 color = MaterialTheme.colorScheme.inversePrimary,
                 bold = true,
@@ -157,8 +157,8 @@ private fun InteractiveMap(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun MapScreenPreview() {
-    KiwiTheme {
+fun MapScreen_Preview() {
+    Kiwi_Theme {
         Scaffold(
             bottomBar = {
                 AppBarModal(navController = rememberNavController())

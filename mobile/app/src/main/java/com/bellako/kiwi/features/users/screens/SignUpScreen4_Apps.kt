@@ -37,10 +37,10 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiLabel2
-import com.bellako.kiwi.common.screens.components.KiwiP2
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -51,7 +51,7 @@ import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -150,8 +150,8 @@ fun AppClassification(
             modifier =
                 Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
         ) {
-            KiwiP2(
-                KiwiTextArguments(
+            Kiwi_P2(
+                Kiwi_TextArguments(
                     text = "Categorize your apps.\nTap to switch between lists.",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
@@ -167,8 +167,8 @@ fun AppClassification(
                         .weight(1f),
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    KiwiH2(
-                        KiwiTextArguments(
+                    Kiwi_H2(
+                        Kiwi_TextArguments(
                             text = "Good apps",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
@@ -190,8 +190,8 @@ fun AppClassification(
                     }
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    KiwiH2(
-                        KiwiTextArguments(
+                    Kiwi_H2(
+                        Kiwi_TextArguments(
                             text = "Evil apps",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
@@ -216,7 +216,7 @@ fun AppClassification(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                KiwiTextArguments(
+                Kiwi_TextArguments(
                     "CONTINUE",
                     textAlign = TextAlign.Center,
                 ),
@@ -276,7 +276,7 @@ fun AppItem(
                     .padding(end = getResponsiveSizeHeight(10.dp))
                     .graphicsLayer { alpha = if (enabled) 1f else 0.3f },
         )
-        KiwiLabel2(KiwiTextArguments(app.name))
+        Kiwi_Label2(Kiwi_TextArguments(app.name))
     }
 }
 
@@ -288,8 +288,8 @@ fun AppItem(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpScreen4_AppsPreview() {
-    KiwiTheme {
+fun SignUpScreen4_Apps_Preview() {
+    Kiwi_Theme {
         SignUpScreen4_Apps(
             personalityViewModel =
                 PersonalityFakeViewModel(

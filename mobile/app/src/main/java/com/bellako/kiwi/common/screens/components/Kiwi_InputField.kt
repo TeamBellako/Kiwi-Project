@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
@@ -127,16 +127,16 @@ private fun ShowPasswordTrailingIcon(shouldShowPasswordState: MutableState<Boole
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun KiwiInputFieldPreview() {
-    KiwiTheme {
+fun KiwiInputField_Preview() {
+    Kiwi_Theme {
         Column {
             Kiwi_InputField(
                 enabled = true,
                 value = validUsersDTO().email,
                 onValueChange = { },
                 label = {
-                    KiwiLabel2(
-                        KiwiTextArguments(
+                    Kiwi_Label2(
+                        Kiwi_TextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
                         ),
@@ -154,8 +154,8 @@ fun KiwiInputFieldPreview() {
                 value = validUsersDTO().email,
                 onValueChange = { },
                 label = {
-                    KiwiLabel2(
-                        KiwiTextArguments(
+                    Kiwi_Label2(
+                        Kiwi_TextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
                         ),

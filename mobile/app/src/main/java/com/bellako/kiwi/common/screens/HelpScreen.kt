@@ -28,104 +28,116 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.BuildConfig
-import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
-import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP2
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.KiwiH2
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
-
 @Composable
-fun HelpScreen(
-    navController: NavController
-) {
+fun HelpScreen(navController: NavController) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
     ) {
         HelpScreenLayout(navController)
     }
 }
 
 @Composable
-private fun HelpScreenLayout(
-    navController: NavController
-) {
+private fun HelpScreenLayout(navController: NavController) {
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(getResponsiveSizeHeight(Spacing.large)),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(getResponsiveSizeHeight(Spacing.large)),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        KiwiH2(KiwiTextArguments(
-            "SUPPORT",
-            color = MaterialTheme.colorScheme.secondary,
-            bold = true
-        ))
+        Kiwi_H2(
+            Kiwi_TextArguments(
+                "SUPPORT",
+                color = MaterialTheme.colorScheme.secondary,
+                bold = true,
+            ),
+        )
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        val annotatedString = buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-            ) {
-                append("If you have any questions or need support, feel free to reach out to us at ")
-            }
-
-            withLink(link = LinkAnnotation.Clickable(
-                tag = "EMAIL",
-                linkInteractionListener = {
-                    openEmailClient(context)
-                },
-            )) {
+        val annotatedString =
+            buildAnnotatedString {
                 withStyle(
-                    style = SpanStyle(
-                        color = MaterialTheme.colorScheme.inversePrimary,
-                        textDecoration = TextDecoration.Underline
-                    )
+                    style =
+                        SpanStyle(
+                            color = MaterialTheme.colorScheme.secondary,
+                        ),
                 ) {
-                    append(BuildConfig.MOBILE_COMPANY_EMAIL)
+                    append("If you have any questions or need support, feel free to reach out to us at ")
+                }
+
+                withLink(
+                    link =
+                        LinkAnnotation.Clickable(
+                            tag = "EMAIL",
+                            linkInteractionListener = {
+                                openEmailClient(context)
+                            },
+                        ),
+                ) {
+                    withStyle(
+                        style =
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.inversePrimary,
+                                textDecoration = TextDecoration.Underline,
+                            ),
+                    ) {
+                        append(BuildConfig.MOBILE_COMPANY_EMAIL)
+                    }
                 }
             }
-        }
 
-        KiwiAnnotatedStringP2(KiwiAnnotatedStringArguments(
-            annotatedString,
-            TextAlign.Center
-        ))
+        Kiwi_AnnotatedString_P2(
+            KiwiAnnotatedStringArguments(
+                annotatedString,
+                TextAlign.Center,
+            ),
+        )
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        Kiwi_Button(KiwiTextArguments(
-            "BACK",
-            color = MaterialTheme.colorScheme.secondary,
-            bold = true,
-            modifier = Modifier
-                .testTag(CommonTestTags.HELP_SCREEN)
-        ), {
-            navController.navigate(ScreenRoutes.SETTINGS)
-        })
+        Kiwi_Button(
+            Kiwi_TextArguments(
+                "BACK",
+                color = MaterialTheme.colorScheme.secondary,
+                bold = true,
+                modifier =
+                    Modifier
+                        .testTag(CommonTestTags.HELP_SCREEN),
+            ),
+            {
+                navController.navigate(ScreenRoutes.SETTINGS)
+            },
+        )
     }
 }
 
 private fun openEmailClient(context: Context) {
-    val emailIntent = Intent(
-        Intent.ACTION_SENDTO,
-        "mailto:${BuildConfig.MOBILE_COMPANY_EMAIL}".toUri()
-    )
+    val emailIntent =
+        Intent(
+            Intent.ACTION_SENDTO,
+            "mailto:${BuildConfig.MOBILE_COMPANY_EMAIL}".toUri(),
+        )
 
     try {
         context.startActivity(emailIntent)
@@ -140,10 +152,10 @@ private fun openEmailClient(context: Context) {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun HelpScreenPreview() {
-    KiwiTheme {
+fun HelpScreen_Preview() {
+    Kiwi_Theme {
         HelpScreen(
-            navController = rememberNavController()
+            navController = rememberNavController(),
         )
     }
 }
