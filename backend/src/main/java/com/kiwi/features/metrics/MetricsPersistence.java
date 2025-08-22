@@ -116,11 +116,9 @@ public class MetricsPersistence {
                 ", currentBadTimeSeconds=" + currentBadTimeSeconds +
                 '}';
     }
-    
-    public void mergeFromDomain(Metrics domain) {
-        setMaxGoodTimeSeconds(domain.getMaxGoodTimeSeconds());
+
+    public void updateFromDomain(Metrics domain) {
         setCurrentGoodTimeSeconds(domain.getCurrentGoodTimeSeconds());
-        setMaxBadTimeSeconds(domain.getMaxBadTimeSeconds());
         setCurrentBadTimeSeconds(domain.getCurrentBadTimeSeconds());
     }
 }

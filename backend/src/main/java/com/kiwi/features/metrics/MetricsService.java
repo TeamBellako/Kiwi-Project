@@ -4,11 +4,10 @@ import com.kiwi.features.users.UsersNotFoundException;
 import com.kiwi.features.users.UsersPersistence;
 import com.kiwi.features.users.UsersService;
 import com.kiwi.types.Email;
+import com.kiwi.types.PositiveOrZeroInteger;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +28,7 @@ public class MetricsService {
     @Transactional
     public void createMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
         Metrics metrics = MetricsMapper.toDomain(metricsDTO);
+        fillMetricInternalValues(metrics);
 
         UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         if (metricsRepository.findByUserAndDate(targetUserPersistence, metrics.getDate()).isPresent()) {
@@ -48,7 +48,7 @@ public class MetricsService {
             throw new MetricsNotFoundException(email, updateMetrics.getDate());
         }
 
-        targetMetricsPersistence.get().mergeFromDomain(updateMetrics);
+        targetMetricsPersistence.get().updateFromDomain(updateMetrics);
         metricsRepository.saveAndFlush(targetMetricsPersistence.get());
     }
     
@@ -69,5 +69,11 @@ public class MetricsService {
         if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(email.value());
         
         return targetUserPersistence.get();
+    }
+
+    private void fillMetricInternalValues(Metrics metrics) {
+        // TODO calculate with formula depending on ? (personality, previous metrics, etc.)
+        metrics.setMaxGoodTimeSeconds(new PositiveOrZeroInteger(Math.round(0.5f * 3600)));
+        metrics.setMaxBadTimeSeconds(new PositiveOrZeroInteger(10 * 3600));
     }
 }
