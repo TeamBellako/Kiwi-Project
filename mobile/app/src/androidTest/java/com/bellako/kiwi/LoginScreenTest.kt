@@ -29,6 +29,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 
 @RunWith(AndroidJUnit4::class)
 class LoginScreenTest {
@@ -95,7 +97,7 @@ class LoginScreenTest {
     @Test
     fun invalidLogin() {
         usersFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(401)
+        usersFakeViewModel.fakeException = createFakeHttpException(HTTP_UNAUTHORIZED)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
@@ -104,7 +106,7 @@ class LoginScreenTest {
     @Test
     fun errorOnLogin() {
         usersFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(500)
+        usersFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
         rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()

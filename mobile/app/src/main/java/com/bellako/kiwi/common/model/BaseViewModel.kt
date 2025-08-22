@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import retrofit2.HttpException
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 
 abstract class BaseViewModel : ViewModel() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -57,8 +58,7 @@ abstract class BaseViewModel : ViewModel() {
     fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
         when (e) {
             is HttpException -> {
-                @Suppress("MagicNumber")
-                if (e.code() >= 500) {
+                if (e.code() >= HTTP_INTERNAL_ERROR) {
                     UIState.GeneralError
                 } else {
                     UIState.Error(extractHttpExceptionMessage(e))

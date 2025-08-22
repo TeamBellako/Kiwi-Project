@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import retrofit2.HttpException
 import java.io.IOException
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 
 open class BaseFakeViewModel : ViewModel() {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -21,8 +22,7 @@ open class BaseFakeViewModel : ViewModel() {
         _uiState.value =
             when (error) {
                 is HttpException -> {
-                    @Suppress("MagicNumber")
-                    if (error.code() >= 500) {
+                    if (error.code() >= HTTP_INTERNAL_ERROR) {
                         UIState.GeneralError
                     } else {
                         UIState.Error("Server error: ${error.message()}")
@@ -79,8 +79,7 @@ open class BaseFakeViewModel : ViewModel() {
     open fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
         when (e) {
             is HttpException -> {
-                @Suppress("MagicNumber")
-                if (e.code() >= 500) {
+                if (e.code() >= HTTP_INTERNAL_ERROR) {
                     UIState.GeneralError
                 } else {
                     UIState.Error("Server error: ${e.message()}")

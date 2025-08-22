@@ -19,6 +19,7 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import retrofit2.Response
+import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -94,7 +95,7 @@ class UsersIntegrationTest {
     @Test
     fun `login with an incorrect password`() =
         runTest {
-            doThrow(createFakeHttpException(401)).whenever(api).login(any())
+            doThrow(createFakeHttpException(HTTP_UNAUTHORIZED)).whenever(api).login(any())
 
             viewModel.onEmailChanged(validUsersDTO().email)
             viewModel.onPasswordChanged(invalidUsersDTO().password)

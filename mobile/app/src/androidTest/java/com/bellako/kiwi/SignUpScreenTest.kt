@@ -27,6 +27,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 
 @RunWith(AndroidJUnit4::class)
 class SignUpScreenTest {
@@ -95,7 +97,7 @@ class SignUpScreenTest {
     @Test
     fun screen2_invalidSignupUser() {
         usersFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(401)
+        usersFakeViewModel.fakeException = createFakeHttpException(HTTP_UNAUTHORIZED)
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
         Thread.sleep(500)
@@ -105,7 +107,7 @@ class SignUpScreenTest {
     @Test
     fun screen2_errorOnSignupUser() {
         usersFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(500)
+        usersFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
         Thread.sleep(500)
@@ -124,7 +126,7 @@ class SignUpScreenTest {
     @Test
     fun screen4_invalidUpdateApps() {
         personalityFakeViewModel.fakeError = true
-        personalityFakeViewModel.fakeException = createFakeHttpException(500)
+        personalityFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
         Thread.sleep(500)
@@ -134,7 +136,7 @@ class SignUpScreenTest {
     @Test
     fun screen4_errorUpdateApps() {
         personalityFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(500)
+        usersFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
         Thread.sleep(500)
