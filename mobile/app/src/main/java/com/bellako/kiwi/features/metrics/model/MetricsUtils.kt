@@ -11,8 +11,8 @@ object MetricsUtils {
         val minutes = (screenTimeSeconds % 3600) / 60
 
         return buildString {
-            if (hours > 0 || screenTimeSeconds <= 0) append("${hours}h ")
-            if (minutes > 0) append("${minutes}min")
+            if (hours > 0) append("${hours}h ")
+            if (minutes > 0 || hours <= 0) append("${minutes}min")
         }.trim()
     }
 
