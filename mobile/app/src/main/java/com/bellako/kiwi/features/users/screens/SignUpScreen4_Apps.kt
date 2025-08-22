@@ -17,11 +17,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,14 +34,17 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.KiwiLabel2
 import com.bellako.kiwi.common.screens.components.KiwiP2
-import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.LoadingModal
+import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -50,12 +58,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-data class AppInfo(
-    val packageName: String,
-    val name: String,
-    val icon: Drawable,
-)
-
 @Composable
 fun SignUpScreen4_Apps(
     personalityViewModel: IPersonalityViewModel,
@@ -66,6 +68,12 @@ fun SignUpScreen4_Apps(
     }
 }
 
+data class AppInfo(
+    val packageName: String,
+    val name: String,
+    val icon: Drawable,
+)
+
 @Composable
 fun AppClassification(
     personalityViewModel: IPersonalityViewModel,
@@ -74,6 +82,13 @@ fun AppClassification(
     val context = LocalContext.current
     val packageManager = context.packageManager
     val myPackageName = context.packageName
+
+    val personalityUiState by personalityViewModel.uiState.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+
+    val isLoading by remember { derivedStateOf { personalityIsLoading } }
+
+    val isPreview = LocalInspectionMode.current
 
     // Get all installed apps
     val realApps =
@@ -120,87 +135,109 @@ fun AppClassification(
             }
         }
 
-    // Show apps
-
-    Column(
-        modifier =
-            Modifier
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
-    ) {
-        KiwiP2(
-            KiwiTextArguments(
-                text = "Categorize your apps.\nTap to switch between lists.",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary,
-            ),
-        )
-        Kiwi_Spacer(Spacing.large)
-
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .weight(1f),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                KiwiH2(
-                    KiwiTextArguments(
-                        text = "Good apps",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Kiwi_Spacer(Spacing.small)
-                LazyColumn {
-                    items(goodApps) { app ->
-                        AppItem(app) {
-                            goodApps.remove(app)
-                            badApps.add(app)
-                            badApps.sortBy { it.name.lowercase() }
-                            personalityViewModel.onAppsChanged(goodApps.map { it.packageName }, badApps.map { it.packageName })
-                        }
-                    }
-                }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                KiwiH2(
-                    KiwiTextArguments(
-                        text = "Evil apps",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Kiwi_Spacer(Spacing.small)
-                LazyColumn {
-                    items(badApps) { app ->
-                        AppItem(app) {
-                            badApps.remove(app)
-                            goodApps.add(app)
-                            goodApps.sortBy { it.name.lowercase() }
-                            personalityViewModel.onAppsChanged(goodApps.map { it.packageName }, badApps.map { it.packageName })
-                        }
-                    }
-                }
-            }
+    if (personalityUiState == UIState.GeneralError) {
+        ErrorModal(onButtonClick = {
+            personalityViewModel.resetUiState()
+        })
+    } else {
+        if (isLoading || isPreview) {
+            LoadingModal()
         }
-        Kiwi_Spacer(Spacing.large)
 
-        Kiwi_Button(
-            KiwiTextArguments(
-                "CONTINUE",
-                textAlign = TextAlign.Center,
-            ),
-            rowModifier = Modifier.fillMaxWidth(),
-            onClick = {
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (personalityViewModel.updateApps().isSuccess) {
-                        navController.navigate(ScreenRoutes.HOME)
+        Column(
+            modifier =
+                Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
+        ) {
+            KiwiP2(
+                KiwiTextArguments(
+                    text = "Categorize your apps.\nTap to switch between lists.",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.secondary,
+                ),
+            )
+            Kiwi_Spacer(Spacing.large)
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    KiwiH2(
+                        KiwiTextArguments(
+                            text = "Good apps",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                    Kiwi_Spacer(Spacing.small)
+                    LazyColumn {
+                        items(goodApps) { app ->
+                            AppItem(
+                                app = app,
+                                onClick = {
+                                    goodApps.remove(app)
+                                    badApps.add(app)
+                                    badApps.sortBy { it.name.lowercase() }
+                                    personalityViewModel.onAppsChanged(
+                                        goodApps.map { it.packageName },
+                                        badApps.map { it.packageName },
+                                    )
+                                },
+                                enabled = !isLoading,
+                            )
+                        }
                     }
                 }
-            },
-            testTag = UsersTestTags.SIGNUP_BUTTON,
-        )
+                Column(modifier = Modifier.weight(1f)) {
+                    KiwiH2(
+                        KiwiTextArguments(
+                            text = "Evil apps",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                    Kiwi_Spacer(Spacing.small)
+                    LazyColumn {
+                        items(badApps) { app ->
+                            AppItem(
+                                app = app,
+                                onClick = {
+                                    badApps.remove(app)
+                                    goodApps.add(app)
+                                    goodApps.sortBy { it.name.lowercase() }
+                                    personalityViewModel.onAppsChanged(
+                                        goodApps.map { it.packageName },
+                                        badApps.map { it.packageName },
+                                    )
+                                },
+                                enabled = !isLoading,
+                            )
+                        }
+                    }
+                }
+            }
+            Kiwi_Spacer(Spacing.large)
+
+            Kiwi_Button(
+                KiwiTextArguments(
+                    "CONTINUE",
+                    textAlign = TextAlign.Center,
+                ),
+                rowModifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        if (personalityViewModel.updateApps().isSuccess) {
+                            navController.navigate(ScreenRoutes.HOME)
+                        }
+                    }
+                },
+                enabled = !isLoading,
+                testTag = UsersTestTags.SIGNUP_BUTTON,
+            )
+        }
     }
 }
 
@@ -208,13 +245,20 @@ fun AppClassification(
 fun AppItem(
     app: AppInfo,
     onClick: () -> Unit,
+    enabled: Boolean,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
             Modifier
-                .clickable(onClick = onClick)
-                .padding(getResponsiveSizeHeight(Spacing.xSmall)),
+                .clickable(
+                    onClick =
+                        if (enabled) {
+                            onClick
+                        } else {
+                            {}
+                        },
+                ).padding(getResponsiveSizeHeight(Spacing.xSmall)),
     ) {
         Kiwi_Image(
             painter = rememberDrawablePainter(app.icon),
@@ -222,7 +266,8 @@ fun AppItem(
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(50.dp))
-                    .padding(end = getResponsiveSizeHeight(10.dp)),
+                    .padding(end = getResponsiveSizeHeight(10.dp))
+                    .graphicsLayer { alpha = if (enabled) 1f else 0.3f },
         )
         KiwiLabel2(KiwiTextArguments(app.name))
     }

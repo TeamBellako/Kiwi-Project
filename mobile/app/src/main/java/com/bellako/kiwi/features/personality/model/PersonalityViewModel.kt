@@ -132,15 +132,13 @@ class PersonalityViewModel
 
         override suspend fun updateApps(): Result<Unit> {
             setIsLoading(true)
-            return handleResultSuspend(
+            val result =
                 repository.updateApps(
-                    PersonalityAppsDTO(
-                        _state.value.goodApps,
-                        _state.value.badApps,
-                    ),
-                ),
-            ) {
-                setIsLoading(false)
+                    PersonalityAppsDTO(_state.value.goodApps, _state.value.badApps),
+                )
+            setIsLoading(false)
+
+            return handleResultSuspend(result) {
                 _uiState.value = UIState.Success(Unit)
             }
         }
