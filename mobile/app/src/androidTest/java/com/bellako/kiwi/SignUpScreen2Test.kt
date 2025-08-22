@@ -13,14 +13,12 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
-import com.bellako.kiwi.features.map.model.MapViewModel
-import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.data.UsersState
-import com.bellako.kiwi.features.users.screens.LogInScreen
+import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
@@ -33,15 +31,15 @@ import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 
 @RunWith(AndroidJUnit4::class)
-class LoginScreenTest {
+class SignUpScreen2Test {
     @get:Rule
     val rule = createComposeRule()
 
-    private lateinit var usersState: UsersState
     private lateinit var usersFakeViewModel: UsersFakeViewModel
+    private lateinit var usersState: UsersState
 
-    private lateinit var personalityState: PersonalityState
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
+    private lateinit var personalityState: PersonalityState
 
     @SuppressLint("ViewModelConstructorInComposable")
     @Before
@@ -49,8 +47,6 @@ class LoginScreenTest {
         AudioManager.setEnabled(false)
 
         usersState = UsersState(validUsersDTO().email, validUsersDTO().password)
-        usersFakeViewModel = UsersFakeViewModel(usersState)
-
         personalityState =
             PersonalityState(
                 validPersonalityDTO().realName,
@@ -59,20 +55,19 @@ class LoginScreenTest {
                 validPersonalityAppsDTO().goodApps,
                 validPersonalityAppsDTO().badApps,
             )
+
+        usersFakeViewModel = UsersFakeViewModel(usersState)
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
         rule.setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
-                composable(ScreenRoutes.LOGIN) {
-                    LogInScreen(
+            NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP2_FORM) {
+                composable(ScreenRoutes.SIGNUP2_FORM) {
+                    SignUpScreen2_Form(
                         usersViewModel = usersFakeViewModel,
                         personalityViewModel = personalityFakeViewModel,
                         navController = navController,
                     )
-                }
-                composable(ScreenRoutes.HOME) {
-                    MapScreen(viewModel = MapViewModel())
                 }
                 composable(ScreenRoutes.SIGNUP3_TEST) {
                     SignUpScreen3_Test(
@@ -86,29 +81,51 @@ class LoginScreenTest {
     }
 
     @Test
-    fun validLogin() {
+    fun screen2_validSignup() {
         usersFakeViewModel.fakeError = false
 
-        rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
+        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
         Thread.sleep(500)
-        rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).assertDoesNotExist()
+        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).assertDoesNotExist()
     }
 
     @Test
-    fun invalidLogin() {
+    fun screen2_invalidSignupUser() {
         usersFakeViewModel.fakeError = true
         usersFakeViewModel.fakeException = createFakeHttpException(HTTP_UNAUTHORIZED)
 
-        rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
+        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
+        Thread.sleep(500)
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 
     @Test
-    fun errorOnLogin() {
+    fun screen2_errorOnSignupUser() {
         usersFakeViewModel.fakeError = true
         usersFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
-        rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
+        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
+        Thread.sleep(500)
+        rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()
+    }
+
+    @Test
+    fun screen2_invalidSignupName() {
+        personalityFakeViewModel.fakeError = true
+        personalityFakeViewModel.fakeException = createFakeHttpException(HTTP_UNAUTHORIZED)
+
+        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
+        Thread.sleep(500)
+        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
+    }
+
+    @Test
+    fun screen2_errorOnSignupName() {
+        personalityFakeViewModel.fakeError = true
+        personalityFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
+
+        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
+        Thread.sleep(500)
         rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()
     }
 }

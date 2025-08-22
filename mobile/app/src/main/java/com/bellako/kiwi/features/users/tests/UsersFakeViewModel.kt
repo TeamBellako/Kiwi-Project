@@ -19,6 +19,8 @@ class UsersFakeViewModel(
     var fakeError: Boolean = false
     var fakeException: Exception = Exception("Simulated error")
 
+    // ---------------------------------------------------------------------------------------------
+
     override fun onEmailChanged(email: String) {
         _state.value = _state.value?.copy(email = email)
     }

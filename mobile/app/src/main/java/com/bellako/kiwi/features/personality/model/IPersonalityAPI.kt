@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.personality.model
 
+import com.bellako.kiwi.features.personality.data.PersonalityAppsDTO
 import com.bellako.kiwi.features.personality.data.PersonalityBuildDTO
 import com.bellako.kiwi.features.personality.data.PersonalityDTO
 import com.bellako.kiwi.features.personality.data.PersonalityUserNameDTO
@@ -24,5 +25,10 @@ interface IPersonalityAPI {
     @POST("api/user/personality/build")
     suspend fun updateBuild(
         @Body dto: PersonalityBuildDTO,
+    )
+
+    @POST("api/user/personality/apps")
+    suspend fun updateApps(
+        @Body dto: PersonalityAppsDTO,
     )
 }

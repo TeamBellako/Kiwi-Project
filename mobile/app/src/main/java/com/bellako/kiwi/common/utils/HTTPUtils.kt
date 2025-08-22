@@ -8,6 +8,7 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 
 object HTTPUtils {
     fun createFakeHttpException(code: Int): HttpException {
@@ -46,7 +47,7 @@ object HTTPUtils {
     fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
         when (e) {
             is HttpException -> {
-                if (e.code() >= 500) {
+                if (e.code() >= HTTP_INTERNAL_ERROR) {
                     UIState.GeneralError
                 } else {
                     UIState.Error(parseErrorMessage(e.response()?.errorBody()?.string())!!)

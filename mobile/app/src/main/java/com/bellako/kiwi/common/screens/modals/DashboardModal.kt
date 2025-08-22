@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,24 +57,27 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP1
+import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP2
+import com.bellako.kiwi.common.screens.components.KiwiH3
+import com.bellako.kiwi.common.screens.components.KiwiP2
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
-import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_P1
-import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
-import com.bellako.kiwi.features.metrics.model.MetricsMapper
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.model.MetricsUtils
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -86,20 +90,29 @@ import kotlin.math.ceil
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardModal(
-    viewModel: IMetricsViewModel,
+    metricsViewModel: IMetricsViewModel,
+    personalityViewModel: IPersonalityViewModel,
     showCalendarView: Boolean = false,
     initialStateIndex: Int = 0,
 ) {
-    val metricsState by viewModel.state.collectAsState()
+    val metricsState by metricsViewModel.state.collectAsState()
     val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        val loadResult = viewModel.loadMetrics(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-        metricsState?.let {
-            if (loadResult.isFailure) viewModel.createMetrics(it)
 
-            MetricsProvider.getMetrics(context, LocalDate.now())?.let { currentMetrics ->
-                viewModel.updateMetrics(MetricsMapper.toState(currentMetrics))
+    LaunchedEffect(Unit) {
+        val dateNow = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        val loadResult = metricsViewModel.loadMetrics(dateNow)
+        metricsState?.let { state ->
+            if (loadResult.isFailure) {
+                metricsViewModel.createMetrics(state.copy(date = dateNow))
             }
+            metricsViewModel.updateMetrics(
+                MetricsProvider.getCurrentMetrics(
+                    context,
+                    LocalDate.now(),
+                    metricsViewModel.state.value!!,
+                    personalityViewModel.state.value!!,
+                ),
+            )
         }
     }
 
@@ -126,7 +139,7 @@ fun DashboardModal(
                 )
             } else if (currentStateIndex <= 2) {
                 ExpandedContent(
-                    viewModel = viewModel,
+                    viewModel = metricsViewModel,
                     state = metricsState,
                     selectedDay = selectedDay,
                     shouldShowCalendarView = shouldShowCalendarView,
@@ -244,7 +257,7 @@ private fun Header() {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         HeaderLine()
-        Kiwi_H3(
+        KiwiH3(
             KiwiTextArguments(
                 "Daily Progress",
                 TextAlign.Center,
@@ -271,7 +284,6 @@ private fun WeekView(
     selectedDay: MutableState<LocalDate>,
     onCalendarViewClicked: () -> Unit,
 ) {
-    @Suppress("MagicNumber")
     val currentDayOfWeek = selectedDay.value.dayOfWeek.value % 7
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
     val coroutineScope = rememberCoroutineScope()
@@ -300,7 +312,6 @@ private fun WeekView(
                         .weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
             ) {
-                @Suppress("MagicNumber")
                 (0..6).forEach { index ->
                     val day = startOfWeek.plusDays(index.toLong())
                     val dayNumber = day.dayOfMonth
@@ -348,8 +359,8 @@ private fun CalendarView(
             ),
     ) { mutableStateOf(YearMonth.from(selectedDay.value)) }
 
-    var transitionDirection by remember { mutableStateOf(0) } // -1 = previous, 1 = next
-    var totalDragOffsetX by remember { mutableStateOf(0f) }
+    var transitionDirection by remember { mutableIntStateOf(0) } // -1 = previous, 1 = next
+    var totalDragOffsetX by remember { mutableFloatStateOf(0f) }
 
     val gestureModifier =
         Modifier.pointerInput(currentYearMonth) {
@@ -387,7 +398,7 @@ private fun CalendarView(
                 .then(gestureModifier)
                 .testTag(DashboardModalTestTags.CALENDAR_VIEW),
     ) {
-        Kiwi_P2(
+        KiwiP2(
             KiwiTextArguments(
                 currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
                 textAlign = TextAlign.Center,
@@ -496,7 +507,7 @@ private fun ExpandedDayIndicator(
             verticalArrangement = Arrangement.Center,
         ) {
             val contentAlpha = if (isInFuture) 0.4f else 1f
-            Kiwi_P2(
+            KiwiP2(
                 KiwiTextArguments(
                     dayName,
                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -540,23 +551,95 @@ private fun ExpandedProgressBox(state: MetricsState) {
 }
 
 @Composable
+private fun ExpandedMetricProgressTitle(title: String) {
+    KiwiH3(
+        KiwiTextArguments(
+            title,
+            TextAlign.Center,
+            MaterialTheme.colorScheme.secondary,
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
+        ),
+    )
+}
+
+@Composable
+private fun TimeExpanded(
+    maxSeconds: Int,
+    currentSeconds: Int,
+    tag: String,
+) {
+    val text =
+        buildAnnotatedString {
+            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                append(MetricsUtils.parseTimeSeconds(currentSeconds))
+            }
+            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+                append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
+            }
+        }
+    KiwiAnnotatedStringP1(
+        KiwiAnnotatedStringArguments(
+            text,
+            TextAlign.Center,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag(tag),
+        ),
+    )
+}
+
+@Composable
+private fun GoodTimeExpanded(state: MetricsState) {
+    TimeExpanded(state.maxGoodTimeSeconds, state.currentGoodTimeSeconds, DashboardModalTestTags.GOOD_TIME)
+}
+
+@Composable
+private fun BadTimeExpanded(state: MetricsState) {
+    TimeExpanded(state.maxBadTimeSeconds, state.currentBadTimeSeconds, DashboardModalTestTags.BAD_TIME)
+}
+
+@Composable
+private fun TimeCollapsed(
+    maxSeconds: Int,
+    currentSeconds: Int,
+    tag: String,
+) {
+    val text =
+        buildAnnotatedString {
+            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                append(MetricsUtils.parseTimeSeconds(currentSeconds))
+            }
+            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+                append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
+            }
+        }
+    KiwiAnnotatedStringP2(
+        KiwiAnnotatedStringArguments(
+            text,
+            TextAlign.Left,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag(tag),
+        ),
+    )
+}
+
+@Composable
+private fun GoodTimeCollapsed(state: MetricsState) {
+    TimeCollapsed(state.maxGoodTimeSeconds, state.currentGoodTimeSeconds, DashboardModalTestTags.GOOD_TIME)
+}
+
+@Composable
+private fun BadTimeCollapsed(state: MetricsState) {
+    TimeCollapsed(state.maxBadTimeSeconds, state.currentBadTimeSeconds, DashboardModalTestTags.BAD_TIME)
+}
+
+@Composable
 private fun ExpandedMetricsProgress(state: MetricsState) {
-    val maxSteps = 100000
-    val currentSteps =
-        if (state.steps < maxSteps) {
-            state.steps.toString()
-        } else {
-            "+99,999"
-        }
-
-    val maxScreenTimeSeconds = 10 * 60 * 60
-    val currentScreenTimeSeconds =
-        if (state.screenTimeSeconds < maxScreenTimeSeconds) {
-            MetricsUtils.parseScreenTimeSeconds(state.screenTimeSeconds)
-        } else {
-            "+10 hours\n(are you serious?)"
-        }
-
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier =
@@ -564,64 +647,17 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
                 .fillMaxWidth()
                 .wrapContentHeight(),
     ) {
-        MetricProgress(
-            "Steps",
-            currentSteps,
-            "8,000",
-            Modifier.weight(1f),
-            DashboardModalTestTags.STEPS,
-        )
-        MetricProgress(
-            "Screen Time",
-            currentScreenTimeSeconds,
-            "3 hours",
-            Modifier.weight(1f),
-            DashboardModalTestTags.SCREEN_TIME,
-        )
-    }
-}
-
-@Composable
-private fun MetricProgress(
-    title: String,
-    value: String,
-    target: String,
-    modifier: Modifier,
-    testTag: String,
-) {
-    Box(modifier) {
-        Column {
-            Kiwi_H3(
-                KiwiTextArguments(
-                    title,
-                    TextAlign.Center,
-                    MaterialTheme.colorScheme.secondary,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(),
-                ),
-            )
-            Kiwi_P1(
-                KiwiTextArguments(
-                    value,
-                    TextAlign.Center,
-                    MaterialTheme.colorScheme.secondary,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .testTag(testTag),
-                ),
-            )
-            Kiwi_P2(
-                KiwiTextArguments(
-                    "/$target",
-                    TextAlign.Center,
-                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f),
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(),
-                ),
-            )
+        Box(modifier = Modifier.weight(1f)) {
+            Column {
+                ExpandedMetricProgressTitle("Good Apps Time")
+                GoodTimeExpanded(state)
+            }
+        }
+        Box(modifier = Modifier.weight(1f)) {
+            Column {
+                ExpandedMetricProgressTitle("Evil Apps Time")
+                BadTimeExpanded(state)
+            }
         }
     }
 }
@@ -658,57 +694,11 @@ private fun CollapsedSummaryCard(
                 Column(
                     horizontalAlignment = Alignment.Start,
                 ) {
-                    val maxSteps = 100000
-                    val currentSteps =
-                        if (state.steps < maxSteps) {
-                            state.steps.toString()
-                        } else {
-                            "+99,999"
-                        }
-
-                    val maxScreenTimeSeconds = 60
-                    val currentScreenTimeSeconds =
-                        if (state.screenTimeSeconds < maxScreenTimeSeconds) {
-                            (state.screenTimeSeconds / 60).toString()
-                        } else {
-                            "+60"
-                        }
-
-                    val stepsText =
-                        buildAnnotatedString {
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                                append(currentSteps)
-                            }
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                                append("/8,000 steps")
-                            }
-                        }
-                    Kiwi_AnnotatedString_P2(
-                        KiwiAnnotatedStringArguments(
-                            stepsText,
-                            TextAlign.Left,
-                            Modifier.testTag(DashboardModalTestTags.STEPS),
-                        ),
-                    )
+                    GoodTimeCollapsed(state)
 
                     Kiwi_Spacer(Spacing.xSmall)
 
-                    val screenTimeText =
-                        buildAnnotatedString {
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                                append(currentScreenTimeSeconds)
-                            }
-                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                                append("/60 screen mins")
-                            }
-                        }
-                    Kiwi_AnnotatedString_P2(
-                        KiwiAnnotatedStringArguments(
-                            screenTimeText,
-                            TextAlign.Left,
-                            Modifier.testTag(DashboardModalTestTags.SCREEN_TIME),
-                        ),
-                    )
+                    BadTimeCollapsed(state)
                 }
             }
             Box(
@@ -738,7 +728,7 @@ private fun ShowCalendarViewButton(onCalendarViewClicked: () -> Unit) {
 @Composable
 private fun ExpandedSummaryCard() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Kiwi_H3(
+        KiwiH3(
             KiwiTextArguments(
                 "Challenges",
                 TextAlign.Center,
@@ -810,7 +800,7 @@ private fun ExpandedQuestProgress(
                     .weight(0.8F),
             contentAlignment = Alignment.Center,
         ) {
-            Kiwi_P2(
+            KiwiP2(
                 KiwiTextArguments(
                     title,
                     TextAlign.Center,
@@ -878,7 +868,25 @@ private fun DashboardModalPreview(
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
                     DashboardModal(
-                        MetricsFakeViewModel(MetricsState("2025-06-12", 1173, 9900)),
+                        MetricsFakeViewModel(
+                            MetricsState(
+                                date = "2025-06-12",
+                                maxGoodTimeSeconds = 6 * 60 * 60,
+                                currentGoodTimeSeconds = 1 * 60 * 60,
+                                maxBadTimeSeconds = 6 * 60 * 60,
+                                currentBadTimeSeconds = 2 * 60 * 60,
+                            ),
+                        ),
+                        personalityViewModel =
+                            PersonalityFakeViewModel(
+                                PersonalityState(
+                                    validPersonalityDTO().realName,
+                                    validPersonalityDTO().knightName,
+                                    validPersonalityDTO().build,
+                                    validPersonalityDTO().goodApps,
+                                    validPersonalityDTO().badApps,
+                                ),
+                            ),
                         showCalendarView,
                         initialStateIndex,
                     )

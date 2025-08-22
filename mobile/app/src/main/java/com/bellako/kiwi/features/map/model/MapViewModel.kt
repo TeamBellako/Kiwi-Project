@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.sign
 
 @HiltViewModel
 class MapViewModel
@@ -33,7 +32,6 @@ class MapViewModel
 
         private var flingJob: Job? = null
         private val flingFriction = 0.9f // to brake the velocity [0..1] the lower it is, the faster it stops
-
         private val flingMinVelocity = 10f // threshold to stop the fling
         private var flingLastPosition = Offset(0f, 0f)
         private var flingLastTime = 0L
@@ -63,9 +61,8 @@ class MapViewModel
 
             _state.value = _state.value.copy(viewportWidthPx = viewportWidthPx)
             _state.value = _state.value.copy(viewportHeightPx = viewportHeightPx)
-            // considering always orientation portrait (viewportHeightPx > viewportWidthPx)
-            _state.value = _state.value.copy(mapWidthPx = mapWidthPx * (viewportHeightPx / mapHeightPx))
-            _state.value = _state.value.copy(mapHeightPx = mapHeightPx * (viewportHeightPx / mapHeightPx))
+            _state.value = _state.value.copy(mapWidthPx = mapWidthPx * (viewportHeightPx / mapWidthPx))
+            _state.value = _state.value.copy(mapHeightPx = mapHeightPx * (viewportHeightPx / mapWidthPx))
 
             setInitialPositionScale()
         }
@@ -129,8 +126,8 @@ class MapViewModel
             val scaledMapHeight = state.mapHeightPx * state.scale
             // Half the difference between the scaled map size and the viewport size
             return Offset(
-                (scaledMapWidth - state.viewportWidthPx) / 2f,
-                (scaledMapHeight - state.viewportHeightPx) / 2f,
+                max(0f, (scaledMapWidth - state.viewportWidthPx) / 2f) * dragLimitFactor,
+                max(0f, (scaledMapHeight - state.viewportHeightPx) / 2f) * dragLimitFactor,
             )
         }
 
@@ -138,40 +135,13 @@ class MapViewModel
             offset: Offset,
             state: MapState,
         ): Offset {
-            if (state.mapWidthPx <= 0 || state.mapHeightPx <= 0 || state.viewportWidthPx <= 0 || state.viewportHeightPx <= 0) {
-                return offset
-            }
-
             val maxOffset = getMaxOffset(state)
-            // Don't allow panning if the map is smaller than the viewport
-            val effectiveMaxOffsetX = max(0f, maxOffset.x)
-            val effectiveMaxOffsetY = max(0f, maxOffset.y)
-
-            // Add margin to prevent dragging too close to the edge
-            val restrictedMaxOffsetX = effectiveMaxOffsetX * dragLimitFactor
-            val restrictedMaxOffsetY = effectiveMaxOffsetY * dragLimitFactor
-
-            // When dragging beyond the maximum allowed offset, set the offset to exactly the maximum allowed value
-            // This is the key fix for the dragging limit issue
-
-            // If the absolute value of the offset exceeds the restricted maximum,
-            // set it to exactly the restricted maximum with the appropriate sign
-            val resultX =
-                if (abs(offset.x) > restrictedMaxOffsetX) {
-                    sign(offset.x) * restrictedMaxOffsetX
-                } else {
-                    offset.x
-                }
-
-            val resultY =
-                if (abs(offset.y) > restrictedMaxOffsetY) {
-                    sign(offset.y) * restrictedMaxOffsetY
-                } else {
-                    offset.y
-                }
-
+            val resultX = offset.x.coerceIn(-maxOffset.x, maxOffset.x)
+            val resultY = offset.y.coerceIn(-maxOffset.y, maxOffset.y)
             return Offset(resultX, resultY)
         }
+
+        // ---------------------------------------------------------------------------------------------
 
         private fun updateFling(delta: Offset) {
             val now = System.currentTimeMillis()

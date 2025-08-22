@@ -199,6 +199,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.gif)
     implementation(libs.coil.compose)
+    implementation(libs.accompanist.drawablepainter)
 
     implementation(libs.google.firebase.analytics)
     testImplementation(kotlin("test"))

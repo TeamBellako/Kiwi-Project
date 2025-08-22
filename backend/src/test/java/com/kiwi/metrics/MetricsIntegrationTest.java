@@ -81,7 +81,9 @@ public class MetricsIntegrationTest {
                 metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
         
         assert(retrievedMetricsPersistence.isPresent());
-        assertEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO).getDate(), retrievedMetricsPersistence.get().getDate());
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO).getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(MetricsMapper.toDomain(validMetricsDTO).getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
     @Test
@@ -116,7 +118,10 @@ public class MetricsIntegrationTest {
         metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
         
         MetricsDTO duplicatedUpdatedMetricsDTO = validMetricsDTO.copy();
-        duplicatedUpdatedMetricsDTO.setSteps(validMetricsDTO.getSteps() + 1);
+        duplicatedUpdatedMetricsDTO.setMaxGoodTimeSeconds(validMetricsDTO.getMaxGoodTimeSeconds() + 1);
+        duplicatedUpdatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() + 1);
+        duplicatedUpdatedMetricsDTO.setMaxBadTimeSeconds(validMetricsDTO.getMaxBadTimeSeconds() + 1);
+        duplicatedUpdatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() + 1);
         
         mockMvc.perform(post(APIURL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -135,7 +140,8 @@ public class MetricsIntegrationTest {
     public void updateValidMetrics() throws Exception {
         metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
         MetricsDTO updatedMetricsDTO = validMetricsDTO.copy();
-        updatedMetricsDTO.setSteps(validMetricsDTO.getSteps() + 1);
+        updatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() + 1);
+        updatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() + 1);
 
         mockMvc.perform(put(APIURL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +152,9 @@ public class MetricsIntegrationTest {
                 metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(validMetricsDTO.getDate()));
         assert(retrievedMetricsPersistence.isPresent());
         assertNotEquals(MetricsMapper.toDomain(validMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
-        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO), MetricsMapper.toDomain(retrievedMetricsPersistence.get()));
+        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO).getDate(), retrievedMetricsPersistence.get().getDate());
+        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO).getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(MetricsMapper.toDomain(updatedMetricsDTO).getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
     @Test
@@ -154,7 +162,9 @@ public class MetricsIntegrationTest {
     public void updateInvalidMetrics() throws Exception {
         metricsRepository.saveAndFlush(MetricsMapper.toPersistence(validUserPersistence, MetricsMapper.toDomain(validMetricsDTO)));
         MetricsDTO updatedMetricsDTO = invalidMetricsDTO.copy();
-        updatedMetricsDTO.setSteps(validMetricsDTO.getSteps() - 1);
+        Integer invalidTime = 25 * 60 * 60;
+        updatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() - invalidTime);
+        updatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() - invalidTime);
         
         mockMvc.perform(put(APIURL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -202,7 +212,10 @@ public class MetricsIntegrationTest {
         mockMvc.perform(get(APIURL)
                         .param("date", validMetricsDTO.getDate()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.steps").value(validMetricsDTO.getSteps()));
+                .andExpect(jsonPath("$.maxGoodTimeSeconds").value(validMetricsDTO.getMaxGoodTimeSeconds()))
+                .andExpect(jsonPath("$.currentGoodTimeSeconds").value(validMetricsDTO.getCurrentGoodTimeSeconds()))
+                .andExpect(jsonPath("$.maxBadTimeSeconds").value(validMetricsDTO.getMaxBadTimeSeconds()))
+                .andExpect(jsonPath("$.currentBadTimeSeconds").value(validMetricsDTO.getCurrentBadTimeSeconds()));
     }
 
     @Test

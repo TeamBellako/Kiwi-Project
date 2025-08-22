@@ -20,9 +20,19 @@ class MetricsViewModel
         private val repository: MetricsRepository,
     ) : BaseViewModel(),
         IMetricsViewModel {
-        private val _state = MutableStateFlow(MetricsState("", 0, 0))
+        private val _state =
+            MutableStateFlow(
+                MetricsState(
+                    date = "",
+                    maxGoodTimeSeconds = 0,
+                    currentGoodTimeSeconds = 0,
+                    maxBadTimeSeconds = 0,
+                    currentBadTimeSeconds = 0,
+                ),
+            )
         override val state: StateFlow<MetricsState> = _state.asStateFlow()
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun createMetrics(state: MetricsState): Result<Unit> {
             val domain = validateAndMapToDomain(state) ?: return failureWithError(invalidDataMessage())
 
@@ -36,6 +46,7 @@ class MetricsViewModel
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun updateMetrics(state: MetricsState): Result<Unit> {
             val domain = validateAndMapToDomain(state) ?: return failureWithError(invalidDataMessage())
 
@@ -54,10 +65,18 @@ class MetricsViewModel
             val parsedDate =
                 try {
                     LocalDate.parse(date)
-                } catch (e: DateTimeParseException) {
+                } catch (_: DateTimeParseException) {
                     return failureWithError(invalidDataMessage())
                 }
-            _state.value = MetricsState(date)
+
+            _state.value =
+                MetricsState(
+                    date = "",
+                    maxGoodTimeSeconds = 0,
+                    currentGoodTimeSeconds = 0,
+                    maxBadTimeSeconds = 0,
+                    currentBadTimeSeconds = 0,
+                )
 
             val result = repository.getMetricsByDate(parsedDate).getOrNull()
             if (result == null) {
@@ -68,12 +87,9 @@ class MetricsViewModel
             return Result.success(Unit)
         }
 
-        private fun validateAndMapToDomain(state: MetricsState): Metrics? = MetricsMapper.toDomain(state).getOrNull()
+        @RequiresApi(Build.VERSION_CODES.O)
+        private fun validateAndMapToDomain(state: MetricsState): Metrics? = MetricsMapper.toDomain(state)
 
         private fun invalidDataMessage(): String =
-            """
-            Invalid metrics. Metrics must:
-            - Have a positive number of steps
-            - Have a positive number of screenTimeSeconds
-            """.trimIndent()
+            "Invalid metrics. Metrics must have a positive number of good and bad apps TimeSeconds".trimIndent()
     }

@@ -24,13 +24,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.screens.components.KiwiH2
+import com.bellako.kiwi.common.screens.components.KiwiLabel2
+import com.bellako.kiwi.common.screens.components.KiwiSlider
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
-import com.bellako.kiwi.common.screens.components.Kiwi_Label2
-import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -38,6 +38,7 @@ import com.bellako.kiwi.features.settings.data.SettingsState
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.tests.SettingsFakeViewModel
 import com.bellako.kiwi.features.settings.tests.SettingsTestTags
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
@@ -119,7 +120,7 @@ private fun SettingsFields(
                     .testTag(CommonTestTags.SETTINGS_SCREEN),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Kiwi_H2(
+            KiwiH2(
                 KiwiTextArguments(
                     "SETTINGS",
                     bold = true,
@@ -133,7 +134,7 @@ private fun SettingsFields(
                 value = currentState.email,
                 onValueChange = {},
                 label = {
-                    Kiwi_Label2(
+                    KiwiLabel2(
                         KiwiTextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
@@ -147,7 +148,7 @@ private fun SettingsFields(
 
             Kiwi_Spacer(Spacing.large)
 
-            Kiwi_Slider(
+            KiwiSlider(
                 KiwiTextArguments("SFX Volume"),
                 value = soundSliderPosition,
                 onValueChange = { newValue ->
@@ -163,7 +164,7 @@ private fun SettingsFields(
 
             Kiwi_Spacer()
 
-            Kiwi_Slider(
+            KiwiSlider(
                 KiwiTextArguments("Music Volume"),
                 value = musicSliderPosition,
                 onValueChange = { newValue ->
@@ -202,6 +203,8 @@ private fun SettingsFields(
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
@@ -210,7 +213,7 @@ private fun SettingsFields(
 fun SettingsScreenPreview() {
     val previewState =
         SettingsState(
-            email = "finn@thehuman.com",
+            email = validUsersDTO().email,
             soundVolume = 0.67f,
             musicVolume = 0.33f,
         )

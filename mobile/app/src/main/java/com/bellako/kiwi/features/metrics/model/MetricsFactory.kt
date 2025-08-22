@@ -8,22 +8,25 @@ import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
 @RequiresApi(Build.VERSION_CODES.O)
-@Suppress("MagicNumber")
 object MetricsFactory {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
 
     fun generateRandomValidMetricDTO(): MetricsDTO =
         MetricsDTO(
             date = getRandomDate(),
-            steps = getRandomSteps(),
-            screenTimeSeconds = getRandomScreenTimeSeconds(),
+            maxGoodTimeSeconds = getRandomTimeSeconds(5, 6),
+            currentGoodTimeSeconds = getRandomTimeSeconds(1, 2),
+            maxBadTimeSeconds = getRandomTimeSeconds(5, 6),
+            currentBadTimeSeconds = getRandomTimeSeconds(3, 4),
         )
 
     fun generateRandomInvalidMetricDTO(): MetricsDTO =
         MetricsDTO(
             date = getRandomDate(),
-            steps = -getRandomSteps(),
-            screenTimeSeconds = -getRandomScreenTimeSeconds(),
+            maxGoodTimeSeconds = -getRandomTimeSeconds(5, 6),
+            currentGoodTimeSeconds = -getRandomTimeSeconds(1, 2),
+            maxBadTimeSeconds = -getRandomTimeSeconds(5, 6),
+            currentBadTimeSeconds = -getRandomTimeSeconds(3, 4),
         )
 
     fun generateRandomMetricsSet(
@@ -43,9 +46,8 @@ object MetricsFactory {
         return LocalDate.of(year, month, day).format(formatter)
     }
 
-    private fun getRandomSteps(): Int = Random.nextInt(1, 10001)
-
-    private fun getRandomScreenTimeSeconds(): Int {
-        return Random.nextInt(60, 10 * 60 * 60 + 1) // 60 to 36,000 seconds
-    }
+    private fun getRandomTimeSeconds(
+        fromHours: Int,
+        untilHours: Int,
+    ): Int = Random.nextInt(fromHours * 60 * 60, untilHours * 60 * 60)
 }

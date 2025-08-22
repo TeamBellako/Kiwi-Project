@@ -1,10 +1,10 @@
 package com.bellako.kiwi
 
-import com.bellako.kiwi.common.model.HealthApiService
 import com.bellako.kiwi.features.personality.model.IPersonalityAPI
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityRepository
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityBuildDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityKnightNameDTO
@@ -32,14 +32,12 @@ class PersonalityIntegrationTest {
     private lateinit var api: IPersonalityAPI
     private lateinit var repository: PersonalityRepository
     private lateinit var viewModel: IPersonalityViewModel
-    private lateinit var healthApi: HealthApiService
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
         api = mock(IPersonalityAPI::class.java)
-        healthApi = mock(HealthApiService::class.java)
         repository = PersonalityRepository(api)
         viewModel = PersonalityViewModel(repository)
     }
@@ -59,9 +57,7 @@ class PersonalityIntegrationTest {
     fun `update personality real name`() =
         runTest {
             `when`(api.updateRealName(validPersonalityRealNameDTO())).thenReturn(Unit)
-
             val result = repository.updateRealName(validPersonalityRealNameDTO())
-
             Assert.assertTrue(result.isSuccess)
         }
 
@@ -69,9 +65,7 @@ class PersonalityIntegrationTest {
     fun `update personality knight name`() =
         runTest {
             `when`(api.updateKnightName(validPersonalityRealNameDTO())).thenReturn(Unit)
-
             val result = repository.updateKnightName(validPersonalityKnightNameDTO())
-
             Assert.assertTrue(result.isSuccess)
         }
 
@@ -79,9 +73,15 @@ class PersonalityIntegrationTest {
     fun `update personality build`() =
         runTest {
             `when`(api.updateBuild(validPersonalityBuildDTO())).thenReturn(Unit)
-
             val result = repository.updateBuild(validPersonalityBuildDTO())
+            Assert.assertTrue(result.isSuccess)
+        }
 
+    @Test
+    fun `update personality apps`() =
+        runTest {
+            `when`(api.updateApps(validPersonalityAppsDTO())).thenReturn(Unit)
+            val result = repository.updateApps(validPersonalityAppsDTO())
             Assert.assertTrue(result.isSuccess)
         }
 }

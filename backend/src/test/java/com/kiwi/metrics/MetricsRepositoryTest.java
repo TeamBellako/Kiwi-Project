@@ -61,7 +61,10 @@ public class MetricsRepositoryTest {
         Optional<MetricsPersistence> savedMetricsPersistence = 
                 metricsRepository.findByUserAndDate(validUserPersistence, metrics.getDate());
         assert(savedMetricsPersistence.isPresent());
-        savedMetricsPersistence.get().setSteps(new PositiveOrZeroInteger(metrics.getSteps().value() + 1));
+        savedMetricsPersistence.get().setMaxGoodTimeSeconds(new PositiveOrZeroInteger(metrics.getMaxGoodTimeSeconds().value() + 1));
+        savedMetricsPersistence.get().setCurrentGoodTimeSeconds(new PositiveOrZeroInteger(metrics.getCurrentGoodTimeSeconds().value() + 1));
+        savedMetricsPersistence.get().setMaxBadTimeSeconds(new PositiveOrZeroInteger(metrics.getMaxBadTimeSeconds().value() + 1));
+        savedMetricsPersistence.get().setCurrentBadTimeSeconds(new PositiveOrZeroInteger(metrics.getCurrentBadTimeSeconds().value() + 1));
         metricsRepository.saveAndFlush(savedMetricsPersistence.get());
 
         Optional<MetricsPersistence> savedUpdatedMetricsPersistence = 

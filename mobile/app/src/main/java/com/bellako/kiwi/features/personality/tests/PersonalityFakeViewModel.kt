@@ -16,12 +16,19 @@ class PersonalityFakeViewModel(
     private val _state = MutableStateFlow<PersonalityState?>(initialState)
     override val state: StateFlow<PersonalityState?> = _state.asStateFlow()
 
+    var fakeError: Boolean = false
+    var fakeException: Exception = Exception("Simulated error")
+
+    // ---------------------------------------------------------------------------------------------
+
     override suspend fun loadPersonality(): Result<Unit> = Result.success(Unit)
 
     override fun checkValid(): Result<Personality> =
         _state.value?.toDomainObject()?.fold(
             onSuccess = { validState ->
-                Result.success(Personality(validState.realName, validState.knightName, validState.build))
+                Result.success(
+                    Personality(validState.realName, validState.knightName, validState.build, validState.goodApps, validState.badApps),
+                )
             },
             onFailure = { err ->
                 _uiState.value = UIState.Error(err.message.orEmpty())
@@ -29,9 +36,9 @@ class PersonalityFakeViewModel(
             },
         ) ?: Result.failure(Exception("Invalid state"))
 
-    override suspend fun updateRealName(): Result<Unit> = Result.success(Unit)
+    override suspend fun updateRealName(): Result<Unit> = getTestResult()
 
-    override suspend fun updateKnightName(): Result<Unit> = Result.success(Unit)
+    override suspend fun updateKnightName(): Result<Unit> = getTestResult()
 
     override fun onRealNameChanged(name: String) {
         _state.value = _state.value?.copy(realName = name)
@@ -41,5 +48,24 @@ class PersonalityFakeViewModel(
         _state.value = _state.value?.copy(knightName = name)
     }
 
-    override suspend fun updateBuild(): Result<Unit> = Result.success(Unit)
+    override suspend fun updateBuild(): Result<Unit> = getTestResult()
+
+    override fun onAppsChanged(
+        goodApps: List<String>,
+        badApps: List<String>,
+    ) {
+        _state.value = _state.value?.copy(goodApps = goodApps)
+        _state.value = _state.value?.copy(badApps = badApps)
+    }
+
+    override suspend fun updateApps(): Result<Unit> = getTestResult()
+
+    fun getTestResult(): Result<Unit> =
+        if (fakeError) {
+            handleError(fakeException)
+            Result.failure(fakeException)
+        } else {
+            handleSuccess()
+            Result.success(Unit)
+        }
 }

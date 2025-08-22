@@ -28,7 +28,7 @@ fun Kiwi_InfoBox(
                 .fillMaxWidth()
                 .background(color),
     ) {
-        Kiwi_P2(
+        KiwiP2(
             KiwiTextArguments(
                 message,
                 modifier =

@@ -26,11 +26,7 @@ public class UsersDTO {
         
         this.settingsDTO = new SettingsDTO(getEmail());
         this.metricsDTOs = new HashSet<>();
-        this.metricsDTOs.add(new MetricsDTO(
-                formatDate(LocalDate.now()),
-                0,
-                0
-        ));
+        this.metricsDTOs.add(new MetricsDTO(formatDate(LocalDate.now()), 0, 0, 0, 0));
     }
 
     public UsersDTO(String email, String password, SettingsDTO settingsDTO, Set<MetricsDTO> metricsDTOs) {

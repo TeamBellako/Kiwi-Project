@@ -1,11 +1,8 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -18,19 +15,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.screens.components.KiwiH2
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -41,6 +35,7 @@ import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validP
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -49,41 +44,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun SignUpTestScreen(
+fun SignUpScreen3_Test(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center,
-    ) {
-        Kiwi_Image(
-            R.drawable.ph_onboarding_bkg,
-            "Sign Up Background",
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter),
-            contentScale = ContentScale.Crop,
+    SignUpScreen {
+        Question(
+            usersViewModel,
+            personalityViewModel,
+            navController,
         )
-
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(getResponsiveSizeHeight(Spacing.medium)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Question(
-                usersViewModel,
-                personalityViewModel,
-                navController,
-            )
-        }
     }
 }
 
@@ -100,12 +71,9 @@ private fun Question(
 
         when (uiState) {
             is UIState.GeneralError -> {
-                ErrorModal(onRetry = {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        if (personalityViewModel.updateBuild().isSuccess) {
-                            navController.navigate(ScreenRoutes.HOME)
-                        }
-                    }
+                ErrorModal(onButtonClick = {
+                    usersViewModel.resetUiState()
+                    personalityViewModel.resetUiState()
                 })
             }
 
@@ -115,13 +83,14 @@ private fun Question(
                         Modifier
                             .fillMaxWidth()
                             .wrapContentHeight()
+                            .padding(getResponsiveSizeHeight(Spacing.medium))
                             .testTag(CommonTestTags.USERS_SCREEN),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-                    Kiwi_H2(
+                    KiwiH2(
                         KiwiTextArguments(
                             currentPersonalityState.questions[currentQuestion].question,
                             textAlign = TextAlign.Center,
@@ -144,10 +113,9 @@ private fun Question(
                                 if (currentQuestion + 1 < currentPersonalityState.questions.size) {
                                     ++currentQuestion
                                 } else {
-                                    navController.navigate(ScreenRoutes.HOME)
                                     CoroutineScope(Dispatchers.Main).launch {
                                         if (personalityViewModel.updateBuild().isSuccess) {
-                                            navController.navigate(ScreenRoutes.HOME)
+                                            navController.navigate(ScreenRoutes.SIGNUP4_APPS)
                                         }
                                     }
                                 }
@@ -162,18 +130,27 @@ private fun Question(
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpTestScreenPreview() {
+fun SignUpScreen3_TestPreview() {
     KiwiTheme {
-        SignUpTestScreen(
-            UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            PersonalityFakeViewModel(
-                PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build),
-            ),
+        SignUpScreen3_Test(
+            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
+            personalityViewModel =
+                PersonalityFakeViewModel(
+                    PersonalityState(
+                        validPersonalityDTO().realName,
+                        validPersonalityDTO().knightName,
+                        validPersonalityDTO().build,
+                        validPersonalityDTO().goodApps,
+                        validPersonalityDTO().badApps,
+                    ),
+                ),
             navController = rememberNavController(),
         )
     }

@@ -16,8 +16,10 @@ public class MetricsMapper {
 
         return new Metrics(
                 persistence.getDate(),
-                persistence.getSteps(),
-                persistence.getScreenTimeSeconds()
+                persistence.getMaxGoodTimeSeconds(),
+                persistence.getCurrentGoodTimeSeconds(),
+                persistence.getMaxBadTimeSeconds(),
+                persistence.getCurrentBadTimeSeconds()
         );
     }
 
@@ -28,8 +30,10 @@ public class MetricsMapper {
         return new MetricsPersistence(
                 usersPersistence,
                 domain.getDate(),
-                domain.getSteps(),
-                domain.getScreenTimeSeconds()
+                domain.getMaxGoodTimeSeconds(),
+                domain.getCurrentGoodTimeSeconds(),
+                domain.getMaxBadTimeSeconds(),
+                domain.getCurrentBadTimeSeconds()
         );
     }
 
@@ -41,8 +45,10 @@ public class MetricsMapper {
         try {
             metrics = new Metrics(
                     LocalDate.parse(dto.getDate()),
-                    new PositiveOrZeroInteger(dto.getSteps()),
-                    new PositiveOrZeroInteger(dto.getScreenTimeSeconds())
+                    new PositiveOrZeroInteger(dto.getMaxGoodTimeSeconds()),
+                    new PositiveOrZeroInteger(dto.getCurrentGoodTimeSeconds()),
+                    new PositiveOrZeroInteger(dto.getMaxBadTimeSeconds()),
+                    new PositiveOrZeroInteger(dto.getCurrentBadTimeSeconds())
             );
         } catch (Exception e) {
             throw new MetricsInvalidException(e.getMessage());
@@ -56,8 +62,10 @@ public class MetricsMapper {
         if (domain == null) return null;
         return new MetricsDTO(
                 formatDate(domain.getDate()),
-                domain.getSteps().value(),
-                domain.getScreenTimeSeconds().value()
+                domain.getMaxGoodTimeSeconds().value(),
+                domain.getCurrentGoodTimeSeconds().value(),
+                domain.getMaxBadTimeSeconds().value(),
+                domain.getCurrentBadTimeSeconds().value()
         );
     }
 

@@ -1,5 +1,6 @@
 package com.bellako.kiwi
 
+import android.annotation.SuppressLint
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -12,21 +13,26 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.map.model.MapViewModel
+import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.data.UsersState
-import com.bellako.kiwi.features.users.screens.SignUpScreen
-import com.bellako.kiwi.features.users.screens.SignUpTestScreen
+import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 
 @RunWith(AndroidJUnit4::class)
-class SignUpScreenTest {
+class SignUpScreen4Test {
     @get:Rule
     val rule = createComposeRule()
 
@@ -36,40 +42,43 @@ class SignUpScreenTest {
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
     private lateinit var personalityState: PersonalityState
 
+    @SuppressLint("ViewModelConstructorInComposable")
     @Before
     fun setUp() {
         AudioManager.setEnabled(false)
 
-        usersState = UsersState("finn@thehuman.com", "Math3matical!")
-        personalityState = PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)
+        usersState = UsersState(validUsersDTO().email, validUsersDTO().password)
+        personalityState =
+            PersonalityState(
+                validPersonalityDTO().realName,
+                validPersonalityDTO().knightName,
+                validPersonalityDTO().build,
+                validPersonalityAppsDTO().goodApps,
+                validPersonalityAppsDTO().badApps,
+            )
 
         usersFakeViewModel = UsersFakeViewModel(usersState)
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
         rule.setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP) {
-                composable(ScreenRoutes.SIGNUP) {
-                    SignUpScreen(
-                        usersViewModel = usersFakeViewModel,
+            NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP4_APPS) {
+                composable(ScreenRoutes.SIGNUP4_APPS) {
+                    SignUpScreen4_Apps(
                         personalityViewModel = personalityFakeViewModel,
                         navController = navController,
                     )
                 }
-                composable(ScreenRoutes.SIGNUP_TEST) {
-                    SignUpTestScreen(
-                        usersViewModel = usersFakeViewModel,
-                        personalityViewModel = personalityFakeViewModel,
-                        navController = navController,
-                    )
+                composable(ScreenRoutes.HOME) {
+                    MapScreen(viewModel = MapViewModel())
                 }
             }
         }
     }
 
     @Test
-    fun validSignup() {
-        usersFakeViewModel.fakeError = false
+    fun screen4_validApps() {
+        personalityFakeViewModel.fakeError = false
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
         Thread.sleep(500)
@@ -77,20 +86,12 @@ class SignUpScreenTest {
     }
 
     @Test
-    fun invalidSignup() {
-        usersFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(401)
+    fun screen4_errorOnSignupApps() {
+        personalityFakeViewModel.fakeError = true
+        personalityFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
         rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
-        rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
-    }
-
-    @Test
-    fun errorOnSignup() {
-        usersFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(500)
-
-        rule.onNodeWithTag(UsersTestTags.SIGNUP_BUTTON).performClick()
+        Thread.sleep(500)
         rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()
     }
 }

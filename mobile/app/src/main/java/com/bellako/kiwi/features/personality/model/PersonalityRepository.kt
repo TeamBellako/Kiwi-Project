@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.personality.model
 
+import com.bellako.kiwi.features.personality.data.PersonalityAppsDTO
 import com.bellako.kiwi.features.personality.data.PersonalityBuildDTO
 import com.bellako.kiwi.features.personality.data.PersonalityDTO
 import com.bellako.kiwi.features.personality.data.PersonalityUserNameDTO
@@ -14,4 +15,6 @@ class PersonalityRepository(
     suspend fun updateKnightName(dto: PersonalityUserNameDTO): Result<Unit> = runCatching { api.updateKnightName(dto) }
 
     suspend fun updateBuild(dto: PersonalityBuildDTO): Result<Unit> = runCatching { api.updateBuild(dto) }
+
+    suspend fun updateApps(dto: PersonalityAppsDTO): Result<Unit> = runCatching { api.updateApps(dto) }
 }

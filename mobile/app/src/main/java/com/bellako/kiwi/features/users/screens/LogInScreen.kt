@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,14 +40,14 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP2
+import com.bellako.kiwi.common.screens.components.KiwiH2
+import com.bellako.kiwi.common.screens.components.KiwiLabel2
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
-import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
@@ -58,6 +59,7 @@ import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validP
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.KiwiTheme
 import com.bellako.kiwi.ui.Spacing
@@ -84,13 +86,10 @@ fun LogInScreen(
     ) {
         when (uiState) {
             is UIState.GeneralError -> {
-                ErrorModal(onRetry = {
+                ErrorModal(onButtonClick = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        val result = usersViewModel.login(context)
-                        if (result.isSuccess) {
-                            navController.navigate(ScreenRoutes.HOME)
-                            usersViewModel.onLoginSuccess()
-                        }
+                        usersViewModel.clearLocalCredentials(context)
+                        usersViewModel.resetUiState()
                     }
                 })
             }
@@ -141,10 +140,7 @@ private fun LogIn(
         if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
             usersViewModel.onEmailChanged(username)
             usersViewModel.onPasswordChanged(password)
-            if (usersViewModel.login(context).isSuccess) {
-                navController.navigate(ScreenRoutes.HOME)
-                usersViewModel.onLoginSuccess()
-            }
+            performLogin(context, usersViewModel, personalityViewModel, navController)
         }
     }
 
@@ -172,7 +168,7 @@ private fun LogIn(
             ) {
                 // TEXT WELCOME
 
-                Kiwi_H2(
+                KiwiH2(
                     KiwiTextArguments(
                         "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
@@ -193,7 +189,7 @@ private fun LogIn(
                         value = currentState.email,
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
-                            Kiwi_Label2(
+                            KiwiLabel2(
                                 KiwiTextArguments(
                                     "Email",
                                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -212,7 +208,7 @@ private fun LogIn(
                         value = currentState.password,
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
-                            Kiwi_Label2(
+                            KiwiLabel2(
                                 KiwiTextArguments(
                                     "Password",
                                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -234,18 +230,7 @@ private fun LogIn(
                         ),
                         onClick = {
                             CoroutineScope(Dispatchers.Main).launch {
-                                if (usersViewModel.login(context).isSuccess) {
-                                    // check personality registered, navigate to Home or Test depending on that
-                                    personalityViewModel.loadPersonality().fold(
-                                        onSuccess = {
-                                            navController.navigate(ScreenRoutes.HOME)
-                                        },
-                                        onFailure = {
-                                            navController.navigate(ScreenRoutes.SIGNUP_TEST)
-                                        },
-                                    )
-                                    usersViewModel.onLoginSuccess()
-                                }
+                                performLogin(context, usersViewModel, personalityViewModel, navController)
                             }
                         },
                         enabled = !isLoading,
@@ -292,9 +277,42 @@ private fun LogIn(
             contentAlignment = Alignment.BottomCenter,
         ) {
             SignUp {
-                navController.navigate(ScreenRoutes.SIGNUP_WELCOME)
+                navController.navigate(ScreenRoutes.SIGNUP1_WELCOME)
             }
         }
+    }
+}
+
+private suspend fun performLogin(
+    context: Context,
+    usersViewModel: IUsersViewModel,
+    personalityViewModel: IPersonalityViewModel,
+    navController: NavController,
+) {
+    if (usersViewModel.login(context).isSuccess) {
+        // check personality registered and configured
+        // navigate to Home or to the corresponding personality test if anything missing
+        personalityViewModel.loadPersonality().fold(
+            onSuccess = {
+                if (personalityViewModel.state.value?.build == "") {
+                    navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+                } else if (personalityViewModel.state.value
+                        ?.goodApps
+                        ?.isEmpty()!! &&
+                    personalityViewModel.state.value
+                        ?.badApps
+                        ?.isEmpty()!!
+                ) {
+                    navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                } else {
+                    navController.navigate(ScreenRoutes.HOME)
+                }
+            },
+            onFailure = {
+                navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+            },
+        )
+        usersViewModel.onLoginSuccess()
     }
 }
 
@@ -332,13 +350,15 @@ private fun SignUp(onSignUp: () -> Unit) {
             }
         }
 
-    Kiwi_AnnotatedString_P2(
+    KiwiAnnotatedStringP2(
         KiwiAnnotatedStringArguments(
             annotatedString,
             TextAlign.Center,
         ),
     )
 }
+
+// -------------------------------------------------------------------------------------------------
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
@@ -348,10 +368,17 @@ private fun SignUp(onSignUp: () -> Unit) {
 fun LogInScreenPreview() {
     KiwiTheme {
         LogInScreen(
-            UsersFakeViewModel(UsersState("finn@thehuman.com", "Math3matical!")),
-            PersonalityFakeViewModel(
-                PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build),
-            ),
+            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
+            personalityViewModel =
+                PersonalityFakeViewModel(
+                    PersonalityState(
+                        validPersonalityDTO().realName,
+                        validPersonalityDTO().knightName,
+                        validPersonalityDTO().build,
+                        validPersonalityDTO().goodApps,
+                        validPersonalityDTO().badApps,
+                    ),
+                ),
             navController = rememberNavController(),
         )
     }

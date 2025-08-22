@@ -7,62 +7,69 @@ import java.util.Objects;
 
 public class Metrics {
     private LocalDate date;
-    private PositiveOrZeroInteger steps;
-    private PositiveOrZeroInteger screenTimeSeconds;
+    private PositiveOrZeroInteger maxGoodTimeSeconds;
+    private PositiveOrZeroInteger currentGoodTimeSeconds;
+    private PositiveOrZeroInteger maxBadTimeSeconds;
+    private PositiveOrZeroInteger currentBadTimeSeconds;
     
-    public Metrics(LocalDate date, PositiveOrZeroInteger steps, PositiveOrZeroInteger screenTimeSeconds) {
+    public Metrics(LocalDate date, PositiveOrZeroInteger maxGoodTimeSeconds, PositiveOrZeroInteger currentGoodTimeSeconds, PositiveOrZeroInteger maxBadTimeSeconds, PositiveOrZeroInteger currentBadTimeSeconds) {
         this.date = date;
-        this.steps = steps;
-        this.screenTimeSeconds = screenTimeSeconds;
+        this.maxGoodTimeSeconds = maxGoodTimeSeconds;
+        this.currentGoodTimeSeconds = currentGoodTimeSeconds;
+        this.maxBadTimeSeconds = maxBadTimeSeconds;
+        this.currentBadTimeSeconds = currentBadTimeSeconds;
     }
 
     public LocalDate getDate() {
         return date;
     }
-
     public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public PositiveOrZeroInteger getSteps() {
-        return steps;
-    }
+    public PositiveOrZeroInteger getMaxGoodTimeSeconds() { return maxGoodTimeSeconds; }
+    public void setMaxGoodTimeSeconds(PositiveOrZeroInteger maxGoodTimeSeconds) { this.maxGoodTimeSeconds = maxGoodTimeSeconds; }
 
-    public void setSteps(PositiveOrZeroInteger steps) {
-        this.steps = steps;
-    }
+    public PositiveOrZeroInteger getCurrentGoodTimeSeconds() { return currentGoodTimeSeconds; }
+    public void setCurrentGoodTimeSeconds(PositiveOrZeroInteger currentGoodTimeSeconds) { this.currentGoodTimeSeconds = currentGoodTimeSeconds; }
 
-    public PositiveOrZeroInteger getScreenTimeSeconds() {
-        return screenTimeSeconds;
-    }
+    public PositiveOrZeroInteger getMaxBadTimeSeconds() { return maxBadTimeSeconds; }
+    public void setMaxBadTimeSeconds(PositiveOrZeroInteger maxBadTimeSeconds) { this.maxBadTimeSeconds = maxBadTimeSeconds; }
 
-    public void setScreenTime(PositiveOrZeroInteger screenTimeSeconds) {
-        this.screenTimeSeconds = screenTimeSeconds;
-    }
+    public PositiveOrZeroInteger getCurrentBadTimeSeconds() { return currentBadTimeSeconds; }
+    public void setCurrentBadTimeSeconds(PositiveOrZeroInteger currentBadTimeSeconds) { this.currentBadTimeSeconds = currentBadTimeSeconds; }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Metrics metrics = (Metrics) o;
-        return Objects.equals(date, metrics.date) && Objects.equals(steps, metrics.steps) && Objects.equals(screenTimeSeconds, metrics.screenTimeSeconds);
+        return Objects.equals(date, metrics.date) &&
+                Objects.equals(maxGoodTimeSeconds, metrics.maxGoodTimeSeconds) &&
+                Objects.equals(currentGoodTimeSeconds, metrics.currentGoodTimeSeconds) &&
+                Objects.equals(maxBadTimeSeconds, metrics.maxBadTimeSeconds) &&
+                Objects.equals(currentBadTimeSeconds, metrics.currentBadTimeSeconds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, steps, screenTimeSeconds);
+        return Objects.hash(date, maxGoodTimeSeconds, currentGoodTimeSeconds, maxBadTimeSeconds, currentBadTimeSeconds);
     }
 
     @Override
     public String toString() {
         return "Metrics{" +
                 ", date=" + date +
-                ", steps=" + steps +
-                ", screenTimeSeconds=" + screenTimeSeconds +
+                ", maxGoodTimeSeconds=" + maxGoodTimeSeconds +
+                ", currentGoodTimeSeconds=" + currentGoodTimeSeconds +
+                ", maxBadTimeSeconds=" + maxBadTimeSeconds +
+                ", currentBadTimeSeconds=" + currentBadTimeSeconds +
                 '}';
     }
     
     public void merge(Metrics other) {
-        this.steps = other.getSteps();
-        this.screenTimeSeconds = other.getScreenTimeSeconds();
+        this.maxGoodTimeSeconds = other.getMaxGoodTimeSeconds();
+        this.currentGoodTimeSeconds = other.getCurrentGoodTimeSeconds();
+        this.maxBadTimeSeconds = other.getMaxBadTimeSeconds();
+        this.currentBadTimeSeconds = other.getCurrentBadTimeSeconds();
     }
 }

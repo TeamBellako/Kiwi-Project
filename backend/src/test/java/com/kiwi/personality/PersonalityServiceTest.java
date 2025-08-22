@@ -61,4 +61,13 @@ public class PersonalityServiceTest {
         verify(personalityRepository, Mockito.times(1)).saveAndFlush(validPersonality());
     }
 
+    @Test
+    public void updateApps() {
+        when(personalityRepository.saveAndFlush(validPersonality())).thenReturn(validPersonality());
+        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(validPersonality()));
+
+        personalityService.updateApps(validUserDTO().getEmail(), appsDTO());
+        verify(personalityRepository, Mockito.times(1)).saveAndFlush(validPersonality());
+    }
+
 }
