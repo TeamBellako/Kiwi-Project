@@ -134,6 +134,10 @@ fun AppClassification(
                 addAll(apps.filter { it.packageName != myPackageName })
             }
         }
+    personalityViewModel.onAppsChanged(
+        goodApps.map { it.packageName },
+        badApps.map { it.packageName },
+    )
 
     if (personalityUiState == UIState.GeneralError) {
         ErrorModal(onButtonClick = {
