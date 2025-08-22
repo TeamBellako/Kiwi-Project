@@ -5,8 +5,8 @@ value class UserName private constructor(
     val value: String,
 ) {
     companion object {
-        private val NAME_REGEX_FULL = Regex("^[a-zA-Z0-9]{3,}$")
-        private val NAME_REGEX_LENGTH = Regex("^.{3,}$")
+        private val NAME_REGEX_FULL = Regex("^[a-zA-Z0-9]+$")
+        private val NAME_REGEX_LENGTH = Regex("^.+$")
 
         fun isValid(name: String): Boolean = NAME_REGEX_FULL.matches(name)
 

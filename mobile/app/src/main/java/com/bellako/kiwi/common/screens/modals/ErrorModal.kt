@@ -32,8 +32,11 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 @Composable
 fun ErrorModal(
     modifier: Modifier = Modifier,
-    errorMessage: String = "Uh-oh! It seems a careless scribe forgot to write this part of the story. \n\n Let's get back on track!",
-    onRetry: (() -> Unit)? = null
+    errorMessage: String =
+        "Uh-oh! It seems a careless scribe forgot to write this part of the story.\n\n" +
+                "Let's get back on track!",
+    buttonMessage: String = "RETRY",
+    onButtonClick: (() -> Unit)? = null
 ) {
     Box(
         modifier = Modifier
@@ -44,7 +47,8 @@ fun ErrorModal(
         ErrorModalLayout(
             modifier,
             errorMessage,
-            onRetry
+            buttonMessage,
+            onButtonClick
         )
     }
 }
@@ -53,7 +57,8 @@ fun ErrorModal(
 private fun ErrorModalLayout(
     modifier: Modifier = Modifier,
     errorMessage: String,
-    onRetry: (() -> Unit)? = null
+    buttonMessage: String,
+    onButtonClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = modifier
@@ -91,12 +96,12 @@ private fun ErrorModalLayout(
                 .testTag(CommonTestTags.ERROR_MODAL)
         ))
 
-        if (onRetry != null) {
+        if (onButtonClick != null) {
             Kiwi_Button(
                 KiwiTextArguments(
-                    "RETRY",
+                    buttonMessage,
                     color = MaterialTheme.colorScheme.secondary),
-                onRetry,
+                onButtonClick,
                 rowModifier = Modifier
                     .padding(getResponsiveSizeHeight(Spacing.large))
             )

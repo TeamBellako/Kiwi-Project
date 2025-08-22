@@ -86,13 +86,10 @@ fun LogInScreen(
     ) {
         when (uiState) {
             is UIState.GeneralError -> {
-                ErrorModal(onRetry = {
+                ErrorModal(onButtonClick = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        val result = usersViewModel.login(context)
-                        if (result.isSuccess) {
-                            navController.navigate(ScreenRoutes.HOME)
-                            usersViewModel.onLoginSuccess()
-                        }
+                        usersViewModel.clearLocalCredentials(context)
+                        usersViewModel.resetUiState()
                     }
                 })
             }

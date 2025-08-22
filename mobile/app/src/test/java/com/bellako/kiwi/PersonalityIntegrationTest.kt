@@ -1,6 +1,5 @@
 package com.bellako.kiwi
 
-import com.bellako.kiwi.common.model.HealthApiService
 import com.bellako.kiwi.features.personality.model.IPersonalityAPI
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityRepository
@@ -33,15 +32,13 @@ class PersonalityIntegrationTest {
     private lateinit var api: IPersonalityAPI
     private lateinit var repository: PersonalityRepository
     private lateinit var viewModel: IPersonalityViewModel
-    private lateinit var healthApi: HealthApiService
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
         api = mock(IPersonalityAPI::class.java)
-        healthApi = mock(HealthApiService::class.java)
-        repository = PersonalityRepository(api, healthApi)
+        repository = PersonalityRepository(api)
         viewModel = PersonalityViewModel(repository)
     }
 

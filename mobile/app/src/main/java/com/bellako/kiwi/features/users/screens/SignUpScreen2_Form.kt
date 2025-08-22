@@ -27,12 +27,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -49,6 +51,7 @@ import com.bellako.kiwi.common.screens.components.KiwiH2
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.KiwiLabel2
 import com.bellako.kiwi.common.screens.components.KiwiP2
+import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 
 
@@ -81,178 +84,182 @@ private fun SignUp(
 
     val personalityState by personalityViewModel.state.collectAsState()
     val personalityUiState by personalityViewModel.uiState.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+
+    val isLoading by remember { derivedStateOf { usersIsLoading || personalityIsLoading } }
+
+    val isPreview = LocalInspectionMode.current
 
     usersState?.let { currentUsersState ->
         personalityState?.let { currentPersonalityState ->
 
-            when (usersUiState) {
-                is UIState.GeneralError -> {
-                    ErrorModal(onRetry = {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            if (personalityViewModel.checkValid().isSuccess && usersViewModel.signup(context).isSuccess) {
-                                personalityViewModel.updateRealName()
-                                personalityViewModel.updateKnightName()
-                                navController.navigate(ScreenRoutes.SIGNUP3_TEST)
-                            }
-                        }
-                    })
+            if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
+                ErrorModal(onButtonClick = {
+                    usersViewModel.resetUiState()
+                    personalityViewModel.resetUiState()
+                })
+
+            } else {
+                if (isLoading || isPreview) {
+                    LoadingModal()
                 }
 
-                else -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .testTag(CommonTestTags.USERS_SCREEN),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .testTag(CommonTestTags.USERS_SCREEN),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
-                        // TEXT WELCOME
+                    // TEXT WELCOME
 
-                        KiwiP2(KiwiTextArguments(
-                            "Initial Setup Will Take\nApproximately 3 Minutes",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.secondary
-                        ))
+                    KiwiP2(KiwiTextArguments(
+                        "Initial Setup Will Take\nApproximately 3 Minutes",
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.secondary
+                    ))
 
-                        Kiwi_Spacer(Spacing.large)
-                        Kiwi_Spacer(Spacing.large)
+                    Kiwi_Spacer(Spacing.large)
+                    Kiwi_Spacer(Spacing.large)
 
-                        KiwiH2(KiwiTextArguments(
-                            "Let's Start With\nThe Basics",
-                            textAlign = TextAlign.Center,
+                    KiwiH2(KiwiTextArguments(
+                        "Let's Start With\nThe Basics",
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.secondary,
+                        bold = true
+                    ))
+
+                    Kiwi_Spacer(Spacing.large)
+
+
+                    // INPUT
+
+                    Kiwi_InputField(
+                        enabled = !isLoading,
+                        value = currentPersonalityState.realName,
+                        onValueChange = { personalityViewModel.onRealNameChanged(it) },
+                        label = {
+                            KiwiLabel2(KiwiTextArguments(
+                                "Real Name",
+                                color = MaterialTheme.colorScheme.inversePrimary
+                            ))
+                        },
+                        shouldHideInput = false,
+                        textColor = MaterialTheme.colorScheme.inversePrimary,
+                        testTag = UsersTestTags.EMAIL_FIELD
+                    )
+
+                    Kiwi_Spacer()
+
+                    Kiwi_InputField(
+                        enabled = !isLoading,
+                        value = currentPersonalityState.knightName,
+                        onValueChange = { personalityViewModel.onKnightNameChanged(it) },
+                        label = {
+                            KiwiLabel2(KiwiTextArguments(
+                                "Knight Name",
+                                color = MaterialTheme.colorScheme.inversePrimary
+                            ))
+                        },
+                        shouldHideInput = false,
+                        textColor = MaterialTheme.colorScheme.inversePrimary,
+                        testTag = UsersTestTags.EMAIL_FIELD
+                    )
+
+                    Kiwi_Spacer()
+
+                    Kiwi_InputField(
+                        enabled = !isLoading,
+                        value = currentUsersState.email,
+                        onValueChange = { usersViewModel.onEmailChanged(it) },
+                        label = {
+                            KiwiLabel2(KiwiTextArguments(
+                                "Email",
+                                color = MaterialTheme.colorScheme.inversePrimary
+                            ))
+                        },
+                        shouldHideInput = false,
+                        textColor = MaterialTheme.colorScheme.inversePrimary,
+                        testTag = UsersTestTags.EMAIL_FIELD
+                    )
+
+                    Kiwi_Spacer()
+
+                    Kiwi_InputField(
+                        enabled = !isLoading,
+                        value = currentUsersState.password,
+                        onValueChange = { usersViewModel.onPasswordChanged(it) },
+                        label = {
+                            KiwiLabel2(KiwiTextArguments(
+                                "Password",
+                                color = MaterialTheme.colorScheme.inversePrimary
+                            ))
+                        },
+                        shouldHideInput = true,
+                        textColor = MaterialTheme.colorScheme.inversePrimary,
+                        testTag = UsersTestTags.PASSWORD_FIELD
+                    )
+
+                    Kiwi_Spacer(Spacing.xLarge)
+
+
+                    // BUTTON
+
+                    Kiwi_Button(
+                        KiwiTextArguments(
+                            "START JOURNEY",
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true
-                        ))
+                        ),
+                        color = MaterialTheme.colorScheme.tertiary,
+                        onClick = {
+                            CoroutineScope(Dispatchers.Main).launch {
+                                if (personalityViewModel.checkValid().isSuccess &&
+                                    usersViewModel.signup(context).isSuccess) {
 
-                        Kiwi_Spacer(Spacing.large)
+                                    FirebaseEventLogger.logEvent(FirebaseEventNames.ONBOARDING_COMPLETED)
 
+                                    if (personalityViewModel.updateRealName().isSuccess &&
+                                        personalityViewModel.updateKnightName().isSuccess) {
 
-                        // INPUT
-
-                        Kiwi_InputField(
-                            enabled = !usersIsLoading,
-                            value = currentPersonalityState.realName,
-                            onValueChange = { personalityViewModel.onRealNameChanged(it) },
-                            label = {
-                                KiwiLabel2(KiwiTextArguments(
-                                    "Real Name",
-                                    color = MaterialTheme.colorScheme.inversePrimary
-                                ))
-                            },
-                            shouldHideInput = false,
-                            textColor = MaterialTheme.colorScheme.inversePrimary,
-                            testTag = UsersTestTags.EMAIL_FIELD
-                        )
-
-                        Kiwi_Spacer()
-
-                        Kiwi_InputField(
-                            enabled = !usersIsLoading,
-                            value = currentPersonalityState.knightName,
-                            onValueChange = { personalityViewModel.onKnightNameChanged(it) },
-                            label = {
-                                KiwiLabel2(KiwiTextArguments(
-                                    "Knight Name",
-                                    color = MaterialTheme.colorScheme.inversePrimary
-                                ))
-                            },
-                            shouldHideInput = false,
-                            textColor = MaterialTheme.colorScheme.inversePrimary,
-                            testTag = UsersTestTags.EMAIL_FIELD
-                        )
-
-                        Kiwi_Spacer()
-
-                        Kiwi_InputField(
-                            enabled = !usersIsLoading,
-                            value = currentUsersState.email,
-                            onValueChange = { usersViewModel.onEmailChanged(it) },
-                            label = {
-                                KiwiLabel2(KiwiTextArguments(
-                                    "Email",
-                                    color = MaterialTheme.colorScheme.inversePrimary
-                                ))
-                            },
-                            shouldHideInput = false,
-                            textColor = MaterialTheme.colorScheme.inversePrimary,
-                            testTag = UsersTestTags.EMAIL_FIELD
-                        )
-
-                        Kiwi_Spacer()
-
-                        Kiwi_InputField(
-                            enabled = !usersIsLoading,
-                            value = currentUsersState.password,
-                            onValueChange = { usersViewModel.onPasswordChanged(it) },
-                            label = {
-                                KiwiLabel2(KiwiTextArguments(
-                                    "Password",
-                                    color = MaterialTheme.colorScheme.inversePrimary
-                                ))
-                            },
-                            shouldHideInput = true,
-                            textColor = MaterialTheme.colorScheme.inversePrimary,
-                            testTag = UsersTestTags.PASSWORD_FIELD
-                        )
-
-                        Kiwi_Spacer(Spacing.large)
-                        Kiwi_Spacer(Spacing.large)
-
-
-                        // BUTTON
-
-                        Kiwi_Button(
-                            KiwiTextArguments(
-                                "START JOURNEY",
-                                color = MaterialTheme.colorScheme.secondary,
-                                bold = true
-                            ),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            onClick = {
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    if (personalityViewModel.checkValid().isSuccess && usersViewModel.signup(context).isSuccess) {
-                                        FirebaseEventLogger.logEvent(FirebaseEventNames.ONBOARDING_COMPLETED)
-
-                                        personalityViewModel.updateRealName()
-                                        personalityViewModel.updateKnightName()
                                         navController.navigate(ScreenRoutes.SIGNUP3_TEST)
                                     }
                                 }
-                            },
-                            enabled = !usersIsLoading,
-                            testTag = UsersTestTags.SIGNUP_BUTTON,
-                        )
+                            }
+                        },
+                        enabled = !isLoading,
+                        testTag = UsersTestTags.SIGNUP_BUTTON,
+                    )
 
-                        Kiwi_Spacer()
+                    Kiwi_Spacer()
 
 
-                        // SIGNUP ERROR MESSAGE
+                    // SIGNUP ERROR MESSAGE
 
-                        var errorMessage by remember { mutableStateOf("") }
-                        errorMessage = when (usersUiState) {
-                            is UIState.Error -> { (usersUiState as UIState.Error).message }
-                            else -> {
-                                when (personalityUiState) {
-                                    is UIState.Error -> { (personalityUiState as UIState.Error).message }
-                                    else -> { "" }
-                                }
+                    var errorMessage by remember { mutableStateOf("") }
+                    errorMessage = when (usersUiState) {
+                        is UIState.Error -> { (usersUiState as UIState.Error).message }
+                        else -> {
+                            when (personalityUiState) {
+                                is UIState.Error -> { (personalityUiState as UIState.Error).message }
+                                else -> { "" }
                             }
                         }
-
-                        Box(
-                            modifier = Modifier
-                                .alpha(if (errorMessage.isEmpty()) 0f else 1f)
-                        ) {
-                            Kiwi_InfoBox(
-                                message = errorMessage,
-                                color = MaterialTheme.colorScheme.error,
-                                testTag = UsersTestTags.ERROR_TEXT
-                            )
-                        }
-
                     }
+
+                    Box(
+                        modifier = Modifier
+                            .alpha(if (errorMessage.isEmpty()) 0f else 1f)
+                    ) {
+                        Kiwi_InfoBox(
+                            message = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            testTag = UsersTestTags.ERROR_TEXT
+                        )
+                    }
+
                 }
             }
         }

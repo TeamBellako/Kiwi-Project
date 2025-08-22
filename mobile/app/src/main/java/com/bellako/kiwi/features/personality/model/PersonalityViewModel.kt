@@ -76,13 +76,25 @@ class PersonalityViewModel
                 },
             )
 
-        override suspend fun updateRealName(): Result<Unit> =
-            handleResultSuspend(repository.updateRealName(PersonalityUserNameDTO(_state.value.realName))) {
-            }
+        override suspend fun updateRealName(): Result<Unit> {
+            setIsLoading(true)
+            val result = repository.updateRealName(PersonalityUserNameDTO(_state.value.realName))
+            setIsLoading(false)
 
-        override suspend fun updateKnightName(): Result<Unit> =
-            handleResultSuspend(repository.updateKnightName(PersonalityUserNameDTO(_state.value.knightName))) {
+            return handleResultSuspend(result) {
+                _uiState.value = UIState.Success(Unit)
             }
+        }
+
+        override suspend fun updateKnightName(): Result<Unit> {
+            setIsLoading(true)
+            val result = repository.updateKnightName(PersonalityUserNameDTO(_state.value.knightName))
+            setIsLoading(false)
+
+            return handleResultSuspend(result) {
+                _uiState.value = UIState.Success(Unit)
+            }
+        }
 
         override fun onRealNameChanged(name: String) {
             _state.value = _state.value.copy(realName = name)
@@ -110,8 +122,10 @@ class PersonalityViewModel
         override suspend fun updateBuild(): Result<Unit> {
             setIsLoading(true)
             _state.value = _state.value.copy(build = deduceBuild())
-            return handleResultSuspend(repository.updateBuild(PersonalityBuildDTO(_state.value.build))) {
-                setIsLoading(false)
+            val result = repository.updateBuild(PersonalityBuildDTO(_state.value.build))
+            setIsLoading(false)
+
+            return handleResultSuspend(result) {
                 _uiState.value = UIState.Success(Unit)
             }
         }
