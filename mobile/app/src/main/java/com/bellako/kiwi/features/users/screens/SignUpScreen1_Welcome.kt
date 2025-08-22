@@ -76,6 +76,7 @@ private fun Welcome(
             Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
+                .padding(getResponsiveSizeHeight(Spacing.medium))
                 .testTag(CommonTestTags.USERS_SCREEN),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,

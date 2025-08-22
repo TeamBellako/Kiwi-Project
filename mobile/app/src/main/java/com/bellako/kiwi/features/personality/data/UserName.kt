@@ -17,7 +17,7 @@ value class UserName private constructor(
                 Result.failure(
                     IllegalArgumentException(
                         if (!NAME_REGEX_LENGTH.matches(name)) {
-                            "Name should be at least 3 characters long"
+                            "Name should be at least 1 character long"
                         } else {
                             "Invalid name"
                         },
