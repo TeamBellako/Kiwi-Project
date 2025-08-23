@@ -143,7 +143,7 @@ private fun LogIn(
         if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
             usersViewModel.onEmailChanged(username)
             usersViewModel.onPasswordChanged(password)
-            performLogin(context, usersViewModel, personalityViewModel, navController)
+            localLoading = performLogin(context, usersViewModel, personalityViewModel, navController)
         }
     }
 
