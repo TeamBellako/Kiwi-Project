@@ -21,7 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,13 +85,14 @@ fun AppClassification(
     val context = LocalContext.current
     val packageManager = context.packageManager
     val myPackageName = context.packageName
+    val isPreview = LocalInspectionMode.current
 
     val personalityUiState by personalityViewModel.uiState.collectAsState()
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
 
-    val isLoading by remember { derivedStateOf { personalityIsLoading } }
+    var localLoading by remember { mutableStateOf(false) }
 
-    val isPreview = LocalInspectionMode.current
+    val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
 
     // Get all installed apps
     val realApps =
@@ -225,6 +228,7 @@ fun AppClassification(
                     CoroutineScope(Dispatchers.Main).launch {
                         if (personalityViewModel.updateApps().isSuccess) {
                             navController.navigate(ScreenRoutes.HOME)
+                            localLoading = true
                         }
                     }
                 },

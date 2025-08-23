@@ -78,6 +78,7 @@ private fun SignUp(
     navController: NavController,
 ) {
     val context = LocalContext.current
+    val isPreview = LocalInspectionMode.current
 
     val usersState by usersViewModel.state.collectAsState()
     val usersUiState by usersViewModel.uiState.collectAsState()
@@ -87,9 +88,9 @@ private fun SignUp(
     val personalityUiState by personalityViewModel.uiState.collectAsState()
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
 
-    val isLoading by remember { derivedStateOf { usersIsLoading || personalityIsLoading } }
+    var localLoading by remember { mutableStateOf(false) }
 
-    val isPreview = LocalInspectionMode.current
+    val isLoading by remember { derivedStateOf { localLoading || usersIsLoading || personalityIsLoading } }
 
     usersState?.let { currentUsersState ->
         personalityState?.let { currentPersonalityState ->
@@ -236,6 +237,7 @@ private fun SignUp(
                                         personalityViewModel.updateKnightName().isSuccess
                                     ) {
                                         navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+                                        localLoading = true
                                     }
                                 }
                             }

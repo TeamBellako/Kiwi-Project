@@ -123,13 +123,16 @@ private fun LogIn(
 ) {
     val context = LocalContext.current
 
-    val state by usersViewModel.state.collectAsState()
-    val uiState by usersViewModel.uiState.collectAsState()
-
+    val usersState by usersViewModel.state.collectAsState()
+    val usersUiState by usersViewModel.uiState.collectAsState()
     val usersIsLoading by usersViewModel.isLoading.collectAsState()
+
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+
     var initializing by remember { mutableStateOf(true) }
-    val isLoading by remember { derivedStateOf { initializing || usersIsLoading || personalityIsLoading } }
+    var localLoading by remember { mutableStateOf(false) }
+
+    val isLoading by remember { derivedStateOf { initializing || localLoading || usersIsLoading || personalityIsLoading } }
 
     val isPreview = LocalInspectionMode.current
 
@@ -144,7 +147,7 @@ private fun LogIn(
         }
     }
 
-    state?.let { currentState ->
+    usersState?.let { currentState ->
 
         Box(
             modifier =
@@ -230,7 +233,7 @@ private fun LogIn(
                         ),
                         onClick = {
                             CoroutineScope(Dispatchers.Main).launch {
-                                performLogin(context, usersViewModel, personalityViewModel, navController)
+                                localLoading = performLogin(context, usersViewModel, personalityViewModel, navController)
                             }
                         },
                         enabled = !isLoading,
@@ -243,9 +246,9 @@ private fun LogIn(
 
                     var errorMessage by remember { mutableStateOf("") }
                     errorMessage =
-                        when (uiState) {
+                        when (usersUiState) {
                             is UIState.Error -> {
-                                (uiState as UIState.Error).message
+                                (usersUiState as UIState.Error).message
                             }
 
                             else -> {
@@ -288,7 +291,7 @@ private suspend fun performLogin(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
-) {
+): Boolean {
     if (usersViewModel.login(context).isSuccess) {
         // check personality registered and configured
         // navigate to Home or to the corresponding personality test if anything missing
@@ -312,8 +315,9 @@ private suspend fun performLogin(
                 navController.navigate(ScreenRoutes.SIGNUP3_TEST)
             },
         )
-        usersViewModel.onLoginSuccess()
+        return true
     }
+    return false
 }
 
 @Composable
