@@ -6,18 +6,12 @@ object UsersTestFactory {
     fun validUsersDTO(): UsersDTO =
         UsersDTO(
             email = "finn@thehuman.com",
-            password = "Math3matical!",
-        )
-
-    fun incorrectPasswordUsersDTO(): UsersDTO =
-        UsersDTO(
-            email = "finn@thehuman.com",
-            password = "Math3maticalawdawdwad!",
+            password = "Math3matic!",
         )
 
     fun invalidUsersDTO(): UsersDTO =
         UsersDTO(
-            email = "bmolovesfootball.com",
+            email = "football.com",
             password = "kk",
         )
 }

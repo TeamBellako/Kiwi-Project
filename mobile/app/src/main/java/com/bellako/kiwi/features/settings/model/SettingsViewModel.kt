@@ -43,9 +43,6 @@ class SettingsViewModel
         private val _state = MutableStateFlow<SettingsState?>(null)
         override val state: StateFlow<SettingsState?> = _state.asStateFlow()
 
-        override val _isLoading = MutableStateFlow(false)
-        override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
         private var previousValidDomainSettings: Settings? = null
         private var previousDomainSettings: Settings? = null
 
@@ -54,8 +51,8 @@ class SettingsViewModel
         // ---------------------------------------------------------------------------------------------
 
         override suspend fun loadSettings() {
-            _isLoading.value = true
-            _uiState.value = UIState.Loading
+            setIsLoading(true)
+            setUiState(UIState.Loading)
 
             try {
                 val result = repository.getSettings()
@@ -66,20 +63,20 @@ class SettingsViewModel
                             .onSuccess { domain ->
                                 _state.value = domain.toState()
                                 previousDomainSettings = domain
-                                _uiState.value = UIState.Success(Unit)
+                                setUiState(UIState.Success(Unit))
                             }.onFailure { ex ->
-                                _uiState.value = mapExceptionToUIState(ex)
+                                setUiState(mapExceptionToUIState(ex))
                             }
                     },
                     onFailure = { throwable ->
-                        _uiState.value = mapExceptionToUIState(throwable)
+                        setUiState(mapExceptionToUIState(throwable))
                     },
                 )
             } catch (ex: HttpException) {
-                _uiState.value = mapExceptionToUIState(ex)
+                setUiState(mapExceptionToUIState(ex))
             } finally {
                 updateVolume()
-                _isLoading.value = false
+                setIsLoading(false)
             }
         }
 

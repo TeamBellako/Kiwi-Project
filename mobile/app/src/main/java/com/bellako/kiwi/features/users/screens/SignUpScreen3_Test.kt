@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,10 +25,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.KiwiH2
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -36,7 +40,7 @@ import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -64,67 +68,77 @@ private fun Question(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
 ) {
-    val uiState by usersViewModel.uiState.collectAsState()
+    val isPreview = LocalInspectionMode.current
+
+    val usersUiState by usersViewModel.uiState.collectAsState()
+
     val personalityState by personalityViewModel.state.collectAsState()
+    val personalityUiState by personalityViewModel.uiState.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+
+    var localLoading by remember { mutableStateOf(false) }
+    val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
 
     personalityState?.let { currentPersonalityState ->
 
-        when (uiState) {
-            is UIState.GeneralError -> {
-                ErrorModal(onButtonClick = {
-                    usersViewModel.resetUiState()
-                    personalityViewModel.resetUiState()
-                })
-            }
+        if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
+            ErrorModal(onButtonClick = {
+                usersViewModel.resetUiState()
+                personalityViewModel.resetUiState()
+            })
+        } else {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(getResponsiveSizeHeight(Spacing.medium))
+                        .testTag(CommonTestTags.USERS_SCREEN),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-            else -> {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(getResponsiveSizeHeight(Spacing.medium))
-                            .testTag(CommonTestTags.USERS_SCREEN),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
+                Kiwi_H2(
+                    KiwiTextArguments(
+                        currentPersonalityState.questions[currentQuestion].question,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.secondary,
+                    ),
+                )
 
-                    KiwiH2(
-                        KiwiTextArguments(
-                            currentPersonalityState.questions[currentQuestion].question,
-                            textAlign = TextAlign.Center,
+                Kiwi_Spacer(Spacing.large)
+
+                currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
+
+                    Kiwi_Button(
+                        textArguments = KiwiTextArguments(
+                            option,
                             color = MaterialTheme.colorScheme.secondary,
                         ),
-                    )
-
-                    Kiwi_Spacer(Spacing.large)
-
-                    currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
-
-                        Kiwi_Button(
-                            KiwiTextArguments(
-                                option,
-                                color = MaterialTheme.colorScheme.secondary,
-                            ),
-                            color = MaterialTheme.colorScheme.primary,
-                            onClick = {
-                                currentPersonalityState.answers[currentQuestion] = index
-                                if (currentQuestion + 1 < currentPersonalityState.questions.size) {
-                                    ++currentQuestion
-                                } else {
-                                    CoroutineScope(Dispatchers.Main).launch {
-                                        if (personalityViewModel.updateBuild().isSuccess) {
-                                            navController.navigate(ScreenRoutes.SIGNUP4_APPS)
-                                        }
+                        color = MaterialTheme.colorScheme.primary,
+                        onClick = {
+                            currentPersonalityState.answers[currentQuestion] = index
+                            if (currentQuestion + 1 < currentPersonalityState.questions.size) {
+                                ++currentQuestion
+                            } else {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    if (personalityViewModel.updateBuild().isSuccess) {
+                                        navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                                        localLoading = true
                                     }
                                 }
-                            },
-                        )
+                            }
+                        },
+                        enabled = !isLoading,
+                    )
 
-                        Kiwi_Spacer()
-                    }
+                    Kiwi_Spacer()
                 }
+            }
+
+            if (isLoading || isPreview) {
+                LoadingModal()
             }
         }
     }
@@ -137,8 +151,8 @@ private fun Question(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpScreen3_TestPreview() {
-    KiwiTheme {
+fun SignUpScreen3_Test_Preview() {
+    Kiwi_Theme {
         SignUpScreen3_Test(
             UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
             personalityViewModel =

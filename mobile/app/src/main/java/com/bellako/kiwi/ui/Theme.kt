@@ -32,7 +32,7 @@ private val DarkColors =
     )
 
 @Composable
-fun KiwiTheme(
+fun Kiwi_Theme(
     useDarkTheme: Boolean = true,
     content: @Composable () -> Unit,
 ) {

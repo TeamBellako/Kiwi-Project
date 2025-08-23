@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
@@ -28,7 +28,7 @@ fun Kiwi_InfoBox(
                 .fillMaxWidth()
                 .background(color),
     ) {
-        KiwiP2(
+        Kiwi_P2(
             KiwiTextArguments(
                 message,
                 modifier =
@@ -46,8 +46,8 @@ fun Kiwi_InfoBox(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun Kiwi_InfoBoxPreview() {
-    KiwiTheme {
+fun Kiwi_InfoBox_Preview() {
+    Kiwi_Theme {
         Column {
             Kiwi_InfoBox(
                 message = "Invalid email or password",

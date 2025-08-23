@@ -57,28 +57,30 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
-import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP1
-import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringP2
-import com.bellako.kiwi.common.screens.components.KiwiH3
-import com.bellako.kiwi.common.screens.components.KiwiP2
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
+import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
-import com.bellako.kiwi.features.metrics.model.MetricsUtils
+import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.launch
@@ -86,6 +88,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
+
+const val ANIM_DURATION = 3000
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -257,7 +261,7 @@ private fun Header() {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         HeaderLine()
-        KiwiH3(
+        Kiwi_H3(
             KiwiTextArguments(
                 "Daily Progress",
                 TextAlign.Center,
@@ -284,7 +288,7 @@ private fun WeekView(
     selectedDay: MutableState<LocalDate>,
     onCalendarViewClicked: () -> Unit,
 ) {
-    val currentDayOfWeek = selectedDay.value.dayOfWeek.value % 7
+    val currentDayOfWeek = selectedDay.value.dayOfWeek.value % DAYS_IN_WEEK
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
     val coroutineScope = rememberCoroutineScope()
     val startOfWeek = selectedDay.value.minusDays(currentDayOfWeek.toLong())
@@ -312,7 +316,7 @@ private fun WeekView(
                         .weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
             ) {
-                (0..6).forEach { index ->
+                for (index in 0 until DAYS_IN_WEEK) {
                     val day = startOfWeek.plusDays(index.toLong())
                     val dayNumber = day.dayOfMonth
                     val isSelected = selectedDayIndex.intValue == index
@@ -398,7 +402,7 @@ private fun CalendarView(
                 .then(gestureModifier)
                 .testTag(DashboardModalTestTags.CALENDAR_VIEW),
     ) {
-        KiwiP2(
+        Kiwi_P2(
             KiwiTextArguments(
                 currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
                 textAlign = TextAlign.Center,
@@ -414,11 +418,11 @@ private fun CalendarView(
             targetState = currentYearMonth,
             transitionSpec = {
                 slideInHorizontally(
-                    animationSpec = tween(300),
+                    animationSpec = tween(ANIM_DURATION),
                     initialOffsetX = { fullWidth -> fullWidth * transitionDirection },
                 ) togetherWith
                     slideOutHorizontally(
-                        animationSpec = tween(300),
+                        animationSpec = tween(ANIM_DURATION),
                         targetOffsetX = { fullWidth -> -fullWidth * transitionDirection },
                     )
             },
@@ -426,12 +430,12 @@ private fun CalendarView(
         ) { displayedMonth ->
             val startOfMonth = displayedMonth.atDay(1)
             val endOfMonth = displayedMonth.atEndOfMonth()
-            val startDayOfWeek = startOfMonth.dayOfWeek.value % 7
+            val startDayOfWeek = startOfMonth.dayOfWeek.value % DAYS_IN_WEEK
             val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
-            val totalWeeks = ceil(totalDays / 7f).toInt()
+            val totalWeeks = ceil(totalDays / DAYS_IN_WEEK.toFloat()).toInt()
 
             Column {
-                (0 until totalWeeks).forEach { weekIndex ->
+                for (weekIndex in 0 until totalWeeks) {
                     Row(
                         modifier =
                             Modifier
@@ -439,8 +443,8 @@ private fun CalendarView(
                                 .weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp)),
                     ) {
-                        (0..6).forEach { dayOfWeek ->
-                            val dayIndex = weekIndex * 7 + dayOfWeek
+                        for (dayOfWeek in 0 until DAYS_IN_WEEK) {
+                            val dayIndex = weekIndex * DAYS_IN_WEEK + dayOfWeek
                             val dayOffset = dayIndex - startDayOfWeek
                             val dayDate = startOfMonth.plusDays(dayOffset.toLong())
 
@@ -507,7 +511,7 @@ private fun ExpandedDayIndicator(
             verticalArrangement = Arrangement.Center,
         ) {
             val contentAlpha = if (isInFuture) 0.4f else 1f
-            KiwiP2(
+            Kiwi_P2(
                 KiwiTextArguments(
                     dayName,
                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -552,7 +556,7 @@ private fun ExpandedProgressBox(state: MetricsState) {
 
 @Composable
 private fun ExpandedMetricProgressTitle(title: String) {
-    KiwiH3(
+    Kiwi_H3(
         KiwiTextArguments(
             title,
             TextAlign.Center,
@@ -573,13 +577,13 @@ private fun TimeExpanded(
     val text =
         buildAnnotatedString {
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                append(MetricsUtils.parseTimeSeconds(currentSeconds))
+                append(DateUtils.parseTimeSeconds(currentSeconds))
             }
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
+                append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
             }
         }
-    KiwiAnnotatedStringP1(
+    Kiwi_AnnotatedString_P1(
         KiwiAnnotatedStringArguments(
             text,
             TextAlign.Center,
@@ -610,13 +614,13 @@ private fun TimeCollapsed(
     val text =
         buildAnnotatedString {
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                append(MetricsUtils.parseTimeSeconds(currentSeconds))
+                append(DateUtils.parseTimeSeconds(currentSeconds))
             }
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
+                append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
             }
         }
-    KiwiAnnotatedStringP2(
+    Kiwi_AnnotatedString_P2(
         KiwiAnnotatedStringArguments(
             text,
             TextAlign.Left,
@@ -728,7 +732,7 @@ private fun ShowCalendarViewButton(onCalendarViewClicked: () -> Unit) {
 @Composable
 private fun ExpandedSummaryCard() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        KiwiH3(
+        Kiwi_H3(
             KiwiTextArguments(
                 "Challenges",
                 TextAlign.Center,
@@ -800,7 +804,7 @@ private fun ExpandedQuestProgress(
                     .weight(0.8F),
             contentAlignment = Alignment.Center,
         ) {
-            KiwiP2(
+            Kiwi_P2(
                 KiwiTextArguments(
                     title,
                     TextAlign.Center,
@@ -821,7 +825,7 @@ private fun ExpandedQuestProgress(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalHiddenPreview() {
+fun DashboardModalHidden_Preview() {
     DashboardModalPreview(false, 0)
 }
 
@@ -830,7 +834,7 @@ fun DashboardModalHiddenPreview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalCollapsedPreview() {
+fun DashboardModalCollapsed_Preview() {
     DashboardModalPreview(false, 1)
 }
 
@@ -839,7 +843,7 @@ fun DashboardModalCollapsedPreview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalExpandedPreview() {
+fun DashboardModalExpanded_Preview() {
     DashboardModalPreview(false, 2)
 }
 
@@ -848,7 +852,7 @@ fun DashboardModalExpandedPreview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalCalendarPreview() {
+fun DashboardModalCalendar_Preview() {
     DashboardModalPreview(true, 2)
 }
 
@@ -859,7 +863,7 @@ private fun DashboardModalPreview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
 ) {
-    KiwiTheme {
+    Kiwi_Theme {
         Scaffold(
             bottomBar = {
                 AppBarModal(navController = rememberNavController())
@@ -871,10 +875,10 @@ private fun DashboardModalPreview(
                         MetricsFakeViewModel(
                             MetricsState(
                                 date = "2025-06-12",
-                                maxGoodTimeSeconds = 6 * 60 * 60,
-                                currentGoodTimeSeconds = 1 * 60 * 60,
-                                maxBadTimeSeconds = 6 * 60 * 60,
-                                currentBadTimeSeconds = 2 * 60 * 60,
+                                maxGoodTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                currentGoodTimeSeconds = 1 * SECONDS_IN_HOUR,
+                                maxBadTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                currentBadTimeSeconds = 2 * SECONDS_IN_HOUR,
                             ),
                         ),
                         personalityViewModel =

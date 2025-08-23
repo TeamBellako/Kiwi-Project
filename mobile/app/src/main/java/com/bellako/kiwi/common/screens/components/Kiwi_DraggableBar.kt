@@ -29,7 +29,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
@@ -184,7 +184,7 @@ private fun Kiwi_DraggableBar_Preview_2() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
-    KiwiTheme {
+    Kiwi_Theme {
         Kiwi_DraggableBar(
             content = {
                 Box(
@@ -194,7 +194,7 @@ private fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
                             .height(getResponsiveSizeHeight(1600.dp)),
                     contentAlignment = Alignment.TopCenter,
                 ) {
-                    KiwiH3(
+                    Kiwi_H3(
                         KiwiTextArguments(
                             "Content",
                             TextAlign.Center,

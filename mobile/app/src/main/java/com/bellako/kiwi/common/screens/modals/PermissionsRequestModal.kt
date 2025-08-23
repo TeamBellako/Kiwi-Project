@@ -38,13 +38,13 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiP2
-import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -121,7 +121,7 @@ private fun PermissionRequestLayout(
 
             Kiwi_Spacer()
 
-            KiwiH2(
+            Kiwi_H2(
                 KiwiTextArguments(
                     "Permissions Required",
                     color = MaterialTheme.colorScheme.secondary,
@@ -132,7 +132,7 @@ private fun PermissionRequestLayout(
 
             Kiwi_Spacer(Spacing.xLarge)
 
-            KiwiP2(
+            Kiwi_P2(
                 KiwiTextArguments(
                     "GrowTale requires permissions to access metrics such as apps usage time.",
                     TextAlign.Center,
@@ -142,7 +142,7 @@ private fun PermissionRequestLayout(
 
             Kiwi_Spacer(Spacing.small)
 
-            KiwiP2(
+            Kiwi_P2(
                 KiwiTextArguments(
                     "Please click below to activate them before proceeding.",
                     TextAlign.Center,
@@ -153,7 +153,7 @@ private fun PermissionRequestLayout(
             Kiwi_Spacer(Spacing.xLarge)
 
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     "ENABLE APP USAGE ACCESS",
                     color = MaterialTheme.colorScheme.secondary,
                     textAlign = TextAlign.Center,
@@ -187,8 +187,8 @@ private fun hasUsageStatsPermission(context: Context): Boolean {
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
-fun PermissionsRequestModalPreview() {
-    KiwiTheme {
+fun PermissionsRequestModal_Preview() {
+    Kiwi_Theme {
         PermissionsRequestModal {}
     }
 }

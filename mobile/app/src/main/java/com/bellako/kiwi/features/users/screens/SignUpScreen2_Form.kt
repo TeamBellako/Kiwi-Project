@@ -29,13 +29,13 @@ import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiLabel2
-import com.bellako.kiwi.common.screens.components.KiwiP2
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
@@ -49,7 +49,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -78,6 +78,7 @@ private fun SignUp(
     navController: NavController,
 ) {
     val context = LocalContext.current
+    val isPreview = LocalInspectionMode.current
 
     val usersState by usersViewModel.state.collectAsState()
     val usersUiState by usersViewModel.uiState.collectAsState()
@@ -87,9 +88,9 @@ private fun SignUp(
     val personalityUiState by personalityViewModel.uiState.collectAsState()
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
 
-    val isLoading by remember { derivedStateOf { usersIsLoading || personalityIsLoading } }
+    var localLoading by remember { mutableStateOf(false) }
 
-    val isPreview = LocalInspectionMode.current
+    val isLoading by remember { derivedStateOf { localLoading || usersIsLoading || personalityIsLoading } }
 
     usersState?.let { currentUsersState ->
         personalityState?.let { currentPersonalityState ->
@@ -100,10 +101,6 @@ private fun SignUp(
                     personalityViewModel.resetUiState()
                 })
             } else {
-                if (isLoading || isPreview) {
-                    LoadingModal()
-                }
-
                 Column(
                     modifier =
                         Modifier
@@ -116,7 +113,7 @@ private fun SignUp(
                 ) {
                     // TEXT WELCOME
 
-                    KiwiP2(
+                    Kiwi_P2(
                         KiwiTextArguments(
                             "Initial Setup Will Take\nApproximately 3 Minutes",
                             textAlign = TextAlign.Center,
@@ -127,7 +124,7 @@ private fun SignUp(
                     Kiwi_Spacer(Spacing.large)
                     Kiwi_Spacer(Spacing.large)
 
-                    KiwiH2(
+                    Kiwi_H2(
                         KiwiTextArguments(
                             "Let's Start With\nThe Basics",
                             textAlign = TextAlign.Center,
@@ -145,7 +142,7 @@ private fun SignUp(
                         value = currentPersonalityState.realName,
                         onValueChange = { personalityViewModel.onRealNameChanged(it) },
                         label = {
-                            KiwiLabel2(
+                            Kiwi_Label2(
                                 KiwiTextArguments(
                                     "Real Name",
                                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -164,7 +161,7 @@ private fun SignUp(
                         value = currentPersonalityState.knightName,
                         onValueChange = { personalityViewModel.onKnightNameChanged(it) },
                         label = {
-                            KiwiLabel2(
+                            Kiwi_Label2(
                                 KiwiTextArguments(
                                     "Knight Name",
                                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -183,7 +180,7 @@ private fun SignUp(
                         value = currentUsersState.email,
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
-                            KiwiLabel2(
+                            Kiwi_Label2(
                                 KiwiTextArguments(
                                     "Email",
                                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -202,7 +199,7 @@ private fun SignUp(
                         value = currentUsersState.password,
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
-                            KiwiLabel2(
+                            Kiwi_Label2(
                                 KiwiTextArguments(
                                     "Password",
                                     color = MaterialTheme.colorScheme.inversePrimary,
@@ -219,7 +216,7 @@ private fun SignUp(
                     // BUTTON
 
                     Kiwi_Button(
-                        KiwiTextArguments(
+                        textArguments = KiwiTextArguments(
                             "START JOURNEY",
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true,
@@ -236,6 +233,7 @@ private fun SignUp(
                                         personalityViewModel.updateKnightName().isSuccess
                                     ) {
                                         navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+                                        localLoading = true
                                     }
                                 }
                             }
@@ -280,6 +278,10 @@ private fun SignUp(
                         )
                     }
                 }
+
+                if (isLoading || isPreview) {
+                    LoadingModal()
+                }
             }
         }
     }
@@ -292,8 +294,8 @@ private fun SignUp(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpScreen2FormPreview() {
-    KiwiTheme {
+fun SignUpScreen2_Form_Preview() {
+    Kiwi_Theme {
         SignUpScreen2_Form(
             UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
             personalityViewModel =

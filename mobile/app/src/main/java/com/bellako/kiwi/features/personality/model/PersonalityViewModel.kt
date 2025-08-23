@@ -26,18 +26,11 @@ class PersonalityViewModel
         private val _state = MutableStateFlow(PersonalityState("", "", "", listOf(), listOf()))
         override val state: StateFlow<PersonalityState?> = _state.asStateFlow()
 
-        override val _isLoading = MutableStateFlow(false)
-        override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-        private fun setIsLoading(isLoading: Boolean) {
-            _isLoading.value = isLoading
-            _uiState.value = if (isLoading) UIState.Loading else UIState.Idle
-        }
-
         // ---------------------------------------------------------------------------------------------
 
         override suspend fun loadPersonality(): Result<Unit> {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             return repository
                 .getPersonality()
                 .map { dto ->
@@ -51,9 +44,10 @@ class PersonalityViewModel
                             badApps = state.badApps,
                         )
                     setIsLoading(false)
+                    setUiState(UIState.Idle)
                 }.onFailure { throwable ->
                     setIsLoading(false)
-                    _uiState.value = mapExceptionToUIState(throwable)
+                    setUiState(mapExceptionToUIState(throwable))
                 }
         }
 
@@ -71,28 +65,32 @@ class PersonalityViewModel
                     )
                 },
                 onFailure = { err ->
-                    _uiState.value = UIState.Error(err.message.orEmpty())
+                    setUiState(UIState.Error(err.message.orEmpty()))
                     Result.failure(err)
                 },
             )
 
         override suspend fun updateRealName(): Result<Unit> {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             val result = repository.updateRealName(PersonalityUserNameDTO(_state.value.realName))
             setIsLoading(false)
+            setUiState(UIState.Idle)
 
             return handleResultSuspend(result) {
-                _uiState.value = UIState.Success(Unit)
+                setUiState(UIState.Success(Unit))
             }
         }
 
         override suspend fun updateKnightName(): Result<Unit> {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             val result = repository.updateKnightName(PersonalityUserNameDTO(_state.value.knightName))
             setIsLoading(false)
+            setUiState(UIState.Idle)
 
             return handleResultSuspend(result) {
-                _uiState.value = UIState.Success(Unit)
+                setUiState(UIState.Success(Unit))
             }
         }
 
@@ -121,25 +119,29 @@ class PersonalityViewModel
 
         override suspend fun updateBuild(): Result<Unit> {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             _state.value = _state.value.copy(build = deduceBuild())
             val result = repository.updateBuild(PersonalityBuildDTO(_state.value.build))
             setIsLoading(false)
+            setUiState(UIState.Idle)
 
             return handleResultSuspend(result) {
-                _uiState.value = UIState.Success(Unit)
+                setUiState(UIState.Success(Unit))
             }
         }
 
         override suspend fun updateApps(): Result<Unit> {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             val result =
                 repository.updateApps(
                     PersonalityAppsDTO(_state.value.goodApps, _state.value.badApps),
                 )
             setIsLoading(false)
+            setUiState(UIState.Idle)
 
             return handleResultSuspend(result) {
-                _uiState.value = UIState.Success(Unit)
+                setUiState(UIState.Success(Unit))
             }
         }
     }

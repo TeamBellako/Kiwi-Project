@@ -49,8 +49,6 @@ class UsersFakeViewModel(
             Result.success(Unit)
         }
 
-    override suspend fun onLoginSuccess() {}
-
     override suspend fun logout(context: Context) {}
 
     override suspend fun saveLocalCredentials(context: Context) {}

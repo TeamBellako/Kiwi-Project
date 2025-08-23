@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
@@ -67,8 +67,8 @@ private fun LoadingIcon(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun LoadingModalPreview() {
-    KiwiTheme {
+fun LoadingModal_Preview() {
+    Kiwi_Theme {
         LoadingModal()
     }
 }

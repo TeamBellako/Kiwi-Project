@@ -12,7 +12,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 
 @Composable
 fun SignUpScreen(content: @Composable () -> Unit) {
@@ -50,8 +50,8 @@ fun SignUpScreen(content: @Composable () -> Unit) {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpScreenPreview() {
-    KiwiTheme {
+fun SignUpScreen_Preview() {
+    Kiwi_Theme {
         SignUpScreen {}
     }
 }

@@ -29,12 +29,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.common.screens.components.KiwiH2
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -42,7 +43,7 @@ import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 
@@ -92,7 +93,7 @@ fun MapScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        KiwiH2(
+        Kiwi_H2(
             KiwiTextArguments(
                 title,
                 color = MaterialTheme.colorScheme.inversePrimary,
@@ -157,8 +158,8 @@ private fun InteractiveMap(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun MapScreenPreview() {
-    KiwiTheme {
+fun MapScreen_Preview() {
+    Kiwi_Theme {
         Scaffold(
             bottomBar = {
                 AppBarModal(navController = rememberNavController())
@@ -171,10 +172,10 @@ fun MapScreenPreview() {
                             MetricsFakeViewModel(
                                 MetricsState(
                                     date = "2025-06-12",
-                                    maxGoodTimeSeconds = 6 * 60 * 60,
-                                    currentGoodTimeSeconds = 1 * 60 * 60,
-                                    maxBadTimeSeconds = 6 * 60 * 60,
-                                    currentBadTimeSeconds = 2 * 60 * 60,
+                                    maxGoodTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                    currentGoodTimeSeconds = 1 * SECONDS_IN_HOUR,
+                                    maxBadTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                    currentBadTimeSeconds = 2 * SECONDS_IN_HOUR,
                                 ),
                             ),
                         personalityViewModel =

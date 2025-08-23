@@ -19,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiP2
-import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -34,21 +34,22 @@ fun ErrorModal(
     modifier: Modifier = Modifier,
     errorMessage: String =
         "Uh-oh! It seems a careless scribe forgot to write this part of the story.\n\n" +
-                "Let's get back on track!",
+            "Let's get back on track!",
     buttonMessage: String = "RETRY",
-    onButtonClick: (() -> Unit)? = null
+    onButtonClick: (() -> Unit)? = null,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
     ) {
         ErrorModalLayout(
             modifier,
             errorMessage,
             buttonMessage,
-            onButtonClick
+            onButtonClick,
         )
     }
 }
@@ -58,52 +59,60 @@ private fun ErrorModalLayout(
     modifier: Modifier = Modifier,
     errorMessage: String,
     buttonMessage: String,
-    onButtonClick: (() -> Unit)? = null
+    onButtonClick: (() -> Unit)? = null,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(getResponsiveSizeHeight(Spacing.medium)),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(getResponsiveSizeHeight(Spacing.medium)),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-
     ) {
         Icon(
             imageVector = Icons.Filled.Warning,
             contentDescription = "Error icon",
             tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier
-                .size(getResponsiveSizeHeight(Spacing.xLarge))
+            modifier =
+                Modifier
+                    .size(getResponsiveSizeHeight(Spacing.xLarge)),
         )
 
         Kiwi_Spacer(Spacing.small)
 
-        KiwiH2(KiwiTextArguments(
-            "Wild Error Appeared!",
-            color = MaterialTheme.colorScheme.secondary,
-            textAlign = TextAlign.Center,
-            bold = true
-        ))
+        Kiwi_H2(
+            KiwiTextArguments(
+                "Wild Error Appeared!",
+                color = MaterialTheme.colorScheme.secondary,
+                textAlign = TextAlign.Center,
+                bold = true,
+            ),
+        )
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        KiwiP2(KiwiTextArguments(
-            errorMessage,
-            TextAlign.Center,
-            color = MaterialTheme.colorScheme.outline,
-            modifier = Modifier
-                .testTag(CommonTestTags.ERROR_MODAL)
-        ))
+        Kiwi_P2(
+            KiwiTextArguments(
+                errorMessage,
+                TextAlign.Center,
+                color = MaterialTheme.colorScheme.outline,
+                modifier =
+                    Modifier
+                        .testTag(CommonTestTags.ERROR_MODAL),
+            ),
+        )
 
         if (onButtonClick != null) {
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     buttonMessage,
-                    color = MaterialTheme.colorScheme.secondary),
-                onButtonClick,
-                rowModifier = Modifier
-                    .padding(getResponsiveSizeHeight(Spacing.large))
+                    color = MaterialTheme.colorScheme.secondary,
+                ),
+                onClick = onButtonClick,
+                modifier =
+                    Modifier
+                        .padding(getResponsiveSizeHeight(Spacing.large)),
             )
         }
     }
@@ -115,8 +124,8 @@ private fun ErrorModalLayout(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun ErrorModalPreview() {
-    KiwiTheme {
+fun ErrorModal_Preview() {
+    Kiwi_Theme {
         ErrorModal {}
     }
 }

@@ -14,40 +14,43 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun Kiwi_Button(
+    modifier: Modifier = Modifier,
     textArguments: KiwiTextArguments,
     onClick: () -> Unit,
     enabled: Boolean = true,
     color: Color = MaterialTheme.colorScheme.primaryContainer,
     testTag: String = "",
-    rowModifier: Modifier = Modifier,
 ) {
-    Box(modifier = rowModifier) {
+    Box(modifier = modifier) {
         Button(
             onClick = onClick,
             enabled = enabled,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = color,
-                disabledContainerColor = color.copy(alpha = 0.15f),
-                contentColor = MaterialTheme.colorScheme.onSecondary,
-                disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
-            ),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = color,
+                    disabledContainerColor = color.copy(alpha = 0.15f),
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f),
+                ),
             contentPadding = PaddingValues(getResponsiveSizeHeight(8).dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(testTag),
-            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp))
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag(testTag),
+            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
         ) {
-            val actualTextArguments = if (enabled) {
-                textArguments
-            } else {
-                textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
-            }
-            KiwiLabel1(actualTextArguments)
+            val actualTextArguments =
+                if (enabled) {
+                    textArguments
+                } else {
+                    textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                }
+            Kiwi_Label1(actualTextArguments)
         }
     }
 }
@@ -58,14 +61,14 @@ fun Kiwi_Button(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun Kiwi_ButtonPreview() {
-    KiwiTheme {
+fun Kiwi_Button_Preview() {
+    Kiwi_Theme {
         Column {
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     "BUTTON",
                     color = MaterialTheme.colorScheme.secondary,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {},
             )
@@ -73,13 +76,13 @@ fun Kiwi_ButtonPreview() {
             Kiwi_Spacer()
 
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     "BUTTON",
                     color = MaterialTheme.colorScheme.secondary,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {},
-                enabled = false
+                enabled = false,
             )
         }
     }

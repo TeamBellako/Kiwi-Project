@@ -21,7 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,12 +39,12 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiLabel2
-import com.bellako.kiwi.common.screens.components.KiwiP2
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
@@ -51,7 +53,7 @@ import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -83,13 +85,14 @@ fun AppClassification(
     val context = LocalContext.current
     val packageManager = context.packageManager
     val myPackageName = context.packageName
+    val isPreview = LocalInspectionMode.current
 
     val personalityUiState by personalityViewModel.uiState.collectAsState()
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
 
-    val isLoading by remember { derivedStateOf { personalityIsLoading } }
+    var localLoading by remember { mutableStateOf(false) }
 
-    val isPreview = LocalInspectionMode.current
+    val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
 
     // Get all installed apps
     val realApps =
@@ -142,15 +145,11 @@ fun AppClassification(
             personalityViewModel.resetUiState()
         })
     } else {
-        if (isLoading || isPreview) {
-            LoadingModal()
-        }
-
         Column(
             modifier =
                 Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
         ) {
-            KiwiP2(
+            Kiwi_P2(
                 KiwiTextArguments(
                     text = "Categorize your apps.\nTap to switch between lists.",
                     modifier = Modifier.fillMaxWidth(),
@@ -167,7 +166,7 @@ fun AppClassification(
                         .weight(1f),
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    KiwiH2(
+                    Kiwi_H2(
                         KiwiTextArguments(
                             text = "Good apps",
                             modifier = Modifier.fillMaxWidth(),
@@ -190,7 +189,7 @@ fun AppClassification(
                     }
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    KiwiH2(
+                    Kiwi_H2(
                         KiwiTextArguments(
                             text = "Evil apps",
                             modifier = Modifier.fillMaxWidth(),
@@ -216,21 +215,26 @@ fun AppClassification(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     "CONTINUE",
                     textAlign = TextAlign.Center,
                 ),
-                rowModifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         if (personalityViewModel.updateApps().isSuccess) {
                             navController.navigate(ScreenRoutes.HOME)
+                            localLoading = true
                         }
                     }
                 },
                 enabled = !isLoading,
                 testTag = UsersTestTags.SIGNUP_BUTTON,
             )
+        }
+
+        if (isLoading || isPreview) {
+            LoadingModal()
         }
     }
 }
@@ -276,7 +280,7 @@ fun AppItem(
                     .padding(end = getResponsiveSizeHeight(10.dp))
                     .graphicsLayer { alpha = if (enabled) 1f else 0.3f },
         )
-        KiwiLabel2(KiwiTextArguments(app.name))
+        Kiwi_Label2(KiwiTextArguments(app.name))
     }
 }
 
@@ -288,8 +292,8 @@ fun AppItem(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SignUpScreen4_AppsPreview() {
-    KiwiTheme {
+fun SignUpScreen4_Apps_Preview() {
+    Kiwi_Theme {
         SignUpScreen4_Apps(
             personalityViewModel =
                 PersonalityFakeViewModel(

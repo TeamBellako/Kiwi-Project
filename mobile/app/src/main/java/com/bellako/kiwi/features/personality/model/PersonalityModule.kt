@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.personality.model
 
 import com.bellako.kiwi.BuildConfig
-import com.bellako.kiwi.common.model.HealthApiService
 import com.bellako.kiwi.features.users.model.JwtAuthInterceptor
 import dagger.Module
 import dagger.Provides

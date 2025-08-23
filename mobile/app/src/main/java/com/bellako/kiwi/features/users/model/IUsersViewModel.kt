@@ -15,8 +15,6 @@ interface IUsersViewModel : IBaseViewModel<UsersState> {
 
     suspend fun logout(context: Context)
 
-    suspend fun onLoginSuccess()
-
     suspend fun saveLocalCredentials(context: Context)
 
     suspend fun getLocalCredentials(context: Context): Pair<String?, String?>

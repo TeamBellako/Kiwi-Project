@@ -24,13 +24,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.KiwiH2
-import com.bellako.kiwi.common.screens.components.KiwiLabel2
-import com.bellako.kiwi.common.screens.components.KiwiSlider
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
+import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -40,7 +40,7 @@ import com.bellako.kiwi.features.settings.tests.SettingsFakeViewModel
 import com.bellako.kiwi.features.settings.tests.SettingsTestTags
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -120,7 +120,7 @@ private fun SettingsFields(
                     .testTag(CommonTestTags.SETTINGS_SCREEN),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            KiwiH2(
+            Kiwi_H2(
                 KiwiTextArguments(
                     "SETTINGS",
                     bold = true,
@@ -134,7 +134,7 @@ private fun SettingsFields(
                 value = currentState.email,
                 onValueChange = {},
                 label = {
-                    KiwiLabel2(
+                    Kiwi_Label2(
                         KiwiTextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
@@ -148,7 +148,7 @@ private fun SettingsFields(
 
             Kiwi_Spacer(Spacing.large)
 
-            KiwiSlider(
+            Kiwi_Slider(
                 KiwiTextArguments("SFX Volume"),
                 value = soundSliderPosition,
                 onValueChange = { newValue ->
@@ -164,7 +164,7 @@ private fun SettingsFields(
 
             Kiwi_Spacer()
 
-            KiwiSlider(
+            Kiwi_Slider(
                 KiwiTextArguments("Music Volume"),
                 value = musicSliderPosition,
                 onValueChange = { newValue ->
@@ -181,23 +181,25 @@ private fun SettingsFields(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                KiwiTextArguments(
-                    "SUPPORT",
-                    color = White,
-                    bold = true,
-                ),
-                { navController.navigate(ScreenRoutes.HELP) },
+                textArguments =
+                    KiwiTextArguments(
+                        "SUPPORT",
+                        color = White,
+                        bold = true,
+                    ),
+                onClick = { navController.navigate(ScreenRoutes.HELP) },
             )
 
             Kiwi_Spacer()
 
             Kiwi_Button(
-                KiwiTextArguments(
-                    "LOG OUT",
-                    color = White,
-                    bold = true,
-                ),
-                onLogout,
+                textArguments =
+                    KiwiTextArguments(
+                        "LOG OUT",
+                        color = White,
+                        bold = true,
+                    ),
+                onClick = onLogout,
             )
         }
     }
@@ -210,7 +212,7 @@ private fun SettingsFields(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun SettingsScreenPreview() {
+fun SettingsScreen_Preview() {
     val previewState =
         SettingsState(
             email = validUsersDTO().email,
@@ -218,7 +220,7 @@ fun SettingsScreenPreview() {
             musicVolume = 0.33f,
         )
 
-    KiwiTheme {
+    Kiwi_Theme {
         SettingsScreen(
             SettingsFakeViewModel(previewState),
             navController = rememberNavController(),

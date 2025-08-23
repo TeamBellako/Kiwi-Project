@@ -10,13 +10,19 @@ import java.io.IOException
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 
 open class BaseFakeViewModel : ViewModel() {
-    @Suppress("ktlint:standard:backing-property-naming")
-    protected val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
+    private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
-    @Suppress("ktlint:standard:backing-property-naming")
-    protected val _isLoading = MutableStateFlow(false)
+    fun setUiState(inUiState: UIState<Unit>) {
+        _uiState.value = inUiState
+    }
+
+    private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    fun setIsLoading(inIsLoading: Boolean) {
+        _isLoading.value = inIsLoading
+    }
 
     fun handleError(error: Throwable) {
         _uiState.value =

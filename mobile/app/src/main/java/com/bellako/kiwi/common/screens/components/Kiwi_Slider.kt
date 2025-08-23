@@ -22,12 +22,12 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.data.multiplyColorRgb
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.settings.tests.SettingsTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KiwiSlider(
+fun Kiwi_Slider(
     textArguments: KiwiTextArguments,
     value: Float,
     onValueChange: (Float) -> Unit,
@@ -36,7 +36,7 @@ fun KiwiSlider(
     testTag: String,
     enabled: Boolean = true,
 ) {
-    KiwiH3(textArguments)
+    Kiwi_H3(textArguments)
 
     @Suppress("MagicNumber")
     val trackColor = multiplyColorRgb(MaterialTheme.colorScheme.secondary, if (enabled) 1f else 0.4f)
@@ -84,8 +84,8 @@ fun KiwiSlider(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun KiwiSliderPreview() {
-    KiwiTheme {
+fun Kiwi_Slider_Preview() {
+    Kiwi_Theme {
         Column(
             modifier =
                 Modifier
@@ -94,7 +94,7 @@ fun KiwiSliderPreview() {
                     .testTag(CommonTestTags.SETTINGS_SCREEN),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            KiwiSlider(
+            Kiwi_Slider(
                 KiwiTextArguments("Sound Volume"),
                 value = 2.0f,
                 onValueChange = { },
@@ -105,7 +105,7 @@ fun KiwiSliderPreview() {
 
             Kiwi_Spacer()
 
-            KiwiSlider(
+            Kiwi_Slider(
                 KiwiTextArguments("Sound Volume"),
                 value = 2.0f,
                 onValueChange = { },
