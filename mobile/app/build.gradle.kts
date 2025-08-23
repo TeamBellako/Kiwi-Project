@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
 
-    kotlin("kapt")
     id("dagger.hilt.android.plugin")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
@@ -105,7 +104,7 @@ android {
     }
 }
 
-configurations { implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations")) }
+configurations.implementation { exclude(group = "org.jetbrains", module = "annotations") }
 
 tasks.withType<Test> {
     testLogging {
