@@ -37,12 +37,12 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
@@ -151,7 +151,7 @@ fun AppClassification(
                 Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
         ) {
             Kiwi_P2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     text = "Categorize your apps.\nTap to switch between lists.",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
@@ -168,7 +168,7 @@ fun AppClassification(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Kiwi_H2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             text = "Good apps",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
@@ -191,7 +191,7 @@ fun AppClassification(
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Kiwi_H2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             text = "Evil apps",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
@@ -216,7 +216,7 @@ fun AppClassification(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "CONTINUE",
                     textAlign = TextAlign.Center,
                 ),
@@ -276,7 +276,7 @@ fun AppItem(
                     .padding(end = getResponsiveSizeHeight(10.dp))
                     .graphicsLayer { alpha = if (enabled) 1f else 0.3f },
         )
-        Kiwi_Label2(Kiwi_TextArguments(app.name))
+        Kiwi_Label2(KiwiTextArguments(app.name))
     }
 }
 

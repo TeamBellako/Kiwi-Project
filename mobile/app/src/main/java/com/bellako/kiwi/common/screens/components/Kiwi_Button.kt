@@ -19,7 +19,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun Kiwi_Button(
-    textArguments: Kiwi_TextArguments,
+    textArguments: KiwiTextArguments,
     onClick: () -> Unit,
     enabled: Boolean = true,
     color: Color = MaterialTheme.colorScheme.primaryContainer,
@@ -30,23 +30,26 @@ fun Kiwi_Button(
         Button(
             onClick = onClick,
             enabled = enabled,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = color,
-                disabledContainerColor = color.copy(alpha = 0.15f),
-                contentColor = MaterialTheme.colorScheme.onSecondary,
-                disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
-            ),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = color,
+                    disabledContainerColor = color.copy(alpha = 0.15f),
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f),
+                ),
             contentPadding = PaddingValues(getResponsiveSizeHeight(8).dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(testTag),
-            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp))
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag(testTag),
+            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
         ) {
-            val actualTextArguments = if (enabled) {
-                textArguments
-            } else {
-                textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
-            }
+            val actualTextArguments =
+                if (enabled) {
+                    textArguments
+                } else {
+                    textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                }
             Kiwi_Label1(actualTextArguments)
         }
     }
@@ -62,10 +65,10 @@ fun Kiwi_Button_Preview() {
     Kiwi_Theme {
         Column {
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "BUTTON",
                     color = MaterialTheme.colorScheme.secondary,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {},
             )
@@ -73,13 +76,13 @@ fun Kiwi_Button_Preview() {
             Kiwi_Spacer()
 
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "BUTTON",
                     color = MaterialTheme.colorScheme.secondary,
-                    bold = true
+                    bold = true,
                 ),
                 onClick = {},
-                enabled = false
+                enabled = false,
             )
         }
     }

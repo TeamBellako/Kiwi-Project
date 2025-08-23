@@ -38,11 +38,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
@@ -122,7 +122,7 @@ private fun PermissionRequestLayout(
             Kiwi_Spacer()
 
             Kiwi_H2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "Permissions Required",
                     color = MaterialTheme.colorScheme.secondary,
                     textAlign = TextAlign.Center,
@@ -133,7 +133,7 @@ private fun PermissionRequestLayout(
             Kiwi_Spacer(Spacing.xLarge)
 
             Kiwi_P2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "GrowTale requires permissions to access metrics such as apps usage time.",
                     TextAlign.Center,
                     color = MaterialTheme.colorScheme.outline,
@@ -143,7 +143,7 @@ private fun PermissionRequestLayout(
             Kiwi_Spacer(Spacing.small)
 
             Kiwi_P2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "Please click below to activate them before proceeding.",
                     TextAlign.Center,
                     color = MaterialTheme.colorScheme.outline,
@@ -153,7 +153,7 @@ private fun PermissionRequestLayout(
             Kiwi_Spacer(Spacing.xLarge)
 
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "ENABLE APP USAGE ACCESS",
                     color = MaterialTheme.colorScheme.secondary,
                     textAlign = TextAlign.Center,

@@ -27,11 +27,11 @@ import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
@@ -82,7 +82,7 @@ private fun Welcome(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Kiwi_H2(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 "Your Legend is About\nTo Be Forged...",
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary,
@@ -93,7 +93,7 @@ private fun Welcome(
         Kiwi_Spacer(Spacing.xLarge)
 
         Kiwi_Button(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 "LET'S DO IT",
                 color = MaterialTheme.colorScheme.secondary,
                 bold = true,

@@ -15,7 +15,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 // -------------------------------------------------------------------------------------------------
 
-data class Kiwi_TextArguments(
+data class KiwiTextArguments(
     val text: String,
     val textAlign: TextAlign = TextAlign.Left,
     val color: Color = Color.White,
@@ -34,7 +34,7 @@ data class KiwiAnnotatedStringArguments(
 
 @Composable
 private fun Kiwi_Text(
-    arguments: Kiwi_TextArguments,
+    arguments: KiwiTextArguments,
     bodyStyle: TextStyle,
 ) {
     Text(
@@ -54,51 +54,51 @@ private fun Kiwi_Text(
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-fun Kiwi_H1(arguments: Kiwi_TextArguments) {
+fun Kiwi_H1(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.headlineLarge)
 }
 
 @Composable
-fun Kiwi_H2(arguments: Kiwi_TextArguments) {
+fun Kiwi_H2(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.headlineMedium)
 }
 
 @Composable
-fun Kiwi_H3(arguments: Kiwi_TextArguments) {
+fun Kiwi_H3(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.headlineSmall)
 }
 
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-fun Kiwi_P1(arguments: Kiwi_TextArguments) {
+fun Kiwi_P1(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.bodyLarge)
 }
 
 @Composable
-fun Kiwi_P2(arguments: Kiwi_TextArguments) {
+fun Kiwi_P2(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.bodyMedium)
 }
 
 @Composable
-fun Kiwi_P3(arguments: Kiwi_TextArguments) {
+fun Kiwi_P3(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.bodySmall)
 }
 
 // -------------------------------------------------------------------------------------------------
 
 @Composable
-fun Kiwi_Label1(arguments: Kiwi_TextArguments) {
+fun Kiwi_Label1(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.labelLarge)
 }
 
 @Composable
-fun Kiwi_Label2(arguments: Kiwi_TextArguments) {
+fun Kiwi_Label2(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.labelMedium)
 }
 
 @Composable
-fun Kiwi_Label3(arguments: Kiwi_TextArguments) {
+fun Kiwi_Label3(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.labelSmall)
 }
 

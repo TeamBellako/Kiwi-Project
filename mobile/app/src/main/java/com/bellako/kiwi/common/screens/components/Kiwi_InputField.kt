@@ -127,7 +127,7 @@ private fun ShowPasswordTrailingIcon(shouldShowPasswordState: MutableState<Boole
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun KiwiInputField_Preview() {
+fun Kiwi_InputField_Preview() {
     Kiwi_Theme {
         Column {
             Kiwi_InputField(
@@ -136,7 +136,7 @@ fun KiwiInputField_Preview() {
                 onValueChange = { },
                 label = {
                     Kiwi_Label2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
                         ),
@@ -155,7 +155,7 @@ fun KiwiInputField_Preview() {
                 onValueChange = { },
                 label = {
                     Kiwi_Label2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
                         ),

@@ -24,13 +24,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
-import com.bellako.kiwi.common.screens.components.Kiwi_Label2
-import com.bellako.kiwi.common.screens.components.KiwiSlider
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
+import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -121,7 +121,7 @@ private fun SettingsFields(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Kiwi_H2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "SETTINGS",
                     bold = true,
                 ),
@@ -135,7 +135,7 @@ private fun SettingsFields(
                 onValueChange = {},
                 label = {
                     Kiwi_Label2(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "Email",
                             color = MaterialTheme.colorScheme.inversePrimary,
                         ),
@@ -148,8 +148,8 @@ private fun SettingsFields(
 
             Kiwi_Spacer(Spacing.large)
 
-            KiwiSlider(
-                Kiwi_TextArguments("SFX Volume"),
+            Kiwi_Slider(
+                KiwiTextArguments("SFX Volume"),
                 value = soundSliderPosition,
                 onValueChange = { newValue ->
                     soundSliderPosition = newValue
@@ -164,8 +164,8 @@ private fun SettingsFields(
 
             Kiwi_Spacer()
 
-            KiwiSlider(
-                Kiwi_TextArguments("Music Volume"),
+            Kiwi_Slider(
+                KiwiTextArguments("Music Volume"),
                 value = musicSliderPosition,
                 onValueChange = { newValue ->
                     musicSliderPosition = newValue
@@ -181,7 +181,7 @@ private fun SettingsFields(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "SUPPORT",
                     color = White,
                     bold = true,
@@ -192,7 +192,7 @@ private fun SettingsFields(
             Kiwi_Spacer()
 
             Kiwi_Button(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     "LOG OUT",
                     color = White,
                     bold = true,

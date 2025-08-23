@@ -40,6 +40,7 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -48,7 +49,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -169,7 +169,7 @@ private fun LogIn(
                 // TEXT WELCOME
 
                 Kiwi_H2(
-                    Kiwi_TextArguments(
+                    KiwiTextArguments(
                         "Welcome Back, \nKnight",
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.secondary,
@@ -190,7 +190,7 @@ private fun LogIn(
                         onValueChange = { usersViewModel.onEmailChanged(it) },
                         label = {
                             Kiwi_Label2(
-                                Kiwi_TextArguments(
+                                KiwiTextArguments(
                                     "Email",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -209,7 +209,7 @@ private fun LogIn(
                         onValueChange = { usersViewModel.onPasswordChanged(it) },
                         label = {
                             Kiwi_Label2(
-                                Kiwi_TextArguments(
+                                KiwiTextArguments(
                                     "Password",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
@@ -223,7 +223,7 @@ private fun LogIn(
                     Kiwi_Spacer()
 
                     Kiwi_Button(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "LOG IN",
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true,

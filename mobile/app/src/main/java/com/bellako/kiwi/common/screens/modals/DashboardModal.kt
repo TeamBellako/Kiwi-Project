@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
+import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
@@ -65,7 +66,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.components.Kiwi_TextArguments
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.features.map.screens.MapScreen
@@ -258,7 +258,7 @@ private fun Header() {
     ) {
         HeaderLine()
         Kiwi_H3(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 "Daily Progress",
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
@@ -399,7 +399,7 @@ private fun CalendarView(
                 .testTag(DashboardModalTestTags.CALENDAR_VIEW),
     ) {
         Kiwi_P2(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary,
@@ -508,7 +508,7 @@ private fun ExpandedDayIndicator(
         ) {
             val contentAlpha = if (isInFuture) 0.4f else 1f
             Kiwi_P2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     dayName,
                     color = MaterialTheme.colorScheme.inversePrimary,
                     modifier =
@@ -553,7 +553,7 @@ private fun ExpandedProgressBox(state: MetricsState) {
 @Composable
 private fun ExpandedMetricProgressTitle(title: String) {
     Kiwi_H3(
-        Kiwi_TextArguments(
+        KiwiTextArguments(
             title,
             TextAlign.Center,
             MaterialTheme.colorScheme.secondary,
@@ -729,7 +729,7 @@ private fun ShowCalendarViewButton(onCalendarViewClicked: () -> Unit) {
 private fun ExpandedSummaryCard() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Kiwi_H3(
-            Kiwi_TextArguments(
+            KiwiTextArguments(
                 "Challenges",
                 TextAlign.Center,
                 MaterialTheme.colorScheme.secondary,
@@ -801,7 +801,7 @@ private fun ExpandedQuestProgress(
             contentAlignment = Alignment.Center,
         ) {
             Kiwi_P2(
-                Kiwi_TextArguments(
+                KiwiTextArguments(
                     title,
                     TextAlign.Center,
                     MaterialTheme.colorScheme.secondary,
