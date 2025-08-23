@@ -116,104 +116,103 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    compileOnly(libs.annotations)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics.ktx.v1851)
+    // Core
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.room.runtime.android)
-    implementation(libs.androidx.compose.material)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.tink.android)
-    implementation(libs.core.ktx)
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.lifecycle.process)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.navigation.testing)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Compose UI
+    // Compose and Material
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.foundation)
+    androidTestImplementation(libs.androidx.foundation)
+    implementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
     implementation(libs.ui)
+    implementation(libs.androidx.ui.graphics)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.ui.tooling)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.ui.tooling.preview)
     implementation(libs.material)
     implementation(libs.material3)
-    implementation(libs.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.material)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.accompanist.drawablepainter)
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    androidTestImplementation(libs.androidx.navigation.testing)
+
+    // Room and Datastore
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime.android)
+    implementation(libs.androidx.datastore.preferences)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.process)
 
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.logging.interceptor)
-    implementation(libs.moshi)
-    kapt(libs.moshi.kotlin.codegen)
-    implementation(libs.converter.moshi)
-
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
-    // Testing
-    androidTestImplementation(libs.androidx.core.testing)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.junit.jupiter.api)
-    androidTestImplementation(libs.junit.jupiter.engine)
-    androidTestImplementation(libs.ui.test.junit4)
-    androidTestImplementation(libs.androidx.core)
-    debugImplementation(libs.ui.tooling)
-    androidTestImplementation(libs.mockito.kotlin)
-    androidTestImplementation(libs.mockk)
-    androidTestImplementation(libs.mockito.junit.jupiter)
-    testImplementation(libs.mockito.core.v380)
-    androidTestImplementation(libs.mockito.android)
-    testImplementation(libs.mockito.inline)
-    testImplementation(libs.kotlinx.coroutines.test)
-
-    implementation(libs.coil)
-    implementation(libs.coil.gif)
-    implementation(libs.coil.compose)
-    implementation(libs.accompanist.drawablepainter)
-
-    implementation(libs.google.firebase.analytics)
-    testImplementation(kotlin("test"))
-
-    androidTestImplementation(libs.androidx.compose.ui.ui.test.junit4)
-    debugImplementation(libs.ui.test.manifest)
-
+    // Hilt/Dagger
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.androidx.foundation)
-    androidTestImplementation(libs.androidx.foundation)
-
-    testImplementation(libs.mockito.core.v5170)
-    testImplementation(libs.mockito.kotlin)
-
     implementation(libs.androidx.hilt.navigation.compose)
 
-    androidTestImplementation(libs.mockwebserver)
-    testImplementation(libs.robolectric)
+    // Network and Parsing
+    implementation(libs.converter.gson)
+    implementation(libs.converter.moshi)
+    implementation(libs.logging.interceptor)
+    implementation(libs.retrofit)
+    implementation(libs.moshi)
+    ksp(libs.moshi.kotlin.codegen)
 
+    // Firebase
+    implementation(libs.firebase.analytics)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.google.firebase.analytics)
+
+    // Media
+    implementation(libs.androidx.media3.exoplayer)
+
+    // Annotations
+    compileOnly(libs.annotations)
+
+    // Security
+    implementation(libs.tink.android)
+
+    // Testing
+    testImplementation(kotlin("test"))
+    androidTestImplementation(libs.androidx.core)
+    implementation(libs.core.ktx)
+    androidTestImplementation(libs.androidx.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation(libs.ui.test.manifest)
+    androidTestImplementation(libs.androidx.junit)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.junit.jupiter.api)
+    androidTestImplementation(libs.junit.jupiter.engine)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.compose.ui.ui.test.junit4)
+    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(libs.mockito.android)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    androidTestImplementation(libs.mockito.junit.jupiter)
+    androidTestImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockwebserver)
+    androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.espresso.intents)
+    testImplementation(libs.robolectric)
 }
