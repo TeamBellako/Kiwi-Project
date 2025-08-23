@@ -215,11 +215,11 @@ fun AppClassification(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     "CONTINUE",
                     textAlign = TextAlign.Center,
                 ),
-                rowModifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         if (personalityViewModel.updateApps().isSuccess) {

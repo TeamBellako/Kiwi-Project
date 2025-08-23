@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.metrics.model
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -49,5 +50,5 @@ object MetricsFactory {
     private fun getRandomTimeSeconds(
         fromHours: Int,
         untilHours: Int,
-    ): Int = Random.nextInt(fromHours * 60 * 60, untilHours * 60 * 60)
+    ): Int = Random.nextInt(fromHours * SECONDS_IN_HOUR, untilHours * SECONDS_IN_HOUR)
 }

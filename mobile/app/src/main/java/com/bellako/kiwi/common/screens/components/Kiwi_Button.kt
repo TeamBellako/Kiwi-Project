@@ -19,14 +19,14 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun Kiwi_Button(
+    modifier: Modifier = Modifier,
     textArguments: KiwiTextArguments,
     onClick: () -> Unit,
     enabled: Boolean = true,
     color: Color = MaterialTheme.colorScheme.primaryContainer,
     testTag: String = "",
-    rowModifier: Modifier = Modifier,
 ) {
-    Box(modifier = rowModifier) {
+    Box(modifier = modifier) {
         Button(
             onClick = onClick,
             enabled = enabled,
@@ -65,7 +65,7 @@ fun Kiwi_Button_Preview() {
     Kiwi_Theme {
         Column {
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     "BUTTON",
                     color = MaterialTheme.colorScheme.secondary,
                     bold = true,
@@ -76,7 +76,7 @@ fun Kiwi_Button_Preview() {
             Kiwi_Spacer()
 
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     "BUTTON",
                     color = MaterialTheme.colorScheme.secondary,
                     bold = true,

@@ -112,7 +112,7 @@ private fun Question(
                 currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
 
                     Kiwi_Button(
-                        KiwiTextArguments(
+                        textArguments = KiwiTextArguments(
                             option,
                             color = MaterialTheme.colorScheme.secondary,
                         ),

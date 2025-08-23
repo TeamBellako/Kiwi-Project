@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.settings.tests
 
 import com.bellako.kiwi.features.settings.data.SettingsDTO
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.invalidUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 
 object SettingsTestFactory {
@@ -20,7 +21,7 @@ object SettingsTestFactory {
 
     fun invalidSettings(): SettingsDTO =
         SettingsDTO(
-            email = "bmolovesfootball.com",
+            email = invalidUsersDTO().email,
             soundVolume = -0.1f,
             musicVolume = 0.2f,
         )

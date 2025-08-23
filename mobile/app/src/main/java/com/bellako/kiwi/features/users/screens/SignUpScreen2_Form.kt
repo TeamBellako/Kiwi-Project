@@ -216,7 +216,7 @@ private fun SignUp(
                     // BUTTON
 
                     Kiwi_Button(
-                        KiwiTextArguments(
+                        textArguments = KiwiTextArguments(
                             "START JOURNEY",
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true,

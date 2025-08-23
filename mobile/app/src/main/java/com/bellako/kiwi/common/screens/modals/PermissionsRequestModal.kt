@@ -153,7 +153,7 @@ private fun PermissionRequestLayout(
             Kiwi_Spacer(Spacing.xLarge)
 
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     "ENABLE APP USAGE ACCESS",
                     color = MaterialTheme.colorScheme.secondary,
                     textAlign = TextAlign.Center,

@@ -105,12 +105,12 @@ private fun ErrorModalLayout(
 
         if (onButtonClick != null) {
             Kiwi_Button(
-                KiwiTextArguments(
+                textArguments = KiwiTextArguments(
                     buttonMessage,
                     color = MaterialTheme.colorScheme.secondary,
                 ),
-                onButtonClick,
-                rowModifier =
+                onClick = onButtonClick,
+                modifier =
                     Modifier
                         .padding(getResponsiveSizeHeight(Spacing.large)),
             )

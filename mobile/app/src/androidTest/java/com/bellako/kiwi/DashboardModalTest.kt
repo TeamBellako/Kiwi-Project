@@ -18,11 +18,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.MetricsFactory
 import com.bellako.kiwi.features.metrics.model.MetricsMapper
-import com.bellako.kiwi.features.metrics.model.MetricsUtils
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -64,10 +65,10 @@ class DashboardModalTest {
         todayMetricsDTO =
             MetricsDTO(
                 LocalDate.now().toString(),
-                6 * 60 * 60,
-                1 * 60 * 60,
-                6 * 60 * 60,
-                2 * 60,
+                6 * SECONDS_IN_HOUR,
+                1 * SECONDS_IN_HOUR,
+                6 * SECONDS_IN_HOUR,
+                2 * SECONDS_IN_HOUR,
             )
         pastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.minusDays(1).toString())
         futureMetricsDTO =
@@ -99,7 +100,7 @@ class DashboardModalTest {
 
         val yesterdayTestTag =
             DashboardModalTestTags.DAY_INDICATOR_PREFIX +
-                MetricsUtils
+                DateUtils
                     .getDayOfWeekNumber(
                         LocalDate.now().minusDays(1),
                     ).toString()
@@ -107,10 +108,10 @@ class DashboardModalTest {
 
         rule
             .onNodeWithTag(DashboardModalTestTags.GOOD_TIME)
-            .assertTextContains(MetricsUtils.parseTimeSeconds(pastMetricsDTO.currentGoodTimeSeconds), true)
+            .assertTextContains(DateUtils.parseTimeSeconds(pastMetricsDTO.currentGoodTimeSeconds), true)
         rule
             .onNodeWithTag(DashboardModalTestTags.BAD_TIME)
-            .assertTextContains(MetricsUtils.parseTimeSeconds(pastMetricsDTO.currentBadTimeSeconds), true)
+            .assertTextContains(DateUtils.parseTimeSeconds(pastMetricsDTO.currentBadTimeSeconds), true)
     }
 
     @Test
@@ -119,60 +120,61 @@ class DashboardModalTest {
 
         val tomorrowTestTag =
             DashboardModalTestTags.DAY_INDICATOR_PREFIX +
-                MetricsUtils
+                DateUtils
                     .getDayOfWeekNumber(
                         LocalDate.now().plusDays(1),
                     ).toString()
+
         rule.onNodeWithTag(tomorrowTestTag).performClick()
 
         rule
             .onNodeWithTag(DashboardModalTestTags.GOOD_TIME)
-            .assertTextContains(MetricsUtils.parseTimeSeconds(futureMetricsDTO.currentGoodTimeSeconds), true)
+            .assertTextContains(DateUtils.parseTimeSeconds(futureMetricsDTO.currentGoodTimeSeconds), true)
         rule
             .onNodeWithTag(DashboardModalTestTags.BAD_TIME)
-            .assertTextContains(MetricsUtils.parseTimeSeconds(futureMetricsDTO.currentBadTimeSeconds), true)
+            .assertTextContains(DateUtils.parseTimeSeconds(futureMetricsDTO.currentBadTimeSeconds), true)
     }
 
     @Test
     fun dragFromHiddenToCollapsed() {
         setContent(false, 0)
 
-        rule.isInHiddenState()
+        isInHiddenState()
 
         rule.swipeDashboardModal(
             fromState = 0,
             toState = 1,
         )
 
-        rule.isInCollapsedState()
+        isInCollapsedState()
     }
 
     @Test
     fun dragFromHiddenToExpanded() {
         setContent(false, 0)
 
-        rule.isInHiddenState()
+        isInHiddenState()
 
         rule.swipeDashboardModal(
             fromState = 0,
             toState = 2,
         )
 
-        rule.isInExpandedState()
+        isInExpandedState()
     }
 
     @Test
     fun dragFromCollapsedToExpanded() {
         setContent(false, 1)
 
-        rule.isInCollapsedState()
+        isInCollapsedState()
 
         rule.swipeDashboardModal(
             fromState = 1,
             toState = 2,
         )
 
-        rule.isInExpandedState()
+        isInExpandedState()
     }
 
     @Test
@@ -275,13 +277,13 @@ class DashboardModalTest {
             }
     }
 
-    private fun ComposeTestRule.isInExpandedState() {
+    private fun isInExpandedState() {
         rule
             .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
             .isDisplayed()
     }
 
-    private fun ComposeTestRule.isInCollapsedState() {
+    private fun isInCollapsedState() {
         rule
             .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
             .isNotDisplayed()
@@ -291,7 +293,7 @@ class DashboardModalTest {
             .isDisplayed()
     }
 
-    private fun ComposeTestRule.isInHiddenState() {
+    private fun isInHiddenState() {
         rule
             .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + "0")
             .isNotDisplayed()

@@ -117,15 +117,16 @@ private fun HelpScreenLayout(navController: NavController) {
         Kiwi_Spacer(Spacing.xLarge)
 
         Kiwi_Button(
-            KiwiTextArguments(
-                "BACK",
-                color = MaterialTheme.colorScheme.secondary,
-                bold = true,
-                modifier =
-                    Modifier
-                        .testTag(CommonTestTags.HELP_SCREEN),
-            ),
-            {
+            textArguments =
+                KiwiTextArguments(
+                    "BACK",
+                    color = MaterialTheme.colorScheme.secondary,
+                    bold = true,
+                    modifier =
+                        Modifier
+                            .testTag(CommonTestTags.HELP_SCREEN),
+                ),
+            onClick = {
                 navController.navigate(ScreenRoutes.SETTINGS)
             },
         )

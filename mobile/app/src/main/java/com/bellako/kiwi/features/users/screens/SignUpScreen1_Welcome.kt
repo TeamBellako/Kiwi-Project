@@ -93,7 +93,7 @@ private fun Welcome(
         Kiwi_Spacer(Spacing.xLarge)
 
         Kiwi_Button(
-            KiwiTextArguments(
+            textArguments = KiwiTextArguments(
                 "LET'S DO IT",
                 color = MaterialTheme.colorScheme.secondary,
                 bold = true,

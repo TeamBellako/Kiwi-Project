@@ -1,14 +1,18 @@
-package com.bellako.kiwi.features.metrics.model
+package com.bellako.kiwi.common.utils
 
 import android.os.Build
 import androidx.annotation.RequiresApi
 import java.time.LocalDate
 
-@Suppress("MagicNumber")
-object MetricsUtils {
+const val SECONDS_IN_MINUTE = 60
+const val MINUTES_IN_HOUR = 60
+const val SECONDS_IN_HOUR = SECONDS_IN_MINUTE * MINUTES_IN_HOUR
+const val DAYS_IN_WEEK = 7
+
+object DateUtils {
     fun parseTimeSeconds(screenTimeSeconds: Int): String {
-        val hours = screenTimeSeconds / 3600
-        val minutes = (screenTimeSeconds % 3600) / 60
+        val minutes = screenTimeSeconds / SECONDS_IN_MINUTE
+        val hours = minutes / MINUTES_IN_HOUR
 
         return buildString {
             if (hours > 0) append("${hours}h ")
@@ -19,6 +23,6 @@ object MetricsUtils {
     @RequiresApi(Build.VERSION_CODES.O)
     fun getDayOfWeekNumber(date: LocalDate): Int {
         val dayOfWeek = date.dayOfWeek
-        return (dayOfWeek.ordinal + 1) % 7
+        return (dayOfWeek.ordinal + 1) % DAYS_IN_WEEK
     }
 }

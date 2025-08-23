@@ -226,7 +226,7 @@ private fun LogIn(
                     Kiwi_Spacer()
 
                     Kiwi_Button(
-                        KiwiTextArguments(
+                        textArguments = KiwiTextArguments(
                             "LOG IN",
                             color = MaterialTheme.colorScheme.secondary,
                             bold = true,

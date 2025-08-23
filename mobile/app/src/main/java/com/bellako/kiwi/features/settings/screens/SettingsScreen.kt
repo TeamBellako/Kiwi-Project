@@ -181,23 +181,25 @@ private fun SettingsFields(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                KiwiTextArguments(
-                    "SUPPORT",
-                    color = White,
-                    bold = true,
-                ),
-                { navController.navigate(ScreenRoutes.HELP) },
+                textArguments =
+                    KiwiTextArguments(
+                        "SUPPORT",
+                        color = White,
+                        bold = true,
+                    ),
+                onClick = { navController.navigate(ScreenRoutes.HELP) },
             )
 
             Kiwi_Spacer()
 
             Kiwi_Button(
-                KiwiTextArguments(
-                    "LOG OUT",
-                    color = White,
-                    bold = true,
-                ),
-                onLogout,
+                textArguments =
+                    KiwiTextArguments(
+                        "LOG OUT",
+                        color = White,
+                        bold = true,
+                    ),
+                onClick = onLogout,
             )
         }
     }

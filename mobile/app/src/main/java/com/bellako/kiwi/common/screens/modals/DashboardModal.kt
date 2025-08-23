@@ -68,11 +68,13 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
-import com.bellako.kiwi.features.metrics.model.MetricsUtils
+import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -86,8 +88,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
-
-const val DAYS_IN_WEEK = 7
 
 const val ANIM_DURATION = 3000
 
@@ -577,10 +577,10 @@ private fun TimeExpanded(
     val text =
         buildAnnotatedString {
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                append(MetricsUtils.parseTimeSeconds(currentSeconds))
+                append(DateUtils.parseTimeSeconds(currentSeconds))
             }
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
+                append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
             }
         }
     Kiwi_AnnotatedString_P1(
@@ -614,10 +614,10 @@ private fun TimeCollapsed(
     val text =
         buildAnnotatedString {
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                append(MetricsUtils.parseTimeSeconds(currentSeconds))
+                append(DateUtils.parseTimeSeconds(currentSeconds))
             }
             withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                append(" / " + MetricsUtils.parseTimeSeconds(maxSeconds))
+                append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
             }
         }
     Kiwi_AnnotatedString_P2(
@@ -875,10 +875,10 @@ private fun DashboardModalPreview(
                         MetricsFakeViewModel(
                             MetricsState(
                                 date = "2025-06-12",
-                                maxGoodTimeSeconds = 6 * 60 * 60,
-                                currentGoodTimeSeconds = 1 * 60 * 60,
-                                maxBadTimeSeconds = 6 * 60 * 60,
-                                currentBadTimeSeconds = 2 * 60 * 60,
+                                maxGoodTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                currentGoodTimeSeconds = 1 * SECONDS_IN_HOUR,
+                                maxBadTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                currentBadTimeSeconds = 2 * SECONDS_IN_HOUR,
                             ),
                         ),
                         personalityViewModel =

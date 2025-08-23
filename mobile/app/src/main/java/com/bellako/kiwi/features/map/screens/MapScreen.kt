@@ -35,6 +35,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -171,10 +172,10 @@ fun MapScreen_Preview() {
                             MetricsFakeViewModel(
                                 MetricsState(
                                     date = "2025-06-12",
-                                    maxGoodTimeSeconds = 6 * 60 * 60,
-                                    currentGoodTimeSeconds = 1 * 60 * 60,
-                                    maxBadTimeSeconds = 6 * 60 * 60,
-                                    currentBadTimeSeconds = 2 * 60 * 60,
+                                    maxGoodTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                    currentGoodTimeSeconds = 1 * SECONDS_IN_HOUR,
+                                    maxBadTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                    currentBadTimeSeconds = 2 * SECONDS_IN_HOUR,
                                 ),
                             ),
                         personalityViewModel =
