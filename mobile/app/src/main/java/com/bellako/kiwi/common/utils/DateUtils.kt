@@ -11,8 +11,8 @@ const val DAYS_IN_WEEK = 7
 
 object DateUtils {
     fun parseTimeSeconds(screenTimeSeconds: Int): String {
-        val minutes = screenTimeSeconds / SECONDS_IN_MINUTE
-        val hours = minutes / MINUTES_IN_HOUR
+        val hours = screenTimeSeconds / SECONDS_IN_HOUR
+        val minutes = (screenTimeSeconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE
 
         return buildString {
             if (hours > 0) append("${hours}h ")
