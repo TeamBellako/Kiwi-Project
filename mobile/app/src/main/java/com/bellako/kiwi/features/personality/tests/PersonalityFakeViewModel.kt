@@ -31,7 +31,7 @@ class PersonalityFakeViewModel(
                 )
             },
             onFailure = { err ->
-                _uiState.value = UIState.Error(err.message.orEmpty())
+                setUiState(UIState.Error(err.message.orEmpty()))
                 Result.failure(err)
             },
         ) ?: Result.failure(Exception("Invalid state"))

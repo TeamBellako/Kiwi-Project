@@ -10,13 +10,19 @@ import retrofit2.HttpException
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 
 abstract class BaseViewModel : ViewModel() {
-    @Suppress("ktlint:standard:backing-property-naming")
-    protected val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
+    private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
-    @Suppress("ktlint:standard:backing-property-naming")
-    protected open val _isLoading = MutableStateFlow(false)
-    open val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    fun setUiState(inUiState: UIState<Unit>) {
+        _uiState.value = inUiState
+    }
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    fun setIsLoading(inIsLoading: Boolean) {
+        _isLoading.value = inIsLoading
+    }
 
     protected fun <T> failureWithError(message: String): Result<T> {
         _uiState.value = UIState.Error(message)

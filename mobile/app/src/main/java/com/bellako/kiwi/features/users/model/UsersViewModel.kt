@@ -41,11 +41,6 @@ class UsersViewModel
         private val _isLoginCompleted = MutableStateFlow(false)
         val isLoginCompleted: StateFlow<Boolean> = _isLoginCompleted.asStateFlow()
 
-        private fun setIsLoading(isLoading: Boolean) {
-            _isLoading.value = isLoading
-            _uiState.value = if (isLoading) UIState.Loading else UIState.Idle
-        }
-
         // ---------------------------------------------------------------------------------------------
 
         override fun onEmailChanged(email: String) {
@@ -60,8 +55,10 @@ class UsersViewModel
 
         override suspend fun signup(context: Context): Result<Unit> {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             val result = repository.signup(UsersDTO(_state.value.email, _state.value.password))
             setIsLoading(false)
+            setUiState(UIState.Idle)
 
             return handleResultSuspend(result) {
                 login(context)
@@ -70,8 +67,10 @@ class UsersViewModel
 
         override suspend fun login(context: Context): Result<Unit> {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             val result = repository.login(UsersDTO(_state.value.email, _state.value.password))
             setIsLoading(false)
+            setUiState(UIState.Idle)
 
             return handleResultSuspend(result) {
                 authRepository.setJwtToken(result.getOrThrow())
@@ -87,8 +86,10 @@ class UsersViewModel
 
         override suspend fun onLoginSuccess() {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             delay(ON_LOGIN_SUCCESS_DELAY_MILLIS)
             setIsLoading(false)
+            setUiState(UIState.Idle)
         }
 
         // ---------------------------------------------------------------------------------------------
@@ -117,6 +118,7 @@ class UsersViewModel
 
         override suspend fun saveLocalCredentials(context: Context) {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             try {
                 initAEAD(context)
                 context.dataStore.edit { prefs ->
@@ -136,11 +138,13 @@ class UsersViewModel
                 warn("DataStore error: ${e.message}")
             } finally {
                 setIsLoading(false)
+                setUiState(UIState.Idle)
             }
         }
 
         override suspend fun getLocalCredentials(context: Context): Pair<String?, String?> {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             return try {
                 initAEAD(context)
                 val prefs = context.dataStore.data.first()
@@ -170,11 +174,13 @@ class UsersViewModel
                 "" to ""
             } finally {
                 setIsLoading(false)
+                setUiState(UIState.Idle)
             }
         }
 
         override suspend fun clearLocalCredentials(context: Context) {
             setIsLoading(true)
+            setUiState(UIState.Loading)
             try {
                 initAEAD(context)
                 context.dataStore.edit { prefs ->
@@ -185,6 +191,7 @@ class UsersViewModel
                 warn(e.message.orEmpty())
             } finally {
                 setIsLoading(false)
+                setUiState(UIState.Idle)
             }
         }
     }
