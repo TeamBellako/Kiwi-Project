@@ -87,6 +87,10 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 
+const val DAYS_IN_WEEK = 7
+
+const val ANIM_DURATION = 3000
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardModal(
@@ -284,7 +288,7 @@ private fun WeekView(
     selectedDay: MutableState<LocalDate>,
     onCalendarViewClicked: () -> Unit,
 ) {
-    val currentDayOfWeek = selectedDay.value.dayOfWeek.value % 7
+    val currentDayOfWeek = selectedDay.value.dayOfWeek.value % DAYS_IN_WEEK
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
     val coroutineScope = rememberCoroutineScope()
     val startOfWeek = selectedDay.value.minusDays(currentDayOfWeek.toLong())
@@ -312,7 +316,7 @@ private fun WeekView(
                         .weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
             ) {
-                (0..6).forEach { index ->
+                for (index in 0 until DAYS_IN_WEEK) {
                     val day = startOfWeek.plusDays(index.toLong())
                     val dayNumber = day.dayOfMonth
                     val isSelected = selectedDayIndex.intValue == index
@@ -414,11 +418,11 @@ private fun CalendarView(
             targetState = currentYearMonth,
             transitionSpec = {
                 slideInHorizontally(
-                    animationSpec = tween(300),
+                    animationSpec = tween(ANIM_DURATION),
                     initialOffsetX = { fullWidth -> fullWidth * transitionDirection },
                 ) togetherWith
                     slideOutHorizontally(
-                        animationSpec = tween(300),
+                        animationSpec = tween(ANIM_DURATION),
                         targetOffsetX = { fullWidth -> -fullWidth * transitionDirection },
                     )
             },
@@ -426,12 +430,12 @@ private fun CalendarView(
         ) { displayedMonth ->
             val startOfMonth = displayedMonth.atDay(1)
             val endOfMonth = displayedMonth.atEndOfMonth()
-            val startDayOfWeek = startOfMonth.dayOfWeek.value % 7
+            val startDayOfWeek = startOfMonth.dayOfWeek.value % DAYS_IN_WEEK
             val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
-            val totalWeeks = ceil(totalDays / 7f).toInt()
+            val totalWeeks = ceil(totalDays / DAYS_IN_WEEK.toFloat()).toInt()
 
             Column {
-                (0 until totalWeeks).forEach { weekIndex ->
+                for (weekIndex in 0 until totalWeeks) {
                     Row(
                         modifier =
                             Modifier
@@ -439,8 +443,8 @@ private fun CalendarView(
                                 .weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp)),
                     ) {
-                        (0..6).forEach { dayOfWeek ->
-                            val dayIndex = weekIndex * 7 + dayOfWeek
+                        for (dayOfWeek in 0 until DAYS_IN_WEEK) {
+                            val dayIndex = weekIndex * DAYS_IN_WEEK + dayOfWeek
                             val dayOffset = dayIndex - startDayOfWeek
                             val dayDate = startOfMonth.plusDays(dayOffset.toLong())
 
