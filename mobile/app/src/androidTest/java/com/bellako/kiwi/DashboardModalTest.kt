@@ -18,6 +18,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
@@ -57,22 +58,26 @@ class DashboardModalTest {
     private val states = listOf(150, 260, 650)
     private var statesBottom: List<Float> = listOf()
 
+    private val dateNow = LocalDate.now()
+
     @Before
     fun setUp() {
         AudioManager.setEnabled(false)
 
-        val todayLocalDate = LocalDate.now()
         todayMetricsDTO =
-            MetricsDTO(
-                LocalDate.now().toString(),
-                6 * SECONDS_IN_HOUR,
-                1 * SECONDS_IN_HOUR,
-                6 * SECONDS_IN_HOUR,
-                2 * SECONDS_IN_HOUR,
+            MetricsFactory.generateRandomValidMetricDTO().copy(
+                date = dateNow.toString(),
             )
-        pastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = todayLocalDate.minusDays(1).toString())
+        pastMetricsDTO =
+            MetricsFactory.generateRandomValidMetricDTO().copy(
+                date = dateNow.minusDays(1).toString(),
+            )
         futureMetricsDTO =
-            todayMetricsDTO.copy(date = todayLocalDate.plusDays(1).toString(), currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0)
+            todayMetricsDTO.copy(
+                date = dateNow.plusDays(1).toString(),
+                currentGoodTimeSeconds = 0,
+                currentBadTimeSeconds = 0,
+            )
 
         metricsState = MetricsMapper.toState(todayMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0))
         fakeMetricsViewModel =
@@ -98,41 +103,72 @@ class DashboardModalTest {
     fun loadPastMetrics() {
         setContent(false, 2)
 
-        val yesterdayTestTag =
-            DashboardModalTestTags.DAY_INDICATOR_PREFIX +
-                DateUtils
-                    .getDayOfWeekNumber(
-                        LocalDate.now().minusDays(1),
-                    ).toString()
-        rule.onNodeWithTag(yesterdayTestTag).performClick()
+        val dateYesterday = dateNow.minusDays(1)
+        val yesterdayWeekNumber = DateUtils.getDayOfWeekNumber(dateYesterday)
+        if (yesterdayWeekNumber == DAYS_IN_WEEK - 1) {
+            rule
+                .onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
+                .performClick()
+
+            if (dateNow.month != dateYesterday.month) {
+                swipeCalendar(-1f)
+            }
+
+            rule
+                .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + dateYesterday.dayOfMonth)
+                .performClick()
+                .performClick()
+        } else {
+            rule
+                .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + yesterdayWeekNumber.toString())
+                .performClick()
+        }
+
+        val pastGoodTimeSeconds = DateUtils.parseTimeSeconds(pastMetricsDTO.currentGoodTimeSeconds)
+        val pastBadTimeSeconds = DateUtils.parseTimeSeconds(pastMetricsDTO.currentBadTimeSeconds)
 
         rule
             .onNodeWithTag(DashboardModalTestTags.GOOD_TIME)
-            .assertTextContains(DateUtils.parseTimeSeconds(pastMetricsDTO.currentGoodTimeSeconds), true)
+            .assertTextContains(pastGoodTimeSeconds, true)
         rule
             .onNodeWithTag(DashboardModalTestTags.BAD_TIME)
-            .assertTextContains(DateUtils.parseTimeSeconds(pastMetricsDTO.currentBadTimeSeconds), true)
+            .assertTextContains(pastBadTimeSeconds, true)
     }
 
     @Test
     fun loadFutureMetrics() {
         setContent(false, 2)
 
-        val tomorrowTestTag =
-            DashboardModalTestTags.DAY_INDICATOR_PREFIX +
-                DateUtils
-                    .getDayOfWeekNumber(
-                        LocalDate.now().plusDays(1),
-                    ).toString()
+        val dateTomorrow = dateNow.plusDays(1)
+        val tomorrowWeekNumber = DateUtils.getDayOfWeekNumber(dateTomorrow)
+        if (tomorrowWeekNumber == 0) {
+            rule
+                .onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
+                .performClick()
 
-        rule.onNodeWithTag(tomorrowTestTag).performClick()
+            if (dateNow.month != dateTomorrow.month) {
+                swipeCalendar(1f)
+            }
+
+            rule
+                .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + dateTomorrow.dayOfMonth)
+                .performClick()
+                .performClick()
+        } else {
+            rule
+                .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + tomorrowWeekNumber.toString())
+                .performClick()
+        }
+
+        val futureGoodTimeSeconds = DateUtils.parseTimeSeconds(futureMetricsDTO.currentGoodTimeSeconds)
+        val futureBadTimeSeconds = DateUtils.parseTimeSeconds(futureMetricsDTO.currentBadTimeSeconds)
 
         rule
             .onNodeWithTag(DashboardModalTestTags.GOOD_TIME)
-            .assertTextContains(DateUtils.parseTimeSeconds(futureMetricsDTO.currentGoodTimeSeconds), true)
+            .assertTextContains(futureGoodTimeSeconds, true)
         rule
             .onNodeWithTag(DashboardModalTestTags.BAD_TIME)
-            .assertTextContains(DateUtils.parseTimeSeconds(futureMetricsDTO.currentBadTimeSeconds), true)
+            .assertTextContains(futureBadTimeSeconds, true)
     }
 
     @Test
@@ -236,15 +272,8 @@ class DashboardModalTest {
                 .getOrNull(SemanticsProperties.Text)
                 ?.joinToString("") ?: ""
 
-        rule
-            .onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
-            .performTouchInput {
-                swipe(
-                    start = center,
-                    end = Offset(center.x + 150F, center.y),
-                    durationMillis = 300,
-                )
-            }
+        swipeCalendar(-1f)
+
         val newMonthYearText =
             rule
                 .onNodeWithTag(DashboardModalTestTags.SELECTED_MONTH_TEXT)
@@ -272,6 +301,18 @@ class DashboardModalTest {
                 swipe(
                     start = center,
                     end = Offset(center.x, center.y - dragDistance),
+                    durationMillis = 300,
+                )
+            }
+    }
+
+    private fun swipeCalendar(direction: Float) {
+        rule
+            .onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW)
+            .performTouchInput {
+                swipe(
+                    start = center,
+                    end = Offset(center.x + -150f * direction.coerceIn(-1f, 1f), center.y),
                     durationMillis = 300,
                 )
             }
