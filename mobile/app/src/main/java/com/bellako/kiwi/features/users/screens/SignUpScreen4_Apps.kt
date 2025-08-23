@@ -145,10 +145,6 @@ fun AppClassification(
             personalityViewModel.resetUiState()
         })
     } else {
-        if (isLoading || isPreview) {
-            LoadingModal()
-        }
-
         Column(
             modifier =
                 Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
@@ -235,6 +231,10 @@ fun AppClassification(
                 enabled = !isLoading,
                 testTag = UsersTestTags.SIGNUP_BUTTON,
             )
+        }
+
+        if (isLoading || isPreview) {
+            LoadingModal()
         }
     }
 }

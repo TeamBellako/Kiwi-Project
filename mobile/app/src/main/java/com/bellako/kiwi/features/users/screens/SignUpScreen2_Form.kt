@@ -101,10 +101,6 @@ private fun SignUp(
                     personalityViewModel.resetUiState()
                 })
             } else {
-                if (isLoading || isPreview) {
-                    LoadingModal()
-                }
-
                 Column(
                     modifier =
                         Modifier
@@ -281,6 +277,10 @@ private fun SignUp(
                             testTag = UsersTestTags.ERROR_TEXT,
                         )
                     }
+                }
+
+                if (isLoading || isPreview) {
+                    LoadingModal()
                 }
             }
         }
