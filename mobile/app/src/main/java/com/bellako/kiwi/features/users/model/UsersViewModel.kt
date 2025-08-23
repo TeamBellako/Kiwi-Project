@@ -87,7 +87,10 @@ class UsersViewModel
         override suspend fun onLoginSuccess() {
             setIsLoading(true)
             setUiState(UIState.Loading)
+
+            // delay to keep loading icon and input blocked until navigate finished
             delay(ON_LOGIN_SUCCESS_DELAY_MILLIS)
+
             setIsLoading(false)
             setUiState(UIState.Idle)
         }
