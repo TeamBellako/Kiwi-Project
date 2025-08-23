@@ -119,7 +119,6 @@ dependencies {
     compileOnly(libs.annotations)
 
     implementation(platform(libs.firebase.bom))
-    implementation(platform(libs.firebase.bom.v3400))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics.ktx.v1851)
     implementation(libs.androidx.core.ktx)
@@ -175,22 +174,21 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // Testing
-    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.core.testing)
-    androidTestImplementation(libs.androidx.core)
-    androidTestImplementation(libs.androidx.junit.v115)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.junit.jupiter.api)
+    androidTestImplementation(libs.junit.jupiter.engine)
     androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(libs.androidx.core)
     debugImplementation(libs.ui.tooling)
     androidTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockk)
     androidTestImplementation(libs.mockito.junit.jupiter)
-    androidTestImplementation(libs.junit.jupiter.api)
-    androidTestImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.mockito.core.v380)
     androidTestImplementation(libs.mockito.android)
     testImplementation(libs.mockito.inline)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.androidx.core.testing.v210)
 
     implementation(libs.coil)
     implementation(libs.coil.gif)
@@ -208,7 +206,6 @@ dependencies {
     implementation(libs.androidx.foundation)
     androidTestImplementation(libs.androidx.foundation)
 
-    testImplementation(libs.kotlinx.coroutines.test.v173)
     testImplementation(libs.mockito.core.v5170)
     testImplementation(libs.mockito.kotlin)
 
