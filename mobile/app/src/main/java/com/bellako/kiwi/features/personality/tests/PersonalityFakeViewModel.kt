@@ -4,6 +4,7 @@ import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
 import com.bellako.kiwi.features.personality.data.Personality
 import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.data.UserName
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,22 +24,7 @@ class PersonalityFakeViewModel(
 
     override suspend fun loadPersonality(): Result<Unit> = Result.success(Unit)
 
-    override fun checkValid(): Result<Personality> =
-        _state.value?.toDomainObject()?.fold(
-            onSuccess = { validState ->
-                Result.success(
-                    Personality(validState.realName, validState.knightName, validState.build, validState.goodApps, validState.badApps),
-                )
-            },
-            onFailure = { err ->
-                setUiState(UIState.Error(err.message.orEmpty()))
-                Result.failure(err)
-            },
-        ) ?: Result.failure(Exception("Invalid state"))
-
-    override suspend fun updateRealName(): Result<Unit> = getTestResult()
-
-    override suspend fun updateKnightName(): Result<Unit> = getTestResult()
+    // ---------------------------------------------------------------------------------------------
 
     override fun onRealNameChanged(name: String) {
         _state.value = _state.value?.copy(realName = name)
@@ -48,7 +34,28 @@ class PersonalityFakeViewModel(
         _state.value = _state.value?.copy(knightName = name)
     }
 
+    override fun checkRealNameValid(): Boolean = checkNameValid(_state.value!!.realName)
+
+    override fun checkKnightNameValid(): Boolean = checkNameValid(_state.value!!.knightName)
+
+    private fun checkNameValid(name: String): Boolean =
+        UserName.of(name).fold(
+            onSuccess = { _ -> true },
+            onFailure = { err ->
+                setUiState(UIState.Error(err.message.orEmpty()))
+                false
+            },
+        )
+
+    override suspend fun updateRealName(): Result<Unit> = getTestResult()
+
+    override suspend fun updateKnightName(): Result<Unit> = getTestResult()
+
+    // ---------------------------------------------------------------------------------------------
+
     override suspend fun updateBuild(): Result<Unit> = getTestResult()
+
+    // ---------------------------------------------------------------------------------------------
 
     override fun onAppsChanged(
         goodApps: List<String>,

@@ -7,6 +7,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
+import com.bellako.kiwi.features.users.data.Email
+import com.bellako.kiwi.features.users.data.Password
 import com.bellako.kiwi.features.users.data.UsersDTO
 import com.bellako.kiwi.features.users.data.UsersState
 import com.google.crypto.tink.Aead
@@ -38,7 +40,7 @@ class UsersViewModel
         private val _isLoginCompleted = MutableStateFlow(false)
         val isLoginCompleted: StateFlow<Boolean> = _isLoginCompleted.asStateFlow()
 
-        // ---------------------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------
 
         override fun onEmailChanged(email: String) {
             _state.value = _state.value.copy(email = email)
@@ -48,7 +50,25 @@ class UsersViewModel
             _state.value = _state.value.copy(password = password)
         }
 
-        // ---------------------------------------------------------------------------------------------
+        override fun checkEmailValid(): Boolean =
+            Email.of(_state.value.email).fold(
+                onSuccess = { _ -> true },
+                onFailure = { err ->
+                    setUiState(UIState.Error(err.message.orEmpty()))
+                    false
+                },
+            )
+
+        override fun checkPasswordValid(): Boolean =
+            Password.of(_state.value.password).fold(
+                onSuccess = { _ -> true },
+                onFailure = { err ->
+                    setUiState(UIState.Error(err.message.orEmpty()))
+                    false
+                },
+            )
+
+        // -----------------------------------------------------------------------------------------
 
         override suspend fun signup(context: Context): Result<Unit> {
             setIsLoading(true)
@@ -81,7 +101,7 @@ class UsersViewModel
             authRepository.setJwtToken("")
         }
 
-        // ---------------------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------
 
         private val Context.dataStore by preferencesDataStore("secure_prefs")
         private val prefFileName = "prefs"

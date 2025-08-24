@@ -9,11 +9,19 @@ interface IUsersViewModel : IBaseViewModel<UsersState> {
 
     fun onPasswordChanged(password: String)
 
+    fun checkEmailValid(): Boolean
+
+    fun checkPasswordValid(): Boolean
+
+    // ---------------------------------------------------------------------------------------------
+
     suspend fun signup(context: Context): Result<Unit>
 
     suspend fun login(context: Context): Result<Unit>
 
     suspend fun logout(context: Context)
+
+    // ---------------------------------------------------------------------------------------------
 
     suspend fun saveLocalCredentials(context: Context)
 

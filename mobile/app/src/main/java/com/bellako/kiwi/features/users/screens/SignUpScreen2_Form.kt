@@ -216,24 +216,35 @@ private fun SignUp(
                     // BUTTON
 
                     Kiwi_Button(
-                        textArguments = KiwiTextArguments(
-                            "START JOURNEY",
-                            color = MaterialTheme.colorScheme.secondary,
-                            bold = true,
-                        ),
+                        textArguments =
+                            KiwiTextArguments(
+                                "START JOURNEY",
+                                color = MaterialTheme.colorScheme.secondary,
+                                bold = true,
+                            ),
                         color = MaterialTheme.colorScheme.tertiary,
                         onClick = {
                             CoroutineScope(Dispatchers.Main).launch {
-                                if (personalityViewModel.checkValid().isSuccess &&
-                                    usersViewModel.signup(context).isSuccess
-                                ) {
-                                    FirebaseEventLogger.logEvent(FirebaseEventNames.ONBOARDING_COMPLETED)
+                                if (personalityViewModel.checkRealNameValid() && personalityViewModel.checkKnightNameValid()) {
+                                    personalityViewModel.resetUiState()
 
-                                    if (personalityViewModel.updateRealName().isSuccess &&
-                                        personalityViewModel.updateKnightName().isSuccess
-                                    ) {
-                                        navController.navigate(ScreenRoutes.SIGNUP3_TEST)
-                                        localLoading = true
+                                    if (usersViewModel.checkEmailValid()) {
+                                        if (usersViewModel.checkPasswordValid()) {
+                                            usersViewModel.resetUiState()
+
+                                            if (usersViewModel.signup(context).isSuccess) {
+                                                if (personalityViewModel.updateRealName().isSuccess &&
+                                                    personalityViewModel.updateKnightName().isSuccess
+                                                ) {
+                                                    FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_2_FORM_COMPLETED)
+
+                                                    navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+                                                    localLoading = true
+                                                }
+                                            }
+                                        } else {
+                                            FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_2_FORM_INVALID_PASSWORD)
+                                        }
                                     }
                                 }
                             }

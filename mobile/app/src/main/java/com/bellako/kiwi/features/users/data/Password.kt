@@ -28,7 +28,7 @@ value class Password private constructor(
                         } else if (!PASSWORD_REGEX_NUMBER.matches(password)) {
                             "Password should contain at least one number"
                         } else {
-                            "Invalid password"
+                            "Invalid password format"
                         },
                     ),
                 )
