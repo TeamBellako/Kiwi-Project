@@ -39,4 +39,4 @@ VALUES ('finn@thehuman.com', 50, 50);
 
 -- Insert the user into the users table, ensuring that the email matches the settings entry
 INSERT INTO users (email, password)
-VALUES ('finn@thehuman.com', 'Math3matical!');  -- Password for the user
+VALUES ('finn@thehuman.com', 'Math3matic!');  -- Password for the user

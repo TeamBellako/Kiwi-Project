@@ -57,7 +57,7 @@ public class PersonalityControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "bmolovesfootball")
+    @WithMockUser(username = "football")
     public void getPersonality_notFound() throws Exception {
         when(personalityService.getPersonality(invalidUserDTO().getEmail())).thenThrow(new PersonalityNotFoundException(invalidUserDTO().getEmail()));
         mockMvc.perform(get(baseAPIUrl)).andExpect(status().isNotFound());

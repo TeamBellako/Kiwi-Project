@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.kiwi.utils.HTTPUtils.createSuccessResponseBody;
+
 @RestController
 @RequestMapping("/api/public")
 public class UsersController {
@@ -30,10 +32,10 @@ public class UsersController {
     }
     
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<Map<String, String>> signup(@RequestBody LoginDTO loginDTO) {
         UsersDTO newUserDTO = new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword());
         usersService.createUser(newUserDTO);
-        return ResponseEntity.status(201).body("");
+        return ResponseEntity.status(201).body(createSuccessResponseBody("Created successfully"));
     }
 
     @PostMapping("/login")

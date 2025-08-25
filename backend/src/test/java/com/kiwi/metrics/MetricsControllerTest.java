@@ -70,7 +70,7 @@ public class MetricsControllerTest {
     public void updateValidMetrics() throws Exception {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
         when(metricsService.getMetrics(new Email("finn@thehuman.com"), LocalDate.parse(metricsDTO.getDate())))
-                .thenReturn(Optional.of(metricsDTO));
+                .thenReturn(metricsDTO);
         
         MetricsDTO updatedMetricsDTO = metricsDTO.copy();
         updatedMetricsDTO.setMaxGoodTimeSeconds(metricsDTO.getMaxGoodTimeSeconds() + 1);
@@ -87,7 +87,7 @@ public class MetricsControllerTest {
     public void readValidMetrics() throws Exception {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
         when(metricsService.getMetrics(new Email("finn@thehuman.com"), LocalDate.parse(metricsDTO.getDate())))
-                .thenReturn(Optional.of(metricsDTO));
+                .thenReturn(metricsDTO);
 
         mockMvc.perform(get(APIURL)
                         .param("date", metricsDTO.getDate()))

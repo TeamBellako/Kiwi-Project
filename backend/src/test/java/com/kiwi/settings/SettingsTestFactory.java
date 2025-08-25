@@ -22,7 +22,7 @@ public class SettingsTestFactory {
 
     public static SettingsDTO invalidSettingsDTO() {
         return new SettingsDTO(
-                "bmolovesfootball.com",   
+                "football",
                 1.5f,
                 -0.1f
         );
