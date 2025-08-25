@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.metrics.model
 
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -12,15 +11,15 @@ interface IMetricsAPI {
     @POST("api/user/metrics")
     suspend fun createMetrics(
         @Body dto: MetricsDTO,
-    ): Response<Unit>
+    ): MetricsDTO
 
     @PUT("api/user/metrics")
     suspend fun updateMetrics(
         @Body dto: MetricsDTO,
-    ): Response<Unit>
+    ): MetricsDTO
 
     @GET("api/user/metrics")
     suspend fun getMetricsByDate(
         @Query("date") date: String,
-    ): Response<MetricsDTO>
+    ): MetricsDTO?
 }

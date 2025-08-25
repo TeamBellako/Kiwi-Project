@@ -1,7 +1,6 @@
 package com.bellako.kiwi.common.model
 
 import okhttp3.OkHttpClient
-import retrofit2.Response
 import retrofit2.http.GET
 import java.util.concurrent.TimeUnit
 
@@ -16,5 +15,5 @@ private fun createShortTimeoutOkHttpClient(): OkHttpClient =
 
 interface HealthApiService {
     @GET("api/public/ping")
-    suspend fun ping(): Response<Unit>
+    suspend fun ping(): Map<String, String>
 }

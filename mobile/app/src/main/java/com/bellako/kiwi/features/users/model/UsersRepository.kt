@@ -5,7 +5,11 @@ import com.bellako.kiwi.features.users.data.UsersDTO
 class UsersRepository(
     private val api: IUsersAPI,
 ) {
-    suspend fun signup(dto: UsersDTO): Result<Unit> = runCatching { api.signup(dto) }
+    suspend fun signup(dto: UsersDTO): Result<String> =
+        runCatching {
+            api.signup(dto)
+            ""
+        }
 
     suspend fun login(dto: UsersDTO): Result<String> =
         runCatching {
