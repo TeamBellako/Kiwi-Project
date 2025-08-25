@@ -12,7 +12,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import retrofit2.Response
 
 class MetricsIntegrationTest {
     private lateinit var api: IMetricsAPI
@@ -32,9 +31,9 @@ class MetricsIntegrationTest {
     fun `create valid metrics`() =
         runTest {
             whenever(api.createMetrics(validMetricsDTO))
-                .thenReturn(Response.success(Unit))
+                .thenReturn(validMetricsDTO)
             whenever(api.getMetricsByDate(validMetricsDTO.date))
-                .thenReturn(Response.success(null))
+                .thenReturn(null)
 
             val result: Result<Unit> = viewModel.createMetrics(MetricsMapper.toState(validMetricsDTO))
             assertTrue(result.isSuccess)
@@ -45,9 +44,9 @@ class MetricsIntegrationTest {
         runTest {
             val updatedMetricsDTO = validMetricsDTO.copy(currentGoodTimeSeconds = validMetricsDTO.currentGoodTimeSeconds + 1)
             whenever(api.updateMetrics(updatedMetricsDTO))
-                .thenReturn(Response.success(Unit))
+                .thenReturn(validMetricsDTO)
             whenever(api.getMetricsByDate(validMetricsDTO.date))
-                .thenReturn(Response.success(validMetricsDTO))
+                .thenReturn(validMetricsDTO)
 
             val result: Result<Unit> = viewModel.updateMetrics(MetricsMapper.toState(updatedMetricsDTO))
             assertTrue(result.isSuccess)
@@ -57,7 +56,7 @@ class MetricsIntegrationTest {
     fun `load valid metrics`() =
         runTest {
             whenever(api.getMetricsByDate(validMetricsDTO.date))
-                .thenReturn(Response.success(validMetricsDTO))
+                .thenReturn(validMetricsDTO)
 
             val result: Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
             assertTrue(result.isSuccess)
@@ -67,7 +66,7 @@ class MetricsIntegrationTest {
     fun `load non-existing metrics`() =
         runTest {
             whenever(api.getMetricsByDate(validMetricsDTO.date))
-                .thenReturn(Response.success(validMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0)))
+                .thenReturn(validMetricsDTO)
 
             val result: Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
             assertTrue(result.isSuccess)

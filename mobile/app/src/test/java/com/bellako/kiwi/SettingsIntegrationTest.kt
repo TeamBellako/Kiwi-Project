@@ -1,7 +1,6 @@
 package com.bellako.kiwi
 
 import androidx.lifecycle.viewModelScope
-import com.bellako.kiwi.common.model.HealthApiService
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.settings.model.ISettingsAPI
 import com.bellako.kiwi.features.settings.model.SettingsRepository
@@ -30,7 +29,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import retrofit2.Response
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -39,7 +37,6 @@ class SettingsIntegrationTest {
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var api: ISettingsAPI
-    private lateinit var healthApi: HealthApiService
     private lateinit var repository: SettingsRepository
     private lateinit var viewModel: SettingsViewModel
 
@@ -48,8 +45,7 @@ class SettingsIntegrationTest {
         Dispatchers.setMain(testDispatcher)
 
         api = mock(ISettingsAPI::class.java)
-        healthApi = mock(HealthApiService::class.java)
-        repository = SettingsRepository(api, healthApi)
+        repository = SettingsRepository(api)
         viewModel = SettingsViewModel(repository)
     }
 
@@ -118,7 +114,6 @@ class SettingsIntegrationTest {
     @Test
     fun `autoSave triggers updateSettings when values change`() =
         runTest {
-            whenever(healthApi.ping()).thenReturn(Response.success(Unit))
             whenever(api.getSettings()).thenReturn(validSettings())
             whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
 
