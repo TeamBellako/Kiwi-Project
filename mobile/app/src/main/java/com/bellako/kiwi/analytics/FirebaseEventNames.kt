@@ -1,14 +1,14 @@
 package com.bellako.kiwi.analytics
 
 object FirebaseEventNames {
+    // Retention
+    const val APP_OPENED = "APP_OPENED"
     const val PERMISSION_GRANTED = "PERMISSION_GRANTED"
 
+    // SignUp
     const val SIGNUP_1_STARTED = "SIGNUP_1_STARTED"
     const val SIGNUP_2_FORM_INVALID_PASSWORD = "SIGNUP_2_FORM_INVALID_PASSWORD"
     const val SIGNUP_2_FORM_COMPLETED = "SIGNUP_2_FORM_COMPLETED"
     const val SIGNUP_3_TEST_COMPLETED = "SIGNUP_3_TEST_COMPLETED"
     const val SIGNUP_4_APPS_COMPLETED = "SIGNUP_4_APPS_COMPLETED"
-
-    // Retention
-    const val APP_OPENED = "APP_OPENED"
 }
