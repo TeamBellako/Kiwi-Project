@@ -13,8 +13,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MetricsServiceTest {
     private final UsersRepositoryInMemory usersRepositoryInMemory = new UsersRepositoryInMemory();
@@ -123,15 +122,18 @@ public class MetricsServiceTest {
                 metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, metrics.getDate());
         assert(savedMetricsPersistence.isPresent());
         
-        Optional<MetricsDTO> retrievedMetricsDTO =
-                metricsService.getMetrics(validUsersPersistence.getEmail(), metrics.getDate());
-        assert(retrievedMetricsDTO.isPresent());
-        
-        assertEquals(metrics, MetricsMapper.toDomain(retrievedMetricsDTO.get()));
+        MetricsDTO retrievedMetricsDTO = metricsService.getMetrics(validUsersPersistence.getEmail(), metrics.getDate());
+        assertEquals(metrics, MetricsMapper.toDomain(retrievedMetricsDTO));
     }
 
     @Test
     public void getNonExistingMetric() {
-        assertEquals(Optional.empty(), metricsService.getMetrics(validUsersPersistence.getEmail(), LocalDate.now()));
+        boolean notFoundException = false;
+        try {
+            metricsService.getMetrics(validUsersPersistence.getEmail(), LocalDate.now());
+        } catch (MetricsNotFoundException e) {
+            notFoundException = true;
+        }
+        assertTrue(notFoundException);
     }
 }

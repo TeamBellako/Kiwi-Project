@@ -4,12 +4,12 @@ import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.features.personality.data.BERSERKER
 import com.bellako.kiwi.features.personality.data.MONK
-import com.bellako.kiwi.features.personality.data.Personality
 import com.bellako.kiwi.features.personality.data.PersonalityAppsDTO
 import com.bellako.kiwi.features.personality.data.PersonalityBuildDTO
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.data.PersonalityUserNameDTO
 import com.bellako.kiwi.features.personality.data.SHAMAN
+import com.bellako.kiwi.features.personality.data.UserName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +26,7 @@ class PersonalityViewModel
         private val _state = MutableStateFlow(PersonalityState("", "", "", listOf(), listOf()))
         override val state: StateFlow<PersonalityState?> = _state.asStateFlow()
 
-        // ---------------------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------
 
         override suspend fun loadPersonality(): Result<Unit> {
             setIsLoading(true)
@@ -51,22 +51,26 @@ class PersonalityViewModel
                 }
         }
 
-        override fun checkValid(): Result<Personality> =
-            _state.value.toDomainObject().fold(
-                onSuccess = { validState ->
-                    Result.success(
-                        Personality(
-                            validState.realName,
-                            validState.knightName,
-                            validState.build,
-                            validState.goodApps,
-                            validState.badApps,
-                        ),
-                    )
-                },
+        // -----------------------------------------------------------------------------------------
+
+        override fun onRealNameChanged(name: String) {
+            _state.value = _state.value.copy(realName = name)
+        }
+
+        override fun onKnightNameChanged(name: String) {
+            _state.value = _state.value.copy(knightName = name)
+        }
+
+        override fun checkRealNameValid(): Boolean = checkNameValid(_state.value.realName)
+
+        override fun checkKnightNameValid(): Boolean = checkNameValid(_state.value.knightName)
+
+        private fun checkNameValid(name: String): Boolean =
+            UserName.of(name).fold(
+                onSuccess = { _ -> true },
                 onFailure = { err ->
                     setUiState(UIState.Error(err.message.orEmpty()))
-                    Result.failure(err)
+                    false
                 },
             )
 
@@ -94,21 +98,7 @@ class PersonalityViewModel
             }
         }
 
-        override fun onRealNameChanged(name: String) {
-            _state.value = _state.value.copy(realName = name)
-        }
-
-        override fun onKnightNameChanged(name: String) {
-            _state.value = _state.value.copy(knightName = name)
-        }
-
-        override fun onAppsChanged(
-            goodApps: List<String>,
-            badApps: List<String>,
-        ) {
-            _state.value = _state.value.copy(goodApps = goodApps)
-            _state.value = _state.value.copy(badApps = badApps)
-        }
+        // -----------------------------------------------------------------------------------------
 
         private fun deduceBuild(): String =
             when (_state.value.answers.last()) {
@@ -128,6 +118,16 @@ class PersonalityViewModel
             return handleResultSuspend(result) {
                 setUiState(UIState.Success(Unit))
             }
+        }
+
+        // -----------------------------------------------------------------------------------------
+
+        override fun onAppsChanged(
+            goodApps: List<String>,
+            badApps: List<String>,
+        ) {
+            _state.value = _state.value.copy(goodApps = goodApps)
+            _state.value = _state.value.copy(badApps = badApps)
         }
 
         override suspend fun updateApps(): Result<Unit> {

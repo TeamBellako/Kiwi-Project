@@ -18,7 +18,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import retrofit2.Response
 import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -44,7 +43,7 @@ class UsersIntegrationTest {
     @Test
     fun `signup with a valid user`() =
         runTest {
-            whenever(api.signup(any())).thenReturn(Response.success(Unit))
+            whenever(api.signup(any())).thenReturn(mapOf("message" to "Created successfully"))
             whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
 
             viewModel.onEmailChanged(validUsersDTO().email)

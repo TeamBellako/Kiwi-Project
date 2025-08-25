@@ -10,7 +10,7 @@ public class UsersTestFactory {
     public static UsersDTO validUserDTO() {
         return new UsersDTO(
                 "finn@thehuman.com",
-                "Math3matical!",
+                "Math3matic!",
                 validSettingsDTO(),
                 MetricsFactory.generateRandomMetricsSet(3, true)
         );
@@ -18,7 +18,7 @@ public class UsersTestFactory {
     
     public static UsersDTO invalidUserDTO() {
         return new UsersDTO(
-                "bmolovesfootball",
+                "football",
                 "kk",
                 invalidSettingsDTO(),
                 MetricsFactory.generateRandomMetricsSet(3, false)

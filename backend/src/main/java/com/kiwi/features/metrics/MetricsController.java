@@ -6,9 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.time.LocalDate;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user/metrics")
@@ -21,25 +19,21 @@ public class MetricsController {
     }
     
     @PostMapping
-    public ResponseEntity<String> createMetrics(@RequestBody MetricsDTO metricsDTO) {
-        Email jwtEmail = tryGetJWTEmail();
-        
-        metricsService.createMetric(jwtEmail, metricsDTO);
-        URI location = URI.create("/api/user/metrics/" + jwtEmail.value() + "/" + metricsDTO.getDate());
-
-        return ResponseEntity.created(location).build();
+    public ResponseEntity<MetricsDTO> createMetrics(@RequestBody MetricsDTO metricsDTO) {
+        MetricsDTO savedMetrics = metricsService.createMetric(tryGetJWTEmail(), metricsDTO);
+        return ResponseEntity.status(201).body(savedMetrics);
     }
     
     @PutMapping
-    public ResponseEntity<String> updateMetrics(@RequestBody MetricsDTO metricsDTO) {
-        metricsService.updateMetric(tryGetJWTEmail(), metricsDTO);
-        
-        return ResponseEntity.ok().body("Metrics updated");
+    public ResponseEntity<MetricsDTO> updateMetrics(@RequestBody MetricsDTO metricsDTO) {
+        MetricsDTO savedMetrics = metricsService.updateMetric(tryGetJWTEmail(), metricsDTO);
+        return ResponseEntity.ok().body(savedMetrics);
     }
     
     @GetMapping
-    public ResponseEntity<Optional<MetricsDTO>> readMetrics(@RequestParam("date") String date) {
-        return ResponseEntity.ok().body(metricsService.getMetrics(tryGetJWTEmail(), LocalDate.parse(date)));
+    public ResponseEntity<MetricsDTO> readMetrics(@RequestParam("date") String date) {
+        MetricsDTO savedMetrics = metricsService.getMetrics(tryGetJWTEmail(), LocalDate.parse(date));
+        return ResponseEntity.ok().body(savedMetrics);
     }
     
     private Email tryGetJWTEmail() {

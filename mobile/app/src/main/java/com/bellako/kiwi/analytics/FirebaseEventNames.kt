@@ -1,19 +1,14 @@
 package com.bellako.kiwi.analytics
 
 object FirebaseEventNames {
-    const val ONBOARDING_STARTED = "onboarding_started"
-    const val ONBOARDING_COMPLETED = "onboarding_completed"
-    const val PERMISSION_GRANTED = "permission_granted"
-
-    const val COMBAT_STARTED = "combat_started" // TODO
-    const val COMBAT_COMPLETED = "combat_completed" // TODO
-
-    const val QUEST_STARTED = "quest_started" // TODO
-    const val QUEST_COMPLETED = "quest_completed" // TODO
-
     // Retention
-    const val APP_OPENED = "app_opened"
+    const val APP_OPENED = "APP_OPENED"
+    const val PERMISSION_GRANTED = "PERMISSION_GRANTED"
 
-    // Target persona
-    const val TARGET_PERSONA_ASSIGNED = "target_persona_assigned" // TODO
+    // SignUp
+    const val SIGNUP_1_STARTED = "SIGNUP_1_STARTED"
+    const val SIGNUP_2_FORM_INVALID_PASSWORD = "SIGNUP_2_FORM_INVALID_PASSWORD"
+    const val SIGNUP_2_FORM_COMPLETED = "SIGNUP_2_FORM_COMPLETED"
+    const val SIGNUP_3_TEST_COMPLETED = "SIGNUP_3_TEST_COMPLETED"
+    const val SIGNUP_4_APPS_COMPLETED = "SIGNUP_4_APPS_COMPLETED"
 }

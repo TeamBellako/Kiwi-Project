@@ -1,7 +1,10 @@
 package com.bellako.kiwi.features.users.tests
 
 import android.content.Context
+import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
+import com.bellako.kiwi.features.users.data.Email
+import com.bellako.kiwi.features.users.data.Password
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +32,26 @@ class UsersFakeViewModel(
         _state.value = _state.value?.copy(password = password)
     }
 
+    override fun checkEmailValid(): Boolean =
+        Email.of(_state.value!!.email).fold(
+            onSuccess = { _ -> true },
+            onFailure = { err ->
+                setUiState(UIState.Error(err.message.orEmpty()))
+                false
+            },
+        )
+
+    override fun checkPasswordValid(): Boolean =
+        Password.of(_state.value!!.password).fold(
+            onSuccess = { _ -> true },
+            onFailure = { err ->
+                setUiState(UIState.Error(err.message.orEmpty()))
+                false
+            },
+        )
+
+    // ---------------------------------------------------------------------------------------------
+
     override suspend fun signup(context: Context): Result<Unit> =
         if (fakeError) {
             handleError(fakeException)
@@ -50,6 +73,8 @@ class UsersFakeViewModel(
         }
 
     override suspend fun logout(context: Context) {}
+
+    // ---------------------------------------------------------------------------------------------
 
     override suspend fun saveLocalCredentials(context: Context) {}
 

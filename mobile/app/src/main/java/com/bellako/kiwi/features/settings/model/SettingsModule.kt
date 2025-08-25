@@ -61,8 +61,5 @@ object SettingsModule {
 
     @Provides
     @Singleton
-    fun provideSettingsRepository(
-        api: ISettingsAPI,
-        healthApiService: HealthApiService,
-    ): SettingsRepository = SettingsRepository(api, healthApiService)
+    fun provideSettingsRepository(api: ISettingsAPI): SettingsRepository = SettingsRepository(api)
 }

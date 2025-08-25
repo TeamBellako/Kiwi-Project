@@ -59,7 +59,7 @@ public class SettingsControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "bmolovesfootball.com")
+    @WithMockUser(username = "football")
     public void getSettings_invalidInput_returnsBadRequest() throws Exception {
         when(settingsService.getSettingsByEmail(invalidSettingsDTO().getEmail()))
                 .thenThrow(new SettingsInvalidException(""));

@@ -100,7 +100,7 @@ private fun Welcome(
             ),
             color = MaterialTheme.colorScheme.primary,
             onClick = {
-                FirebaseEventLogger.logEvent(FirebaseEventNames.ONBOARDING_STARTED)
+                FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_1_STARTED)
 
                 viewModel.onEmailChanged("")
                 viewModel.onPasswordChanged("")
