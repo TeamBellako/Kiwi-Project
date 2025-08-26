@@ -8,7 +8,9 @@ import com.kiwi.features.settings.data.SettingsPersistence;
 import com.kiwi.features.settings.data.SettingsDTO;
 import com.kiwi.features.settings.exceptions.SettingsNotFoundException;
 import com.kiwi.features.users.controllers.UsersService;
+import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersPersistence;
+import com.kiwi.features.users.exceptions.UsersNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -38,19 +40,18 @@ public class SettingsServiceTest {
     public void getSettings_validInput_returnsSettings() {
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(savedUser, settingsDTO());
-        when(settingsRepository.findByUserEmail(savedUser.getEmail())).thenReturn(Optional.of(settingsPersistence));
+        when(settingsRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(settingsPersistence));
 
-        SettingsPersistence retrievedSettings = settingsService.getSettings(savedUser.getEmail());
+        SettingsPersistence retrievedSettings = settingsService.getSettings(validUserDTO().getEmail());
 
         assertNotNull(retrievedSettings);
         assertEquals(settingsPersistence, retrievedSettings);
-        verify(settingsRepository, Mockito.times(1)).findByUserEmail(savedUser.getEmail());
+        verify(settingsRepository, Mockito.times(1)).findByUserEmail(validUserDTO().getEmail());
     }
 
     @Test(expected = SettingsNotFoundException.class)
     public void getSettings_settingsDoesNotExist_created() {
-        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
-        SettingsPersistence retrievedSettings = settingsService.getSettings("a" + savedUser.getEmail());
+        SettingsPersistence retrievedSettings = settingsService.getSettings("a" + validUserDTO().getEmail());
         assertNotNull(retrievedSettings);
     }
 
@@ -64,9 +65,9 @@ public class SettingsServiceTest {
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(savedUser, settingsDTO());
         when(settingsRepository.saveAndFlush(settingsPersistence)).thenReturn(settingsPersistence);
-        when(settingsRepository.findByUserEmail(savedUser.getEmail())).thenReturn(Optional.of(settingsPersistence));
+        when(settingsRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(settingsPersistence));
 
-        SettingsDTO newSettingsDTO = settingsService.updateSettings(savedUser.getEmail(), settingsDTO());
+        SettingsDTO newSettingsDTO = settingsService.updateSettings(validUserDTO().getEmail(), settingsDTO());
 
         assertEquals(newSettingsDTO, settingsDTO());
         verify(settingsRepository, Mockito.times(1)).saveAndFlush(settingsPersistence);
@@ -74,13 +75,14 @@ public class SettingsServiceTest {
 
     @Test(expected = NullPointerException.class)
     public void updateSettings_nullInput_throwsNullPointerException() {
-        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
-        settingsService.updateSettings(savedUser.getEmail(), null);
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
+        settingsService.updateSettings(validUserDTO().getEmail(), null);
     }
 
-    @Test(expected = SettingsNotFoundException.class)
-    public void updateSettings_settingsDoesNotExist_throwsSettingsNotFoundException() {
-        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
-        settingsService.updateSettings(savedUser.getEmail(), settingsDTO());
+    @Test(expected = UsersNotFoundException.class)
+    public void updateSettings_userDoesNotExist_throwsUsersNotFoundException() {
+        settingsService.updateSettings(validUserDTO().getEmail(), settingsDTO());
     }
 }

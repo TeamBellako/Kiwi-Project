@@ -6,6 +6,7 @@ import com.kiwi.features.metrics.data.MetricsDomain;
 import com.kiwi.features.metrics.data.MetricsDTO;
 import com.kiwi.features.metrics.data.MetricsPersistence;
 import com.kiwi.features.metrics.exceptions.MetricsConflictException;
+import com.kiwi.features.metrics.exceptions.MetricsInvalidException;
 import com.kiwi.features.metrics.exceptions.MetricsNotFoundException;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.users.UsersRepositoryInMemory;
@@ -39,7 +40,7 @@ public class MetricsDomainServiceTest {
     private final MetricsService metricsService = new MetricsService(metricsRepositoryInMemory, usersService);
     
     private UsersPersistence validUsersPersistence;
-    private final Email validEmail = new Email("finn@thehuman.com");
+    private final Email validEmail = new Email(validUserDTO().getEmail());
     
     @Before
     public void setUp() {
@@ -56,11 +57,11 @@ public class MetricsDomainServiceTest {
                 metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, LocalDate.parse(metricsDTO.getDate()));
         assert(savedMetricsPersistence.isPresent());
         assertEquals(MetricsDataMapper.toDomain(metricsDTO).getDate(), savedMetricsPersistence.get().getDate());
-        assertEquals(MetricsDataMapper.toDomain(metricsDTO).getCurrentGoodTimeSeconds(), savedMetricsPersistence.get().getCurrentGoodTimeSeconds());
-        assertEquals(MetricsDataMapper.toDomain(metricsDTO).getCurrentBadTimeSeconds(), savedMetricsPersistence.get().getCurrentBadTimeSeconds());
+        assertEquals(metricsDTO.getCurrentGoodTimeSeconds(), savedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(metricsDTO.getCurrentBadTimeSeconds(), savedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = MetricsInvalidException.class)
     public void createInvalidMetrics() {
         MetricsDTO invalidMetricsDTO = MetricsFactory.generateRandomInvalidMetricDTO();
         metricsService.createMetric(validEmail, invalidMetricsDTO);
@@ -96,12 +97,12 @@ public class MetricsDomainServiceTest {
         assert(retrievedMetricsPersistence.isPresent());
         
         assertNotEquals(metricsDomain, MetricsDataMapper.toDomain(retrievedMetricsPersistence.get()));
-        assertEquals(MetricsDataMapper.toDomain(metricsDTO).getDate(), retrievedMetricsPersistence.get().getDate());
-        assertEquals(MetricsDataMapper.toDomain(metricsDTO).getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
-        assertEquals(MetricsDataMapper.toDomain(metricsDTO).getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
+        assertEquals(metricsDTO.getDate(), MetricsDataMapper.toDTO(retrievedMetricsPersistence.get()).getDate());
+        assertEquals(metricsDTO.getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(metricsDTO.getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = MetricsInvalidException.class)
     public void updateInvalidMetrics() {
         MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
         MetricsDomain metricsDomain = MetricsDataMapper.toDomain(metricsDTO);

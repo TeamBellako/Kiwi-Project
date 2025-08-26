@@ -49,9 +49,9 @@ public class PersonalityIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private PersonalityRepository personalityRepository;
-    @Autowired
     private UsersRepository usersRepository;
+    @Autowired
+    private PersonalityRepository personalityRepository;
 
     private final String baseAPIUrl = "/api/user/personality";
 

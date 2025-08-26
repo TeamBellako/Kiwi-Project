@@ -57,7 +57,7 @@ public class MetricsService {
         LocalDate date;
         try {
             date = MetricsDataMapper.toDomain(metricsDTO).getDate();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             throw new MetricsInvalidException(e.getMessage());
         }
 

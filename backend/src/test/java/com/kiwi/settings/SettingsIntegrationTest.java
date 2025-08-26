@@ -2,13 +2,17 @@ package com.kiwi.settings;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kiwi.common.types.Email;
 import com.kiwi.features.settings.controllers.SettingsRepository;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.features.settings.data.SettingsDataMapper;
+import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.config.WebSecurityConfig;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,15 +50,24 @@ public class SettingsIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private UsersRepository usersRepository;
+    @Autowired
     private SettingsRepository settingsRepository;
 
     private final String baseAPIUrl = "/api/user/settings";
 
+    @Before
+    public void setUp() {
+        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validUserDTO().getPassword());
+        usersRepository.saveAndFlush(usersPersistence);
+    }
+
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getSettings_validInput_returnsCurrentSettings() throws Exception {
-        UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
-        settingsRepository.save(SettingsDataMapper.toPersistence(user, settingsDTO()));
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
+        settingsRepository.save(SettingsDataMapper.toPersistence(savedUser, settingsDTO()));
 
         mockMvc.perform(put(baseAPIUrl)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -71,8 +84,8 @@ public class SettingsIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateSettings_validInput_returnsUpdatedSettings() throws Exception {
-        UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
-        settingsRepository.save(SettingsDataMapper.toPersistence(user, settingsDTO()));
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
+        settingsRepository.save(SettingsDataMapper.toPersistence(savedUser, settingsDTO()));
 
         mockMvc.perform(put(baseAPIUrl)
                         .contentType(MediaType.APPLICATION_JSON)
