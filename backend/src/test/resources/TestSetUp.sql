@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Create settings table
 CREATE TABLE IF NOT EXISTS settings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     sound_volume FLOAT NOT NULL CHECK (sound_volume >= 0 AND sound_volume <= 1),
     music_volume FLOAT NOT NULL CHECK (music_volume >= 0 AND music_volume <= 1),
 
