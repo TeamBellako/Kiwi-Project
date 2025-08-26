@@ -57,10 +57,7 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getPersonality_valid() throws Exception {
-        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
-
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         personalityPersistence.setUser(savedUser);
 
@@ -82,10 +79,7 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateRealName() throws Exception {
-        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
-
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         personalityPersistence.setUser(savedUser);
 
@@ -107,10 +101,7 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateKnightName() throws Exception {
-        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
-
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         personalityPersistence.setUser(savedUser);
 
@@ -132,10 +123,7 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateBuild() throws Exception {
-        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
-
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         personalityPersistence.setUser(savedUser);
 
@@ -157,10 +145,7 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateApps() throws Exception {
-        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
-
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         personalityPersistence.setUser(savedUser);
 

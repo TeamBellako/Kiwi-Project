@@ -3,9 +3,11 @@ package com.kiwi.features.metrics.controllers;
 import com.kiwi.features.metrics.data.MetricsDomain;
 import com.kiwi.features.metrics.data.MetricsDataMapper;
 import com.kiwi.features.metrics.exceptions.MetricsConflictException;
+import com.kiwi.features.metrics.exceptions.MetricsInvalidException;
 import com.kiwi.features.metrics.exceptions.MetricsNotFoundException;
 import com.kiwi.features.metrics.data.MetricsDTO;
 import com.kiwi.features.metrics.data.MetricsPersistence;
+import com.kiwi.features.users.exceptions.UsersInvalidException;
 import com.kiwi.features.users.exceptions.UsersNotFoundException;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersService;
@@ -33,7 +35,12 @@ public class MetricsService {
 
     @Transactional
     public MetricsDTO createMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
-        MetricsDomain metricsDomain = MetricsDataMapper.toDomain(metricsDTO);
+        MetricsDomain metricsDomain;
+        try {
+            metricsDomain = MetricsDataMapper.toDomain(metricsDTO);
+        } catch (Exception e) {
+            throw new MetricsInvalidException(e.getMessage());
+        }
         fillMetricInternalValues(metricsDomain);
 
         UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
@@ -48,7 +55,13 @@ public class MetricsService {
     @Transactional
     public MetricsDTO updateMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
         UsersPersistence userPersistence = getTargetUserPersistence(email);
-        LocalDate date = MetricsDataMapper.toDomain(metricsDTO).getDate();
+        LocalDate date;
+        try {
+            date = MetricsDataMapper.toDomain(metricsDTO).getDate();
+        } catch (Exception e) {
+            throw new MetricsInvalidException(e.getMessage());
+        }
+
         Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(userPersistence, date);
         if (metricsPersistence.isEmpty()) {
             throw new MetricsNotFoundException(email, date);

@@ -1,12 +1,12 @@
 package com.kiwi.personality;
 
+import com.kiwi.common.types.Email;
 import com.kiwi.features.personality.controllers.PersonalityRepository;
 import com.kiwi.features.personality.controllers.PersonalityService;
 import com.kiwi.features.personality.data.PersonalityDataMapper;
 import com.kiwi.features.personality.data.PersonalityPersistence;
 import com.kiwi.features.personality.exceptions.PersonalityNotFoundException;
 import com.kiwi.features.users.controllers.UsersService;
-import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersPersistence;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -26,11 +26,10 @@ public class PersonalityServiceTest {
     private final UsersService usersService = Mockito.mock(UsersService.class);
     private final PersonalityService personalityService = new PersonalityService(personalityRepository, usersService);
 
-    private final UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
-    private final PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(user, personalityDTO());
-
     @Test
     public void getPersonality_valid() {
+        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
         PersonalityPersistence newPersonalityPersistence = personalityService.getPersonality(validUserDTO().getEmail());
@@ -51,6 +50,8 @@ public class PersonalityServiceTest {
 
     @Test
     public void updateRealName() {
+        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
         when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
@@ -60,6 +61,8 @@ public class PersonalityServiceTest {
 
     @Test
     public void updateKnightName() {
+        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
         when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
@@ -69,6 +72,8 @@ public class PersonalityServiceTest {
 
     @Test
     public void updateBuild() {
+        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
         when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
@@ -78,6 +83,8 @@ public class PersonalityServiceTest {
 
     @Test
     public void updateApps() {
+        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
         when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 

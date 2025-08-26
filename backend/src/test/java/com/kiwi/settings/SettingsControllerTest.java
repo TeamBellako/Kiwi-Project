@@ -1,9 +1,10 @@
 package com.kiwi.settings;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
+import com.kiwi.common.types.Email;
 import com.kiwi.features.settings.data.SettingsDataMapper;
 import com.kiwi.features.settings.data.SettingsPersistence;
-import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
@@ -47,18 +48,20 @@ public class SettingsControllerTest {
     private CustomUserDetailsService userDetailsService;
     @MockitoBean
     private AuthEntryPointJwt authEntryPointJwt;
+
+    @MockitoBean
+    private UsersService usersService;
     
     @MockitoBean
     private SettingsService settingsService;
     
     private final String baseAPIUrl = "/api/user/settings";
 
-    private final UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
-    private final SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(user, settingsDTO());
-
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getSettings_validInput_returnsSettings() throws Exception {
+        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
+        SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(savedUser, settingsDTO());
         when(settingsService.getSettings(validUserDTO().getEmail()))
                 .thenReturn(settingsPersistence);
         

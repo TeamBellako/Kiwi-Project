@@ -4,7 +4,6 @@ import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsW
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.features.metrics.data.MetricsDataMapper;
 import com.kiwi.features.metrics.controllers.MetricsRepository;
-import com.kiwi.features.metrics.controllers.MetricsService;
 import com.kiwi.features.metrics.data.MetricsDTO;
 import com.kiwi.features.metrics.data.MetricsPersistence;
 import com.kiwi.features.users.data.UsersPersistence;
@@ -52,13 +51,11 @@ public class MetricsDomainIntegrationTest {
     
     @Autowired
     private MetricsRepository metricsRepository;
-    @Autowired
-    private MetricsService metricsService;
 
     @Autowired
     private ObjectMapper objectMapper;
     
-    private final String APIURL = "/api/user/metrics";
+    private final String API_URL = "/api/user/metrics";
     
     private final MetricsDTO validMetricsDTO = MetricsFactory.generateRandomValidMetricDTO();
     private final MetricsDTO invalidMetricsDTO = MetricsFactory.generateRandomInvalidMetricDTO();
@@ -67,7 +64,7 @@ public class MetricsDomainIntegrationTest {
     private UsersRepository usersRepository;
     
     private UsersPersistence validUserPersistence;
-    
+
     @Before
     public void setUp() {
         validUserPersistence = usersRepository.findByEmail(validUserDTO().getEmail()).get();
@@ -76,7 +73,7 @@ public class MetricsDomainIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void createValidMetrics() throws Exception {
-        mockMvc.perform(post(APIURL)
+        mockMvc.perform(post(API_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validMetricsDTO)))
                 .andExpect(status().isCreated());
@@ -86,28 +83,28 @@ public class MetricsDomainIntegrationTest {
         
         assert(retrievedMetricsPersistence.isPresent());
         assertEquals(MetricsDataMapper.toDomain(validMetricsDTO).getDate(), retrievedMetricsPersistence.get().getDate());
-        assertEquals(MetricsDataMapper.toDomain(validMetricsDTO).getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
-        assertEquals(MetricsDataMapper.toDomain(validMetricsDTO).getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
+        assertEquals(validMetricsDTO.getCurrentGoodTimeSeconds(), retrievedMetricsPersistence.get().getCurrentGoodTimeSeconds());
+        assertEquals(validMetricsDTO.getCurrentBadTimeSeconds(), retrievedMetricsPersistence.get().getCurrentBadTimeSeconds());
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void createInvalidMetrics() throws Exception {
-        mockMvc.perform(post(APIURL)
+        mockMvc.perform(post(API_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidMetricsDTO)))
                 .andExpect(status().isBadRequest());
 
         Optional<MetricsPersistence> retrievedMetricsPersistence =
                 metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(invalidMetricsDTO.getDate()));
-        
+
         assert(retrievedMetricsPersistence.isEmpty());
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void createNullMetrics() throws Exception {
-        mockMvc.perform(post(APIURL))
+        mockMvc.perform(post(API_URL))
                 .andExpect(status().isBadRequest());
 
         Optional<MetricsPersistence> retrievedMetricsPersistence =
@@ -128,7 +125,7 @@ public class MetricsDomainIntegrationTest {
         duplicatedUpdatedMetricsDTO.setMaxBadTimeSeconds(validMetricsDTO.getMaxBadTimeSeconds() + 1);
         duplicatedUpdatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() + 1);
 
-        mockMvc.perform(post(APIURL)
+        mockMvc.perform(post(API_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(duplicatedUpdatedMetricsDTO)))
                 .andExpect(status().isConflict());
@@ -146,10 +143,12 @@ public class MetricsDomainIntegrationTest {
         metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(validUserPersistence, MetricsDataMapper.toDomain(validMetricsDTO)));
         MetricsDTO updatedMetricsDTO = new MetricsDTO();
         updatedMetricsDTO.setDate(validMetricsDTO.getDate());
+        updatedMetricsDTO.setMaxGoodTimeSeconds(0);
         updatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() + 1);
+        updatedMetricsDTO.setMaxBadTimeSeconds(0);
         updatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() + 1);
 
-        mockMvc.perform(put(APIURL)
+        mockMvc.perform(put(API_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedMetricsDTO)))
                 .andExpect(status().isOk());
@@ -170,10 +169,12 @@ public class MetricsDomainIntegrationTest {
         MetricsDTO updatedMetricsDTO = new MetricsDTO();
         updatedMetricsDTO.setDate(validMetricsDTO.getDate());
         Integer invalidTime = 25 * 60 * 60;
+        updatedMetricsDTO.setMaxGoodTimeSeconds(0);
         updatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() - invalidTime);
+        updatedMetricsDTO.setMaxBadTimeSeconds(0);
         updatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() - invalidTime);
-        
-        mockMvc.perform(put(APIURL)
+
+        mockMvc.perform(put(API_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedMetricsDTO)))
                 .andExpect(status().isBadRequest());
@@ -189,7 +190,7 @@ public class MetricsDomainIntegrationTest {
     public void updateNullMetrics() throws Exception {
         metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(validUserPersistence, MetricsDataMapper.toDomain(validMetricsDTO)));
 
-        mockMvc.perform(put(APIURL))
+        mockMvc.perform(put(API_URL))
                 .andExpect(status().isBadRequest());
 
         Optional<MetricsPersistence> retrievedMetricsPersistence =
@@ -201,7 +202,7 @@ public class MetricsDomainIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateNonExistingMetrics() throws Exception {
-        mockMvc.perform(put(APIURL)
+        mockMvc.perform(put(API_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validMetricsDTO)))
                 .andExpect(status().isNotFound());
@@ -216,7 +217,7 @@ public class MetricsDomainIntegrationTest {
     public void getExistingMetrics() throws Exception {
         metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(validUserPersistence, MetricsDataMapper.toDomain(validMetricsDTO)));
 
-        mockMvc.perform(get(APIURL)
+        mockMvc.perform(get(API_URL)
                         .param("date", validMetricsDTO.getDate()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.maxGoodTimeSeconds").value(validMetricsDTO.getMaxGoodTimeSeconds()))
@@ -228,7 +229,7 @@ public class MetricsDomainIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getNonExistingMetrics() throws Exception {
-        mockMvc.perform(get(APIURL)
+        mockMvc.perform(get(API_URL)
                         .param("date", validMetricsDTO.getDate()))
                 .andExpect(status().isNotFound());
     }

@@ -16,6 +16,15 @@ import static com.kiwi.common.utils.HTTPUtils.createErrorResponseBody;
 public class MetricsExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(MetricsExceptionHandler.class);
 
+    @ExceptionHandler(MetricsInvalidException.class)
+    public ResponseEntity<Map<String, String>> handleMetricsInvalid(MetricsInvalidException ex) {
+        logger.error("Invalid metrics: {}", ex.getMessage(), ex);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(createErrorResponseBody(ex.getMessage()));
+    }
+
     @ExceptionHandler(MetricsConflictException.class)
     public ResponseEntity<Map<String, String>> handleMetricsConflict(MetricsConflictException ex) {
         logger.error("Conflict metrics: {}", ex.getMessage(), ex);

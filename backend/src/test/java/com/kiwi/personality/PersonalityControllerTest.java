@@ -1,6 +1,7 @@
 package com.kiwi.personality;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
+import com.kiwi.common.types.Email;
 import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.personality.controllers.PersonalityController;
 import com.kiwi.features.personality.data.PersonalityDataMapper;
@@ -8,7 +9,7 @@ import com.kiwi.features.personality.data.PersonalityPersistence;
 import com.kiwi.features.personality.exceptions.PersonalityNotFoundException;
 import com.kiwi.features.personality.controllers.PersonalityService;
 import com.kiwi.features.users.controllers.CustomUserDetailsService;
-import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
@@ -48,16 +49,19 @@ public class PersonalityControllerTest {
     private AuthEntryPointJwt authEntryPointJwt;
 
     @MockitoBean
+    private UsersService usersService;
+
+    @MockitoBean
     private PersonalityService personalityService;
     
     private final String baseAPIUrl = "/api/user/personality";
 
-    private final UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
-    private final PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(user, personalityDTO());
-
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getPersonality_valid() throws Exception {
+        UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
+
         when(personalityService.getPersonality(validUserDTO().getEmail())).thenReturn(personalityPersistence);
         mockMvc.perform(get(baseAPIUrl)).andExpect(status().isOk());
     }

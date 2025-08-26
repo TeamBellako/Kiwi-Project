@@ -37,14 +37,12 @@ public class SettingsRepositoryTest {
     @Autowired
     private SettingsRepository settingsRepository;
 
-    private final UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
-    private final SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(user, settingsDTO());
-
     @Test
     public void getSettings_validId_returnsSettings() {
-        usersRepository.saveAndFlush(user);
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
+        SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(savedUser, settingsDTO());
         settingsRepository.saveAndFlush(settingsPersistence);
-        assertNotNull(settingsRepository.findByUserEmail(user.getEmail()));
+        assertNotNull(settingsRepository.findByUserEmail(savedUser.getEmail()));
     }
 
     @Test

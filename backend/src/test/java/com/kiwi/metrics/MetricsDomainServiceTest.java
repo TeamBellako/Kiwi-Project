@@ -85,7 +85,9 @@ public class MetricsDomainServiceTest {
         MetricsDomain metricsDomain = MetricsDataMapper.toDomain(metricsDTO);
         metricsRepositoryInMemory.saveAndFlush(MetricsDataMapper.toPersistence(validUsersPersistence, metricsDomain));
 
+        metricsDTO.setMaxGoodTimeSeconds(0);
         metricsDTO.setCurrentGoodTimeSeconds(metricsDTO.getCurrentGoodTimeSeconds() + 1);
+        metricsDTO.setMaxBadTimeSeconds(0);
         metricsDTO.setCurrentBadTimeSeconds(metricsDTO.getCurrentBadTimeSeconds() + 1);
         metricsService.updateMetric(validEmail, metricsDTO);
         
