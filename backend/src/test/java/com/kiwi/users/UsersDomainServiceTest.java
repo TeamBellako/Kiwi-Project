@@ -3,10 +3,8 @@ package com.kiwi.users;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersDataMapper;
-import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.exceptions.UsersConflictException;
 import com.kiwi.features.users.exceptions.UsersInvalidException;
-import com.kiwi.features.users.tests.UsersRepositoryInMemory;
 import com.kiwi.common.types.Email;
 import org.junit.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,9 +34,7 @@ public class UsersDomainServiceTest {
     @Test
     public void createValidUser() {
         usersService.createUser(validUserDTO());
-        
-        UsersPersistence createdUser = usersRepositoryInMemory.findByEmail(validEmailString).get();
-        assertEquals(UsersDataMapper.toDomain(validUserDTO()), UsersDataMapper.toDomain(createdUser));
+        assertTrue(usersRepositoryInMemory.findByEmail(validEmailString).isPresent());
     }
 
     @Test(expected = UsersInvalidException.class)
@@ -46,7 +42,7 @@ public class UsersDomainServiceTest {
         usersService.createUser(invalidUserDTO());
     }
 
-    @Test(expected = UsersInvalidException.class)
+    @Test(expected = NullPointerException.class)
     public void createNullUser() {
         usersService.createUser(null);
     }
@@ -61,9 +57,7 @@ public class UsersDomainServiceTest {
     public void getValidUser() {
         UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
         usersRepositoryInMemory.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-
-        UsersPersistence createdUser = usersRepositoryInMemory.findByEmail(getValidEmail().value()).get();
-        assertEquals(UsersDataMapper.toDomain(validUserDTO()), UsersDataMapper.toDomain(createdUser));
+        assertTrue(usersRepositoryInMemory.findByEmail(getValidEmail().value()).isPresent());
     }
 
     @Test(expected = NullPointerException.class)

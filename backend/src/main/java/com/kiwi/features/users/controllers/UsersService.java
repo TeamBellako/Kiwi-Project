@@ -1,11 +1,13 @@
 package com.kiwi.features.users.controllers;
 
+import com.kiwi.common.types.Password;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.exceptions.UsersConflictException;
 import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersDTO;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.common.types.Email;
+import com.kiwi.features.users.exceptions.UsersInvalidException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +30,18 @@ public class UsersService {
 
     @Transactional
     public void createUser(@Valid @NotNull UsersDTO userDTO) {
-        UsersDomain user = UsersDataMapper.toDomain(userDTO);
-        
-        String userEmailValue = user.getEmail().value(); 
-        if (usersRepository.existsByEmail(userEmailValue)) throw new UsersConflictException(userEmailValue);
-        
-        String rawPassword = user.getPassword().value();
-        String hashedPassword = passwordEncoder.encode(rawPassword);
-        
-        UsersPersistence usersPersistence = new UsersPersistence(
-                user.getEmail(),
-                hashedPassword,
-                user.getSettings()
-        );
+        UsersDomain userDomain;
+        try {
+            userDomain = UsersDataMapper.toDomain(userDTO);
+        } catch (IllegalArgumentException e) {
+            throw new UsersInvalidException(e.getMessage());
+        }
+
+        String email = userDomain.getEmail().value();
+        if (usersRepository.existsByEmail(email)) throw new UsersConflictException(email);
+
+        String hashedPassword = passwordEncoder.encode(userDomain.getPassword().value());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, hashedPassword);
         usersRepository.saveAndFlush(usersPersistence);
     }
 

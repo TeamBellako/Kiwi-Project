@@ -16,15 +16,6 @@ import static com.kiwi.common.utils.HTTPUtils.createErrorResponseBody;
 public class PersonalityExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(PersonalityExceptionHandler.class);
 
-    @ExceptionHandler(PersonalityInvalidException.class)
-    public ResponseEntity<Map<String, String>> handleSettingsInvalid(PersonalityInvalidException ex) {
-        logger.error("PersonalityInvalidException: {}", ex.getMessage(), ex);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(createErrorResponseBody(ex.getMessage()));
-    }
-
     @ExceptionHandler(PersonalityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handlePersonalityNotFound(PersonalityNotFoundException ex) {
         logger.error("PersonalityNotFoundException: {}", ex.getMessage(), ex);

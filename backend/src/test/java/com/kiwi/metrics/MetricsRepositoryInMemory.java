@@ -1,4 +1,4 @@
-package com.kiwi.features.metrics.tests;
+package com.kiwi.metrics;
 
 import com.kiwi.features.metrics.controllers.MetricsRepository;
 import com.kiwi.features.metrics.data.MetricsPersistence;

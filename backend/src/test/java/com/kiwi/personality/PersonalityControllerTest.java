@@ -3,9 +3,13 @@ package com.kiwi.personality;
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.personality.controllers.PersonalityController;
+import com.kiwi.features.personality.data.PersonalityDataMapper;
+import com.kiwi.features.personality.data.PersonalityPersistence;
 import com.kiwi.features.personality.exceptions.PersonalityNotFoundException;
 import com.kiwi.features.personality.controllers.PersonalityService;
 import com.kiwi.features.users.controllers.CustomUserDetailsService;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
@@ -48,11 +52,13 @@ public class PersonalityControllerTest {
     
     private final String baseAPIUrl = "/api/user/personality";
 
+    private final UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
+    private final PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(user, personalityDTO());
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getPersonality_valid() throws Exception {
-        when(personalityService.getPersonality(validUserDTO().getEmail())).thenReturn(validPersonality());
+        when(personalityService.getPersonality(validUserDTO().getEmail())).thenReturn(personalityPersistence);
         mockMvc.perform(get(baseAPIUrl)).andExpect(status().isOk());
     }
 
@@ -66,7 +72,7 @@ public class PersonalityControllerTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateRealName() throws Exception {
-        when(personalityService.updateRealName(validUserDTO().getEmail(), userNameRealDTO())).thenReturn(validPersonalityDTO());
+        when(personalityService.updateRealName(validUserDTO().getEmail(), userNameRealDTO())).thenReturn(personalityDTO());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/build", userNameRealDTO()))
                 .andExpect(status().isOk());
     }
@@ -74,7 +80,7 @@ public class PersonalityControllerTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateKnightName() throws Exception {
-        when(personalityService.updateKnightName(validUserDTO().getEmail(), userNameKnightDTO())).thenReturn(validPersonalityDTO());
+        when(personalityService.updateKnightName(validUserDTO().getEmail(), userNameKnightDTO())).thenReturn(personalityDTO());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/build", userNameKnightDTO()))
                 .andExpect(status().isOk());
     }
@@ -82,7 +88,7 @@ public class PersonalityControllerTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateBuild() throws Exception {
-        when(personalityService.updateBuild(validUserDTO().getEmail(), buildDTO())).thenReturn(validPersonalityDTO());
+        when(personalityService.updateBuild(validUserDTO().getEmail(), buildDTO())).thenReturn(personalityDTO());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/build", buildDTO()))
                 .andExpect(status().isOk());
     }
@@ -90,7 +96,7 @@ public class PersonalityControllerTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateApps() throws Exception {
-        when(personalityService.updateApps(validUserDTO().getEmail(), appsDTO())).thenReturn(validPersonalityDTO());
+        when(personalityService.updateApps(validUserDTO().getEmail(), appsDTO())).thenReturn(personalityDTO());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/apps", appsDTO()))
                 .andExpect(status().isOk());
     }

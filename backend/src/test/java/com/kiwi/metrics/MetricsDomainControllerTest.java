@@ -3,7 +3,6 @@ package com.kiwi.metrics;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.features.metrics.controllers.MetricsController;
 import com.kiwi.features.metrics.data.MetricsDTO;
-import com.kiwi.features.metrics.tests.MetricsFactory;
 import com.kiwi.features.metrics.controllers.MetricsService;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.config.JacksonConfig;
@@ -71,7 +70,8 @@ public class MetricsDomainControllerTest {
         when(metricsService.getMetrics(new Email("finn@thehuman.com"), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(metricsDTO);
         
-        MetricsDTO updatedMetricsDTO = metricsDTO.copy();
+        MetricsDTO updatedMetricsDTO = new MetricsDTO();
+        updatedMetricsDTO.setDate(metricsDTO.getDate());
         updatedMetricsDTO.setMaxGoodTimeSeconds(metricsDTO.getMaxGoodTimeSeconds() + 1);
         updatedMetricsDTO.setCurrentGoodTimeSeconds(metricsDTO.getCurrentGoodTimeSeconds() + 1);
         updatedMetricsDTO.setMaxBadTimeSeconds(metricsDTO.getMaxBadTimeSeconds() + 1);

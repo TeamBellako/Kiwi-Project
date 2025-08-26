@@ -6,18 +6,14 @@ import java.util.List;
 
 public class PersonalityTestFactory {
 
-    public static Personality validPersonality() {
-        return new Personality(
+    public static PersonalityDTO personalityDTO() {
+        return new PersonalityDTO(
                 userNameRealDTO().getName(),
                 userNameKnightDTO().getName(),
                 buildDTO().getBuild(),
                 appsDTO().getGoodApps(),
                 appsDTO().getBadApps()
         );
-    }
-
-    public static PersonalityDTO validPersonalityDTO() {
-        return validPersonality().toDTO();
     }
 
     public static UserNameDTO userNameRealDTO() {

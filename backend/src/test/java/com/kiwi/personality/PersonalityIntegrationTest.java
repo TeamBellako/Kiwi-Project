@@ -3,7 +3,8 @@ package com.kiwi.personality;
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.config.WebSecurityConfig;
-import com.kiwi.features.personality.data.Personality;
+import com.kiwi.features.personality.data.PersonalityDataMapper;
+import com.kiwi.features.personality.data.PersonalityPersistence;
 import com.kiwi.features.personality.controllers.PersonalityRepository;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersDataMapper;
@@ -34,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(scripts = "/UsersTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc 
 @AutoConfigureAddonsWebmvcResourceServerSecurity
@@ -58,12 +59,12 @@ public class PersonalityIntegrationTest {
     public void getPersonality_valid() throws Exception {
         UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
         usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
 
-        Personality personality = validPersonality();
-        personality.setUser(savedUser);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
+        personalityPersistence.setUser(savedUser);
 
-        personalityRepository.saveAndFlush(personality);
+        personalityRepository.saveAndFlush(personalityPersistence);
         mockMvc.perform(get(baseAPIUrl)).andExpect(status().isOk());
     }
 
@@ -83,12 +84,12 @@ public class PersonalityIntegrationTest {
     public void updateRealName() throws Exception {
         UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
         usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
 
-        Personality personality = validPersonality();
-        personality.setUser(savedUser);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
+        personalityPersistence.setUser(savedUser);
 
-        personalityRepository.saveAndFlush(personality);
+        personalityRepository.saveAndFlush(personalityPersistence);
         mockMvc.perform(post(baseAPIUrl + "/realName")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userNameRealDTO())))
@@ -108,12 +109,12 @@ public class PersonalityIntegrationTest {
     public void updateKnightName() throws Exception {
         UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
         usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
 
-        Personality personality = validPersonality();
-        personality.setUser(savedUser);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
+        personalityPersistence.setUser(savedUser);
 
-        personalityRepository.saveAndFlush(personality);
+        personalityRepository.saveAndFlush(personalityPersistence);
         mockMvc.perform(post(baseAPIUrl + "/knightName")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userNameKnightDTO())))
@@ -133,12 +134,12 @@ public class PersonalityIntegrationTest {
     public void updateBuild() throws Exception {
         UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
         usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
 
-        Personality personality = validPersonality();
-        personality.setUser(savedUser);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
+        personalityPersistence.setUser(savedUser);
 
-        personalityRepository.saveAndFlush(personality);
+        personalityRepository.saveAndFlush(personalityPersistence);
         mockMvc.perform(post(baseAPIUrl + "/build")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildDTO())))
@@ -158,12 +159,12 @@ public class PersonalityIntegrationTest {
     public void updateApps() throws Exception {
         UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
         usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
 
-        Personality personality = validPersonality();
-        personality.setUser(savedUser);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
+        personalityPersistence.setUser(savedUser);
 
-        personalityRepository.saveAndFlush(personality);
+        personalityRepository.saveAndFlush(personalityPersistence);
         mockMvc.perform(post(baseAPIUrl + "/apps")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(appsDTO())))

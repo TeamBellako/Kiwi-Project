@@ -22,8 +22,8 @@ public class CustomUserDetailsService  implements UserDetailsService {
         if (usersPersistence.isEmpty()) throw new UsernameNotFoundException("User Not Found with username: " + username);
         
         return new User(
-                usersPersistence.get().getEmail().value(),
-                usersPersistence.get().getPassword(),
+                usersPersistence.get().getEmail(),
+                usersPersistence.get().getHashedPassword(),
                 Collections.emptyList()
         );
     }

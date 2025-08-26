@@ -5,7 +5,7 @@ import lombok.*;
 import java.util.List;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @EqualsAndHashCode @ToString
-public class PersonalityDTO {
+public class PersonalityDomain {
     private String realName;
     private String knightName;
     private String build;

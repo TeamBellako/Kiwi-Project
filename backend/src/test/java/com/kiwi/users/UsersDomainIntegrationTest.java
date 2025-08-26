@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(scripts = "/UsersTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @AutoConfigureAddonsWebmvcResourceServerSecurity
@@ -70,8 +70,8 @@ public class UsersDomainIntegrationTest {
         assertTrue(savedUserOpt.isPresent());
         UsersPersistence savedUser = savedUserOpt.get();
 
-        assertTrue(passwordEncoder.matches(userDTO.getPassword(), savedUser.getPassword()));
-        assertEquals(userDTO.getEmail(), savedUser.getEmail().value());
+        assertTrue(passwordEncoder.matches(userDTO.getPassword(), savedUser.getHashedPassword()));
+        assertEquals(userDTO.getEmail(), savedUser.getEmail());
     }
 
     @Test

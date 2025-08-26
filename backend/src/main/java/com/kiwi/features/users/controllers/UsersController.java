@@ -53,17 +53,17 @@ public class UsersController {
         } catch (IllegalArgumentException e) {
             throw new UsersInvalidException(e.getMessage());
         }
-        
+
         Optional<UsersPersistence> userPersistenceOpt = usersService.getUserByEmail(providedEmail);
         if (userPersistenceOpt.isEmpty()) throw new UsersNotFoundException(providedEmail.value());
 
         UsersPersistence userPersistence = userPersistenceOpt.get();
 
-        boolean isPasswordCorrect = passwordEncoder.matches(providedPassword.value(), userPersistence.getPassword());
+        boolean isPasswordCorrect = passwordEncoder.matches(providedPassword.value(), userPersistence.getHashedPassword());
 
         if (isPasswordCorrect) {
             Map<String, String> response = new HashMap<>();
-            response.put("jwt", jwtUtils.generateToken(userPersistence.getEmail().value()));
+            response.put("jwt", jwtUtils.generateToken(userPersistence.getEmail()));
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(401).body(Map.of("error", "Incorrect email or password"));

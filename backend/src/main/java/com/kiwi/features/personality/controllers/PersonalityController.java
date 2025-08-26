@@ -1,8 +1,6 @@
 package com.kiwi.features.personality.controllers;
 
-import com.kiwi.features.personality.data.AppsDTO;
-import com.kiwi.features.personality.data.BuildDTO;
-import com.kiwi.features.personality.data.UserNameDTO;
+import com.kiwi.features.personality.data.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,7 +21,8 @@ public class PersonalityController {
 
     @GetMapping("")
     public ResponseEntity<?> getPersonality(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(personalityService.getPersonality(userDetails.getUsername()).toDTO());
+        PersonalityPersistence personalityPersistence = personalityService.getPersonality(userDetails.getUsername());
+        return ResponseEntity.ok(PersonalityDataMapper.toDTO(personalityPersistence));
     }
 
     @PostMapping("/realName")

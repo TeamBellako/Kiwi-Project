@@ -1,4 +1,4 @@
-package com.kiwi.features.users.tests;
+package com.kiwi.users;
 
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.features.users.data.UsersPersistence;
@@ -18,7 +18,7 @@ public class UsersRepositoryInMemory implements UsersRepository {
 
     @Override
     public <S extends UsersPersistence> S saveAndFlush(S entity) {
-        return (S) users.put(entity.getEmail().value(), entity);
+        return (S) users.put(entity.getEmail(), entity);
     }
 
     @Override

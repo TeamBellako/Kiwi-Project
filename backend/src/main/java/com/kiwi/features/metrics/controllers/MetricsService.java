@@ -42,29 +42,31 @@ public class MetricsService {
         }
 
         MetricsPersistence savedMetrics = metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(targetUserPersistence, metricsDomain));
-        return MetricsDataMapper.toDTO(MetricsDataMapper.toDomain(savedMetrics));
+        return MetricsDataMapper.toDTO(savedMetrics);
     }
     
     @Transactional
     public MetricsDTO updateMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
-        MetricsDomain updateMetricsDomain = MetricsDataMapper.toDomain(metricsDTO);
-        
-        UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
-        Optional<MetricsPersistence> targetMetricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, updateMetricsDomain.getDate());
-        if (targetMetricsPersistence.isEmpty()) {
-            throw new MetricsNotFoundException(email, updateMetricsDomain.getDate());
+        UsersPersistence userPersistence = getTargetUserPersistence(email);
+        LocalDate date = MetricsDataMapper.toDomain(metricsDTO).getDate();
+        Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(userPersistence, date);
+        if (metricsPersistence.isEmpty()) {
+            throw new MetricsNotFoundException(email, date);
         }
 
-        targetMetricsPersistence.get().updateFromDomain(updateMetricsDomain);
-        MetricsPersistence savedMetrics = metricsRepository.saveAndFlush(targetMetricsPersistence.get());
-        return MetricsDataMapper.toDTO(MetricsDataMapper.toDomain(savedMetrics));
+        MetricsDomain updateMetricsDomain = MetricsDataMapper.toDomain(metricsPersistence.get());
+        updateMetricsDomain.update(metricsDTO);
+        MetricsPersistence updateMetricsPersistence = MetricsDataMapper.toPersistence(userPersistence, updateMetricsDomain);
+
+        MetricsPersistence savedMetrics = metricsRepository.saveAndFlush(updateMetricsPersistence);
+        return MetricsDataMapper.toDTO(savedMetrics);
     }
     
     public MetricsDTO getMetrics(@Valid @NotNull Email email, @NotNull LocalDate date) {
         UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, date);
         if (metricsPersistence.isPresent()) {
-            return MetricsDataMapper.toDTO(MetricsDataMapper.toDomain(metricsPersistence.get()));
+            return MetricsDataMapper.toDTO(metricsPersistence.get());
         }
         throw new MetricsNotFoundException(email, date);
     }
@@ -72,7 +74,6 @@ public class MetricsService {
     private UsersPersistence getTargetUserPersistence(Email email) {
         Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(email);
         if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(email.value());
-        
         return targetUserPersistence.get();
     }
 

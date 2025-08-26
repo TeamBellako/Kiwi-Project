@@ -1,10 +1,10 @@
 package com.kiwi.features.personality.controllers;
 
-import com.kiwi.features.personality.data.Personality;
+import com.kiwi.features.personality.data.PersonalityPersistence;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 
-public interface PersonalityRepository extends JpaRepository<Personality, String> {
-    Optional<Personality> findByUserEmail(String email);
+public interface PersonalityRepository extends JpaRepository<PersonalityPersistence, String> {
+    Optional<PersonalityPersistence> findByUserEmail(String email);
 }

@@ -2,10 +2,13 @@ package com.kiwi.settings;
 
 import com.kiwi.features.settings.controllers.SettingsRepository;
 import com.kiwi.features.settings.controllers.SettingsService;
-import com.kiwi.features.settings.data.Settings;
+import com.kiwi.features.settings.data.SettingsDataMapper;
+import com.kiwi.features.settings.data.SettingsPersistence;
 import com.kiwi.features.settings.data.SettingsDTO;
-import com.kiwi.features.settings.exceptions.SettingsInvalidException;
 import com.kiwi.features.settings.exceptions.SettingsNotFoundException;
+import com.kiwi.features.users.controllers.UsersService;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersPersistence;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -13,6 +16,8 @@ import java.util.Optional;
 
 import static com.kiwi.settings.SettingsTestFactory.*;
 
+import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
+import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,59 +25,52 @@ import static org.mockito.Mockito.when;
 public class SettingsServiceTest {
 
     private final SettingsRepository settingsRepository = Mockito.mock(SettingsRepository.class);
-    private final SettingsService settingsService = new SettingsService(settingsRepository);
-    
-    private final Settings validSettings = validSettingsDTO().toDomainObject();
-    private final Settings updatedSettings = updatedSettingsDTO().toDomainObject();
+    private final UsersService usersService = Mockito.mock(UsersService.class);
+    private final SettingsService settingsService = new SettingsService(settingsRepository, usersService);
+
+    private final UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
+    private final SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(user, settingsDTO());
 
     @Test
     public void getSettings_validInput_returnsSettings() {
-        when(settingsRepository.findByEmail(validSettings.getEmail().value())).thenReturn(Optional.of(validSettings));
+        when(settingsRepository.findByUserEmail(user.getEmail())).thenReturn(Optional.of(settingsPersistence));
 
-        Optional<SettingsDTO> retrievedSettings = settingsService.getSettingsByEmail(validSettings.getEmail().value());
+        SettingsPersistence retrievedSettings = settingsService.getSettings(user.getEmail());
 
         assertNotNull(retrievedSettings);
-        assertTrue(retrievedSettings.isPresent());
-        assertEquals(validSettings.toDTO(), retrievedSettings.get());
-        verify(settingsRepository, Mockito.times(1)).findByEmail(validSettings.getEmail().value());
+        assertEquals(settingsPersistence, retrievedSettings);
+        verify(settingsRepository, Mockito.times(1)).findByUserEmail(user.getEmail());
+    }
+
+    @Test(expected = SettingsNotFoundException.class)
+    public void getSettings_settingsDoesNotExist_created() {
+        SettingsPersistence retrievedSettings = settingsService.getSettings("a" + user.getEmail());
+        assertNotNull(retrievedSettings);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getSettings_invalidInput_throwsIllegalArgumentException() {
-        settingsService.getSettingsByEmail(invalidSettingsDTO().getEmail());
-    }
-
-    @Test(expected = SettingsNotFoundException.class)
-    public void getSettings_settingsDoesNotExist_throwsSettingsNotFoundException() {
-        settingsService.getSettingsByEmail(updatedSettingsDTO().getEmail());
+        settingsService.getSettings(invalidUserDTO().getEmail());
     }
 
     @Test
     public void updateSettings_validInput_settingsUpdated() {
-        when(settingsRepository.saveAndFlush(validSettings)).thenReturn(validSettings);
-        when(settingsRepository.saveAndFlush(updatedSettings)).thenReturn(updatedSettings);
-        when(settingsRepository.findByEmail(updatedSettings.getEmail().value())).thenReturn(Optional.of(validSettings));
-        
-        Settings newSettings = settingsService.updateSettings(updatedSettings.toDTO()).toDomainObject();
+        when(settingsRepository.saveAndFlush(settingsPersistence)).thenReturn(settingsPersistence);
+        when(settingsRepository.findByUserEmail(user.getEmail())).thenReturn(Optional.of(settingsPersistence));
 
-        assertEquals(updatedSettings, newSettings);
-        verify(settingsRepository, Mockito.times(1)).saveAndFlush(SettingsServiceTest.this.updatedSettings);
-    }
+        SettingsDTO newSettingsDTO = settingsService.updateSettings(user.getEmail(), settingsDTO());
 
-    @Test(expected = SettingsInvalidException.class)
-    public void updateSettings_invalidInput_throwsUsersInvalidException() throws SettingsInvalidException {
-        when(settingsRepository.existsByEmail(invalidSettingsDTO().getEmail())).thenReturn(true);
-        
-        settingsService.updateSettings(invalidSettingsDTO());
+        assertEquals(newSettingsDTO, settingsDTO());
+        verify(settingsRepository, Mockito.times(1)).saveAndFlush(SettingsServiceTest.this.settingsPersistence);
     }
 
     @Test(expected = NullPointerException.class)
     public void updateSettings_nullInput_throwsNullPointerException() {
-        settingsService.updateSettings(null);
+        settingsService.updateSettings(user.getEmail(), null);
     }
 
     @Test(expected = SettingsNotFoundException.class)
     public void updateSettings_settingsDoesNotExist_throwsSettingsNotFoundException() {
-        settingsService.updateSettings(updatedSettings.toDTO());
+        settingsService.updateSettings(user.getEmail(), settingsDTO());
     }
 }

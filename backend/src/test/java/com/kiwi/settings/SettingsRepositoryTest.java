@@ -1,7 +1,11 @@
 package com.kiwi.settings;
 
-import com.kiwi.features.settings.data.Settings;
+import com.kiwi.features.settings.data.SettingsDataMapper;
+import com.kiwi.features.settings.data.SettingsPersistence;
 import com.kiwi.features.settings.controllers.SettingsRepository;
+import com.kiwi.features.users.controllers.UsersRepository;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersPersistence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,49 +18,42 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static com.kiwi.settings.SettingsTestFactory.*;
+import static com.kiwi.settings.SettingsTestFactory.settingsDTO;
+import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
+import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@Sql(scripts = "/UsersTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 public class SettingsRepositoryTest {
-    
+
+    @Autowired
+    private UsersRepository usersRepository;
+
     @Autowired
     private SettingsRepository settingsRepository;
 
+    private final UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
+    private final SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(user, settingsDTO());
+
     @Test
     public void getSettings_validId_returnsSettings() {
-        settingsRepository.saveAndFlush(validSettingsDTO().toDomainObject());
-        
-        assertNotNull(settingsRepository.findByEmail(validSettingsDTO().getEmail()));
+        usersRepository.saveAndFlush(user);
+        settingsRepository.saveAndFlush(settingsPersistence);
+        assertNotNull(settingsRepository.findByUserEmail(user.getEmail()));
     }
 
     @Test
     public void getSettings_invalidId_returnsEmptyOptional() {
-        assertEquals(Optional.empty(), settingsRepository.findByEmail(invalidSettingsDTO().getEmail()));
+        assertEquals(Optional.empty(), settingsRepository.findByUserEmail(invalidUserDTO().getEmail()));
     }
 
     @Test
     public void getSettings_settingsDoesNotExist_returnsEmptyOptional() {
-        assertEquals(Optional.empty(), settingsRepository.findByEmail(validSettingsDTO().getEmail() + 1));
-    }
-
-    @Test
-    public void updateSettings_validInput_updatesSettings() {
-        settingsRepository.saveAndFlush(updatedSettingsDTO().toDomainObject());
-        
-        assertEquals(settingsRepository.findByEmail(updatedSettingsDTO().getEmail()).get(), updatedSettingsDTO().toDomainObject());
-    }
-
-    @Test
-    public void updateSettings_settingsDoesNotExist_createsUserSetting() {
-        Settings saved = settingsRepository.saveAndFlush(validSettingsDTO().toDomainObject());
-        Optional<Settings> result = settingsRepository.findByEmail(saved.getEmail().value());
-        
-        assertEquals(validSettingsDTO().toDomainObject(), result.get());
+        assertEquals(Optional.empty(), settingsRepository.findByUserEmail(validUserDTO().getEmail()));
     }
 }

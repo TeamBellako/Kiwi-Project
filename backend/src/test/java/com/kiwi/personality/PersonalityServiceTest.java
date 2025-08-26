@@ -2,15 +2,19 @@ package com.kiwi.personality;
 
 import com.kiwi.features.personality.controllers.PersonalityRepository;
 import com.kiwi.features.personality.controllers.PersonalityService;
-import com.kiwi.features.personality.data.Personality;
+import com.kiwi.features.personality.data.PersonalityDataMapper;
+import com.kiwi.features.personality.data.PersonalityPersistence;
 import com.kiwi.features.personality.exceptions.PersonalityNotFoundException;
-import com.kiwi.features.users.controllers.UsersRepository;
+import com.kiwi.features.users.controllers.UsersService;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersPersistence;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Optional;
 
 import static com.kiwi.personality.PersonalityTestFactory.*;
+import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -19,58 +23,66 @@ import static org.mockito.Mockito.when;
 public class PersonalityServiceTest {
 
     private final PersonalityRepository personalityRepository = Mockito.mock(PersonalityRepository.class);
-    private final UsersRepository usersRepository = Mockito.mock(UsersRepository.class);
-    private final PersonalityService personalityService = new PersonalityService(personalityRepository, usersRepository);
+    private final UsersService usersService = Mockito.mock(UsersService.class);
+    private final PersonalityService personalityService = new PersonalityService(personalityRepository, usersService);
+
+    private final UsersPersistence user = UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword());
+    private final PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(user, personalityDTO());
 
     @Test
     public void getPersonality_valid() {
-        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(validPersonality()));
+        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
-        Personality personality = personalityService.getPersonality(validUserDTO().getEmail());
-        assertNotNull(personality);
-        assertEquals(validPersonality(), personality);
+        PersonalityPersistence newPersonalityPersistence = personalityService.getPersonality(validUserDTO().getEmail());
+        assertNotNull(newPersonalityPersistence);
+        assertEquals(newPersonalityPersistence, personalityPersistence);
         verify(personalityRepository, Mockito.times(1)).findByUserEmail(validUserDTO().getEmail());
     }
 
     @Test(expected = PersonalityNotFoundException.class)
-    public void getPersonality_invalid() {
+    public void getPersonality_notFound() {
         personalityService.getPersonality(validUserDTO().getEmail());
+    }
+
+    @Test(expected = PersonalityNotFoundException.class)
+    public void getSettings_invalidInput_throwsIllegalArgumentException() {
+        personalityService.getPersonality(invalidUserDTO().getEmail());
     }
 
     @Test
     public void updateRealName() {
-        when(personalityRepository.saveAndFlush(validPersonality())).thenReturn(validPersonality());
-        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(validPersonality()));
+        when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
+        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
         personalityService.updateRealName(validUserDTO().getEmail(), userNameRealDTO());
-        verify(personalityRepository, Mockito.times(1)).saveAndFlush(validPersonality());
+        verify(personalityRepository, Mockito.times(1)).saveAndFlush(personalityPersistence);
     }
 
     @Test
     public void updateKnightName() {
-        when(personalityRepository.saveAndFlush(validPersonality())).thenReturn(validPersonality());
-        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(validPersonality()));
+        when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
+        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
         personalityService.updateKnightName(validUserDTO().getEmail(), userNameKnightDTO());
-        verify(personalityRepository, Mockito.times(1)).saveAndFlush(validPersonality());
+        verify(personalityRepository, Mockito.times(1)).saveAndFlush(personalityPersistence);
     }
 
     @Test
     public void updateBuild() {
-        when(personalityRepository.saveAndFlush(validPersonality())).thenReturn(validPersonality());
-        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(validPersonality()));
+        when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
+        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
         personalityService.updateBuild(validUserDTO().getEmail(), buildDTO());
-        verify(personalityRepository, Mockito.times(1)).saveAndFlush(validPersonality());
+        verify(personalityRepository, Mockito.times(1)).saveAndFlush(personalityPersistence);
     }
 
     @Test
     public void updateApps() {
-        when(personalityRepository.saveAndFlush(validPersonality())).thenReturn(validPersonality());
-        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(validPersonality()));
+        when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
+        when(personalityRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(personalityPersistence));
 
         personalityService.updateApps(validUserDTO().getEmail(), appsDTO());
-        verify(personalityRepository, Mockito.times(1)).saveAndFlush(validPersonality());
+        verify(personalityRepository, Mockito.times(1)).saveAndFlush(personalityPersistence);
     }
 
 }

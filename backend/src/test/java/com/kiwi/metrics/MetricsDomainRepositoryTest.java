@@ -1,11 +1,9 @@
 package com.kiwi.metrics;
 
 import com.kiwi.features.metrics.data.MetricsDomain;
-import com.kiwi.features.metrics.tests.MetricsFactory;
 import com.kiwi.features.metrics.data.MetricsDataMapper;
 import com.kiwi.features.metrics.controllers.MetricsRepository;
 import com.kiwi.features.metrics.data.MetricsPersistence;
-import com.kiwi.common.types.PositiveOrZeroInteger;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersRepository;
 import org.junit.Before;
@@ -30,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@Sql(scripts = "/MetricsTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 public class MetricsDomainRepositoryTest {
     @Autowired
@@ -65,10 +63,10 @@ public class MetricsDomainRepositoryTest {
         Optional<MetricsPersistence> savedMetricsPersistence = 
                 metricsRepository.findByUserAndDate(validUserPersistence, metricsDomain.getDate());
         assert(savedMetricsPersistence.isPresent());
-        savedMetricsPersistence.get().setMaxGoodTimeSeconds(new PositiveOrZeroInteger(metricsDomain.getMaxGoodTimeSeconds().value() + 1));
-        savedMetricsPersistence.get().setCurrentGoodTimeSeconds(new PositiveOrZeroInteger(metricsDomain.getCurrentGoodTimeSeconds().value() + 1));
-        savedMetricsPersistence.get().setMaxBadTimeSeconds(new PositiveOrZeroInteger(metricsDomain.getMaxBadTimeSeconds().value() + 1));
-        savedMetricsPersistence.get().setCurrentBadTimeSeconds(new PositiveOrZeroInteger(metricsDomain.getCurrentBadTimeSeconds().value() + 1));
+        savedMetricsPersistence.get().setMaxGoodTimeSeconds(metricsDomain.getMaxGoodTimeSeconds().value() + 1);
+        savedMetricsPersistence.get().setCurrentGoodTimeSeconds(metricsDomain.getCurrentGoodTimeSeconds().value() + 1);
+        savedMetricsPersistence.get().setMaxBadTimeSeconds(metricsDomain.getMaxBadTimeSeconds().value() + 1);
+        savedMetricsPersistence.get().setCurrentBadTimeSeconds(metricsDomain.getCurrentBadTimeSeconds().value() + 1);
         metricsRepository.saveAndFlush(savedMetricsPersistence.get());
 
         Optional<MetricsPersistence> savedUpdatedMetricsPersistence =

@@ -1,6 +1,7 @@
 package com.kiwi.personality;
 
-import com.kiwi.features.personality.data.Personality;
+import com.kiwi.features.personality.data.PersonalityDataMapper;
+import com.kiwi.features.personality.data.PersonalityPersistence;
 import com.kiwi.features.personality.controllers.PersonalityRepository;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersDataMapper;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static com.kiwi.personality.PersonalityTestFactory.validPersonality;
+import static com.kiwi.personality.PersonalityTestFactory.personalityDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@Sql(scripts = "/UsersTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 public class PersonalityRepositoryTest {
     
@@ -40,13 +41,13 @@ public class PersonalityRepositoryTest {
     public void findPersonality() {
         UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
         usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
 
-        Personality personality = validPersonality();
-        personality.setUser(savedUser);
+        PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
+        personalityPersistence.setUser(savedUser);
 
-        personalityRepository.saveAndFlush(personality);
-        Optional<Personality> savedPersonality = personalityRepository.findByUserEmail(validUserDTO().getEmail());
+        personalityRepository.saveAndFlush(personalityPersistence);
+        Optional<PersonalityPersistence> savedPersonality = personalityRepository.findByUserEmail(validUserDTO().getEmail());
         assertTrue(savedPersonality.isPresent());
     }
 

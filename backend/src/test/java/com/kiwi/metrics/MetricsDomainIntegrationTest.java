@@ -2,7 +2,6 @@ package com.kiwi.metrics;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.features.metrics.tests.MetricsFactory;
 import com.kiwi.features.metrics.data.MetricsDataMapper;
 import com.kiwi.features.metrics.controllers.MetricsRepository;
 import com.kiwi.features.metrics.controllers.MetricsService;
@@ -42,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(scripts = "/MetricsTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @AutoConfigureAddonsWebmvcResourceServerSecurity
@@ -121,13 +120,14 @@ public class MetricsDomainIntegrationTest {
     @WithMockUser(username = "finn@thehuman.com")
     public void createDuplicatedMetrics() throws Exception {
         metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(validUserPersistence, MetricsDataMapper.toDomain(validMetricsDTO)));
-        
-        MetricsDTO duplicatedUpdatedMetricsDTO = validMetricsDTO.copy();
+
+        MetricsDTO duplicatedUpdatedMetricsDTO = new MetricsDTO();
+        duplicatedUpdatedMetricsDTO.setDate(validMetricsDTO.getDate());
         duplicatedUpdatedMetricsDTO.setMaxGoodTimeSeconds(validMetricsDTO.getMaxGoodTimeSeconds() + 1);
         duplicatedUpdatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() + 1);
         duplicatedUpdatedMetricsDTO.setMaxBadTimeSeconds(validMetricsDTO.getMaxBadTimeSeconds() + 1);
         duplicatedUpdatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() + 1);
-        
+
         mockMvc.perform(post(APIURL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(duplicatedUpdatedMetricsDTO)))
@@ -144,7 +144,8 @@ public class MetricsDomainIntegrationTest {
     @WithMockUser(username = "finn@thehuman.com")
     public void updateValidMetrics() throws Exception {
         metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(validUserPersistence, MetricsDataMapper.toDomain(validMetricsDTO)));
-        MetricsDTO updatedMetricsDTO = validMetricsDTO.copy();
+        MetricsDTO updatedMetricsDTO = new MetricsDTO();
+        updatedMetricsDTO.setDate(validMetricsDTO.getDate());
         updatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() + 1);
         updatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() + 1);
 
@@ -166,7 +167,8 @@ public class MetricsDomainIntegrationTest {
     @WithMockUser(username = "finn@thehuman.com")
     public void updateInvalidMetrics() throws Exception {
         metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(validUserPersistence, MetricsDataMapper.toDomain(validMetricsDTO)));
-        MetricsDTO updatedMetricsDTO = invalidMetricsDTO.copy();
+        MetricsDTO updatedMetricsDTO = new MetricsDTO();
+        updatedMetricsDTO.setDate(validMetricsDTO.getDate());
         Integer invalidTime = 25 * 60 * 60;
         updatedMetricsDTO.setCurrentGoodTimeSeconds(validMetricsDTO.getCurrentGoodTimeSeconds() - invalidTime);
         updatedMetricsDTO.setCurrentBadTimeSeconds(validMetricsDTO.getCurrentBadTimeSeconds() - invalidTime);

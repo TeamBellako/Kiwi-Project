@@ -24,22 +24,4 @@ public class SettingsExceptionHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(createErrorResponseBody("Users settings not found"));
     }
-
-    @ExceptionHandler(SettingsInvalidException.class)
-    public ResponseEntity<Map<String, String>> handleSettingsInvalid(SettingsInvalidException ex) {
-        logger.error("Invalid user settings: {}", ex.getMessage(), ex);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(createErrorResponseBody(ex.getMessage()));
-    }
-
-    @ExceptionHandler(SettingsConflictException.class)
-    public ResponseEntity<Map<String, String>> handleSettingsConflict(SettingsConflictException ex) {
-        logger.error("User settings conflict: {}", ex.getMessage(), ex);
-
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(createErrorResponseBody("A user settings instance with that information already exists"));
-    }
 }

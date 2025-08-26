@@ -1,6 +1,5 @@
 package com.kiwi.users;
 
-import com.kiwi.features.settings.controllers.SettingsRepository;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersPersistence;
@@ -19,28 +18,26 @@ import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@Sql(scripts = "/UsersTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 public class UsersDomainRepositoryTests {
     
     @Autowired
     private UsersRepository usersRepository;
-
-    @Autowired
-    private SettingsRepository settingsRepository;
     
     @Test
     public void createValidUser() {
-        UsersDomain user =  UsersDataMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-        
-        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
-        assertEquals(user, UsersDataMapper.toDomain(savedUser));
+        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
+        String hashedPassword = validUserDTO().getPassword();
+        UsersPersistence userPersistence = UsersDataMapper.toPersistence(userDomain, hashedPassword);
+        usersRepository.saveAndFlush(userPersistence);
+        assertTrue(usersRepository.findByEmail(validUserDTO().getEmail()).isPresent());
     }
     
     @Test

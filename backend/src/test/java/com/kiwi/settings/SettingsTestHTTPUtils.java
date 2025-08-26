@@ -3,6 +3,7 @@ package com.kiwi.settings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.features.settings.data.SettingsDTO;
+import com.kiwi.features.users.data.UsersDTO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -26,7 +27,7 @@ public class SettingsTestHTTPUtils {
         return objectMapper.writeValueAsString(settingsDTO);
     }
 
-    public static @NotNull ResultMatcher getSettingsResultMatcher(@NotNull SettingsDTO settingsDTO) {
-        return jsonPath("$.email").value(settingsDTO.getEmail());
+    public static @NotNull ResultMatcher getSettingsResultMatcher(@NotNull UsersDTO usersDTO, @NotNull SettingsDTO settingsDTO) {
+        return jsonPath("$.email").value(usersDTO.getEmail());
     }
 }

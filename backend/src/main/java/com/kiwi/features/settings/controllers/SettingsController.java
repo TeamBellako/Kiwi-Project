@@ -1,9 +1,12 @@
 package com.kiwi.features.settings.controllers;
 
 import com.kiwi.features.settings.data.SettingsDTO;
+import com.kiwi.features.settings.data.SettingsDataMapper;
+import com.kiwi.features.settings.data.SettingsPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,21 +20,13 @@ public class SettingsController {
     }
 
     @GetMapping
-    public ResponseEntity<SettingsDTO> getSettings() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        
-        return settingsService.getSettingsByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<SettingsDTO> getSettings(@AuthenticationPrincipal UserDetails userDetails) {
+        SettingsPersistence settingsPersistence = settingsService.getSettings(userDetails.getUsername());
+        return ResponseEntity.ok(SettingsDataMapper.toDTO(settingsPersistence));
     }
 
     @PutMapping
-    public ResponseEntity<SettingsDTO> updateSettings(@RequestBody SettingsDTO settingsDTO) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!settingsDTO.getEmail().equals(email)) return ResponseEntity.badRequest().build(); 
-        
-        SettingsDTO updatedSettingsDTO = settingsService.updateSettings(settingsDTO);
-
-        return ResponseEntity.ok(updatedSettingsDTO);
+    public ResponseEntity<SettingsDTO> updateSettings(@AuthenticationPrincipal UserDetails userDetails, @RequestBody SettingsDTO settingsDTO) {
+        return ResponseEntity.ok(settingsService.updateSettings(userDetails.getUsername(), settingsDTO));
     }
 }
