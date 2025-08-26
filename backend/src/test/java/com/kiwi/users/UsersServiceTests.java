@@ -15,9 +15,9 @@ import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UsersDomainServiceTest {
-    private final UsersRepositoryInMemory usersRepositoryInMemory = new UsersRepositoryInMemory();
-    private final UsersService usersService = new UsersService(usersRepositoryInMemory, new PasswordEncoder() {
+public class UsersServiceTests {
+    private final UsersTestRepositoryInMemory usersTestRepositoryInMemory = new UsersTestRepositoryInMemory();
+    private final UsersService usersService = new UsersService(usersTestRepositoryInMemory, new PasswordEncoder() {
         @Override
         public String encode(CharSequence rawPassword) {
             return rawPassword.toString();
@@ -34,7 +34,7 @@ public class UsersDomainServiceTest {
     @Test
     public void createValidUser() {
         usersService.createUser(validUserDTO());
-        assertTrue(usersRepositoryInMemory.findByEmail(validEmailString).isPresent());
+        assertTrue(usersTestRepositoryInMemory.findByEmail(validEmailString).isPresent());
     }
 
     @Test(expected = UsersInvalidException.class)
@@ -56,8 +56,8 @@ public class UsersDomainServiceTest {
     @Test
     public void getValidUser() {
         UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
-        usersRepositoryInMemory.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
-        assertTrue(usersRepositoryInMemory.findByEmail(getValidEmail().value()).isPresent());
+        usersTestRepositoryInMemory.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
+        assertTrue(usersTestRepositoryInMemory.findByEmail(getValidEmail().value()).isPresent());
     }
 
     @Test(expected = NullPointerException.class)

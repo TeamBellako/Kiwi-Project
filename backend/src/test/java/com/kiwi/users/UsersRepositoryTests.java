@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Transactional
 @Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
-public class UsersDomainRepositoryTests {
+public class UsersRepositoryTests {
     
     @Autowired
     private UsersRepository usersRepository;

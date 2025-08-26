@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @Transactional
 @Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
-public class MetricsDomainRepositoryTest {
+public class MetricsRepositoryTests {
     @Autowired
     private UsersRepository usersRepository;
     @Autowired
@@ -45,7 +45,7 @@ public class MetricsDomainRepositoryTest {
     
     @Test
     public void createValidMetrics() {
-        MetricsDomain metricsDomain = MetricsDataMapper.toDomain(MetricsFactory.generateRandomValidMetricDTO());
+        MetricsDomain metricsDomain = MetricsDataMapper.toDomain(MetricsTestFactory.generateRandomValidMetricDTO());
         metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(validUserPersistence, metricsDomain));
         
         Optional<MetricsPersistence> savedMetricsPersistence = 
@@ -57,7 +57,7 @@ public class MetricsDomainRepositoryTest {
 
     @Test
     public void updateValidMetrics() {
-        MetricsDomain metricsDomain = MetricsDataMapper.toDomain(MetricsFactory.generateRandomValidMetricDTO());
+        MetricsDomain metricsDomain = MetricsDataMapper.toDomain(MetricsTestFactory.generateRandomValidMetricDTO());
         metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(validUserPersistence, metricsDomain));
 
         Optional<MetricsPersistence> savedMetricsPersistence = 
@@ -79,7 +79,7 @@ public class MetricsDomainRepositoryTest {
     public void getNonExistingMetrics() {
         assertEquals(
                 Optional.empty(),
-                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(MetricsFactory.generateRandomValidMetricDTO().getDate()))
+                metricsRepository.findByUserAndDate(validUserPersistence, LocalDate.parse(MetricsTestFactory.generateRandomValidMetricDTO().getDate()))
         );
     }
 }

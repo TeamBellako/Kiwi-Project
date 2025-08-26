@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 
-public class MetricsRepositoryInMemory implements MetricsRepository {
+public class MetricsTestRepositoryInMemory implements MetricsRepository {
     private final HashMap<UsersPersistence, Set<MetricsPersistence>> metrics = new HashMap<>();
 
     public Optional<MetricsPersistence> findByUserAndDate(UsersPersistence usersPersistence, LocalDate date) {

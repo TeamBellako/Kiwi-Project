@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureAddonsWebmvcResourceServerSecurity
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class, JwtUtils.class, JacksonConfig.class})
-public class MetricsDomainIntegrationTest {
+public class MetricsIntegrationTests {
     @Autowired
     private MockMvc mockMvc;
     
@@ -59,8 +59,8 @@ public class MetricsDomainIntegrationTest {
     
     private final String API_URL = "/api/user/metrics";
     
-    private final MetricsDTO validMetricsDTO = MetricsFactory.generateRandomValidMetricDTO();
-    private final MetricsDTO invalidMetricsDTO = MetricsFactory.generateRandomInvalidMetricDTO();
+    private final MetricsDTO validMetricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
+    private final MetricsDTO invalidMetricsDTO = MetricsTestFactory.generateRandomInvalidMetricDTO();
     
     @Autowired
     private UsersRepository usersRepository;

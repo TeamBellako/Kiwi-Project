@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(PingController.class)
 @AutoConfigureMockMvc
-public class RateLimitFilterTest {
+public class RateLimitFilterTests {
 
     @Autowired
     private MockMvc mockMvc;

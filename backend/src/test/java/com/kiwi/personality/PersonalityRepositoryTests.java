@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Transactional
 @Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
-public class PersonalityRepositoryTest {
+public class PersonalityRepositoryTests {
     
     @Autowired
     private PersonalityRepository personalityRepository;

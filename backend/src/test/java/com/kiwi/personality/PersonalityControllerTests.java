@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(PersonalityController.class)
 @AutoConfigureAddonsWebmvcResourceServerSecurity
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class })
-public class PersonalityControllerTest {
+public class PersonalityControllerTests {
 
     @Autowired
     private MockMvc mockMvc;

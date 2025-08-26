@@ -7,6 +7,7 @@ import com.kiwi.features.personality.data.PersonalityDataMapper;
 import com.kiwi.features.personality.data.PersonalityPersistence;
 import com.kiwi.features.personality.exceptions.PersonalityNotFoundException;
 import com.kiwi.features.users.controllers.UsersService;
+import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersPersistence;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class PersonalityServiceTest {
+public class PersonalityServiceTests {
 
     private final PersonalityRepository personalityRepository = Mockito.mock(PersonalityRepository.class);
     private final UsersService usersService = Mockito.mock(UsersService.class);
@@ -59,6 +60,14 @@ public class PersonalityServiceTest {
         verify(personalityRepository, Mockito.times(1)).saveAndFlush(personalityPersistence);
     }
 
+    @Test(expected = NullPointerException.class)
+    public void updateRealName_nullInput_throwsNullPointerException() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
+        personalityService.updateRealName(validUserDTO().getEmail(), null);
+    }
+
     @Test
     public void updateKnightName() {
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
@@ -68,6 +77,14 @@ public class PersonalityServiceTest {
 
         personalityService.updateKnightName(validUserDTO().getEmail(), userNameKnightDTO());
         verify(personalityRepository, Mockito.times(1)).saveAndFlush(personalityPersistence);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void updateKnightName_nullInput_throwsNullPointerException() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
+        personalityService.updateKnightName(validUserDTO().getEmail(), null);
     }
 
     @Test
@@ -81,6 +98,14 @@ public class PersonalityServiceTest {
         verify(personalityRepository, Mockito.times(1)).saveAndFlush(personalityPersistence);
     }
 
+    @Test(expected = NullPointerException.class)
+    public void updateBuild_nullInput_throwsNullPointerException() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
+        personalityService.updateBuild(validUserDTO().getEmail(), null);
+    }
+
     @Test
     public void updateApps() {
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
@@ -90,6 +115,14 @@ public class PersonalityServiceTest {
 
         personalityService.updateApps(validUserDTO().getEmail(), appsDTO());
         verify(personalityRepository, Mockito.times(1)).saveAndFlush(personalityPersistence);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void updateApps_nullInput_throwsNullPointerException() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
+        personalityService.updateApps(validUserDTO().getEmail(), null);
     }
 
 }

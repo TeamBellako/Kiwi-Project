@@ -2,7 +2,6 @@ package com.kiwi.settings;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.common.types.Email;
 import com.kiwi.features.settings.controllers.SettingsRepository;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.features.settings.data.SettingsDataMapper;
@@ -42,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc 
 @AutoConfigureAddonsWebmvcResourceServerSecurity
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class, JwtUtils.class })
-public class SettingsIntegrationTest {
+public class SettingsIntegrationTests {
     @Autowired
     private MockMvc mockMvc;
 

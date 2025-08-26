@@ -9,7 +9,7 @@ import com.kiwi.features.metrics.exceptions.MetricsConflictException;
 import com.kiwi.features.metrics.exceptions.MetricsInvalidException;
 import com.kiwi.features.metrics.exceptions.MetricsNotFoundException;
 import com.kiwi.features.users.data.UsersPersistence;
-import com.kiwi.users.UsersRepositoryInMemory;
+import com.kiwi.users.UsersTestRepositoryInMemory;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.common.types.Email;
 import org.junit.Before;
@@ -22,9 +22,9 @@ import java.util.Optional;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MetricsDomainServiceTest {
-    private final UsersRepositoryInMemory usersRepositoryInMemory = new UsersRepositoryInMemory();
-    private final UsersService usersService = new UsersService(usersRepositoryInMemory, new PasswordEncoder() {
+public class MetricsServiceTests {
+    private final UsersTestRepositoryInMemory usersTestRepositoryInMemory = new UsersTestRepositoryInMemory();
+    private final UsersService usersService = new UsersService(usersTestRepositoryInMemory, new PasswordEncoder() {
         @Override
         public String encode(CharSequence rawPassword) {
             return rawPassword.toString();
@@ -36,8 +36,8 @@ public class MetricsDomainServiceTest {
         }
     });
     
-    private final MetricsRepositoryInMemory metricsRepositoryInMemory = new MetricsRepositoryInMemory();
-    private final MetricsService metricsService = new MetricsService(metricsRepositoryInMemory, usersService);
+    private final MetricsTestRepositoryInMemory metricsTestRepositoryInMemory = new MetricsTestRepositoryInMemory();
+    private final MetricsService metricsService = new MetricsService(metricsTestRepositoryInMemory, usersService);
     
     private UsersPersistence validUsersPersistence;
     private final Email validEmail = new Email(validUserDTO().getEmail());
@@ -50,11 +50,11 @@ public class MetricsDomainServiceTest {
     
     @Test
     public void createValidMetrics() {
-        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        MetricsDTO metricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
         metricsService.createMetric(validEmail, metricsDTO);
         
         Optional<MetricsPersistence> savedMetricsPersistence =
-                metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, LocalDate.parse(metricsDTO.getDate()));
+                metricsTestRepositoryInMemory.findByUserAndDate(validUsersPersistence, LocalDate.parse(metricsDTO.getDate()));
         assert(savedMetricsPersistence.isPresent());
         assertEquals(MetricsDataMapper.toDomain(metricsDTO).getDate(), savedMetricsPersistence.get().getDate());
         assertEquals(metricsDTO.getCurrentGoodTimeSeconds(), savedMetricsPersistence.get().getCurrentGoodTimeSeconds());
@@ -63,7 +63,7 @@ public class MetricsDomainServiceTest {
 
     @Test(expected = MetricsInvalidException.class)
     public void createInvalidMetrics() {
-        MetricsDTO invalidMetricsDTO = MetricsFactory.generateRandomInvalidMetricDTO();
+        MetricsDTO invalidMetricsDTO = MetricsTestFactory.generateRandomInvalidMetricDTO();
         metricsService.createMetric(validEmail, invalidMetricsDTO);
     }
 
@@ -74,7 +74,7 @@ public class MetricsDomainServiceTest {
 
     @Test(expected = MetricsConflictException.class)
     public void createDuplicatedMetrics() {
-        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        MetricsDTO metricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
         
         metricsService.createMetric(validEmail, metricsDTO);
         metricsService.createMetric(validEmail, metricsDTO);
@@ -82,9 +82,9 @@ public class MetricsDomainServiceTest {
 
     @Test
     public void updateValidMetrics() {
-        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        MetricsDTO metricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
         MetricsDomain metricsDomain = MetricsDataMapper.toDomain(metricsDTO);
-        metricsRepositoryInMemory.saveAndFlush(MetricsDataMapper.toPersistence(validUsersPersistence, metricsDomain));
+        metricsTestRepositoryInMemory.saveAndFlush(MetricsDataMapper.toPersistence(validUsersPersistence, metricsDomain));
 
         metricsDTO.setMaxGoodTimeSeconds(0);
         metricsDTO.setCurrentGoodTimeSeconds(metricsDTO.getCurrentGoodTimeSeconds() + 1);
@@ -93,7 +93,7 @@ public class MetricsDomainServiceTest {
         metricsService.updateMetric(validEmail, metricsDTO);
         
         Optional<MetricsPersistence> retrievedMetricsPersistence = 
-                metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, metricsDomain.getDate());
+                metricsTestRepositoryInMemory.findByUserAndDate(validUsersPersistence, metricsDomain.getDate());
         assert(retrievedMetricsPersistence.isPresent());
         
         assertNotEquals(metricsDomain, MetricsDataMapper.toDomain(retrievedMetricsPersistence.get()));
@@ -104,11 +104,11 @@ public class MetricsDomainServiceTest {
 
     @Test(expected = MetricsInvalidException.class)
     public void updateInvalidMetrics() {
-        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        MetricsDTO metricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
         MetricsDomain metricsDomain = MetricsDataMapper.toDomain(metricsDTO);
-        metricsRepositoryInMemory.saveAndFlush(MetricsDataMapper.toPersistence(validUsersPersistence, metricsDomain));
+        metricsTestRepositoryInMemory.saveAndFlush(MetricsDataMapper.toPersistence(validUsersPersistence, metricsDomain));
 
-        metricsService.updateMetric(validEmail, MetricsFactory.generateRandomInvalidMetricDTO());
+        metricsService.updateMetric(validEmail, MetricsTestFactory.generateRandomInvalidMetricDTO());
     }
 
     @Test(expected = NullPointerException.class)
@@ -118,17 +118,17 @@ public class MetricsDomainServiceTest {
 
     @Test(expected = MetricsNotFoundException.class)
     public void updateNonExistingMetrics() {
-        metricsService.updateMetric(validEmail, MetricsFactory.generateRandomValidMetricDTO());
+        metricsService.updateMetric(validEmail, MetricsTestFactory.generateRandomValidMetricDTO());
     }
     
     @Test
     public void getExistingMetrics() {
-        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        MetricsDTO metricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
         MetricsDomain metricsDomain = MetricsDataMapper.toDomain(metricsDTO);
-        metricsRepositoryInMemory.saveAndFlush(MetricsDataMapper.toPersistence(validUsersPersistence, metricsDomain));
+        metricsTestRepositoryInMemory.saveAndFlush(MetricsDataMapper.toPersistence(validUsersPersistence, metricsDomain));
         
         Optional<MetricsPersistence> savedMetricsPersistence =
-                metricsRepositoryInMemory.findByUserAndDate(validUsersPersistence, metricsDomain.getDate());
+                metricsTestRepositoryInMemory.findByUserAndDate(validUsersPersistence, metricsDomain.getDate());
         assert(savedMetricsPersistence.isPresent());
         
         MetricsDTO retrievedMetricsDTO = metricsService.getMetrics(new Email(validUsersPersistence.getEmail()), metricsDomain.getDate());

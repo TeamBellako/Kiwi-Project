@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class SettingsServiceTest {
+public class SettingsServiceTests {
 
     private final SettingsRepository settingsRepository = Mockito.mock(SettingsRepository.class);
     private final UsersService usersService = Mockito.mock(UsersService.class);

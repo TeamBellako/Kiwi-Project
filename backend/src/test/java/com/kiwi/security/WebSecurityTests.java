@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @ActiveProfiles("test")
 @AutoConfigureAddonsWebmvcResourceServerSecurity
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class, JwtUtils.class })
-public class WebSecurityTest {
+public class WebSecurityTests {
     
     @Autowired
     private MockMvc mockMvc;

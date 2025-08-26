@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(MetricsController.class)
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class, JacksonConfig.class})
-public class MetricsDomainControllerTest {
+public class MetricsControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
@@ -55,7 +55,7 @@ public class MetricsDomainControllerTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void createValidMetrics() throws Exception {
-        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        MetricsDTO metricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
         
         mockMvc.perform(post(APIURL)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -66,7 +66,7 @@ public class MetricsDomainControllerTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateValidMetrics() throws Exception {
-        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        MetricsDTO metricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
         when(metricsService.getMetrics(new Email("finn@thehuman.com"), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(metricsDTO);
         
@@ -84,7 +84,7 @@ public class MetricsDomainControllerTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void readValidMetrics() throws Exception {
-        MetricsDTO metricsDTO = MetricsFactory.generateRandomValidMetricDTO();
+        MetricsDTO metricsDTO = MetricsTestFactory.generateRandomValidMetricDTO();
         when(metricsService.getMetrics(new Email("finn@thehuman.com"), LocalDate.parse(metricsDTO.getDate())))
                 .thenReturn(metricsDTO);
 

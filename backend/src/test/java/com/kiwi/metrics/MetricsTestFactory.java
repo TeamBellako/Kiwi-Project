@@ -9,7 +9,7 @@ import java.util.Set;
 
 import static com.kiwi.common.utils.FormatUtils.formatDate;
 
-public class MetricsFactory {
+public class MetricsTestFactory {
     private static final Random RANDOM = new Random();
 
     public static MetricsDTO generateRandomValidMetricDTO() {

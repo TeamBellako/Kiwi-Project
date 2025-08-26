@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 @WebMvcTest(SettingsController.class)
 @AutoConfigureAddonsWebmvcResourceServerSecurity
 @Import({ GlobalExceptionHandler.class, WebSecurityConfig.class })
-public class SettingsControllerTest {
+public class SettingsControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
