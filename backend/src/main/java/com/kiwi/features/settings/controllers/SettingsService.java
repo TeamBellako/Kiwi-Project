@@ -28,7 +28,7 @@ public class SettingsService {
     }
 
     public SettingsPersistence getSettings(String email) {
-        Optional<SettingsPersistence> settingsPersistence = settingsRepository.findByUserEmail(email);
+        Optional<SettingsPersistence> settingsPersistence = settingsRepository.findByUserEmail(new Email(email).value());
         if (settingsPersistence.isPresent()) { return settingsPersistence.get(); }
         throw new SettingsNotFoundException(email);
     }

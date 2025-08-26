@@ -43,7 +43,7 @@ public class PersonalityServiceTest {
         personalityService.getPersonality(validUserDTO().getEmail());
     }
 
-    @Test(expected = PersonalityNotFoundException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void getSettings_invalidInput_throwsIllegalArgumentException() {
         personalityService.getPersonality(invalidUserDTO().getEmail());
     }

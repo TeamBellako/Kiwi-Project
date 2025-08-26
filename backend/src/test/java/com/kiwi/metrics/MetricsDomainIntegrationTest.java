@@ -6,6 +6,8 @@ import com.kiwi.features.metrics.data.MetricsDataMapper;
 import com.kiwi.features.metrics.controllers.MetricsRepository;
 import com.kiwi.features.metrics.data.MetricsDTO;
 import com.kiwi.features.metrics.data.MetricsPersistence;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
@@ -67,6 +69,9 @@ public class MetricsDomainIntegrationTest {
 
     @Before
     public void setUp() {
+        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validUserDTO().getPassword());
+        usersRepository.saveAndFlush(usersPersistence);
         validUserPersistence = usersRepository.findByEmail(validUserDTO().getEmail()).get();
     }
     

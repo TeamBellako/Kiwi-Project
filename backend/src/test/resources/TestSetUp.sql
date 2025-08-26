@@ -46,7 +46,3 @@ CREATE TABLE IF NOT EXISTS personality (
     user_id BIGINT NOT NULL,
     CONSTRAINT fk_personality_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
--- Init user
-INSERT INTO users (email, password)
-VALUES ('finn@thehuman.com', 'Math3matic!');

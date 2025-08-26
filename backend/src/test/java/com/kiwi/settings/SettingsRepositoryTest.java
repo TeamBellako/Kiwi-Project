@@ -5,7 +5,9 @@ import com.kiwi.features.settings.data.SettingsPersistence;
 import com.kiwi.features.settings.controllers.SettingsRepository;
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersPersistence;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,13 @@ public class SettingsRepositoryTest {
 
     @Autowired
     private SettingsRepository settingsRepository;
+
+    @Before
+    public void setUp() {
+        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validUserDTO().getPassword());
+        usersRepository.saveAndFlush(usersPersistence);
+    }
 
     @Test
     public void getSettings_validId_returnsSettings() {

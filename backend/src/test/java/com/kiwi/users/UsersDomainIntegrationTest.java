@@ -3,7 +3,6 @@ package com.kiwi.users;
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.features.users.controllers.UsersRepository;
-import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.*;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.security.JwtUtils;
@@ -47,8 +46,6 @@ public class UsersDomainIntegrationTest {
 
     @Autowired
     private UsersRepository usersRepository;
-    @Autowired
-    private UsersService usersService;
     @Autowired
     private PasswordEncoder passwordEncoder;
 

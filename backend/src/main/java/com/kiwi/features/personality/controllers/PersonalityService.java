@@ -28,7 +28,7 @@ public class PersonalityService {
 
     @Transactional
     public PersonalityPersistence getPersonality(String email) {
-        Optional<PersonalityPersistence> personalityPersistence = personalityRepository.findByUserEmail(email);
+        Optional<PersonalityPersistence> personalityPersistence = personalityRepository.findByUserEmail(new Email(email).value());
         if (personalityPersistence.isPresent()) { return personalityPersistence.get(); }
         throw new PersonalityNotFoundException(email);
     }

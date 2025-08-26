@@ -12,6 +12,7 @@ import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,13 @@ public class PersonalityIntegrationTest {
     private UsersRepository usersRepository;
 
     private final String baseAPIUrl = "/api/user/personality";
+
+    @Before
+    public void setUp() {
+        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validUserDTO().getPassword());
+        usersRepository.saveAndFlush(usersPersistence);
+    }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")

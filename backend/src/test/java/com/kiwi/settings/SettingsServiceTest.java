@@ -9,6 +9,7 @@ import com.kiwi.features.settings.data.SettingsDTO;
 import com.kiwi.features.settings.exceptions.SettingsNotFoundException;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersPersistence;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -27,6 +28,11 @@ public class SettingsServiceTest {
     private final SettingsRepository settingsRepository = Mockito.mock(SettingsRepository.class);
     private final UsersService usersService = Mockito.mock(UsersService.class);
     private final SettingsService settingsService = new SettingsService(settingsRepository, usersService);
+
+    @Before
+    public void setUp() {
+        usersService.createUser(validUserDTO());
+    }
 
     @Test
     public void getSettings_validInput_returnsSettings() {
