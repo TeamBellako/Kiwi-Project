@@ -7,7 +7,6 @@ import com.kiwi.features.metrics.exceptions.MetricsInvalidException;
 import com.kiwi.features.metrics.exceptions.MetricsNotFoundException;
 import com.kiwi.features.metrics.data.MetricsDTO;
 import com.kiwi.features.metrics.data.MetricsPersistence;
-import com.kiwi.features.users.exceptions.UsersInvalidException;
 import com.kiwi.features.users.exceptions.UsersNotFoundException;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersService;
@@ -68,8 +67,9 @@ public class MetricsService {
         }
 
         MetricsDomain updateMetricsDomain = MetricsDataMapper.toDomain(metricsPersistence.get());
-        updateMetricsDomain.update(metricsDTO);
-        MetricsPersistence updateMetricsPersistence = MetricsDataMapper.toPersistence(userPersistence, updateMetricsDomain);
+        MetricsDataMapper.updateDomain(updateMetricsDomain, metricsDTO);
+        MetricsPersistence updateMetricsPersistence = metricsPersistence.get();
+        MetricsDataMapper.updatePersistence(updateMetricsPersistence, updateMetricsDomain);
 
         MetricsPersistence savedMetrics = metricsRepository.saveAndFlush(updateMetricsPersistence);
         return MetricsDataMapper.toDTO(savedMetrics);

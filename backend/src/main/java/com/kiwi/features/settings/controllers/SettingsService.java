@@ -52,20 +52,13 @@ public class SettingsService {
 
     @Transactional
     public SettingsDTO updateSettings(String email, @Valid SettingsDTO settingsDTO) {
-        UsersPersistence userPersistence = getTargetUserPersistence(new Email(email));
-        SettingsPersistence newSettingsPersistence = getOrCreateSettings(email);
+        SettingsPersistence updateSettingsPersistence = getOrCreateSettings(email);
 
-        SettingsDomain updateSettingsDomain = SettingsDataMapper.toDomain(newSettingsPersistence);
-        updateSettingsDomain.update(settingsDTO);
-        SettingsPersistence updateSettingsPersistence = SettingsDataMapper.toPersistence(userPersistence, updateSettingsDomain);
+        SettingsDomain updateSettingsDomain = SettingsDataMapper.toDomain(updateSettingsPersistence);
+        SettingsDataMapper.updateDomain(updateSettingsDomain, settingsDTO);
+        SettingsDataMapper.updatePersistence(updateSettingsPersistence, updateSettingsDomain);
 
         SettingsPersistence savedSettings = settingsRepository.saveAndFlush(updateSettingsPersistence);
         return SettingsDataMapper.toDTO(savedSettings);
-    }
-
-    private UsersPersistence getTargetUserPersistence(Email email) {
-        Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(email);
-        if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(email.value());
-        return targetUserPersistence.get();
     }
 }

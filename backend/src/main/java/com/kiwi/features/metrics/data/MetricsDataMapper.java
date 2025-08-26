@@ -31,6 +31,11 @@ public class MetricsDataMapper {
                 );
     }
 
+    public static void updateDomain(MetricsDomain metricsDomain, MetricsDTO dto) {
+        metricsDomain.setCurrentGoodTimeSeconds(new PositiveOrZeroInteger(dto.getCurrentGoodTimeSeconds()));
+        metricsDomain.setCurrentBadTimeSeconds(new PositiveOrZeroInteger(dto.getCurrentBadTimeSeconds()));
+    }
+
     public static MetricsPersistence toPersistence(UsersPersistence usersPersistence, MetricsDomain domain) {
         return (domain == null) ? null :
                 MetricsPersistence.builder()
@@ -45,6 +50,13 @@ public class MetricsDataMapper {
 
     public static MetricsPersistence toPersistence(UsersPersistence usersPersistence, MetricsDTO dto) {
         return toPersistence(usersPersistence, toDomain(dto));
+    }
+
+    public static void updatePersistence(MetricsPersistence metricsPersistence, MetricsDomain domain) {
+        metricsPersistence.setMaxGoodTimeSeconds(domain.getMaxGoodTimeSeconds().value());
+        metricsPersistence.setCurrentGoodTimeSeconds(domain.getCurrentGoodTimeSeconds().value());
+        metricsPersistence.setMaxBadTimeSeconds(domain.getMaxBadTimeSeconds().value());
+        metricsPersistence.setCurrentBadTimeSeconds(domain.getCurrentBadTimeSeconds().value());
     }
 
     public static MetricsDTO toDTO(MetricsDomain domain) {

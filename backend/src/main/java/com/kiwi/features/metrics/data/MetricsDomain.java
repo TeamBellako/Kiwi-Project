@@ -12,9 +12,4 @@ public class MetricsDomain {
     private PositiveOrZeroInteger currentGoodTimeSeconds;
     private PositiveOrZeroInteger maxBadTimeSeconds;
     private PositiveOrZeroInteger currentBadTimeSeconds;
-
-    public void update(MetricsDTO dto) {
-        setCurrentGoodTimeSeconds(new PositiveOrZeroInteger(dto.getCurrentGoodTimeSeconds()));
-        setCurrentBadTimeSeconds(new PositiveOrZeroInteger(dto.getCurrentBadTimeSeconds()));
-    }
 }

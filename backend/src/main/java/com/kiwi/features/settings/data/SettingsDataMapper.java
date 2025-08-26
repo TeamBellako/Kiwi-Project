@@ -20,6 +20,11 @@ public class SettingsDataMapper {
                 );
     }
 
+    public static void updateDomain(SettingsDomain settingsDomain, SettingsDTO dto) {
+        settingsDomain.setSoundVolume(dto.getSoundVolume());
+        settingsDomain.setMusicVolume(dto.getMusicVolume());
+    }
+
     public static SettingsPersistence toPersistence(UsersPersistence usersPersistence, SettingsDomain domain) {
         return (domain == null) ? null :
                 SettingsPersistence.builder()
@@ -31,6 +36,11 @@ public class SettingsDataMapper {
 
     public static SettingsPersistence toPersistence(UsersPersistence usersPersistence, SettingsDTO dto) {
         return toPersistence(usersPersistence, toDomain(dto));
+    }
+
+    public static void updatePersistence(SettingsPersistence settingsPersistence, SettingsDomain domain) {
+        settingsPersistence.setSoundVolume(domain.getSoundVolume());
+        settingsPersistence.setMusicVolume(domain.getMusicVolume());
     }
 
     public static SettingsDTO toDTO(SettingsDomain domain) {

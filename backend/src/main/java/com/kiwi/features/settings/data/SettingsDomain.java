@@ -6,9 +6,4 @@ import lombok.*;
 public class SettingsDomain {
     private float soundVolume;
     private float musicVolume;
-
-    public void update(SettingsDTO dto) {
-        setSoundVolume(dto.getSoundVolume());
-        setMusicVolume(dto.getMusicVolume());
-    }
 }
