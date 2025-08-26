@@ -22,9 +22,9 @@ import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
+import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.MetricsFactory
-import com.bellako.kiwi.features.metrics.model.MetricsMapper
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -79,7 +79,7 @@ class DashboardModalTest {
                 currentBadTimeSeconds = 0,
             )
 
-        metricsState = MetricsMapper.toState(todayMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0))
+        metricsState = MetricsDataMapper.toState(todayMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0))
         fakeMetricsViewModel =
             MetricsFakeViewModel(
                 metricsState,

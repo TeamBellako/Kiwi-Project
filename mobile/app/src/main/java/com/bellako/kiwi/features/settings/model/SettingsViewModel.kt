@@ -1,10 +1,13 @@
 package com.bellako.kiwi.features.settings.model
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
-import com.bellako.kiwi.features.settings.data.Settings
+import com.bellako.kiwi.features.settings.data.SettingsDataMapper
+import com.bellako.kiwi.features.settings.data.SettingsDomain
 import com.bellako.kiwi.features.settings.data.SettingsState
 import dagger.Module
 import dagger.Provides
@@ -43,13 +46,14 @@ class SettingsViewModel
         private val _state = MutableStateFlow<SettingsState?>(null)
         override val state: StateFlow<SettingsState?> = _state.asStateFlow()
 
-        private var previousValidDomainSettings: Settings? = null
-        private var previousDomainSettings: Settings? = null
+        private var previousValidSettingsDomain: SettingsDomain? = null
+        private var previousSettingsDomain: SettingsDomain? = null
 
-        private val pendingSave = MutableStateFlow<Settings?>(null)
+        private val pendingSave = MutableStateFlow<SettingsDomain?>(null)
 
         // ---------------------------------------------------------------------------------------------
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun loadSettings() {
             setIsLoading(true)
             setUiState(UIState.Loading)
@@ -58,15 +62,9 @@ class SettingsViewModel
                 val result = repository.getSettings()
                 result.fold(
                     onSuccess = { dto ->
-                        dto
-                            .toDomainObject()
-                            .onSuccess { domain ->
-                                _state.value = domain.toState()
-                                previousDomainSettings = domain
-                                setUiState(UIState.Success(Unit))
-                            }.onFailure { ex ->
-                                setUiState(mapExceptionToUIState(ex))
-                            }
+                        _state.value = SettingsDataMapper.toState(dto)
+                        previousSettingsDomain = SettingsDataMapper.toDomain(dto)
+                        setUiState(UIState.Success(Unit))
                     },
                     onFailure = { throwable ->
                         setUiState(mapExceptionToUIState(throwable))
@@ -80,16 +78,16 @@ class SettingsViewModel
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun updateSettings(state: SettingsState) {
             _state.value = state
             updateVolume()
-            state.toDomainObject().onSuccess { domain ->
-                if (previousValidDomainSettings == domain) {
-                    return
-                }
-                previousValidDomainSettings = domain
-                pendingSave.value = domain
+            val domain = SettingsDataMapper.toDomain(state)
+            if (previousValidSettingsDomain == domain) {
+                return
             }
+            previousValidSettingsDomain = domain
+            pendingSave.value = domain
         }
 
         // ---------------------------------------------------------------------------------------------
@@ -98,7 +96,7 @@ class SettingsViewModel
             viewModelScope.launch {
                 pendingSave.debounce(AUTO_SAVE_MILLIS).collectLatest { domain ->
                     domain?.let {
-                        repository.updateSettings(domain.toDTO())
+                        repository.updateSettings(SettingsDataMapper.toDTO(domain))
                     }
                 }
             }

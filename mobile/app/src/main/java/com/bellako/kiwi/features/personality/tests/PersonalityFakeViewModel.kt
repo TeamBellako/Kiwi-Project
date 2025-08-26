@@ -2,7 +2,6 @@ package com.bellako.kiwi.features.personality.tests
 
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
-import com.bellako.kiwi.features.personality.data.Personality
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.data.UserName
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel

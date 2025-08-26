@@ -23,29 +23,4 @@ data class PersonalityState(
     var currentQuestion = 0
 
     var answers = MutableList(questions.size) { -1 }
-
-    fun toDTO(): PersonalityDTO =
-        PersonalityDTO(
-            realName = realName,
-            knightName = knightName,
-            build = build,
-            goodApps = goodApps,
-            badApps = badApps,
-        )
-
-    fun toDomainObject(): Result<Personality> {
-        val realNameResult = UserName.of(realName)
-        return realNameResult.fold(
-            onSuccess = { validRealName ->
-                val knightNameResult = UserName.of(knightName)
-                knightNameResult.fold(
-                    onSuccess = { validKnightName ->
-                        Result.success(Personality(validRealName, validKnightName, build, goodApps, badApps))
-                    },
-                    onFailure = { err -> Result.failure(err) },
-                )
-            },
-            onFailure = { err -> Result.failure(err) },
-        )
-    }
 }

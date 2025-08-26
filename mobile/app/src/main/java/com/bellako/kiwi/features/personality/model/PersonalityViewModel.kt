@@ -1,11 +1,14 @@
 package com.bellako.kiwi.features.personality.model
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.features.personality.data.BERSERKER
 import com.bellako.kiwi.features.personality.data.MONK
 import com.bellako.kiwi.features.personality.data.PersonalityAppsDTO
 import com.bellako.kiwi.features.personality.data.PersonalityBuildDTO
+import com.bellako.kiwi.features.personality.data.PersonalityDataMapper
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.data.PersonalityUserNameDTO
 import com.bellako.kiwi.features.personality.data.SHAMAN
@@ -28,13 +31,16 @@ class PersonalityViewModel
 
         // -----------------------------------------------------------------------------------------
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun loadPersonality(): Result<Unit> {
             setIsLoading(true)
             setUiState(UIState.Loading)
+
             return repository
                 .getPersonality()
-                .map { dto ->
-                    val state = dto.toState()
+                .mapCatching { dto ->
+                    PersonalityDataMapper.toState(dto).getOrThrow()
+                }.map { state ->
                     _state.value =
                         _state.value.copy(
                             realName = state.realName,

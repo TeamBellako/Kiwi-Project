@@ -1,7 +1,10 @@
 package com.bellako.kiwi.features.settings.tests
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.model.BaseFakeViewModel
-import com.bellako.kiwi.features.settings.data.Settings
+import com.bellako.kiwi.features.settings.data.SettingsDataMapper
+import com.bellako.kiwi.features.settings.data.SettingsDomain
 import com.bellako.kiwi.features.settings.data.SettingsState
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +18,8 @@ class SettingsFakeViewModel(
     private val _state = MutableStateFlow<SettingsState?>(backingState)
     override val state: StateFlow<SettingsState?> = _state.asStateFlow()
 
-    private var currentDomainSettings: Settings? = backingState.toDomainObject().getOrNull()
+    @RequiresApi(Build.VERSION_CODES.O)
+    private var currentSettingsDomain: SettingsDomain? = SettingsDataMapper.toDomain(backingState)
 
     var simulateLoadError: Boolean = false
     var simulateUpdateError: Boolean = false
@@ -34,6 +38,7 @@ class SettingsFakeViewModel(
         setLoading(false)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun updateSettings(state: SettingsState) {
         setLoading(true)
 
@@ -44,18 +49,12 @@ class SettingsFakeViewModel(
             return
         }
 
-        val result = state.toDomainObject()
-
-        result
-            .onFailure {
-                handleError(simulatedException)
-            }.onSuccess { domain ->
-                if (currentDomainSettings != domain) {
-                    currentDomainSettings = domain
-                    _state.value = domain.toState()
-                    handleSuccess()
-                }
-            }
+        val domain = SettingsDataMapper.toDomain(state)
+        if (currentSettingsDomain != domain) {
+            currentSettingsDomain = domain
+            _state.value = state
+            handleSuccess()
+        }
 
         setLoading(false)
     }

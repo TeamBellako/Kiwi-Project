@@ -2,6 +2,7 @@ package com.bellako.kiwi
 
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.settings.data.SettingsDataMapper
 import com.bellako.kiwi.features.settings.model.ISettingsAPI
 import com.bellako.kiwi.features.settings.model.SettingsRepository
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
@@ -106,7 +107,7 @@ class SettingsIntegrationTest {
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            val expectedState = validSettings().toState()
+            val expectedState = SettingsDataMapper.toState(validSettings())
 
             Assert.assertEquals(expectedState, viewModel.state.first())
         }
@@ -120,7 +121,7 @@ class SettingsIntegrationTest {
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            val newState = updateSettings().toState()
+            val newState = SettingsDataMapper.toState(updateSettings())
             viewModel.updateSettings(newState)
             advanceUntilIdle()
 
@@ -136,7 +137,7 @@ class SettingsIntegrationTest {
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            val sameState = validSettings().toState()
+            val sameState = SettingsDataMapper.toState(validSettings())
             viewModel.updateSettings(sameState)
             advanceUntilIdle()
 
@@ -153,11 +154,12 @@ class SettingsIntegrationTest {
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            viewModel.updateSettings(validSettings().toState())
+            val state = SettingsDataMapper.toState(validSettings())
+            viewModel.updateSettings(state)
             advanceTimeBy(100)
-            viewModel.updateSettings(updateSettings().toState())
+            viewModel.updateSettings(state)
             advanceTimeBy(100)
-            viewModel.updateSettings(validSettings().toState())
+            viewModel.updateSettings(state)
             advanceUntilIdle()
 
             verify(api, times(1)).updateSettings(anyOrNull())

@@ -1,6 +1,6 @@
 package com.bellako.kiwi.features.settings.data
 
-data class SettingsDTO(
+data class SettingsDomain(
     val soundVolume: Float,
     val musicVolume: Float,
 )

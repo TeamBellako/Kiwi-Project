@@ -1,9 +1,9 @@
 package com.bellako.kiwi
 
+import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
 import com.bellako.kiwi.features.metrics.model.IMetricsAPI
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsFactory
-import com.bellako.kiwi.features.metrics.model.MetricsMapper
 import com.bellako.kiwi.features.metrics.model.MetricsRepository
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import junit.framework.TestCase.assertTrue
@@ -35,7 +35,7 @@ class MetricsIntegrationTest {
             whenever(api.getMetricsByDate(validMetricsDTO.date))
                 .thenReturn(null)
 
-            val result: Result<Unit> = viewModel.createMetrics(MetricsMapper.toState(validMetricsDTO))
+            val result: Result<Unit> = viewModel.createMetrics(MetricsDataMapper.toState(validMetricsDTO))
             assertTrue(result.isSuccess)
         }
 
@@ -48,7 +48,7 @@ class MetricsIntegrationTest {
             whenever(api.getMetricsByDate(validMetricsDTO.date))
                 .thenReturn(validMetricsDTO)
 
-            val result: Result<Unit> = viewModel.updateMetrics(MetricsMapper.toState(updatedMetricsDTO))
+            val result: Result<Unit> = viewModel.updateMetrics(MetricsDataMapper.toState(updatedMetricsDTO))
             assertTrue(result.isSuccess)
         }
 

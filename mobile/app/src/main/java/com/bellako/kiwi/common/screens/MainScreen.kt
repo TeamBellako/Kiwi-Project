@@ -170,7 +170,8 @@ private fun AppScreen(
                         Kiwi_BackHandler()
                         Kiwi_Music_Home()
                         SettingsScreen(
-                            viewModel = settingsViewModel,
+                            usersViewModel = usersViewModel,
+                            settingsViewModel = settingsViewModel,
                             navController = navController,
                             onLogout = {
                                 CoroutineScope(Dispatchers.Main).launch {
