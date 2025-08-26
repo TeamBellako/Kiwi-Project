@@ -1,11 +1,16 @@
 package com.kiwi.settings;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
+import com.kiwi.security.AuthEntryPointJwt;
+import com.kiwi.security.JwtUtils;
 import com.kiwi.config.WebSecurityConfig;
-import com.kiwi.features.settings.*;
-import com.kiwi.utils.GlobalExceptionHandler;
-import com.kiwi.security.*;
-import com.kiwi.features.users.CustomUserDetailsService;
+import com.kiwi.features.settings.controllers.SettingsController;
+import com.kiwi.features.settings.controllers.SettingsService;
+import com.kiwi.features.settings.data.SettingsDTO;
+import com.kiwi.features.settings.exceptions.SettingsInvalidException;
+import com.kiwi.features.settings.exceptions.SettingsNotFoundException;
+import com.kiwi.common.exceptions.GlobalExceptionHandler;
+import com.kiwi.features.users.controllers.CustomUserDetailsService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

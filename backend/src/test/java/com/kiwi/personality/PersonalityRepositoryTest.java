@@ -1,11 +1,11 @@
 package com.kiwi.personality;
 
-import com.kiwi.features.personality.Personality;
-import com.kiwi.features.personality.PersonalityRepository;
-import com.kiwi.features.users.Users;
-import com.kiwi.features.users.UsersMapper;
-import com.kiwi.features.users.UsersPersistence;
-import com.kiwi.features.users.UsersRepository;
+import com.kiwi.features.personality.data.Personality;
+import com.kiwi.features.personality.controllers.PersonalityRepository;
+import com.kiwi.features.users.data.UsersDomain;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersPersistence;
+import com.kiwi.features.users.controllers.UsersRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +38,8 @@ public class PersonalityRepositoryTest {
 
     @Test
     public void findPersonality() {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
 
         Personality personality = validPersonality();

@@ -1,6 +1,6 @@
 package com.kiwi.personality;
 
-import com.kiwi.features.personality.*;
+import com.kiwi.features.personality.data.*;
 
 import java.util.List;
 

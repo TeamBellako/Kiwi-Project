@@ -1,0 +1,50 @@
+package com.kiwi.users;
+
+import com.kiwi.features.settings.controllers.SettingsRepository;
+import com.kiwi.features.users.data.UsersDomain;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersPersistence;
+import com.kiwi.features.users.controllers.UsersRepository;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+import static com.kiwi.users.UsersTestFactory.validUserDTO;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+@Transactional
+@Sql(scripts = "/UsersTestSetUp.sql")
+@ActiveProfiles("test")
+public class UsersDomainRepositoryTests {
+    
+    @Autowired
+    private UsersRepository usersRepository;
+
+    @Autowired
+    private SettingsRepository settingsRepository;
+    
+    @Test
+    public void createValidUser() {
+        UsersDomain user =  UsersDataMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
+        
+        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
+        assertEquals(user, UsersDataMapper.toDomain(savedUser));
+    }
+    
+    @Test
+    public void getNonExistingUser() {
+        assertEquals(Optional.empty(), usersRepository.findByEmail(validUserDTO().getEmail()));
+    }
+}

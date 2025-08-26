@@ -1,9 +1,9 @@
 package com.kiwi.settings;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
-import com.kiwi.features.settings.SettingsRepository;
-import com.kiwi.features.settings.SettingsService;
-import com.kiwi.utils.GlobalExceptionHandler;
+import com.kiwi.features.settings.controllers.SettingsRepository;
+import com.kiwi.features.settings.controllers.SettingsService;
+import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.config.WebSecurityConfig;
 import org.junit.Test;

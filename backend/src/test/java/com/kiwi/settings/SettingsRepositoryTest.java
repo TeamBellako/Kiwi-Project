@@ -1,7 +1,7 @@
 package com.kiwi.settings;
 
-import com.kiwi.features.settings.Settings;
-import com.kiwi.features.settings.SettingsRepository;
+import com.kiwi.features.settings.data.Settings;
+import com.kiwi.features.settings.controllers.SettingsRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

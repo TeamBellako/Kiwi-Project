@@ -2,13 +2,13 @@ package com.kiwi.personality;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.kiwi.config.WebSecurityConfig;
-import com.kiwi.features.personality.PersonalityController;
-import com.kiwi.features.personality.PersonalityNotFoundException;
-import com.kiwi.features.personality.PersonalityService;
-import com.kiwi.features.users.*;
+import com.kiwi.features.personality.controllers.PersonalityController;
+import com.kiwi.features.personality.exceptions.PersonalityNotFoundException;
+import com.kiwi.features.personality.controllers.PersonalityService;
+import com.kiwi.features.users.controllers.CustomUserDetailsService;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
-import com.kiwi.utils.GlobalExceptionHandler;
+import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

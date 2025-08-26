@@ -3,15 +3,14 @@ package com.kiwi.personality;
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.config.WebSecurityConfig;
-import com.kiwi.features.personality.Personality;
-import com.kiwi.features.personality.PersonalityRepository;
-import com.kiwi.features.personality.PersonalityService;
-import com.kiwi.features.users.Users;
-import com.kiwi.features.users.UsersMapper;
-import com.kiwi.features.users.UsersPersistence;
-import com.kiwi.features.users.UsersRepository;
+import com.kiwi.features.personality.data.Personality;
+import com.kiwi.features.personality.controllers.PersonalityRepository;
+import com.kiwi.features.users.data.UsersDomain;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersPersistence;
+import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.security.JwtUtils;
-import com.kiwi.utils.GlobalExceptionHandler;
+import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,8 +56,8 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void getPersonality_valid() throws Exception {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
 
         Personality personality = validPersonality();
@@ -82,8 +81,8 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateRealName() throws Exception {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
 
         Personality personality = validPersonality();
@@ -107,8 +106,8 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateKnightName() throws Exception {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
 
         Personality personality = validPersonality();
@@ -132,8 +131,8 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateBuild() throws Exception {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
 
         Personality personality = validPersonality();
@@ -157,8 +156,8 @@ public class PersonalityIntegrationTest {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void updateApps() throws Exception {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
 
         Personality personality = validPersonality();

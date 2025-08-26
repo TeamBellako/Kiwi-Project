@@ -1,6 +1,6 @@
 package com.kiwi.settings;
 
-import com.kiwi.features.settings.SettingsDTO;
+import com.kiwi.features.settings.data.SettingsDTO;
 
 public class SettingsTestFactory {
 

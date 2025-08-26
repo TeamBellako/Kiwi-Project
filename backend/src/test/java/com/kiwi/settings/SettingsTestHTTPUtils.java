@@ -2,7 +2,7 @@ package com.kiwi.settings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.features.settings.SettingsDTO;
+import com.kiwi.features.settings.data.SettingsDTO;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultMatcher;

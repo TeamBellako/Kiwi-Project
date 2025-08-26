@@ -1,7 +1,11 @@
 package com.kiwi.settings;
 
-import com.kiwi.features.settings.*;
-import com.kiwi.features.users.UsersInvalidException;
+import com.kiwi.features.settings.controllers.SettingsRepository;
+import com.kiwi.features.settings.controllers.SettingsService;
+import com.kiwi.features.settings.data.Settings;
+import com.kiwi.features.settings.data.SettingsDTO;
+import com.kiwi.features.settings.exceptions.SettingsInvalidException;
+import com.kiwi.features.settings.exceptions.SettingsNotFoundException;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -33,8 +37,8 @@ public class SettingsServiceTest {
         verify(settingsRepository, Mockito.times(1)).findByEmail(validSettings.getEmail().value());
     }
 
-    @Test(expected = SettingsInvalidException.class)
-    public void getSettings_invalidInput_throwsSettingsInvalidException() {
+    @Test(expected = IllegalArgumentException.class)
+    public void getSettings_invalidInput_throwsIllegalArgumentException() {
         settingsService.getSettingsByEmail(invalidSettingsDTO().getEmail());
     }
 

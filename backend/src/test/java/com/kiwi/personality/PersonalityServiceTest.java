@@ -1,7 +1,10 @@
 package com.kiwi.personality;
 
-import com.kiwi.features.personality.*;
-import com.kiwi.features.users.UsersRepository;
+import com.kiwi.features.personality.controllers.PersonalityRepository;
+import com.kiwi.features.personality.controllers.PersonalityService;
+import com.kiwi.features.personality.data.Personality;
+import com.kiwi.features.personality.exceptions.PersonalityNotFoundException;
+import com.kiwi.features.users.controllers.UsersRepository;
 import org.junit.Test;
 import org.mockito.Mockito;
 
