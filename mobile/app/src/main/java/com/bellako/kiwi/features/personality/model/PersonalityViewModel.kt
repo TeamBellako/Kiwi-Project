@@ -38,9 +38,8 @@ class PersonalityViewModel
 
             return repository
                 .getPersonality()
-                .mapCatching { dto ->
-                    PersonalityDataMapper.toState(dto).getOrThrow()
-                }.map { state ->
+                .map { dto ->
+                    val state = PersonalityDataMapper.toState(dto)
                     _state.value =
                         _state.value.copy(
                             realName = state.realName,

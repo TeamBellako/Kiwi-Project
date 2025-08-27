@@ -8,15 +8,17 @@ value class UserName private constructor(
         private val NAME_REGEX_FULL = Regex("^[a-zA-Z0-9]+$")
         private val NAME_REGEX_LENGTH = Regex("^.+$")
 
-        fun isValid(name: String): Boolean = NAME_REGEX_FULL.matches(name)
+        fun isValid(name: String?): Boolean = name != null && NAME_REGEX_FULL.matches(name)
 
-        fun of(name: String): Result<UserName> =
+        fun of(name: String?): Result<UserName> =
             if (isValid(name)) {
-                Result.success(UserName(name))
+                Result.success(UserName(name!!))
             } else {
                 Result.failure(
                     IllegalArgumentException(
-                        if (!NAME_REGEX_LENGTH.matches(name)) {
+                        if (name == null) {
+                            "Name is null"
+                        } else if (!NAME_REGEX_LENGTH.matches(name)) {
                             "Name should be at least 1 character long"
                         } else {
                             "Invalid name"
