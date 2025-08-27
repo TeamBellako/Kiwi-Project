@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -90,11 +89,7 @@ fun PermissionsRequestModal(withPermissions: @Composable () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-private fun PermissionRequestLayout(
-    context: Context,
-) {
-    val isPreview = LocalInspectionMode.current
-
+private fun PermissionRequestLayout(context: Context) {
     Box(
         modifier =
             Modifier
