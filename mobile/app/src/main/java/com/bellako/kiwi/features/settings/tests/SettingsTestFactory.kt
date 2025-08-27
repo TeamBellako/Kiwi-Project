@@ -11,7 +11,7 @@ object SettingsTestFactory {
             musicVolume = 0.33f,
         )
 
-    fun updateSettings(): SettingsDTO =
+    fun updatedSettings(): SettingsDTO =
         SettingsDTO(
             soundVolume = 0.33f,
             musicVolume = 0f,
