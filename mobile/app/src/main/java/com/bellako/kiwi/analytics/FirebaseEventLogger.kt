@@ -1,6 +1,7 @@
 package com.bellako.kiwi.analytics
 
 import android.os.Bundle
+import com.bellako.kiwi.BuildConfig
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
 
@@ -30,6 +31,8 @@ object FirebaseEventLogger {
             }
         }
 
-        analytics.logEvent(eventName, if (bundle.isEmpty) null else bundle)
+        bundle.putString("env", if (BuildConfig.DEBUG) "dev" else "prod")
+
+        analytics.logEvent(eventName, bundle)
     }
 }

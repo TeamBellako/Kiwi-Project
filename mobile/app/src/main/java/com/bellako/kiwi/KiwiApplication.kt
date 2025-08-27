@@ -1,6 +1,7 @@
 package com.bellako.kiwi
 
 import android.app.Application
+import android.content.Context
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.google.firebase.Firebase
@@ -12,12 +13,13 @@ import dagger.hilt.android.HiltAndroidApp
 class KiwiApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        FirebaseApp.initializeApp(this)
 
+        initFirebase(this)
         FirebaseEventLogger.logEvent(FirebaseEventNames.APP_OPENED)
-
-        if (!BuildConfig.DEBUG) {
-            Firebase.analytics.setAnalyticsCollectionEnabled(true)
-        }
     }
+}
+
+private fun initFirebase(context: Context) {
+    FirebaseApp.initializeApp(context)
+    Firebase.analytics.setAnalyticsCollectionEnabled(true)
 }
