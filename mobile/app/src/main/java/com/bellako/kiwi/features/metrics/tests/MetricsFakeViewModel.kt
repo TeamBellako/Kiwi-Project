@@ -4,10 +4,10 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.model.BaseFakeViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
+import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsFactory
-import com.bellako.kiwi.features.metrics.model.MetricsMapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,7 +35,7 @@ class MetricsFakeViewModel(
             Result.failure(fakeException)
         } else {
             handleSuccess()
-            _state.value = MetricsMapper.toState(todayMetricsDTO)
+            _state.value = MetricsDataMapper.toState(todayMetricsDTO)
             Result.success(Unit)
         }
 
@@ -45,7 +45,7 @@ class MetricsFakeViewModel(
             Result.failure(fakeException)
         } else {
             handleSuccess()
-            _state.value = MetricsMapper.toState(todayMetricsDTO)
+            _state.value = MetricsDataMapper.toState(todayMetricsDTO)
             Result.success(Unit)
         }
 
@@ -58,13 +58,13 @@ class MetricsFakeViewModel(
 
             when {
                 LocalDate.parse(date).isEqual(currentDate) -> {
-                    _state.value = MetricsMapper.toState(todayMetricsDTO)
+                    _state.value = MetricsDataMapper.toState(todayMetricsDTO)
                 }
                 LocalDate.parse(date).isAfter(currentDate) -> {
-                    _state.value = MetricsMapper.toState(futureMetricsDTO)
+                    _state.value = MetricsDataMapper.toState(futureMetricsDTO)
                 }
                 else -> {
-                    _state.value = MetricsMapper.toState(pastMetricsDTO)
+                    _state.value = MetricsDataMapper.toState(pastMetricsDTO)
                 }
             }
 

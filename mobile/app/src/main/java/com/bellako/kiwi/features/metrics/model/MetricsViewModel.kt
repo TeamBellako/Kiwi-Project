@@ -3,7 +3,8 @@ package com.bellako.kiwi.features.metrics.model
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.model.BaseViewModel
-import com.bellako.kiwi.features.metrics.data.Metrics
+import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
+import com.bellako.kiwi.features.metrics.data.MetricsDomain
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -40,9 +41,9 @@ class MetricsViewModel
             if (exists != null) return failureWithError("A metrics entry already exists with that user and date")
 
             return handleResult(
-                repository.createMetrics(MetricsMapper.toDTO(domain)),
+                repository.createMetrics(MetricsDataMapper.toDTO(domain)),
             ) {
-                _state.value = MetricsMapper.toState(domain)
+                _state.value = MetricsDataMapper.toState(domain)
             }
         }
 
@@ -54,9 +55,9 @@ class MetricsViewModel
             if (existing == null) return failureWithError("There is no metrics entry with that user and date")
 
             return handleResult(
-                repository.updateMetrics(MetricsMapper.toDTO(domain)),
+                repository.updateMetrics(MetricsDataMapper.toDTO(domain)),
             ) {
-                _state.value = MetricsMapper.toState(domain)
+                _state.value = MetricsDataMapper.toState(domain)
             }
         }
 
@@ -83,12 +84,12 @@ class MetricsViewModel
                 return Result.failure(Exception("No metrics found"))
             }
 
-            _state.value = MetricsMapper.toState(result)
+            _state.value = MetricsDataMapper.toState(result)
             return Result.success(Unit)
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        private fun validateAndMapToDomain(state: MetricsState): Metrics? = MetricsMapper.toDomain(state)
+        private fun validateAndMapToDomain(state: MetricsState): MetricsDomain? = MetricsDataMapper.toDomain(state)
 
         private fun invalidDataMessage(): String =
             "Invalid metrics. Metrics must have a positive number of good and bad apps TimeSeconds".trimIndent()

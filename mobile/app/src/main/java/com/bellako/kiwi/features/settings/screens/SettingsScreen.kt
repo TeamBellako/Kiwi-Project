@@ -38,6 +38,9 @@ import com.bellako.kiwi.features.settings.data.SettingsState
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.tests.SettingsFakeViewModel
 import com.bellako.kiwi.features.settings.tests.SettingsTestTags
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -49,7 +52,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
-    viewModel: ISettingsViewModel,
+    usersViewModel: IUsersViewModel,
+    settingsViewModel: ISettingsViewModel,
     navController: NavController,
     onLogout: () -> Unit,
 ) {
@@ -61,7 +65,8 @@ fun SettingsScreen(
                 .padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
         SettingsScreenLayout(
-            viewModel,
+            usersViewModel,
+            settingsViewModel,
             navController,
             onLogout,
         )
@@ -70,12 +75,14 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsScreenLayout(
-    viewModel: ISettingsViewModel,
+    usersViewModel: IUsersViewModel,
+    settingsViewModel: ISettingsViewModel,
     navController: NavController,
     onLogout: () -> Unit,
 ) {
-    val state by viewModel.state.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val usersState by usersViewModel.state.collectAsState()
+    val settingsState by settingsViewModel.state.collectAsState()
+    val uiState by settingsViewModel.uiState.collectAsState()
 
     when (uiState) {
         is UIState.Loading -> LoadingModal()
@@ -88,8 +95,9 @@ private fun SettingsScreenLayout(
         }
         else -> {
             SettingsFields(
-                state = state,
-                viewModel = viewModel,
+                usersState = usersState,
+                settingsState = settingsState,
+                viewModel = settingsViewModel,
                 navController = navController,
                 onLogout = onLogout,
             )
@@ -99,108 +107,111 @@ private fun SettingsScreenLayout(
 
 @Composable
 private fun SettingsFields(
-    state: SettingsState?,
+    usersState: UsersState?,
+    settingsState: SettingsState?,
     viewModel: ISettingsViewModel,
     navController: NavController,
     onLogout: () -> Unit,
 ) {
-    state?.let { currentState ->
-        var soundSliderPosition by remember {
-            mutableFloatStateOf(currentState.soundVolume.coerceIn(0f, 1f))
-        }
-        var musicSliderPosition by remember {
-            mutableFloatStateOf(currentState.musicVolume.coerceIn(0f, 1f))
-        }
+    usersState?.let { currentUsersState ->
+        settingsState?.let { currentSettingsState ->
+            var soundSliderPosition by remember {
+                mutableFloatStateOf(currentSettingsState.soundVolume.coerceIn(0f, 1f))
+            }
+            var musicSliderPosition by remember {
+                mutableFloatStateOf(currentSettingsState.musicVolume.coerceIn(0f, 1f))
+            }
 
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .testTag(CommonTestTags.SETTINGS_SCREEN),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Kiwi_H2(
-                KiwiTextArguments(
-                    "SETTINGS",
-                    bold = true,
-                ),
-            )
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .testTag(CommonTestTags.SETTINGS_SCREEN),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Kiwi_H2(
+                    KiwiTextArguments(
+                        "SETTINGS",
+                        bold = true,
+                    ),
+                )
 
-            Kiwi_Spacer()
+                Kiwi_Spacer()
 
-            Kiwi_InputField(
-                enabled = false,
-                value = currentState.email,
-                onValueChange = {},
-                label = {
-                    Kiwi_Label2(
+                Kiwi_InputField(
+                    enabled = false,
+                    value = currentUsersState.email,
+                    onValueChange = {},
+                    label = {
+                        Kiwi_Label2(
+                            KiwiTextArguments(
+                                "Email",
+                                color = MaterialTheme.colorScheme.inversePrimary,
+                            ),
+                        )
+                    },
+                    textColor = MaterialTheme.colorScheme.inversePrimary,
+                    testTag = UsersTestTags.EMAIL_FIELD,
+                    shouldHideInput = false,
+                )
+
+                Kiwi_Spacer(Spacing.large)
+
+                Kiwi_Slider(
+                    KiwiTextArguments("SFX Volume"),
+                    value = soundSliderPosition,
+                    onValueChange = { newValue ->
+                        soundSliderPosition = newValue
+                        CoroutineScope(Dispatchers.Main).launch {
+                            viewModel.updateSettings(currentSettingsState.copy(soundVolume = newValue))
+                        }
+                    },
+                    valueRange = 0f..1f,
+                    steps = 0,
+                    testTag = SettingsTestTags.SOUND_VOLUME_SLIDER,
+                )
+
+                Kiwi_Spacer()
+
+                Kiwi_Slider(
+                    KiwiTextArguments("Music Volume"),
+                    value = musicSliderPosition,
+                    onValueChange = { newValue ->
+                        musicSliderPosition = newValue
+                        CoroutineScope(Dispatchers.Main).launch {
+                            viewModel.updateSettings(currentSettingsState.copy(musicVolume = newValue))
+                        }
+                    },
+                    valueRange = 0f..1f,
+                    steps = 0,
+                    testTag = SettingsTestTags.MUSIC_VOLUME_SLIDER,
+                )
+
+                Kiwi_Spacer(Spacing.large)
+
+                Kiwi_Button(
+                    textArguments =
                         KiwiTextArguments(
-                            "Email",
-                            color = MaterialTheme.colorScheme.inversePrimary,
+                            "SUPPORT",
+                            color = White,
+                            bold = true,
                         ),
-                    )
-                },
-                textColor = MaterialTheme.colorScheme.inversePrimary,
-                testTag = UsersTestTags.EMAIL_FIELD,
-                shouldHideInput = false,
-            )
+                    onClick = { navController.navigate(ScreenRoutes.HELP) },
+                )
 
-            Kiwi_Spacer(Spacing.large)
+                Kiwi_Spacer()
 
-            Kiwi_Slider(
-                KiwiTextArguments("SFX Volume"),
-                value = soundSliderPosition,
-                onValueChange = { newValue ->
-                    soundSliderPosition = newValue
-                    CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.updateSettings(currentState.copy(soundVolume = newValue))
-                    }
-                },
-                valueRange = 0f..1f,
-                steps = 0,
-                testTag = SettingsTestTags.SOUND_VOLUME_SLIDER,
-            )
-
-            Kiwi_Spacer()
-
-            Kiwi_Slider(
-                KiwiTextArguments("Music Volume"),
-                value = musicSliderPosition,
-                onValueChange = { newValue ->
-                    musicSliderPosition = newValue
-                    CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.updateSettings(currentState.copy(musicVolume = newValue))
-                    }
-                },
-                valueRange = 0f..1f,
-                steps = 0,
-                testTag = SettingsTestTags.MUSIC_VOLUME_SLIDER,
-            )
-
-            Kiwi_Spacer(Spacing.large)
-
-            Kiwi_Button(
-                textArguments =
-                    KiwiTextArguments(
-                        "SUPPORT",
-                        color = White,
-                        bold = true,
-                    ),
-                onClick = { navController.navigate(ScreenRoutes.HELP) },
-            )
-
-            Kiwi_Spacer()
-
-            Kiwi_Button(
-                textArguments =
-                    KiwiTextArguments(
-                        "LOG OUT",
-                        color = White,
-                        bold = true,
-                    ),
-                onClick = onLogout,
-            )
+                Kiwi_Button(
+                    textArguments =
+                        KiwiTextArguments(
+                            "LOG OUT",
+                            color = White,
+                            bold = true,
+                        ),
+                    onClick = onLogout,
+                )
+            }
         }
     }
 }
@@ -215,13 +226,13 @@ private fun SettingsFields(
 fun SettingsScreen_Preview() {
     val previewState =
         SettingsState(
-            email = validUsersDTO().email,
             soundVolume = 0.67f,
             musicVolume = 0.33f,
         )
 
     Kiwi_Theme {
         SettingsScreen(
+            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
             SettingsFakeViewModel(previewState),
             navController = rememberNavController(),
         ) {}

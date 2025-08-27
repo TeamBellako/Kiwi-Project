@@ -2,10 +2,11 @@ package com.bellako.kiwi
 
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.settings.data.SettingsDataMapper
 import com.bellako.kiwi.features.settings.model.ISettingsAPI
 import com.bellako.kiwi.features.settings.model.SettingsRepository
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
-import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.updateSettings
+import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.updatedSettings
 import com.bellako.kiwi.features.settings.tests.SettingsTestFactory.validSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -80,7 +81,7 @@ class SettingsIntegrationTest {
     @Test
     fun `updateSettings returns success when API completes`() =
         runTest {
-            `when`(api.updateSettings(validSettings())).thenReturn(Unit)
+            `when`(api.updateSettings(validSettings())).thenReturn(validSettings())
 
             val result = repository.updateSettings(validSettings())
 
@@ -106,7 +107,7 @@ class SettingsIntegrationTest {
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            val expectedState = validSettings().toState()
+            val expectedState = SettingsDataMapper.toState(validSettings())
 
             Assert.assertEquals(expectedState, viewModel.state.first())
         }
@@ -115,12 +116,12 @@ class SettingsIntegrationTest {
     fun `autoSave triggers updateSettings when values change`() =
         runTest {
             whenever(api.getSettings()).thenReturn(validSettings())
-            whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
+            whenever(api.updateSettings(anyOrNull())).thenReturn(updatedSettings())
 
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            val newState = updateSettings().toState()
+            val newState = SettingsDataMapper.toState(updatedSettings())
             viewModel.updateSettings(newState)
             advanceUntilIdle()
 
@@ -131,12 +132,12 @@ class SettingsIntegrationTest {
     fun `autoSave does not trigger updateSettings for same state`() =
         runTest {
             whenever(api.getSettings()).thenReturn(validSettings())
-            whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
+            whenever(api.updateSettings(anyOrNull())).thenReturn(validSettings())
 
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            val sameState = validSettings().toState()
+            val sameState = SettingsDataMapper.toState(validSettings())
             viewModel.updateSettings(sameState)
             advanceUntilIdle()
 
@@ -148,16 +149,17 @@ class SettingsIntegrationTest {
     fun `autoSave triggers updateSettings only once for rapid changes`() =
         runTest {
             whenever(api.getSettings()).thenReturn(validSettings())
-            whenever(api.updateSettings(anyOrNull())).thenReturn(Unit)
+            whenever(api.updateSettings(anyOrNull())).thenReturn(validSettings())
 
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            viewModel.updateSettings(validSettings().toState())
+            val state = SettingsDataMapper.toState(validSettings())
+            viewModel.updateSettings(state)
             advanceTimeBy(100)
-            viewModel.updateSettings(updateSettings().toState())
+            viewModel.updateSettings(state)
             advanceTimeBy(100)
-            viewModel.updateSettings(validSettings().toState())
+            viewModel.updateSettings(state)
             advanceUntilIdle()
 
             verify(api, times(1)).updateSettings(anyOrNull())

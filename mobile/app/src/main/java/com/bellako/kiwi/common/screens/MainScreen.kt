@@ -170,7 +170,8 @@ private fun AppScreen(
                         Kiwi_BackHandler()
                         Kiwi_Music_Home()
                         SettingsScreen(
-                            viewModel = settingsViewModel,
+                            usersViewModel = usersViewModel,
+                            settingsViewModel = settingsViewModel,
                             navController = navController,
                             onLogout = {
                                 CoroutineScope(Dispatchers.Main).launch {
@@ -222,14 +223,11 @@ private fun Kiwi_AudioHandler() {
     DisposableEffect(lifecycleOwner) {
         val observer =
             LifecycleEventObserver { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_START -> {
-                        AudioManager.onBackgroundResume()
-                    }
-                    Lifecycle.Event.ON_STOP -> {
-                        AudioManager.onBackgroundEnter()
-                    }
-                    else -> {}
+                if (event == Lifecycle.Event.ON_START) {
+                    AudioManager.onBackgroundResume()
+                }
+                if (event == Lifecycle.Event.ON_STOP) {
+                    AudioManager.onBackgroundEnter()
                 }
             }
         lifecycleOwner.lifecycle.addObserver(observer)

@@ -1,6 +1,5 @@
 package com.bellako.kiwi.common.screens.modals
 
-import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -22,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,50 +42,54 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.hasUsageStatsPermission
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun PermissionsRequestModal(onPermissionsGranted: @Composable () -> Unit) {
+fun PermissionsRequestModal(withPermissions: @Composable () -> Unit) {
     val context = LocalContext.current
     val isPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val hasUsageAccess = remember { mutableStateOf(hasUsageStatsPermission(context)) }
+    var hadPermissionsOnStop = false
+    val hasPermissions = remember { mutableStateOf(hasUsageStatsPermission(context)) }
 
-    DisposableEffect(lifecycleOwner) {
-        val observer =
-            LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    hasUsageAccess.value = hasUsageStatsPermission(context)
+    if (!hasPermissions.value) {
+        DisposableEffect(lifecycleOwner) {
+            val observer =
+                LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_STOP) {
+                        hadPermissionsOnStop = hasPermissions.value
+                    }
+                    if (event == Lifecycle.Event.ON_START) {
+                        hasPermissions.value = hasUsageStatsPermission(context)
+                        if (hasPermissions.value && !hadPermissionsOnStop) {
+                            FirebaseEventLogger.logEvent(FirebaseEventNames.PERMISSION_GRANTED)
+                        }
+                    }
                 }
+
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
             }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
-    if (!isPreview && hasUsageAccess.value) {
-        FirebaseEventLogger.logEvent(FirebaseEventNames.PERMISSION_GRANTED)
-        onPermissionsGranted()
+    if (!isPreview && hasPermissions.value) {
+        withPermissions()
     } else {
-        PermissionRequestLayout(context, hasUsageAccess)
+        PermissionRequestLayout(context)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-private fun PermissionRequestLayout(
-    context: Context,
-    hasUsageAccess: MutableState<Boolean>,
-) {
-    val isPreview = LocalInspectionMode.current
-
+private fun PermissionRequestLayout(context: Context) {
     Box(
         modifier =
             Modifier
@@ -153,31 +155,19 @@ private fun PermissionRequestLayout(
             Kiwi_Spacer(Spacing.xLarge)
 
             Kiwi_Button(
-                textArguments = KiwiTextArguments(
-                    "ENABLE APP USAGE ACCESS",
-                    color = MaterialTheme.colorScheme.secondary,
-                    textAlign = TextAlign.Center,
-                    bold = true,
-                ),
+                textArguments =
+                    KiwiTextArguments(
+                        "ENABLE APP USAGE ACCESS",
+                        color = MaterialTheme.colorScheme.secondary,
+                        textAlign = TextAlign.Center,
+                        bold = true,
+                    ),
                 onClick = {
                     context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                 },
-                enabled = isPreview || !hasUsageAccess.value,
             )
         }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.Q)
-private fun hasUsageStatsPermission(context: Context): Boolean {
-    val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-    val mode =
-        appOps.unsafeCheckOpNoThrow(
-            AppOpsManager.OPSTR_GET_USAGE_STATS,
-            android.os.Process.myUid(),
-            context.packageName,
-        )
-    return mode == AppOpsManager.MODE_ALLOWED
 }
 
 // -------------------------------------------------------------------------------------------------

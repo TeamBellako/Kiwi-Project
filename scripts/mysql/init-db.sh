@@ -21,32 +21,30 @@ USE kiwi_db_dev;
 -- Drop tables if they exist
 DROP TABLE IF EXISTS metrics;
 DROP TABLE IF EXISTS personality;
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS settings;
-
--- Create settings table
-CREATE TABLE IF NOT EXISTS settings (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-
-    sound_volume FLOAT NOT NULL CHECK (sound_volume >= 0 AND sound_volume <= 1),
-    music_volume FLOAT NOT NULL CHECK (music_volume >= 0 AND music_volume <= 1)
-);
+DROP TABLE IF EXISTS users;
 
 -- Create users table with a foreign key to settings
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
 
-    -- Reference to settings table using email
-    CONSTRAINT fk_user_to_settings FOREIGN KEY (email) REFERENCES settings(email) ON DELETE CASCADE
+-- Create settings table
+CREATE TABLE IF NOT EXISTS settings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sound_volume FLOAT NOT NULL CHECK (sound_volume >= 0 AND sound_volume <= 1),
+    music_volume FLOAT NOT NULL CHECK (music_volume >= 0 AND music_volume <= 1),
+
+    -- Foreign key to users table
+    user_id BIGINT NOT NULL,
+    CONSTRAINT fk_settings_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Create metrics table with a foreign key to users
 CREATE TABLE IF NOT EXISTS metrics (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,  -- Foreign key to users
     date DATE NOT NULL,
     max_good_time_seconds INT NOT NULL CHECK (max_good_time_seconds >= 0),
     current_good_time_seconds INT NOT NULL CHECK (current_good_time_seconds >= 0),
@@ -54,6 +52,7 @@ CREATE TABLE IF NOT EXISTS metrics (
     current_bad_time_seconds INT NOT NULL CHECK (current_bad_time_seconds >= 0),
 
     -- Foreign key to users table
+    user_id BIGINT NOT NULL,
     CONSTRAINT fk_metrics_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 
     -- Add a unique constraint for each date for each user to avoid multiple entries per day
@@ -71,7 +70,7 @@ CREATE TABLE IF NOT EXISTS personality (
 
     -- Foreign key to users table
     user_id BIGINT NOT NULL,
-    CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_personality_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 

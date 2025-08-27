@@ -1,27 +1,13 @@
 package com.kiwi.users;
 
-import com.kiwi.features.metrics.MetricsFactory;
-import com.kiwi.features.users.UsersDTO;
-
-import static com.kiwi.settings.SettingsTestFactory.invalidSettingsDTO;
-import static com.kiwi.settings.SettingsTestFactory.validSettingsDTO;
+import com.kiwi.features.users.data.UsersDTO;
 
 public class UsersTestFactory {
     public static UsersDTO validUserDTO() {
-        return new UsersDTO(
-                "finn@thehuman.com",
-                "Math3matic!",
-                validSettingsDTO(),
-                MetricsFactory.generateRandomMetricsSet(3, true)
-        );
+        return new UsersDTO("finn@thehuman.com", "Math3matic!");
     }
     
     public static UsersDTO invalidUserDTO() {
-        return new UsersDTO(
-                "football",
-                "kk",
-                invalidSettingsDTO(),
-                MetricsFactory.generateRandomMetricsSet(3, false)
-        );
+        return new UsersDTO("football", "kk");
     }
 }

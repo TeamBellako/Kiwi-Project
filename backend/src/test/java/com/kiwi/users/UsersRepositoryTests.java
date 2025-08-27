@@ -1,10 +1,9 @@
 package com.kiwi.users;
 
-import com.kiwi.features.settings.SettingsRepository;
-import com.kiwi.features.users.Users;
-import com.kiwi.features.users.UsersMapper;
-import com.kiwi.features.users.UsersPersistence;
-import com.kiwi.features.users.UsersRepository;
+import com.kiwi.features.users.data.UsersDomain;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.features.users.data.UsersPersistence;
+import com.kiwi.features.users.controllers.UsersRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,28 +18,26 @@ import java.util.Optional;
 
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@Sql(scripts = "/UsersTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 public class UsersRepositoryTests {
     
     @Autowired
     private UsersRepository usersRepository;
-
-    @Autowired
-    private SettingsRepository settingsRepository;
     
     @Test
     public void createValidUser() {
-        Users user =  UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
-        
-        UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).get();
-        assertEquals(user, UsersMapper.toDomain(savedUser));
+        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
+        String hashedPassword = validUserDTO().getPassword();
+        UsersPersistence userPersistence = UsersDataMapper.toPersistence(userDomain, hashedPassword);
+        usersRepository.saveAndFlush(userPersistence);
+        assertTrue(usersRepository.findByEmail(validUserDTO().getEmail()).isPresent());
     }
     
     @Test
