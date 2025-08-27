@@ -12,5 +12,5 @@ interface ISettingsAPI {
     @PUT("api/user/settings")
     suspend fun updateSettings(
         @Body settings: SettingsDTO,
-    )
+    ): SettingsDTO
 }

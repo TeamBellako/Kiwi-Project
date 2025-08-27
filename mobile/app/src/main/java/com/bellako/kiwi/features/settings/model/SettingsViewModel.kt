@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.features.settings.data.SettingsDTO
 import com.bellako.kiwi.features.settings.data.SettingsDataMapper
 import com.bellako.kiwi.features.settings.data.SettingsDomain
 import com.bellako.kiwi.features.settings.data.SettingsState
@@ -58,24 +59,29 @@ class SettingsViewModel
             setIsLoading(true)
             setUiState(UIState.Loading)
 
-            try {
-                val result = repository.getSettings()
-                result.fold(
-                    onSuccess = { dto ->
-                        _state.value = SettingsDataMapper.toState(dto)
-                        previousSettingsDomain = SettingsDataMapper.toDomain(dto)
-                        setUiState(UIState.Success(Unit))
-                    },
-                    onFailure = { throwable ->
-                        setUiState(mapExceptionToUIState(throwable))
-                    },
-                )
-            } catch (ex: HttpException) {
-                setUiState(mapExceptionToUIState(ex))
-            } finally {
-                updateVolume()
-                setIsLoading(false)
-            }
+            repository.getSettings().fold(
+                onSuccess = { dto ->
+                    _state.value = SettingsDataMapper.toState(dto)
+                    previousSettingsDomain = SettingsDataMapper.toDomain(dto)
+                    setUiState(UIState.Success(Unit))
+                },
+                onFailure = { throwable ->
+                    val dto = SettingsDTO(1f, 1f)
+                    repository.updateSettings(dto).fold(
+                        onSuccess = { dto ->
+                            _state.value = SettingsDataMapper.toState(dto)
+                            previousSettingsDomain = SettingsDataMapper.toDomain(dto)
+                            setUiState(UIState.Success(Unit))
+                        },
+                        onFailure = { throwable ->
+                            setUiState(mapExceptionToUIState(throwable))
+                        },
+                    )
+                },
+            )
+
+            updateVolume()
+            setIsLoading(false)
         }
 
         @RequiresApi(Build.VERSION_CODES.O)

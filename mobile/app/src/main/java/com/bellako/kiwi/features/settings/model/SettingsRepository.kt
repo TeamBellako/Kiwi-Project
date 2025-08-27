@@ -7,5 +7,5 @@ class SettingsRepository(
 ) {
     suspend fun getSettings(): Result<SettingsDTO> = runCatching { api.getSettings() }
 
-    suspend fun updateSettings(settings: SettingsDTO): Result<Unit> = runCatching { api.updateSettings(settings) }
+    suspend fun updateSettings(settings: SettingsDTO): Result<SettingsDTO> = runCatching { api.updateSettings(settings) }
 }
