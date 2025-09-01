@@ -41,8 +41,12 @@ public class PersonalityService {
     public PersonalityPersistence saveToPersistence(String email, PersonalityDomain personalityDomain) {
         Optional<UsersPersistence> user = usersService.getUserByEmail(new Email(email));
         if (user.isPresent()) {
-            PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(user.get(), personalityDomain);
-            return personalityRepository.saveAndFlush(personalityPersistence);
+            Optional<PersonalityPersistence> personalityPersistence = personalityRepository.findByUserEmail(email);
+            if (personalityPersistence.isPresent()) {
+                PersonalityDataMapper.updatePersistence(personalityPersistence.get(), personalityDomain);
+                return personalityRepository.saveAndFlush(personalityPersistence.get());
+            }
+            return personalityRepository.saveAndFlush(PersonalityDataMapper.toPersistence(user.get(), personalityDomain));
         } else {
             throw new UsersNotFoundException(email);
         }

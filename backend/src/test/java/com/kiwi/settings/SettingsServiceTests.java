@@ -11,7 +11,6 @@ import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.exceptions.UsersNotFoundException;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -31,13 +30,11 @@ public class SettingsServiceTests {
     private final UsersService usersService = Mockito.mock(UsersService.class);
     private final SettingsService settingsService = new SettingsService(settingsRepository, usersService);
 
-    @Before
-    public void setUp() {
-        usersService.createUser(validUserDTO());
-    }
-
     @Test
     public void getSettings_validInput_returnsSettings() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(savedUser, settingsDTO());
         when(settingsRepository.findByUserEmail(validUserDTO().getEmail())).thenReturn(Optional.of(settingsPersistence));
@@ -62,6 +59,9 @@ public class SettingsServiceTests {
 
     @Test
     public void updateSettings_validInput_settingsUpdated() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(savedUser, settingsDTO());
         when(settingsRepository.saveAndFlush(settingsPersistence)).thenReturn(settingsPersistence);

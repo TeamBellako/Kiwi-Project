@@ -1,6 +1,5 @@
 package com.kiwi.features.users.controllers;
 
-import com.kiwi.common.types.Password;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.exceptions.UsersConflictException;
 import com.kiwi.features.users.data.UsersDataMapper;
@@ -38,7 +37,9 @@ public class UsersService {
         }
 
         String email = userDomain.getEmail().value();
-        if (usersRepository.existsByEmail(email)) throw new UsersConflictException(email);
+        if (usersRepository.existsByEmail(email)) {
+            throw new UsersConflictException(email);
+        }
 
         String hashedPassword = passwordEncoder.encode(userDomain.getPassword().value());
         UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, hashedPassword);

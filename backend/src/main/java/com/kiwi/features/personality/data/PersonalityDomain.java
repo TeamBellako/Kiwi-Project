@@ -2,6 +2,7 @@ package com.kiwi.features.personality.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PersonalityDomain {
     private String realName;
@@ -40,5 +41,16 @@ public class PersonalityDomain {
 
     public List<String> getBadApps() { return badApps; }
     public void setBadApps(List<String> badApps) { this.badApps = badApps; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PersonalityDomain other = (PersonalityDomain) o;
+        return Objects.equals(realName, other.realName) &&
+                Objects.equals(knightName, other.knightName) &&
+                Objects.equals(build, other.build) &&
+                Objects.equals(goodApps, other.goodApps) &&
+                Objects.equals(badApps, other.badApps);
+    }
 
 }
