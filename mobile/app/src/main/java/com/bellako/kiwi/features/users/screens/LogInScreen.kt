@@ -37,8 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
-import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
@@ -226,11 +226,12 @@ private fun LogIn(
                     Kiwi_Spacer()
 
                     Kiwi_Button(
-                        textArguments = KiwiTextArguments(
-                            "LOG IN",
-                            color = MaterialTheme.colorScheme.secondary,
-                            bold = true,
-                        ),
+                        textArguments =
+                            KiwiTextArguments(
+                                "LOG IN",
+                                color = MaterialTheme.colorScheme.secondary,
+                                bold = true,
+                            ),
                         onClick = {
                             CoroutineScope(Dispatchers.Main).launch {
                                 localLoading = performLogin(context, usersViewModel, personalityViewModel, navController)

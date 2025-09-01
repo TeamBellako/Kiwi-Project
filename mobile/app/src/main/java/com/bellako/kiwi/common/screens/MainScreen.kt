@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -26,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.audio.Kiwi_Music_Home
 import com.bellako.kiwi.audio.Kiwi_Music_SignUp
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.modals.AppBarModal
 import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.screens.modals.PermissionsRequestModal
@@ -42,20 +42,6 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-
-object ScreenRoutes {
-    const val LOGIN = "login"
-    const val SIGNUP1_WELCOME = "signup1_welcome"
-    const val SIGNUP2_FORM = "signup2_form"
-    const val SIGNUP3_TEST = "signup3_test"
-    const val SIGNUP4_APPS = "signup4_apps"
-    const val HOME = "home"
-    const val SETTINGS = "settings"
-    const val HELP = "help"
-}
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -80,8 +66,6 @@ private fun AppScreen(
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
-
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val route = currentBackStackEntry?.destination?.route
@@ -92,7 +76,8 @@ private fun AppScreen(
             route == ScreenRoutes.SIGNUP2_FORM ||
             route == ScreenRoutes.SIGNUP3_TEST ||
             route == ScreenRoutes.SIGNUP4_APPS
-    val isSettingsScreen = route == ScreenRoutes.SETTINGS
+
+    val showDashboard = route == ScreenRoutes.HOME
 
     Scaffold(
         bottomBar = {
@@ -173,27 +158,15 @@ private fun AppScreen(
                             usersViewModel = usersViewModel,
                             settingsViewModel = settingsViewModel,
                             navController = navController,
-                            onLogout = {
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    usersViewModel.logout(context)
-                                    navController.navigate(ScreenRoutes.LOGIN) {
-                                        popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
-                                    }
-                                }
-                            },
                         )
                     }
                 }
 
-                if (!isLoginScreen && isLoginCompleted && !isSettingsScreen) {
-                    Kiwi_BackHandler()
-                    Kiwi_Music_Home()
+                if (showDashboard) {
                     DashboardModal(metricsViewModel, personalityViewModel)
                 }
 
                 if (!isLoginScreen && isLoginCompleted) {
-                    Kiwi_BackHandler()
-                    Kiwi_Music_Home()
                     Kiwi_LoggedInScreen(
                         settingsViewModel = settingsViewModel,
                         personalityViewModel = personalityViewModel,

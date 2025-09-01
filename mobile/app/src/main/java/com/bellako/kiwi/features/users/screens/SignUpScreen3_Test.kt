@@ -25,8 +25,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
-import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -114,10 +114,11 @@ private fun Question(
                 currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
 
                     Kiwi_Button(
-                        textArguments = KiwiTextArguments(
-                            option,
-                            color = MaterialTheme.colorScheme.secondary,
-                        ),
+                        textArguments =
+                            KiwiTextArguments(
+                                option,
+                                color = MaterialTheme.colorScheme.secondary,
+                            ),
                         color = MaterialTheme.colorScheme.primary,
                         onClick = {
                             currentPersonalityState.answers[currentQuestion] = index
