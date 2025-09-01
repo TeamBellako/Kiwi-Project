@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.users.tests
 
+import com.bellako.kiwi.features.users.data.LoggedDTO
 import com.bellako.kiwi.features.users.data.LoginDTO
 import com.bellako.kiwi.features.users.data.UsersDTO
 
@@ -16,7 +17,13 @@ object UsersTestFactory {
             password = "kk",
         )
 
-    private const val DATE = ""
+    private const val DATE = "2025-01-01"
+
+    fun validLoggedDTO(): LoggedDTO =
+        LoggedDTO(
+            jwt = "test",
+            registerDate = DATE,
+        )
 
     fun validUsersDTO(): UsersDTO =
         UsersDTO(

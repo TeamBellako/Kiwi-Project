@@ -46,7 +46,7 @@ class SignUpScreen2Test {
     fun setUp() {
         AudioManager.setEnabled(false)
 
-        usersState = UsersState(validUsersDTO().email, validUsersDTO().password)
+        usersState = UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)
         personalityState =
             PersonalityState(
                 validPersonalityDTO().realName,
