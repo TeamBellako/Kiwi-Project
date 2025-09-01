@@ -1,9 +1,9 @@
 package com.kiwi.features.users.controllers;
 
 import com.kiwi.features.users.data.*;
-import com.kiwi.features.users.exceptions.UsersConflictException;
+import com.kiwi.features.users.exceptions.CreateUserConflictException;
 import com.kiwi.common.types.Email;
-import com.kiwi.features.users.exceptions.UsersInvalidException;
+import com.kiwi.features.users.exceptions.CreateUserInvalidException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +33,12 @@ public class UsersService {
         try {
             userDomain = UsersDataMapper.toDomain(new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword(), formatDate(LocalDate.now())));
         } catch (IllegalArgumentException e) {
-            throw new UsersInvalidException(e.getMessage());
+            throw new CreateUserInvalidException(e.getMessage());
         }
 
         String email = userDomain.getEmail().value();
         if (usersRepository.existsByEmail(email)) {
-            throw new UsersConflictException(email);
+            throw new CreateUserConflictException(email);
         }
 
         String hashedPassword = passwordEncoder.encode(userDomain.getPassword().value());

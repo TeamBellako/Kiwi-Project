@@ -3,8 +3,8 @@ package com.kiwi.users;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersDataMapper;
-import com.kiwi.features.users.exceptions.UsersConflictException;
-import com.kiwi.features.users.exceptions.UsersInvalidException;
+import com.kiwi.features.users.exceptions.CreateUserConflictException;
+import com.kiwi.features.users.exceptions.CreateUserInvalidException;
 import com.kiwi.common.types.Email;
 import org.junit.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,7 +36,7 @@ public class UsersServiceTests {
         assertTrue(usersTestRepositoryInMemory.findByEmail(validEmailString).isPresent());
     }
 
-    @Test(expected = UsersInvalidException.class)
+    @Test(expected = CreateUserInvalidException.class)
     public void createInvalidUser() {
         usersService.createUser(invalidLoginDTO());
     }
@@ -46,7 +46,7 @@ public class UsersServiceTests {
         usersService.createUser(null);
     }
     
-    @Test(expected = UsersConflictException.class)
+    @Test(expected = CreateUserConflictException.class)
     public void createDuplicatedUser() {
         usersService.createUser(validLoginDTO());
         usersService.createUser(validLoginDTO());
