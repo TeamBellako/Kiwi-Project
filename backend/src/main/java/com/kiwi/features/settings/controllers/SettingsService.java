@@ -34,31 +34,30 @@ public class SettingsService {
     }
 
     @Transactional
-    public SettingsPersistence getOrCreateSettings(String email) {
+    public SettingsDomain getOrCreateSettings(String email) {
         Optional<SettingsPersistence> settingsPersistence = settingsRepository.findByUserEmail(email);
-        if (settingsPersistence.isPresent()) {
-            return settingsPersistence.get();
-        } else {
-            SettingsPersistence newSettingsPersistence = new SettingsPersistence();
-            Optional<UsersPersistence> user = usersService.getUserByEmail(new Email(email));
-            if (user.isPresent()) {
-                newSettingsPersistence.setUser(user.get());
-                return newSettingsPersistence;
-            } else {
-                throw new UsersNotFoundException(email);
+        return settingsPersistence.map(SettingsDataMapper::toDomain).orElseGet(SettingsDomain::new);
+    }
+
+    @Transactional
+    public SettingsPersistence saveToPersistence(String email, SettingsDomain settingsDomain) {
+        Optional<UsersPersistence> user = usersService.getUserByEmail(new Email(email));
+        if (user.isPresent()) {
+            Optional<SettingsPersistence> settingsPersistence = settingsRepository.findByUserEmail(email);
+            if (settingsPersistence.isPresent()) {
+                SettingsDataMapper.updatePersistence(settingsPersistence.get(), settingsDomain);
+                return settingsRepository.saveAndFlush(settingsPersistence.get());
             }
+            return settingsRepository.saveAndFlush(SettingsDataMapper.toPersistence(user.get(), settingsDomain));
+        } else {
+            throw new UsersNotFoundException(email);
         }
     }
 
     @Transactional
     public SettingsDTO updateSettings(String email, @Valid SettingsDTO settingsDTO) {
-        SettingsPersistence updateSettingsPersistence = getOrCreateSettings(email);
-
-        SettingsDomain updateSettingsDomain = SettingsDataMapper.toDomain(updateSettingsPersistence);
+        SettingsDomain updateSettingsDomain = getOrCreateSettings(email);
         SettingsDataMapper.updateDomain(updateSettingsDomain, settingsDTO);
-        SettingsDataMapper.updatePersistence(updateSettingsPersistence, updateSettingsDomain);
-
-        SettingsPersistence savedSettings = settingsRepository.saveAndFlush(updateSettingsPersistence);
-        return SettingsDataMapper.toDTO(savedSettings);
+        return SettingsDataMapper.toDTO(saveToPersistence(email, updateSettingsDomain));
     }
 }

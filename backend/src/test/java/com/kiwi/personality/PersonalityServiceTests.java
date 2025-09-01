@@ -51,6 +51,9 @@ public class PersonalityServiceTests {
 
     @Test
     public void updateRealName() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
@@ -70,6 +73,9 @@ public class PersonalityServiceTests {
 
     @Test
     public void updateKnightName() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
@@ -89,6 +95,9 @@ public class PersonalityServiceTests {
 
     @Test
     public void updateBuild() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);
@@ -108,6 +117,9 @@ public class PersonalityServiceTests {
 
     @Test
     public void updateApps() {
+        when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
         when(personalityRepository.saveAndFlush(personalityPersistence)).thenReturn(personalityPersistence);

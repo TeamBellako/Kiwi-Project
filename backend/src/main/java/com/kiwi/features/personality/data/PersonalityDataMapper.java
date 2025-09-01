@@ -42,6 +42,14 @@ public class PersonalityDataMapper {
         return toPersistence(usersPersistence, toDomain(dto));
     }
 
+    public static void updatePersistence(PersonalityPersistence persistence, PersonalityDomain domain) {
+        persistence.setRealName(domain.getRealName());
+        persistence.setKnightName(domain.getKnightName());
+        persistence.setBuild(domain.getBuild());
+        persistence.setGoodApps(domain.getGoodApps());
+        persistence.setBadApps(domain.getBadApps());
+    }
+
     public static PersonalityDTO toDTO(PersonalityDomain domain) {
         if (domain == null) return null;
         return new PersonalityDTO(

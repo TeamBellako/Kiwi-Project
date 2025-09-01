@@ -38,9 +38,9 @@ public class SettingsDataMapper {
         return toPersistence(usersPersistence, toDomain(dto));
     }
 
-    public static void updatePersistence(SettingsPersistence settingsPersistence, SettingsDomain domain) {
-        settingsPersistence.setSoundVolume(domain.getSoundVolume());
-        settingsPersistence.setMusicVolume(domain.getMusicVolume());
+    public static void updatePersistence(SettingsPersistence persistence, SettingsDomain domain) {
+        persistence.setSoundVolume(domain.getSoundVolume());
+        persistence.setMusicVolume(domain.getMusicVolume());
     }
 
     public static SettingsDTO toDTO(SettingsDomain domain) {

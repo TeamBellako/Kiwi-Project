@@ -52,11 +52,11 @@ public class MetricsDataMapper {
         return toPersistence(usersPersistence, toDomain(dto));
     }
 
-    public static void updatePersistence(MetricsPersistence metricsPersistence, MetricsDomain domain) {
-        metricsPersistence.setMaxGoodTimeSeconds(domain.getMaxGoodTimeSeconds().value());
-        metricsPersistence.setCurrentGoodTimeSeconds(domain.getCurrentGoodTimeSeconds().value());
-        metricsPersistence.setMaxBadTimeSeconds(domain.getMaxBadTimeSeconds().value());
-        metricsPersistence.setCurrentBadTimeSeconds(domain.getCurrentBadTimeSeconds().value());
+    public static void updatePersistence(MetricsPersistence persistence, MetricsDomain domain) {
+        persistence.setMaxGoodTimeSeconds(domain.getMaxGoodTimeSeconds().value());
+        persistence.setCurrentGoodTimeSeconds(domain.getCurrentGoodTimeSeconds().value());
+        persistence.setMaxBadTimeSeconds(domain.getMaxBadTimeSeconds().value());
+        persistence.setCurrentBadTimeSeconds(domain.getCurrentBadTimeSeconds().value());
     }
 
     public static MetricsDTO toDTO(MetricsDomain domain) {
