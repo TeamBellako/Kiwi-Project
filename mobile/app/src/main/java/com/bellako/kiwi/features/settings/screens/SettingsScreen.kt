@@ -232,7 +232,7 @@ fun SettingsScreen_Preview() {
 
     Kiwi_Theme {
         SettingsScreen(
-            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
+            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)),
             SettingsFakeViewModel(previewState),
             navController = rememberNavController(),
         ) {}

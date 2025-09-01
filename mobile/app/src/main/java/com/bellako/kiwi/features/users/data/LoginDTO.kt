@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.users.data
 
-data class UsersDTO(
+data class LoginDTO(
     val email: String,
     val password: String,
-    val registerDate: String,
 )

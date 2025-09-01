@@ -372,7 +372,7 @@ private fun SignUp(onSignUp: () -> Unit) {
 fun LogInScreen_Preview() {
     Kiwi_Theme {
         LogInScreen(
-            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password)),
+            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(

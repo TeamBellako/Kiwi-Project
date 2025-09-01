@@ -8,6 +8,7 @@ import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.users.data.Email
+import com.bellako.kiwi.features.users.data.LoginDTO
 import com.bellako.kiwi.features.users.data.Password
 import com.bellako.kiwi.features.users.data.UsersDTO
 import com.bellako.kiwi.features.users.data.UsersState
@@ -34,7 +35,7 @@ class UsersViewModel
         private val authRepository: AuthRepository,
     ) : BaseViewModel(),
         IUsersViewModel {
-        private val _state = MutableStateFlow(UsersState("", ""))
+        private val _state = MutableStateFlow(UsersState("", "", ""))
         override val state: StateFlow<UsersState> = _state.asStateFlow()
 
         private val _isLoginCompleted = MutableStateFlow(false)
@@ -73,7 +74,7 @@ class UsersViewModel
         override suspend fun signup(context: Context): Result<Unit> {
             setIsLoading(true)
             setUiState(UIState.Loading)
-            val result = repository.signup(UsersDTO(_state.value.email, _state.value.password))
+            val result = repository.signup(LoginDTO(_state.value.email, _state.value.password))
             setIsLoading(false)
             setUiState(UIState.Idle)
 
@@ -85,12 +86,13 @@ class UsersViewModel
         override suspend fun login(context: Context): Result<Unit> {
             setIsLoading(true)
             setUiState(UIState.Loading)
-            val result = repository.login(UsersDTO(_state.value.email, _state.value.password))
+            val result = repository.login(LoginDTO(_state.value.email, _state.value.password))
             setIsLoading(false)
             setUiState(UIState.Idle)
 
             return handleResultSuspend(result) {
-                authRepository.setJwtToken(result.getOrThrow())
+                authRepository.setJwtToken(result.getOrThrow().jwt)
+                _state.value = _state.value.copy(registerDate = result.getOrThrow().registerDate)
                 saveLocalCredentials(context)
                 _isLoginCompleted.value = true
             }
