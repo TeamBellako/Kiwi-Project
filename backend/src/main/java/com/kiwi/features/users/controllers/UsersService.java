@@ -1,10 +1,7 @@
 package com.kiwi.features.users.controllers;
 
-import com.kiwi.features.users.data.UsersDomain;
+import com.kiwi.features.users.data.*;
 import com.kiwi.features.users.exceptions.UsersConflictException;
-import com.kiwi.features.users.data.UsersDataMapper;
-import com.kiwi.features.users.data.UsersDTO;
-import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.common.types.Email;
 import com.kiwi.features.users.exceptions.UsersInvalidException;
 import jakarta.validation.Valid;
@@ -14,7 +11,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Optional;
+
+import static com.kiwi.common.utils.FormatUtils.formatDate;
 
 @Service
 public class UsersService {
@@ -28,10 +28,10 @@ public class UsersService {
     }
 
     @Transactional
-    public void createUser(@Valid @NotNull UsersDTO userDTO) {
+    public void createUser(@Valid @NotNull LoginDTO loginDTO) {
         UsersDomain userDomain;
         try {
-            userDomain = UsersDataMapper.toDomain(userDTO);
+            userDomain = UsersDataMapper.toDomain(new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword(), formatDate(LocalDate.now())));
         } catch (IllegalArgumentException e) {
             throw new UsersInvalidException(e.getMessage());
         }

@@ -6,4 +6,5 @@ import lombok.*;
 public class UsersDTO {
     private String email;
     private String password;
+    private String registerDate;
 }

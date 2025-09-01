@@ -3,13 +3,18 @@ package com.kiwi.features.users.data;
 import com.kiwi.common.types.Email;
 import com.kiwi.common.types.Password;
 
+import java.time.LocalDate;
+
+import static com.kiwi.common.utils.FormatUtils.formatDate;
+
 public class UsersDataMapper {
 
     public static UsersDomain toDomain(UsersDTO dto) {
         return (dto == null) ? null :
                 new UsersDomain(
                         new Email(dto.getEmail()),
-                        new Password(dto.getPassword())
+                        new Password(dto.getPassword()),
+                        LocalDate.parse(dto.getRegisterDate())
                 );
     }
 
@@ -17,7 +22,8 @@ public class UsersDataMapper {
         return (domain == null) ? null :
                 new UsersDTO(
                         domain.getEmail().value(),
-                        domain.getPassword().value()
+                        domain.getPassword().value(),
+                        formatDate(domain.getRegisterDate())
                 );
     }
 
@@ -28,6 +34,7 @@ public class UsersDataMapper {
                 UsersPersistence.builder()
                         .email(domain.getEmail().value())
                         .hashedPassword(hashedPassword)
+                        .registerDate(domain.getRegisterDate())
                         .build();
     }
 

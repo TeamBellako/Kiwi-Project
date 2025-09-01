@@ -38,8 +38,7 @@ public class UsersController {
     
     @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> signup(@RequestBody LoginDTO loginDTO) {
-        UsersDTO newUserDTO = new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword());
-        usersService.createUser(newUserDTO);
+        usersService.createUser(loginDTO);
         return ResponseEntity.status(201).body(createSuccessResponseBody("Created successfully"));
     }
 

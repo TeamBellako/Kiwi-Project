@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,7 +45,7 @@ public class MetricsServiceTests {
     
     @Before
     public void setUp() {
-        usersService.createUser(validUserDTO());
+        usersService.createUser(validLoginDTO());
         validUsersPersistence = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).get();
     }
     
