@@ -4,7 +4,6 @@ import com.kiwi.common.types.Email;
 import com.kiwi.features.personality.exceptions.PersonalityNotFoundException;
 import com.kiwi.features.personality.data.*;
 import com.kiwi.features.users.controllers.UsersService;
-import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.exceptions.UsersNotFoundException;
 import com.kiwi.features.users.data.UsersPersistence;
 import jakarta.validation.Valid;
@@ -25,7 +24,6 @@ public class PersonalityService {
         this.usersService = usersService;
     }
 
-
     @Transactional
     public PersonalityPersistence getPersonality(String email) {
         Optional<PersonalityPersistence> personalityPersistence = personalityRepository.findByUserEmail(new Email(email).value());
@@ -34,53 +32,49 @@ public class PersonalityService {
     }
 
     @Transactional
-    public PersonalityPersistence getOrCreatePersonality(String email) {
+    public PersonalityDomain getOrCreatePersonality(String email) {
         Optional<PersonalityPersistence> personalityPersistence = personalityRepository.findByUserEmail(email);
-        if (personalityPersistence.isPresent()) {
-            return personalityPersistence.get();
+        return personalityPersistence.map(PersonalityDataMapper::toDomain).orElseGet(PersonalityDomain::new);
+    }
+
+    @Transactional
+    public PersonalityPersistence saveToPersistence(String email, PersonalityDomain personalityDomain) {
+        Optional<UsersPersistence> user = usersService.getUserByEmail(new Email(email));
+        if (user.isPresent()) {
+            PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(user.get(), personalityDomain);
+            return personalityRepository.saveAndFlush(personalityPersistence);
         } else {
-            PersonalityPersistence newPersonalityPersistence = new PersonalityPersistence();
-            Optional<UsersPersistence> user = usersService.getUserByEmail(new Email(email));
-            if (user.isPresent()) {
-                newPersonalityPersistence.setUser(user.get());
-                return newPersonalityPersistence;
-            } else {
-                throw new UsersNotFoundException(email);
-            }
+            throw new UsersNotFoundException(email);
         }
     }
 
     @Transactional
     public PersonalityDTO updateRealName(String email, @Valid UserNameDTO userNameDTO) {
-        PersonalityPersistence newPersonalityPersistence = getOrCreatePersonality(email);
-        newPersonalityPersistence.setRealName(userNameDTO.getName());
-        PersonalityPersistence savedPersonalityPersistence = personalityRepository.saveAndFlush(newPersonalityPersistence);
-        return PersonalityDataMapper.toDTO(savedPersonalityPersistence);
+        PersonalityDomain personalityDomain = getOrCreatePersonality(email);
+        personalityDomain.setRealName(userNameDTO.getName());
+        return PersonalityDataMapper.toDTO(saveToPersistence(email, personalityDomain));
     }
 
     @Transactional
     public PersonalityDTO updateKnightName(String email, @Valid UserNameDTO userNameDTO) {
-        PersonalityPersistence newPersonalityPersistence = getOrCreatePersonality(email);
-        newPersonalityPersistence.setKnightName(userNameDTO.getName());
-        PersonalityPersistence savedPersonalityPersistence = personalityRepository.saveAndFlush(newPersonalityPersistence);
-        return PersonalityDataMapper.toDTO(savedPersonalityPersistence);
+        PersonalityDomain personalityDomain = getOrCreatePersonality(email);
+        personalityDomain.setKnightName(userNameDTO.getName());
+        return PersonalityDataMapper.toDTO(saveToPersistence(email, personalityDomain));
     }
 
     @Transactional
     public PersonalityDTO updateBuild(String email, @Valid BuildDTO buildDTO) {
-        PersonalityPersistence newPersonalityPersistence = getOrCreatePersonality(email);
-        newPersonalityPersistence.setBuild(buildDTO.getBuild());
-        PersonalityPersistence savedPersonalityPersistence = personalityRepository.saveAndFlush(newPersonalityPersistence);
-        return PersonalityDataMapper.toDTO(savedPersonalityPersistence);
+        PersonalityDomain personalityDomain = getOrCreatePersonality(email);
+        personalityDomain.setBuild(buildDTO.getBuild());
+        return PersonalityDataMapper.toDTO(saveToPersistence(email, personalityDomain));
     }
 
     @Transactional
     public PersonalityDTO updateApps(String email, @Valid AppsDTO appsDTO) {
-        PersonalityPersistence newPersonalityPersistence = getOrCreatePersonality(email);
-        newPersonalityPersistence.setGoodApps(appsDTO.getGoodApps());
-        newPersonalityPersistence.setBadApps(appsDTO.getBadApps());
-        PersonalityPersistence savedPersonalityPersistence = personalityRepository.saveAndFlush(newPersonalityPersistence);
-        return PersonalityDataMapper.toDTO(savedPersonalityPersistence);
+        PersonalityDomain personalityDomain = getOrCreatePersonality(email);
+        personalityDomain.setGoodApps(appsDTO.getGoodApps());
+        personalityDomain.setBadApps(appsDTO.getBadApps());
+        return PersonalityDataMapper.toDTO(saveToPersistence(email, personalityDomain));
     }
 
 }
