@@ -3,6 +3,7 @@ package com.bellako.kiwi.common.utils
 import android.os.Build
 import androidx.annotation.RequiresApi
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 const val SECONDS_IN_MINUTE = 60
 const val MINUTES_IN_HOUR = 60
@@ -25,4 +26,7 @@ object DateUtils {
         val dayOfWeek = date.dayOfWeek
         return (dayOfWeek.ordinal + 1) % DAYS_IN_WEEK
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun formatDate(date: LocalDate): String = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 }

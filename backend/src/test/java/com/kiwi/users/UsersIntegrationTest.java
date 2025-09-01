@@ -107,13 +107,13 @@ public class UsersIntegrationTest {
     @Test
     public void invalidLogin() throws Exception {
         mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getinValidLoginDTO()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void nonExistingLogin() throws Exception {
         mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getValidLoginDTO()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

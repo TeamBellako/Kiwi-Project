@@ -48,7 +48,7 @@ class LoginScreenTest {
     fun setUp() {
         AudioManager.setEnabled(false)
 
-        usersState = UsersState(validUsersDTO().email, validUsersDTO().password)
+        usersState = UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)
         usersFakeViewModel = UsersFakeViewModel(usersState)
 
         personalityState =

@@ -74,6 +74,7 @@ import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.common.utils.DateUtils.formatDate
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -103,7 +104,7 @@ fun DashboardModal(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        val dateNow = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        val dateNow = formatDate(LocalDate.now())
         val loadResult = metricsViewModel.loadMetrics(dateNow)
         metricsState?.let { state ->
             if (loadResult.isFailure) {
@@ -330,9 +331,7 @@ private fun WeekView(
                                 selectedDay.value = startOfWeek.plusDays(index.toLong())
 
                                 coroutineScope.launch {
-                                    viewModel.loadMetrics(
-                                        day.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                                    )
+                                    viewModel.loadMetrics(formatDate(day))
                                 }
                             },
                             isInFuture = day.isAfter(LocalDate.now()),
@@ -465,9 +464,7 @@ private fun CalendarView(
 
                                             selectedDay.value = dayDate
                                             coroutineScope.launch {
-                                                viewModel.loadMetrics(
-                                                    dayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                                                )
+                                                viewModel.loadMetrics(formatDate(dayDate))
                                             }
                                         },
                                         isInFuture = dayDate.isAfter(LocalDate.now()),

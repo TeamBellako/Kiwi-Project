@@ -3,16 +3,15 @@ package com.kiwi.users;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersDataMapper;
-import com.kiwi.features.users.exceptions.UsersConflictException;
-import com.kiwi.features.users.exceptions.UsersInvalidException;
+import com.kiwi.features.users.exceptions.CreateUserConflictException;
+import com.kiwi.features.users.exceptions.CreateUserInvalidException;
 import com.kiwi.common.types.Email;
 import org.junit.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
-import static com.kiwi.users.UsersTestFactory.validUserDTO;
+import static com.kiwi.users.UsersTestFactory.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UsersServiceTests {
@@ -33,13 +32,13 @@ public class UsersServiceTests {
     
     @Test
     public void createValidUser() {
-        usersService.createUser(validUserDTO());
+        usersService.createUser(validLoginDTO());
         assertTrue(usersTestRepositoryInMemory.findByEmail(validEmailString).isPresent());
     }
 
-    @Test(expected = UsersInvalidException.class)
+    @Test(expected = CreateUserInvalidException.class)
     public void createInvalidUser() {
-        usersService.createUser(invalidUserDTO());
+        usersService.createUser(invalidLoginDTO());
     }
 
     @Test(expected = NullPointerException.class)
@@ -47,10 +46,10 @@ public class UsersServiceTests {
         usersService.createUser(null);
     }
     
-    @Test(expected = UsersConflictException.class)
+    @Test(expected = CreateUserConflictException.class)
     public void createDuplicatedUser() {
-        usersService.createUser(validUserDTO());
-        usersService.createUser(validUserDTO());
+        usersService.createUser(validLoginDTO());
+        usersService.createUser(validLoginDTO());
     }
 
     @Test

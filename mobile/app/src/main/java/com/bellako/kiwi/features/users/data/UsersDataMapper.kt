@@ -2,6 +2,8 @@ package com.bellako.kiwi.features.users.data
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.bellako.kiwi.common.utils.DateUtils.formatDate
+import java.time.LocalDate
 
 object UsersDataMapper {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -12,7 +14,7 @@ object UsersDataMapper {
                 val passwordResult = Password.of(dto.password)
                 passwordResult.fold(
                     onSuccess = { validPassword ->
-                        Result.success(UsersDomain(validEmail, validPassword))
+                        Result.success(UsersDomain(validEmail, validPassword, LocalDate.parse(dto.registerDate)))
                     },
                     onFailure = { err -> Result.failure(err) },
                 )
@@ -29,7 +31,7 @@ object UsersDataMapper {
                 val passwordResult = Password.of(state.password)
                 passwordResult.fold(
                     onSuccess = { validPassword ->
-                        Result.success(UsersDomain(validEmail, validPassword))
+                        Result.success(UsersDomain(validEmail, validPassword, LocalDate.parse(state.registerDate)))
                     },
                     onFailure = { err -> Result.failure(err) },
                 )
@@ -38,10 +40,12 @@ object UsersDataMapper {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun toState(domain: UsersDomain): UsersState =
         UsersState(
             email = domain.email.value,
             password = domain.password.value,
+            registerDate = formatDate(domain.registerDate),
         )
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -55,10 +59,12 @@ object UsersDataMapper {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun toDTO(domain: UsersDomain): UsersDTO =
         UsersDTO(
             email = domain.email.value,
             password = domain.password.value,
+            registerDate = formatDate(domain.registerDate),
         )
 
     @RequiresApi(Build.VERSION_CODES.O)

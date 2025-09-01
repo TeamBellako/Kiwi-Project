@@ -3,6 +3,8 @@ package com.kiwi.features.users.data;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @EqualsAndHashCode @ToString
 @Entity
 @Table(name = "users")
@@ -17,4 +19,7 @@ public class UsersPersistence {
 
     @Column(name = "password", nullable = false)
     private String hashedPassword;
+
+    @Column(name = "register_date", nullable = false)
+    private LocalDate registerDate;
 }

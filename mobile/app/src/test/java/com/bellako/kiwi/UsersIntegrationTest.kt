@@ -9,6 +9,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.model.UsersRepository
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.invalidUsersDTO
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validLoggedDTO
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -20,7 +21,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import kotlin.test.Test
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
@@ -44,7 +44,7 @@ class UsersIntegrationTest {
     fun `signup with a valid user`() =
         runTest {
             whenever(api.signup(any())).thenReturn(mapOf("message" to "Created successfully"))
-            whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
+            whenever(api.login(any())).thenReturn(validLoggedDTO())
 
             viewModel.onEmailChanged(validUsersDTO().email)
             viewModel.onPasswordChanged(validUsersDTO().password)
@@ -68,7 +68,7 @@ class UsersIntegrationTest {
     @Test
     fun `login with a valid user`() =
         runTest {
-            whenever(api.login(any())).thenReturn(mapOf("jwt" to "mockJwt"))
+            whenever(api.login(any())).thenReturn(validLoggedDTO())
 
             viewModel.onEmailChanged(validUsersDTO().email)
             viewModel.onPasswordChanged(validUsersDTO().password)
@@ -76,19 +76,6 @@ class UsersIntegrationTest {
 
             assertTrue(result.isSuccess)
             assertTrue(authRepository.isJwtTokenSet())
-        }
-
-    @Test
-    fun `login with a valid user but jwt is missing`() =
-        runTest {
-            whenever(api.login(any())).thenReturn(emptyMap())
-
-            viewModel.onEmailChanged(validUsersDTO().email)
-            viewModel.onPasswordChanged(validUsersDTO().password)
-            val result: Result<Unit> = viewModel.login(context)
-
-            assertTrue(result.isFailure)
-            assertFalse(authRepository.isJwtTokenSet())
         }
 
     @Test

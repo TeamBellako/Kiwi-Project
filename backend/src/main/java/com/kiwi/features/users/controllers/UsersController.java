@@ -1,9 +1,10 @@
 package com.kiwi.features.users.controllers;
 
+import com.kiwi.features.users.data.LoggedDTO;
 import com.kiwi.features.users.data.LoginDTO;
-import com.kiwi.features.users.exceptions.UsersInvalidException;
+import com.kiwi.features.users.exceptions.CreateUserInvalidException;
+import com.kiwi.features.users.exceptions.LoginUserInvalidException;
 import com.kiwi.features.users.exceptions.UsersNotFoundException;
-import com.kiwi.features.users.data.UsersDTO;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.common.types.Email;
@@ -16,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.kiwi.common.utils.FormatUtils.formatDate;
 import static com.kiwi.common.utils.HTTPUtils.createSuccessResponseBody;
 
 @RestController
@@ -38,35 +39,33 @@ public class UsersController {
     
     @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> signup(@RequestBody LoginDTO loginDTO) {
-        UsersDTO newUserDTO = new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword());
-        usersService.createUser(newUserDTO);
+        usersService.createUser(loginDTO);
         return ResponseEntity.status(201).body(createSuccessResponseBody("Created successfully"));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<LoggedDTO> login(@RequestBody LoginDTO loginDTO) {
         Email providedEmail;
         Password providedPassword;
         try {
             providedEmail = new Email(loginDTO.getEmail());
             providedPassword = new Password(loginDTO.getPassword());
         } catch (IllegalArgumentException e) {
-            throw new UsersInvalidException(e.getMessage());
+            throw new LoginUserInvalidException();
         }
 
         Optional<UsersPersistence> userPersistenceOpt = usersService.getUserByEmail(providedEmail);
-        if (userPersistenceOpt.isEmpty()) throw new UsersNotFoundException(providedEmail.value());
+        if (userPersistenceOpt.isEmpty()) throw new LoginUserInvalidException();
 
         UsersPersistence userPersistence = userPersistenceOpt.get();
 
         boolean isPasswordCorrect = passwordEncoder.matches(providedPassword.value(), userPersistence.getHashedPassword());
 
         if (isPasswordCorrect) {
-            Map<String, String> response = new HashMap<>();
-            response.put("jwt", jwtUtils.generateToken(userPersistence.getEmail()));
+            LoggedDTO response = new LoggedDTO(jwtUtils.generateToken(userPersistence.getEmail()), formatDate(userPersistence.getRegisterDate()));
             return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.status(401).body(Map.of("error", "Incorrect email or password"));
+            throw new LoginUserInvalidException();
         }
     }
 
