@@ -87,24 +87,34 @@ class SettingsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun updateSettings(state: SettingsState) {
-            _state.value = state
-            updateVolume()
-            val domain = SettingsDataMapper.toDomain(state)
-            if (previousValidSettingsDomain == domain) {
+            val currentDomain = SettingsDataMapper.toDomain(_state.value!!)
+            val newDomain = SettingsDataMapper.toDomain(state)
+            if (currentDomain == newDomain) {
                 return
             }
-            previousValidSettingsDomain = domain
-            pendingSave.value = domain
+            _state.value = state
+            updateVolume()
+            previousValidSettingsDomain = currentDomain
+            pendingSave.value = newDomain
         }
 
         // ---------------------------------------------------------------------------------------------
 
         init {
             viewModelScope.launch {
-                pendingSave.debounce(AUTO_SAVE_MILLIS).collectLatest { domain ->
-                    domain?.let {
+                pendingSave.debounce(AUTO_SAVE_MILLIS).collectLatest { newDomain ->
+                    newDomain?.let { domain ->
                         repository.updateSettings(SettingsDataMapper.toDTO(domain))
-                        FirebaseEventLogger.logEvent(FirebaseEventNames.SETTINGS_UPDATE_VOLUME)
+
+                        FirebaseEventLogger.logEvent(
+                            FirebaseEventNames.SETTINGS_UPDATE_VOLUME,
+                            mapOf(
+                                "sound_old" to previousValidSettingsDomain?.soundVolume!!,
+                                "sound_new" to domain.soundVolume,
+                                "music_old" to previousValidSettingsDomain?.musicVolume!!,
+                                "music_new" to domain.musicVolume,
+                            ),
+                        )
                     }
                 }
             }
