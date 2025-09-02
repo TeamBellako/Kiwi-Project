@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -115,13 +116,13 @@ private fun PermissionRequestLayout(context: Context) {
             Icon(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = "Error icon",
-                tint = MaterialTheme.colorScheme.error,
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier =
                     Modifier
-                        .size(getResponsiveSizeHeight(Spacing.xLarge)),
+                        .size(getResponsiveSizeHeight(50.dp)),
             )
 
-            Kiwi_Spacer()
+            Kiwi_Spacer(Spacing.xLarge)
 
             Kiwi_H2(
                 KiwiTextArguments(
