@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.settings.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -147,6 +148,10 @@ private fun SettingsInfoFields(usersState: UsersState?) {
             textColor = MaterialTheme.colorScheme.inversePrimary,
             testTag = UsersTestTags.EMAIL_FIELD,
             shouldHideInput = false,
+            modifier = Modifier
+                .clickable {
+                    FirebaseEventLogger.logEvent(FirebaseEventNames.SETTINGS_CLICK_ON_EMAIL)
+                },
         )
 
         Kiwi_Spacer(Spacing.large)
@@ -254,7 +259,7 @@ private fun SettingsButtons(
             Kiwi_Button(
                 textArguments =
                     KiwiTextArguments(
-                        "progress??",
+                        "RESET PROGRESS",
                         color = MaterialTheme.colorScheme.secondary,
                         bold = true,
                     ),

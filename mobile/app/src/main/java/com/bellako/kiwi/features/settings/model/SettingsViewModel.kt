@@ -3,6 +3,8 @@ package com.bellako.kiwi.features.settings.model
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.analytics.FirebaseEventLogger
+import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
@@ -25,7 +27,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -103,6 +104,7 @@ class SettingsViewModel
                 pendingSave.debounce(AUTO_SAVE_MILLIS).collectLatest { domain ->
                     domain?.let {
                         repository.updateSettings(SettingsDataMapper.toDTO(domain))
+                        FirebaseEventLogger.logEvent(FirebaseEventNames.SETTINGS_UPDATE_VOLUME)
                     }
                 }
             }
