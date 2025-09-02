@@ -33,7 +33,7 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.AppBarScreen
-import com.bellako.kiwi.common.screens.DashboardScreen
+import com.bellako.kiwi.features.metrics.screens.DashboardScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd

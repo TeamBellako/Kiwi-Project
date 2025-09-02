@@ -30,6 +30,7 @@ import com.bellako.kiwi.common.screens.modals.SupportModalScreen
 import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
+import com.bellako.kiwi.features.metrics.screens.DashboardScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
