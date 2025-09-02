@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,14 +31,13 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
-fun ErrorModal(
+fun WIPModal(
     modifier: Modifier = Modifier,
     message: String =
-        "Wild Error Appeared!",
+        "Coming soon!",
     subMessage: String =
-        "Uh-oh! It seems a careless scribe forgot to write this part of the story.\n\n" +
-            "Let's get back on track!",
-    buttonMessage: String = "RETRY",
+        "This feature isn’t ready just yet, but we’re building it for you! Stay tuned for updates.",
+    buttonMessage: String = "BACK",
     onButtonClick: (() -> Unit)? = null,
 ) {
     Box(
@@ -48,7 +47,7 @@ fun ErrorModal(
                 .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center,
     ) {
-        ErrorModalLayout(
+        WIPModalLayout(
             modifier,
             message,
             subMessage,
@@ -59,7 +58,7 @@ fun ErrorModal(
 }
 
 @Composable
-private fun ErrorModalLayout(
+private fun WIPModalLayout(
     modifier: Modifier = Modifier,
     message: String,
     subMessage: String,
@@ -76,9 +75,9 @@ private fun ErrorModalLayout(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
-            imageVector = Icons.Filled.Warning,
-            contentDescription = "Error icon",
-            tint = MaterialTheme.colorScheme.error,
+            imageVector = Icons.Filled.Handyman,
+            contentDescription = "WIP icon",
+            tint = MaterialTheme.colorScheme.secondary,
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(50.dp)),
@@ -112,10 +111,11 @@ private fun ErrorModalLayout(
 
         if (onButtonClick != null) {
             Kiwi_Button(
-                textArguments = KiwiTextArguments(
-                    buttonMessage,
-                    color = MaterialTheme.colorScheme.secondary,
-                ),
+                textArguments =
+                    KiwiTextArguments(
+                        buttonMessage,
+                        color = MaterialTheme.colorScheme.secondary,
+                    ),
                 onClick = onButtonClick,
                 modifier =
                     Modifier
@@ -131,8 +131,8 @@ private fun ErrorModalLayout(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun ErrorModal_Preview() {
+fun WIPModal_Preview() {
     Kiwi_Theme {
-        ErrorModal {}
+        WIPModal {}
     }
 }
