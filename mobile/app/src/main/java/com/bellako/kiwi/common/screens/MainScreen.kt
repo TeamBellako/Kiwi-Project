@@ -28,6 +28,7 @@ import com.bellako.kiwi.audio.Kiwi_Music_SignUp
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.modals.SupportModalScreen
 import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
+import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.metrics.screens.DashboardScreen
@@ -145,12 +146,6 @@ private fun AppScreen(
                         MapScreen()
                     }
 
-                    composable(ScreenRoutes.HELP) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_Home()
-                        SupportModalScreen(navController = navController)
-                    }
-
                     composable(ScreenRoutes.SETTINGS) {
                         Kiwi_BackHandler()
                         Kiwi_Music_Home()
@@ -159,6 +154,18 @@ private fun AppScreen(
                             settingsViewModel = settingsViewModel,
                             navController = navController,
                         )
+                    }
+
+                    composable(ScreenRoutes.HELP) {
+                        Kiwi_BackHandler()
+                        Kiwi_Music_Home()
+                        SupportModalScreen(navController = navController)
+                    }
+
+                    composable(ScreenRoutes.WIP) {
+                        Kiwi_BackHandler()
+                        Kiwi_Music_Home()
+                        WIPModalScreen()
                     }
                 }
 

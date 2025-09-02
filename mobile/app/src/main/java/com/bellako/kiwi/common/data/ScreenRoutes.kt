@@ -1,12 +1,13 @@
 package com.bellako.kiwi.common.data
 
 object ScreenRoutes {
-    const val LOGIN = "login"
-    const val SIGNUP1_WELCOME = "signup1_welcome"
-    const val SIGNUP2_FORM = "signup2_form"
-    const val SIGNUP3_TEST = "signup3_test"
-    const val SIGNUP4_APPS = "signup4_apps"
-    const val HOME = "home"
-    const val SETTINGS = "settings"
-    const val HELP = "help"
+    const val LOGIN = "LOGIN"
+    const val SIGNUP1_WELCOME = "SIGNUP1_WELCOME"
+    const val SIGNUP2_FORM = "SIGNUP2_FORM"
+    const val SIGNUP3_TEST = "SIGNUP3_TEST"
+    const val SIGNUP4_APPS = "SIGNUP4_APPS"
+    const val HOME = "HOME"
+    const val SETTINGS = "SETTINGS"
+    const val HELP = "HELP"
+    const val WIP = "WIP"
 }

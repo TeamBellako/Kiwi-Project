@@ -49,16 +49,15 @@ val navigationItems =
         ),
         NavigationItem(
             icon = R.drawable.ic_fire,
-            route = ScreenRoutes.HOME,
+            route = ScreenRoutes.WIP,
         ),
         NavigationItem(
             icon = R.drawable.ic_target,
-            route = ScreenRoutes.HOME,
+            route = ScreenRoutes.WIP,
         ),
         NavigationItem(
             icon = R.drawable.ic_swords,
-            route = ScreenRoutes.HOME,
-            enabled = false,
+            route = ScreenRoutes.WIP,
         ),
         NavigationItem(
             icon = R.drawable.ic_person,
