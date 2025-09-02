@@ -1,4 +1,4 @@
-package com.bellako.kiwi.features.metrics.screens
+package com.bellako.kiwi.features.dashboard.screens
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -56,7 +56,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
@@ -73,6 +72,7 @@ import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.common.utils.DateUtils.formatDate
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
+import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
