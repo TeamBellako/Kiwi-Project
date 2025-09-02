@@ -20,5 +20,7 @@ interface IBaseViewModel<T> {
 
     fun mapExceptionToUIState(e: Throwable): UIState<Unit>
 
+    fun setUiState(inUiState: UIState<Unit>)
+
     fun resetUiState()
 }

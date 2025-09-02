@@ -13,10 +13,6 @@ abstract class BaseViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
-    fun setUiState(inUiState: UIState<Unit>) {
-        _uiState.value = inUiState
-    }
-
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -73,8 +69,12 @@ abstract class BaseViewModel : ViewModel() {
             else -> UIState.GeneralError
         }
 
+    fun setUiState(inUiState: UIState<Unit>) {
+        _uiState.value = inUiState
+    }
+
     fun resetUiState() {
-        _uiState.value = UIState.Idle
+        setUiState(UIState.Idle)
     }
 
     protected fun extractHttpExceptionMessage(exception: HttpException): String {

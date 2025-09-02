@@ -38,6 +38,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.AppBarModal
+import com.bellako.kiwi.common.screens.modals.WIPModal
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.settings.data.SettingsState
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
@@ -95,6 +96,11 @@ private fun SettingsScreenContainer(
                 testTag = SettingsTestTags.SERVER_ERROR,
             )
         }
+        is UIState.WIP -> {
+            WIPModal(onButtonClick = {
+                settingsViewModel.resetUiState()
+            })
+        }
         else -> {
             Column(
                 modifier =
@@ -109,10 +115,11 @@ private fun SettingsScreenContainer(
                 )
                 SettingsEditFields(
                     settingsState = settingsState,
-                    viewModel = settingsViewModel,
+                    settingsViewModel = settingsViewModel,
                 )
                 SettingsButtons(
                     usersViewModel = usersViewModel,
+                    settingsViewModel = settingsViewModel,
                     navController = navController,
                 )
             }
@@ -148,10 +155,11 @@ private fun SettingsInfoFields(usersState: UsersState?) {
             textColor = MaterialTheme.colorScheme.inversePrimary,
             testTag = UsersTestTags.EMAIL_FIELD,
             shouldHideInput = false,
-            modifier = Modifier
-                .clickable {
-                    FirebaseEventLogger.logEvent(FirebaseEventNames.SETTINGS_CLICK_ON_EMAIL)
-                },
+            modifier =
+                Modifier
+                    .clickable {
+                        FirebaseEventLogger.logEvent(FirebaseEventNames.SETTINGS_CLICK_ON_EMAIL)
+                    },
         )
 
         Kiwi_Spacer(Spacing.large)
@@ -161,7 +169,7 @@ private fun SettingsInfoFields(usersState: UsersState?) {
 @Composable
 private fun SettingsEditFields(
     settingsState: SettingsState?,
-    viewModel: ISettingsViewModel,
+    settingsViewModel: ISettingsViewModel,
 ) {
     settingsState?.let { currentSettingsState ->
         var soundSliderPosition by remember {
@@ -177,7 +185,7 @@ private fun SettingsEditFields(
             onValueChange = { newValue ->
                 soundSliderPosition = newValue
                 CoroutineScope(Dispatchers.Main).launch {
-                    viewModel.updateSettings(currentSettingsState.copy(soundVolume = newValue))
+                    settingsViewModel.updateSettings(currentSettingsState.copy(soundVolume = newValue))
                 }
             },
             valueRange = 0f..1f,
@@ -193,7 +201,7 @@ private fun SettingsEditFields(
             onValueChange = { newValue ->
                 musicSliderPosition = newValue
                 CoroutineScope(Dispatchers.Main).launch {
-                    viewModel.updateSettings(currentSettingsState.copy(musicVolume = newValue))
+                    settingsViewModel.updateSettings(currentSettingsState.copy(musicVolume = newValue))
                 }
             },
             valueRange = 0f..1f,
@@ -206,6 +214,7 @@ private fun SettingsEditFields(
 @Composable
 private fun SettingsButtons(
     usersViewModel: IUsersViewModel,
+    settingsViewModel: ISettingsViewModel,
     navController: NavController,
 ) {
     val context = LocalContext.current
@@ -266,6 +275,7 @@ private fun SettingsButtons(
                 color = MaterialTheme.colorScheme.error,
                 onClick = {
                     FirebaseEventLogger.logEvent(FirebaseEventNames.SETTINGS_RESET_PROGRESS)
+                    settingsViewModel.setUiState(UIState.WIP)
                 },
             )
         }
