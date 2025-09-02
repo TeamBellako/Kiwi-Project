@@ -16,11 +16,10 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.common.screens.modals.DashboardModal
+import com.bellako.kiwi.common.screens.DashboardScreen
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
-import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
 import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -351,7 +350,7 @@ class DashboardModalTest {
         rule.setContent {
             screenHeightDp = getScreenHeight(withoutInsetTop = true).dp
             statesBottom = states.map { state -> getResponsiveSizeHeight(state).toFloat() }
-            DashboardModal(fakeMetricsViewModel, fakePersonalityViewModel, showCalendarView, initialStateIndex)
+            DashboardScreen(fakeMetricsViewModel, fakePersonalityViewModel, showCalendarView, initialStateIndex)
         }
         rule.waitUntil {
             screenHeightDp > 0.dp

@@ -32,8 +32,8 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.modals.AppBarModal
-import com.bellako.kiwi.common.screens.modals.DashboardModal
+import com.bellako.kiwi.common.screens.AppBarScreen
+import com.bellako.kiwi.common.screens.DashboardScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
@@ -162,12 +162,12 @@ fun MapScreen_Preview() {
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarModal(navController = rememberNavController())
+                AppBarScreen(navController = rememberNavController())
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
-                    DashboardModal(
+                    DashboardScreen(
                         metricsViewModel =
                             MetricsFakeViewModel(
                                 MetricsState(

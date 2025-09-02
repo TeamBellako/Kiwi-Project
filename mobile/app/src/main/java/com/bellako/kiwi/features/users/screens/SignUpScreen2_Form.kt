@@ -38,7 +38,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
-import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -96,7 +96,7 @@ private fun SignUp(
         personalityState?.let { currentPersonalityState ->
 
             if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
-                ErrorModal(onButtonClick = {
+                ErrorModalScreen(onButtonClick = {
                     usersViewModel.resetUiState()
                     personalityViewModel.resetUiState()
                 })

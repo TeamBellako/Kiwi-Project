@@ -50,7 +50,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
-import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -86,7 +86,7 @@ fun LogInScreen(
     ) {
         when (uiState) {
             is UIState.GeneralError -> {
-                ErrorModal(onButtonClick = {
+                ErrorModalScreen(onButtonClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         usersViewModel.clearLocalCredentials(context)
                         usersViewModel.resetUiState()

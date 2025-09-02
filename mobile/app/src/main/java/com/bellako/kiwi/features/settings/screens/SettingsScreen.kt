@@ -37,8 +37,8 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
-import com.bellako.kiwi.common.screens.modals.AppBarModal
-import com.bellako.kiwi.common.screens.modals.WIPModal
+import com.bellako.kiwi.common.screens.AppBarScreen
+import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.settings.data.SettingsState
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
@@ -97,7 +97,7 @@ private fun SettingsScreenContainer(
             )
         }
         is UIState.WIP -> {
-            WIPModal(onButtonClick = {
+            WIPModalScreen(onButtonClick = {
                 settingsViewModel.resetUiState()
             })
         }
@@ -293,7 +293,7 @@ fun SettingsScreen_Preview() {
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarModal(navController = rememberNavController())
+                AppBarScreen(navController = rememberNavController())
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {

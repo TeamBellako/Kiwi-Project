@@ -1,4 +1,4 @@
-package com.bellako.kiwi.common.screens.modals
+package com.bellako.kiwi.common.screens
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -69,13 +69,13 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
+import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.common.utils.DateUtils.formatDate
+import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
-import com.bellako.kiwi.common.utils.DateUtils
-import com.bellako.kiwi.common.utils.DateUtils.formatDate
-import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -94,7 +94,7 @@ const val ANIM_DURATION = 3000
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DashboardModal(
+fun DashboardScreen(
     metricsViewModel: IMetricsViewModel,
     personalityViewModel: IPersonalityViewModel,
     showCalendarView: Boolean = false,
@@ -863,12 +863,12 @@ private fun DashboardModalPreview(
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarModal(navController = rememberNavController())
+                AppBarScreen(navController = rememberNavController())
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
-                    DashboardModal(
+                    DashboardScreen(
                         MetricsFakeViewModel(
                             MetricsState(
                                 date = "2025-06-12",

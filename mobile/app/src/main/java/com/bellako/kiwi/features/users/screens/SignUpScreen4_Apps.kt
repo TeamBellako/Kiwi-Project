@@ -49,7 +49,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
-import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -143,7 +143,7 @@ fun AppClassification(
     updateApps(goodApps, badApps, personalityViewModel)
 
     if (personalityUiState == UIState.GeneralError) {
-        ErrorModal(onButtonClick = {
+        ErrorModalScreen(onButtonClick = {
             personalityViewModel.resetUiState()
         })
     } else {

@@ -49,7 +49,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun PermissionsRequestModal(withPermissions: @Composable () -> Unit) {
+fun PermissionsModalScreen(withPermissions: @Composable () -> Unit) {
     val context = LocalContext.current
     val isPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -179,6 +179,6 @@ private fun PermissionRequestLayout(context: Context) {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 fun PermissionsRequestModal_Preview() {
     Kiwi_Theme {
-        PermissionsRequestModal {}
+        PermissionsModalScreen {}
     }
 }

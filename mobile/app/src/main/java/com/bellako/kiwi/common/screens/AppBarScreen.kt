@@ -1,4 +1,4 @@
-package com.bellako.kiwi.common.screens.modals
+package com.bellako.kiwi.common.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -67,7 +67,7 @@ val navigationItems =
     )
 
 @Composable
-fun AppBarModal(navController: NavController) {
+fun AppBarScreen(navController: NavController) {
     Box(
         modifier =
             Modifier
@@ -147,7 +147,7 @@ fun AppBarModal_Preview() {
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarModal(navController = rememberNavController())
+                AppBarScreen(navController = rememberNavController())
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues))

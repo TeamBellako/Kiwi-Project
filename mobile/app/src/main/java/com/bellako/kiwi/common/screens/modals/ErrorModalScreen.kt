@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Handyman
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,13 +31,14 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
-fun WIPModal(
+fun ErrorModalScreen(
     modifier: Modifier = Modifier,
     message: String =
-        "Coming soon!",
+        "Wild Error Appeared!",
     subMessage: String =
-        "This feature isn’t ready just yet, but we’re building it for you! Stay tuned for updates.",
-    buttonMessage: String = "BACK",
+        "Uh-oh! It seems a careless scribe forgot to write this part of the story.\n\n" +
+            "Let's get back on track!",
+    buttonMessage: String = "RETRY",
     onButtonClick: (() -> Unit)? = null,
 ) {
     Box(
@@ -47,7 +48,7 @@ fun WIPModal(
                 .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center,
     ) {
-        WIPModalLayout(
+        ErrorModalLayout(
             modifier,
             message,
             subMessage,
@@ -58,7 +59,7 @@ fun WIPModal(
 }
 
 @Composable
-private fun WIPModalLayout(
+private fun ErrorModalLayout(
     modifier: Modifier = Modifier,
     message: String,
     subMessage: String,
@@ -75,9 +76,9 @@ private fun WIPModalLayout(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
-            imageVector = Icons.Filled.Handyman,
-            contentDescription = "WIP icon",
-            tint = MaterialTheme.colorScheme.secondary,
+            imageVector = Icons.Filled.Warning,
+            contentDescription = "Error icon",
+            tint = MaterialTheme.colorScheme.error,
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(50.dp)),
@@ -131,8 +132,8 @@ private fun WIPModalLayout(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun WIPModal_Preview() {
+fun ErrorModal_Preview() {
     Kiwi_Theme {
-        WIPModal {}
+        ErrorModalScreen {}
     }
 }

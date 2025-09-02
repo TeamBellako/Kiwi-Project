@@ -26,9 +26,8 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.audio.Kiwi_Music_Home
 import com.bellako.kiwi.audio.Kiwi_Music_SignUp
 import com.bellako.kiwi.common.data.ScreenRoutes
-import com.bellako.kiwi.common.screens.modals.AppBarModal
-import com.bellako.kiwi.common.screens.modals.DashboardModal
-import com.bellako.kiwi.common.screens.modals.PermissionsRequestModal
+import com.bellako.kiwi.common.screens.modals.SupportModalScreen
+import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -53,7 +52,7 @@ fun MainScreen(
 ) {
     Kiwi_AudioHandler()
 
-    PermissionsRequestModal {
+    PermissionsModalScreen {
         AppScreen(usersViewModel, settingsViewModel, personalityViewModel, metricsViewModel)
     }
 }
@@ -82,7 +81,7 @@ private fun AppScreen(
     Scaffold(
         bottomBar = {
             if (!isLoginScreen && isLoginCompleted) {
-                AppBarModal(navController = navController)
+                AppBarScreen(navController = navController)
             }
         },
         content = { paddingValues ->
@@ -148,7 +147,7 @@ private fun AppScreen(
                     composable(ScreenRoutes.HELP) {
                         Kiwi_BackHandler()
                         Kiwi_Music_Home()
-                        HelpScreen(navController = navController)
+                        SupportModalScreen(navController = navController)
                     }
 
                     composable(ScreenRoutes.SETTINGS) {
@@ -163,7 +162,7 @@ private fun AppScreen(
                 }
 
                 if (showDashboard) {
-                    DashboardModal(metricsViewModel, personalityViewModel)
+                    DashboardScreen(metricsViewModel, personalityViewModel)
                 }
 
                 if (!isLoginScreen && isLoginCompleted) {
