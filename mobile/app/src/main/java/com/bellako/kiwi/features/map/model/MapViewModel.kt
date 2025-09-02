@@ -29,6 +29,7 @@ class MapViewModel
 
         private val _state = MutableStateFlow(MapState(scale = initialScale))
         override val state: StateFlow<MapState> = _state.asStateFlow()
+        override val previousState = MutableStateFlow(MapState())
 
         private var flingJob: Job? = null
         private val flingFriction = 0.9f // to brake the velocity [0..1] the lower it is, the faster it stops
@@ -65,6 +66,7 @@ class MapViewModel
             _state.value = _state.value.copy(mapHeightPx = mapHeightPx * (viewportHeightPx / mapWidthPx))
 
             setInitialPositionScale()
+            updatePreviousState()
         }
 
         private fun setInitialPositionScale() {
@@ -87,6 +89,10 @@ class MapViewModel
         }
 
         // ---------------------------------------------------------------------------------------------
+
+        override fun updatePreviousState() {
+            previousState.value = _state.value
+        }
 
         override fun updateScale(
             scaleFactor: Float,

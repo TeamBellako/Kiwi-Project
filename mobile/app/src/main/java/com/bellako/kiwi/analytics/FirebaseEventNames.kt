@@ -12,6 +12,9 @@ object FirebaseEventNames {
     const val SIGNUP_3_TEST_COMPLETED = "SIGNUP_3_TEST_COMPLETED"
     const val SIGNUP_4_APPS_COMPLETED = "SIGNUP_4_APPS_COMPLETED"
 
+    // Map
+    const val MAP_PERFORM_ZOOM = "MAP_PERFORM_ZOOM"
+
     // Settings
     const val SETTINGS_CLICK_ON_EMAIL = "SETTINGS_CLICK_ON_EMAIL"
     const val SETTINGS_UPDATE_VOLUME = "SETTINGS_UPDATE_VOLUME"
