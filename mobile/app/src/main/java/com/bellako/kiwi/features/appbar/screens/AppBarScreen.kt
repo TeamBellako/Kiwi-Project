@@ -1,4 +1,4 @@
-package com.bellako.kiwi.common.screens
+package com.bellako.kiwi.features.appbar.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -28,42 +28,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.R
-import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.appbar.data.appBarItems
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-
-data class NavigationItem(
-    val icon: Int,
-    val route: String,
-    val enabled: Boolean = true,
-)
-
-val navigationItems =
-    listOf(
-        NavigationItem(
-            icon = R.drawable.ic_map,
-            route = ScreenRoutes.HOME,
-        ),
-        NavigationItem(
-            icon = R.drawable.ic_fire,
-            route = ScreenRoutes.WIP,
-        ),
-        NavigationItem(
-            icon = R.drawable.ic_target,
-            route = ScreenRoutes.WIP,
-        ),
-        NavigationItem(
-            icon = R.drawable.ic_swords,
-            route = ScreenRoutes.WIP,
-        ),
-        NavigationItem(
-            icon = R.drawable.ic_person,
-            route = ScreenRoutes.SETTINGS,
-        ),
-    )
 
 @Composable
 fun AppBarScreen(navController: NavController) {
@@ -92,7 +61,7 @@ fun AppBarModalLayout(navController: NavController) {
         contentColor = MaterialTheme.colorScheme.secondary,
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        navigationItems.forEachIndexed { index, item ->
+        appBarItems.forEachIndexed { index, item ->
             val tint =
                 MaterialTheme.colorScheme.secondary.copy(
                     alpha = if (item.enabled) 1f else 0.4f,
