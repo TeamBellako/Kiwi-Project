@@ -12,6 +12,7 @@ fun firebaseLogEvent(
     try {
         FirebaseEventLogger.logEvent(eventName, params)
     } catch (_: ExceptionInInitializerError) {
+    } catch (_: NoClassDefFoundError) {
     }
 }
 
