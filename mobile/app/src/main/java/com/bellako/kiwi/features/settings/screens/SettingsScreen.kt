@@ -24,8 +24,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -37,9 +37,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
-import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.settings.data.SettingsState
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.tests.SettingsFakeViewModel
@@ -158,7 +158,7 @@ private fun SettingsInfoFields(usersState: UsersState?) {
             modifier =
                 Modifier
                     .clickable {
-                        FirebaseEventLogger.logEvent(FirebaseEventNames.SETTINGS_CLICK_ON_EMAIL)
+                        firebaseLogEvent(FirebaseEventNames.SETTINGS_CLICK_ON_EMAIL)
                     },
         )
 
@@ -274,7 +274,7 @@ private fun SettingsButtons(
                     ),
                 color = MaterialTheme.colorScheme.error,
                 onClick = {
-                    FirebaseEventLogger.logEvent(FirebaseEventNames.SETTINGS_RESET_PROGRESS)
+                    firebaseLogEvent(FirebaseEventNames.SETTINGS_RESET_PROGRESS)
                     settingsViewModel.setUiState(UIState.WIP)
                 },
             )

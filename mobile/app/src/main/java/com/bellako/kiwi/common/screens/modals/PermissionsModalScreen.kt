@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -68,7 +68,7 @@ fun PermissionsModalScreen(withPermissions: @Composable () -> Unit) {
                     if (event == Lifecycle.Event.ON_START) {
                         hasPermissions.value = hasUsageStatsPermission(context)
                         if (hasPermissions.value && !hadPermissionsOnStop) {
-                            FirebaseEventLogger.logEvent(FirebaseEventNames.PERMISSION_GRANTED)
+                            firebaseLogEvent(FirebaseEventNames.PERMISSION_GRANTED)
                         }
                     }
                 }

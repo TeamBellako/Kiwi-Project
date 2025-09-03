@@ -3,8 +3,8 @@ package com.bellako.kiwi.features.settings.model
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
@@ -106,7 +106,7 @@ class SettingsViewModel
                     newDomain?.let { domain ->
                         repository.updateSettings(SettingsDataMapper.toDTO(domain))
 
-                        FirebaseEventLogger.logEvent(
+                        firebaseLogEvent(
                             FirebaseEventNames.SETTINGS_UPDATE_VOLUME,
                             mapOf(
                                 "sound_old" to previousValidSettingsDomain?.soundVolume!!,

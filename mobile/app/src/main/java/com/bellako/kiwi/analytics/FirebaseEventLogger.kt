@@ -5,6 +5,16 @@ import com.bellako.kiwi.BuildConfig
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
 
+fun firebaseLogEvent(
+    eventName: String,
+    params: Map<String, Any>? = null,
+) {
+    try {
+        FirebaseEventLogger.logEvent(eventName, params)
+    } catch (_: ExceptionInInitializerError) {
+    }
+}
+
 object FirebaseEventLogger {
     private val analytics = Firebase.analytics
 

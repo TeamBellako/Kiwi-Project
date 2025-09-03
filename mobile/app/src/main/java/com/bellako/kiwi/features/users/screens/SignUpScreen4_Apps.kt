@@ -37,8 +37,8 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -226,7 +226,7 @@ fun AppClassification(
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         if (personalityViewModel.updateApps().isSuccess) {
-                            FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
+                            firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
 
                             navController.navigate(ScreenRoutes.HOME)
                             localLoading = true

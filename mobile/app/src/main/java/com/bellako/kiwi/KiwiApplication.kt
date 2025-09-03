@@ -2,8 +2,8 @@ package com.bellako.kiwi
 
 import android.app.Application
 import android.content.Context
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.analytics
@@ -15,7 +15,7 @@ class KiwiApplication : Application() {
         super.onCreate()
 
         initFirebase(this)
-        FirebaseEventLogger.logEvent(FirebaseEventNames.APP_OPENED)
+        firebaseLogEvent(FirebaseEventNames.APP_OPENED)
     }
 }
 

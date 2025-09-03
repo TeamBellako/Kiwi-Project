@@ -25,8 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -236,14 +236,14 @@ private fun SignUp(
                                                 if (personalityViewModel.updateRealName().isSuccess &&
                                                     personalityViewModel.updateKnightName().isSuccess
                                                 ) {
-                                                    FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_2_FORM_COMPLETED)
+                                                    firebaseLogEvent(FirebaseEventNames.SIGNUP_2_FORM_COMPLETED)
 
                                                     navController.navigate(ScreenRoutes.SIGNUP3_TEST)
                                                     localLoading = true
                                                 }
                                             }
                                         } else {
-                                            FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_2_FORM_INVALID_PASSWORD)
+                                            firebaseLogEvent(FirebaseEventNames.SIGNUP_2_FORM_INVALID_PASSWORD)
                                         }
                                     }
                                 }

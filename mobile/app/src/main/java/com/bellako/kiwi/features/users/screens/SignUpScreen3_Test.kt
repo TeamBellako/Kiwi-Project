@@ -23,8 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -127,7 +127,7 @@ private fun Question(
                             } else {
                                 CoroutineScope(Dispatchers.Main).launch {
                                     if (personalityViewModel.updateBuild().isSuccess) {
-                                        FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
+                                        firebaseLogEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
 
                                         navController.navigate(ScreenRoutes.SIGNUP4_APPS)
                                         localLoading = true
