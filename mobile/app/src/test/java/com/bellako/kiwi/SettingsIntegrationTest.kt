@@ -137,12 +137,11 @@ class SettingsIntegrationTest {
             viewModel.loadSettings()
             advanceUntilIdle()
 
-            val sameState = SettingsDataMapper.toState(validSettings())
-            viewModel.updateSettings(sameState)
+            val state = SettingsDataMapper.toState(validSettings())
+            viewModel.updateSettings(state)
             advanceUntilIdle()
 
-            // We expect this to be called once because the initial load syncs its content with the server
-            verify(api, times(1)).updateSettings(anyOrNull())
+            verify(api, times(0)).updateSettings(anyOrNull())
         }
 
     @Test
@@ -155,11 +154,11 @@ class SettingsIntegrationTest {
             advanceUntilIdle()
 
             val state = SettingsDataMapper.toState(validSettings())
+            val updatedState = SettingsDataMapper.toState(updatedSettings())
             viewModel.updateSettings(state)
-            advanceTimeBy(100)
+            viewModel.updateSettings(updatedState)
             viewModel.updateSettings(state)
-            advanceTimeBy(100)
-            viewModel.updateSettings(state)
+            viewModel.updateSettings(updatedState)
             advanceUntilIdle()
 
             verify(api, times(1)).updateSettings(anyOrNull())
