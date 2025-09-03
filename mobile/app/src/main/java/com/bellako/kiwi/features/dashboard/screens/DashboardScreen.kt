@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -92,6 +93,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 
 const val ANIM_DURATION = 3000
+const val DAY_DISABLED_ALPHA = 0.4f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -129,27 +131,43 @@ fun DashboardScreen(
         modifier = Modifier.testTag(DashboardModalTestTags.DRAGGABLE_NODE),
         states = listOf(150, 260, 650),
         content = { currentStateIndex ->
-            if (currentStateIndex == 0) {
-                CollapsedContent(
-                    state = metricsState,
-                    isHidden = true,
-                    onCalendarViewClicked = {},
-                )
-            } else if (currentStateIndex <= 1) {
-                CollapsedContent(
-                    state = metricsState,
-                    isHidden = false,
-                    onCalendarViewClicked = {
-                        shouldShowCalendarView.value = true
-                    },
-                )
-            } else if (currentStateIndex <= 2) {
-                ExpandedContent(
-                    viewModel = metricsViewModel,
-                    state = metricsState,
-                    selectedDay = selectedDay,
-                    shouldShowCalendarView = shouldShowCalendarView,
-                )
+            Column(
+                modifier =
+                    Modifier
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(
+                            top = 0.dp,
+                            bottom = getResponsiveSizeHeight(Spacing.medium),
+                            start = getResponsiveSizeHeight(Spacing.medium),
+                            end = getResponsiveSizeHeight(Spacing.medium),
+                        ).fillMaxWidth()
+                        .testTag(CommonTestTags.DASHBOARD_MODAL),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Header()
+
+                if (currentStateIndex == 0) {
+                    CollapsedContent(
+                        state = metricsState,
+                        isHidden = true,
+                        onCalendarViewClicked = {},
+                    )
+                } else if (currentStateIndex <= 1) {
+                    CollapsedContent(
+                        state = metricsState,
+                        isHidden = false,
+                        onCalendarViewClicked = {
+                            shouldShowCalendarView.value = true
+                        },
+                    )
+                } else if (currentStateIndex <= 2) {
+                    ExpandedContent(
+                        viewModel = metricsViewModel,
+                        state = metricsState,
+                        selectedDay = selectedDay,
+                        shouldShowCalendarView = shouldShowCalendarView,
+                    )
+                }
             }
         },
         initialStateIndex = initialStateIndex,
@@ -164,22 +182,9 @@ private fun CollapsedContent(
 ) {
     state?.let { currentState ->
         Column(
-            modifier =
-                Modifier
-                    .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(
-                        top = 0.dp,
-                        bottom = getResponsiveSizeHeight(Spacing.medium),
-                        start = getResponsiveSizeHeight(Spacing.medium),
-                        end = getResponsiveSizeHeight(Spacing.medium),
-                    ).fillMaxWidth()
-                    .wrapContentHeight()
-                    .testTag(CommonTestTags.DASHBOARD_MODAL),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Header()
-
             if (!isHidden) {
                 CollapsedSummaryCard(
                     currentState,
@@ -200,46 +205,24 @@ private fun ExpandedContent(
 ) {
     state?.let {
         Column(
-            modifier =
-                Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(
-                        top = 0.dp,
-                        bottom = getResponsiveSizeHeight(Spacing.medium),
-                        start = getResponsiveSizeHeight(Spacing.medium),
-                        end = getResponsiveSizeHeight(Spacing.medium),
-                    ).fillMaxWidth()
-                    .height(getResponsiveSizeHeight(500.dp))
-                    .testTag(CommonTestTags.DASHBOARD_MODAL),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Header()
-
             if (shouldShowCalendarView.value) {
-                CalendarView(
+                CalendarMonthView(
                     viewModel = viewModel,
                     shouldShowCalendarView = shouldShowCalendarView,
                     selectedDay = selectedDay,
                 )
             } else {
-                if (shouldShowCalendarView.value) {
-                    CalendarView(
-                        viewModel = viewModel,
-                        shouldShowCalendarView = shouldShowCalendarView,
-                        selectedDay = selectedDay,
-                    )
-                } else {
-                    WeekView(
-                        viewModel = viewModel,
-                        selectedDay = selectedDay,
-                    ) {
-                        shouldShowCalendarView.value = true
-                    }
+                CurrentDayIndicator()
+                CalendarWeekView(
+                    viewModel = viewModel,
+                    selectedDay = selectedDay,
+                ) {
+                    shouldShowCalendarView.value = true
                 }
-
-                if (!shouldShowCalendarView.value) {
-                    ExpandedProgressBox(it)
-                }
+                ExpandedProgressBox(it)
             }
         }
     }
@@ -285,7 +268,7 @@ private fun CurrentDayIndicator() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun WeekView(
+private fun CalendarWeekView(
     viewModel: IMetricsViewModel,
     selectedDay: MutableState<LocalDate>,
     onCalendarViewClicked: () -> Unit,
@@ -294,8 +277,6 @@ private fun WeekView(
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
     val coroutineScope = rememberCoroutineScope()
     val startOfWeek = selectedDay.value.minusDays(currentDayOfWeek.toLong())
-
-    CurrentDayIndicator()
 
     Column(
         modifier =
@@ -349,7 +330,7 @@ private fun WeekView(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun CalendarView(
+private fun CalendarMonthView(
     viewModel: IMetricsViewModel,
     modifier: Modifier = Modifier,
     selectedDay: MutableState<LocalDate>,
@@ -508,14 +489,12 @@ private fun ExpandedDayIndicator(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            val contentAlpha = if (isInFuture) 0.4f else 1f
+            val contentAlpha = if (isInFuture) DAY_DISABLED_ALPHA else 1f
             Kiwi_P2(
                 KiwiTextArguments(
                     dayName,
                     color = MaterialTheme.colorScheme.inversePrimary,
-                    modifier =
-                        Modifier
-                            .alpha(contentAlpha),
+                    modifier = Modifier.alpha(contentAlpha),
                 ),
             )
 
@@ -683,14 +662,13 @@ private fun CollapsedSummaryCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                Modifier
-                    .weight(0.2F),
+                Modifier.width(getResponsiveSizeHeight(60.dp)),
             ) {
                 CurrentDayIndicator()
             }
             Box(
                 Modifier
-                    .weight(0.6F)
+                    .fillMaxWidth()
                     .padding(horizontal = getResponsiveSizeHeight(Spacing.small)),
             ) {
                 Column(
@@ -703,12 +681,14 @@ private fun CollapsedSummaryCard(
                     BadTimeCollapsed(state)
                 }
             }
-            Box(
-                Modifier
-                    .weight(0.1F),
-            ) {
-                ShowCalendarViewButton(onCalendarViewClicked)
-            }
+        }
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(getResponsiveSizeHeight(52.dp)),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            ShowCalendarViewButton(onCalendarViewClicked)
         }
     }
 }
@@ -797,9 +777,7 @@ private fun ExpandedQuestProgress(
             )
         }
         Box(
-            modifier =
-                Modifier
-                    .weight(0.8F),
+            modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
             Kiwi_P2(
