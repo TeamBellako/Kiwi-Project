@@ -93,7 +93,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
-const val DAY_DISABLED_ALPHA = 0.4f
+const val DAY_DISABLED_ALPHA = 0.3f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -301,12 +301,11 @@ private fun CalendarWeekView(
             ) {
                 for (index in 0 until DAYS_IN_WEEK) {
                     val day = startOfWeek.plusDays(index.toLong())
-                    val dayNumber = day.dayOfMonth
                     val isSelected = selectedDayIndex.intValue == index
 
                     Box(modifier = Modifier.weight(1f)) {
                         ExpandedDayIndicator(
-                            dayName = dayNumber.toString(),
+                            day = day,
                             isSelected = isSelected,
                             onClicked = {
                                 selectedDayIndex.intValue = index
@@ -316,7 +315,6 @@ private fun CalendarWeekView(
                                     viewModel.loadMetrics(formatDate(day))
                                 }
                             },
-                            isInFuture = day.isAfter(LocalDate.now()),
                             testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
                         )
                     }
@@ -437,7 +435,7 @@ private fun CalendarMonthView(
                                     val isSelected = selectedDay.value == dayDate
 
                                     ExpandedDayIndicator(
-                                        dayName = dayDate.dayOfMonth.toString(),
+                                        day = dayDate,
                                         isSelected = isSelected,
                                         onClicked = {
                                             if (selectedDay.value == dayDate) {
@@ -449,7 +447,6 @@ private fun CalendarMonthView(
                                                 viewModel.loadMetrics(formatDate(dayDate))
                                             }
                                         },
-                                        isInFuture = dayDate.isAfter(LocalDate.now()),
                                         testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
                                     )
                                 } else {
@@ -464,14 +461,16 @@ private fun CalendarMonthView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ExpandedDayIndicator(
-    dayName: String,
+    day: LocalDate,
     isSelected: Boolean,
     onClicked: () -> Unit,
-    isInFuture: Boolean,
     testTag: String,
 ) {
+    val isDayEnabled = !day.isAfter(LocalDate.now())
+
     Box(
         modifier =
             Modifier
@@ -481,18 +480,20 @@ private fun ExpandedDayIndicator(
                     color = if (isSelected) MaterialTheme.colorScheme.inversePrimary else Color.Transparent,
                     shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp)),
                 ).padding(vertical = getResponsiveSizeHeight(Spacing.xSmall))
-                .clickable { onClicked() }
-                .testTag(testTag),
+                .clickable(
+                    enabled = isDayEnabled,
+                    onClick = onClicked,
+                ).testTag(testTag),
         contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            val contentAlpha = if (isInFuture) DAY_DISABLED_ALPHA else 1f
+            val contentAlpha = if (isDayEnabled) 1f else DAY_DISABLED_ALPHA
             Kiwi_P2(
                 KiwiTextArguments(
-                    dayName,
+                    day.dayOfMonth.toString(),
                     color = MaterialTheme.colorScheme.inversePrimary,
                     modifier = Modifier.alpha(contentAlpha),
                 ),
