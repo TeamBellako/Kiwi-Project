@@ -92,7 +92,7 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 
-const val ANIM_DURATION = 3000
+const val MONTH_SLIDE_ANIM_DURATION = 300
 const val DAY_DISABLED_ALPHA = 0.4f
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -399,11 +399,11 @@ private fun CalendarMonthView(
             targetState = currentYearMonth,
             transitionSpec = {
                 slideInHorizontally(
-                    animationSpec = tween(ANIM_DURATION),
+                    animationSpec = tween(MONTH_SLIDE_ANIM_DURATION),
                     initialOffsetX = { fullWidth -> fullWidth * transitionDirection },
                 ) togetherWith
                     slideOutHorizontally(
-                        animationSpec = tween(ANIM_DURATION),
+                        animationSpec = tween(MONTH_SLIDE_ANIM_DURATION),
                         targetOffsetX = { fullWidth -> -fullWidth * transitionDirection },
                     )
             },
