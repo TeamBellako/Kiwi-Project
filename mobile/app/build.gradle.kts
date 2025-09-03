@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 val mobileApiUrl: String = System.getenv("MOBILE_API_URL") ?: "http://10.0.2.2:8080"
 val companyEmail: String = System.getenv("MOBILE_COMPANY_EMAIL") ?: "simon@petrikov.com"
 
@@ -11,6 +13,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
 
+    // Formatter and linter
     id("org.jlleitschuh.gradle.ktlint")
     id("io.gitlab.arturbosch.detekt")
 }
@@ -36,7 +39,7 @@ detekt {
 android {
     namespace = "com.bellako.kiwi"
     testNamespace = "com.bellako.kiwi.test"
-    compileSdk = 35
+    compileSdk = 36
 
     packaging {
         resources.excludes.add("META-INF/LICENSE.md")
@@ -96,11 +99,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         compose = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
