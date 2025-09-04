@@ -164,7 +164,7 @@ private fun GoToLogIn(onSignUp: () -> Unit) {
 fun SignUpScreen1_Welcome_Preview() {
     Kiwi_Theme {
         SignUpScreen1_Welcome(
-            usersViewModel = UsersFakeViewModel(
+            viewModel = UsersFakeViewModel(
                 UsersState(
                     validUsersDTO().email,
                     validUsersDTO().password,
