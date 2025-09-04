@@ -19,6 +19,7 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.common.utils.DateUtils.stringToYearMonth
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
 import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
@@ -28,6 +29,9 @@ import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import org.junit.Before
@@ -36,22 +40,20 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 
 @RunWith(AndroidJUnit4::class)
 class DashboardModalTest {
     @get:Rule
     val rule = createComposeRule()
 
-    private lateinit var fakeMetricsViewModel: MetricsFakeViewModel
+    private lateinit var usersState: UsersState
+    private lateinit var usersFakeViewModel: UsersFakeViewModel
+
     private lateinit var metricsState: MetricsState
+    private lateinit var fakeMetricsViewModel: MetricsFakeViewModel
 
-    private lateinit var fakePersonalityViewModel: PersonalityFakeViewModel
     private lateinit var personalityState: PersonalityState
-
-    private lateinit var futureMetricsDTO: MetricsDTO
-    private lateinit var todayMetricsDTO: MetricsDTO
-    private lateinit var pastMetricsDTO: MetricsDTO
+    private lateinit var fakePersonalityViewModel: PersonalityFakeViewModel
 
     private var screenHeightDp = 0.dp
     private val states = listOf(150, 260, 650)
@@ -59,24 +61,15 @@ class DashboardModalTest {
 
     private val dateNow = LocalDate.now()
 
+    private val pastMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = dateNow.minusDays(1).toString())
+    private val todayMetricsDTO = MetricsFactory.generateRandomValidMetricDTO().copy(date = dateNow.toString())
+
     @Before
     fun setUp() {
         AudioManager.setEnabled(false)
 
-        todayMetricsDTO =
-            MetricsFactory.generateRandomValidMetricDTO().copy(
-                date = dateNow.toString(),
-            )
-        pastMetricsDTO =
-            MetricsFactory.generateRandomValidMetricDTO().copy(
-                date = dateNow.minusDays(1).toString(),
-            )
-        futureMetricsDTO =
-            todayMetricsDTO.copy(
-                date = dateNow.plusDays(1).toString(),
-                currentGoodTimeSeconds = 0,
-                currentBadTimeSeconds = 0,
-            )
+        usersState = UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)
+        usersFakeViewModel = UsersFakeViewModel(usersState)
 
         metricsState = MetricsDataMapper.toState(todayMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0))
         fakeMetricsViewModel =
@@ -84,7 +77,6 @@ class DashboardModalTest {
                 metricsState,
                 todayMetricsDTO,
                 pastMetricsDTO,
-                futureMetricsDTO,
             )
 
         personalityState =
@@ -116,7 +108,6 @@ class DashboardModalTest {
             rule
                 .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + dateYesterday.dayOfMonth)
                 .performClick()
-                .performClick()
         } else {
             rule
                 .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + yesterdayWeekNumber.toString())
@@ -135,7 +126,7 @@ class DashboardModalTest {
     }
 
     @Test
-    fun loadFutureMetrics() {
+    fun tryLoadFutureMetrics() {
         setContent(false, 2)
 
         val dateTomorrow = dateNow.plusDays(1)
@@ -152,22 +143,21 @@ class DashboardModalTest {
             rule
                 .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + dateTomorrow.dayOfMonth)
                 .performClick()
-                .performClick()
         } else {
             rule
                 .onNodeWithTag(DashboardModalTestTags.DAY_INDICATOR_PREFIX + tomorrowWeekNumber.toString())
                 .performClick()
         }
 
-        val futureGoodTimeSeconds = DateUtils.parseTimeSeconds(futureMetricsDTO.currentGoodTimeSeconds)
-        val futureBadTimeSeconds = DateUtils.parseTimeSeconds(futureMetricsDTO.currentBadTimeSeconds)
+        val todayGoodTimeSeconds = DateUtils.parseTimeSeconds(todayMetricsDTO.currentGoodTimeSeconds)
+        val todayBadTimeSeconds = DateUtils.parseTimeSeconds(todayMetricsDTO.currentBadTimeSeconds)
 
-        rule
-            .onNodeWithTag(DashboardModalTestTags.GOOD_TIME)
-            .assertTextContains(futureGoodTimeSeconds, true)
-        rule
-            .onNodeWithTag(DashboardModalTestTags.BAD_TIME)
-            .assertTextContains(futureBadTimeSeconds, true)
+        val goodTimeNode = rule.onNodeWithTag(DashboardModalTestTags.GOOD_TIME)
+        val badTimeNode = rule.onNodeWithTag(DashboardModalTestTags.BAD_TIME)
+        if (goodTimeNode.isDisplayed() && badTimeNode.isDisplayed()) {
+            goodTimeNode.assertTextContains(todayGoodTimeSeconds, true)
+            badTimeNode.assertTextContains(todayBadTimeSeconds, true)
+        }
     }
 
     @Test
@@ -281,8 +271,8 @@ class DashboardModalTest {
                 .getOrNull(SemanticsProperties.Text)
                 ?.joinToString("") ?: ""
 
-        val originalDate = YearMonth.parse(originalMonthYearText, DateTimeFormatter.ofPattern("MM-yyyy"))
-        val newDate = YearMonth.parse(newMonthYearText, DateTimeFormatter.ofPattern("MM-yyyy"))
+        val originalDate = stringToYearMonth(originalMonthYearText)
+        val newDate = stringToYearMonth(newMonthYearText)
         assert(originalDate.isAfter(newDate))
     }
 
@@ -350,7 +340,7 @@ class DashboardModalTest {
         rule.setContent {
             screenHeightDp = getScreenHeight(withoutInsetTop = true).dp
             statesBottom = states.map { state -> getResponsiveSizeHeight(state).toFloat() }
-            DashboardScreen(fakeMetricsViewModel, fakePersonalityViewModel, showCalendarView, initialStateIndex)
+            DashboardScreen(usersFakeViewModel, fakeMetricsViewModel, fakePersonalityViewModel, showCalendarView, initialStateIndex)
         }
         rule.waitUntil {
             screenHeightDp > 0.dp

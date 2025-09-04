@@ -73,7 +73,7 @@ import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
-import com.bellako.kiwi.common.utils.DateUtils.formatDate
+import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.map.screens.MapScreen
@@ -115,7 +115,7 @@ fun DashboardScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        val dateNow = formatDate(LocalDate.now())
+        val dateNow = dateToString(LocalDate.now())
         val loadResult = metricsViewModel.loadMetrics(dateNow)
         metricsState?.let { state ->
             if (loadResult.isFailure) {
@@ -388,7 +388,7 @@ private fun CalendarMonthView(
     ) {
         Kiwi_P2(
             KiwiTextArguments(
-                text = formatDate(selectedMonth.value),
+                text = dateToString(selectedMonth.value),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary,
                 modifier =
@@ -520,15 +520,15 @@ private fun selectDay(
     firebaseLogEvent(
         FirebaseEventNames.DASHBOARD_SEE_DAY,
         mapOf(
-            "day_old" to formatDate(selectedDay.value),
-            "day_new" to formatDate(newDay),
+            "day_old" to dateToString(selectedDay.value),
+            "day_new" to dateToString(newDay),
         ),
     )
 
     selectedDay.value = newDay
 
     coroutineScope.launch {
-        metricsViewModel.loadMetrics(formatDate(newDay))
+        metricsViewModel.loadMetrics(dateToString(newDay))
     }
 }
 
@@ -540,8 +540,8 @@ private fun selectYearMonth(
     firebaseLogEvent(
         FirebaseEventNames.DASHBOARD_SEE_MONTH,
         mapOf(
-            "month_old" to formatDate(selectedMonth.value),
-            "month_new" to formatDate(newMonth),
+            "month_old" to dateToString(selectedMonth.value),
+            "month_new" to dateToString(newMonth),
         ),
     )
 

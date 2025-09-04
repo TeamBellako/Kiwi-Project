@@ -2,13 +2,13 @@ package com.bellako.kiwi.features.metrics.data
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import java.time.LocalDate
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 
 object MetricsDataMapper {
     @RequiresApi(Build.VERSION_CODES.O)
     fun toDomain(dto: MetricsDTO): MetricsDomain =
         MetricsDomain(
-            date = LocalDate.parse(dto.date),
+            date = stringToDate(dto.date),
             maxGoodTimeSeconds = dto.maxGoodTimeSeconds,
             currentGoodTimeSeconds = dto.currentGoodTimeSeconds,
             maxBadTimeSeconds = dto.maxBadTimeSeconds,
@@ -18,7 +18,7 @@ object MetricsDataMapper {
     @RequiresApi(Build.VERSION_CODES.O)
     fun toDomain(state: MetricsState): MetricsDomain =
         MetricsDomain(
-            date = LocalDate.parse(state.date),
+            date = stringToDate(state.date),
             maxGoodTimeSeconds = state.maxGoodTimeSeconds,
             currentGoodTimeSeconds = state.currentGoodTimeSeconds,
             maxBadTimeSeconds = state.maxBadTimeSeconds,

@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.metrics.model
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
 import com.bellako.kiwi.features.metrics.data.MetricsDomain
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -11,7 +12,6 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
 @HiltViewModel
@@ -65,7 +65,7 @@ class MetricsViewModel
         override suspend fun loadMetrics(date: String): Result<Unit> {
             val parsedDate =
                 try {
-                    LocalDate.parse(date)
+                    stringToDate(date)
                 } catch (_: DateTimeParseException) {
                     return failureWithError(invalidDataMessage())
                 }

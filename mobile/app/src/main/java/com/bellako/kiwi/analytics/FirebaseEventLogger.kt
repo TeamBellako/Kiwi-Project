@@ -12,6 +12,7 @@ fun firebaseFunctionWrapper(function: (() -> Unit)) {
         function.invoke()
     } catch (_: ExceptionInInitializerError) {
     } catch (_: NoClassDefFoundError) {
+    } catch (_: IllegalStateException) {
     }
 }
 

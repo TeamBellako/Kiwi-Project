@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.features.users.data.Email
 import com.bellako.kiwi.features.users.data.Password
 import com.bellako.kiwi.features.users.data.UsersState
@@ -54,7 +55,7 @@ class UsersFakeViewModel(
         )
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun getRegisterDate(): LocalDate = LocalDate.parse(_state.value?.registerDate)
+    override fun getRegisterDate(): LocalDate = stringToDate(_state.value?.registerDate.orEmpty())
 
     // ---------------------------------------------------------------------------------------------
 
