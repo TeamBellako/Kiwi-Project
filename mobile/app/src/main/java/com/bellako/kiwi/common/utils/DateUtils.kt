@@ -3,6 +3,7 @@ package com.bellako.kiwi.common.utils
 import android.os.Build
 import androidx.annotation.RequiresApi
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 const val SECONDS_IN_MINUTE = 60
@@ -29,4 +30,7 @@ object DateUtils {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun formatDate(date: LocalDate): String = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun formatDate(date: YearMonth): String = date.format(DateTimeFormatter.ofPattern("MM-yyyy"))
 }

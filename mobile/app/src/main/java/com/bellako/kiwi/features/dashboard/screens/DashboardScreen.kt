@@ -345,30 +345,25 @@ private fun CalendarMonthView(
     selectedDay: MutableState<LocalDate>,
     shouldShowCalendarView: MutableState<Boolean>,
 ) {
-    var currentYearMonth by rememberSaveable(
-        stateSaver =
-            Saver(
-                save = { it.toString() },
-                restore = { YearMonth.parse(it) },
-            ),
-    ) { mutableStateOf(YearMonth.from(selectedDay.value)) }
+
+    val selectedMonth = remember { mutableStateOf(YearMonth.from(selectedDay.value)) }
 
     var transitionDirection by remember { mutableIntStateOf(0) } // -1 = previous, 1 = next
     var totalDragOffsetX by remember { mutableFloatStateOf(0f) }
 
     val gestureModifier =
-        Modifier.pointerInput(currentYearMonth) {
+        Modifier.pointerInput(selectedMonth) {
             detectDragGestures(
                 onDragEnd = {
                     val dragThreshold = 100f
                     when {
                         totalDragOffsetX > dragThreshold -> {
                             transitionDirection = -1
-                            currentYearMonth = currentYearMonth.minusMonths(1)
+                            selectYearMonth(selectedMonth, selectedMonth.value.minusMonths(1))
                         }
                         totalDragOffsetX < -dragThreshold -> {
                             transitionDirection = 1
-                            currentYearMonth = currentYearMonth.plusMonths(1)
+                            selectYearMonth(selectedMonth, selectedMonth.value.plusMonths(1))
                         }
                     }
                     totalDragOffsetX = 0f
@@ -393,7 +388,7 @@ private fun CalendarMonthView(
     ) {
         Kiwi_P2(
             KiwiTextArguments(
-                currentYearMonth.format(DateTimeFormatter.ofPattern("MM-yyyy")),
+                text = formatDate(selectedMonth.value),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary,
                 modifier =
@@ -404,7 +399,7 @@ private fun CalendarMonthView(
         Kiwi_Spacer(Spacing.large)
 
         AnimatedContent(
-            targetState = currentYearMonth,
+            targetState = selectedMonth.value,
             transitionSpec = {
                 slideInHorizontally(
                     animationSpec = tween(MONTH_SLIDE_ANIM_DURATION),
@@ -520,20 +515,37 @@ private fun selectDay(
     coroutineScope: CoroutineScope,
     metricsViewModel: IMetricsViewModel,
     selectedDay: MutableState<LocalDate>,
-    day: LocalDate,
+    newDay: LocalDate,
 ) {
-    selectedDay.value = day
-
-    coroutineScope.launch {
-        metricsViewModel.loadMetrics(formatDate(day))
-    }
-
     firebaseLogEvent(
         FirebaseEventNames.DASHBOARD_SEE_DAY,
         mapOf(
-            "day" to formatDate(day),
+            "day_old" to formatDate(selectedDay.value),
+            "day_new" to formatDate(newDay),
         ),
     )
+
+    selectedDay.value = newDay
+
+    coroutineScope.launch {
+        metricsViewModel.loadMetrics(formatDate(newDay))
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+private fun selectYearMonth(
+    selectedMonth: MutableState<YearMonth>,
+    newMonth: YearMonth,
+) {
+    firebaseLogEvent(
+        FirebaseEventNames.DASHBOARD_SEE_MONTH,
+        mapOf(
+            "month_old" to formatDate(selectedMonth.value),
+            "month_new" to formatDate(newMonth),
+        ),
+    )
+
+    selectedMonth.value = newMonth
 }
 
 @Composable
