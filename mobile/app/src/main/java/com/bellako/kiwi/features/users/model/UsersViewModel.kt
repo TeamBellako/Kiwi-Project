@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.bellako.kiwi.analytics.firebaseSetUserId
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
@@ -94,6 +95,7 @@ class UsersViewModel
                 authRepository.setJwtToken(result.getOrThrow().jwt)
                 _state.value = _state.value.copy(registerDate = result.getOrThrow().registerDate)
                 saveLocalCredentials(context)
+                firebaseSetUserId(_state.value.email)
                 _isLoginCompleted.value = true
             }
         }
