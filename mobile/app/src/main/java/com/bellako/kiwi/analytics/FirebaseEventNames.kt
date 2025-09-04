@@ -16,6 +16,7 @@ object FirebaseEventNames {
     const val MAP_PERFORM_ZOOM = "MAP_PERFORM_ZOOM"
 
     // Dashboard
+    const val DASHBOARD_LAYOUT_ENGAGEMENT = "DASHBOARD_LAYOUT_ENGAGEMENT"
     const val DASHBOARD_SEE_MONTH = "DASHBOARD_SEE_MONTH"
     const val DASHBOARD_SEE_DAY = "DASHBOARD_SEE_DAY"
 

@@ -29,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -155,15 +156,10 @@ fun DashboardScreen(
                 Header()
 
                 if (currentStateIndex == 0) {
-                    CollapsedContent(
-                        state = metricsState,
-                        isHidden = true,
-                        onCalendarViewClicked = {},
-                    )
+                    HiddenContent()
                 } else if (currentStateIndex <= 1) {
                     CollapsedContent(
                         state = metricsState,
-                        isHidden = false,
                         onCalendarViewClicked = {
                             shouldShowCalendarView.value = true
                         },
@@ -184,22 +180,43 @@ fun DashboardScreen(
 }
 
 @Composable
+private fun ComposableEngagementMeasuring(layout: String) {
+    DisposableEffect(Unit) {
+        val composeTime = System.currentTimeMillis()
+        onDispose {
+            val visibleTime = System.currentTimeMillis() - composeTime
+            firebaseLogEvent(
+                FirebaseEventNames.DASHBOARD_LAYOUT_ENGAGEMENT,
+                mapOf(
+                    "layout" to layout,
+                    "visible_time_ms" to visibleTime,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HiddenContent() {
+    ComposableEngagementMeasuring("hidden")
+}
+
+@Composable
 private fun CollapsedContent(
     state: MetricsState?,
-    isHidden: Boolean,
     onCalendarViewClicked: () -> Unit,
 ) {
+    ComposableEngagementMeasuring("collapsed")
+
     state?.let { currentState ->
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (!isHidden) {
-                CollapsedSummaryCard(
-                    currentState,
-                    onCalendarViewClicked,
-                )
-            }
+            CollapsedSummaryCard(
+                currentState,
+                onCalendarViewClicked,
+            )
         }
     }
 }
@@ -213,6 +230,8 @@ private fun ExpandedContent(
     selectedDay: MutableState<LocalDate>,
     shouldShowCalendarView: MutableState<Boolean>,
 ) {
+    ComposableEngagementMeasuring("expanded")
+
     state?.let {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -345,7 +364,6 @@ private fun CalendarMonthView(
     selectedDay: MutableState<LocalDate>,
     shouldShowCalendarView: MutableState<Boolean>,
 ) {
-
     val selectedMonth = remember { mutableStateOf(YearMonth.from(selectedDay.value)) }
 
     var transitionDirection by remember { mutableIntStateOf(0) } // -1 = previous, 1 = next
