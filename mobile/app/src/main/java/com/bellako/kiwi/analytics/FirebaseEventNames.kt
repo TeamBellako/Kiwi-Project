@@ -15,6 +15,9 @@ object FirebaseEventNames {
     // Map
     const val MAP_PERFORM_ZOOM = "MAP_PERFORM_ZOOM"
 
+    // Dashboard
+    const val DASHBOARD_SEE_DAY = "DASHBOARD_SEE_DAY"
+
     // Settings
     const val SETTINGS_CLICK_ON_EMAIL = "SETTINGS_CLICK_ON_EMAIL"
     const val SETTINGS_UPDATE_VOLUME = "SETTINGS_UPDATE_VOLUME"

@@ -57,6 +57,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
@@ -90,6 +92,7 @@ import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
@@ -168,7 +171,7 @@ fun DashboardScreen(
                 } else if (currentStateIndex <= 2) {
                     ExpandedContent(
                         usersViewModel = usersViewModel,
-                        viewModel = metricsViewModel,
+                        metricsViewModel = metricsViewModel,
                         state = metricsState,
                         selectedDay = selectedDay,
                         shouldShowCalendarView = shouldShowCalendarView,
@@ -205,7 +208,7 @@ private fun CollapsedContent(
 @Composable
 private fun ExpandedContent(
     usersViewModel: IUsersViewModel,
-    viewModel: IMetricsViewModel,
+    metricsViewModel: IMetricsViewModel,
     state: MetricsState?,
     selectedDay: MutableState<LocalDate>,
     shouldShowCalendarView: MutableState<Boolean>,
@@ -218,7 +221,7 @@ private fun ExpandedContent(
             if (shouldShowCalendarView.value) {
                 CalendarMonthView(
                     usersViewModel = usersViewModel,
-                    viewModel = viewModel,
+                    metricsViewModel = metricsViewModel,
                     shouldShowCalendarView = shouldShowCalendarView,
                     selectedDay = selectedDay,
                 )
@@ -226,7 +229,7 @@ private fun ExpandedContent(
                 CurrentDayIndicator()
                 CalendarWeekView(
                     usersViewModel = usersViewModel,
-                    viewModel = viewModel,
+                    metricsViewModel = metricsViewModel,
                     selectedDay = selectedDay,
                 ) {
                     shouldShowCalendarView.value = true
@@ -279,7 +282,7 @@ private fun CurrentDayIndicator() {
 @Composable
 private fun CalendarWeekView(
     usersViewModel: IUsersViewModel,
-    viewModel: IMetricsViewModel,
+    metricsViewModel: IMetricsViewModel,
     selectedDay: MutableState<LocalDate>,
     onCalendarViewClicked: () -> Unit,
 ) {
@@ -320,11 +323,7 @@ private fun CalendarWeekView(
                             isSelected = isSelected,
                             onClicked = {
                                 selectedDayIndex.intValue = index
-                                selectedDay.value = startOfWeek.plusDays(index.toLong())
-
-                                coroutineScope.launch {
-                                    viewModel.loadMetrics(formatDate(day))
-                                }
+                                selectDay(coroutineScope, metricsViewModel, selectedDay, startOfWeek.plusDays(index.toLong()))
                             },
                             testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
                         )
@@ -341,7 +340,7 @@ private fun CalendarWeekView(
 @Composable
 private fun CalendarMonthView(
     usersViewModel: IUsersViewModel,
-    viewModel: IMetricsViewModel,
+    metricsViewModel: IMetricsViewModel,
     modifier: Modifier = Modifier,
     selectedDay: MutableState<LocalDate>,
     shouldShowCalendarView: MutableState<Boolean>,
@@ -448,11 +447,8 @@ private fun CalendarMonthView(
                                         day = dayDate,
                                         isSelected = selectedDay.value == dayDate,
                                         onClicked = {
-                                            selectedDay.value = dayDate
+                                            selectDay(coroutineScope, metricsViewModel, selectedDay, dayDate)
                                             shouldShowCalendarView.value = false
-                                            coroutineScope.launch {
-                                                viewModel.loadMetrics(formatDate(dayDate))
-                                            }
                                         },
                                         testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
                                     )
@@ -517,6 +513,27 @@ private fun CalendarDayView(
             )
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+private fun selectDay(
+    coroutineScope: CoroutineScope,
+    metricsViewModel: IMetricsViewModel,
+    selectedDay: MutableState<LocalDate>,
+    day: LocalDate,
+) {
+    selectedDay.value = day
+
+    coroutineScope.launch {
+        metricsViewModel.loadMetrics(formatDate(day))
+    }
+
+    firebaseLogEvent(
+        FirebaseEventNames.DASHBOARD_SEE_DAY,
+        mapOf(
+            "day" to formatDate(day),
+        ),
+    )
 }
 
 @Composable
@@ -857,22 +874,24 @@ private fun DashboardModalPreview(
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
                     DashboardScreen(
-                        usersViewModel = UsersFakeViewModel(
-                            UsersState(
-                                validUsersDTO().email,
-                                validUsersDTO().password,
-                                validUsersDTO().registerDate
-                            )
-                        ),
-                        metricsViewModel = MetricsFakeViewModel(
-                            MetricsState(
-                                date = "2025-06-12",
-                                maxGoodTimeSeconds = 6 * SECONDS_IN_HOUR,
-                                currentGoodTimeSeconds = 1 * SECONDS_IN_HOUR,
-                                maxBadTimeSeconds = 6 * SECONDS_IN_HOUR,
-                                currentBadTimeSeconds = 2 * SECONDS_IN_HOUR,
+                        usersViewModel =
+                            UsersFakeViewModel(
+                                UsersState(
+                                    validUsersDTO().email,
+                                    validUsersDTO().password,
+                                    validUsersDTO().registerDate,
+                                ),
                             ),
-                        ),
+                        metricsViewModel =
+                            MetricsFakeViewModel(
+                                MetricsState(
+                                    date = "2025-06-12",
+                                    maxGoodTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                    currentGoodTimeSeconds = 1 * SECONDS_IN_HOUR,
+                                    maxBadTimeSeconds = 6 * SECONDS_IN_HOUR,
+                                    currentBadTimeSeconds = 2 * SECONDS_IN_HOUR,
+                                ),
+                            ),
                         personalityViewModel =
                             PersonalityFakeViewModel(
                                 PersonalityState(
