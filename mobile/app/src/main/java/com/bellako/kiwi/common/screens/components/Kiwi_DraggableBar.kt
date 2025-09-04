@@ -35,6 +35,8 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import kotlinx.coroutines.launch
 
+const val SNAP_VELOCITY_THRESHOLD = 400f
+
 /**
  * @param content placed inside the bar, called with param @currentStateIndex when modified
  * @param states list of (states) sizes the bar can have, passed as raw int (relativized internally)
@@ -61,7 +63,6 @@ fun Kiwi_DraggableBar(
     var offsetY by remember { mutableFloatStateOf(statesBottom[initialStateIndex]) }
 
     // velocity
-    val velocityThreshold = 400f
     var lastPosition by remember { mutableFloatStateOf(animatableOffset.value) }
     var lastTime by remember { mutableLongStateOf(0L) }
     var dragVelocity by remember { mutableFloatStateOf(0f) }
@@ -115,11 +116,11 @@ fun Kiwi_DraggableBar(
                                 scope.launch {
                                     val target =
                                         when {
-                                            dragVelocity > velocityThreshold -> {
+                                            dragVelocity > SNAP_VELOCITY_THRESHOLD -> {
                                                 // High velocity upwards, snap to next upper state
                                                 statesBottom.filter { it >= animatableOffset.value }.minOrNull() ?: statesBottom.last()
                                             }
-                                            dragVelocity < -velocityThreshold -> {
+                                            dragVelocity < -SNAP_VELOCITY_THRESHOLD -> {
                                                 // High velocity downwards, snap to next lower state
                                                 statesBottom.filter { it <= animatableOffset.value }.maxOrNull() ?: statesBottom.first()
                                             }
@@ -159,7 +160,7 @@ fun Kiwi_DraggableBar(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_0() {
+fun Kiwi_DraggableBar_Preview_0() {
     Kiwi_DraggableBar_Preview(0)
 }
 
@@ -168,7 +169,7 @@ private fun Kiwi_DraggableBar_Preview_0() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_1() {
+fun Kiwi_DraggableBar_Preview_1() {
     Kiwi_DraggableBar_Preview(1)
 }
 
@@ -177,13 +178,13 @@ private fun Kiwi_DraggableBar_Preview_1() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_2() {
+fun Kiwi_DraggableBar_Preview_2() {
     Kiwi_DraggableBar_Preview(2)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
+fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
     Kiwi_Theme {
         Kiwi_DraggableBar(
             content = {
