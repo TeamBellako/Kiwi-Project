@@ -45,6 +45,9 @@ import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
@@ -181,6 +184,13 @@ fun MapScreen_Preview() {
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
                     DashboardScreen(
+                        usersViewModel = UsersFakeViewModel(
+                            UsersState(
+                                validUsersDTO().email,
+                                validUsersDTO().password,
+                                validUsersDTO().registerDate
+                            )
+                        ),
                         metricsViewModel =
                             MetricsFakeViewModel(
                                 MetricsState(

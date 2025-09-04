@@ -159,7 +159,13 @@ private fun Question(
 fun SignUpScreen3_Test_Preview() {
     Kiwi_Theme {
         SignUpScreen3_Test(
-            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)),
+            usersViewModel = UsersFakeViewModel(
+                UsersState(
+                    validUsersDTO().email,
+                    validUsersDTO().password,
+                    validUsersDTO().registerDate
+                )
+            ),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(

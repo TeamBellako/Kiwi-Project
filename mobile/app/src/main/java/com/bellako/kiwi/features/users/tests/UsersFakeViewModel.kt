@@ -1,6 +1,8 @@
 package com.bellako.kiwi.features.users.tests
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
 import com.bellako.kiwi.features.users.data.Email
@@ -10,6 +12,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.time.LocalDate
 
 @Suppress("EmptyFunctionBlock")
 class UsersFakeViewModel(
@@ -49,6 +52,9 @@ class UsersFakeViewModel(
                 false
             },
         )
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun getRegisterDate(): LocalDate = LocalDate.parse(_state.value?.registerDate)
 
     // ---------------------------------------------------------------------------------------------
 

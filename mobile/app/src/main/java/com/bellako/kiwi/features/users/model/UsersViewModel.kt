@@ -1,6 +1,8 @@
 package com.bellako.kiwi.features.users.model
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import java.io.IOException
 import java.security.GeneralSecurityException
+import java.time.LocalDate
 
 @HiltViewModel
 class UsersViewModel
@@ -69,6 +72,9 @@ class UsersViewModel
                     false
                 },
             )
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun getRegisterDate(): LocalDate = LocalDate.parse(_state.value.registerDate)
 
         // -----------------------------------------------------------------------------------------
 

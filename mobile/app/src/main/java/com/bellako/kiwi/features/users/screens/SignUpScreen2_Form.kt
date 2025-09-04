@@ -308,7 +308,13 @@ private fun SignUp(
 fun SignUpScreen2_Form_Preview() {
     Kiwi_Theme {
         SignUpScreen2_Form(
-            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)),
+            usersViewModel = UsersFakeViewModel(
+                UsersState(
+                    validUsersDTO().email,
+                    validUsersDTO().password,
+                    validUsersDTO().registerDate
+                )
+            ),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(
