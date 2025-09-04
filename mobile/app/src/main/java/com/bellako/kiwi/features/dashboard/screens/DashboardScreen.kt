@@ -83,6 +83,10 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -98,6 +102,7 @@ const val DAY_DISABLED_ALPHA = 0.3f
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardScreen(
+    usersViewModel: IUsersViewModel,
     metricsViewModel: IMetricsViewModel,
     personalityViewModel: IPersonalityViewModel,
     showCalendarView: Boolean = false,
@@ -162,6 +167,7 @@ fun DashboardScreen(
                     )
                 } else if (currentStateIndex <= 2) {
                     ExpandedContent(
+                        usersViewModel = usersViewModel,
                         viewModel = metricsViewModel,
                         state = metricsState,
                         selectedDay = selectedDay,
@@ -198,6 +204,7 @@ private fun CollapsedContent(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ExpandedContent(
+    usersViewModel: IUsersViewModel,
     viewModel: IMetricsViewModel,
     state: MetricsState?,
     selectedDay: MutableState<LocalDate>,
@@ -210,6 +217,7 @@ private fun ExpandedContent(
         ) {
             if (shouldShowCalendarView.value) {
                 CalendarMonthView(
+                    usersViewModel = usersViewModel,
                     viewModel = viewModel,
                     shouldShowCalendarView = shouldShowCalendarView,
                     selectedDay = selectedDay,
@@ -217,6 +225,7 @@ private fun ExpandedContent(
             } else {
                 CurrentDayIndicator()
                 CalendarWeekView(
+                    usersViewModel = usersViewModel,
                     viewModel = viewModel,
                     selectedDay = selectedDay,
                 ) {
@@ -269,6 +278,7 @@ private fun CurrentDayIndicator() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun CalendarWeekView(
+    usersViewModel: IUsersViewModel,
     viewModel: IMetricsViewModel,
     selectedDay: MutableState<LocalDate>,
     onCalendarViewClicked: () -> Unit,
@@ -304,7 +314,8 @@ private fun CalendarWeekView(
                     val isSelected = selectedDayIndex.intValue == index
 
                     Box(modifier = Modifier.weight(1f)) {
-                        ExpandedDayIndicator(
+                        CalendarDayView(
+                            usersViewModel = usersViewModel,
                             day = day,
                             isSelected = isSelected,
                             onClicked = {
@@ -329,6 +340,7 @@ private fun CalendarWeekView(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun CalendarMonthView(
+    usersViewModel: IUsersViewModel,
     viewModel: IMetricsViewModel,
     modifier: Modifier = Modifier,
     selectedDay: MutableState<LocalDate>,
@@ -369,7 +381,6 @@ private fun CalendarMonthView(
             )
         }
 
-    val selectedDay = rememberSaveable { mutableStateOf(LocalDate.now()) }
     val coroutineScope = rememberCoroutineScope()
 
     Column(
@@ -432,17 +443,13 @@ private fun CalendarMonthView(
                                 contentAlignment = Alignment.Center,
                             ) {
                                 if (dayDate in startOfMonth..endOfMonth) {
-                                    val isSelected = selectedDay.value == dayDate
-
-                                    ExpandedDayIndicator(
+                                    CalendarDayView(
+                                        usersViewModel = usersViewModel,
                                         day = dayDate,
-                                        isSelected = isSelected,
+                                        isSelected = selectedDay.value == dayDate,
                                         onClicked = {
-                                            if (selectedDay.value == dayDate) {
-                                                shouldShowCalendarView.value = false
-                                            }
-
                                             selectedDay.value = dayDate
+                                            shouldShowCalendarView.value = false
                                             coroutineScope.launch {
                                                 viewModel.loadMetrics(formatDate(dayDate))
                                             }
@@ -463,13 +470,14 @@ private fun CalendarMonthView(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun ExpandedDayIndicator(
+private fun CalendarDayView(
+    usersViewModel: IUsersViewModel,
     day: LocalDate,
     isSelected: Boolean,
     onClicked: () -> Unit,
     testTag: String,
 ) {
-    val isDayEnabled = !day.isAfter(LocalDate.now())
+    val isDayEnabled = !day.isBefore(usersViewModel.getRegisterDate()) && !day.isAfter(LocalDate.now())
 
     Box(
         modifier =
@@ -849,7 +857,14 @@ private fun DashboardModalPreview(
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
                     DashboardScreen(
-                        MetricsFakeViewModel(
+                        usersViewModel = UsersFakeViewModel(
+                            UsersState(
+                                validUsersDTO().email,
+                                validUsersDTO().password,
+                                validUsersDTO().registerDate
+                            )
+                        ),
+                        metricsViewModel = MetricsFakeViewModel(
                             MetricsState(
                                 date = "2025-06-12",
                                 maxGoodTimeSeconds = 6 * SECONDS_IN_HOUR,
