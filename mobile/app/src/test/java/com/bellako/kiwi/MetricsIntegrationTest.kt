@@ -1,5 +1,6 @@
 package com.bellako.kiwi
 
+import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
 import com.bellako.kiwi.features.metrics.model.IMetricsAPI
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
@@ -11,6 +12,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.whenever
 
 class MetricsIntegrationTest {
@@ -30,10 +33,8 @@ class MetricsIntegrationTest {
     @Test
     fun `create valid metrics`() =
         runTest {
-            whenever(api.createMetrics(validMetricsDTO))
+            whenever(api.createMetrics(any()))
                 .thenReturn(validMetricsDTO)
-            whenever(api.getMetricsByDate(validMetricsDTO.date))
-                .thenReturn(null)
 
             val result: Result<Unit> = viewModel.createMetrics(MetricsDataMapper.toState(validMetricsDTO))
             assertTrue(result.isSuccess)
@@ -44,9 +45,7 @@ class MetricsIntegrationTest {
         runTest {
             val updatedMetricsDTO = validMetricsDTO.copy(currentGoodTimeSeconds = validMetricsDTO.currentGoodTimeSeconds + 1)
             whenever(api.updateMetrics(updatedMetricsDTO))
-                .thenReturn(validMetricsDTO)
-            whenever(api.getMetricsByDate(validMetricsDTO.date))
-                .thenReturn(validMetricsDTO)
+                .thenReturn(updatedMetricsDTO)
 
             val result: Result<Unit> = viewModel.updateMetrics(MetricsDataMapper.toState(updatedMetricsDTO))
             assertTrue(result.isSuccess)
@@ -65,10 +64,9 @@ class MetricsIntegrationTest {
     @Test
     fun `load non-existing metrics`() =
         runTest {
-            whenever(api.getMetricsByDate(validMetricsDTO.date))
-                .thenReturn(validMetricsDTO)
+            doThrow(createFakeHttpException(404)).whenever(api).getMetricsByDate(any())
 
             val result: Result<Unit> = viewModel.loadMetrics(validMetricsDTO.date)
-            assertTrue(result.isSuccess)
+            assertTrue(result.isFailure)
         }
 }

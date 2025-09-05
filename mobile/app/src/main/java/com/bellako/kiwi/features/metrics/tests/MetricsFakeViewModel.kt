@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.metrics.tests
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.model.BaseFakeViewModel
+import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
 import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
@@ -27,6 +28,11 @@ class MetricsFakeViewModel(
 
     var fakeError: Boolean = false
     var fakeException: Exception = Exception("Fake exception message")
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onDateChanged(newDate: LocalDate) {
+        _state.value = _state.value?.copy(date = dateToString(newDate))
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun createMetrics(state: MetricsState): Result<Unit> =
