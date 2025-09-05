@@ -1,4 +1,4 @@
-package com.bellako.kiwi.common.screens
+package com.bellako.kiwi.common.screens.modals
 
 import android.content.Context
 import android.content.Intent
@@ -28,6 +28,7 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.BuildConfig
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
@@ -40,7 +41,7 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
-fun HelpScreen(navController: NavController) {
+fun SupportModalScreen(navController: NavController) {
     Box(
         modifier =
             Modifier
@@ -155,7 +156,7 @@ private fun openEmailClient(context: Context) {
 @Composable
 fun HelpScreen_Preview() {
     Kiwi_Theme {
-        HelpScreen(
+        SupportModalScreen(
             navController = rememberNavController(),
         )
     }

@@ -39,13 +39,17 @@ fun Kiwi_InputField(
     shouldHideInput: Boolean,
     textColor: Color,
     testTag: String,
+    modifier: Modifier = Modifier,
 ) {
     var inputFieldColor = textColor
     if (!enabled) {
         inputFieldColor = inputFieldColor.copy(alpha = 0.3F)
     }
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .then(modifier)
+    ) {
         val shouldShowPassword = remember { mutableStateOf(false) }
 
         val keyboardOptions =

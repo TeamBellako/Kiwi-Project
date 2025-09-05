@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -30,9 +31,11 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
-fun ErrorModal(
+fun ErrorModalScreen(
     modifier: Modifier = Modifier,
-    errorMessage: String =
+    message: String =
+        "Wild Error Appeared!",
+    subMessage: String =
         "Uh-oh! It seems a careless scribe forgot to write this part of the story.\n\n" +
             "Let's get back on track!",
     buttonMessage: String = "RETRY",
@@ -47,7 +50,8 @@ fun ErrorModal(
     ) {
         ErrorModalLayout(
             modifier,
-            errorMessage,
+            message,
+            subMessage,
             buttonMessage,
             onButtonClick,
         )
@@ -57,7 +61,8 @@ fun ErrorModal(
 @Composable
 private fun ErrorModalLayout(
     modifier: Modifier = Modifier,
-    errorMessage: String,
+    message: String,
+    subMessage: String,
     buttonMessage: String,
     onButtonClick: (() -> Unit)? = null,
 ) {
@@ -76,14 +81,14 @@ private fun ErrorModalLayout(
             tint = MaterialTheme.colorScheme.error,
             modifier =
                 Modifier
-                    .size(getResponsiveSizeHeight(Spacing.xLarge)),
+                    .size(getResponsiveSizeHeight(50.dp)),
         )
 
-        Kiwi_Spacer(Spacing.small)
+        Kiwi_Spacer(Spacing.xLarge)
 
         Kiwi_H2(
             KiwiTextArguments(
-                "Wild Error Appeared!",
+                message,
                 color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
                 bold = true,
@@ -94,7 +99,7 @@ private fun ErrorModalLayout(
 
         Kiwi_P2(
             KiwiTextArguments(
-                errorMessage,
+                subMessage,
                 TextAlign.Center,
                 color = MaterialTheme.colorScheme.outline,
                 modifier =
@@ -103,12 +108,15 @@ private fun ErrorModalLayout(
             ),
         )
 
+        Kiwi_Spacer(Spacing.xLarge)
+
         if (onButtonClick != null) {
             Kiwi_Button(
-                textArguments = KiwiTextArguments(
-                    buttonMessage,
-                    color = MaterialTheme.colorScheme.secondary,
-                ),
+                textArguments =
+                    KiwiTextArguments(
+                        buttonMessage,
+                        color = MaterialTheme.colorScheme.secondary,
+                    ),
                 onClick = onButtonClick,
                 modifier =
                     Modifier
@@ -126,6 +134,6 @@ private fun ErrorModalLayout(
 @Composable
 fun ErrorModal_Preview() {
     Kiwi_Theme {
-        ErrorModal {}
+        ErrorModalScreen {}
     }
 }

@@ -14,4 +14,6 @@ sealed class UIState<out T> {
     ) : UIState<Nothing>()
 
     object GeneralError : UIState<Nothing>()
+
+    object WIP : UIState<Nothing>()
 }

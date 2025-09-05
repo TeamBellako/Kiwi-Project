@@ -29,20 +29,25 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.modals.AppBarModal
-import com.bellako.kiwi.common.screens.modals.DashboardModal
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
@@ -129,6 +134,17 @@ private fun InteractiveMap(
                         },
                         onGestureEnd = {
                             viewModel.startFling()
+
+                            if (viewModel.previousState.value.scale != viewModel.state.value.scale) {
+                                firebaseLogEvent(
+                                    FirebaseEventNames.MAP_PERFORM_ZOOM,
+                                    mapOf(
+                                        "scale_old" to viewModel.previousState.value.scale,
+                                        "scale_new" to viewModel.state.value.scale,
+                                    ),
+                                )
+                            }
+                            viewModel.updatePreviousState()
                         },
                     )
                 },
@@ -162,12 +178,19 @@ fun MapScreen_Preview() {
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarModal(navController = rememberNavController())
+                AppBarScreen(navController = rememberNavController())
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
-                    DashboardModal(
+                    DashboardScreen(
+                        usersViewModel = UsersFakeViewModel(
+                            UsersState(
+                                validUsersDTO().email,
+                                validUsersDTO().password,
+                                validUsersDTO().registerDate
+                            )
+                        ),
                         metricsViewModel =
                             MetricsFakeViewModel(
                                 MetricsState(

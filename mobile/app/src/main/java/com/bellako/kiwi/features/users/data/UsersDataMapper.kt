@@ -2,8 +2,8 @@ package com.bellako.kiwi.features.users.data
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.bellako.kiwi.common.utils.DateUtils.formatDate
-import java.time.LocalDate
+import com.bellako.kiwi.common.utils.DateUtils.dateToString
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 
 object UsersDataMapper {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -14,7 +14,7 @@ object UsersDataMapper {
                 val passwordResult = Password.of(dto.password)
                 passwordResult.fold(
                     onSuccess = { validPassword ->
-                        Result.success(UsersDomain(validEmail, validPassword, LocalDate.parse(dto.registerDate)))
+                        Result.success(UsersDomain(validEmail, validPassword, stringToDate(dto.registerDate)))
                     },
                     onFailure = { err -> Result.failure(err) },
                 )
@@ -31,7 +31,7 @@ object UsersDataMapper {
                 val passwordResult = Password.of(state.password)
                 passwordResult.fold(
                     onSuccess = { validPassword ->
-                        Result.success(UsersDomain(validEmail, validPassword, LocalDate.parse(state.registerDate)))
+                        Result.success(UsersDomain(validEmail, validPassword, stringToDate(state.registerDate)))
                     },
                     onFailure = { err -> Result.failure(err) },
                 )
@@ -45,7 +45,7 @@ object UsersDataMapper {
         UsersState(
             email = domain.email.value,
             password = domain.password.value,
-            registerDate = formatDate(domain.registerDate),
+            registerDate = dateToString(domain.registerDate),
         )
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -64,7 +64,7 @@ object UsersDataMapper {
         UsersDTO(
             email = domain.email.value,
             password = domain.password.value,
-            registerDate = formatDate(domain.registerDate),
+            registerDate = dateToString(domain.registerDate),
         )
 
     @RequiresApi(Build.VERSION_CODES.O)

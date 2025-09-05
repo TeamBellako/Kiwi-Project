@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.users.model
 import android.content.Context
 import com.bellako.kiwi.common.model.IBaseViewModel
 import com.bellako.kiwi.features.users.data.UsersState
+import java.time.LocalDate
 
 interface IUsersViewModel : IBaseViewModel<UsersState> {
     fun onEmailChanged(email: String)
@@ -12,6 +13,8 @@ interface IUsersViewModel : IBaseViewModel<UsersState> {
     fun checkEmailValid(): Boolean
 
     fun checkPasswordValid(): Boolean
+
+    fun getRegisterDate(): LocalDate
 
     // ---------------------------------------------------------------------------------------------
 

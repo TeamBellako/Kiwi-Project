@@ -23,16 +23,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
-import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
-import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -84,7 +84,7 @@ private fun Question(
     personalityState?.let { currentPersonalityState ->
 
         if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
-            ErrorModal(onButtonClick = {
+            ErrorModalScreen(onButtonClick = {
                 usersViewModel.resetUiState()
                 personalityViewModel.resetUiState()
             })
@@ -114,10 +114,11 @@ private fun Question(
                 currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
 
                     Kiwi_Button(
-                        textArguments = KiwiTextArguments(
-                            option,
-                            color = MaterialTheme.colorScheme.secondary,
-                        ),
+                        textArguments =
+                            KiwiTextArguments(
+                                option,
+                                color = MaterialTheme.colorScheme.secondary,
+                            ),
                         color = MaterialTheme.colorScheme.primary,
                         onClick = {
                             currentPersonalityState.answers[currentQuestion] = index
@@ -126,7 +127,7 @@ private fun Question(
                             } else {
                                 CoroutineScope(Dispatchers.Main).launch {
                                     if (personalityViewModel.updateBuild().isSuccess) {
-                                        FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
+                                        firebaseLogEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
 
                                         navController.navigate(ScreenRoutes.SIGNUP4_APPS)
                                         localLoading = true
@@ -158,7 +159,13 @@ private fun Question(
 fun SignUpScreen3_Test_Preview() {
     Kiwi_Theme {
         SignUpScreen3_Test(
-            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)),
+            usersViewModel = UsersFakeViewModel(
+                UsersState(
+                    validUsersDTO().email,
+                    validUsersDTO().password,
+                    validUsersDTO().registerDate
+                )
+            ),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(

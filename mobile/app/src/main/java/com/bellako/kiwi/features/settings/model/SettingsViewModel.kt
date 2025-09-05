@@ -3,6 +3,8 @@ package com.bellako.kiwi.features.settings.model
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
@@ -25,7 +27,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -86,23 +87,34 @@ class SettingsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun updateSettings(state: SettingsState) {
-            _state.value = state
-            updateVolume()
-            val domain = SettingsDataMapper.toDomain(state)
-            if (previousValidSettingsDomain == domain) {
+            val currentDomain = SettingsDataMapper.toDomain(_state.value!!)
+            val newDomain = SettingsDataMapper.toDomain(state)
+            if (currentDomain == newDomain) {
                 return
             }
-            previousValidSettingsDomain = domain
-            pendingSave.value = domain
+            _state.value = state
+            updateVolume()
+            previousValidSettingsDomain = currentDomain
+            pendingSave.value = newDomain
         }
 
         // ---------------------------------------------------------------------------------------------
 
         init {
             viewModelScope.launch {
-                pendingSave.debounce(AUTO_SAVE_MILLIS).collectLatest { domain ->
-                    domain?.let {
+                pendingSave.debounce(AUTO_SAVE_MILLIS).collectLatest { newDomain ->
+                    newDomain?.let { domain ->
                         repository.updateSettings(SettingsDataMapper.toDTO(domain))
+
+                        firebaseLogEvent(
+                            FirebaseEventNames.SETTINGS_UPDATE_VOLUME,
+                            mapOf(
+                                "sound_old" to previousValidSettingsDomain?.soundVolume!!,
+                                "sound_new" to domain.soundVolume,
+                                "music_old" to previousValidSettingsDomain?.musicVolume!!,
+                                "music_new" to domain.musicVolume,
+                            ),
+                        )
                     }
                 }
             }

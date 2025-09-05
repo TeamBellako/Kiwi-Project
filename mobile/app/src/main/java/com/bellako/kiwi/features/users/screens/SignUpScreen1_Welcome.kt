@@ -23,9 +23,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
-import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.analytics.firebaseLogEvent
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
@@ -93,14 +93,15 @@ private fun Welcome(
         Kiwi_Spacer(Spacing.xLarge)
 
         Kiwi_Button(
-            textArguments = KiwiTextArguments(
-                "LET'S DO IT",
-                color = MaterialTheme.colorScheme.secondary,
-                bold = true,
-            ),
+            textArguments =
+                KiwiTextArguments(
+                    "LET'S DO IT",
+                    color = MaterialTheme.colorScheme.secondary,
+                    bold = true,
+                ),
             color = MaterialTheme.colorScheme.primary,
             onClick = {
-                FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_1_STARTED)
+                firebaseLogEvent(FirebaseEventNames.SIGNUP_1_STARTED)
 
                 viewModel.onEmailChanged("")
                 viewModel.onPasswordChanged("")
@@ -163,7 +164,13 @@ private fun GoToLogIn(onSignUp: () -> Unit) {
 fun SignUpScreen1_Welcome_Preview() {
     Kiwi_Theme {
         SignUpScreen1_Welcome(
-            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)),
+            viewModel = UsersFakeViewModel(
+                UsersState(
+                    validUsersDTO().email,
+                    validUsersDTO().password,
+                    validUsersDTO().registerDate
+                )
+            ),
             navController = rememberNavController(),
         )
     }

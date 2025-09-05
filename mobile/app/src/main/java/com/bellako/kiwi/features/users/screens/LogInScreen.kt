@@ -37,8 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
-import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
@@ -50,7 +50,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
-import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -86,7 +86,7 @@ fun LogInScreen(
     ) {
         when (uiState) {
             is UIState.GeneralError -> {
-                ErrorModal(onButtonClick = {
+                ErrorModalScreen(onButtonClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         usersViewModel.clearLocalCredentials(context)
                         usersViewModel.resetUiState()
@@ -226,11 +226,12 @@ private fun LogIn(
                     Kiwi_Spacer()
 
                     Kiwi_Button(
-                        textArguments = KiwiTextArguments(
-                            "LOG IN",
-                            color = MaterialTheme.colorScheme.secondary,
-                            bold = true,
-                        ),
+                        textArguments =
+                            KiwiTextArguments(
+                                "LOG IN",
+                                color = MaterialTheme.colorScheme.secondary,
+                                bold = true,
+                            ),
                         onClick = {
                             CoroutineScope(Dispatchers.Main).launch {
                                 localLoading = performLogin(context, usersViewModel, personalityViewModel, navController)
@@ -372,7 +373,13 @@ private fun SignUp(onSignUp: () -> Unit) {
 fun LogInScreen_Preview() {
     Kiwi_Theme {
         LogInScreen(
-            UsersFakeViewModel(UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)),
+            usersViewModel = UsersFakeViewModel(
+                UsersState(
+                    validUsersDTO().email,
+                    validUsersDTO().password,
+                    validUsersDTO().registerDate
+                )
+            ),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(

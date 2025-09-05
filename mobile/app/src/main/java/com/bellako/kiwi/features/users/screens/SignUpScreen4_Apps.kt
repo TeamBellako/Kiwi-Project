@@ -37,10 +37,10 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
-import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -49,7 +49,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
-import com.bellako.kiwi.common.screens.modals.ErrorModal
+import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -143,7 +143,7 @@ fun AppClassification(
     updateApps(goodApps, badApps, personalityViewModel)
 
     if (personalityUiState == UIState.GeneralError) {
-        ErrorModal(onButtonClick = {
+        ErrorModalScreen(onButtonClick = {
             personalityViewModel.resetUiState()
         })
     } else {
@@ -217,15 +217,16 @@ fun AppClassification(
             Kiwi_Spacer(Spacing.large)
 
             Kiwi_Button(
-                textArguments = KiwiTextArguments(
-                    "CONTINUE",
-                    textAlign = TextAlign.Center,
-                ),
+                textArguments =
+                    KiwiTextArguments(
+                        "CONTINUE",
+                        textAlign = TextAlign.Center,
+                    ),
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         if (personalityViewModel.updateApps().isSuccess) {
-                            FirebaseEventLogger.logEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
+                            firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
 
                             navController.navigate(ScreenRoutes.HOME)
                             localLoading = true

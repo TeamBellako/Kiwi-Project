@@ -31,11 +31,12 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.bellako.kiwi.analytics.FirebaseEventLogger
 import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -49,7 +50,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun PermissionsRequestModal(withPermissions: @Composable () -> Unit) {
+fun PermissionsModalScreen(withPermissions: @Composable () -> Unit) {
     val context = LocalContext.current
     val isPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -67,7 +68,7 @@ fun PermissionsRequestModal(withPermissions: @Composable () -> Unit) {
                     if (event == Lifecycle.Event.ON_START) {
                         hasPermissions.value = hasUsageStatsPermission(context)
                         if (hasPermissions.value && !hadPermissionsOnStop) {
-                            FirebaseEventLogger.logEvent(FirebaseEventNames.PERMISSION_GRANTED)
+                            firebaseLogEvent(FirebaseEventNames.PERMISSION_GRANTED)
                         }
                     }
                 }
@@ -115,13 +116,13 @@ private fun PermissionRequestLayout(context: Context) {
             Icon(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = "Error icon",
-                tint = MaterialTheme.colorScheme.error,
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier =
                     Modifier
-                        .size(getResponsiveSizeHeight(Spacing.xLarge)),
+                        .size(getResponsiveSizeHeight(50.dp)),
             )
 
-            Kiwi_Spacer()
+            Kiwi_Spacer(Spacing.xLarge)
 
             Kiwi_H2(
                 KiwiTextArguments(
@@ -179,6 +180,6 @@ private fun PermissionRequestLayout(context: Context) {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 fun PermissionsRequestModal_Preview() {
     Kiwi_Theme {
-        PermissionsRequestModal {}
+        PermissionsModalScreen {}
     }
 }

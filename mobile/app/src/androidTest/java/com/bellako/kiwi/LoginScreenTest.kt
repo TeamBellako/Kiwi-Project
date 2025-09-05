@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.map.model.MapViewModel

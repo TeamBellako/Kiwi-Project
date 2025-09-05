@@ -1,16 +1,19 @@
 package com.bellako.kiwi.features.users.model
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.bellako.kiwi.analytics.firebaseSetUserId
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.users.data.Email
 import com.bellako.kiwi.features.users.data.LoginDTO
 import com.bellako.kiwi.features.users.data.Password
-import com.bellako.kiwi.features.users.data.UsersDTO
 import com.bellako.kiwi.features.users.data.UsersState
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.ConfigurationV0
@@ -26,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import java.io.IOException
 import java.security.GeneralSecurityException
+import java.time.LocalDate
 
 @HiltViewModel
 class UsersViewModel
@@ -69,6 +73,9 @@ class UsersViewModel
                 },
             )
 
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun getRegisterDate(): LocalDate = stringToDate(_state.value.registerDate)
+
         // -----------------------------------------------------------------------------------------
 
         override suspend fun signup(context: Context): Result<Unit> {
@@ -94,6 +101,7 @@ class UsersViewModel
                 authRepository.setJwtToken(result.getOrThrow().jwt)
                 _state.value = _state.value.copy(registerDate = result.getOrThrow().registerDate)
                 saveLocalCredentials(context)
+                firebaseSetUserId(_state.value.email)
                 _isLoginCompleted.value = true
             }
         }

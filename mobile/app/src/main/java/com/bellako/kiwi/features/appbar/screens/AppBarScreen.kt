@@ -1,4 +1,4 @@
-package com.bellako.kiwi.common.screens.modals
+package com.bellako.kiwi.features.appbar.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -28,77 +28,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.R
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.ScreenRoutes
+import com.bellako.kiwi.features.appbar.data.appBarItems
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
-data class NavigationItem(
-    val icon: Int,
-    val route: String,
-    val enabled: Boolean = true
-)
-
-val navigationItems = listOf(
-    NavigationItem(
-        icon = R.drawable.ic_map,
-        route = ScreenRoutes.HOME
-    ),
-    NavigationItem(
-        icon = R.drawable.ic_fire,
-        route = ScreenRoutes.HOME
-    ),
-    NavigationItem(
-        icon = R.drawable.ic_target,
-        route = ScreenRoutes.HOME
-    ),
-    NavigationItem(
-        icon = R.drawable.ic_swords,
-        route = ScreenRoutes.HOME,
-        enabled = false
-    ),
-    NavigationItem(
-        icon = R.drawable.ic_person,
-        route = ScreenRoutes.SETTINGS
-    )
-)
-
 @Composable
-fun AppBarModal(
-    navController: NavController
-) {
+fun AppBarScreen(navController: NavController) {
     Box(
-        modifier = Modifier
-            .wrapContentSize()
+        modifier =
+            Modifier
+                .wrapContentSize(),
     ) {
         AppBarModalLayout(
-            navController
+            navController,
         )
     }
 }
 
-
 @Composable
-fun AppBarModalLayout(
-    navController: NavController
-) {
+fun AppBarModalLayout(navController: NavController) {
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
 
     NavigationBar(
-        modifier = Modifier
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp), getResponsiveSizeHeight(40.dp), 0.dp, 0.dp))
-            .fillMaxWidth()
-            .height(getResponsiveSizeHeight(100.dp))
-            .testTag(CommonTestTags.BOTTOM_APPBAR),
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp), getResponsiveSizeHeight(40.dp), 0.dp, 0.dp))
+                .fillMaxWidth()
+                .height(getResponsiveSizeHeight(100.dp))
+                .testTag(CommonTestTags.BOTTOM_APPBAR),
         contentColor = MaterialTheme.colorScheme.secondary,
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        navigationItems.forEachIndexed { index, item ->
-            val tint = MaterialTheme.colorScheme.secondary.copy(
-                alpha = if (item.enabled) 1f else 0.4f
-            )
+        appBarItems.forEachIndexed { index, item ->
+            val tint =
+                MaterialTheme.colorScheme.secondary.copy(
+                    alpha = if (item.enabled) 1f else 0.4f,
+                )
             NavigationBarItem(
                 enabled = item.enabled,
                 selected = selectedNavigationIndex.intValue == index,
@@ -108,28 +75,30 @@ fun AppBarModalLayout(
                 },
                 icon = {
                     Box(
-                        modifier = Modifier
-                            .background(
-                                color =
-                                    if (selectedNavigationIndex.intValue == index)
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    else
-                                        Color.Transparent,
-                                shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp))
-                            )
-                            .padding(getResponsiveSizeHeight(Spacing.small))
+                        modifier =
+                            Modifier
+                                .background(
+                                    color =
+                                        if (selectedNavigationIndex.intValue == index) {
+                                            MaterialTheme.colorScheme.primaryContainer
+                                        } else {
+                                            Color.Transparent
+                                        },
+                                    shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
+                                ).padding(getResponsiveSizeHeight(Spacing.small)),
                     ) {
                         Icon(
                             painter = painterResource(id = item.icon),
                             contentDescription = "",
                             tint = tint,
-                            modifier = Modifier.size(getResponsiveSizeHeight(30.dp))
+                            modifier = Modifier.size(getResponsiveSizeHeight(30.dp)),
                         )
                     }
                 },
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = Color.Transparent // Override default container color behavior
-                )
+                colors =
+                    NavigationBarItemDefaults.colors(
+                        indicatorColor = Color.Transparent, // Override default container color behavior
+                    ),
             )
         }
     }
@@ -146,11 +115,11 @@ fun AppBarModal_Preview() {
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarModal(navController = rememberNavController())
+                AppBarScreen(navController = rememberNavController())
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues))
-            }
+            },
         )
     }
 }
