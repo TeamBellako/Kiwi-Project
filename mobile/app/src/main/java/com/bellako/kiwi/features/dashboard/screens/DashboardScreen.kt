@@ -39,7 +39,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -97,7 +96,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
@@ -481,12 +479,14 @@ private fun CalendarMonthView(
 @Composable
 private fun CalendarDayView(
     usersViewModel: IUsersViewModel,
+    canSelectBeforeRegisterDate: Boolean = true,
     day: LocalDate,
     isSelected: Boolean,
     onClicked: () -> Unit,
     testTag: String,
 ) {
-    val isDayEnabled = !day.isBefore(usersViewModel.getRegisterDate()) && !day.isAfter(LocalDate.now())
+    val isDayEnabled = !day.isAfter(LocalDate.now()) &&
+            (canSelectBeforeRegisterDate || !day.isBefore(usersViewModel.getRegisterDate()))
 
     Box(
         modifier =
