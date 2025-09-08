@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -50,41 +54,49 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-fun PermissionsModalScreen(withPermissions: @Composable () -> Unit) {
+fun PermissionsModalScreen(
+    navController: NavHostController,
+    exclusionRoutes: List<String> = listOf(),
+    withPermissions: @Composable () -> Unit,
+) {
     val context = LocalContext.current
     val isPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val isExclusion =
+        navBackStackEntry == null ||
+            navBackStackEntry?.destination == null ||
+            exclusionRoutes.contains(navBackStackEntry?.destination?.route)
+
     var hadPermissionsOnStop = false
     val hasPermissions = remember { mutableStateOf(hasUsageStatsPermission(context)) }
 
-    if (!hasPermissions.value) {
-        DisposableEffect(lifecycleOwner) {
-            val observer =
-                LifecycleEventObserver { _, event ->
-                    if (event == Lifecycle.Event.ON_STOP) {
-                        hadPermissionsOnStop = hasPermissions.value
-                    }
-                    if (event == Lifecycle.Event.ON_START) {
-                        hasPermissions.value = hasUsageStatsPermission(context)
-                        if (hasPermissions.value && !hadPermissionsOnStop) {
-                            firebaseLogEvent(FirebaseEventNames.PERMISSION_GRANTED)
-                        }
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_STOP) {
+                    hadPermissionsOnStop = hasPermissions.value
+                }
+                if (event == Lifecycle.Event.ON_START) {
+                    hasPermissions.value = hasUsageStatsPermission(context)
+                    if (hasPermissions.value && !hadPermissionsOnStop) {
+                        firebaseLogEvent(FirebaseEventNames.PERMISSION_GRANTED)
                     }
                 }
-
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
             }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
-    if (!isPreview && hasPermissions.value) {
-        withPermissions()
-    } else {
+    if (isPreview || (!hasPermissions.value && !isExclusion)) {
         PermissionRequestLayout(context)
+    } else {
+        withPermissions()
     }
 }
 
@@ -180,6 +192,8 @@ private fun PermissionRequestLayout(context: Context) {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 fun PermissionsRequestModal_Preview() {
     Kiwi_Theme {
-        PermissionsModalScreen {}
+        PermissionsModalScreen(
+            navController = rememberNavController(),
+        ) {}
     }
 }
