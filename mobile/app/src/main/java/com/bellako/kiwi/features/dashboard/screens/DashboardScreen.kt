@@ -34,6 +34,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -70,6 +71,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
@@ -94,15 +96,20 @@ import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getScreenHeight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.math.ceil
-import kotlin.math.exp
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
 const val DAY_DISABLED_ALPHA = 0.3f
+
+const val STATE_HEIGHT_0 = 150
+const val STATE_HEIGHT_1 = 260
+const val STATE_HEIGHT_2 = 650
+val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -114,11 +121,15 @@ fun DashboardScreen(
     initialStateIndex: Int = 0,
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val metricsState by metricsViewModel.state.collectAsState()
+    val metricsIsLoading by metricsViewModel.isLoading.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+
+    val isLoading by remember { derivedStateOf { metricsIsLoading || personalityIsLoading } }
 
     LaunchedEffect(Unit) {
-        metricsViewModel.onDateChanged(LocalDate.now())
         loadMetrics(dateToString(LocalDate.now()), metricsViewModel, personalityViewModel, context)
     }
 
@@ -126,7 +137,7 @@ fun DashboardScreen(
 
     Kiwi_DraggableBar(
         modifier = Modifier.testTag(DashboardModalTestTags.DRAGGABLE_NODE),
-        states = listOf(150, 260, 650),
+        states = STATES,
         content = { currentStateIndex ->
             Column(
                 modifier =
@@ -148,18 +159,40 @@ fun DashboardScreen(
                 } else if (currentStateIndex <= 1) {
                     CollapsedContent(
                         metricsState = metricsState!!,
+                        isLoading = isLoading,
                         onCalendarViewClicked = {
                             shouldShowCalendarView.value = true
                         },
                     )
                 } else if (currentStateIndex <= 2) {
                     ExpandedContent(
+                        context = context,
+                        coroutineScope = coroutineScope,
                         usersViewModel = usersViewModel,
                         metricsViewModel = metricsViewModel,
                         metricsState = metricsState!!,
                         personalityViewModel = personalityViewModel,
                         shouldShowCalendarView = shouldShowCalendarView,
+                        isLoading = isLoading,
                     )
+                }
+            }
+
+            if (isLoading) {
+                Box(
+                    modifier =
+                        Modifier
+                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.3f))
+                            .fillMaxWidth()
+                            .height(
+                                getResponsiveSizeHeight(STATES[currentStateIndex]).dp -
+                                    getResponsiveSizeHeight(100.dp), // appbar
+                            ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (currentStateIndex > 0) {
+                        LoadingModal()
+                    }
                 }
             }
         },
@@ -192,6 +225,7 @@ private fun HiddenContent() {
 @Composable
 private fun CollapsedContent(
     metricsState: MetricsState,
+    isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
 ) {
     ComposableEngagementMeasuring("collapsed")
@@ -201,8 +235,9 @@ private fun CollapsedContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CollapsedSummaryCard(
-            metricsState,
-            onCalendarViewClicked,
+            metricsState = metricsState,
+            isLoading = isLoading,
+            onCalendarViewClicked = onCalendarViewClicked,
         )
     }
 }
@@ -210,15 +245,15 @@ private fun CollapsedContent(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ExpandedContent(
+    context: Context,
+    coroutineScope: CoroutineScope,
     usersViewModel: IUsersViewModel,
     metricsViewModel: IMetricsViewModel,
     metricsState: MetricsState,
     personalityViewModel: IPersonalityViewModel,
     shouldShowCalendarView: MutableState<Boolean>,
+    isLoading: Boolean,
 ) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
     ComposableEngagementMeasuring("expanded")
 
     Column(
@@ -228,6 +263,7 @@ private fun ExpandedContent(
         if (shouldShowCalendarView.value) {
             CalendarMonthView(
                 context = context,
+                isLoading = isLoading,
                 coroutineScope = coroutineScope,
                 usersViewModel = usersViewModel,
                 metricsViewModel = metricsViewModel,
@@ -244,6 +280,7 @@ private fun ExpandedContent(
                 metricsViewModel = metricsViewModel,
                 metricsState = metricsState,
                 personalityViewModel = personalityViewModel,
+                isLoading = isLoading,
             ) {
                 shouldShowCalendarView.value = true
             }
@@ -299,6 +336,7 @@ private fun CalendarWeekView(
     metricsState: MetricsState,
     metricsViewModel: IMetricsViewModel,
     personalityViewModel: IPersonalityViewModel,
+    isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
 ) {
     val date = stringToDate(metricsState.date)
@@ -334,6 +372,7 @@ private fun CalendarWeekView(
                     Box(modifier = Modifier.weight(1f)) {
                         CalendarDayView(
                             usersViewModel = usersViewModel,
+                            isLoading = isLoading,
                             day = day,
                             isSelected = isSelected,
                             onClicked = {
@@ -353,7 +392,10 @@ private fun CalendarWeekView(
                 }
             }
 
-            ShowCalendarViewButton(onCalendarViewClicked)
+            ShowCalendarViewButton(
+                isLoading = isLoading,
+                onCalendarViewClicked = onCalendarViewClicked,
+            )
         }
     }
 }
@@ -362,6 +404,7 @@ private fun CalendarWeekView(
 @Composable
 private fun CalendarMonthView(
     context: Context,
+    isLoading: Boolean,
     coroutineScope: CoroutineScope,
     usersViewModel: IUsersViewModel,
     metricsViewModel: IMetricsViewModel,
@@ -461,6 +504,7 @@ private fun CalendarMonthView(
                                 if (dayDate in startOfMonth..endOfMonth) {
                                     CalendarDayView(
                                         usersViewModel = usersViewModel,
+                                        isLoading = isLoading,
                                         day = dayDate,
                                         isSelected = stringToDate(metricsState.date) == dayDate,
                                         onClicked = {
@@ -492,6 +536,7 @@ private fun CalendarMonthView(
 @Composable
 private fun CalendarDayView(
     usersViewModel: IUsersViewModel,
+    isLoading: Boolean,
     canSelectBeforeRegisterDate: Boolean = true,
     day: LocalDate,
     isSelected: Boolean,
@@ -512,7 +557,7 @@ private fun CalendarDayView(
                     shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp)),
                 ).padding(vertical = getResponsiveSizeHeight(Spacing.xSmall))
                 .clickable(
-                    enabled = isDayEnabled,
+                    enabled = !isLoading && isDayEnabled,
                     onClick = onClicked,
                 ).testTag(testTag),
         contentAlignment = Alignment.Center,
@@ -559,8 +604,6 @@ private fun selectDay(
         ),
     )
 
-    metricsViewModel.onDateChanged(newDay)
-
     coroutineScope.launch {
         loadMetrics(dateToString(newDay), metricsViewModel, personalityViewModel, context)
     }
@@ -589,6 +632,11 @@ private suspend fun loadMetrics(
     personalityViewModel: IPersonalityViewModel,
     context: Context,
 ) {
+    if (date == metricsViewModel.state.value!!.date) {
+        return
+    }
+    metricsViewModel.onDateChanged(stringToDate(date))
+
     val metricsState = metricsViewModel.state.value!!
     val personalityState = personalityViewModel.state.value!!
     var deviceMetrics = MetricsProvider.getDeviceMetrics(context, metricsState, personalityState)
@@ -721,7 +769,8 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
 
 @Composable
 private fun CollapsedSummaryCard(
-    state: MetricsState,
+    metricsState: MetricsState,
+    isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
 ) {
     Box(
@@ -751,9 +800,9 @@ private fun CollapsedSummaryCard(
                     horizontalAlignment = Alignment.Start,
                 ) {
                     SelectedMetricsTime(
-                        state.maxGoodTimeSeconds,
-                        state.currentGoodTimeSeconds,
-                        state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                        metricsState.maxGoodTimeSeconds,
+                        metricsState.currentGoodTimeSeconds,
+                        metricsState.currentGoodTimeSeconds > 0 || metricsState.currentBadTimeSeconds > 0,
                         false,
                         DashboardModalTestTags.GOOD_TIME,
                     )
@@ -761,9 +810,9 @@ private fun CollapsedSummaryCard(
                     Kiwi_Spacer(Spacing.xSmall)
 
                     SelectedMetricsTime(
-                        state.maxBadTimeSeconds,
-                        state.currentBadTimeSeconds,
-                        state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                        metricsState.maxBadTimeSeconds,
+                        metricsState.currentBadTimeSeconds,
+                        metricsState.currentGoodTimeSeconds > 0 || metricsState.currentBadTimeSeconds > 0,
                         false,
                         DashboardModalTestTags.BAD_TIME,
                     )
@@ -776,20 +825,28 @@ private fun CollapsedSummaryCard(
                 .height(getResponsiveSizeHeight(52.dp)),
             contentAlignment = Alignment.CenterEnd,
         ) {
-            ShowCalendarViewButton(onCalendarViewClicked)
+            ShowCalendarViewButton(
+                isLoading,
+                onCalendarViewClicked,
+            )
         }
     }
 }
 
 @Composable
-private fun ShowCalendarViewButton(onCalendarViewClicked: () -> Unit) {
+private fun ShowCalendarViewButton(
+    isLoading: Boolean,
+    onCalendarViewClicked: () -> Unit,
+) {
     Kiwi_Image(
         R.drawable.calendar,
         "Show Calendar View Button",
         Modifier
             .size(getResponsiveSizeHeight(30.dp))
             .background(MaterialTheme.colorScheme.background)
-            .clickable {
+            .clickable(
+                enabled = !isLoading,
+            ) {
                 onCalendarViewClicked()
             }.testTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON),
     )
