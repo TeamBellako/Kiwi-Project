@@ -21,7 +21,6 @@ import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.common.utils.DateUtils.stringToYearMonth
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
-import com.bellako.kiwi.features.metrics.data.MetricsDTO
 import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.MetricsFactory
@@ -39,7 +38,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
-import java.time.YearMonth
 
 @RunWith(AndroidJUnit4::class)
 class DashboardModalTest {
@@ -71,13 +69,8 @@ class DashboardModalTest {
         usersState = UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)
         usersFakeViewModel = UsersFakeViewModel(usersState)
 
-        metricsState = MetricsDataMapper.toState(todayMetricsDTO.copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0))
-        fakeMetricsViewModel =
-            MetricsFakeViewModel(
-                metricsState,
-                todayMetricsDTO,
-                pastMetricsDTO,
-            )
+        metricsState = MetricsDataMapper.toState(todayMetricsDTO)
+        fakeMetricsViewModel = MetricsFakeViewModel(metricsState, todayMetricsDTO, pastMetricsDTO)
 
         personalityState =
             PersonalityState(
