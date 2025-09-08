@@ -94,11 +94,12 @@ private fun AppScreen(
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
 ) {
+    val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val route = currentBackStackEntry?.destination?.route
-    val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val isLoginScreen =
-        route == ScreenRoutes.LOGIN ||
+        route == null ||
+            route == ScreenRoutes.LOGIN ||
             route == ScreenRoutes.SIGNUP1_WELCOME ||
             route == ScreenRoutes.SIGNUP2_FORM ||
             route == ScreenRoutes.SIGNUP3_TEST ||
