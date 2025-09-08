@@ -99,6 +99,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.math.ceil
+import kotlin.math.exp
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
 const val DAY_DISABLED_ALPHA = 0.3f
@@ -215,6 +216,9 @@ private fun ExpandedContent(
     personalityViewModel: IPersonalityViewModel,
     shouldShowCalendarView: MutableState<Boolean>,
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     ComposableEngagementMeasuring("expanded")
 
     Column(
@@ -223,6 +227,8 @@ private fun ExpandedContent(
     ) {
         if (shouldShowCalendarView.value) {
             CalendarMonthView(
+                context = context,
+                coroutineScope = coroutineScope,
                 usersViewModel = usersViewModel,
                 metricsViewModel = metricsViewModel,
                 metricsState = metricsState,
@@ -232,6 +238,8 @@ private fun ExpandedContent(
         } else {
             CurrentDayIndicator()
             CalendarWeekView(
+                context = context,
+                coroutineScope = coroutineScope,
                 usersViewModel = usersViewModel,
                 metricsViewModel = metricsViewModel,
                 metricsState = metricsState,
@@ -285,18 +293,17 @@ private fun CurrentDayIndicator() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun CalendarWeekView(
+    context: Context,
+    coroutineScope: CoroutineScope,
     usersViewModel: IUsersViewModel,
     metricsState: MetricsState,
     metricsViewModel: IMetricsViewModel,
     personalityViewModel: IPersonalityViewModel,
     onCalendarViewClicked: () -> Unit,
 ) {
-    val context = LocalContext.current
-
     val date = stringToDate(metricsState.date)
     val currentDayOfWeek = date.dayOfWeek.value % DAYS_IN_WEEK
     val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
-    val coroutineScope = rememberCoroutineScope()
     val startOfWeek = date.minusDays(currentDayOfWeek.toLong())
 
     Column(
@@ -354,6 +361,8 @@ private fun CalendarWeekView(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun CalendarMonthView(
+    context: Context,
+    coroutineScope: CoroutineScope,
     usersViewModel: IUsersViewModel,
     metricsViewModel: IMetricsViewModel,
     metricsState: MetricsState,
@@ -361,8 +370,6 @@ private fun CalendarMonthView(
     modifier: Modifier = Modifier,
     shouldShowCalendarView: MutableState<Boolean>,
 ) {
-    val context = LocalContext.current
-
     val selectedMonth = remember { mutableStateOf(YearMonth.from(stringToDate(metricsState.date))) }
 
     var transitionDirection by remember { mutableIntStateOf(0) } // -1 = previous, 1 = next
@@ -391,8 +398,6 @@ private fun CalendarMonthView(
                 },
             )
         }
-
-    val coroutineScope = rememberCoroutineScope()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -585,43 +590,24 @@ private suspend fun loadMetrics(
     context: Context,
 ) {
     val metricsState = metricsViewModel.state.value!!
+    val personalityState = personalityViewModel.state.value!!
+    var deviceMetrics = MetricsProvider.getDeviceMetrics(context, metricsState, personalityState)
     metricsViewModel.loadMetrics(date).fold(
         onSuccess = { _ ->
-            updateWithDeviceMetrics(metricsViewModel, personalityViewModel, context)
+            if (deviceMetrics.currentGoodTimeSeconds < metricsState.currentGoodTimeSeconds) {
+                deviceMetrics = deviceMetrics.copy(currentGoodTimeSeconds = metricsState.currentGoodTimeSeconds)
+            }
+            if (deviceMetrics.currentBadTimeSeconds < metricsState.currentBadTimeSeconds) {
+                deviceMetrics = deviceMetrics.copy(currentBadTimeSeconds = metricsState.currentBadTimeSeconds)
+            }
+            if (deviceMetrics != metricsState) {
+                metricsViewModel.updateMetrics(deviceMetrics)
+            }
         },
         onFailure = { _ ->
-            metricsViewModel.createMetrics(metricsState).fold(
-                onSuccess = { _ ->
-                    updateWithDeviceMetrics(metricsViewModel, personalityViewModel, context)
-                },
-                onFailure = { _ -> },
-            )
+            metricsViewModel.createMetrics(deviceMetrics)
         },
     )
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-private suspend fun updateWithDeviceMetrics(
-    metricsViewModel: IMetricsViewModel,
-    personalityViewModel: IPersonalityViewModel,
-    context: Context,
-) {
-    val metricsState = metricsViewModel.state.value!!
-    var deviceMetrics =
-        MetricsProvider.getDeviceMetrics(
-            context,
-            metricsState,
-            personalityViewModel.state.value!!,
-        )
-    if (deviceMetrics.currentGoodTimeSeconds < metricsState.currentGoodTimeSeconds) {
-        deviceMetrics = deviceMetrics.copy(currentGoodTimeSeconds = metricsState.currentGoodTimeSeconds)
-    }
-    if (deviceMetrics.currentBadTimeSeconds < metricsState.currentBadTimeSeconds) {
-        deviceMetrics = deviceMetrics.copy(currentBadTimeSeconds = metricsState.currentBadTimeSeconds)
-    }
-    if (deviceMetrics != metricsState) {
-        metricsViewModel.updateMetrics(deviceMetrics)
-    }
 }
 
 @Composable
@@ -660,77 +646,41 @@ private fun ExpandedMetricProgressTitle(title: String) {
 }
 
 @Composable
-private fun TimeExpanded(
+private fun SelectedMetricsTime(
     maxSeconds: Int,
     currentSeconds: Int,
+    validMetrics: Boolean,
+    expanded: Boolean,
     tag: String,
 ) {
-    val text =
-        buildAnnotatedString {
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                append(DateUtils.parseTimeSeconds(currentSeconds))
-            }
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
-            }
-        }
-    Kiwi_AnnotatedString_P1(
+    val textArguments =
         KiwiAnnotatedStringArguments(
-            text,
-            TextAlign.Center,
+            buildAnnotatedString {
+                withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                    if (validMetrics) {
+                        append(DateUtils.parseTimeSeconds(currentSeconds))
+                    }
+                }
+                withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+                    if (validMetrics) {
+                        append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
+                    } else {
+                        append("No data")
+                    }
+                }
+            },
+            if (expanded) TextAlign.Center else TextAlign.Left,
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .testTag(tag),
-        ),
-    )
-}
+        )
 
-@Composable
-private fun GoodTimeExpanded(state: MetricsState) {
-    TimeExpanded(state.maxGoodTimeSeconds, state.currentGoodTimeSeconds, DashboardModalTestTags.GOOD_TIME)
-}
-
-@Composable
-private fun BadTimeExpanded(state: MetricsState) {
-    TimeExpanded(state.maxBadTimeSeconds, state.currentBadTimeSeconds, DashboardModalTestTags.BAD_TIME)
-}
-
-@Composable
-private fun TimeCollapsed(
-    maxSeconds: Int,
-    currentSeconds: Int,
-    tag: String,
-) {
-    val text =
-        buildAnnotatedString {
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                append(DateUtils.parseTimeSeconds(currentSeconds))
-            }
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
-            }
-        }
-    Kiwi_AnnotatedString_P2(
-        KiwiAnnotatedStringArguments(
-            text,
-            TextAlign.Left,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .testTag(tag),
-        ),
-    )
-}
-
-@Composable
-private fun GoodTimeCollapsed(state: MetricsState) {
-    TimeCollapsed(state.maxGoodTimeSeconds, state.currentGoodTimeSeconds, DashboardModalTestTags.GOOD_TIME)
-}
-
-@Composable
-private fun BadTimeCollapsed(state: MetricsState) {
-    TimeCollapsed(state.maxBadTimeSeconds, state.currentBadTimeSeconds, DashboardModalTestTags.BAD_TIME)
+    if (expanded) {
+        Kiwi_AnnotatedString_P1(textArguments)
+    } else {
+        Kiwi_AnnotatedString_P2(textArguments)
+    }
 }
 
 @Composable
@@ -745,13 +695,25 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
         Box(modifier = Modifier.weight(1f)) {
             Column {
                 ExpandedMetricProgressTitle("Good Apps Time")
-                GoodTimeExpanded(state)
+                SelectedMetricsTime(
+                    state.maxGoodTimeSeconds,
+                    state.currentGoodTimeSeconds,
+                    state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                    true,
+                    DashboardModalTestTags.GOOD_TIME,
+                )
             }
         }
         Box(modifier = Modifier.weight(1f)) {
             Column {
                 ExpandedMetricProgressTitle("Evil Apps Time")
-                BadTimeExpanded(state)
+                SelectedMetricsTime(
+                    state.maxBadTimeSeconds,
+                    state.currentBadTimeSeconds,
+                    state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                    true,
+                    DashboardModalTestTags.BAD_TIME,
+                )
             }
         }
     }
@@ -788,11 +750,23 @@ private fun CollapsedSummaryCard(
                 Column(
                     horizontalAlignment = Alignment.Start,
                 ) {
-                    GoodTimeCollapsed(state)
+                    SelectedMetricsTime(
+                        state.maxGoodTimeSeconds,
+                        state.currentGoodTimeSeconds,
+                        state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                        false,
+                        DashboardModalTestTags.GOOD_TIME,
+                    )
 
                     Kiwi_Spacer(Spacing.xSmall)
 
-                    BadTimeCollapsed(state)
+                    SelectedMetricsTime(
+                        state.maxBadTimeSeconds,
+                        state.currentBadTimeSeconds,
+                        state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                        false,
+                        DashboardModalTestTags.BAD_TIME,
+                    )
                 }
             }
         }
