@@ -5,201 +5,153 @@ import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-
-private enum class AudioType { MUSIC, SFX }
 
 data class AudioLayer(
     val resId: Int,
     val isActive: Boolean,
 )
 
-private class AudioLayerPlayer(
+class AudioLayerPlayer(
     val resId: Int,
     var isActive: Boolean,
     val player: ExoPlayer,
     var fade: Runnable?,
 )
 
+private const val DEFAULT_FADE_DURATION = 2000L
+private const val DEFAULT_FADE_DURATION_FAST = 200L
+private const val FADE_IN_INTERVAL = 50L
+
 /**
  * For centralized audio management. Music, SFXs and volume.
  */
-object AudioManager {
-    private const val DEFAULT_FADE_DURATION = 2000L
-    private const val DEFAULT_FADE_DURATION_FAST = 200L
-
-    private const val FADE_IN_INTERVAL = 50L
-
+class AudioManagerBase {
     // Enabled
     private var isEnabled: Boolean = true
 
     // Volume
-    private var globalVolumeMusic: Float = 1f // 0f..1f
-    private var globalVolumeSFX: Float = 1f // 0f..1f
+    private var globalVolume: Float = 1f // 0f..1f
 
-    // Music (layers) currently playing. See @playMusic()
-    private val currentMusic: MutableMap<Int, AudioLayerPlayer> = mutableMapOf()
-
-    // SFXs currently playing. See @playSFX()
-    private val currentSFXs: MutableSet<AudioLayerPlayer> = mutableSetOf()
+    // Layers currently playing
+    private val currentLayers: MutableMap<Int, AudioLayerPlayer> = mutableMapOf()
 
     // Event handlers
     private val handler = Handler(Looper.getMainLooper())
 
     // ---------------------------------------------------------------------------------------------
 
+    /** Getter layers. */
+    fun getLayers(): MutableMap<Int, AudioLayerPlayer> = currentLayers
+
     /** Disables the whole audio. Used for android tests. */
     fun setEnabled(isEnabled: Boolean) {
         this.isEnabled = isEnabled
     }
 
-    /** Updates the music volume of the whole app. */
-    fun updateGlobalVolumeMusic(newGlobalVolumeMusic: Float) {
-        globalVolumeMusic = newGlobalVolumeMusic.coerceIn(0f, 1f)
-        updateCurrentMusicVolume()
-    }
-
-    /** Updates the SFXs volume of the whole app. */
-    fun updateGlobalVolumeSFX(newGlobalVolumeSFX: Float) {
-        globalVolumeSFX = newGlobalVolumeSFX.coerceIn(0f, 1f)
-        updateCurrentSFXsVolume()
-    }
-
-    /**
-     * Plays a new music looping.
-     * There may be only one music playing simultaneously, so if there is any already,
-     * it will fade out while the new one is fading in.
-     * A music can have several layers, all playing at the same time, inactive ones with volume 0.
-     * Use this function also to enable/disable layers.
-     */
-    fun playMusic(
-        context: Context,
-        resIds: List<AudioLayer>,
-        fadeDuration: Long = DEFAULT_FADE_DURATION,
-    ) {
-        play(context, resIds, AudioType.MUSIC, fadeDuration)
-    }
-
-    /** Stops the music currently playing (every layer) */
-    fun stopMusic(fadeDuration: Long = DEFAULT_FADE_DURATION) {
-        for ((_, player) in currentMusic) {
-            stopPlayer(player, AudioType.MUSIC, fadeDuration)
-        }
-    }
-
-    /** Plays a new SFX once */
-    fun playSFX(
-        context: Context,
-        resId: Int,
-    ) {
-        play(context, listOf(AudioLayer(resId, true)), AudioType.SFX, 0)
-    }
-
-    /**
-     * Should be called when the app comes to foreground.
-     * Resume the music if any.
-     */
-    fun onBackgroundResume() {
-        for ((_, player) in currentMusic) {
-            playPlayer(player, AudioType.MUSIC, DEFAULT_FADE_DURATION_FAST)
-        }
+    /** Updates the volume of the whole manager. */
+    fun updateGlobalVolume(newGlobalVolume: Float) {
+        globalVolume = newGlobalVolume.coerceIn(0f, 1f)
+        updateCurrentLayersVolume()
     }
 
     /**
      * Should be called when the app goes to background or screen turns off.
-     * Pause the music and SFXs if any.
+     * Pause all the layers if any.
      */
     fun onBackgroundEnter() {
-        for ((_, player) in currentMusic) {
-            pausePlayer(player, DEFAULT_FADE_DURATION_FAST)
-        }
-        for (player in currentSFXs) {
-            stopPlayer(player, AudioType.SFX, DEFAULT_FADE_DURATION_FAST)
+        pauseAll()
+    }
+
+    /**
+     * Should be called when the app comes to foreground.
+     * Resume all the layers if any.
+     */
+    fun onBackgroundResume() {
+        for ((_, player) in currentLayers) {
+            playPlayer(player, DEFAULT_FADE_DURATION_FAST)
         }
     }
 
-    // ---------------------------------------------------------------------------------------------
-
-    private fun play(
+    /** Updates a layer, active or not. Creates a player or fades (in or our) if already existing. */
+    fun setLayerActive(
         context: Context,
-        layers: List<AudioLayer>,
-        type: AudioType,
+        layer: AudioLayer,
         fadeDuration: Long,
+        looping: Boolean,
     ) {
         if (!isEnabled) {
             return
         }
-        // Remove all currently playing musics not found in the new music
-        if (type == AudioType.MUSIC) {
-            for ((currentMusicResId, currentMusicPlayer) in currentMusic.toMap()) {
-                if (!layers.any { it.resId == currentMusicResId }) {
-                    stopPlayer(currentMusicPlayer, AudioType.MUSIC, fadeDuration)
-                }
-            }
-        }
-        for (layer in layers) {
-            // Enable/disable layers if already active music
-            if (type == AudioType.MUSIC && currentMusic.containsKey(layer.resId)) {
-                val player = currentMusic[layer.resId]!!
-                val fromVolume = if (layer.isActive) 0f else globalVolumeMusic
-                val toVolume = if (layer.isActive) globalVolumeMusic else 0f
-                if (player.isActive != layer.isActive) {
-                    player.isActive = layer.isActive
-                    fade(player, fromVolume, toVolume, fadeDuration)
-                }
-                // Start new music or SFX
-            } else {
-                addLayer(context, layer, type, fadeDuration)
-            }
-        }
-    }
 
-    private fun addLayer(
-        context: Context,
-        layer: AudioLayer,
-        type: AudioType,
-        fadeDuration: Long,
-    ) {
+        val targetVolume = if (layer.isActive) globalVolume else 0f
+
+        val existingLayerPlayer = currentLayers[layer.resId]
+        if (existingLayerPlayer != null) {
+            fade(existingLayerPlayer, existingLayerPlayer.player.volume, targetVolume, fadeDuration)
+            return
+        }
+
         val player = ExoPlayer.Builder(context).build()
         val uri =
             Uri
                 .Builder()
-                .scheme(
-                    ContentResolver.SCHEME_ANDROID_RESOURCE,
-                ).authority(context.packageName)
+                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+                .authority(context.packageName)
                 .appendPath(layer.resId.toString())
                 .build()
         player.setMediaItem(MediaItem.fromUri(uri))
-        player.repeatMode = if (type == AudioType.MUSIC) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
+        player.repeatMode = if (looping) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
         player.prepare()
-        val layerPlayer = AudioLayerPlayer(layer.resId, layer.isActive, player, null)
-        playPlayer(layerPlayer, type, fadeDuration)
+        val newLayerPlayer = AudioLayerPlayer(layer.resId, layer.isActive, player, null)
 
-        if (type == AudioType.MUSIC) {
-            currentMusic[layer.resId] = layerPlayer
-        } else {
-            currentSFXs.add(layerPlayer)
+        if (!looping) {
             player.addListener(
                 object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_ENDED) {
-                            stopPlayer(layerPlayer, AudioType.SFX, 0)
+                            stopPlayer(newLayerPlayer, 0)
                         }
                     }
                 },
             )
         }
+
+        playPlayer(newLayerPlayer, fadeDuration)
+        currentLayers.put(layer.resId, newLayerPlayer)
     }
+
+    /** Stops a layer and removes it. */
+    fun removeLayer(
+        layer: AudioLayer,
+        fadeDuration: Long,
+    ) {
+        val layerPlayer = currentLayers[layer.resId]
+        if (layerPlayer != null) {
+            stopPlayer(layerPlayer, fadeDuration)
+        }
+    }
+
+    /** Pause all current layers. */
+    fun pauseAll(fadeDuration: Long = DEFAULT_FADE_DURATION_FAST) {
+        for ((_, player) in currentLayers) {
+            pausePlayer(player, fadeDuration)
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
 
     private fun playPlayer(
         player: AudioLayerPlayer,
-        type: AudioType,
         fadeDuration: Long,
     ) {
-        val actualToVolume = if (type == AudioType.MUSIC) globalVolumeMusic else globalVolumeSFX
-        fade(player, 0f, if (player.isActive) actualToVolume else 0f, if (player.isActive) fadeDuration else 0, null)
+        val targetVolume = if (player.isActive) globalVolume else 0f
+        val fadeDuration = if (player.isActive) fadeDuration else 0
+        fade(player, 0f, targetVolume, fadeDuration, null)
         player.player.play()
     }
 
@@ -214,17 +166,11 @@ object AudioManager {
 
     private fun stopPlayer(
         player: AudioLayerPlayer,
-        type: AudioType,
         fadeDuration: Long,
     ) {
         fade(player, player.player.volume, 0f, fadeDuration) {
             player.player.stop()
-
-            if (type == AudioType.MUSIC) {
-                currentMusic.remove(player.resId)
-            } else {
-                currentSFXs.remove(player)
-            }
+            currentLayers.remove(player.resId)
         }
     }
 
@@ -271,17 +217,88 @@ object AudioManager {
         handler.post(runnable)
     }
 
-    private fun updateCurrentMusicVolume() {
-        for ((_, player) in currentMusic) {
+    private fun updateCurrentLayersVolume() {
+        for ((_, player) in currentLayers) {
             if (player.isActive) {
-                fade(player, player.player.volume, globalVolumeMusic, DEFAULT_FADE_DURATION_FAST)
+                fade(player, player.player.volume, globalVolume, DEFAULT_FADE_DURATION_FAST)
             }
         }
     }
+}
 
-    private fun updateCurrentSFXsVolume() {
-        for (player in currentSFXs) {
-            fade(player, player.player.volume, globalVolumeSFX, DEFAULT_FADE_DURATION_FAST)
+/**
+ * For centralized audio management. Plays music, SFXs and manages the global volume of the app.
+ */
+object AudioManager {
+    val musicManager = AudioManagerBase()
+    val sfxManager = AudioManagerBase()
+
+    /** Disables the whole audio. Used for android tests. */
+    fun setEnabled(isEnabled: Boolean) {
+        musicManager.setEnabled(isEnabled)
+        sfxManager.setEnabled(isEnabled)
+    }
+
+    /** Updates the music volume of the whole app. */
+    fun updateGlobalVolumeMusic(newGlobalVolumeMusic: Float) {
+        musicManager.updateGlobalVolume(newGlobalVolumeMusic)
+    }
+
+    /** Updates the SFXs volume of the whole app. */
+    fun updateGlobalVolumeSFX(newGlobalVolumeSFX: Float) {
+        sfxManager.updateGlobalVolume(newGlobalVolumeSFX)
+    }
+
+    /**
+     * Plays a new music looping.
+     * There may be only one music playing simultaneously, so if there is any already,
+     * it will fade out while the new one is fading in.
+     * A music can have several layers, all playing at the same time, inactive ones with volume 0.
+     * Use this function also to enable/disable layers.
+     */
+    fun playMusic(
+        context: Context,
+        layers: List<AudioLayer>,
+        fadeDuration: Long = DEFAULT_FADE_DURATION,
+    ) {
+        val layersToRemove = mutableStateListOf<AudioLayer>()
+        for (existingLayer in musicManager.getLayers()) {
+            if (!(layers.map { audioLayer -> audioLayer.resId }.contains(existingLayer.key))) {
+                layersToRemove.add(AudioLayer(existingLayer.value.resId, existingLayer.value.isActive))
+            }
         }
+        for (layerToRemove in layersToRemove) {
+            musicManager.removeLayer(layerToRemove, fadeDuration)
+        }
+
+        for (newLayer in layers) {
+            musicManager.setLayerActive(context, newLayer, fadeDuration, true)
+        }
+    }
+
+    /** Plays a new SFX once */
+    fun playSFX(
+        context: Context,
+        resId: Int,
+    ) {
+        sfxManager.setLayerActive(context, AudioLayer(resId, true), 0, false)
+    }
+
+    /**
+     * Should be called when the app goes to background or screen turns off.
+     * Pause the music and SFXs if any.
+     */
+    fun onBackgroundEnter() {
+        musicManager.onBackgroundEnter()
+        sfxManager.onBackgroundEnter()
+    }
+
+    /**
+     * Should be called when the app comes to foreground.
+     * Resume the music if any.
+     */
+    fun onBackgroundResume() {
+        musicManager.onBackgroundResume()
+        sfxManager.onBackgroundResume()
     }
 }
