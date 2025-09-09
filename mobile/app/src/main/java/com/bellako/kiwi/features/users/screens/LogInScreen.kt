@@ -3,13 +3,11 @@ package com.bellako.kiwi.features.users.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +23,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,7 +40,6 @@ import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
@@ -51,7 +47,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
-import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -75,7 +70,10 @@ fun LogInScreen(
     navController: NavController,
 ) {
     val context = LocalContext.current
-    val uiState by usersViewModel.uiState.collectAsState()
+    val isPreview = LocalInspectionMode.current
+
+    val usersState by usersViewModel.state.collectAsState()
+    val usersUiState by usersViewModel.uiState.collectAsState()
 
     Box(
         modifier =
@@ -84,7 +82,7 @@ fun LogInScreen(
                 .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center,
     ) {
-        when (uiState) {
+        when (usersUiState) {
             is UIState.GeneralError -> {
                 ErrorModalScreen(onButtonClick = {
                     CoroutineScope(Dispatchers.Main).launch {
@@ -105,10 +103,14 @@ fun LogInScreen(
                     contentScale = ContentScale.Crop,
                 )
 
-                LogIn(
-                    usersViewModel,
-                    personalityViewModel,
-                    navController,
+                LogInLayout(
+                    context = context,
+                    isPreview = isPreview,
+                    usersViewModel = usersViewModel,
+                    usersState = usersState,
+                    usersUiState = usersUiState,
+                    personalityViewModel = personalityViewModel,
+                    navController = navController,
                 )
             }
         }
@@ -116,25 +118,20 @@ fun LogInScreen(
 }
 
 @Composable
-private fun LogIn(
+private fun LogInLayout(
+    context: Context,
+    isPreview: Boolean,
     usersViewModel: IUsersViewModel,
+    usersState: UsersState?,
+    usersUiState: UIState<Unit>,
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
 ) {
-    val context = LocalContext.current
-
-    val usersState by usersViewModel.state.collectAsState()
-    val usersUiState by usersViewModel.uiState.collectAsState()
     val usersIsLoading by usersViewModel.isLoading.collectAsState()
-
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
-
     var initializing by remember { mutableStateOf(true) }
     var localLoading by remember { mutableStateOf(false) }
-
     val isLoading by remember { derivedStateOf { initializing || localLoading || usersIsLoading || personalityIsLoading } }
-
-    val isPreview = LocalInspectionMode.current
 
     // check stored credentials for auto login
     LaunchedEffect(Unit) {
@@ -160,129 +157,145 @@ private fun LogIn(
                 LoadingModal()
             }
 
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .testTag(CommonTestTags.USERS_SCREEN),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                // TEXT WELCOME
+            LogInForm(
+                context = context,
+                isLoading = isLoading,
+                isPreview = isPreview,
+                usersViewModel = usersViewModel,
+                usersState = usersState,
+                usersUiState = usersUiState,
+                personalityViewModel = personalityViewModel,
+                navController = navController,
+                onLoginSuccess = {
+                    localLoading = true
+                },
+            )
+        }
 
-                Kiwi_H2(
+        GoToSignUp(
+            isLoading = isLoading,
+            isPreview = isPreview,
+            navController = navController,
+        )
+    }
+}
+
+@Composable
+private fun LogInForm(
+    context: Context,
+    isLoading: Boolean,
+    isPreview: Boolean,
+    usersViewModel: IUsersViewModel,
+    usersState: UsersState,
+    usersUiState: UIState<Unit>,
+    personalityViewModel: IPersonalityViewModel,
+    navController: NavController,
+    onLoginSuccess: (() -> Unit),
+) {
+    Column(
+        modifier =
+            Modifier
+                .alpha(if (!isLoading || isPreview) 1f else 0f),
+    ) {
+        Kiwi_InputField(
+            enabled = !isLoading,
+            value = usersState.email,
+            onValueChange = { usersViewModel.onEmailChanged(it) },
+            label = {
+                Kiwi_Label2(
                     KiwiTextArguments(
-                        "Welcome Back, \nKnight",
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.large)),
+                        "Email",
+                        color = MaterialTheme.colorScheme.inversePrimary,
                     ),
                 )
+            },
+            shouldHideInput = false,
+            textColor = MaterialTheme.colorScheme.inversePrimary,
+            testTag = UsersTestTags.EMAIL_FIELD,
+        )
 
-                Column(
-                    modifier =
-                        Modifier
-                            .alpha(if (!isLoading || isPreview) 1f else 0f),
-                ) {
-                    // CREDENTIALS
+        Kiwi_Spacer()
 
-                    Kiwi_InputField(
-                        enabled = !isLoading,
-                        value = currentState.email,
-                        onValueChange = { usersViewModel.onEmailChanged(it) },
-                        label = {
-                            Kiwi_Label2(
-                                KiwiTextArguments(
-                                    "Email",
-                                    color = MaterialTheme.colorScheme.inversePrimary,
-                                ),
-                            )
-                        },
-                        shouldHideInput = false,
-                        textColor = MaterialTheme.colorScheme.inversePrimary,
-                        testTag = UsersTestTags.EMAIL_FIELD,
-                    )
+        Kiwi_InputField(
+            enabled = !isLoading,
+            value = usersState.password,
+            onValueChange = { usersViewModel.onPasswordChanged(it) },
+            label = {
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        "Password",
+                        color = MaterialTheme.colorScheme.inversePrimary,
+                    ),
+                )
+            },
+            shouldHideInput = true,
+            textColor = MaterialTheme.colorScheme.inversePrimary,
+            testTag = UsersTestTags.PASSWORD_FIELD,
+        )
 
-                    Kiwi_Spacer()
+        Kiwi_Spacer()
 
-                    Kiwi_InputField(
-                        enabled = !isLoading,
-                        value = currentState.password,
-                        onValueChange = { usersViewModel.onPasswordChanged(it) },
-                        label = {
-                            Kiwi_Label2(
-                                KiwiTextArguments(
-                                    "Password",
-                                    color = MaterialTheme.colorScheme.inversePrimary,
-                                ),
-                            )
-                        },
-                        shouldHideInput = true,
-                        textColor = MaterialTheme.colorScheme.inversePrimary,
-                        testTag = UsersTestTags.PASSWORD_FIELD,
-                    )
-
-                    Kiwi_Spacer()
-
-                    Kiwi_Button(
-                        textArguments =
-                            KiwiTextArguments(
-                                "LOG IN",
-                                color = MaterialTheme.colorScheme.secondary,
-                                bold = true,
-                            ),
-                        onClick = {
-                            CoroutineScope(Dispatchers.Main).launch {
-                                localLoading = performLogin(context, usersViewModel, personalityViewModel, navController)
-                            }
-                        },
-                        enabled = !isLoading,
-                        testTag = UsersTestTags.LOGIN_BUTTON,
-                    )
-
-                    Kiwi_Spacer()
-
-                    // LOGIN ERROR  MESSAGE
-
-                    var errorMessage by remember { mutableStateOf("") }
-                    errorMessage =
-                        when (usersUiState) {
-                            is UIState.Error -> {
-                                (usersUiState as UIState.Error).message
-                            }
-
-                            else -> {
-                                ""
-                            }
-                        }
-
-                    Box(
-                        modifier =
-                            Modifier
-                                .alpha(if (errorMessage.isEmpty()) 0f else 1f),
-                    ) {
-                        Kiwi_InfoBox(
-                            message = errorMessage,
-                            color = MaterialTheme.colorScheme.error,
-                            testTag = UsersTestTags.ERROR_TEXT,
-                        )
+        Kiwi_Button(
+            textArguments =
+                KiwiTextArguments(
+                    "LOG IN",
+                    color = MaterialTheme.colorScheme.secondary,
+                    bold = true,
+                ),
+            onClick = {
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (performLogin(context, usersViewModel, personalityViewModel, navController)) {
+                        onLoginSuccess()
                     }
                 }
+            },
+            enabled = !isLoading,
+            testTag = UsersTestTags.LOGIN_BUTTON,
+        )
+
+        Kiwi_Spacer()
+
+        LogInErrorMessage(usersUiState)
+    }
+}
+
+@Composable
+private fun LogInErrorMessage(usersUiState: UIState<Unit>) {
+    var errorMessage by remember { mutableStateOf("") }
+    errorMessage =
+        when (usersUiState) {
+            is UIState.Error -> {
+                usersUiState.message
+            } else -> {
+                ""
             }
         }
 
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
-                    .alpha(if (!isLoading || isPreview) 1f else 0f),
-            contentAlignment = Alignment.BottomCenter,
-        ) {
-            SignUp {
-                navController.navigate(ScreenRoutes.SIGNUP1_WELCOME)
-            }
+    Box(modifier = Modifier.alpha(if (errorMessage.isEmpty()) 0f else 1f)) {
+        Kiwi_InfoBox(
+            message = errorMessage,
+            color = MaterialTheme.colorScheme.error,
+            testTag = UsersTestTags.ERROR_TEXT,
+        )
+    }
+}
+
+@Composable
+private fun GoToSignUp(
+    isLoading: Boolean,
+    isPreview: Boolean,
+    navController: NavController,
+) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
+                .alpha(if (!isLoading || isPreview) 1f else 0f),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        SignUp {
+            navController.navigate(ScreenRoutes.SIGNUP1_WELCOME)
         }
     }
 }
@@ -373,13 +386,14 @@ private fun SignUp(onSignUp: () -> Unit) {
 fun LogInScreen_Preview() {
     Kiwi_Theme {
         LogInScreen(
-            usersViewModel = UsersFakeViewModel(
-                UsersState(
-                    validUsersDTO().email,
-                    validUsersDTO().password,
-                    validUsersDTO().registerDate
-                )
-            ),
+            usersViewModel =
+                UsersFakeViewModel(
+                    UsersState(
+                        validUsersDTO().email,
+                        validUsersDTO().password,
+                        validUsersDTO().registerDate,
+                    ),
+                ),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(
