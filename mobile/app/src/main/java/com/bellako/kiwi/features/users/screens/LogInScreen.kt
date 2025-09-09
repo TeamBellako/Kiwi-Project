@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
@@ -329,6 +330,7 @@ private suspend fun performLogin(
                 navController.navigate(ScreenRoutes.SIGNUP3_TEST)
             },
         )
+        AudioManager.playSFX(context, R.raw.sfx_bellsspaceodyssey)
         return true
     }
     return false
