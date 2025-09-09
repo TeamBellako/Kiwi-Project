@@ -35,7 +35,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import kotlinx.coroutines.launch
 
-const val SNAP_VELOCITY_THRESHOLD = 400f
+private const val SNAP_VELOCITY_THRESHOLD = 400f
 
 /**
  * @param content placed inside the bar, called with param @currentStateIndex when modified
@@ -182,10 +182,10 @@ fun Kiwi_DraggableBar_Preview_2() {
     Kiwi_DraggableBar_Preview(2)
 }
 
-const val STATE_HEIGHT_0 = 150
-const val STATE_HEIGHT_1 = 260
-const val STATE_HEIGHT_2 = 650
-val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
+private const val STATE_HEIGHT_0 = 150
+private const val STATE_HEIGHT_1 = 260
+private const val STATE_HEIGHT_2 = 650
+private val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
