@@ -182,6 +182,11 @@ fun Kiwi_DraggableBar_Preview_2() {
     Kiwi_DraggableBar_Preview(2)
 }
 
+const val STATE_HEIGHT_0 = 150
+const val STATE_HEIGHT_1 = 260
+const val STATE_HEIGHT_2 = 650
+val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
@@ -204,7 +209,7 @@ fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
                     )
                 }
             },
-            states = listOf(0, 100, 600),
+            states = STATES,
             initialStateIndex = initialStateIndex,
         )
     }
