@@ -221,54 +221,80 @@ fun CalendarMonthView(
                     )
             },
             label = "CalendarMonthTransition",
-        ) { displayedMonth ->
-            val startOfMonth = displayedMonth.atDay(1)
-            val endOfMonth = displayedMonth.atEndOfMonth()
-            val startDayOfWeek = startOfMonth.dayOfWeek.value % DAYS_IN_WEEK
-            val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
-            val totalWeeks = ceil(totalDays / DAYS_IN_WEEK.toFloat()).toInt()
+        ) { month ->
+            CalendarMonth(
+                context = context,
+                isLoading = isLoading,
+                coroutineScope = coroutineScope,
+                usersViewModel = usersViewModel,
+                metricsViewModel = metricsViewModel,
+                metricsState = metricsState,
+                shouldShowCalendarView = shouldShowCalendarView,
+                month = month,
+                personalityViewModel = personalityViewModel,
+            )
+        }
+    }
+}
 
-            Column {
-                for (weekIndex in 0 until totalWeeks) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp)),
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun CalendarMonth(
+    context: Context,
+    isLoading: Boolean,
+    coroutineScope: CoroutineScope,
+    usersViewModel: IUsersViewModel,
+    metricsViewModel: IMetricsViewModel,
+    metricsState: MetricsState,
+    personalityViewModel: IPersonalityViewModel,
+    month: YearMonth,
+    shouldShowCalendarView: MutableState<Boolean>,
+) {
+    val startOfMonth = month.atDay(1)
+    val endOfMonth = month.atEndOfMonth()
+    val startDayOfWeek = startOfMonth.dayOfWeek.value % DAYS_IN_WEEK
+    val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
+    val totalWeeks = ceil(totalDays / DAYS_IN_WEEK.toFloat()).toInt()
+
+    Column {
+        for (weekIndex in 0 until totalWeeks) {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp)),
+            ) {
+                for (dayOfWeek in 0 until DAYS_IN_WEEK) {
+                    val dayIndex = weekIndex * DAYS_IN_WEEK + dayOfWeek
+                    val dayOffset = dayIndex - startDayOfWeek
+                    val dayDate = startOfMonth.plusDays(dayOffset.toLong())
+
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        for (dayOfWeek in 0 until DAYS_IN_WEEK) {
-                            val dayIndex = weekIndex * DAYS_IN_WEEK + dayOfWeek
-                            val dayOffset = dayIndex - startDayOfWeek
-                            val dayDate = startOfMonth.plusDays(dayOffset.toLong())
-
-                            Box(
-                                modifier = Modifier.weight(1f),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (dayDate in startOfMonth..endOfMonth) {
-                                    CalendarDayView(
-                                        usersViewModel = usersViewModel,
-                                        isLoading = isLoading,
-                                        day = dayDate,
-                                        isSelected = stringToDate(metricsState.date) == dayDate,
-                                        onClicked = {
-                                            selectDay(
-                                                coroutineScope,
-                                                metricsViewModel,
-                                                metricsState,
-                                                personalityViewModel,
-                                                context,
-                                                dayDate,
-                                            )
-                                            shouldShowCalendarView.value = false
-                                        },
-                                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
+                        if (dayDate in startOfMonth..endOfMonth) {
+                            CalendarDayView(
+                                usersViewModel = usersViewModel,
+                                isLoading = isLoading,
+                                day = dayDate,
+                                isSelected = stringToDate(metricsState.date) == dayDate,
+                                onClicked = {
+                                    selectDay(
+                                        coroutineScope,
+                                        metricsViewModel,
+                                        metricsState,
+                                        personalityViewModel,
+                                        context,
+                                        dayDate,
                                     )
-                                } else {
-                                    Kiwi_Spacer()
-                                }
-                            }
+                                    shouldShowCalendarView.value = false
+                                },
+                                testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
+                            )
+                        } else {
+                            Kiwi_Spacer()
                         }
                     }
                 }
