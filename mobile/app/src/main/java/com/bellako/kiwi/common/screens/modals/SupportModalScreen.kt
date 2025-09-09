@@ -1,7 +1,9 @@
 package com.bellako.kiwi.common.screens.modals
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.util.AndroidRuntimeException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +38,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -49,12 +52,12 @@ fun SupportModalScreen(navController: NavController) {
                 .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center,
     ) {
-        HelpScreenLayout(navController)
+        SupportScreenLayout(navController)
     }
 }
 
 @Composable
-private fun HelpScreenLayout(navController: NavController) {
+private fun SupportScreenLayout(navController: NavController) {
     val context = LocalContext.current
 
     Column(
@@ -143,8 +146,10 @@ private fun openEmailClient(context: Context) {
 
     try {
         context.startActivity(emailIntent)
-    } catch (e: Exception) {
-        e.printStackTrace()
+    } catch (e: ActivityNotFoundException) {
+        warn("No mail app found: ${e.message}")
+    } catch (e: AndroidRuntimeException) {
+        warn("Runtime error: ${e.message}")
     }
 }
 
@@ -154,7 +159,7 @@ private fun openEmailClient(context: Context) {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun HelpScreen_Preview() {
+fun SupportScreen_Preview() {
     Kiwi_Theme {
         SupportModalScreen(
             navController = rememberNavController(),
