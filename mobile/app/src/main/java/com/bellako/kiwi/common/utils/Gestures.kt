@@ -15,6 +15,8 @@ import androidx.compose.ui.util.fastForEach
 import kotlin.math.PI
 import kotlin.math.abs
 
+// Adapted from TransformGestureDetector.kt -> PointerInputScope.detectTransformGestures
+@Suppress("CyclomaticComplexMethod")
 suspend fun PointerInputScope.detectTransformGesturesAndEnd(
     panZoomLock: Boolean = false,
     onGesture: (centroid: Offset, pan: Offset, zoom: Float, rotation: Float) -> Unit,
