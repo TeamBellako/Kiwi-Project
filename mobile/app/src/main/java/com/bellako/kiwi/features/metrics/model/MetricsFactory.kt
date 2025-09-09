@@ -8,6 +8,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
+@Suppress("MagicNumber")
 @RequiresApi(Build.VERSION_CODES.O)
 object MetricsFactory {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
