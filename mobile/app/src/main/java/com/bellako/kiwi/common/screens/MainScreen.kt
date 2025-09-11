@@ -18,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -53,27 +54,52 @@ fun MainScreen(
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
 ) {
+    val navController = rememberNavController()
+
     Kiwi_AudioHandler()
 
-    PermissionsModalScreen {
-        AppScreen(usersViewModel, settingsViewModel, personalityViewModel, metricsViewModel)
+    PermissionsModalScreen(
+        navController = navController,
+        exclusionRoutes =
+            listOf(
+                ScreenRoutes.LOGIN,
+                ScreenRoutes.SIGNUP1_WELCOME,
+                ScreenRoutes.SIGNUP2_FORM,
+                ScreenRoutes.SIGNUP3_TEST,
+            ),
+    ) {
+        AppScreen(
+            navController = navController,
+            usersViewModel = usersViewModel,
+            settingsViewModel = settingsViewModel,
+            personalityViewModel = personalityViewModel,
+            metricsViewModel = metricsViewModel,
+        )
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.Q)
+@Composable
+private fun AppScreenWrapper(screen: @Composable () -> Unit) {
+    Kiwi_BackHandler()
+    screen()
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 private fun AppScreen(
+    navController: NavHostController,
     usersViewModel: UsersViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
 ) {
-    val navController = rememberNavController()
+    val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val route = currentBackStackEntry?.destination?.route
-    val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val isLoginScreen =
-        route == ScreenRoutes.LOGIN ||
+        route == null ||
+            route == ScreenRoutes.LOGIN ||
             route == ScreenRoutes.SIGNUP1_WELCOME ||
             route == ScreenRoutes.SIGNUP2_FORM ||
             route == ScreenRoutes.SIGNUP3_TEST ||
@@ -89,86 +115,12 @@ private fun AppScreen(
         },
         content = { paddingValues ->
             Box(Modifier.padding(paddingValues)) {
-                NavHost(
+                AppNavHost(
                     navController = navController,
-                    startDestination = ScreenRoutes.LOGIN,
-                ) {
-                    composable(ScreenRoutes.LOGIN) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_Home()
-                        LogInScreen(
-                            usersViewModel = usersViewModel,
-                            personalityViewModel = personalityViewModel,
-                            navController = navController,
-                        )
-                    }
-
-                    composable(ScreenRoutes.SIGNUP1_WELCOME) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_SignUp()
-                        SignUpScreen1_Welcome(
-                            viewModel = usersViewModel,
-                            navController = navController,
-                        )
-                    }
-
-                    composable(ScreenRoutes.SIGNUP2_FORM) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_SignUp()
-                        SignUpScreen2_Form(
-                            usersViewModel = usersViewModel,
-                            personalityViewModel = personalityViewModel,
-                            navController = navController,
-                        )
-                    }
-
-                    composable(ScreenRoutes.SIGNUP3_TEST) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_SignUp()
-                        SignUpScreen3_Test(
-                            usersViewModel = usersViewModel,
-                            personalityViewModel = personalityViewModel,
-                            navController = navController,
-                        )
-                    }
-
-                    composable(ScreenRoutes.SIGNUP4_APPS) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_SignUp()
-                        SignUpScreen4_Apps(
-                            personalityViewModel = personalityViewModel,
-                            navController = navController,
-                        )
-                    }
-
-                    composable(ScreenRoutes.HOME) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_Home()
-                        MapScreen()
-                    }
-
-                    composable(ScreenRoutes.SETTINGS) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_Home()
-                        SettingsScreen(
-                            usersViewModel = usersViewModel,
-                            settingsViewModel = settingsViewModel,
-                            navController = navController,
-                        )
-                    }
-
-                    composable(ScreenRoutes.HELP) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_Home()
-                        SupportModalScreen(navController = navController)
-                    }
-
-                    composable(ScreenRoutes.WIP) {
-                        Kiwi_BackHandler()
-                        Kiwi_Music_Home()
-                        WIPModalScreen()
-                    }
-                }
+                    usersViewModel = usersViewModel,
+                    settingsViewModel = settingsViewModel,
+                    personalityViewModel = personalityViewModel,
+                )
 
                 if (showDashboard) {
                     DashboardScreen(
@@ -187,6 +139,105 @@ private fun AppScreen(
             }
         },
     )
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+@Composable
+fun AppNavHost(
+    navController: NavHostController,
+    usersViewModel: UsersViewModel = hiltViewModel(),
+    settingsViewModel: ISettingsViewModel,
+    personalityViewModel: IPersonalityViewModel,
+) {
+    NavHost(
+        navController = navController,
+        startDestination = ScreenRoutes.LOGIN,
+    ) {
+        composable(ScreenRoutes.LOGIN) {
+            AppScreenWrapper {
+                Kiwi_Music_Home()
+                LogInScreen(
+                    usersViewModel = usersViewModel,
+                    personalityViewModel = personalityViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.SIGNUP1_WELCOME) {
+            AppScreenWrapper {
+                Kiwi_Music_SignUp()
+                SignUpScreen1_Welcome(
+                    viewModel = usersViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.SIGNUP2_FORM) {
+            AppScreenWrapper {
+                Kiwi_Music_SignUp()
+                SignUpScreen2_Form(
+                    usersViewModel = usersViewModel,
+                    personalityViewModel = personalityViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.SIGNUP3_TEST) {
+            AppScreenWrapper {
+                Kiwi_Music_SignUp()
+                SignUpScreen3_Test(
+                    usersViewModel = usersViewModel,
+                    personalityViewModel = personalityViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.SIGNUP4_APPS) {
+            AppScreenWrapper {
+                Kiwi_Music_SignUp()
+                SignUpScreen4_Apps(
+                    personalityViewModel = personalityViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.HOME) {
+            AppScreenWrapper {
+                Kiwi_Music_Home()
+                MapScreen()
+            }
+        }
+
+        composable(ScreenRoutes.SETTINGS) {
+            AppScreenWrapper {
+                Kiwi_Music_Home()
+                SettingsScreen(
+                    usersViewModel = usersViewModel,
+                    settingsViewModel = settingsViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.HELP) {
+            AppScreenWrapper {
+                Kiwi_Music_Home()
+                SupportModalScreen(navController = navController)
+            }
+        }
+
+        composable(ScreenRoutes.WIP) {
+            AppScreenWrapper {
+                Kiwi_Music_Home()
+                WIPModalScreen()
+            }
+        }
+    }
 }
 
 @Composable

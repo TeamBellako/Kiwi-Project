@@ -8,6 +8,12 @@ interface IBaseViewModel<T> {
     val isLoading: StateFlow<Boolean>
     val uiState: StateFlow<UIState<Unit>>
 
+    fun setIsLoading(inIsLoading: Boolean)
+
+    fun setUiState(inUiState: UIState<Unit>)
+
+    fun resetUiState()
+
     fun <T> handleResult(
         result: Result<T>,
         successAction: () -> Unit,
@@ -19,8 +25,4 @@ interface IBaseViewModel<T> {
     ): Result<Unit>
 
     fun mapExceptionToUIState(e: Throwable): UIState<Unit>
-
-    fun setUiState(inUiState: UIState<Unit>)
-
-    fun resetUiState()
 }

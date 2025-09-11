@@ -20,8 +20,16 @@ abstract class BaseViewModel : ViewModel() {
         _isLoading.value = inIsLoading
     }
 
+    fun setUiState(inUiState: UIState<Unit>) {
+        _uiState.value = inUiState
+    }
+
+    fun resetUiState() {
+        setUiState(UIState.Idle)
+    }
+
     protected fun <T> failureWithError(message: String): Result<T> {
-        _uiState.value = UIState.Error(message)
+        setUiState(UIState.Error(message))
         return Result.failure(Exception(message))
     }
 
@@ -31,12 +39,12 @@ abstract class BaseViewModel : ViewModel() {
     ): Result<Unit> =
         result.fold(
             onSuccess = {
-                _uiState.value = UIState.Success(Unit)
+                setUiState(UIState.Success(Unit))
                 successAction()
                 Result.success(Unit)
             },
             onFailure = { throwable ->
-                _uiState.value = mapExceptionToUIState(throwable)
+                setUiState(mapExceptionToUIState(throwable))
                 Result.failure(throwable)
             },
         )
@@ -47,12 +55,12 @@ abstract class BaseViewModel : ViewModel() {
     ): Result<Unit> =
         result.fold(
             onSuccess = {
-                _uiState.value = UIState.Success(Unit)
+                setUiState(UIState.Success(Unit))
                 successAction()
                 Result.success(Unit)
             },
             onFailure = { throwable ->
-                _uiState.value = mapExceptionToUIState(throwable)
+                setUiState(mapExceptionToUIState(throwable))
                 Result.failure(throwable)
             },
         )
@@ -68,14 +76,6 @@ abstract class BaseViewModel : ViewModel() {
             }
             else -> UIState.GeneralError
         }
-
-    fun setUiState(inUiState: UIState<Unit>) {
-        _uiState.value = inUiState
-    }
-
-    fun resetUiState() {
-        setUiState(UIState.Idle)
-    }
 
     protected fun extractHttpExceptionMessage(exception: HttpException): String {
         val errorBody = exception.response()?.errorBody()?.string()

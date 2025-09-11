@@ -10,6 +10,7 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.util.concurrent.TimeUnit
 
 object MetricsProvider {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -47,13 +48,12 @@ object MetricsProvider {
     ): Int {
         val startTime = getDayLocalTime(date, LocalTime.MIN)
         val endTime = getDayLocalTime(date, LocalTime.MAX)
-
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
-        return (
+        val sumMs =
             usageStatsList
                 .filter { usageStats -> packageNames.contains(usageStats.packageName) }
-                .sumOf { it.totalTimeInForeground } / 1000
-        ).toInt()
+                .sumOf { it.totalTimeInForeground }
+        return TimeUnit.MILLISECONDS.toSeconds(sumMs).toInt()
     }
 }

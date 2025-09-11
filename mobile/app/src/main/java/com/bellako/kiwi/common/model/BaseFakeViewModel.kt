@@ -13,10 +13,6 @@ open class BaseFakeViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
-    fun setUiState(inUiState: UIState<Unit>) {
-        _uiState.value = inUiState
-    }
-
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -24,8 +20,16 @@ open class BaseFakeViewModel : ViewModel() {
         _isLoading.value = inIsLoading
     }
 
+    fun setUiState(inUiState: UIState<Unit>) {
+        _uiState.value = inUiState
+    }
+
+    fun resetUiState() {
+        setUiState(UIState.Idle)
+    }
+
     fun handleError(error: Throwable) {
-        _uiState.value =
+        setUiState(
             when (error) {
                 is HttpException -> {
                     if (error.code() >= HTTP_INTERNAL_ERROR) {
@@ -36,16 +40,12 @@ open class BaseFakeViewModel : ViewModel() {
                 }
                 is IOException -> UIState.GeneralError
                 else -> UIState.GeneralError
-            }
-    }
-
-    fun setLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
-        _uiState.value = if (isLoading) UIState.Loading else UIState.Idle
+            },
+        )
     }
 
     fun handleSuccess() {
-        _uiState.value = UIState.Success(Unit)
+        setUiState(UIState.Success(Unit))
     }
 
     fun <T> handleResult(
@@ -62,10 +62,6 @@ open class BaseFakeViewModel : ViewModel() {
                 Result.failure(throwable)
             },
         )
-
-    fun resetUiState() {
-        _uiState.value = UIState.Idle
-    }
 
     suspend fun <T> handleResultSuspend(
         result: Result<T>,

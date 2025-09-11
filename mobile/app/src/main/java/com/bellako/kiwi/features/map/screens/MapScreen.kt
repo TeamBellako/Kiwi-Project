@@ -67,7 +67,7 @@ fun MapScreen(
     minZoom: Float = 1.5f,
     maxZoom: Float = 6f,
     initialZoom: Float = 2f,
-    initialPosition: Offset = Offset(-0.4f, -0.4f),
+    initialPosition: Offset = @Suppress("MagicNumber") Offset(-0.4f, -0.4f),
     dragLimitFactor: Float = 1f,
     mapResourceId: Int = R.drawable.ph_home_map,
     title: String = "WORLD MAP",
@@ -184,13 +184,14 @@ fun MapScreen_Preview() {
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen()
                     DashboardScreen(
-                        usersViewModel = UsersFakeViewModel(
-                            UsersState(
-                                validUsersDTO().email,
-                                validUsersDTO().password,
-                                validUsersDTO().registerDate
-                            )
-                        ),
+                        usersViewModel =
+                            UsersFakeViewModel(
+                                UsersState(
+                                    validUsersDTO().email,
+                                    validUsersDTO().password,
+                                    validUsersDTO().registerDate,
+                                ),
+                            ),
                         metricsViewModel =
                             MetricsFakeViewModel(
                                 MetricsState(

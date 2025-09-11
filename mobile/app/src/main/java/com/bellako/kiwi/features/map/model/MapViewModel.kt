@@ -14,6 +14,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
+
+private const val FLING_FRICTION = 0.9f // to brake the velocity [0..1] the lower it is, the faster it stops
+private const val FLING_MIN_VELOCITY = 10f // threshold to stop the fling
+private const val FRAME_MILLIS = 16L
 
 @HiltViewModel
 class MapViewModel
@@ -32,8 +38,6 @@ class MapViewModel
         override val previousState = MutableStateFlow(MapState())
 
         private var flingJob: Job? = null
-        private val flingFriction = 0.9f // to brake the velocity [0..1] the lower it is, the faster it stops
-        private val flingMinVelocity = 10f // threshold to stop the fling
         private var flingLastPosition = Offset(0f, 0f)
         private var flingLastTime = 0L
         private var flingVelocity = Offset(0f, 0f)
@@ -154,7 +158,7 @@ class MapViewModel
             val elapsed = now - flingLastTime
             if (elapsed > 0L) {
                 val newPos = flingLastPosition + delta
-                flingVelocity = (newPos - flingLastPosition) / (elapsed / 1000f)
+                flingVelocity = (newPos - flingLastPosition) / elapsed.milliseconds.toDouble(DurationUnit.SECONDS).toFloat()
                 flingLastPosition = newPos
                 flingLastTime = now
             }
@@ -165,12 +169,11 @@ class MapViewModel
             var velocity = flingVelocity
             flingJob =
                 viewModelScope.launch {
-                    while (abs(velocity.x) > flingMinVelocity || abs(velocity.y) > flingMinVelocity) {
-                        val millis = 16L // (approx 1 frame)
-                        val delta = velocity * (millis / 1000f) // Calculate displacement
-                        velocity *= flingFriction // Brake
+                    while (abs(velocity.x) > FLING_MIN_VELOCITY || abs(velocity.y) > FLING_MIN_VELOCITY) {
+                        val delta = velocity * FRAME_MILLIS.milliseconds.toDouble(DurationUnit.SECONDS).toFloat() // Calculate displacement
+                        velocity *= FLING_FRICTION // Brake
                         updateOffset(delta)
-                        delay(16L)
+                        delay(FRAME_MILLIS)
                     }
                 }
         }

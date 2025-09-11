@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,7 +64,7 @@ fun SignUpScreen2_Form(
     navController: NavController,
 ) {
     SignUpScreen {
-        SignUp(
+        SignUpFormLayoutContainer(
             usersViewModel,
             personalityViewModel,
             navController,
@@ -72,14 +73,11 @@ fun SignUpScreen2_Form(
 }
 
 @Composable
-private fun SignUp(
+private fun SignUpFormLayoutContainer(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
 ) {
-    val context = LocalContext.current
-    val isPreview = LocalInspectionMode.current
-
     val usersState by usersViewModel.state.collectAsState()
     val usersUiState by usersViewModel.uiState.collectAsState()
     val usersIsLoading by usersViewModel.isLoading.collectAsState()
@@ -101,200 +99,276 @@ private fun SignUp(
                     personalityViewModel.resetUiState()
                 })
             } else {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(getResponsiveSizeHeight(Spacing.medium))
-                            .testTag(CommonTestTags.USERS_SCREEN),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    // TEXT WELCOME
+                SignUpFormLayout(
+                    isLoading = isLoading,
+                    usersViewModel = usersViewModel,
+                    usersState = currentUsersState,
+                    usersUiState = usersUiState,
+                    personalityViewModel = personalityViewModel,
+                    personalityState = currentPersonalityState,
+                    personalityUiState = personalityUiState,
+                    navController = navController,
+                    onSignUpSuccess = {
+                        localLoading = true
+                    },
+                )
+            }
+        }
+    }
+}
 
-                    Kiwi_P2(
-                        KiwiTextArguments(
-                            "Initial Setup Will Take\nApproximately 3 Minutes",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.secondary,
-                        ),
-                    )
+@Composable
+private fun SignUpFormLayout(
+    isLoading: Boolean,
+    usersViewModel: IUsersViewModel,
+    usersState: UsersState,
+    usersUiState: UIState<Unit>,
+    personalityViewModel: IPersonalityViewModel,
+    personalityState: PersonalityState,
+    personalityUiState: UIState<Unit>,
+    navController: NavController,
+    onSignUpSuccess: (() -> Unit),
+) {
+    val context = LocalContext.current
+    val isPreview = LocalInspectionMode.current
 
-                    Kiwi_Spacer(Spacing.large)
-                    Kiwi_Spacer(Spacing.large)
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(getResponsiveSizeHeight(Spacing.medium))
+                .testTag(CommonTestTags.USERS_SCREEN),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Kiwi_P2(
+            KiwiTextArguments(
+                "Initial Setup Will Take\nApproximately 3 Minutes",
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.secondary,
+            ),
+        )
 
-                    Kiwi_H2(
-                        KiwiTextArguments(
-                            "Let's Start With\nThe Basics",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.secondary,
-                            bold = true,
-                        ),
-                    )
+        Kiwi_Spacer(Spacing.large)
+        Kiwi_Spacer(Spacing.large)
 
-                    Kiwi_Spacer(Spacing.large)
+        Kiwi_H2(
+            KiwiTextArguments(
+                "Let's Start With\nThe Basics",
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.secondary,
+                bold = true,
+            ),
+        )
 
-                    // INPUT
+        Kiwi_Spacer(Spacing.large)
 
-                    Kiwi_InputField(
-                        enabled = !isLoading,
-                        value = currentPersonalityState.realName,
-                        onValueChange = { personalityViewModel.onRealNameChanged(it) },
-                        label = {
-                            Kiwi_Label2(
-                                KiwiTextArguments(
-                                    "Real Name",
-                                    color = MaterialTheme.colorScheme.inversePrimary,
-                                ),
-                            )
-                        },
-                        shouldHideInput = false,
-                        textColor = MaterialTheme.colorScheme.inversePrimary,
-                        testTag = UsersTestTags.EMAIL_FIELD,
-                    )
+        SignUpForm(
+            context = context,
+            isLoading = isLoading,
+            usersViewModel = usersViewModel,
+            usersState = usersState,
+            personalityViewModel = personalityViewModel,
+            personalityState = personalityState,
+            navController = navController,
+            onSignUpSuccess = onSignUpSuccess,
+        )
 
-                    Kiwi_Spacer()
+        Kiwi_Spacer()
 
-                    Kiwi_InputField(
-                        enabled = !isLoading,
-                        value = currentPersonalityState.knightName,
-                        onValueChange = { personalityViewModel.onKnightNameChanged(it) },
-                        label = {
-                            Kiwi_Label2(
-                                KiwiTextArguments(
-                                    "Knight Name",
-                                    color = MaterialTheme.colorScheme.inversePrimary,
-                                ),
-                            )
-                        },
-                        shouldHideInput = false,
-                        textColor = MaterialTheme.colorScheme.inversePrimary,
-                        testTag = UsersTestTags.EMAIL_FIELD,
-                    )
+        SignUpErrorMessage(
+            usersUiState = usersUiState,
+            personalityUiState = personalityUiState,
+        )
+    }
 
-                    Kiwi_Spacer()
+    if (isLoading || isPreview) {
+        LoadingModal()
+    }
+}
 
-                    Kiwi_InputField(
-                        enabled = !isLoading,
-                        value = currentUsersState.email,
-                        onValueChange = { usersViewModel.onEmailChanged(it) },
-                        label = {
-                            Kiwi_Label2(
-                                KiwiTextArguments(
-                                    "Email",
-                                    color = MaterialTheme.colorScheme.inversePrimary,
-                                ),
-                            )
-                        },
-                        shouldHideInput = false,
-                        textColor = MaterialTheme.colorScheme.inversePrimary,
-                        testTag = UsersTestTags.EMAIL_FIELD,
-                    )
+@Composable
+private fun SignUpForm(
+    context: Context,
+    isLoading: Boolean,
+    usersViewModel: IUsersViewModel,
+    usersState: UsersState,
+    personalityViewModel: IPersonalityViewModel,
+    personalityState: PersonalityState,
+    navController: NavController,
+    onSignUpSuccess: (() -> Unit),
+) {
+    SignUpForm_Personality(
+        isLoading = isLoading,
+        personalityViewModel = personalityViewModel,
+        personalityState = personalityState,
+    )
 
-                    Kiwi_Spacer()
+    Kiwi_Spacer()
 
-                    Kiwi_InputField(
-                        enabled = !isLoading,
-                        value = currentUsersState.password,
-                        onValueChange = { usersViewModel.onPasswordChanged(it) },
-                        label = {
-                            Kiwi_Label2(
-                                KiwiTextArguments(
-                                    "Password",
-                                    color = MaterialTheme.colorScheme.inversePrimary,
-                                ),
-                            )
-                        },
-                        shouldHideInput = true,
-                        textColor = MaterialTheme.colorScheme.inversePrimary,
-                        testTag = UsersTestTags.PASSWORD_FIELD,
-                    )
+    SignUpForm_Users(
+        isLoading = isLoading,
+        usersViewModel = usersViewModel,
+        usersState = usersState,
+    )
 
-                    Kiwi_Spacer(Spacing.xLarge)
+    Kiwi_Spacer(Spacing.xLarge)
 
-                    // BUTTON
+    Kiwi_Button(
+        textArguments =
+            KiwiTextArguments(
+                "START JOURNEY",
+                color = MaterialTheme.colorScheme.secondary,
+                bold = true,
+            ),
+        color = MaterialTheme.colorScheme.tertiary,
+        onClick = {
+            CoroutineScope(Dispatchers.Main).launch {
+                if (personalityViewModel.checkRealNameValid() && personalityViewModel.checkKnightNameValid()) {
+                    personalityViewModel.resetUiState()
 
-                    Kiwi_Button(
-                        textArguments =
-                            KiwiTextArguments(
-                                "START JOURNEY",
-                                color = MaterialTheme.colorScheme.secondary,
-                                bold = true,
-                            ),
-                        color = MaterialTheme.colorScheme.tertiary,
-                        onClick = {
-                            CoroutineScope(Dispatchers.Main).launch {
-                                if (personalityViewModel.checkRealNameValid() && personalityViewModel.checkKnightNameValid()) {
-                                    personalityViewModel.resetUiState()
+                    if (usersViewModel.checkEmailValid()) {
+                        if (usersViewModel.checkPasswordValid()) {
+                            usersViewModel.resetUiState()
 
-                                    if (usersViewModel.checkEmailValid()) {
-                                        if (usersViewModel.checkPasswordValid()) {
-                                            usersViewModel.resetUiState()
+                            if (usersViewModel.signup(context).isSuccess) {
+                                if (personalityViewModel.updateRealName().isSuccess &&
+                                    personalityViewModel.updateKnightName().isSuccess
+                                ) {
+                                    firebaseLogEvent(FirebaseEventNames.SIGNUP_2_FORM_COMPLETED)
 
-                                            if (usersViewModel.signup(context).isSuccess) {
-                                                if (personalityViewModel.updateRealName().isSuccess &&
-                                                    personalityViewModel.updateKnightName().isSuccess
-                                                ) {
-                                                    firebaseLogEvent(FirebaseEventNames.SIGNUP_2_FORM_COMPLETED)
-
-                                                    navController.navigate(ScreenRoutes.SIGNUP3_TEST)
-                                                    localLoading = true
-                                                }
-                                            }
-                                        } else {
-                                            firebaseLogEvent(FirebaseEventNames.SIGNUP_2_FORM_INVALID_PASSWORD)
-                                        }
-                                    }
+                                    navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+                                    onSignUpSuccess()
                                 }
                             }
-                        },
-                        enabled = !isLoading,
-                        testTag = UsersTestTags.SIGNUP_BUTTON,
-                    )
-
-                    Kiwi_Spacer()
-
-                    // SIGNUP ERROR MESSAGE
-
-                    var errorMessage by remember { mutableStateOf("") }
-                    errorMessage =
-                        when (usersUiState) {
-                            is UIState.Error -> {
-                                (usersUiState as UIState.Error).message
-                            }
-
-                            else -> {
-                                when (personalityUiState) {
-                                    is UIState.Error -> {
-                                        (personalityUiState as UIState.Error).message
-                                    }
-
-                                    else -> {
-                                        ""
-                                    }
-                                }
-                            }
+                        } else {
+                            firebaseLogEvent(FirebaseEventNames.SIGNUP_2_FORM_INVALID_PASSWORD)
                         }
-
-                    Box(
-                        modifier =
-                            Modifier
-                                .alpha(if (errorMessage.isEmpty()) 0f else 1f),
-                    ) {
-                        Kiwi_InfoBox(
-                            message = errorMessage,
-                            color = MaterialTheme.colorScheme.error,
-                            testTag = UsersTestTags.ERROR_TEXT,
-                        )
                     }
                 }
+            }
+        },
+        enabled = !isLoading,
+        testTag = UsersTestTags.SIGNUP_BUTTON,
+    )
+}
 
-                if (isLoading || isPreview) {
-                    LoadingModal()
+@Composable
+private fun SignUpForm_Personality(
+    isLoading: Boolean,
+    personalityViewModel: IPersonalityViewModel,
+    personalityState: PersonalityState,
+) {
+    Kiwi_InputField(
+        enabled = !isLoading,
+        value = personalityState.realName,
+        onValueChange = { personalityViewModel.onRealNameChanged(it) },
+        label = {
+            Kiwi_Label2(
+                KiwiTextArguments(
+                    "Real Name",
+                    color = MaterialTheme.colorScheme.inversePrimary,
+                ),
+            )
+        },
+        shouldHideInput = false,
+        textColor = MaterialTheme.colorScheme.inversePrimary,
+        testTag = UsersTestTags.EMAIL_FIELD,
+    )
+
+    Kiwi_Spacer()
+
+    Kiwi_InputField(
+        enabled = !isLoading,
+        value = personalityState.knightName,
+        onValueChange = { personalityViewModel.onKnightNameChanged(it) },
+        label = {
+            Kiwi_Label2(
+                KiwiTextArguments(
+                    "Knight Name",
+                    color = MaterialTheme.colorScheme.inversePrimary,
+                ),
+            )
+        },
+        shouldHideInput = false,
+        textColor = MaterialTheme.colorScheme.inversePrimary,
+        testTag = UsersTestTags.EMAIL_FIELD,
+    )
+}
+
+@Composable
+private fun SignUpForm_Users(
+    isLoading: Boolean,
+    usersViewModel: IUsersViewModel,
+    usersState: UsersState,
+) {
+    Kiwi_InputField(
+        enabled = !isLoading,
+        value = usersState.email,
+        onValueChange = { usersViewModel.onEmailChanged(it) },
+        label = {
+            Kiwi_Label2(
+                KiwiTextArguments(
+                    "Email",
+                    color = MaterialTheme.colorScheme.inversePrimary,
+                ),
+            )
+        },
+        shouldHideInput = false,
+        textColor = MaterialTheme.colorScheme.inversePrimary,
+        testTag = UsersTestTags.EMAIL_FIELD,
+    )
+
+    Kiwi_Spacer()
+
+    Kiwi_InputField(
+        enabled = !isLoading,
+        value = usersState.password,
+        onValueChange = { usersViewModel.onPasswordChanged(it) },
+        label = {
+            Kiwi_Label2(
+                KiwiTextArguments(
+                    "Password",
+                    color = MaterialTheme.colorScheme.inversePrimary,
+                ),
+            )
+        },
+        shouldHideInput = true,
+        textColor = MaterialTheme.colorScheme.inversePrimary,
+        testTag = UsersTestTags.PASSWORD_FIELD,
+    )
+}
+
+@Composable
+private fun SignUpErrorMessage(
+    usersUiState: UIState<Unit>,
+    personalityUiState: UIState<Unit>,
+) {
+    var errorMessage by remember { mutableStateOf("") }
+    errorMessage =
+        when (usersUiState) {
+            is UIState.Error -> {
+                usersUiState.message
+            }
+            else -> {
+                when (personalityUiState) {
+                    is UIState.Error -> {
+                        personalityUiState.message
+                    }
+                    else -> {
+                        ""
+                    }
                 }
             }
         }
+
+    Box(modifier = Modifier.alpha(if (errorMessage.isEmpty()) 0f else 1f)) {
+        Kiwi_InfoBox(
+            message = errorMessage,
+            color = MaterialTheme.colorScheme.error,
+            testTag = UsersTestTags.ERROR_TEXT,
+        )
     }
 }
 
@@ -308,13 +382,14 @@ private fun SignUp(
 fun SignUpScreen2_Form_Preview() {
     Kiwi_Theme {
         SignUpScreen2_Form(
-            usersViewModel = UsersFakeViewModel(
-                UsersState(
-                    validUsersDTO().email,
-                    validUsersDTO().password,
-                    validUsersDTO().registerDate
-                )
-            ),
+            usersViewModel =
+                UsersFakeViewModel(
+                    UsersState(
+                        validUsersDTO().email,
+                        validUsersDTO().password,
+                        validUsersDTO().registerDate,
+                    ),
+                ),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(

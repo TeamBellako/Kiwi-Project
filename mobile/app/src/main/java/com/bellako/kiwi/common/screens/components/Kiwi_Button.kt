@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -20,6 +21,8 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 @Composable
 fun Kiwi_Button(
     modifier: Modifier = Modifier,
+    contentPaddingHorizontal: Dp = 8.dp,
+    contentPaddingVertical: Dp = 8.dp,
     textArguments: KiwiTextArguments,
     onClick: () -> Unit,
     enabled: Boolean = true,
@@ -37,7 +40,11 @@ fun Kiwi_Button(
                     contentColor = MaterialTheme.colorScheme.onSecondary,
                     disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f),
                 ),
-            contentPadding = PaddingValues(getResponsiveSizeHeight(8).dp),
+            contentPadding =
+                PaddingValues(
+                    getResponsiveSizeHeight(contentPaddingHorizontal),
+                    getResponsiveSizeHeight(contentPaddingVertical),
+                ),
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -65,22 +72,24 @@ fun Kiwi_Button_Preview() {
     Kiwi_Theme {
         Column {
             Kiwi_Button(
-                textArguments = KiwiTextArguments(
-                    "BUTTON",
-                    color = MaterialTheme.colorScheme.secondary,
-                    bold = true,
-                ),
+                textArguments =
+                    KiwiTextArguments(
+                        "BUTTON",
+                        color = MaterialTheme.colorScheme.secondary,
+                        bold = true,
+                    ),
                 onClick = {},
             )
 
             Kiwi_Spacer()
 
             Kiwi_Button(
-                textArguments = KiwiTextArguments(
-                    "BUTTON",
-                    color = MaterialTheme.colorScheme.secondary,
-                    bold = true,
-                ),
+                textArguments =
+                    KiwiTextArguments(
+                        "BUTTON",
+                        color = MaterialTheme.colorScheme.secondary,
+                        bold = true,
+                    ),
                 onClick = {},
                 enabled = false,
             )

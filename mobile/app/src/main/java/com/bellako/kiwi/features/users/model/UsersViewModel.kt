@@ -167,21 +167,27 @@ class UsersViewModel
             return try {
                 initAEAD(context)
                 val prefs = context.dataStore.data.first()
-                val emailEncrypted = prefs[usernameDataKey] ?: return "" to ""
-                val passwordEncrypted = prefs[passwordDataKey] ?: return "" to ""
+                val emailEncrypted = prefs[usernameDataKey]
+                val passwordEncrypted = prefs[passwordDataKey]
 
-                val emailDecrypted =
-                    aEAD.decrypt(
-                        android.util.Base64.decode(emailEncrypted, android.util.Base64.DEFAULT),
-                        null,
-                    )
-                val passwordDecrypted =
-                    aEAD.decrypt(
-                        android.util.Base64.decode(passwordEncrypted, android.util.Base64.DEFAULT),
-                        null,
-                    )
-
-                String(emailDecrypted) to String(passwordDecrypted)
+                if (emailEncrypted == null || passwordEncrypted == null) {
+                    "" to ""
+                } else {
+                    val emailDecrypted =
+                        aEAD.decrypt(
+                            android.util.Base64.decode(emailEncrypted, android.util.Base64.DEFAULT),
+                            null,
+                        )
+                    val passwordDecrypted =
+                        aEAD.decrypt(
+                            android.util.Base64.decode(
+                                passwordEncrypted,
+                                android.util.Base64.DEFAULT,
+                            ),
+                            null,
+                        )
+                    String(emailDecrypted) to String(passwordDecrypted)
+                }
             } catch (e: GeneralSecurityException) {
                 warn("Decryption error: ${e.message}")
                 "" to ""
@@ -197,6 +203,7 @@ class UsersViewModel
             }
         }
 
+        @Suppress("TooGenericExceptionCaught")
         override suspend fun clearLocalCredentials(context: Context) {
             setIsLoading(true)
             setUiState(UIState.Loading)

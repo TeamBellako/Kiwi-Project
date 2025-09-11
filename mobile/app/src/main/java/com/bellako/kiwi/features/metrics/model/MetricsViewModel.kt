@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.metrics.model
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
@@ -40,8 +41,12 @@ class MetricsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun createMetrics(state: MetricsState): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
             val domain = MetricsDataMapper.toDomain(state).copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0)
             val result = repository.createMetrics(MetricsDataMapper.toDTO(domain))
+            setIsLoading(false)
+            setUiState(UIState.Idle)
             return handleResult(result) {
                 _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
             }
@@ -49,8 +54,12 @@ class MetricsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun updateMetrics(state: MetricsState): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
             val domain = MetricsDataMapper.toDomain(state)
             val result = repository.updateMetrics(MetricsDataMapper.toDTO(domain))
+            setIsLoading(false)
+            setUiState(UIState.Idle)
             return handleResult(result) {
                 _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
             }
@@ -58,7 +67,11 @@ class MetricsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun loadMetrics(date: String): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
             val result = repository.getMetricsByDate(stringToDate(date))
+            setIsLoading(false)
+            setUiState(UIState.Idle)
             return handleResult(result) {
                 _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
             }

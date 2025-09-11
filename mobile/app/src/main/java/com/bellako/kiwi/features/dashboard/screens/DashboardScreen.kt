@@ -4,50 +4,26 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
@@ -57,7 +33,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
@@ -67,12 +42,10 @@ import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
-import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
@@ -94,14 +67,15 @@ import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.YearMonth
-import kotlin.math.ceil
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
 const val DAY_DISABLED_ALPHA = 0.3f
+
+const val STATE_HEIGHT_0 = 150
+const val STATE_HEIGHT_1 = 260
+const val STATE_HEIGHT_2 = 650
+val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -113,11 +87,15 @@ fun DashboardScreen(
     initialStateIndex: Int = 0,
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val metricsState by metricsViewModel.state.collectAsState()
+    val metricsIsLoading by metricsViewModel.isLoading.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+
+    val isLoading by remember { derivedStateOf { metricsIsLoading || personalityIsLoading } }
 
     LaunchedEffect(Unit) {
-        metricsViewModel.onDateChanged(LocalDate.now())
         loadMetrics(dateToString(LocalDate.now()), metricsViewModel, personalityViewModel, context)
     }
 
@@ -125,7 +103,7 @@ fun DashboardScreen(
 
     Kiwi_DraggableBar(
         modifier = Modifier.testTag(DashboardModalTestTags.DRAGGABLE_NODE),
-        states = listOf(150, 260, 650),
+        states = STATES,
         content = { currentStateIndex ->
             Column(
                 modifier =
@@ -143,22 +121,44 @@ fun DashboardScreen(
                 Header()
 
                 if (currentStateIndex == 0) {
-                    HiddenContent()
+                    DashboardScreen0_Hidden()
                 } else if (currentStateIndex <= 1) {
-                    CollapsedContent(
+                    DashboardScreen1_Collapsed(
                         metricsState = metricsState!!,
+                        isLoading = isLoading,
                         onCalendarViewClicked = {
                             shouldShowCalendarView.value = true
                         },
                     )
                 } else if (currentStateIndex <= 2) {
-                    ExpandedContent(
+                    DashboardScreen2_Expanded(
+                        context = context,
+                        coroutineScope = coroutineScope,
                         usersViewModel = usersViewModel,
                         metricsViewModel = metricsViewModel,
                         metricsState = metricsState!!,
                         personalityViewModel = personalityViewModel,
                         shouldShowCalendarView = shouldShowCalendarView,
+                        isLoading = isLoading,
                     )
+                }
+            }
+
+            if (isLoading) {
+                Box(
+                    modifier =
+                        Modifier
+                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.3f))
+                            .fillMaxWidth()
+                            .height(
+                                getResponsiveSizeHeight(STATES[currentStateIndex]).dp -
+                                    getResponsiveSizeHeight(100.dp), // appbar
+                            ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (currentStateIndex > 0) {
+                        LoadingModal()
+                    }
                 }
             }
         },
@@ -167,7 +167,7 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun ComposableEngagementMeasuring(layout: String) {
+fun ComposableEngagementMeasuring(layout: String) {
     DisposableEffect(Unit) {
         val composeTime = System.currentTimeMillis()
         onDispose {
@@ -179,67 +179,6 @@ private fun ComposableEngagementMeasuring(layout: String) {
                     "visible_time_ms" to visibleTime,
                 ),
             )
-        }
-    }
-}
-
-@Composable
-private fun HiddenContent() {
-    ComposableEngagementMeasuring("hidden")
-}
-
-@Composable
-private fun CollapsedContent(
-    metricsState: MetricsState,
-    onCalendarViewClicked: () -> Unit,
-) {
-    ComposableEngagementMeasuring("collapsed")
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        CollapsedSummaryCard(
-            metricsState,
-            onCalendarViewClicked,
-        )
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-private fun ExpandedContent(
-    usersViewModel: IUsersViewModel,
-    metricsViewModel: IMetricsViewModel,
-    metricsState: MetricsState,
-    personalityViewModel: IPersonalityViewModel,
-    shouldShowCalendarView: MutableState<Boolean>,
-) {
-    ComposableEngagementMeasuring("expanded")
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        if (shouldShowCalendarView.value) {
-            CalendarMonthView(
-                usersViewModel = usersViewModel,
-                metricsViewModel = metricsViewModel,
-                metricsState = metricsState,
-                shouldShowCalendarView = shouldShowCalendarView,
-                personalityViewModel = personalityViewModel,
-            )
-        } else {
-            CurrentDayIndicator()
-            CalendarWeekView(
-                usersViewModel = usersViewModel,
-                metricsViewModel = metricsViewModel,
-                metricsState = metricsState,
-                personalityViewModel = personalityViewModel,
-            ) {
-                shouldShowCalendarView.value = true
-            }
-            ExpandedProgressBox(metricsState)
         }
     }
 }
@@ -274,637 +213,74 @@ private fun Header() {
     Kiwi_Spacer()
 }
 
-@Composable
-private fun CurrentDayIndicator() {
-    Kiwi_Image(
-        R.drawable.ph_dashboard_heart,
-        "Current day indicator",
-    )
-}
-
 @RequiresApi(Build.VERSION_CODES.O)
-@Composable
-private fun CalendarWeekView(
-    usersViewModel: IUsersViewModel,
-    metricsState: MetricsState,
-    metricsViewModel: IMetricsViewModel,
-    personalityViewModel: IPersonalityViewModel,
-    onCalendarViewClicked: () -> Unit,
-) {
-    val context = LocalContext.current
-
-    val date = stringToDate(metricsState.date)
-    val currentDayOfWeek = date.dayOfWeek.value % DAYS_IN_WEEK
-    val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
-    val coroutineScope = rememberCoroutineScope()
-    val startOfWeek = date.minusDays(currentDayOfWeek.toLong())
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(vertical = getResponsiveSizeHeight(Spacing.medium)),
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.medium)),
-        ) {
-            Row(
-                modifier =
-                    Modifier
-                        .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
-            ) {
-                for (index in 0 until DAYS_IN_WEEK) {
-                    val day = startOfWeek.plusDays(index.toLong())
-                    val isSelected = selectedDayIndex.intValue == index
-
-                    Box(modifier = Modifier.weight(1f)) {
-                        CalendarDayView(
-                            usersViewModel = usersViewModel,
-                            day = day,
-                            isSelected = isSelected,
-                            onClicked = {
-                                selectedDayIndex.intValue = index
-                                selectDay(
-                                    coroutineScope,
-                                    metricsViewModel,
-                                    metricsState,
-                                    personalityViewModel,
-                                    context,
-                                    startOfWeek.plusDays(index.toLong()),
-                                )
-                            },
-                            testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
-                        )
-                    }
-                }
-            }
-
-            ShowCalendarViewButton(onCalendarViewClicked)
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-private fun CalendarMonthView(
-    usersViewModel: IUsersViewModel,
-    metricsViewModel: IMetricsViewModel,
-    metricsState: MetricsState,
-    personalityViewModel: IPersonalityViewModel,
-    modifier: Modifier = Modifier,
-    shouldShowCalendarView: MutableState<Boolean>,
-) {
-    val context = LocalContext.current
-
-    val selectedMonth = remember { mutableStateOf(YearMonth.from(stringToDate(metricsState.date))) }
-
-    var transitionDirection by remember { mutableIntStateOf(0) } // -1 = previous, 1 = next
-    var totalDragOffsetX by remember { mutableFloatStateOf(0f) }
-
-    val gestureModifier =
-        Modifier.pointerInput(selectedMonth) {
-            detectDragGestures(
-                onDragEnd = {
-                    val dragThreshold = 100f
-                    when {
-                        totalDragOffsetX > dragThreshold -> {
-                            transitionDirection = -1
-                            selectYearMonth(selectedMonth, selectedMonth.value.minusMonths(1))
-                        }
-                        totalDragOffsetX < -dragThreshold -> {
-                            transitionDirection = 1
-                            selectYearMonth(selectedMonth, selectedMonth.value.plusMonths(1))
-                        }
-                    }
-                    totalDragOffsetX = 0f
-                },
-                onDrag = { change, dragAmount ->
-                    change.consume()
-                    totalDragOffsetX += dragAmount.x
-                },
-            )
-        }
-
-    val coroutineScope = rememberCoroutineScope()
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(getResponsiveSizeHeight(300.dp))
-                .then(gestureModifier)
-                .testTag(DashboardModalTestTags.CALENDAR_VIEW),
-    ) {
-        Kiwi_P2(
-            KiwiTextArguments(
-                text = dateToString(selectedMonth.value),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier =
-                    Modifier
-                        .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT),
-            ),
-        )
-        Kiwi_Spacer(Spacing.large)
-
-        AnimatedContent(
-            targetState = selectedMonth.value,
-            transitionSpec = {
-                slideInHorizontally(
-                    animationSpec = tween(MONTH_SLIDE_ANIM_DURATION),
-                    initialOffsetX = { fullWidth -> fullWidth * transitionDirection },
-                ) togetherWith
-                    slideOutHorizontally(
-                        animationSpec = tween(MONTH_SLIDE_ANIM_DURATION),
-                        targetOffsetX = { fullWidth -> -fullWidth * transitionDirection },
-                    )
-            },
-            label = "CalendarMonthTransition",
-        ) { displayedMonth ->
-            val startOfMonth = displayedMonth.atDay(1)
-            val endOfMonth = displayedMonth.atEndOfMonth()
-            val startDayOfWeek = startOfMonth.dayOfWeek.value % DAYS_IN_WEEK
-            val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
-            val totalWeeks = ceil(totalDays / DAYS_IN_WEEK.toFloat()).toInt()
-
-            Column {
-                for (weekIndex in 0 until totalWeeks) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp)),
-                    ) {
-                        for (dayOfWeek in 0 until DAYS_IN_WEEK) {
-                            val dayIndex = weekIndex * DAYS_IN_WEEK + dayOfWeek
-                            val dayOffset = dayIndex - startDayOfWeek
-                            val dayDate = startOfMonth.plusDays(dayOffset.toLong())
-
-                            Box(
-                                modifier = Modifier.weight(1f),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (dayDate in startOfMonth..endOfMonth) {
-                                    CalendarDayView(
-                                        usersViewModel = usersViewModel,
-                                        day = dayDate,
-                                        isSelected = stringToDate(metricsState.date) == dayDate,
-                                        onClicked = {
-                                            selectDay(
-                                                coroutineScope,
-                                                metricsViewModel,
-                                                metricsState,
-                                                personalityViewModel,
-                                                context,
-                                                dayDate,
-                                            )
-                                            shouldShowCalendarView.value = false
-                                        },
-                                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
-                                    )
-                                } else {
-                                    Kiwi_Spacer()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-private fun CalendarDayView(
-    usersViewModel: IUsersViewModel,
-    canSelectBeforeRegisterDate: Boolean = true,
-    day: LocalDate,
-    isSelected: Boolean,
-    onClicked: () -> Unit,
-    testTag: String,
-) {
-    val isDayEnabled =
-        !day.isAfter(LocalDate.now()) &&
-            (canSelectBeforeRegisterDate || !day.isBefore(usersViewModel.getRegisterDate()))
-
-    Box(
-        modifier =
-            Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(12.dp)))
-                .border(
-                    width = if (isSelected) getResponsiveSizeHeight(2.dp) else 0.dp,
-                    color = if (isSelected) MaterialTheme.colorScheme.inversePrimary else Color.Transparent,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp)),
-                ).padding(vertical = getResponsiveSizeHeight(Spacing.xSmall))
-                .clickable(
-                    enabled = isDayEnabled,
-                    onClick = onClicked,
-                ).testTag(testTag),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            val contentAlpha = if (isDayEnabled) 1f else DAY_DISABLED_ALPHA
-            Kiwi_P2(
-                KiwiTextArguments(
-                    day.dayOfMonth.toString(),
-                    color = MaterialTheme.colorScheme.inversePrimary,
-                    modifier = Modifier.alpha(contentAlpha),
-                ),
-            )
-
-            Kiwi_Image(
-                R.drawable.ph_dashboard_day_empty,
-                "Dashboard day indicator",
-                modifier =
-                    Modifier
-                        .size(getResponsiveSizeHeight(50.dp))
-                        .alpha(contentAlpha),
-            )
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-private fun selectDay(
-    coroutineScope: CoroutineScope,
-    metricsViewModel: IMetricsViewModel,
-    metricsState: MetricsState,
-    personalityViewModel: IPersonalityViewModel,
-    context: Context,
-    newDay: LocalDate,
-) {
-    firebaseLogEvent(
-        FirebaseEventNames.DASHBOARD_SEE_DAY,
-        mapOf(
-            "day_old" to metricsState.date,
-            "day_new" to dateToString(newDay),
-        ),
-    )
-
-    metricsViewModel.onDateChanged(newDay)
-
-    coroutineScope.launch {
-        loadMetrics(dateToString(newDay), metricsViewModel, personalityViewModel, context)
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-private fun selectYearMonth(
-    selectedMonth: MutableState<YearMonth>,
-    newMonth: YearMonth,
-) {
-    firebaseLogEvent(
-        FirebaseEventNames.DASHBOARD_SEE_MONTH,
-        mapOf(
-            "month_old" to dateToString(selectedMonth.value),
-            "month_new" to dateToString(newMonth),
-        ),
-    )
-
-    selectedMonth.value = newMonth
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-private suspend fun loadMetrics(
+suspend fun loadMetrics(
     date: String,
     metricsViewModel: IMetricsViewModel,
     personalityViewModel: IPersonalityViewModel,
     context: Context,
 ) {
+    if (date == metricsViewModel.state.value!!.date) {
+        return
+    }
+    metricsViewModel.onDateChanged(stringToDate(date))
+
     val metricsState = metricsViewModel.state.value!!
+    val personalityState = personalityViewModel.state.value!!
+    var deviceMetrics = MetricsProvider.getDeviceMetrics(context, metricsState, personalityState)
     metricsViewModel.loadMetrics(date).fold(
         onSuccess = { _ ->
-            updateWithDeviceMetrics(metricsViewModel, personalityViewModel, context)
+            if (deviceMetrics.currentGoodTimeSeconds < metricsState.currentGoodTimeSeconds) {
+                deviceMetrics = deviceMetrics.copy(currentGoodTimeSeconds = metricsState.currentGoodTimeSeconds)
+            }
+            if (deviceMetrics.currentBadTimeSeconds < metricsState.currentBadTimeSeconds) {
+                deviceMetrics = deviceMetrics.copy(currentBadTimeSeconds = metricsState.currentBadTimeSeconds)
+            }
+            if (deviceMetrics != metricsState) {
+                metricsViewModel.updateMetrics(deviceMetrics)
+            }
         },
         onFailure = { _ ->
-            metricsViewModel.createMetrics(metricsState).fold(
-                onSuccess = { _ ->
-                    updateWithDeviceMetrics(metricsViewModel, personalityViewModel, context)
-                },
-                onFailure = { _ -> },
-            )
+            metricsViewModel.createMetrics(deviceMetrics)
         },
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-private suspend fun updateWithDeviceMetrics(
-    metricsViewModel: IMetricsViewModel,
-    personalityViewModel: IPersonalityViewModel,
-    context: Context,
-) {
-    val metricsState = metricsViewModel.state.value!!
-    var deviceMetrics =
-        MetricsProvider.getDeviceMetrics(
-            context,
-            metricsState,
-            personalityViewModel.state.value!!,
-        )
-    if (deviceMetrics.currentGoodTimeSeconds < metricsState.currentGoodTimeSeconds) {
-        deviceMetrics = deviceMetrics.copy(currentGoodTimeSeconds = metricsState.currentGoodTimeSeconds)
-    }
-    if (deviceMetrics.currentBadTimeSeconds < metricsState.currentBadTimeSeconds) {
-        deviceMetrics = deviceMetrics.copy(currentBadTimeSeconds = metricsState.currentBadTimeSeconds)
-    }
-    if (deviceMetrics != metricsState) {
-        metricsViewModel.updateMetrics(deviceMetrics)
-    }
-}
-
 @Composable
-private fun ExpandedProgressBox(state: MetricsState) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp)))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
-    ) {
-        Column {
-            ExpandedMetricsProgress(state)
-
-            Kiwi_Spacer()
-
-            ExpandedSummaryCard()
-        }
-    }
-}
-
-@Composable
-private fun ExpandedMetricProgressTitle(title: String) {
-    Kiwi_H3(
-        KiwiTextArguments(
-            title,
-            TextAlign.Center,
-            MaterialTheme.colorScheme.secondary,
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
-        ),
-    )
-}
-
-@Composable
-private fun TimeExpanded(
+fun SelectedMetricsTime(
     maxSeconds: Int,
     currentSeconds: Int,
+    validMetrics: Boolean,
+    expanded: Boolean,
     tag: String,
 ) {
-    val text =
-        buildAnnotatedString {
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                append(DateUtils.parseTimeSeconds(currentSeconds))
-            }
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
-            }
-        }
-    Kiwi_AnnotatedString_P1(
+    val textArguments =
         KiwiAnnotatedStringArguments(
-            text,
-            TextAlign.Center,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .testTag(tag),
-        ),
-    )
-}
-
-@Composable
-private fun GoodTimeExpanded(state: MetricsState) {
-    TimeExpanded(state.maxGoodTimeSeconds, state.currentGoodTimeSeconds, DashboardModalTestTags.GOOD_TIME)
-}
-
-@Composable
-private fun BadTimeExpanded(state: MetricsState) {
-    TimeExpanded(state.maxBadTimeSeconds, state.currentBadTimeSeconds, DashboardModalTestTags.BAD_TIME)
-}
-
-@Composable
-private fun TimeCollapsed(
-    maxSeconds: Int,
-    currentSeconds: Int,
-    tag: String,
-) {
-    val text =
-        buildAnnotatedString {
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                append(DateUtils.parseTimeSeconds(currentSeconds))
-            }
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
-            }
-        }
-    Kiwi_AnnotatedString_P2(
-        KiwiAnnotatedStringArguments(
-            text,
-            TextAlign.Left,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .testTag(tag),
-        ),
-    )
-}
-
-@Composable
-private fun GoodTimeCollapsed(state: MetricsState) {
-    TimeCollapsed(state.maxGoodTimeSeconds, state.currentGoodTimeSeconds, DashboardModalTestTags.GOOD_TIME)
-}
-
-@Composable
-private fun BadTimeCollapsed(state: MetricsState) {
-    TimeCollapsed(state.maxBadTimeSeconds, state.currentBadTimeSeconds, DashboardModalTestTags.BAD_TIME)
-}
-
-@Composable
-private fun ExpandedMetricsProgress(state: MetricsState) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-    ) {
-        Box(modifier = Modifier.weight(1f)) {
-            Column {
-                ExpandedMetricProgressTitle("Good Apps Time")
-                GoodTimeExpanded(state)
-            }
-        }
-        Box(modifier = Modifier.weight(1f)) {
-            Column {
-                ExpandedMetricProgressTitle("Evil Apps Time")
-                BadTimeExpanded(state)
-            }
-        }
-    }
-}
-
-@Composable
-private fun CollapsedSummaryCard(
-    state: MetricsState,
-    onCalendarViewClicked: () -> Unit,
-) {
-    Box(
-        modifier =
-            Modifier
-                .padding(horizontal = getResponsiveSizeHeight(Spacing.xLarge))
-                .background(MaterialTheme.colorScheme.surface)
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp)))
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                Modifier.width(getResponsiveSizeHeight(60.dp)),
-            ) {
-                CurrentDayIndicator()
-            }
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = getResponsiveSizeHeight(Spacing.small)),
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                ) {
-                    GoodTimeCollapsed(state)
-
-                    Kiwi_Spacer(Spacing.xSmall)
-
-                    BadTimeCollapsed(state)
+            buildAnnotatedString {
+                withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
+                    if (validMetrics) {
+                        append(DateUtils.parseTimeSeconds(currentSeconds))
+                    }
                 }
-            }
-        }
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(getResponsiveSizeHeight(52.dp)),
-            contentAlignment = Alignment.CenterEnd,
-        ) {
-            ShowCalendarViewButton(onCalendarViewClicked)
-        }
-    }
-}
-
-@Composable
-private fun ShowCalendarViewButton(onCalendarViewClicked: () -> Unit) {
-    Kiwi_Image(
-        R.drawable.calendar,
-        "Show Calendar View Button",
-        Modifier
-            .size(getResponsiveSizeHeight(30.dp))
-            .background(MaterialTheme.colorScheme.background)
-            .clickable {
-                onCalendarViewClicked()
-            }.testTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON),
-    )
-}
-
-@Composable
-private fun ExpandedSummaryCard() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Kiwi_H3(
-            KiwiTextArguments(
-                "Challenges",
-                TextAlign.Center,
-                MaterialTheme.colorScheme.secondary,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-            ),
-        )
-
-        Kiwi_Spacer(Spacing.small)
-
-        ExpandedQuestProgress(
-            "Use Duolingo For 20 Minutes",
-            R.drawable.ph_quest_01,
-            0.5f,
-        )
-
-        Kiwi_Spacer()
-
-        ExpandedQuestProgress(
-            "Do 3 Sets Of 10 Push-Ups",
-            R.drawable.ph_quest_02,
-            0.8f,
-        )
-    }
-}
-
-@Composable
-private fun ExpandedQuestProgress(
-    title: String,
-    imageRes: Int,
-    progress: Float,
-) {
-    Row(
-        modifier =
-            Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .background(MaterialTheme.colorScheme.inversePrimary),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
+                withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+                    if (validMetrics) {
+                        append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
+                    } else {
+                        append("No data")
+                    }
+                }
+            },
+            if (expanded) TextAlign.Center else TextAlign.Left,
             modifier =
                 Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator(
-                progress = { progress },
-                strokeWidth = getResponsiveSizeHeight(4.dp),
-                color = MaterialTheme.colorScheme.tertiary,
-            )
+                    .fillMaxWidth()
+                    .testTag(tag),
+        )
 
-            Kiwi_Image(
-                imageRes,
-                "Quest Indicator For: $title",
-                modifier =
-                    Modifier
-                        .size(getResponsiveSizeHeight(20.dp)),
-            )
-        }
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Kiwi_P2(
-                KiwiTextArguments(
-                    title,
-                    TextAlign.Center,
-                    MaterialTheme.colorScheme.secondary,
-                    modifier =
-                        Modifier
-                            .padding(getResponsiveSizeHeight(Spacing.small)),
-                ),
-            )
-        }
+    if (expanded) {
+        Kiwi_AnnotatedString_P1(textArguments)
+    } else {
+        Kiwi_AnnotatedString_P2(textArguments)
     }
 }
 
@@ -915,8 +291,8 @@ private fun ExpandedQuestProgress(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalHidden_Preview() {
-    DashboardModalPreview(false, 0)
+fun DashboardModal_Preview_Hidden() {
+    DashboardModal_Preview(false, 0)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -924,8 +300,8 @@ fun DashboardModalHidden_Preview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalCollapsed_Preview() {
-    DashboardModalPreview(false, 1)
+fun DashboardModal_Preview_Collapsed() {
+    DashboardModal_Preview(false, 1)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -933,8 +309,8 @@ fun DashboardModalCollapsed_Preview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalExpanded_Preview() {
-    DashboardModalPreview(false, 2)
+fun DashboardModal_Preview_Expanded() {
+    DashboardModal_Preview(false, 2)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -942,14 +318,14 @@ fun DashboardModalExpanded_Preview() {
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun DashboardModalCalendar_Preview() {
-    DashboardModalPreview(true, 2)
+fun DashboardModal_Preview_Expanded_Calendar() {
+    DashboardModal_Preview(true, 2)
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun DashboardModalPreview(
+fun DashboardModal_Preview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
 ) {

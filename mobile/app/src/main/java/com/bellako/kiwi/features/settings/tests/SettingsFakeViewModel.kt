@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.settings.tests
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
 import com.bellako.kiwi.features.settings.data.SettingsDataMapper
 import com.bellako.kiwi.features.settings.data.SettingsDomain
@@ -26,7 +27,8 @@ class SettingsFakeViewModel(
     var simulatedException: Exception = Exception("Something went wrong")
 
     override suspend fun loadSettings() {
-        setLoading(true)
+        setIsLoading(true)
+        setUiState(UIState.Loading)
 
         // Simulate an error or successful loading asynchronously
         if (simulateLoadError) {
@@ -35,17 +37,20 @@ class SettingsFakeViewModel(
             handleSuccess()
         }
 
-        setLoading(false)
+        setIsLoading(false)
+        setUiState(UIState.Idle)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun updateSettings(state: SettingsState) {
-        setLoading(true)
+        setIsLoading(true)
+        setUiState(UIState.Loading)
 
         // Simulate an error or successful update asynchronously
         if (simulateUpdateError) {
             handleError(simulatedException)
-            setLoading(false)
+            setIsLoading(false)
+            setUiState(UIState.Idle)
             return
         }
 
@@ -56,6 +61,7 @@ class SettingsFakeViewModel(
             handleSuccess()
         }
 
-        setLoading(false)
+        setIsLoading(false)
+        setUiState(UIState.Idle)
     }
 }

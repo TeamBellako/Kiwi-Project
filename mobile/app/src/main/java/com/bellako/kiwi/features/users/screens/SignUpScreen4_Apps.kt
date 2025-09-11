@@ -63,6 +63,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+private const val APP_ITEM_DISABLED_ALPHA = 0.3f
+
 @Composable
 fun SignUpScreen4_Apps(
     personalityViewModel: IPersonalityViewModel,
@@ -147,100 +149,121 @@ fun AppClassification(
             personalityViewModel.resetUiState()
         })
     } else {
-        Column(
-            modifier =
-                Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
-        ) {
-            Kiwi_P2(
-                KiwiTextArguments(
-                    text = "Categorize your apps.\nTap to switch between lists.",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.secondary,
-                ),
-            )
-            Kiwi_Spacer(Spacing.large)
-
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .weight(1f),
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Kiwi_H2(
-                        KiwiTextArguments(
-                            text = "Good apps",
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        ),
-                    )
-                    Kiwi_Spacer(Spacing.small)
-                    LazyColumn {
-                        items(goodApps) { app ->
-                            AppItem(
-                                app = app,
-                                onClick = {
-                                    goodApps.remove(app)
-                                    badApps.add(app)
-                                    updateApps(goodApps, badApps, personalityViewModel)
-                                },
-                                enabled = !isLoading,
-                            )
-                        }
-                    }
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Kiwi_H2(
-                        KiwiTextArguments(
-                            text = "Evil apps",
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                        ),
-                    )
-                    Kiwi_Spacer(Spacing.small)
-                    LazyColumn {
-                        items(badApps) { app ->
-                            AppItem(
-                                app = app,
-                                onClick = {
-                                    badApps.remove(app)
-                                    goodApps.add(app)
-                                    updateApps(goodApps, badApps, personalityViewModel)
-                                },
-                                enabled = !isLoading,
-                            )
-                        }
-                    }
-                }
-            }
-            Kiwi_Spacer(Spacing.large)
-
-            Kiwi_Button(
-                textArguments =
-                    KiwiTextArguments(
-                        "CONTINUE",
-                        textAlign = TextAlign.Center,
-                    ),
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        if (personalityViewModel.updateApps().isSuccess) {
-                            firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
-
-                            navController.navigate(ScreenRoutes.HOME)
-                            localLoading = true
-                        }
-                    }
-                },
-                enabled = !isLoading,
-                testTag = UsersTestTags.SIGNUP_BUTTON,
-            )
-        }
+        AppClassificationColumns(
+            isLoading = isLoading,
+            personalityViewModel = personalityViewModel,
+            goodApps = goodApps,
+            badApps = badApps,
+            navController = navController,
+            onUpdateSuccess = {
+                localLoading = true
+            },
+        )
 
         if (isLoading || isPreview) {
             LoadingModal()
         }
+    }
+}
+
+@Composable
+fun AppClassificationColumns(
+    isLoading: Boolean,
+    personalityViewModel: IPersonalityViewModel,
+    goodApps: SnapshotStateList<AppInfo>,
+    badApps: SnapshotStateList<AppInfo>,
+    navController: NavController,
+    onUpdateSuccess: (() -> Unit),
+) {
+    Column(
+        modifier =
+            Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
+    ) {
+        Kiwi_P2(
+            KiwiTextArguments(
+                text = "Categorize your apps.\nTap to switch between lists.",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.secondary,
+            ),
+        )
+        Kiwi_Spacer(Spacing.large)
+
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Kiwi_H2(
+                    KiwiTextArguments(
+                        text = "Good apps",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                    ),
+                )
+                Kiwi_Spacer(Spacing.small)
+                LazyColumn {
+                    items(goodApps) { app ->
+                        AppItem(
+                            app = app,
+                            onClick = {
+                                goodApps.remove(app)
+                                badApps.add(app)
+                                updateApps(goodApps, badApps, personalityViewModel)
+                            },
+                            enabled = !isLoading,
+                        )
+                    }
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Kiwi_H2(
+                    KiwiTextArguments(
+                        text = "Evil apps",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                    ),
+                )
+                Kiwi_Spacer(Spacing.small)
+                LazyColumn {
+                    items(badApps) { app ->
+                        AppItem(
+                            app = app,
+                            onClick = {
+                                badApps.remove(app)
+                                goodApps.add(app)
+                                updateApps(goodApps, badApps, personalityViewModel)
+                            },
+                            enabled = !isLoading,
+                        )
+                    }
+                }
+            }
+        }
+        Kiwi_Spacer(Spacing.large)
+
+        Kiwi_Button(
+            textArguments =
+                KiwiTextArguments(
+                    "CONTINUE",
+                    textAlign = TextAlign.Center,
+                ),
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (personalityViewModel.updateApps().isSuccess) {
+                        firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
+
+                        navController.navigate(ScreenRoutes.HOME)
+                        onUpdateSuccess()
+                    }
+                }
+            },
+            enabled = !isLoading,
+            testTag = UsersTestTags.SIGNUP_BUTTON,
+        )
     }
 }
 
@@ -283,7 +306,7 @@ fun AppItem(
                 Modifier
                     .size(getResponsiveSizeHeight(50.dp))
                     .padding(end = getResponsiveSizeHeight(10.dp))
-                    .graphicsLayer { alpha = if (enabled) 1f else 0.3f },
+                    .graphicsLayer { alpha = if (enabled) 1f else APP_ITEM_DISABLED_ALPHA },
         )
         Kiwi_Label2(KiwiTextArguments(app.name))
     }
