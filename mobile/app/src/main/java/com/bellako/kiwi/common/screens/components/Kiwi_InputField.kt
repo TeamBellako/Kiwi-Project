@@ -46,9 +46,11 @@ fun Kiwi_InputField(
         inputFieldColor = inputFieldColor.copy(alpha = 0.3F)
     }
 
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .then(modifier)
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .then(modifier),
     ) {
         val shouldShowPassword = remember { mutableStateOf(false) }
 
