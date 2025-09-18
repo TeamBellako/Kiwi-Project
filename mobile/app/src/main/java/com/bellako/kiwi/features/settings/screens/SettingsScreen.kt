@@ -298,19 +298,21 @@ fun SettingsScreen_Preview() {
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
                     SettingsScreen(
-                        usersViewModel = UsersFakeViewModel(
-                            UsersState(
-                                validUsersDTO().email,
-                                validUsersDTO().password,
-                                validUsersDTO().registerDate
-                            )
-                        ),
-                        settingsViewModel = SettingsFakeViewModel(
-                            SettingsState(
-                                soundVolume = 0.67f,
-                                musicVolume = 0.33f
-                            )
-                        ),
+                        usersViewModel =
+                            UsersFakeViewModel(
+                                UsersState(
+                                    validUsersDTO().email,
+                                    validUsersDTO().password,
+                                    validUsersDTO().registerDate,
+                                ),
+                            ),
+                        settingsViewModel =
+                            SettingsFakeViewModel(
+                                SettingsState(
+                                    soundVolume = 0.67f,
+                                    musicVolume = 0.33f,
+                                ),
+                            ),
                         navController = rememberNavController(),
                     )
                 }

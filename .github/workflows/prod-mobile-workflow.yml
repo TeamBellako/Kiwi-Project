@@ -17,7 +17,6 @@ on:
       - '.github/workflows/prod-mobile-workflow.yml'
 
 jobs:
-  # ---- CI: run tests on PRs ----
   mobile-tests:
     name: Run Android Tests (PR)
     if: ${{ github.event_name == 'pull_request' }}
@@ -89,7 +88,10 @@ jobs:
         run: ./gradlew test
         working-directory: ./mobile
 
-  # ---- CD: build, sign, and upload on pushes ----
+      - name: Run detekt
+        run: ./gradlew detekt
+        working-directory: ./mobile
+
   mobile-ci-cd:
     name: Build, Sign & Upload to Play (Prod)
     if: ${{ github.event_name == 'push' }}
