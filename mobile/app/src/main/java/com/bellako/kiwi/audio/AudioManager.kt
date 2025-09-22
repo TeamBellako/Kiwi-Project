@@ -22,8 +22,8 @@ class AudioLayerPlayer(
     var fade: Runnable?,
 )
 
-private const val DEFAULT_FADE_DURATION = 2000L
-private const val DEFAULT_FADE_DURATION_FAST = 200L
+private const val DEFAULT_FADE_DURATION = 1000L
+private const val DEFAULT_FADE_DURATION_FAST = 100L
 private const val FADE_IN_INTERVAL = 50L
 
 /**
