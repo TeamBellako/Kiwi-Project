@@ -25,6 +25,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.audio.Kiwi_Music_Home
+import com.bellako.kiwi.audio.Kiwi_Music_Login
+import com.bellako.kiwi.audio.Kiwi_Music_Settings
 import com.bellako.kiwi.audio.Kiwi_Music_SignUp
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
@@ -155,7 +157,7 @@ fun AppNavHost(
     ) {
         composable(ScreenRoutes.LOGIN) {
             AppScreenWrapper {
-                Kiwi_Music_Home()
+                Kiwi_Music_Login()
                 LogInScreen(
                     usersViewModel = usersViewModel,
                     personalityViewModel = personalityViewModel,
@@ -166,7 +168,7 @@ fun AppNavHost(
 
         composable(ScreenRoutes.SIGNUP1_WELCOME) {
             AppScreenWrapper {
-                Kiwi_Music_SignUp()
+                Kiwi_Music_Login()
                 SignUpScreen1_Welcome(
                     viewModel = usersViewModel,
                     navController = navController,
@@ -215,7 +217,7 @@ fun AppNavHost(
 
         composable(ScreenRoutes.SETTINGS) {
             AppScreenWrapper {
-                Kiwi_Music_Home()
+                Kiwi_Music_Settings()
                 SettingsScreen(
                     usersViewModel = usersViewModel,
                     settingsViewModel = settingsViewModel,
@@ -226,7 +228,7 @@ fun AppNavHost(
 
         composable(ScreenRoutes.HELP) {
             AppScreenWrapper {
-                Kiwi_Music_Home()
+                Kiwi_Music_Settings()
                 SupportModalScreen(navController = navController)
             }
         }
