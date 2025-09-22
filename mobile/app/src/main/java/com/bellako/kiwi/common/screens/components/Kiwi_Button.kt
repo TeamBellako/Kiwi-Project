@@ -11,10 +11,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -29,9 +32,14 @@ fun Kiwi_Button(
     color: Color = MaterialTheme.colorScheme.primaryContainer,
     testTag: String = "",
 ) {
+    val context = LocalContext.current
+
     Box(modifier = modifier) {
         Button(
-            onClick = onClick,
+            onClick = {
+                AudioManager.playSFX(context, R.raw.snd_ui_button)
+                onClick.invoke()
+            },
             enabled = enabled,
             colors =
                 ButtonDefaults.buttonColors(
