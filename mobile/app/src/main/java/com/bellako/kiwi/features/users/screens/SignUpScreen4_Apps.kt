@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -186,6 +187,12 @@ fun AppClassificationColumns(
     navController: NavController,
     onUpdateSuccess: (() -> Unit),
 ) {
+    var draggingApp by remember { mutableStateOf<AppInfo?>(null) }
+    var dragOffset by remember { mutableStateOf(IntOffset(0, 0)) }
+    var dragStartPosition by remember { mutableStateOf(Offset(0f, 0f)) }
+    var goodColumnReact = remember { mutableStateOf<Rect?>(null) }
+    var badColumnReact = remember { mutableStateOf<Rect?>(null) }
+    var neutralColumnReact = remember { mutableStateOf<Rect?>(null) }
     Column(
         modifier =
             Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
