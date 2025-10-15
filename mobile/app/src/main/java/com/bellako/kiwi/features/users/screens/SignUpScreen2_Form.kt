@@ -398,6 +398,7 @@ fun SignUpScreen2_Form_Preview() {
                         validPersonalityDTO().build,
                         validPersonalityDTO().goodApps,
                         validPersonalityDTO().badApps,
+                        validPersonalityDTO().neutralApps,
                     ),
                 ),
             navController = rememberNavController(),

@@ -7,10 +7,13 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,11 +30,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -138,11 +146,14 @@ fun AppClassification(
         }
     val badApps =
         remember {
-            mutableStateListOf<AppInfo>().apply {
-                addAll(apps.filter { it.packageName != myPackageName })
-            }
+            mutableStateListOf<AppInfo>()
         }
-    updateApps(goodApps, badApps, personalityViewModel)
+    val neutralApps =
+        remember {
+            mutableStateListOf<AppInfo>().apply { addAll( apps.filter { it.packageName != myPackageName })
+    } }
+
+    updateApps(goodApps, badApps, neutralApps, personalityViewModel)
 
     if (personalityUiState == UIState.GeneralError) {
         ErrorModalScreen(onButtonClick = {
@@ -198,7 +209,7 @@ fun AppClassificationColumns(
             Column(modifier = Modifier.weight(1f)) {
                 Kiwi_H2(
                     KiwiTextArguments(
-                        text = "Good apps",
+                        text = "Good",
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                     ),
@@ -208,11 +219,6 @@ fun AppClassificationColumns(
                     items(goodApps) { app ->
                         AppItem(
                             app = app,
-                            onClick = {
-                                goodApps.remove(app)
-                                badApps.add(app)
-                                updateApps(goodApps, badApps, personalityViewModel)
-                            },
                             enabled = !isLoading,
                         )
                     }
@@ -221,7 +227,25 @@ fun AppClassificationColumns(
             Column(modifier = Modifier.weight(1f)) {
                 Kiwi_H2(
                     KiwiTextArguments(
-                        text = "Evil apps",
+                        text = "Neutral",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                    ),
+                )
+                Kiwi_Spacer(Spacing.small)
+                LazyColumn {
+                    items(goodApps) { app ->
+                        AppItem(
+                            app = app,
+                            enabled = !isLoading,
+                        )
+                    }
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Kiwi_H2(
+                    KiwiTextArguments(
+                        text = "Evil",
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                     ),
@@ -231,11 +255,6 @@ fun AppClassificationColumns(
                     items(badApps) { app ->
                         AppItem(
                             app = app,
-                            onClick = {
-                                badApps.remove(app)
-                                goodApps.add(app)
-                                updateApps(goodApps, badApps, personalityViewModel)
-                            },
                             enabled = !isLoading,
                         )
                     }
@@ -270,34 +289,30 @@ fun AppClassificationColumns(
 private fun updateApps(
     goodApps: SnapshotStateList<AppInfo>,
     badApps: SnapshotStateList<AppInfo>,
+    neutralApps: SnapshotStateList<AppInfo>,
     personalityViewModel: IPersonalityViewModel,
 ) {
     goodApps.sortBy { it.name.lowercase() }
     badApps.sortBy { it.name.lowercase() }
+    neutralApps.sortBy { it.name.lowercase() }
     personalityViewModel.onAppsChanged(
         goodApps.map { it.packageName },
         badApps.map { it.packageName },
+        neutralApps.map { it.packageName },
     )
 }
 
 @Composable
 fun AppItem(
     app: AppInfo,
-    onClick: () -> Unit,
     enabled: Boolean,
+    isDragging: Boolean = false,
+    dragOffset: IntOffset? = null
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
-            Modifier
-                .clickable(
-                    onClick =
-                        if (enabled) {
-                            onClick
-                        } else {
-                            {}
-                        },
-                ).padding(getResponsiveSizeHeight(Spacing.xSmall)),
+            Modifier.padding(getResponsiveSizeHeight(Spacing.xSmall)).offset { dragOffset ?: androidx.compose.ui.unit.IntOffset(0, 0) },
     ) {
         Kiwi_Image(
             painter = rememberDrawablePainter(app.icon),
@@ -331,6 +346,7 @@ fun SignUpScreen4_Apps_Preview() {
                         validPersonalityDTO().build,
                         validPersonalityDTO().goodApps,
                         validPersonalityDTO().badApps,
+                        validPersonalityDTO().neutralApps,
                     ),
                 ),
             navController = rememberNavController(),

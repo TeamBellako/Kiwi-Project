@@ -6,6 +6,7 @@ data class PersonalityState(
     val build: String,
     val goodApps: List<String>,
     val badApps: List<String>,
+    val neutralApps: List<String>,
 ) {
     val questions: List<Question> =
         listOf(

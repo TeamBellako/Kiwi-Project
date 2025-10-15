@@ -364,6 +364,7 @@ fun DashboardModal_Preview(
                                     validPersonalityDTO().build,
                                     validPersonalityDTO().goodApps,
                                     validPersonalityDTO().badApps,
+                                    validPersonalityDTO().neutralApps,
                                 ),
                             ),
                         showCalendarView,
