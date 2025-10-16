@@ -5,8 +5,8 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
@@ -166,6 +166,7 @@ fun AppClassification(
             personalityViewModel = personalityViewModel,
             goodApps = goodApps,
             badApps = badApps,
+            neutralApps = neutralApps,
             navController = navController,
             onUpdateSuccess = {
                 localLoading = true
@@ -184,92 +185,243 @@ fun AppClassificationColumns(
     personalityViewModel: IPersonalityViewModel,
     goodApps: SnapshotStateList<AppInfo>,
     badApps: SnapshotStateList<AppInfo>,
+    neutralApps: SnapshotStateList<AppInfo>,
     navController: NavController,
     onUpdateSuccess: (() -> Unit),
 ) {
     var draggingApp by remember { mutableStateOf<AppInfo?>(null) }
-    var dragOffset by remember { mutableStateOf(IntOffset(0, 0)) }
+    var dragOffset by remember { mutableStateOf(Offset.Zero) }
     var dragStartPosition by remember { mutableStateOf(Offset(0f, 0f)) }
-    var goodColumnReact = remember { mutableStateOf<Rect?>(null) }
-    var badColumnReact = remember { mutableStateOf<Rect?>(null) }
-    var neutralColumnReact = remember { mutableStateOf<Rect?>(null) }
+    var dragItemStartPosition by remember { mutableStateOf(Offset(0f, 0f)) }
+    var goodColumnRect by remember { mutableStateOf<Rect?>(null) }
+    var badColumnRect by remember { mutableStateOf<Rect?>(null) }
+    var neutralColumnRect by remember { mutableStateOf<Rect?>(null) }
+    var boxPosition by remember { mutableStateOf<Offset?>(null) }
+
+    // Map to store each app's position
+    val appPositions = remember { mutableMapOf<AppInfo, Rect>() }
+
     Column(
-        modifier =
-            Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
+        modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
         Kiwi_P2(
             KiwiTextArguments(
-                text = "Categorize your apps.\nTap to switch between lists.",
+                text = "Categorize your apps.\nDrag them between columns.",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.secondary,
             ),
         )
-        Kiwi_Spacer(Spacing.large)
 
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .weight(1f),
+        Kiwi_Spacer(Spacing.large)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .onGloballyPositioned { coordinates ->
+                    boxPosition = coordinates.boundsInWindow().topLeft
+                }
+                .pointerInput(isLoading) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            if (!isLoading && boxPosition != null) {
+                                // Convert offset to global coordinates
+                                val globalOffset = Offset(
+                                    boxPosition!!.x + offset.x,
+                                    boxPosition!!.y + offset.y
+                                )
+
+                                // Find which app is under the finger using global coordinates
+                                val appUnderFinger = appPositions.entries.firstOrNull { (_, rect) ->
+                                    rect.contains(globalOffset)
+                                }?.key
+
+                                if (appUnderFinger != null) {
+                                    draggingApp = appUnderFinger
+                                    // Save the click position for drop detection
+                                    dragStartPosition = globalOffset
+                                    // Save the item's top-left position for rendering
+                                    dragItemStartPosition = appPositions[appUnderFinger]?.topLeft ?: Offset.Zero
+                                    dragOffset = Offset.Zero
+                                }
+                            }
+                        },
+                        onDrag = { change, dragAmount ->
+                            if (draggingApp != null) {
+                                dragOffset = Offset(
+                                    dragOffset.x + dragAmount.x,
+                                    dragOffset.y + dragAmount.y
+                                )
+                                change.consume()
+                            }
+                        },
+                        onDragEnd = {
+                            draggingApp?.let { app ->
+                                Log.d("Drag", "Ended dragging ${app.name}")
+                                val currentDragPosition = Offset(
+                                    dragStartPosition.x + dragOffset.x,
+                                    dragStartPosition.y + dragOffset.y
+                                )
+
+                                // Determine which column the app was dropped in
+                                val droppedInGood = goodColumnRect?.contains(currentDragPosition) == true
+                                val droppedInBad = badColumnRect?.contains(currentDragPosition) == true
+                                val droppedInNeutral = neutralColumnRect?.contains(currentDragPosition) == true
+
+                                // Remove from all lists
+                                goodApps.remove(app)
+                                badApps.remove(app)
+                                neutralApps.remove(app)
+
+                                // Add to the appropriate list
+                                when {
+                                    droppedInGood -> {
+                                        Log.d("Drag", "Dropped in Good column")
+                                        goodApps.add(app)
+                                    }
+                                    droppedInBad -> {
+                                        Log.d("Drag", "Dropped in Bad column")
+                                        badApps.add(app)
+                                    }
+                                    droppedInNeutral -> {
+                                        Log.d("Drag", "Dropped in Neutral column")
+                                        neutralApps.add(app)
+                                    }
+                                    else -> {
+                                        // If dropped outside all columns, return to neutral
+                                        Log.d("Drag", "Dropped outside, returning to Neutral")
+                                        neutralApps.add(app)
+                                    }
+                                }
+
+                                updateApps(goodApps, badApps, neutralApps, personalityViewModel)
+                            }
+                            draggingApp = null
+                            dragOffset = Offset.Zero
+                        }
+                    )
+                }
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Kiwi_H2(
-                    KiwiTextArguments(
-                        text = "Good",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Kiwi_Spacer(Spacing.small)
-                LazyColumn {
-                    items(goodApps) { app ->
-                        AppItem(
-                            app = app,
-                            enabled = !isLoading,
-                        )
+            Row(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                // Good Column
+                Column(modifier = Modifier.weight(1f).onGloballyPositioned { coordinates ->
+                    goodColumnRect = coordinates.boundsInWindow()
+                }) {
+                    Kiwi_H2(
+                        KiwiTextArguments(
+                            text = "Good",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                    Kiwi_Spacer(Spacing.small)
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        items(goodApps) { app ->
+                            val isDragging = draggingApp == app
+                            if (!isDragging) {
+                                AppItem(
+                                    app = app,
+                                    enabled = !isLoading,
+                                    isDragging = false,
+                                    dragOffset = Offset.Zero,
+                                    onPositionChanged = { rect ->
+                                        appPositions[app] = rect
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+                // Neutral Column
+                Column(modifier = Modifier.weight(1f).onGloballyPositioned { coordinates ->
+                    neutralColumnRect = coordinates.boundsInWindow()
+                }) {
+                    Kiwi_H2(
+                        KiwiTextArguments(
+                            text = "Neutral",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                    Kiwi_Spacer(Spacing.small)
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        items(neutralApps) { app ->
+                            val isDragging = draggingApp == app
+                            if (!isDragging) {
+                                AppItem(
+                                    app = app,
+                                    enabled = !isLoading,
+                                    isDragging = false,
+                                    dragOffset = Offset.Zero,
+                                    onPositionChanged = { rect ->
+                                        appPositions[app] = rect
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+                // Bad Column
+                Column(modifier = Modifier.weight(1f).onGloballyPositioned { coordinates ->
+                    badColumnRect = coordinates.boundsInWindow()
+                }) {
+                    Kiwi_H2(
+                        KiwiTextArguments(
+                            text = "Evil",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
+                    Kiwi_Spacer(Spacing.small)
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        items(badApps) { app ->
+                            val isDragging = draggingApp == app
+                            if (!isDragging) {
+                                AppItem(
+                                    app = app,
+                                    enabled = !isLoading,
+                                    isDragging = false,
+                                    dragOffset = Offset.Zero,
+                                    onPositionChanged = { rect ->
+                                        appPositions[app] = rect
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
-            Column(modifier = Modifier.weight(1f)) {
-                Kiwi_H2(
-                    KiwiTextArguments(
-                        text = "Neutral",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                    ),
+            // Render dragging app on top
+            draggingApp?.let { app ->
+                // Calculate the position relative to the Box
+                val itemOffsetInBox = Offset(
+                    dragItemStartPosition.x - (boxPosition?.x ?: 0f),
+                    dragItemStartPosition.y - (boxPosition?.y ?: 0f)
                 )
-                Kiwi_Spacer(Spacing.small)
-                LazyColumn {
-                    items(goodApps) { app ->
-                        AppItem(
-                            app = app,
-                            enabled = !isLoading,
-                        )
-                    }
-                }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Kiwi_H2(
-                    KiwiTextArguments(
-                        text = "Evil",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Kiwi_Spacer(Spacing.small)
-                LazyColumn {
-                    items(badApps) { app ->
-                        AppItem(
-                            app = app,
-                            enabled = !isLoading,
-                        )
-                    }
+
+                Box(
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(
+                                (itemOffsetInBox.x + dragOffset.x).toInt(),
+                                (itemOffsetInBox.y + dragOffset.y).toInt()
+                            )
+                        }
+                ) {
+                    AppItem(
+                        app = app,
+                        enabled = !isLoading,
+                        isDragging = true,
+                        dragOffset = Offset.Zero,
+                        onPositionChanged = {}
+                    )
                 }
             }
         }
-        Kiwi_Spacer(Spacing.large)
 
+        Kiwi_Spacer(Spacing.large)
         Kiwi_Button(
             textArguments =
                 KiwiTextArguments(
@@ -281,7 +433,6 @@ fun AppClassificationColumns(
                 CoroutineScope(Dispatchers.Main).launch {
                     if (personalityViewModel.updateApps().isSuccess) {
                         firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
-
                         navController.navigate(ScreenRoutes.HOME)
                         onUpdateSuccess()
                     }
@@ -314,12 +465,24 @@ fun AppItem(
     app: AppInfo,
     enabled: Boolean,
     isDragging: Boolean = false,
-    dragOffset: IntOffset? = null
+    dragOffset: Offset = Offset.Zero,
+    onPositionChanged: (Rect) -> Unit = {},
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier =
-            Modifier.padding(getResponsiveSizeHeight(Spacing.xSmall)).offset { dragOffset ?: androidx.compose.ui.unit.IntOffset(0, 0) },
+        modifier = Modifier
+            .padding(getResponsiveSizeHeight(Spacing.xSmall))
+            .onGloballyPositioned { coordinates ->
+                onPositionChanged(coordinates.boundsInWindow())
+            }
+            .offset { IntOffset(dragOffset.x.toInt(), dragOffset.y.toInt()) }
+            .graphicsLayer {
+                if (isDragging) {
+                    alpha = 1.0f
+                    scaleX = 1.1f
+                    scaleY = 1.1f
+                }
+            }
     ) {
         Kiwi_Image(
             painter = rememberDrawablePainter(app.icon),
