@@ -34,6 +34,10 @@ public class PersonalityPersistence {
     @Column(name = "bad_apps")
     private List<String> badApps;
 
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "neutral_apps")
+    private List<String> neutralApps;
+
     @OneToOne()
     @JoinColumn(name = "user_id")
     private UsersPersistence user;
