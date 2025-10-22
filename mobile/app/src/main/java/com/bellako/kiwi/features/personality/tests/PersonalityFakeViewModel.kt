@@ -59,9 +59,11 @@ class PersonalityFakeViewModel(
     override fun onAppsChanged(
         goodApps: List<String>,
         badApps: List<String>,
+        neutralApps: List<String>,
     ) {
         _state.value = _state.value?.copy(goodApps = goodApps)
         _state.value = _state.value?.copy(badApps = badApps)
+        _state.value = _state.value?.copy(neutralApps = neutralApps)
     }
 
     override suspend fun updateApps(): Result<Unit> = getTestResult()

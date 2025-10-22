@@ -79,6 +79,7 @@ class DashboardModalTest {
                 validPersonalityDTO().build,
                 validPersonalityDTO().goodApps,
                 validPersonalityDTO().badApps,
+                validPersonalityDTO().neutralApps,
             )
         fakePersonalityViewModel = PersonalityFakeViewModel(personalityState)
     }

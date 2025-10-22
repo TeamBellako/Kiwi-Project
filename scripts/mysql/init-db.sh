@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS personality (
     build VARCHAR(255),
     good_apps TEXT,
     bad_apps TEXT,
+    neutral_apps TEXT,
 
     -- Foreign key to users table
     user_id BIGINT NOT NULL,

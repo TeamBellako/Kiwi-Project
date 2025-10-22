@@ -11,7 +11,8 @@ public class PersonalityDataMapper {
                         dto.getKnightName(),
                         dto.getBuild(),
                         dto.getGoodApps(),
-                        dto.getBadApps()
+                        dto.getBadApps(),
+                        dto.getNeutralApps()
                 );
     }
 
@@ -22,7 +23,8 @@ public class PersonalityDataMapper {
                         persistence.getKnightName(),
                         persistence.getBuild(),
                         persistence.getGoodApps(),
-                        persistence.getBadApps()
+                        persistence.getBadApps(),
+                        persistence.getNeutralApps()
                 );
     }
 
@@ -35,6 +37,7 @@ public class PersonalityDataMapper {
                         .build(domain.getBuild())
                         .goodApps(domain.getGoodApps())
                         .badApps(domain.getBadApps())
+                        .neutralApps(domain.getNeutralApps())
                         .build();
     }
 
@@ -48,6 +51,7 @@ public class PersonalityDataMapper {
         persistence.setBuild(domain.getBuild());
         persistence.setGoodApps(domain.getGoodApps());
         persistence.setBadApps(domain.getBadApps());
+        persistence.setNeutralApps(domain.getNeutralApps());
     }
 
     public static PersonalityDTO toDTO(PersonalityDomain domain) {
@@ -57,7 +61,8 @@ public class PersonalityDataMapper {
                 domain.getKnightName(),
                 domain.getBuild(),
                 domain.getGoodApps(),
-                domain.getBadApps()
+                domain.getBadApps(),
+                domain.getNeutralApps()
         );
     }
 
