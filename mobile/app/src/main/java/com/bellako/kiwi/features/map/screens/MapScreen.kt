@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,6 +48,9 @@ import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
+import com.bellako.kiwi.ui.Spacing
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 
@@ -73,6 +75,7 @@ fun MapScreen(
     title: String = "WORLD MAP",
     viewModel: MapViewModel? = null,
 ) {
+    val kiwiColors = LocalKiwiColors.current
     val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
     val density = LocalDensity.current
     val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
@@ -93,7 +96,7 @@ fun MapScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(kiwiColors.color2)
                 .testTag(CommonTestTags.HOME_SCREEN),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -101,8 +104,9 @@ fun MapScreen(
         Kiwi_H2(
             KiwiTextArguments(
                 title,
-                color = MaterialTheme.colorScheme.inversePrimary,
+                color = kiwiColors.colorF,
                 bold = true,
+                modifier = Modifier.padding(0.dp,getResponsiveSizeHeight(Spacing.small))
             ),
         )
 

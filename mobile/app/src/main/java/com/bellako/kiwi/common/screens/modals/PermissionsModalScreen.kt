@@ -49,6 +49,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.hasUsageStatsPermission
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -103,6 +104,9 @@ fun PermissionsModalScreen(
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 private fun PermissionRequestLayout(context: Context) {
+
+    val kiwicolors = LocalKiwiColors.current
+
     Box(
         modifier =
             Modifier
@@ -175,6 +179,7 @@ private fun PermissionRequestLayout(context: Context) {
                         textAlign = TextAlign.Center,
                         bold = true,
                     ),
+                color = kiwicolors.color5A,
                 onClick = {
                     context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                 },

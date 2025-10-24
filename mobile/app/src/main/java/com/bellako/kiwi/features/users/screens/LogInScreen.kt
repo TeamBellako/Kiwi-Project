@@ -5,10 +5,11 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,17 +21,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
@@ -38,8 +43,9 @@ import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
@@ -57,6 +63,7 @@ import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +78,7 @@ fun LogInScreen(
 ) {
     val context = LocalContext.current
     val isPreview = LocalInspectionMode.current
+    val kiwiColors = LocalKiwiColors.current
 
     val usersState by usersViewModel.state.collectAsState()
     val usersUiState by usersViewModel.uiState.collectAsState()
@@ -79,7 +87,7 @@ fun LogInScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(kiwiColors.color2),
         contentAlignment = Alignment.Center,
     ) {
         when (usersUiState) {
@@ -94,14 +102,36 @@ fun LogInScreen(
 
             else -> {
                 Kiwi_Image(
-                    R.drawable.ph_login_bkg,
+                    R.drawable.login_bg,
                     "Login Background",
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopCenter),
-                    contentScale = ContentScale.Crop,
+                            .fillMaxHeight(0.46f)
+                            .align(Alignment.TopStart),
+                    contentScale = ContentScale.FillHeight,
+                    alignment = Alignment.TopStart,
                 )
+
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.46f)
+                            .align(Alignment.TopStart)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color.Transparent,
+                                        kiwiColors.color2,
+                                        kiwiColors.color2,
+                                    ),
+                                    startY = 0f,
+                                    endY = Float.POSITIVE_INFINITY,
+                                )
+                            )
+                )
+
 
                 LogInLayout(
                     context = context,
@@ -150,8 +180,8 @@ private fun LogInLayout(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(getResponsiveSizeHeight(Spacing.medium)),
-            contentAlignment = Alignment.Center,
+                    .padding(getResponsiveSizeHeight(Spacing.large)),
+            contentAlignment = Alignment.CenterStart,
         ) {
             if (isLoading || isPreview) {
                 LoadingModal()
@@ -170,6 +200,8 @@ private fun LogInLayout(
                     localLoading = true
                 },
             )
+
+
         }
 
         GoToSignUp(
@@ -177,6 +209,7 @@ private fun LogInLayout(
             isPreview = isPreview,
             navController = navController,
         )
+
     }
 }
 
@@ -192,11 +225,18 @@ private fun LogInForm(
     navController: NavController,
     onLoginSuccess: (() -> Unit),
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     Column(
         modifier =
             Modifier
+                .offset(0.dp, (40).dp)
                 .alpha(if (!isLoading || isPreview) 1f else 0f),
     ) {
+        WelcomeText()
+
+        Kiwi_Spacer()
+
         Kiwi_InputField(
             enabled = !isLoading,
             value = usersState.email,
@@ -205,12 +245,13 @@ private fun LogInForm(
                 Kiwi_Label2(
                     KiwiTextArguments(
                         "Email",
-                        color = MaterialTheme.colorScheme.inversePrimary,
+                        color = kiwiColors.color7B,
                     ),
                 )
             },
-            shouldHideInput = false,
-            textColor = MaterialTheme.colorScheme.inversePrimary,
+            keyboardType = KeyboardType.Email,
+            textColor = kiwiColors.color7B,
+            color = kiwiColors.color3A,
             testTag = UsersTestTags.EMAIL_FIELD,
         )
 
@@ -224,12 +265,13 @@ private fun LogInForm(
                 Kiwi_Label2(
                     KiwiTextArguments(
                         "Password",
-                        color = MaterialTheme.colorScheme.inversePrimary,
+                        color = kiwiColors.color7B,
                     ),
                 )
             },
-            shouldHideInput = true,
-            textColor = MaterialTheme.colorScheme.inversePrimary,
+            keyboardType = KeyboardType.Password,
+            textColor = kiwiColors.color7B,
+            color = kiwiColors.color3A,
             testTag = UsersTestTags.PASSWORD_FIELD,
         )
 
@@ -239,9 +281,10 @@ private fun LogInForm(
             textArguments =
                 KiwiTextArguments(
                     "LOG IN",
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = kiwiColors.colorF,
                     bold = true,
                 ),
+            color = kiwiColors.color5 ,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
                     if (performLogin(context, usersViewModel, personalityViewModel, navController)) {
@@ -255,12 +298,33 @@ private fun LogInForm(
 
         Kiwi_Spacer()
 
+        ForgotPassword { navController.navigate(ScreenRoutes.WIP) }
+
+        Kiwi_Spacer()
+
         LogInErrorMessage(usersUiState)
     }
 }
 
 @Composable
+private fun WelcomeText() {
+    val kiwiColors = LocalKiwiColors.current
+
+    Kiwi_H1(
+        KiwiTextArguments(
+            "Welcome Back,\nKnight",
+            TextAlign.Center,
+            color = kiwiColors.colorF,
+            bold = true,
+            modifier = Modifier
+                .fillMaxWidth()
+        ),
+    )
+}
+
+@Composable
 private fun LogInErrorMessage(usersUiState: UIState<Unit>) {
+    val kiwiColors = LocalKiwiColors.current
     var errorMessage by remember { mutableStateOf("") }
     errorMessage =
         when (usersUiState) {
@@ -274,7 +338,7 @@ private fun LogInErrorMessage(usersUiState: UIState<Unit>) {
     Box(modifier = Modifier.alpha(if (errorMessage.isEmpty()) 0f else 1f)) {
         Kiwi_InfoBox(
             message = errorMessage,
-            color = MaterialTheme.colorScheme.error,
+            color = kiwiColors.colorR,
             testTag = UsersTestTags.ERROR_TEXT,
         )
     }
@@ -290,7 +354,7 @@ private fun GoToSignUp(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
+                .padding(bottom = getResponsiveSizeHeight(Spacing.xLarge))
                 .alpha(if (!isLoading || isPreview) 1f else 0f),
         contentAlignment = Alignment.BottomCenter,
     ) {
@@ -335,13 +399,52 @@ private suspend fun performLogin(
 }
 
 @Composable
+private fun ForgotPassword(onForgotPass: () -> Unit) {
+    val kiwiColors = LocalKiwiColors.current
+
+    val annotatedString =
+        buildAnnotatedString {
+            withLink(
+                link =
+                    LinkAnnotation.Clickable(
+                        tag = "FORGOTPASS",
+                        linkInteractionListener = {
+                            onForgotPass()
+                        },
+                    ),
+            ) {
+                withStyle(
+                    style =
+                        SpanStyle(
+                            color = kiwiColors.color7B,
+                        ),
+                ) {
+                    append("Forgot Password?")
+                }
+            }
+        }
+
+        Kiwi_AnnotatedString_P1(
+            KiwiAnnotatedStringArguments(
+                annotatedString,
+                TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ),
+        )
+
+}
+
+@Composable
 private fun SignUp(onSignUp: () -> Unit) {
+    val kiwiColors = LocalKiwiColors.current
+
     val annotatedString =
         buildAnnotatedString {
             withStyle(
                 style =
                     SpanStyle(
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color6,
                     ),
             ) {
                 append("First Time? \nStart Your Adventure ")
@@ -359,7 +462,7 @@ private fun SignUp(onSignUp: () -> Unit) {
                 withStyle(
                     style =
                         SpanStyle(
-                            color = MaterialTheme.colorScheme.inversePrimary,
+                            color = kiwiColors.color7B,
                             textDecoration = TextDecoration.Underline,
                         ),
                 ) {
@@ -368,7 +471,7 @@ private fun SignUp(onSignUp: () -> Unit) {
             }
         }
 
-    Kiwi_AnnotatedString_P2(
+    Kiwi_AnnotatedString_P1(
         KiwiAnnotatedStringArguments(
             annotatedString,
             TextAlign.Center,

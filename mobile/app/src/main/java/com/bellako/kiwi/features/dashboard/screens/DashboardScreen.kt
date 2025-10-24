@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,11 +36,10 @@ import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
+import com.bellako.kiwi.common.screens.components.Kiwi_Display1
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
-import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -65,6 +63,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import java.time.LocalDate
@@ -73,8 +72,8 @@ const val MONTH_SLIDE_ANIM_DURATION = 300
 const val DAY_DISABLED_ALPHA = 0.3f
 
 const val STATE_HEIGHT_0 = 150
-const val STATE_HEIGHT_1 = 260
-const val STATE_HEIGHT_2 = 650
+const val STATE_HEIGHT_1 = 270
+const val STATE_HEIGHT_2 = 700
 val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -99,16 +98,21 @@ fun DashboardScreen(
         loadMetrics(dateToString(LocalDate.now()), metricsViewModel, personalityViewModel, context)
     }
 
+    val kiwiColors = LocalKiwiColors.current
     val shouldShowCalendarView = remember { mutableStateOf(showCalendarView) }
 
     Kiwi_DraggableBar(
-        modifier = Modifier.testTag(DashboardModalTestTags.DRAGGABLE_NODE),
+        modifier = Modifier
+            .testTag(DashboardModalTestTags.DRAGGABLE_NODE)
+        ,
         states = STATES,
         content = { currentStateIndex ->
             Column(
                 modifier =
                     Modifier
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(
+                            kiwiColors.color2,
+                         )
                         .padding(
                             top = 0.dp,
                             bottom = getResponsiveSizeHeight(Spacing.medium),
@@ -148,7 +152,7 @@ fun DashboardScreen(
                 Box(
                     modifier =
                         Modifier
-                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.3f))
+                            .background(kiwiColors.color2.copy(alpha = 0.3f))
                             .fillMaxWidth()
                             .height(
                                 getResponsiveSizeHeight(STATES[currentStateIndex]).dp -
@@ -184,31 +188,18 @@ fun ComposableEngagementMeasuring(layout: String) {
 }
 
 @Composable
-private fun HeaderLine() {
-    val linePadding = getResponsiveSizeHeight(20.dp)
-    Kiwi_HorizontalLine(
-        40.dp,
-        2.dp,
-        MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.padding(start = linePadding, end = linePadding),
-    )
-}
-
-@Composable
 private fun Header() {
     Kiwi_Spacer()
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        HeaderLine()
         Kiwi_H3(
             KiwiTextArguments(
-                "Daily Progress",
+                ":: Daily Progress ::",
                 TextAlign.Center,
-                MaterialTheme.colorScheme.secondary,
+                LocalKiwiColors.current.color6,
             ),
         )
-        HeaderLine()
     }
     Kiwi_Spacer()
 }
@@ -254,33 +245,58 @@ fun SelectedMetricsTime(
     expanded: Boolean,
     tag: String,
 ) {
-    val textArguments =
-        KiwiAnnotatedStringArguments(
-            buildAnnotatedString {
-                withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline)) {
-                    if (validMetrics) {
-                        append(DateUtils.parseTimeSeconds(currentSeconds))
-                    }
-                }
-                withStyle(SpanStyle(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
-                    if (validMetrics) {
-                        append(" / " + DateUtils.parseTimeSeconds(maxSeconds))
-                    } else {
-                        append("No data")
-                    }
-                }
-            },
-            if (expanded) TextAlign.Center else TextAlign.Left,
+    val kiwiColors = LocalKiwiColors.current
+
+    val currentString = buildAnnotatedString {
+        withStyle(SpanStyle(color = kiwiColors.color6)) {
+            if (validMetrics) {
+                append(DateUtils.parseTimeSeconds(currentSeconds))
+            } else {
+                append("No data")
+            }
+        }
+    }
+    val maxString = buildAnnotatedString {
+        withStyle(SpanStyle(color = kiwiColors.color7D)) {
+            if (validMetrics) {
+                append("/" + DateUtils.parseTimeSeconds(maxSeconds))
+            } else {
+                append("No data")
+            }
+        }
+    }
+
+    if (expanded) {
+
+        Kiwi_Display1(KiwiTextArguments(
+            text = currentString.text,
+            TextAlign.Center,
+            color = kiwiColors.color6,
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .testTag(tag),
-        )
+            ))
 
-    if (expanded) {
-        Kiwi_AnnotatedString_P1(textArguments)
+        Kiwi_AnnotatedString_P2(
+            KiwiAnnotatedStringArguments(
+                maxString,
+                TextAlign.Center,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .testTag(tag),
+            ))
     } else {
-        Kiwi_AnnotatedString_P2(textArguments)
+        Kiwi_AnnotatedString_P2(
+            KiwiAnnotatedStringArguments(
+                currentString + maxString,
+                TextAlign.Left,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .testTag(tag),
+            ))
     }
 }
 

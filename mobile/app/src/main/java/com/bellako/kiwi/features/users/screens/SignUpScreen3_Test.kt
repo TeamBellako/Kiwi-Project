@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -43,6 +42,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -99,13 +99,14 @@ private fun Question(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                val kiwiColors = LocalKiwiColors.current
                 var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
                 Kiwi_H2(
                     KiwiTextArguments(
                         currentPersonalityState.questions[currentQuestion].question,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color6,
                     ),
                 )
 
@@ -117,9 +118,9 @@ private fun Question(
                         textArguments =
                             KiwiTextArguments(
                                 option,
-                                color = MaterialTheme.colorScheme.secondary,
+                                color = kiwiColors.color6,
                             ),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = kiwiColors.color3A,
                         onClick = {
                             currentPersonalityState.answers[currentQuestion] = index
                             if (currentQuestion + 1 < currentPersonalityState.questions.size) {

@@ -94,7 +94,7 @@ val kiwiTypography =
                 lineHeight = (10 * 1.4).sp,
             ),
         // Timers
-        displayMedium =
+        displayLarge =
             TextStyle(
                 fontFamily = Poppins,
                 fontWeight = FontWeight.SemiBold,
@@ -102,7 +102,7 @@ val kiwiTypography =
                 lineHeight = 22.sp,
             ),
         // Stat Numbers
-        displayLarge =
+        displayMedium =
             TextStyle(
                 fontFamily = Poppins,
                 fontWeight = FontWeight.Medium,

@@ -16,19 +16,19 @@ val appBarItems =
             route = ScreenRoutes.HOME,
         ),
         AppBarItem(
-            icon = R.drawable.ic_fire,
+            icon = R.drawable.ic_skills,
             route = ScreenRoutes.WIP,
         ),
         AppBarItem(
-            icon = R.drawable.ic_target,
+            icon = R.drawable.ic_objectives,
             route = ScreenRoutes.WIP,
         ),
         AppBarItem(
-            icon = R.drawable.ic_swords,
+            icon = R.drawable.ic_glossary,
             route = ScreenRoutes.WIP,
         ),
         AppBarItem(
-            icon = R.drawable.ic_person,
+            icon = R.drawable.ic_settings,
             route = ScreenRoutes.SETTINGS,
         ),
     )

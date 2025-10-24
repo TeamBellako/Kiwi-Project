@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
@@ -29,7 +30,7 @@ fun Kiwi_Button(
     textArguments: KiwiTextArguments,
     onClick: () -> Unit,
     enabled: Boolean = true,
-    color: Color = MaterialTheme.colorScheme.primaryContainer,
+    color: Color,
     testTag: String = "",
 ) {
     val context = LocalContext.current
@@ -45,8 +46,8 @@ fun Kiwi_Button(
                 ButtonDefaults.buttonColors(
                     containerColor = color,
                     disabledContainerColor = color.copy(alpha = 0.15f),
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f),
+                    contentColor = color,
+                    disabledContentColor = color.copy(alpha = 0.3f),
                 ),
             contentPadding =
                 PaddingValues(
@@ -77,15 +78,18 @@ fun Kiwi_Button(
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 fun Kiwi_Button_Preview() {
+    val kiwiColors = LocalKiwiColors.current
+
     Kiwi_Theme {
         Column {
             Kiwi_Button(
                 textArguments =
                     KiwiTextArguments(
                         "BUTTON",
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.colorF,
                         bold = true,
                     ),
+                color = kiwiColors.color5,
                 onClick = {},
             )
 
@@ -95,9 +99,10 @@ fun Kiwi_Button_Preview() {
                 textArguments =
                     KiwiTextArguments(
                         "BUTTON",
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.colorF,
                         bold = true,
                     ),
+                color = kiwiColors.color5,
                 onClick = {},
                 enabled = false,
             )

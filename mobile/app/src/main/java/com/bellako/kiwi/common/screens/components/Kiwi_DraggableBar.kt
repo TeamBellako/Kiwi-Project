@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
@@ -49,7 +50,7 @@ fun Kiwi_DraggableBar(
     content: @Composable (currentStateIndex: Int) -> Unit,
     states: List<Int>,
     initialStateIndex: Int = 0,
-    backgroundColor: Color = MaterialTheme.colorScheme.background,
+    backgroundColor: Color = LocalKiwiColors.current.color2,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -74,7 +75,7 @@ fun Kiwi_DraggableBar(
                 .fillMaxWidth()
                 .height(statesBottom.max().dp)
                 .offset(y = offset)
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(70.dp)))
                 .background(backgroundColor)
                 .then(modifier),
     ) {
@@ -204,7 +205,7 @@ fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
                         KiwiTextArguments(
                             "Content",
                             TextAlign.Center,
-                            MaterialTheme.colorScheme.secondary,
+                            LocalKiwiColors.current.color6,
                         ),
                     )
                 }

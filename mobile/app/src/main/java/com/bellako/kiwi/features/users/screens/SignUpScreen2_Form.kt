@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -22,6 +21,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
@@ -51,6 +51,7 @@ import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -131,6 +132,7 @@ private fun SignUpFormLayout(
 ) {
     val context = LocalContext.current
     val isPreview = LocalInspectionMode.current
+    val kiwiColors = LocalKiwiColors.current
 
     Column(
         modifier =
@@ -146,7 +148,7 @@ private fun SignUpFormLayout(
             KiwiTextArguments(
                 "Initial Setup Will Take\nApproximately 3 Minutes",
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.color6,
             ),
         )
 
@@ -157,7 +159,7 @@ private fun SignUpFormLayout(
             KiwiTextArguments(
                 "Let's Start With\nThe Basics",
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.color6,
                 bold = true,
             ),
         )
@@ -199,6 +201,8 @@ private fun SignUpForm(
     navController: NavController,
     onSignUpSuccess: (() -> Unit),
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     SignUpForm_Personality(
         isLoading = isLoading,
         personalityViewModel = personalityViewModel,
@@ -219,10 +223,10 @@ private fun SignUpForm(
         textArguments =
             KiwiTextArguments(
                 "START JOURNEY",
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.colorF,
                 bold = true,
             ),
-        color = MaterialTheme.colorScheme.tertiary,
+        color = kiwiColors.color8,
         onClick = {
             CoroutineScope(Dispatchers.Main).launch {
                 if (personalityViewModel.checkRealNameValid() && personalityViewModel.checkKnightNameValid()) {
@@ -260,6 +264,8 @@ private fun SignUpForm_Personality(
     personalityViewModel: IPersonalityViewModel,
     personalityState: PersonalityState,
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     Kiwi_InputField(
         enabled = !isLoading,
         value = personalityState.realName,
@@ -268,12 +274,12 @@ private fun SignUpForm_Personality(
             Kiwi_Label2(
                 KiwiTextArguments(
                     "Real Name",
-                    color = MaterialTheme.colorScheme.inversePrimary,
+                    color = kiwiColors.color7B,
                 ),
             )
         },
-        shouldHideInput = false,
-        textColor = MaterialTheme.colorScheme.inversePrimary,
+        textColor = kiwiColors.color7B,
+        color = kiwiColors.color3A,
         testTag = UsersTestTags.EMAIL_FIELD,
     )
 
@@ -287,12 +293,12 @@ private fun SignUpForm_Personality(
             Kiwi_Label2(
                 KiwiTextArguments(
                     "Knight Name",
-                    color = MaterialTheme.colorScheme.inversePrimary,
+                    color = kiwiColors.color7B,
                 ),
             )
         },
-        shouldHideInput = false,
-        textColor = MaterialTheme.colorScheme.inversePrimary,
+        textColor = kiwiColors.color7B,
+        color = kiwiColors.color3A,
         testTag = UsersTestTags.EMAIL_FIELD,
     )
 }
@@ -303,6 +309,8 @@ private fun SignUpForm_Users(
     usersViewModel: IUsersViewModel,
     usersState: UsersState,
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     Kiwi_InputField(
         enabled = !isLoading,
         value = usersState.email,
@@ -311,12 +319,12 @@ private fun SignUpForm_Users(
             Kiwi_Label2(
                 KiwiTextArguments(
                     "Email",
-                    color = MaterialTheme.colorScheme.inversePrimary,
+                    color = kiwiColors.color7B,
                 ),
             )
         },
-        shouldHideInput = false,
-        textColor = MaterialTheme.colorScheme.inversePrimary,
+        textColor = kiwiColors.color7B,
+        color = kiwiColors.color3A,
         testTag = UsersTestTags.EMAIL_FIELD,
     )
 
@@ -330,12 +338,13 @@ private fun SignUpForm_Users(
             Kiwi_Label2(
                 KiwiTextArguments(
                     "Password",
-                    color = MaterialTheme.colorScheme.inversePrimary,
+                    color = kiwiColors.color7B,
                 ),
             )
         },
-        shouldHideInput = true,
-        textColor = MaterialTheme.colorScheme.inversePrimary,
+        keyboardType = KeyboardType.Password,
+        textColor = kiwiColors.color7B,
+        color = kiwiColors.color3A,
         testTag = UsersTestTags.PASSWORD_FIELD,
     )
 }
@@ -345,6 +354,7 @@ private fun SignUpErrorMessage(
     usersUiState: UIState<Unit>,
     personalityUiState: UIState<Unit>,
 ) {
+    val kiwiColors = LocalKiwiColors.current
     var errorMessage by remember { mutableStateOf("") }
     errorMessage =
         when (usersUiState) {
@@ -366,7 +376,7 @@ private fun SignUpErrorMessage(
     Box(modifier = Modifier.alpha(if (errorMessage.isEmpty()) 0f else 1f)) {
         Kiwi_InfoBox(
             message = errorMessage,
-            color = MaterialTheme.colorScheme.error,
+            color = kiwiColors.colorR,
             testTag = UsersTestTags.ERROR_TEXT,
         )
     }
