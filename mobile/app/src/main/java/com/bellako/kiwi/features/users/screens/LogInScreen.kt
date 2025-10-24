@@ -505,6 +505,7 @@ fun LogInScreen_Preview() {
                         validPersonalityDTO().build,
                         validPersonalityDTO().goodApps,
                         validPersonalityDTO().badApps,
+                        validPersonalityDTO().neutralApps,
                     ),
                 ),
             navController = rememberNavController(),

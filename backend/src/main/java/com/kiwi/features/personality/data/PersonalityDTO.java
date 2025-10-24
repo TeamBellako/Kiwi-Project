@@ -11,4 +11,5 @@ public class PersonalityDTO {
     private String build;
     private List<String> goodApps;
     private List<String> badApps;
+    private List<String> neutralApps;
 }

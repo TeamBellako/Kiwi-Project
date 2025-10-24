@@ -214,6 +214,7 @@ fun MapScreen_Preview() {
                                     validPersonalityDTO().build,
                                     validPersonalityDTO().goodApps,
                                     validPersonalityDTO().badApps,
+                                    validPersonalityDTO().neutralApps,
                                 ),
                             ),
                     )

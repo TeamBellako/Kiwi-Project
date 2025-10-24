@@ -12,6 +12,7 @@ object PersonalityDataMapper {
             build = dto.build,
             goodApps = dto.goodApps,
             badApps = dto.badApps,
+            neutralApps = dto.neutralApps,
         )
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -22,6 +23,7 @@ object PersonalityDataMapper {
             build = state.build,
             goodApps = state.goodApps,
             badApps = state.badApps,
+            neutralApps = state.neutralApps,
         )
 
     fun toState(domain: PersonalityDomain): PersonalityState =
@@ -31,6 +33,7 @@ object PersonalityDataMapper {
             build = domain.build,
             goodApps = domain.goodApps,
             badApps = domain.badApps,
+            neutralApps = domain.neutralApps,
         )
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -43,6 +46,7 @@ object PersonalityDataMapper {
             build = domain.build,
             goodApps = domain.goodApps,
             badApps = domain.badApps,
+            neutralApps = domain.neutralApps,
         )
 
     @RequiresApi(Build.VERSION_CODES.O)

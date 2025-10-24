@@ -54,6 +54,7 @@ class SignUpScreen2Test {
                 validPersonalityDTO().build,
                 validPersonalityAppsDTO().goodApps,
                 validPersonalityAppsDTO().badApps,
+                validPersonalityAppsDTO().neutralApps
             )
 
         usersFakeViewModel = UsersFakeViewModel(usersState)

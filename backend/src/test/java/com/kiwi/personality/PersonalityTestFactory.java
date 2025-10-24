@@ -12,7 +12,8 @@ public class PersonalityTestFactory {
                 userNameKnightDTO().getName(),
                 buildDTO().getBuild(),
                 appsDTO().getGoodApps(),
-                appsDTO().getBadApps()
+                appsDTO().getBadApps(),
+                appsDTO().getNeutralApps()
         );
     }
 
@@ -29,6 +30,6 @@ public class PersonalityTestFactory {
     }
 
     public static AppsDTO appsDTO() {
-        return new AppsDTO(List.of("GrowTale"), List.of("X"));
+        return new AppsDTO(List.of("GrowTale"), List.of("Settings"), List.of("X"));
     }
 }
