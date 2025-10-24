@@ -284,8 +284,7 @@ fun SelectedMetricsTime(
                 TextAlign.Center,
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .testTag(tag),
+                        .fillMaxWidth(),
             ))
     } else {
         Kiwi_AnnotatedString_P2(

@@ -207,9 +207,7 @@ private fun ExpandedQuestProgress(
     val kiwiColors = LocalKiwiColors.current
     Box(
         modifier = Modifier
-            .padding(horizontal = getResponsiveSizeHeight(Spacing.medium))
-            .fillMaxWidth()
-            .height(getResponsiveSizeHeight(50.dp))
+            .size(getResponsiveSizeHeight(280.dp),getResponsiveSizeHeight(50.dp))
     ) {
 
         Kiwi_Image(
