@@ -14,6 +14,7 @@ object PersonalityTestFactory {
             validPersonalityBuildDTO().build,
             validPersonalityAppsDTO().goodApps,
             validPersonalityAppsDTO().badApps,
+            validPersonalityAppsDTO().neutralApps,
         )
 
     fun validPersonalityRealNameDTO(): PersonalityUserNameDTO = PersonalityUserNameDTO("Finn")
@@ -22,5 +23,5 @@ object PersonalityTestFactory {
 
     fun validPersonalityBuildDTO(): PersonalityBuildDTO = PersonalityBuildDTO(BERSERKER)
 
-    fun validPersonalityAppsDTO(): PersonalityAppsDTO = PersonalityAppsDTO(listOf("GrowTale"), listOf("X"))
+    fun validPersonalityAppsDTO(): PersonalityAppsDTO = PersonalityAppsDTO(listOf("GrowTale"), listOf("X"), listOf("Settings"))
 }

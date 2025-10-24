@@ -176,6 +176,7 @@ fun SignUpScreen3_Test_Preview() {
                         validPersonalityDTO().build,
                         validPersonalityDTO().goodApps,
                         validPersonalityDTO().badApps,
+                        validPersonalityDTO().neutralApps,
                     ),
                 ),
             navController = rememberNavController(),

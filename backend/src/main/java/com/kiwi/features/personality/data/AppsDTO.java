@@ -8,4 +8,5 @@ import java.util.List;
 public class AppsDTO {
     private List<String> goodApps;
     private List<String> badApps;
+    private List<String> neutralApps;
 }

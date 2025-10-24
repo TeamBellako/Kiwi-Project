@@ -29,6 +29,7 @@ interface IPersonalityViewModel : IBaseViewModel<PersonalityState> {
     fun onAppsChanged(
         goodApps: List<String>,
         badApps: List<String>,
+        neutralApps: List<String>,
     )
 
     suspend fun updateApps(): Result<Unit>

@@ -6,4 +6,5 @@ data class PersonalityDomain(
     val build: String,
     val goodApps: List<String>,
     val badApps: List<String>,
+    val neutralApps: List<String>,
 )

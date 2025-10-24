@@ -58,6 +58,7 @@ class LoginScreenTest {
                 validPersonalityDTO().build,
                 validPersonalityAppsDTO().goodApps,
                 validPersonalityAppsDTO().badApps,
+                validPersonalityAppsDTO().neutralApps,
             )
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 

@@ -26,7 +26,7 @@ class PersonalityViewModel
         private val repository: PersonalityRepository,
     ) : BaseViewModel(),
         IPersonalityViewModel {
-        private val _state = MutableStateFlow(PersonalityState("", "", "", listOf(), listOf()))
+        private val _state = MutableStateFlow(PersonalityState("", "", "", listOf(), listOf(), neutralApps = listOf()))
         override val state: StateFlow<PersonalityState?> = _state.asStateFlow()
 
         // -----------------------------------------------------------------------------------------
@@ -47,6 +47,7 @@ class PersonalityViewModel
                             build = state.build,
                             goodApps = state.goodApps,
                             badApps = state.badApps,
+                            neutralApps = state.neutralApps,
                         )
                     setIsLoading(false)
                     setUiState(UIState.Idle)
@@ -130,9 +131,11 @@ class PersonalityViewModel
         override fun onAppsChanged(
             goodApps: List<String>,
             badApps: List<String>,
+            neutralApps: List<String>
         ) {
             _state.value = _state.value.copy(goodApps = goodApps)
             _state.value = _state.value.copy(badApps = badApps)
+            _state.value = _state.value.copy(neutralApps = neutralApps)
         }
 
         override suspend fun updateApps(): Result<Unit> {
@@ -140,7 +143,8 @@ class PersonalityViewModel
             setUiState(UIState.Loading)
             val result =
                 repository.updateApps(
-                    PersonalityAppsDTO(_state.value.goodApps, _state.value.badApps),
+                    PersonalityAppsDTO(_state.value.goodApps, _state.value.badApps, neutralApps = _state.value.neutralApps),
+
                 )
             setIsLoading(false)
             setUiState(UIState.Idle)

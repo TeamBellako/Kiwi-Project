@@ -78,6 +78,7 @@ public class PersonalityService {
         PersonalityDomain personalityDomain = getOrCreatePersonality(email);
         personalityDomain.setGoodApps(appsDTO.getGoodApps());
         personalityDomain.setBadApps(appsDTO.getBadApps());
+        personalityDomain.setNeutralApps(appsDTO.getNeutralApps());
         return PersonalityDataMapper.toDTO(saveToPersistence(email, personalityDomain));
     }
 
