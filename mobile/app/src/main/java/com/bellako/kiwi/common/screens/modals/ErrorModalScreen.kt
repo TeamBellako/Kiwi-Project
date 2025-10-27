@@ -27,6 +27,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -66,6 +67,8 @@ private fun ErrorModalLayout(
     buttonMessage: String,
     onButtonClick: (() -> Unit)? = null,
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     Column(
         modifier =
             modifier
@@ -78,7 +81,7 @@ private fun ErrorModalLayout(
         Icon(
             imageVector = Icons.Filled.Warning,
             contentDescription = "Error icon",
-            tint = MaterialTheme.colorScheme.error,
+            tint = kiwiColors.colorR,
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(50.dp)),
@@ -115,9 +118,10 @@ private fun ErrorModalLayout(
                 textArguments =
                     KiwiTextArguments(
                         buttonMessage,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color6,
                     ),
                 onClick = onButtonClick,
+                color = kiwiColors.color5A,
                 modifier =
                     Modifier
                         .padding(getResponsiveSizeHeight(Spacing.large)),

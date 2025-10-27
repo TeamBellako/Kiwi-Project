@@ -4,14 +4,17 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -31,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.appbar.data.appBarItems
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -50,20 +54,25 @@ fun AppBarScreen(navController: NavController) {
 @Composable
 fun AppBarModalLayout(navController: NavController) {
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
+    val kiwiColors = LocalKiwiColors.current
 
     NavigationBar(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp), getResponsiveSizeHeight(40.dp), 0.dp, 0.dp))
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp), getResponsiveSizeHeight(40.dp), 0.dp, 0.dp))
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .height(getResponsiveSizeHeight(100.dp))
                 .testTag(CommonTestTags.BOTTOM_APPBAR),
-        contentColor = MaterialTheme.colorScheme.secondary,
-        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = kiwiColors.color1,
+        containerColor = kiwiColors.color1,
+
     ) {
+        Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
+
         appBarItems.forEachIndexed { index, item ->
             val tint =
-                MaterialTheme.colorScheme.secondary.copy(
+                kiwiColors.colorF.copy(
                     alpha = if (item.enabled) 1f else 0.4f,
                 )
             NavigationBarItem(
@@ -80,18 +89,18 @@ fun AppBarModalLayout(navController: NavController) {
                                 .background(
                                     color =
                                         if (selectedNavigationIndex.intValue == index) {
-                                            MaterialTheme.colorScheme.primaryContainer
+                                            kiwiColors.color5A
                                         } else {
                                             Color.Transparent
                                         },
                                     shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
-                                ).padding(getResponsiveSizeHeight(Spacing.small)),
+                                ).padding(getResponsiveSizeHeight(Spacing.xSmall)),
                     ) {
                         Icon(
                             painter = painterResource(id = item.icon),
                             contentDescription = "",
                             tint = tint,
-                            modifier = Modifier.size(getResponsiveSizeHeight(30.dp)),
+                            modifier = Modifier.size(getResponsiveSizeHeight(50.dp)),
                         )
                     }
                 },
@@ -101,6 +110,8 @@ fun AppBarModalLayout(navController: NavController) {
                     ),
             )
         }
+
+        Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
     }
 }
 

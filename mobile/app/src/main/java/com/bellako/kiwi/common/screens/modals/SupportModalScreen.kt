@@ -40,6 +40,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -59,6 +60,7 @@ fun SupportModalScreen(navController: NavController) {
 @Composable
 private fun SupportScreenLayout(navController: NavController) {
     val context = LocalContext.current
+    val kiwiColors = LocalKiwiColors.current
 
     Column(
         modifier =
@@ -130,6 +132,7 @@ private fun SupportScreenLayout(navController: NavController) {
                         Modifier
                             .testTag(CommonTestTags.HELP_SCREEN),
                 ),
+            color = kiwiColors.color5A,
             onClick = {
                 navController.navigate(ScreenRoutes.SETTINGS)
             },

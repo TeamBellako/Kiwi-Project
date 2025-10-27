@@ -7,21 +7,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.features.metrics.data.MetricsState
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -51,27 +47,23 @@ private fun CollapsedSummaryCard(
     isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     Box(
         modifier =
             Modifier
                 .padding(horizontal = getResponsiveSizeHeight(Spacing.xLarge))
-                .background(MaterialTheme.colorScheme.surface)
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp)))
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
+                .background(kiwiColors.color3, shape = RoundedCornerShape(30.dp))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                Modifier.width(getResponsiveSizeHeight(60.dp)),
             ) {
-                CurrentDayIndicator()
+                CurrentDayIndicator(getResponsiveSizeHeight(85.dp))
             }
             Box(
                 Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = getResponsiveSizeHeight(Spacing.small)),
             ) {
                 Column(
@@ -99,9 +91,8 @@ private fun CollapsedSummaryCard(
         }
         Box(
             Modifier
-                .fillMaxWidth()
-                .height(getResponsiveSizeHeight(52.dp)),
-            contentAlignment = Alignment.CenterEnd,
+                .align(alignment = Alignment.CenterEnd)
+                .padding(horizontal = getResponsiveSizeHeight(Spacing.large)),
         ) {
             ShowCalendarViewButton(
                 isLoading,

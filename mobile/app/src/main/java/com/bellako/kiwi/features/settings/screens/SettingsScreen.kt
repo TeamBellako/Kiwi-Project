@@ -21,7 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
@@ -50,8 +52,10 @@ import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,7 +70,7 @@ fun SettingsScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(LocalKiwiColors.current.color2)
                 .padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
         SettingsScreenContainer(
@@ -129,6 +133,8 @@ private fun SettingsScreenContainer(
 
 @Composable
 private fun SettingsInfoFields(usersState: UsersState?) {
+
+    val kiwiColors = LocalKiwiColors.current
     usersState?.let { currentUsersState ->
 
         Kiwi_H2(
@@ -153,8 +159,9 @@ private fun SettingsInfoFields(usersState: UsersState?) {
                 )
             },
             textColor = MaterialTheme.colorScheme.inversePrimary,
+            color = kiwiColors.color3A,
             testTag = UsersTestTags.EMAIL_FIELD,
-            shouldHideInput = false,
+            keyboardType = KeyboardType.Text,
             modifier =
                 Modifier
                     .clickable {
@@ -171,6 +178,8 @@ private fun SettingsEditFields(
     settingsState: SettingsState?,
     settingsViewModel: ISettingsViewModel,
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     settingsState?.let { currentSettingsState ->
         var soundSliderPosition by remember {
             mutableFloatStateOf(currentSettingsState.soundVolume.coerceIn(0f, 1f))
@@ -180,7 +189,13 @@ private fun SettingsEditFields(
         }
 
         Kiwi_Slider(
-            KiwiTextArguments("SFX Volume"),
+            KiwiTextArguments (
+                "SFX Volume",
+                modifier =
+                    Modifier.padding(getResponsiveSizeWidth(Spacing.medium), 0.dp)
+                            .fillMaxWidth(),
+                color = kiwiColors.color6
+            ),
             value = soundSliderPosition,
             onValueChange = { newValue ->
                 soundSliderPosition = newValue
@@ -196,7 +211,13 @@ private fun SettingsEditFields(
         Kiwi_Spacer()
 
         Kiwi_Slider(
-            KiwiTextArguments("Music Volume"),
+            KiwiTextArguments(
+                "Music Volume",
+                modifier =
+                    Modifier.padding(getResponsiveSizeHeight(Spacing.medium), 0.dp)
+                            .fillMaxWidth(),
+                color = kiwiColors.color6
+            ),
             value = musicSliderPosition,
             onValueChange = { newValue ->
                 musicSliderPosition = newValue
@@ -218,6 +239,7 @@ private fun SettingsButtons(
     navController: NavController,
 ) {
     val context = LocalContext.current
+    val kiwiColors = LocalKiwiColors.current
 
     Box(
         modifier =
@@ -238,9 +260,10 @@ private fun SettingsButtons(
                 textArguments =
                     KiwiTextArguments(
                         "SUPPORT",
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color6,
                         bold = true,
                     ),
+                color = kiwiColors.color5A,
                 onClick = { navController.navigate(ScreenRoutes.HELP) },
             )
 
@@ -250,9 +273,10 @@ private fun SettingsButtons(
                 textArguments =
                     KiwiTextArguments(
                         "LOG OUT",
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color6,
                         bold = true,
                     ),
+                color = kiwiColors.color5A,
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         usersViewModel.logout(context)
@@ -269,10 +293,10 @@ private fun SettingsButtons(
                 textArguments =
                     KiwiTextArguments(
                         "RESET PROGRESS",
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color6,
                         bold = true,
                     ),
-                color = MaterialTheme.colorScheme.error,
+                color = kiwiColors.colorR1,
                 onClick = {
                     firebaseLogEvent(FirebaseEventNames.SETTINGS_RESET_PROGRESS)
                     settingsViewModel.setUiState(UIState.WIP)

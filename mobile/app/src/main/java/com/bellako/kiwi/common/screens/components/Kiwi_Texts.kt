@@ -1,5 +1,6 @@
 package com.bellako.kiwi.common.screens.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -100,6 +101,18 @@ fun Kiwi_Label2(arguments: KiwiTextArguments) {
 @Composable
 fun Kiwi_Label3(arguments: KiwiTextArguments) {
     Kiwi_Text(arguments, MaterialTheme.typography.labelSmall)
+}
+
+// -------------------------------------------------------------------------------------------------
+
+@Composable
+fun Kiwi_Display1(arguments: KiwiTextArguments) {
+    Kiwi_Text(arguments, MaterialTheme.typography.displayLarge)
+}
+
+@Composable
+fun Kiwi_Display2(arguments: KiwiTextArguments) {
+    Kiwi_Text(arguments, MaterialTheme.typography.displayMedium)
 }
 
 // -------------------------------------------------------------------------------------------------

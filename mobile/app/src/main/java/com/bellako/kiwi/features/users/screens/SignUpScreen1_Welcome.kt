@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +37,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
@@ -56,7 +56,7 @@ fun SignUpScreen1_Welcome(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(bottom = getResponsiveSizeHeight(Spacing.medium)),
+                    .padding(bottom = getResponsiveSizeHeight(Spacing.large)),
             contentAlignment = Alignment.BottomCenter,
         ) {
             GoToLogIn {
@@ -71,6 +71,7 @@ private fun Welcome(
     viewModel: IUsersViewModel,
     navController: NavController,
 ) {
+    val kiwiColors = LocalKiwiColors.current
     Column(
         modifier =
             Modifier
@@ -85,7 +86,7 @@ private fun Welcome(
             KiwiTextArguments(
                 "Your Legend is About\nTo Be Forged...",
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.color6,
                 bold = true,
             ),
         )
@@ -96,10 +97,10 @@ private fun Welcome(
             textArguments =
                 KiwiTextArguments(
                     "LET'S DO IT",
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = kiwiColors.colorF,
                     bold = true,
                 ),
-            color = MaterialTheme.colorScheme.primary,
+            color = kiwiColors.color3A,
             onClick = {
                 firebaseLogEvent(FirebaseEventNames.SIGNUP_1_STARTED)
 
@@ -114,12 +115,13 @@ private fun Welcome(
 
 @Composable
 private fun GoToLogIn(onSignUp: () -> Unit) {
+    val kiwiColors = LocalKiwiColors.current
     val annotatedString =
         buildAnnotatedString {
             withStyle(
                 style =
                     SpanStyle(
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color6,
                     ),
             ) {
                 append("Not Your First Time?\nContinue Your Adventure By\n")
@@ -137,7 +139,7 @@ private fun GoToLogIn(onSignUp: () -> Unit) {
                 withStyle(
                     style =
                         SpanStyle(
-                            color = MaterialTheme.colorScheme.inversePrimary,
+                            color = kiwiColors.color7B,
                             textDecoration = TextDecoration.Underline,
                         ),
                 ) {

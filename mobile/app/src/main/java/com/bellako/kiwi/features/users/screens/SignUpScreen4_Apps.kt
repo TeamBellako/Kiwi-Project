@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -65,6 +64,7 @@ import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -196,6 +196,7 @@ fun AppClassificationColumns(
     navController: NavController,
     onUpdateSuccess: (() -> Unit),
 ) {
+    val kiwiColors = LocalKiwiColors.current
     val draggingApp = remember { mutableStateOf<AppInfo?>(null) }
     val dragOffset = remember { mutableStateOf(Offset.Zero) }
     val dragStartPosition = remember { mutableStateOf(Offset(0f, 0f)) }
@@ -229,7 +230,7 @@ fun AppClassificationColumns(
                 text = "Categorize your apps.\nDrag them between columns.",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.color6,
             ),
         )
 
@@ -274,6 +275,7 @@ fun AppClassificationColumns(
                     textAlign = TextAlign.Center,
                 ),
             modifier = Modifier.fillMaxWidth(),
+            color = kiwiColors.color5A,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
                     if (personalityViewModel.updateApps().isSuccess) {

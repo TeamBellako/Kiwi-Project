@@ -7,24 +7,31 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -37,6 +44,7 @@ import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
@@ -71,7 +79,7 @@ fun DashboardScreen2_Expanded(
                 personalityViewModel = personalityViewModel,
             )
         } else {
-            CurrentDayIndicator()
+            CurrentDayIndicator(getResponsiveSizeHeight(170.dp))
             CalendarWeekView(
                 context = context,
                 coroutineScope = coroutineScope,
@@ -96,7 +104,7 @@ private fun ExpandedProgressBox(state: MetricsState) {
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp)))
-                .background(MaterialTheme.colorScheme.surface)
+                .background(LocalKiwiColors.current.color3)
                 .padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
         Column {
@@ -115,7 +123,7 @@ private fun ExpandedMetricProgressTitle(title: String) {
         KiwiTextArguments(
             title,
             TextAlign.Center,
-            MaterialTheme.colorScheme.secondary,
+            LocalKiwiColors.current.color6,
             modifier =
                 Modifier
                     .fillMaxWidth(),
@@ -166,7 +174,7 @@ private fun ExpandedSummaryCard() {
             KiwiTextArguments(
                 "Challenges",
                 TextAlign.Center,
-                MaterialTheme.colorScheme.secondary,
+                LocalKiwiColors.current.color6,
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -174,21 +182,17 @@ private fun ExpandedSummaryCard() {
             ),
         )
 
-        Kiwi_Spacer(Spacing.small)
-
         @Suppress("MagicNumber")
         ExpandedQuestProgress(
-            "Use Duolingo For 20 Minutes",
-            R.drawable.ph_quest_01,
+            "Use Duolingo 20 Minutes",
+            R.drawable.ic_daily_challenge_mental,
             0.5f,
         )
-
-        Kiwi_Spacer()
 
         @Suppress("MagicNumber")
         ExpandedQuestProgress(
             "Do 3 Sets Of 10 Push-Ups",
-            R.drawable.ph_quest_02,
+            R.drawable.ic_daily_challenge_physical,
             0.8f,
         )
     }
@@ -200,50 +204,88 @@ private fun ExpandedQuestProgress(
     imageRes: Int,
     progress: Float,
 ) {
-    Row(
-        modifier =
-            Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .background(MaterialTheme.colorScheme.inversePrimary),
-        verticalAlignment = Alignment.CenterVertically,
+    val kiwiColors = LocalKiwiColors.current
+    Box(
+        modifier = Modifier
+            .size(getResponsiveSizeHeight(280.dp),getResponsiveSizeHeight(50.dp))
     ) {
-        Box(
+
+        Kiwi_Image(
+            R.drawable.daily_challenges_bg,
+            "Bar bg",
+            modifier =
+                Modifier.matchParentSize()
+        )
+
+        Kiwi_Image(
+            R.drawable.daily_challenges_fill,
+            "Bar fill",
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RectangleShape)
+                .then(
+                    Modifier.widthIn(max = Dp.Infinity)
+                )
+                .graphicsLayer {
+                    clip = true
+                    shape = object : Shape {
+                        override fun createOutline(
+                            size: Size,
+                            layoutDirection: LayoutDirection,
+                            density: Density
+                        ): Outline {
+                            val w = size.width * progress.coerceIn(0f, 1f)
+                            return Outline.Rectangle(Rect(0f, 0f, w, size.height))
+                        }
+                    }
+                }
+
+        )
+
+        Row(
             modifier =
                 Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface),
-            contentAlignment = Alignment.Center,
+                    .matchParentSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            CircularProgressIndicator(
-                progress = { progress },
-                strokeWidth = getResponsiveSizeHeight(4.dp),
-                color = MaterialTheme.colorScheme.tertiary,
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+            ) {
 
-            Kiwi_Image(
-                imageRes,
-                "Quest Indicator For: $title",
-                modifier =
-                    Modifier
-                        .size(getResponsiveSizeHeight(20.dp)),
-            )
-        }
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Kiwi_P2(
-                KiwiTextArguments(
-                    title,
-                    TextAlign.Center,
-                    MaterialTheme.colorScheme.secondary,
+                Kiwi_Image(
+                    imageRes,
+                    "Quest Indicator For: $title",
                     modifier =
                         Modifier
-                            .padding(getResponsiveSizeHeight(Spacing.small)),
-                ),
-            )
+                            .size(getResponsiveSizeHeight(25.dp)),
+                )
+            }
+            Box(
+                modifier = Modifier.width(getResponsiveSizeHeight(206.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Kiwi_P2(
+                    KiwiTextArguments(
+                        title,
+                        TextAlign.Center,
+                        kiwiColors.color6,
+
+                    ),
+                )
+            }
+            Box(
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+
+                Kiwi_Image(
+                    R.drawable.ic_daily_challenges_plus,
+                    "Quest Indicator For: $title",
+                    modifier =
+                        Modifier
+                            .size(getResponsiveSizeHeight(18.dp)),
+                )
+            }
         }
     }
 }
