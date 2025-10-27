@@ -1,39 +1,23 @@
 package com.bellako.kiwi.ui
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-private val LightColors =
-    lightColorScheme(
-        primary = KiwiPrimary,
-        inversePrimary = KiwiInversePrimary,
-        secondary = KiwiSecondary,
-        tertiary = KiwiTertiary,
-        background = KiwiBackground,
-        primaryContainer = KiwiContainer,
-        surface = KiwiSurface,
-        outline = KiwiOutline,
-        error = KiwiError,
-    )
-
-private val DarkColors =
-    darkColorScheme(
-        primary = KiwiPrimary,
-        inversePrimary = KiwiInversePrimary,
-        secondary = KiwiSecondary,
-        tertiary = KiwiTertiary,
-        background = KiwiBackground,
-        primaryContainer = KiwiContainer,
-        surface = KiwiSurface,
-        outline = KiwiOutline,
-        error = KiwiError,
-    )
+@Composable
+fun Kiwi_Theme(content: @Composable () -> Unit) {
+    CompositionLocalProvider(
+        LocalKiwiColors provides KiwiColors,
+    ) {
+        MaterialTheme(
+            typography = kiwiTypography,
+            content = content,
+        )
+    }
+}
 
 @Immutable
 data class KiwiColorsData(
@@ -79,65 +63,48 @@ data class KiwiColorsData(
     val colorR1: Color,
 )
 
-val KiwiColors = KiwiColorsData(
-    color1 = KiwiColor1,
-    color1A = KiwiColor1A,
-    color2 = KiwiColor2,
-    color2A = KiwiColor2A,
-    color2B = KiwiColor2B,
-    color2C = KiwiColor2C,
-    color3 = KiwiColor3,
-    color3A = KiwiColor3A,
-    color4 = KiwiColor4,
-    color4A = KiwiColor4A,
-    color4B = KiwiColor4B,
-    color4C = KiwiColor4C,
-    color5 = KiwiColor5,
-    color5A = KiwiColor5A,
-    color5B = KiwiColor5B,
-    color5C = KiwiColor5C,
-    color6 = KiwiColor6,
-    color6A = KiwiColor6A,
-    color6B = KiwiColor6B,
-    color7 = KiwiColor7,
-    color7A = KiwiColor7A,
-    color7B = KiwiColor7B,
-    color7C = KiwiColor7C,
-    color7D = KiwiColor7D,
-    color8 = KiwiColor8,
-    color8A = KiwiColor8A,
-    color8B = KiwiColor8B,
-    color8C = KiwiColor8C,
-    color9 = KiwiColor9,
-    color9A = KiwiColor9A,
-    color9B = KiwiColor9B,
-    color9C = KiwiColor9C,
-    colorF = KiwiColorF,
-    colorF1 = KiwiColorF1,
-    color0 = KiwiColor0,
-    color0A = KiwiColor0A,
-    color0B = KiwiColor0B,
-    color0C = KiwiColor0C,
-    colorR = KiwiColorR,
-    colorR1 = KiwiColorR1,
-)
+val KiwiColors =
+    KiwiColorsData(
+        color1 = KiwiColor1,
+        color1A = KiwiColor1A,
+        color2 = KiwiColor2,
+        color2A = KiwiColor2A,
+        color2B = KiwiColor2B,
+        color2C = KiwiColor2C,
+        color3 = KiwiColor3,
+        color3A = KiwiColor3A,
+        color4 = KiwiColor4,
+        color4A = KiwiColor4A,
+        color4B = KiwiColor4B,
+        color4C = KiwiColor4C,
+        color5 = KiwiColor5,
+        color5A = KiwiColor5A,
+        color5B = KiwiColor5B,
+        color5C = KiwiColor5C,
+        color6 = KiwiColor6,
+        color6A = KiwiColor6A,
+        color6B = KiwiColor6B,
+        color7 = KiwiColor7,
+        color7A = KiwiColor7A,
+        color7B = KiwiColor7B,
+        color7C = KiwiColor7C,
+        color7D = KiwiColor7D,
+        color8 = KiwiColor8,
+        color8A = KiwiColor8A,
+        color8B = KiwiColor8B,
+        color8C = KiwiColor8C,
+        color9 = KiwiColor9,
+        color9A = KiwiColor9A,
+        color9B = KiwiColor9B,
+        color9C = KiwiColor9C,
+        colorF = KiwiColorF,
+        colorF1 = KiwiColorF1,
+        color0 = KiwiColor0,
+        color0A = KiwiColor0A,
+        color0B = KiwiColor0B,
+        color0C = KiwiColor0C,
+        colorR = KiwiColorR,
+        colorR1 = KiwiColorR1,
+    )
 
 val LocalKiwiColors = staticCompositionLocalOf { KiwiColors }
-
-@Composable
-fun Kiwi_Theme(
-    useDarkTheme: Boolean = true,
-    content: @Composable () -> Unit,
-) {
-    val colorScheme = if (useDarkTheme) DarkColors else LightColors
-
-    CompositionLocalProvider(
-        LocalKiwiColors provides KiwiColors
-    ) {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography = kiwiTypography,
-            content = content
-        )
-    }
-}

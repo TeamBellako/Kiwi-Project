@@ -35,7 +35,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
@@ -83,6 +82,9 @@ fun LogInScreen(
     val usersState by usersViewModel.state.collectAsState()
     val usersUiState by usersViewModel.uiState.collectAsState()
 
+    @Suppress("MagicNumber")
+    val imgPercentage = 0.46f
+
     Box(
         modifier =
             Modifier
@@ -99,14 +101,13 @@ fun LogInScreen(
                     }
                 })
             }
-
             else -> {
                 Kiwi_Image(
                     R.drawable.login_bg,
                     "Login Background",
                     modifier =
                         Modifier
-                            .fillMaxHeight(0.46f)
+                            .fillMaxHeight(imgPercentage)
                             .align(Alignment.TopStart),
                     contentScale = ContentScale.FillHeight,
                     alignment = Alignment.TopStart,
@@ -116,22 +117,22 @@ fun LogInScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .fillMaxHeight(0.46f)
+                            .fillMaxHeight(imgPercentage)
                             .align(Alignment.TopStart)
                             .background(
                                 Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        Color.Transparent,
-                                        kiwiColors.color2,
-                                        kiwiColors.color2,
-                                    ),
+                                    colors =
+                                        listOf(
+                                            Color.Transparent,
+                                            Color.Transparent,
+                                            kiwiColors.color2,
+                                            kiwiColors.color2,
+                                        ),
                                     startY = 0f,
                                     endY = Float.POSITIVE_INFINITY,
-                                )
-                            )
+                                ),
+                            ),
                 )
-
 
                 LogInLayout(
                     context = context,
@@ -200,8 +201,6 @@ private fun LogInLayout(
                     localLoading = true
                 },
             )
-
-
         }
 
         GoToSignUp(
@@ -209,7 +208,6 @@ private fun LogInLayout(
             isPreview = isPreview,
             navController = navController,
         )
-
     }
 }
 
@@ -230,7 +228,7 @@ private fun LogInForm(
     Column(
         modifier =
             Modifier
-                .offset(0.dp, (40).dp)
+                .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
                 .alpha(if (!isLoading || isPreview) 1f else 0f),
     ) {
         WelcomeText()
@@ -284,7 +282,7 @@ private fun LogInForm(
                     color = kiwiColors.colorF,
                     bold = true,
                 ),
-            color = kiwiColors.color5 ,
+            color = kiwiColors.color5,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
                     if (performLogin(context, usersViewModel, personalityViewModel, navController)) {
@@ -316,8 +314,9 @@ private fun WelcomeText() {
             TextAlign.Center,
             color = kiwiColors.colorF,
             bold = true,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
         ),
     )
 }
@@ -424,15 +423,15 @@ private fun ForgotPassword(onForgotPass: () -> Unit) {
             }
         }
 
-        Kiwi_AnnotatedString_P1(
-            KiwiAnnotatedStringArguments(
-                annotatedString,
-                TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ),
-        )
-
+    Kiwi_AnnotatedString_P1(
+        KiwiAnnotatedStringArguments(
+            annotatedString,
+            TextAlign.Center,
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
+        ),
+    )
 }
 
 @Composable
