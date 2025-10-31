@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -35,17 +34,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_Display1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
@@ -63,15 +73,118 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.Locale
 import kotlin.math.ceil
+import kotlin.math.min
 
 @Composable
-fun CurrentDayIndicator(size: Dp) {
-    Kiwi_Image(
-        R.drawable.ph_dashboard_heart,
-        "Current day indicator",
-        Modifier.size(size)
-    )
+fun CurrentDayIndicator(
+    size: Dp,
+    challengesProgress: Float,
+    dailyStatsProgress: Float,
+) {
+    Box(
+        modifier = Modifier.size(size),
+    ) {
+        Kiwi_Image(
+            if (challengesProgress == 1f && dailyStatsProgress == 1f) {
+                R.drawable.heart_bg_completed
+            } else {
+                R.drawable.heart_bg_empty
+            },
+            "Day indicator bg",
+            modifier = Modifier.matchParentSize(),
+        )
+
+        Kiwi_Image(
+            R.drawable.heart_exterior_empty,
+            "Day indicator challenges bg",
+            modifier = Modifier.matchParentSize(),
+        )
+
+        Kiwi_Image(
+            R.drawable.heart_exterior_completed,
+            "Day indicator challenges fill",
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        clip = true
+                        shape =
+                            object : Shape {
+                                override fun createOutline(
+                                    size: Size,
+                                    layoutDirection: LayoutDirection,
+                                    density: Density,
+                                ): Outline {
+                                    val progress = challengesProgress.coerceIn(0f, 1f)
+                                    val sweep = 180f * progress
+
+                                    val radius = min(size.width, size.height) / 2f
+                                    val center = Offset(size.width / 2f, size.height / 2f)
+
+                                    val rect =
+                                        Rect(
+                                            center.x - radius,
+                                            center.y - radius,
+                                            center.x + radius,
+                                            center.y + radius,
+                                        )
+
+                                    val startAngle = 90f + sweep
+
+                                    val path =
+                                        Path().apply {
+                                            moveTo(center.x, center.y)
+                                            arcTo(
+                                                rect = rect,
+                                                startAngleDegrees = startAngle,
+                                                sweepAngleDegrees = -2 * sweep,
+                                                forceMoveTo = false,
+                                            )
+                                            close()
+                                        }
+
+                                    return Outline.Generic(path)
+                                }
+                            }
+                    },
+        )
+
+        Kiwi_Image(
+            R.drawable.heart_interior_empty,
+            "Day indicator stepscreen bg",
+            modifier = Modifier.matchParentSize(),
+        )
+
+        Kiwi_Image(
+            R.drawable.heart_interior_completed,
+            "Day indicator challenges fill",
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        clip = true
+                        shape =
+                            object : Shape {
+                                override fun createOutline(
+                                    size: Size,
+                                    layoutDirection: LayoutDirection,
+                                    density: Density,
+                                ): Outline {
+                                    val progress = dailyStatsProgress.coerceIn(0f, 1f)
+                                    val topPadding = size.height * 0.28f
+                                    val bottomPadding = size.height * 0.28f
+                                    val usableHeight = size.height - topPadding - bottomPadding
+                                    val h = usableHeight * progress
+                                    return Outline.Rectangle(
+                                        Rect(0f, size.height - bottomPadding - h, size.width, size.height - bottomPadding),
+                                    )
+                                }
+                            }
+                    },
+        )
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -96,57 +209,53 @@ fun CalendarWeekView(
             Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
+                .padding(
+                    top = 0.dp,
+                    start = getResponsiveSizeHeight(Spacing.large),
+                    end = getResponsiveSizeHeight(Spacing.large),
+                    bottom = getResponsiveSizeHeight(Spacing.medium),
+                ),
     ) {
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .wrapContentHeight()
+                    .clip(RoundedCornerShape(getResponsiveSizeHeight(22.dp)))
+                    .background(color = LocalKiwiColors.current.color2B)
+                    .padding(getResponsiveSizeHeight(Spacing.small), getResponsiveSizeHeight(Spacing.small)),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.medium)),
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            Row(
-                modifier =
-                    Modifier
-                        .clip(RoundedCornerShape(getResponsiveSizeHeight(22.dp)))
-                        .background(color = LocalKiwiColors.current.color2B)
-                        .padding(getResponsiveSizeHeight(Spacing.xSmall))
-                        .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
-            ) {
-                for (index in 0 until DAYS_IN_WEEK) {
-                    val day = startOfWeek.plusDays(index.toLong())
-                    val isSelected = selectedDayIndex.intValue == index
+            for (index in 0 until DAYS_IN_WEEK) {
+                val day = startOfWeek.plusDays(index.toLong())
+                val isSelected = selectedDayIndex.intValue == index
 
-                    Box(modifier = Modifier.weight(1f)) {
-                        CalendarDayView(
-                            usersViewModel = usersViewModel,
-                            isLoading = isLoading,
-                            day = day,
-                            isSelected = isSelected,
-                            onClicked = {
-                                selectedDayIndex.intValue = index
-                                selectDay(
-                                    coroutineScope,
-                                    metricsViewModel,
-                                    metricsState,
-                                    personalityViewModel,
-                                    context,
-                                    startOfWeek.plusDays(index.toLong()),
-                                )
-                            },
-                            testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
-                        )
-                    }
+                Box(modifier = Modifier.weight(1f)) {
+                    CalendarDayView(
+                        usersViewModel = usersViewModel,
+                        isLoading = isLoading,
+                        day = day,
+                        isSelected = isSelected,
+                        onClicked = {
+                            selectedDayIndex.intValue = index
+                            selectDay(
+                                coroutineScope,
+                                metricsViewModel,
+                                metricsState,
+                                personalityViewModel,
+                                context,
+                                startOfWeek.plusDays(index.toLong()),
+                            )
+                        },
+                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
+                    )
                 }
             }
-
-            ShowCalendarViewButton(
+            ShowCalendarButton(
                 isLoading = isLoading,
                 onCalendarViewClicked = onCalendarViewClicked,
             )
-
         }
     }
 }
@@ -194,26 +303,35 @@ fun CalendarMonthView(
             )
         }
 
+    Kiwi_Spacer(Spacing.medium)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier =
             modifier
-                .height(getResponsiveSizeHeight(340.dp))
-                .padding( horizontal = getResponsiveSizeHeight(Spacing.medium))
+                .wrapContentHeight()
+                .padding(horizontal = getResponsiveSizeHeight(Spacing.large))
+                .background(kiwiColors.color2B, shape = RoundedCornerShape(getResponsiveSizeHeight(22.dp)))
                 .then(gestureModifier)
                 .testTag(DashboardModalTestTags.CALENDAR_VIEW),
     ) {
-        Kiwi_P2(
-            KiwiTextArguments(
-                text = dateToString(selectedMonth.value),
-                textAlign = TextAlign.Center,
-                color = kiwiColors.color6,
-                modifier =
-                    Modifier
-                        .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT),
-            ),
-        )
-        Kiwi_Spacer(Spacing.large)
+        Box {
+            Kiwi_Display1(
+                KiwiTextArguments(
+                    String.format(Locale.ROOT, "%02d", selectedMonth.value.monthValue),
+                    color = kiwiColors.color4B,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.Center).padding(start = getResponsiveSizeHeight(Spacing.medium)),
+                ),
+            )
+            Kiwi_P1(
+                KiwiTextArguments(
+                    selectedMonth.value.month.toString(),
+                    color = kiwiColors.color4B,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.Center),
+                ),
+            )
+        }
 
         AnimatedContent(
             targetState = selectedMonth.value,
@@ -263,16 +381,18 @@ fun CalendarMonth(
     val totalDays = startDayOfWeek + endOfMonth.dayOfMonth
     val totalWeeks = ceil(totalDays / DAYS_IN_WEEK.toFloat()).toInt()
 
-    Column (
-        verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp))
-    ){
+    Column(
+        verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(8.dp)),
+        modifier =
+            Modifier.padding(
+                start = getResponsiveSizeHeight(Spacing.large),
+                end = getResponsiveSizeHeight(Spacing.large),
+                bottom = getResponsiveSizeHeight(Spacing.medium),
+            ),
+    ) {
         for (weekIndex in 0 until totalWeeks) {
             Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(4.dp)),
+                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 for (dayOfWeek in 0 until DAYS_IN_WEEK) {
                     val dayIndex = weekIndex * DAYS_IN_WEEK + dayOfWeek
@@ -320,6 +440,8 @@ fun CalendarDayView(
     canSelectBeforeRegisterDate: Boolean = true,
     day: LocalDate,
     isSelected: Boolean,
+    isCompletedChallenges: Boolean = false,
+    isCompletedStepsScreen: Boolean = false,
     onClicked: () -> Unit,
     testTag: String,
 ) {
@@ -331,39 +453,73 @@ fun CalendarDayView(
     Box(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(22.dp)))
-                .background(color = kiwiColors.color3)
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
+                .background(color = if (isSelected) kiwiColors.color9A else kiwiColors.color3A)
                 .border(
                     width = if (isSelected) getResponsiveSizeHeight(2.dp) else 0.dp,
                     color = if (isSelected) kiwiColors.color9 else Color.Transparent,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(22.dp)),
-                ).padding(getResponsiveSizeHeight(Spacing.xSmall))
+                    shape = RoundedCornerShape(getResponsiveSizeHeight(20.dp)),
+                ).padding(getResponsiveSizeHeight(6.dp))
                 .clickable(
                     enabled = !isLoading && isDayEnabled,
                     onClick = onClicked,
                 ).testTag(testTag),
         contentAlignment = Alignment.Center,
     ) {
+        val contentAlpha = if (isDayEnabled) 1f else DAY_DISABLED_ALPHA
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
+            modifier = Modifier.alpha(contentAlpha),
         ) {
-            val contentAlpha = if (isDayEnabled) 1f else DAY_DISABLED_ALPHA
             Kiwi_P2(
                 KiwiTextArguments(
                     day.dayOfMonth.toString(),
-                    color = kiwiColors.color9,
-                    modifier = Modifier.alpha(contentAlpha),
+                    color = if (isSelected) kiwiColors.color9 else kiwiColors.color4B,
                 ),
             )
-
-            Kiwi_Image(
-                R.drawable.ph_dashboard_day_empty,
-                "Dashboard day indicator",
+            Box(
                 modifier =
                     Modifier
-                        .alpha(contentAlpha),
-            )
+                        .padding(
+                            top = getResponsiveSizeHeight(4.dp),
+                            start = getResponsiveSizeHeight(1.dp),
+                            end = getResponsiveSizeHeight(1.dp),
+                        ).size(getResponsiveSizeHeight(16.dp)),
+            ) {
+                Kiwi_Image(
+                    if (isCompletedChallenges) {
+                        R.drawable.tiny_heart_exterior_filled
+                    } else {
+                        if (isSelected) {
+                            R.drawable.tiny_heart_exterior_current_empty
+                        } else {
+                            R.drawable.tiny_heart_exterior_empty
+                        }
+                    },
+                    "Dashboard day indicator",
+                    modifier =
+                        Modifier
+                            .matchParentSize(),
+                )
+
+                Kiwi_Image(
+                    if (isCompletedStepsScreen) {
+                        R.drawable.tiny_heart_filled
+                    } else {
+                        if (isSelected) {
+                            R.drawable.tiny_heart_current_empty
+                        } else {
+                            R.drawable.tiny_heart_empty
+                        }
+                    },
+                    "Dashboard day indicator",
+                    modifier =
+                        Modifier
+                            .matchParentSize(),
+                )
+            }
         }
     }
 }
@@ -407,29 +563,53 @@ fun selectYearMonth(
 }
 
 @Composable
-fun ShowCalendarViewButton(
+fun ShowCalendarButton(
     isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
 ) {
     Box(
         modifier =
             Modifier
-                .size(height = getResponsiveSizeHeight(60.dp), width = getResponsiveSizeHeight(35.dp))
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(14.dp)))
-                .background(color = LocalKiwiColors.current.color3)
+                .size(getResponsiveSizeHeight(34.dp))
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
+                .background(color = LocalKiwiColors.current.color4)
                 .clickable(
                     enabled = !isLoading,
                 ) {
                     onCalendarViewClicked()
                 }.testTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Kiwi_Image(
-            R.drawable.calendar,
+            R.drawable.ic_calendar,
             "Show Calendar View Button",
             Modifier
-                .size(getResponsiveSizeHeight(24.dp))
+                .size(getResponsiveSizeHeight(20.dp)),
+        )
+    }
+}
 
+@Composable
+fun SelectedDayText(selectedDay: String) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Box(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
+                .background(color = LocalKiwiColors.current.color9A)
+                .padding(horizontal = getResponsiveSizeHeight(12.dp)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Kiwi_P2(
+            KiwiTextArguments(
+                text = selectedDay,
+                textAlign = TextAlign.Center,
+                color = kiwiColors.color6,
+                modifier =
+                    Modifier
+                        .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT), // TODO cambiar nombre por se si rompe las metrics de la DB
+            ),
         )
     }
 }

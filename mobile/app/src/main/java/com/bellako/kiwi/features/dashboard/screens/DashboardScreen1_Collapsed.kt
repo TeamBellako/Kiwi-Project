@@ -52,15 +52,17 @@ private fun CollapsedSummaryCard(
     Box(
         modifier =
             Modifier
-                .padding(horizontal = getResponsiveSizeHeight(Spacing.xLarge))
-                .background(kiwiColors.color3, shape = RoundedCornerShape(30.dp))
+                .padding(getResponsiveSizeHeight(Spacing.medium))
+                .background(kiwiColors.color3, shape = RoundedCornerShape(40.dp)),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
+                Modifier
+                    .padding(start = getResponsiveSizeHeight(Spacing.medium)),
             ) {
-                CurrentDayIndicator(getResponsiveSizeHeight(85.dp))
+                CurrentDayIndicator(getResponsiveSizeHeight(100.dp), 0.5f, 0.8f)
             }
             Box(
                 Modifier
@@ -94,7 +96,7 @@ private fun CollapsedSummaryCard(
                 .align(alignment = Alignment.CenterEnd)
                 .padding(horizontal = getResponsiveSizeHeight(Spacing.large)),
         ) {
-            ShowCalendarViewButton(
+            ShowCalendarButton(
                 isLoading,
                 onCalendarViewClicked,
             )

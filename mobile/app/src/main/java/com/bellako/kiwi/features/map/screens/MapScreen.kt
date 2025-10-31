@@ -105,7 +105,6 @@ fun MapScreen(
             KiwiTextArguments(
                 title,
                 color = kiwiColors.colorF,
-                bold = true,
                 modifier = Modifier.padding(0.dp,getResponsiveSizeHeight(Spacing.small))
             ),
         )

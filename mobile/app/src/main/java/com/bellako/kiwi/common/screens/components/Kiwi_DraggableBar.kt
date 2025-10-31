@@ -75,7 +75,7 @@ fun Kiwi_DraggableBar(
                 .fillMaxWidth()
                 .height(statesBottom.max().dp)
                 .offset(y = offset)
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(70.dp)))
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(50.dp), getResponsiveSizeHeight(50.dp)))
                 .background(backgroundColor)
                 .then(modifier),
     ) {

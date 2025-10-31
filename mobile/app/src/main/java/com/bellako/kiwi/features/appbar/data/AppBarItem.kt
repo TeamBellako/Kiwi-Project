@@ -24,7 +24,7 @@ val appBarItems =
             route = ScreenRoutes.WIP,
         ),
         AppBarItem(
-            icon = R.drawable.ic_glossary,
+            icon = R.drawable.ic_troops,
             route = ScreenRoutes.WIP,
         ),
         AppBarItem(
