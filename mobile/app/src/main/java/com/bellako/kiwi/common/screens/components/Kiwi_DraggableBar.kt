@@ -13,10 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,8 +51,9 @@ fun Kiwi_DraggableBar(
     modifier: Modifier = Modifier,
     content: @Composable (currentStateIndex: Int) -> Unit,
     states: List<Int>,
-    initialStateIndex: Int = 0,
     backgroundColor: Color = LocalKiwiColors.current.color2,
+    currentStateIndex: Int,
+    onStateChange: ((Int) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -60,8 +63,13 @@ fun Kiwi_DraggableBar(
     fun closestState(value: Float): Float = statesBottom.minByOrNull { kotlin.math.abs(it - value) } ?: statesBottom.first()
 
     // offset
-    val animatableOffset = remember { Animatable(statesBottom[initialStateIndex]) }
-    var offsetY by remember { mutableFloatStateOf(statesBottom[initialStateIndex]) }
+    val animatableOffset = remember { Animatable(statesBottom[currentStateIndex]) }
+    var offsetY by remember { mutableFloatStateOf(statesBottom[currentStateIndex]) }
+
+    LaunchedEffect(currentStateIndex) {
+        animatableOffset.animateTo(statesBottom[currentStateIndex])
+        offsetY = statesBottom[currentStateIndex]
+    }
 
     // velocity
     var lastPosition by remember { mutableFloatStateOf(animatableOffset.value) }
@@ -69,6 +77,13 @@ fun Kiwi_DraggableBar(
     var dragVelocity by remember { mutableFloatStateOf(0f) }
 
     val offset = getScreenHeight(withoutInsetTop = true).dp - animatableOffset.value.dp
+
+    fun updateState(newIndex: Int) {
+        if (onStateChange != null) {
+            onStateChange(newIndex)
+        }
+    }
+
     Box(
         modifier =
             Modifier
@@ -130,6 +145,10 @@ fun Kiwi_DraggableBar(
                                                 closestState(animatableOffset.value)
                                             }
                                         }
+
+                                    val newIndex = statesBottom.indexOf(target)
+                                    updateState(newIndex)
+
                                     animatableOffset.animateTo(target)
                                     offsetY = target
                                 }
@@ -191,8 +210,11 @@ private val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
+    val draggableStateIndex = remember { mutableIntStateOf(initialStateIndex) }
     Kiwi_Theme {
         Kiwi_DraggableBar(
+            currentStateIndex = draggableStateIndex.intValue,
+            onStateChange = { newIndex -> draggableStateIndex.intValue = newIndex },
             content = {
                 Box(
                     modifier =
@@ -211,7 +233,6 @@ fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
                 }
             },
             states = STATES,
-            initialStateIndex = initialStateIndex,
         )
     }
 }

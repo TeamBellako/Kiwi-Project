@@ -28,7 +28,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -201,7 +200,7 @@ fun CalendarWeekView(
 ) {
     val date = stringToDate(metricsState.date)
     val currentDayOfWeek = date.dayOfWeek.value % DAYS_IN_WEEK
-    val selectedDayIndex = rememberSaveable { mutableIntStateOf(currentDayOfWeek) }
+    var selectedDayIndex = currentDayOfWeek
     val startOfWeek = date.minusDays(currentDayOfWeek.toLong())
 
     Column(
@@ -229,7 +228,7 @@ fun CalendarWeekView(
         ) {
             for (index in 0 until DAYS_IN_WEEK) {
                 val day = startOfWeek.plusDays(index.toLong())
-                val isSelected = selectedDayIndex.intValue == index
+                val isSelected = selectedDayIndex == index
 
                 Box(modifier = Modifier.weight(1f)) {
                     CalendarDayView(
@@ -238,7 +237,7 @@ fun CalendarWeekView(
                         day = day,
                         isSelected = isSelected,
                         onClicked = {
-                            selectedDayIndex.intValue = index
+                            selectedDayIndex = index
                             selectDay(
                                 coroutineScope,
                                 metricsViewModel,
@@ -590,8 +589,9 @@ fun ShowCalendarButton(
 }
 
 @Composable
-fun SelectedDayText(selectedDay: String) {
+fun SelectedDayText(metricsState: MetricsState) {
     val kiwiColors = LocalKiwiColors.current
+    val selectedDay = metricsState.date
 
     Box(
         modifier =

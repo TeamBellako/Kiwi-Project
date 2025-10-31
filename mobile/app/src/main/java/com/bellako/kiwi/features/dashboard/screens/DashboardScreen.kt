@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -104,11 +105,15 @@ fun DashboardScreen(
     val kiwiColors = LocalKiwiColors.current
     val shouldShowCalendarView = remember { mutableStateOf(showCalendarView) }
 
+    val draggableStateIndex = remember { mutableIntStateOf(initialStateIndex) }
+
     Kiwi_DraggableBar(
         modifier =
             Modifier
                 .testTag(DashboardModalTestTags.DRAGGABLE_NODE),
         states = STATES,
+        currentStateIndex = draggableStateIndex.intValue,
+        onStateChange = { newIndex -> draggableStateIndex.intValue = newIndex },
         content = { currentStateIndex ->
             Column(
                 modifier =
@@ -126,13 +131,16 @@ fun DashboardScreen(
                 Header()
 
                 if (currentStateIndex == 0) {
+                    // TODO pedir de nuevo el dia actual
                     DashboardScreen0_Hidden()
                 } else if (currentStateIndex <= 1) {
+                    // TODO cerrar calendario
                     DashboardScreen1_Collapsed(
                         metricsState = metricsState!!,
                         isLoading = isLoading,
                         onCalendarViewClicked = {
                             shouldShowCalendarView.value = true
+                            draggableStateIndex.intValue = 2
                         },
                     )
                 } else if (currentStateIndex <= 2) {
@@ -167,7 +175,6 @@ fun DashboardScreen(
                 }
             }
         },
-        initialStateIndex = initialStateIndex,
     )
 }
 
@@ -250,7 +257,7 @@ fun SelectedMetricsTime(
     val currentString =
         if (validMetrics) {
             DateUtils.parseTimeSeconds(currentSeconds)
-        }else{
+        } else {
             "No data"
         }
 
@@ -281,14 +288,12 @@ fun SelectedMetricsTime(
                 color = kiwiColors.color7D,
                 modifier =
                     Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
             ),
         )
-
     } else {
-
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Kiwi_Label2(
                 KiwiTextArguments(

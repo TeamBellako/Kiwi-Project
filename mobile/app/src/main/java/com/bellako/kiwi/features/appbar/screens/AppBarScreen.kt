@@ -42,7 +42,8 @@ fun AppBarScreen(navController: NavController) {
     Box(
         modifier =
             Modifier
-                .wrapContentSize(),
+                .wrapContentSize()
+                .background(LocalKiwiColors.current.color2),
     ) {
         AppBarModalLayout(
             navController,
@@ -63,7 +64,6 @@ fun AppBarModalLayout(navController: NavController) {
                 .navigationBarsPadding()
                 .height(getResponsiveSizeHeight(90.dp))
                 .testTag(CommonTestTags.BOTTOM_APPBAR),
-        contentColor = kiwiColors.color1,
         containerColor = kiwiColors.color1,
     ) {
         Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
