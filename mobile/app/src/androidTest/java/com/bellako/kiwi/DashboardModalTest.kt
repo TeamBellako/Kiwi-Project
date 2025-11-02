@@ -19,6 +19,7 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.common.utils.DateUtils.stringToYearMonth
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
@@ -265,9 +266,14 @@ class DashboardModalTest {
                 .getOrNull(SemanticsProperties.Text)
                 ?.joinToString("") ?: ""
 
-        val originalDate = stringToYearMonth(originalMonthYearText)
-        val newDate = stringToYearMonth(newMonthYearText)
-        assert(originalDate.isAfter(newDate))
+        val originalMonth = originalMonthYearText.toInt()
+        val newMonth = newMonthYearText.toInt()
+
+        if (originalMonth == 12) {
+            assert(originalMonth < newMonth)
+        } else {
+            assert(newMonth < originalMonth)
+        }
     }
 
     private fun ComposeTestRule.swipeDashboardModal(

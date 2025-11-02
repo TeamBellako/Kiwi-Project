@@ -319,7 +319,12 @@ fun CalendarMonthView(
                 KiwiTextArguments(
                     String.format(Locale.ROOT, "%02d", selectedMonth.value.monthValue),
                     color = kiwiColors.color4B,
-                    modifier = Modifier.fillMaxWidth().align(Alignment.Center).padding(start = getResponsiveSizeHeight(Spacing.medium)),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center)
+                            .padding(start = getResponsiveSizeHeight(Spacing.medium))
+                            .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT),
                 ),
             )
             Kiwi_P1(
@@ -608,7 +613,7 @@ fun SelectedDayText(metricsState: MetricsState) {
                 color = kiwiColors.color6,
                 modifier =
                     Modifier
-                        .testTag(DashboardModalTestTags.SELECTED_MONTH_TEXT), // TODO cambiar nombre por se si rompe las metrics de la DB
+                        .testTag(DashboardModalTestTags.SELECTED_DAY_TEXT),
             ),
         )
     }
