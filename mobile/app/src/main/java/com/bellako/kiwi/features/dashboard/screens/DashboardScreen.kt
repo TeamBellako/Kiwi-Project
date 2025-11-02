@@ -26,24 +26,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
-import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
-import com.bellako.kiwi.common.screens.components.Kiwi_Display1
 import com.bellako.kiwi.common.screens.components.Kiwi_Display2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
-import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -98,14 +91,20 @@ fun DashboardScreen(
 
     val isLoading by remember { derivedStateOf { metricsIsLoading || personalityIsLoading } }
 
-    LaunchedEffect(Unit) {
-        loadMetrics(dateToString(LocalDate.now()), metricsViewModel, personalityViewModel, context)
-    }
-
     val kiwiColors = LocalKiwiColors.current
     val shouldShowCalendarView = remember { mutableStateOf(showCalendarView) }
 
     val draggableStateIndex = remember { mutableIntStateOf(initialStateIndex) }
+
+    LaunchedEffect(draggableStateIndex.intValue) {
+        if (draggableStateIndex.intValue == 0) {
+            loadMetrics(dateToString(LocalDate.now()), metricsViewModel, personalityViewModel, context)
+        }
+
+        if (draggableStateIndex.intValue <= 1) {
+            shouldShowCalendarView.value = false
+        }
+    }
 
     Kiwi_DraggableBar(
         modifier =
@@ -134,7 +133,6 @@ fun DashboardScreen(
                     // TODO pedir de nuevo el dia actual
                     DashboardScreen0_Hidden()
                 } else if (currentStateIndex <= 1) {
-                    // TODO cerrar calendario
                     DashboardScreen1_Collapsed(
                         metricsState = metricsState!!,
                         isLoading = isLoading,
