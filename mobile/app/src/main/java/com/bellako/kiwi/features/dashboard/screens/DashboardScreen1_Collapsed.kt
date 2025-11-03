@@ -62,6 +62,7 @@ private fun CollapsedSummaryCard(
                 Modifier
                     .padding(start = getResponsiveSizeHeight(Spacing.medium)),
             ) {
+                @Suppress("MagicNumber")
                 CurrentDayIndicator(getResponsiveSizeHeight(100.dp), 0.5f, 0.8f)
             }
             Box(

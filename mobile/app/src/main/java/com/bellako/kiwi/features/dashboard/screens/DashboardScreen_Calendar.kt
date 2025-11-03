@@ -111,6 +111,7 @@ fun CurrentDayIndicator(
                         clip = true
                         shape =
                             object : Shape {
+                                @Suppress("MagicNumber")
                                 override fun createOutline(
                                     size: Size,
                                     layoutDirection: LayoutDirection,
@@ -166,6 +167,7 @@ fun CurrentDayIndicator(
                         clip = true
                         shape =
                             object : Shape {
+                                @Suppress("MagicNumber")
                                 override fun createOutline(
                                     size: Size,
                                     layoutDirection: LayoutDirection,
