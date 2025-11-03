@@ -71,7 +71,7 @@ fun MapScreen(
     initialZoom: Float = 2f,
     initialPosition: Offset = @Suppress("MagicNumber") Offset(-0.4f, -0.4f),
     dragLimitFactor: Float = 1f,
-    mapResourceId: Int = R.drawable.ph_home_map,
+    mapResourceId: Int = R.drawable.map_hd,
     title: String = "WORLD MAP",
     viewModel: MapViewModel? = null,
 ) {
@@ -105,8 +105,7 @@ fun MapScreen(
             KiwiTextArguments(
                 title,
                 color = kiwiColors.colorF,
-                bold = true,
-                modifier = Modifier.padding(0.dp,getResponsiveSizeHeight(Spacing.small))
+                modifier = Modifier.padding(0.dp, getResponsiveSizeHeight(Spacing.small)),
             ),
         )
 

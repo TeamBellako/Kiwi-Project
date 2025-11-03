@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -43,7 +42,8 @@ fun AppBarScreen(navController: NavController) {
     Box(
         modifier =
             Modifier
-                .wrapContentSize(),
+                .wrapContentSize()
+                .background(LocalKiwiColors.current.color2),
     ) {
         AppBarModalLayout(
             navController,
@@ -59,14 +59,12 @@ fun AppBarModalLayout(navController: NavController) {
     NavigationBar(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp), getResponsiveSizeHeight(40.dp), 0.dp, 0.dp))
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(30.dp), getResponsiveSizeHeight(30.dp), 0.dp, 0.dp))
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .height(getResponsiveSizeHeight(100.dp))
+                .height(getResponsiveSizeHeight(90.dp))
                 .testTag(CommonTestTags.BOTTOM_APPBAR),
-        contentColor = kiwiColors.color1,
         containerColor = kiwiColors.color1,
-
     ) {
         Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
 

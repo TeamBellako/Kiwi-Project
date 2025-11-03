@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -25,21 +26,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
-import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
-import com.bellako.kiwi.common.screens.components.Kiwi_Display1
+import com.bellako.kiwi.common.screens.components.Kiwi_Display2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -71,9 +68,9 @@ import java.time.LocalDate
 const val MONTH_SLIDE_ANIM_DURATION = 300
 const val DAY_DISABLED_ALPHA = 0.3f
 
-const val STATE_HEIGHT_0 = 150
+const val STATE_HEIGHT_0 = 140
 const val STATE_HEIGHT_1 = 270
-const val STATE_HEIGHT_2 = 700
+const val STATE_HEIGHT_2 = 680
 val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -94,25 +91,33 @@ fun DashboardScreen(
 
     val isLoading by remember { derivedStateOf { metricsIsLoading || personalityIsLoading } }
 
-    LaunchedEffect(Unit) {
-        loadMetrics(dateToString(LocalDate.now()), metricsViewModel, personalityViewModel, context)
-    }
-
     val kiwiColors = LocalKiwiColors.current
     val shouldShowCalendarView = remember { mutableStateOf(showCalendarView) }
 
+    val draggableStateIndex = remember { mutableIntStateOf(initialStateIndex) }
+
+    LaunchedEffect(draggableStateIndex.intValue) {
+        if (draggableStateIndex.intValue == 0) {
+            loadMetrics(dateToString(LocalDate.now()), metricsViewModel, personalityViewModel, context)
+        }
+
+        if (draggableStateIndex.intValue <= 1) {
+            shouldShowCalendarView.value = false
+        }
+    }
+
     Kiwi_DraggableBar(
-        modifier = Modifier
-            .testTag(DashboardModalTestTags.DRAGGABLE_NODE)
-        ,
+        modifier =
+            Modifier
+                .testTag(DashboardModalTestTags.DRAGGABLE_NODE),
         states = STATES,
+        currentStateIndex = draggableStateIndex.intValue,
+        onStateChange = { newIndex -> draggableStateIndex.intValue = newIndex },
         content = { currentStateIndex ->
             Column(
                 modifier =
                     Modifier
-                        .background(
-                            kiwiColors.color2,
-                         )
+                        .background(kiwiColors.color2)
                         .padding(
                             top = 0.dp,
                             bottom = getResponsiveSizeHeight(Spacing.medium),
@@ -125,6 +130,7 @@ fun DashboardScreen(
                 Header()
 
                 if (currentStateIndex == 0) {
+                    // TODO pedir de nuevo el dia actual
                     DashboardScreen0_Hidden()
                 } else if (currentStateIndex <= 1) {
                     DashboardScreen1_Collapsed(
@@ -132,6 +138,7 @@ fun DashboardScreen(
                         isLoading = isLoading,
                         onCalendarViewClicked = {
                             shouldShowCalendarView.value = true
+                            draggableStateIndex.intValue = 2
                         },
                     )
                 } else if (currentStateIndex <= 2) {
@@ -166,7 +173,6 @@ fun DashboardScreen(
                 }
             }
         },
-        initialStateIndex = initialStateIndex,
     )
 }
 
@@ -201,7 +207,6 @@ private fun Header() {
             ),
         )
     }
-    Kiwi_Spacer()
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -247,55 +252,66 @@ fun SelectedMetricsTime(
 ) {
     val kiwiColors = LocalKiwiColors.current
 
-    val currentString = buildAnnotatedString {
-        withStyle(SpanStyle(color = kiwiColors.color6)) {
-            if (validMetrics) {
-                append(DateUtils.parseTimeSeconds(currentSeconds))
-            } else {
-                append("No data")
-            }
+    val currentString =
+        if (validMetrics) {
+            DateUtils.parseTimeSeconds(currentSeconds)
+        } else {
+            "No data"
         }
-    }
-    val maxString = buildAnnotatedString {
-        withStyle(SpanStyle(color = kiwiColors.color7D)) {
-            if (validMetrics) {
-                append("/" + DateUtils.parseTimeSeconds(maxSeconds))
-            } else {
-                append("No data")
-            }
+
+    val maxString =
+        if (validMetrics) {
+            "/" + DateUtils.parseTimeSeconds(maxSeconds)
+        } else {
+            ""
         }
-    }
 
     if (expanded) {
-
-        Kiwi_Display1(KiwiTextArguments(
-            text = currentString.text,
-            TextAlign.Center,
-            color = kiwiColors.color6,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .testTag(tag),
-            ))
-
-        Kiwi_AnnotatedString_P2(
-            KiwiAnnotatedStringArguments(
-                maxString,
+        Kiwi_Display2(
+            KiwiTextArguments(
+                text = currentString,
                 TextAlign.Center,
-                modifier =
-                    Modifier
-                        .fillMaxWidth(),
-            ))
-    } else {
-        Kiwi_AnnotatedString_P2(
-            KiwiAnnotatedStringArguments(
-                currentString + maxString,
-                TextAlign.Left,
+                color = kiwiColors.color9,
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .testTag(tag),
-            ))
+            ),
+        )
+
+        Kiwi_Label2(
+            KiwiTextArguments(
+                maxString,
+                TextAlign.Center,
+                color = kiwiColors.color7D,
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+            ),
+        )
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Kiwi_Label2(
+                KiwiTextArguments(
+                    currentString,
+                    TextAlign.Left,
+                    color = kiwiColors.color9,
+                    modifier =
+                        Modifier
+                            .testTag(tag),
+                ),
+            )
+
+            Kiwi_Label2(
+                KiwiTextArguments(
+                    maxString,
+                    TextAlign.Left,
+                    color = kiwiColors.color7D,
+                ),
+            )
+        }
     }
 }
 
