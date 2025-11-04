@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.map.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -11,8 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -20,6 +25,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
@@ -34,10 +40,13 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
+import com.bellako.kiwi.features.goals.model.GoalsViewModel
+import com.bellako.kiwi.features.goals.screens.YesterdayGoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
@@ -53,6 +62,7 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
+import java.time.LocalDate
 
 /**
  * @param minZoom how small (zoom out) the map can be, considering 1 the full map on screen
@@ -64,6 +74,7 @@ import com.bellako.kiwi.ui.getScreenWidth
  * @param title
  * @param viewModel Optional parameter for testing
  */
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MapScreen(
     minZoom: Float = 1.5f,
@@ -74,11 +85,29 @@ fun MapScreen(
     mapResourceId: Int = R.drawable.ph_home_map,
     title: String = "WORLD MAP",
     viewModel: MapViewModel? = null,
+    goalsViewModel: GoalsViewModel? = null,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
+    val actualGoalsViewModel = goalsViewModel ?: hiltViewModel<GoalsViewModel>()
     val density = LocalDensity.current
     val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
+    val context = LocalContext.current
+
+    // Verificar si ya se mostró el modal hoy
+    LaunchedEffect(Unit) {
+        val prefs = context.getSharedPreferences("kiwi_goals_prefs", Context.MODE_PRIVATE)
+        val lastShownDate = prefs.getString("last_yesterday_goals_check", "")
+        val today = dateToString(LocalDate.now())
+
+        // Solo cargar si no se ha revisado hoy
+        if (lastShownDate != today) {
+            actualGoalsViewModel.loadYesterdayDailyChallenges()
+
+            // Guardar la fecha de hoy
+            prefs.edit().putString("last_yesterday_goals_check", today).apply()
+        }
+    }
 
     mapViewModel.setParameters(
         minScale = minZoom,
@@ -106,7 +135,7 @@ fun MapScreen(
                 title,
                 color = kiwiColors.colorF,
                 bold = true,
-                modifier = Modifier.padding(0.dp,getResponsiveSizeHeight(Spacing.small))
+                modifier = Modifier.padding(0.dp, getResponsiveSizeHeight(Spacing.small)),
             ),
         )
 
@@ -116,6 +145,9 @@ fun MapScreen(
             modifier = Modifier.fillMaxSize(),
         )
     }
+
+    // Mostrar el modal de Yesterday Goals (el ViewModel controla su visibilidad)
+    YesterdayGoalsModal(viewModel = actualGoalsViewModel)
 }
 
 @Composable
