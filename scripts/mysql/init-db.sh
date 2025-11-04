@@ -19,6 +19,7 @@ USE ${MYSQL_DATABASE};
 USE kiwi_db_dev;
 
 -- Drop tables if they exist
+DROP TABLE IF EXISTS goals;
 DROP TABLE IF EXISTS metrics;
 DROP TABLE IF EXISTS personality;
 DROP TABLE IF EXISTS settings;
@@ -73,6 +74,23 @@ CREATE TABLE IF NOT EXISTS personality (
     -- Foreign key to users table
     user_id BIGINT NOT NULL,
     CONSTRAINT fk_personality_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create goals table with a foreign key to users
+CREATE TABLE IF NOT EXISTS goals (
+    id VARCHAR(36) PRIMARY KEY,
+    objective VARCHAR(255) NOT NULL,
+    category ENUM('DAILY_CHALLENGES', 'APP_USAGE') NOT NULL,
+    status ENUM('COMPLETED', 'NOT_COMPLETED', 'REVIEW') NOT NULL,
+    points INT NOT NULL,
+    date DATE NOT NULL,
+
+    -- Foreign key to users table
+    user_id BIGINT NOT NULL,
+    CONSTRAINT fk_goals_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+
+    -- Add index for efficient queries by user and date
+    INDEX idx_user_date (user_id, date)
 );
 
 
