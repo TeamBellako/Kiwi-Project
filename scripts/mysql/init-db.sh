@@ -75,6 +75,23 @@ CREATE TABLE IF NOT EXISTS personality (
     CONSTRAINT fk_personality_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Create nodes table
+CREATE TABLE nodes (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  node_order INT NOT NULL,
+  price INT DEFAULT NULL
+);
+
+-- Create user_nodes_status table
+CREATE TABLE user_node_status (
+  user_id BIGINT NOT NULL,
+  node_id BIGINT NOT NULL,
+  status ENUM('LOCKED', 'OPEN', 'COMPLETED') NOT NULL,
+  PRIMARY KEY (user_id, node_id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (node_id) REFERENCES nodes(id)
+);
+
 
 CREATE USER '${BACKEND_DB_USERNAME}'@'%' IDENTIFIED BY '${BACKEND_DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${BACKEND_DB_USERNAME}'@'%';
