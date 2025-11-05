@@ -6,7 +6,7 @@ import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.nodes.controllers.NodesController;
 import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.nodes.data.NodeStatus;
-import com.kiwi.features.nodes.dto.NodesDTO;
+import com.kiwi.features.nodes.data.NodesDTO;
 import com.kiwi.features.nodes.exceptions.NodeLockedException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
 import com.kiwi.security.AuthEntryPointJwt;
@@ -52,9 +52,9 @@ public class NodesControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void getNode_valid() throws Exception {
-        NodesDTO dto = dtoNode(1L, 1, 100, NodeStatus.OPEN);
+        NodesDTO dto = dtoNode(1, 1, NodeStatus.OPEN, 100 );
 
-        when(nodesService.getNode(1L)).thenReturn(dto);
+        when(nodesService.getNode(1)).thenReturn(dto);
 
         mockMvc.perform(get(baseAPIUrl + "/1"))
                 .andExpect(status().isOk());
@@ -63,7 +63,7 @@ public class NodesControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void getNode_notFound() throws Exception {
-        when(nodesService.getNode(99L)).thenThrow(new NodeNotFoundException(99L));
+        when(nodesService.getNode(99)).thenThrow(new NodeNotFoundException(99));
 
         mockMvc.perform(get(baseAPIUrl + "/99"))
                 .andExpect(status().isNotFound());
@@ -73,9 +73,9 @@ public class NodesControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void listNodes_valid() throws Exception {
-        when(nodesService.getNodesForUser(1L)).thenReturn(List.of(
-                dtoNode(1L, 1, 100, NodeStatus.OPEN),
-                dtoNode(2L, 2, 120, NodeStatus.LOCKED)
+        when(nodesService.getNodesForUser(1)).thenReturn(List.of(
+                dtoNode(1, 1, NodeStatus.OPEN, 100),
+                dtoNode(2, 2, NodeStatus.LOCKED, 120)
         ));
 
         mockMvc.perform(get(baseAPIUrl + "?userId=1"))
@@ -86,22 +86,22 @@ public class NodesControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void unlockNode_valid() throws Exception {
-        when(nodesService.unlockNode(1L, 2L))
-                .thenReturn(dtoNode(2L, 2, 120, NodeStatus.OPEN));
+        when(nodesService.unlockNode(1, 2))
+                .thenReturn(dtoNode(2, 2, NodeStatus.OPEN, 120));
 
         mockMvc.perform(
-                getPostRequestBuilder(baseAPIUrl + "/2/unlock", userIdDTO(1L))
+                getPostRequestBuilder(baseAPIUrl + "/2/unlock", userIdDTO(1))
         ).andExpect(status().isOk());
     }
 
     @Test
     @WithMockUser(username = "test@test.com")
     public void unlockNode_locked() throws Exception {
-        when(nodesService.unlockNode(1L, 2L))
-                .thenThrow(new NodeLockedException(2L));
+        when(nodesService.unlockNode(1, 2))
+                .thenThrow(new NodeLockedException(2));
 
         mockMvc.perform(
-                getPostRequestBuilder(baseAPIUrl + "/2/unlock", userIdDTO(1L))
+                getPostRequestBuilder(baseAPIUrl + "/2/unlock", userIdDTO(1))
         ).andExpect(status().isLocked());
     }
 
@@ -109,11 +109,11 @@ public class NodesControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void completeNode_valid() throws Exception {
-        when(nodesService.completeNode(1L, 2L))
-                .thenReturn(dtoNode(2L, 2, 120, NodeStatus.COMPLETED));
+        when(nodesService.completeNode(1, 2))
+                .thenReturn(dtoNode(2, 2, NodeStatus.COMPLETED, 120));
 
         mockMvc.perform(
-                getPostRequestBuilder(baseAPIUrl + "/2/complete", userIdDTO(1L))
+                getPostRequestBuilder(baseAPIUrl + "/2/complete", userIdDTO(1))
         ).andExpect(status().isOk());
     }
 }

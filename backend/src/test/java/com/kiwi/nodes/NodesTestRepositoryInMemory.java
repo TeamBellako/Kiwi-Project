@@ -3,6 +3,7 @@ package com.kiwi.nodes;
 import com.kiwi.features.nodes.controllers.NodesRepository;
 import com.kiwi.features.nodes.data.NodesPersistence;
 import com.kiwi.features.nodes.data.UserNodeStatusPersistence;
+import com.kiwi.features.users.data.UsersPersistence;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,15 +25,26 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
         return List.of();
     }
 
+    @Override
+    public Optional<NodesPersistence> findById(Integer integer) {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean existsById(Integer integer) {
+        return false;
+    }
+
     // ---- NODE ----
     public List<NodesPersistence> findAll() {
         return new ArrayList<>(nodeStore.values());
     }
 
     @Override
-    public List<NodesPersistence> findAllById(Iterable<Long> longs) {
+    public List<NodesPersistence> findAllById(Iterable<Integer> integers) {
         return List.of();
     }
+
 
     @Override
     public long count() {
@@ -40,9 +52,10 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public void deleteById(Long aLong) {
+    public void deleteById(Integer integer) {
 
     }
+
 
     @Override
     public void delete(NodesPersistence entity) {
@@ -50,7 +63,7 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public void deleteAllById(Iterable<? extends Long> longs) {
+    public void deleteAllById(Iterable<? extends Integer> integers) {
 
     }
 
@@ -68,17 +81,10 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
         return Optional.ofNullable(nodeStore.get(id));
     }
 
-    @Override
-    public boolean existsById(Long aLong) {
-        return false;
-    }
 
-    public NodesPersistence save(NodesPersistence entity) {
-        if (entity.getId() == null) {
-            entity.setId(idSequence++);
-        }
-        nodeStore.put(entity.getId(), entity);
-        return entity;
+    @Override
+    public <S extends NodesPersistence> S save(S entity) {
+        return null;
     }
 
     // ---- USER NODE STATUS ----
@@ -107,12 +113,17 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
+    public void deleteInBatch(Iterable<NodesPersistence> entities) {
+        NodesRepository.super.deleteInBatch(entities);
+    }
+
+    @Override
     public void deleteAllInBatch(Iterable<NodesPersistence> entities) {
 
     }
 
     @Override
-    public void deleteAllByIdInBatch(Iterable<Long> longs) {
+    public void deleteAllByIdInBatch(Iterable<Integer> integers) {
 
     }
 
@@ -122,17 +133,17 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public NodesPersistence getOne(Long aLong) {
+    public NodesPersistence getOne(Integer integer) {
         return null;
     }
 
     @Override
-    public NodesPersistence getById(Long aLong) {
+    public NodesPersistence getById(Integer integer) {
         return null;
     }
 
     @Override
-    public NodesPersistence getReferenceById(Long aLong) {
+    public NodesPersistence getReferenceById(Integer integer) {
         return null;
     }
 

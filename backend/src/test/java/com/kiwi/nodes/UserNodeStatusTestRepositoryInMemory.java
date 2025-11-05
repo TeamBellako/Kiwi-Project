@@ -17,7 +17,7 @@ public class UserNodeStatusTestRepositoryInMemory implements UserNodeStatusRepos
     private final Map<UserNodeStatusKey, UserNodeStatusPersistence> store = new HashMap<>();
 
     @Override
-    public Optional<UserNodeStatusPersistence> findByUserIdAndNodeId(Long userId, Long nodeId) {
+    public Optional<UserNodeStatusPersistence> findByUserIdAndNodeId(int userId, int nodeId) {
         return Optional.ofNullable(store.get(new UserNodeStatusKey(userId, nodeId)));
     }
 

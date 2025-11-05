@@ -21,51 +21,51 @@ public class NodesServiceTests {
 
     @Test
     public void getExistingNode() {
-        nodeRepo.save(persistenceNode(1L, 1, 100));
+        nodeRepo.save(persistenceNode(1, 1, 100));
 
-        var result = service.getNode(1L);
+        var result = service.getNode(1);
         assertEquals(1L, result.getId());
     }
 
     @Test(expected = NodeNotFoundException.class)
     public void getNonExistingNode() {
-        service.getNode(99L);
+        service.getNode(99);
     }
 
     @Test
     public void getNodesForUser() {
-        nodeRepo.save(persistenceNode(1L, 1, 100));
-        nodeRepo.save(persistenceNode(2L, 2, 200));
+        nodeRepo.save(persistenceNode(1, 1, 100));
+        nodeRepo.save(persistenceNode(2, 2, 200));
 
-        var result = service.getNodesForUser(1L);
+        var result = service.getNodesForUser(1);
         assertEquals(2, result.size());
     }
 
     @Test
     public void unlockNodeSuccess() {
-        int userId = 1L;
+        int userId = 1;
 
-        nodeRepo.save(persistenceNode(1L, 1, 100));
+        nodeRepo.save(persistenceNode(1, 1, 100));
         statusRepo.saveUserStatus(lockedStatus(userId, 1));
 
-        var result = service.unlockNode(userId, 1L);
+        var result = service.unlockNode(userId, 1);
 
         assertEquals(NodeStatus.OPEN.name(), result.getStatus());
     }
 
     @Test(expected = NodeLockedException.class)
     public void unlockNodeFailsIfNotLocked() {
-        int userId = 1L;
+        int userId = 1;
 
-        nodeRepo.save(persistenceNode(1L, 1, 100));
+        nodeRepo.save(persistenceNode(1, 1, 100));
         statusRepo.saveUserStatus(inaccessibleStatus(userId, 1));
 
-        service.unlockNode(userId, 1L);
+        service.unlockNode(userId, 1);
     }
 
     @Test(expected = NodeNotFoundException.class)
     public void unlockNodeNotFound() {
-        service.unlockNode(1L, 99L);
+        service.unlockNode(1, 99);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class NodesServiceTests {
         nodeRepo.save(persistenceNode(2, 2, 200));
         nodeRepo.saveUserStatus(openStatus(userId, 2));
 
-        var result = service.completeNode(userId, 2L);
+        var result = service.completeNode(userId, 2);
 
         assertEquals(NodeStatus.COMPLETED.name(), result.getStatus());
     }
@@ -87,12 +87,12 @@ public class NodesServiceTests {
         nodeRepo.save(persistenceNode(2, 2, 200));
         nodeRepo.saveUserStatus(lockedStatus(userId, 2));
 
-        service.completeNode(userId, 2L);
+        service.completeNode(userId, 2);
     }
 
     @Test(expected = NodeNotFoundException.class)
     public void completeNonExistingNodeFails() {
         int userId = 1;
-        service.completeNode(userId, 999L);
+        service.completeNode(userId, 999);
     }
 }
