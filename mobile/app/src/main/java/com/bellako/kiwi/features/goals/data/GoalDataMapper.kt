@@ -41,8 +41,8 @@ object GoalDataMapper {
 
     fun toDTO(state: GoalState): GoalDTO = toDTO(toDomain(state))
 
-    private fun stringToCategory(category: String): GoalCategory =
-        when (category.uppercase()) {
+    private fun stringToCategory(category: String?): GoalCategory =
+        when (category?.uppercase()) {
             "DAILY_CHALLENGES" -> GoalCategory.DAILY_CHALLENGES
             "APP_USAGE" -> GoalCategory.APP_USAGE
             else -> GoalCategory.DAILY_CHALLENGES
@@ -54,8 +54,8 @@ object GoalDataMapper {
             GoalCategory.APP_USAGE -> "APP_USAGE"
         }
 
-    private fun stringToStatus(status: String): GoalStatus =
-        when (status.uppercase()) {
+    private fun stringToStatus(status: String?): GoalStatus =
+        when (status?.uppercase()) {
             "COMPLETED" -> GoalStatus.COMPLETED
             "NOT_COMPLETED" -> GoalStatus.NOT_COMPLETED
             "REVIEW" -> GoalStatus.REVIEW

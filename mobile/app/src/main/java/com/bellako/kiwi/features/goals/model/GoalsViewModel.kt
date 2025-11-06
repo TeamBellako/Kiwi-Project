@@ -7,6 +7,7 @@ import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
+import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDataMapper
 import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListDTO
@@ -35,7 +36,7 @@ class GoalsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onDateChanged(newDate: LocalDate) {
-            _state.value = _state.value.copy(date = dateToString(newDate))
+            // El cambio de fecha ya no actualiza el estado, se maneja externamente
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
@@ -58,7 +59,6 @@ class GoalsViewModel
                 val resultDTO = result.getOrNull()!!
                 _state.value =
                     _state.value.copy(
-                        date = resultDTO.date,
                         goals = resultDTO.goals.map { GoalDataMapper.toState(it) },
                         isLoading = false,
                         error = null,
@@ -75,13 +75,46 @@ class GoalsViewModel
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override suspend fun updateGoal(goal: GoalState): Result<Unit> {
+        override suspend fun completeGoal(goalId: String): Result<Unit> {
             setIsLoading(true)
             setUiState(UIState.Loading)
             _state.value = _state.value.copy(isLoading = true, error = null)
 
-            val dto = GoalDataMapper.toDTO(goal)
-            val result = repository.updateGoal(dto)
+            val result = repository.completeGoal(goalId)
+
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+
+            return handleResult(result) {
+                val updatedGoal = GoalDataMapper.toState(result.getOrNull()!!)
+                val updatedGoals =
+                    _state.value.goals.map {
+                        if (it.id == updatedGoal.id) updatedGoal else it
+                    }
+                _state.value =
+                    _state.value.copy(
+                        goals = updatedGoals,
+                        isLoading = false,
+                        error = null,
+                    )
+            }.also {
+                if (it.isFailure) {
+                    _state.value =
+                        _state.value.copy(
+                            isLoading = false,
+                            error = it.exceptionOrNull()?.message,
+                        )
+                }
+            }
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun uncompleteGoal(goalId: String): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            _state.value = _state.value.copy(isLoading = true, error = null)
+
+            val result = repository.uncompleteGoal(goalId)
 
             setIsLoading(false)
             setUiState(UIState.Idle)
@@ -125,7 +158,6 @@ class GoalsViewModel
                 if (resultDTO != null) {
                     _state.value =
                         _state.value.copy(
-                            date = resultDTO.date,
                             goals = resultDTO.goals.map { GoalDataMapper.toState(it) },
                             isLoading = false,
                             error = null,
@@ -133,7 +165,6 @@ class GoalsViewModel
                 } else {
                     _state.value =
                         _state.value.copy(
-                            date = date,
                             goals = emptyList(),
                             isLoading = false,
                             error = null,
@@ -161,8 +192,6 @@ class GoalsViewModel
             setUiState(UIState.Idle)
 
             return handleResult(result) {
-                // Este método podría devolver una lista de todos los días con goals
-                // Por ahora solo actualizamos el estado de loading
                 _state.value =
                     _state.value.copy(
                         isLoading = false,
@@ -179,45 +208,44 @@ class GoalsViewModel
             }
         }
 
-        override fun completeGoal(goalId: String) {
-            val updatedGoals =
-                _state.value.goals.map { goal ->
-                    if (goal.id == goalId) {
-                        goal.copy(status = "COMPLETED")
-                    } else {
-                        goal
-                    }
-                }
-            _state.value = _state.value.copy(goals = updatedGoals)
-        }
-
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun loadYesterdayDailyChallenges(): Result<Unit> {
             setIsLoading(true)
             _yesterdayGoalsState.value = _yesterdayGoalsState.value.copy(isLoading = true, error = null)
 
-            val yesterday = LocalDate.now().minusDays(1)
-            val result = repository.getGoalsByDate(yesterday)
+            val result = repository.getGoalsToReview()
 
             setIsLoading(false)
 
+            @Suppress("TooGenericExceptionCaught")
             return handleResult(result) {
-                val resultDTO = result.getOrNull()
-                if (resultDTO != null) {
-                    // Filtrar solo los goals que estén en estado REVIEW
-                    val goalsToReview =
-                        resultDTO.goals
-                            .filter { it.status == "REVIEW" }
-                            .map { GoalDataMapper.toState(it) }
+                val goalsListToReview = result.getOrNull()
+                if (goalsListToReview != null && goalsListToReview.isNotEmpty()) {
+                    try {
+                        val allGoals = goalsListToReview.flatMap { it.goals }
+                        // TODO: Implementar manejo automático de goals de tipo APP_USAGE
+                        val filteredGoals = allGoals.filter { it.category != "APP_USAGE" }
 
-                    _yesterdayGoalsState.value =
-                        _yesterdayGoalsState.value.copy(
-                            goals = goalsToReview,
-                            currentGoalIndex = 0,
-                            isVisible = goalsToReview.isNotEmpty(),
-                            isLoading = false,
-                            error = null,
-                        )
+                        // Convertir los goals a estado
+                        val goals = filteredGoals.map { GoalDataMapper.toState(it) }
+
+                        _yesterdayGoalsState.value =
+                            _yesterdayGoalsState.value.copy(
+                                goals = goals,
+                                currentGoalIndex = 0,
+                                isVisible = goals.isNotEmpty(),
+                                isLoading = false,
+                                error = null,
+                            )
+                    } catch (e: Exception) {
+                        _yesterdayGoalsState.value =
+                            _yesterdayGoalsState.value.copy(
+                                goals = emptyList(),
+                                isVisible = false,
+                                isLoading = false,
+                                error = "Error al procesar goals: ${e.message}",
+                            )
+                    }
                 } else {
                     _yesterdayGoalsState.value =
                         _yesterdayGoalsState.value.copy(
@@ -238,27 +266,25 @@ class GoalsViewModel
             }
         }
 
+        @Suppress("TooGenericExceptionCaught")
         @RequiresApi(Build.VERSION_CODES.O)
         override fun markYesterdayGoalAsCompleted(
             goalId: String,
             completed: Boolean,
         ) {
             viewModelScope.launch {
-                // Encontrar el goal actual
-                val currentGoal = _yesterdayGoalsState.value.goals.find { it.id == goalId }
-
-                if (currentGoal != null) {
-                    // Actualizar el estado del goal
-                    val updatedGoal =
-                        currentGoal.copy(
-                            status = if (completed) "COMPLETED" else "NOT_COMPLETED",
-                        )
-
+                try {
                     // Llamar al backend para persistir el cambio
-                    val result = repository.updateGoal(GoalDataMapper.toDTO(updatedGoal))
+                    val result =
+                        if (completed) {
+                            repository.completeGoal(goalId)
+                        } else {
+                            repository.uncompleteGoal(goalId)
+                        }
 
                     if (result.isSuccess) {
                         // Si la actualización fue exitosa, actualizar el estado local
+                        val updatedGoal = GoalDataMapper.toState(result.getOrNull()!!)
                         val updatedGoals =
                             _yesterdayGoalsState.value.goals.map { goal ->
                                 if (goal.id == goalId) {
@@ -288,10 +314,51 @@ class GoalsViewModel
                                 )
                         }
                     } else {
-                        // Manejar el error (opcional: mostrar mensaje)
+                        // Si falla la actualización, registrar el error pero avanzar al siguiente goal
+                        android.util.Log.e(
+                            "GoalsViewModel",
+                            "Error al actualizar goal $goalId: ${result.exceptionOrNull()?.message}",
+                        )
+
+                        val currentIndex = _yesterdayGoalsState.value.currentGoalIndex
+                        val nextIndex = currentIndex + 1
+
+                        if (nextIndex >= _yesterdayGoalsState.value.goals.size) {
+                            // Ya no hay más goals, cerrar el modal
+                            _yesterdayGoalsState.value =
+                                _yesterdayGoalsState.value.copy(
+                                    currentGoalIndex = nextIndex,
+                                    isVisible = false,
+                                    error = "Error al guardar algunos cambios: ${result.exceptionOrNull()?.message}",
+                                )
+                        } else {
+                            // Pasar al siguiente goal aunque haya fallado
+                            _yesterdayGoalsState.value =
+                                _yesterdayGoalsState.value.copy(
+                                    currentGoalIndex = nextIndex,
+                                    error = "Error al guardar: ${result.exceptionOrNull()?.message}",
+                                )
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Capturar cualquier excepción inesperada
+                    android.util.Log.e("GoalsViewModel", "Excepción inesperada al marcar goal: ${e.message}", e)
+
+                    val currentIndex = _yesterdayGoalsState.value.currentGoalIndex
+                    val nextIndex = currentIndex + 1
+
+                    if (nextIndex >= _yesterdayGoalsState.value.goals.size) {
                         _yesterdayGoalsState.value =
                             _yesterdayGoalsState.value.copy(
-                                error = result.exceptionOrNull()?.message,
+                                currentGoalIndex = nextIndex,
+                                isVisible = false,
+                                error = "Error inesperado: ${e.message}",
+                            )
+                    } else {
+                        _yesterdayGoalsState.value =
+                            _yesterdayGoalsState.value.copy(
+                                currentGoalIndex = nextIndex,
+                                error = "Error inesperado: ${e.message}",
                             )
                     }
                 }

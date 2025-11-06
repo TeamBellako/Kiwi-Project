@@ -37,11 +37,11 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongMethod")
 fun YesterdayGoalsModal(viewModel: IGoalsViewModel) {
     val yesterdayGoalsState by viewModel.yesterdayGoalsState.collectAsState()
     val kiwiColors = LocalKiwiColors.current
 
-    // Cargar los goals de ayer
     LaunchedEffect(Unit) {
         viewModel.loadYesterdayDailyChallenges()
     }
@@ -70,14 +70,12 @@ fun YesterdayGoalsModal(viewModel: IGoalsViewModel) {
                         LoadingModal()
                     } else {
                         val currentGoal = yesterdayGoalsState.currentGoal
-
                         if (currentGoal != null) {
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(16.dp)),
                             ) {
-                                // Título
                                 Kiwi_Label1(
                                     KiwiTextArguments(
                                         text = "Yesterday's Goals",
@@ -87,30 +85,22 @@ fun YesterdayGoalsModal(viewModel: IGoalsViewModel) {
                                 )
 
                                 Kiwi_Spacer()
-
-                                // Indicador de progreso
                                 Kiwi_Label2(
                                     KiwiTextArguments(
                                         text =
                                             "Goal ${yesterdayGoalsState.currentGoalIndex + 1} of ${yesterdayGoalsState.goals.size}",
-                                        color = kiwiColors.color5,
+                                        color = kiwiColors.colorF,
                                     ),
                                 )
 
                                 Kiwi_Spacer()
-
-                                // Objetivo
                                 Kiwi_Label1(
                                     KiwiTextArguments(
                                         text = currentGoal.objective,
                                         color = kiwiColors.colorF,
                                     ),
                                 )
-
                                 Kiwi_Spacer()
-                                Kiwi_Spacer()
-
-                                // Pregunta
                                 Kiwi_Label2(
                                     KiwiTextArguments(
                                         text = "Did you complete this goal?",
@@ -119,8 +109,6 @@ fun YesterdayGoalsModal(viewModel: IGoalsViewModel) {
                                 )
 
                                 Kiwi_Spacer()
-
-                                // Botones
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(12.dp)),

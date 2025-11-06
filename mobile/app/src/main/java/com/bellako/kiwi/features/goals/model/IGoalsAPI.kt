@@ -4,8 +4,9 @@ import com.bellako.kiwi.features.goals.data.GoalDTO
 import com.bellako.kiwi.features.goals.data.GoalsListDTO
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
-import retrofit2.http.PUT
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface IGoalsAPI {
@@ -14,9 +15,14 @@ interface IGoalsAPI {
         @Body dto: GoalsListDTO,
     ): GoalsListDTO
 
-    @PUT("api/user/goals")
-    suspend fun updateGoal(
-        @Body dto: GoalDTO,
+    @PATCH("api/user/goals/{goalId}/complete")
+    suspend fun completeGoal(
+        @Path("goalId") goalId: String,
+    ): GoalDTO
+
+    @PATCH("api/user/goals/{goalId}/uncompleted")
+    suspend fun uncompleteGoal(
+        @Path("goalId") goalId: String,
     ): GoalDTO
 
     @GET("api/user/goals")
@@ -26,4 +32,7 @@ interface IGoalsAPI {
 
     @GET("api/user/goals/all")
     suspend fun getAllGoals(): List<GoalsListDTO>
+
+    @GET("api/user/goals/review")
+    suspend fun getGoalsToReview(): List<GoalsListDTO>
 }

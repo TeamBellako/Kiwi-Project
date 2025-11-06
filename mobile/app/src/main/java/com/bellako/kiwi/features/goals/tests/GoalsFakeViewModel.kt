@@ -43,7 +43,16 @@ class GoalsFakeViewModel(
             Result.success(Unit)
         }
 
-    override suspend fun updateGoal(goal: GoalState): Result<Unit> =
+    override suspend fun completeGoal(goalId: String): Result<Unit> =
+        if (fakeError) {
+            handleError(fakeException)
+            Result.failure(fakeException)
+        } else {
+            handleSuccess()
+            Result.success(Unit)
+        }
+
+    override suspend fun uncompleteGoal(goalId: String): Result<Unit> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -69,18 +78,6 @@ class GoalsFakeViewModel(
             handleSuccess()
             Result.success(Unit)
         }
-
-    override fun completeGoal(goalId: String) {
-        val updatedGoals =
-            _state.value.goals.map { goal ->
-                if (goal.id == goalId) {
-                    goal.copy(status = "COMPLETED")
-                } else {
-                    goal
-                }
-            }
-        _state.value = _state.value.copy(goals = updatedGoals)
-    }
 
     override suspend fun loadYesterdayDailyChallenges(): Result<Unit> =
         if (fakeError) {

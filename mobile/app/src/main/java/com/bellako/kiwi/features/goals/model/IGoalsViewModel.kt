@@ -19,13 +19,13 @@ interface IGoalsViewModel {
         goals: List<GoalState>,
     ): Result<Unit>
 
-    suspend fun updateGoal(goal: GoalState): Result<Unit>
+    suspend fun completeGoal(goalId: String): Result<Unit>
+
+    suspend fun uncompleteGoal(goalId: String): Result<Unit>
 
     suspend fun loadGoalsByDate(date: String): Result<Unit>
 
     suspend fun loadAllGoals(): Result<Unit>
-
-    fun completeGoal(goalId: String)
 
     suspend fun loadYesterdayDailyChallenges(): Result<Unit>
 

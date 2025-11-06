@@ -20,7 +20,6 @@ object GoalsTestFactory {
     )
 
     fun validGoalsListState(
-        date: String = "2025-01-01",
         goals: List<GoalState> =
             listOf(
                 validGoalState(id = "1", objective = "Exercise for 30 minutes"),
@@ -30,7 +29,6 @@ object GoalsTestFactory {
         isLoading: Boolean = false,
         error: String? = null,
     ) = GoalsListState(
-        date = date,
         goals = goals,
         isLoading = isLoading,
         error = error,

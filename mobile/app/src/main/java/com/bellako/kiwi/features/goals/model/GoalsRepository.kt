@@ -15,9 +15,14 @@ class GoalsRepository(
             api.createGoals(dto)
         }
 
-    suspend fun updateGoal(dto: GoalDTO): Result<GoalDTO> =
+    suspend fun completeGoal(goalId: String): Result<GoalDTO> =
         runCatching {
-            api.updateGoal(dto)
+            api.completeGoal(goalId)
+        }
+
+    suspend fun uncompleteGoal(goalId: String): Result<GoalDTO> =
+        runCatching {
+            api.uncompleteGoal(goalId)
         }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -29,5 +34,10 @@ class GoalsRepository(
     suspend fun getAllGoals(): Result<List<GoalsListDTO>> =
         runCatching {
             api.getAllGoals()
+        }
+
+    suspend fun getGoalsToReview(): Result<List<GoalsListDTO>> =
+        runCatching {
+            api.getGoalsToReview()
         }
 }
