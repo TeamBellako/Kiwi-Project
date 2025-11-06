@@ -24,4 +24,13 @@ public class GoalExceptionHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(createErrorResponseBody(ex.getMessage()));
     }
+
+    @ExceptionHandler(GoalUnauthorizedException.class)
+    public ResponseEntity<Map<String, String>> handleGoalUnauthorized(GoalUnauthorizedException ex) {
+        logger.error("Goal unauthorized access: {}", ex.getMessage(), ex);
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(createErrorResponseBody(ex.getMessage()));
+    }
 }
