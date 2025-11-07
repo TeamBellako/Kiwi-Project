@@ -22,7 +22,14 @@ public class GoalPersistence {
     private String id;
 
     @Column(name = "objective", nullable = false)
-    private String objective;
+    private Long objective;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private GoalType type;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)

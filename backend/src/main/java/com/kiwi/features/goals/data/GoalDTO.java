@@ -11,7 +11,9 @@ import lombok.*;
 @ToString
 public class GoalDTO {
     private String id;
-    private String objective;
+    private Long objective;
+    private String description;
+    private String type;
     private String category;
     private String status;
     private Integer points;

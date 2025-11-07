@@ -96,7 +96,7 @@ fun YesterdayGoalsModal(viewModel: IGoalsViewModel) {
                                 Kiwi_Spacer()
                                 Kiwi_Label1(
                                     KiwiTextArguments(
-                                        text = currentGoal.objective,
+                                        text = currentGoal.description,
                                         color = kiwiColors.colorF,
                                     ),
                                 )

@@ -7,13 +7,17 @@ import com.bellako.kiwi.features.goals.data.YesterdayGoalsState
 object GoalsTestFactory {
     fun validGoalState(
         id: String = "goal1",
-        objective: String = "Exercise for 30 minutes",
+        objective: Long = 30L,
+        description: String = "Complete 30 minutes of physical exercise",
+        type: String = "EXERCISE",
         category: String = "DAILY_CHALLENGES",
         status: String = "REVIEW",
         points: Int = 10,
     ) = GoalState(
         id = id,
         objective = objective,
+        description = description,
+        type = type,
         category = category,
         status = status,
         points = points,
@@ -22,9 +26,9 @@ object GoalsTestFactory {
     fun validGoalsListState(
         goals: List<GoalState> =
             listOf(
-                validGoalState(id = "1", objective = "Exercise for 30 minutes"),
-                validGoalState(id = "2", objective = "Read for 20 minutes"),
-                validGoalState(id = "3", objective = "Meditate for 10 minutes"),
+                validGoalState(id = "1", description = "Exercise for 30 minutes"),
+                validGoalState(id = "2", description = "Read for 20 minutes"),
+                validGoalState(id = "3", description = "Meditate for 10 minutes"),
             ),
         isLoading: Boolean = false,
         error: String? = null,
@@ -37,9 +41,9 @@ object GoalsTestFactory {
     fun validYesterdayGoalsState(
         goals: List<GoalState> =
             listOf(
-                validGoalState(id = "1", objective = "Exercise for 30 minutes"),
-                validGoalState(id = "2", objective = "Read for 20 minutes"),
-                validGoalState(id = "3", objective = "Meditate for 10 minutes"),
+                validGoalState(id = "1", description = "Exercise for 30 minutes"),
+                validGoalState(id = "2", description = "Read for 20 minutes"),
+                validGoalState(id = "3", description = "Meditate for 10 minutes"),
             ),
         currentGoalIndex: Int = 0,
         isVisible: Boolean = true,
