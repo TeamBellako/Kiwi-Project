@@ -41,7 +41,7 @@ public class NodesService {
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
         UserNodeStatusPersistence userStatus = userNodeStatusRepository
-                .findByUserIdAndNodeId(userId, node.getId())
+                .findByIdUserIdAndIdNodeId(userId, node.getId())
                 .orElse(null);
 
         if (userStatus != null) {
@@ -59,7 +59,7 @@ public class NodesService {
 
         return nodes.stream().map(n -> {
             UserNodeStatusPersistence userStatus = userNodeStatusRepository
-                    .findByUserIdAndNodeId(userId, n.getId())
+                    .findByIdUserIdAndIdNodeId(userId, n.getId())
                     .orElse(null);
 
             NodesDomain domain = NodesDomainFactory.create(n, userStatus);
@@ -73,7 +73,7 @@ public class NodesService {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
-        if (userNodeStatusRepository.findByUserIdAndNodeId(userId, nodeId).isPresent()) {
+        if (userNodeStatusRepository.findByIdUserIdAndIdNodeId(userId, nodeId).isPresent()) {
             return null;
         }
 
@@ -91,7 +91,7 @@ public class NodesService {
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
         UserNodeStatusPersistence current = userNodeStatusRepository
-                .findByUserIdAndNodeId(userId, nodeId)
+                .findByIdUserIdAndIdNodeId(userId, nodeId)
                 .orElseThrow(() -> new NodeLockedException(nodeId));
 
         NodesDomain domain = NodesDataMapper.toDomain(node, current);
@@ -109,7 +109,7 @@ public class NodesService {
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
         UserNodeStatusPersistence current = userNodeStatusRepository
-                .findByUserIdAndNodeId(userId, nodeId)
+                .findByIdUserIdAndIdNodeId(userId, nodeId)
                 .orElseThrow(() -> new NodeLockedException(nodeId));
 
         NodesDomain domain = NodesDataMapper.toDomain(node, current);

@@ -17,7 +17,7 @@ public class UserNodeStatusTestRepositoryInMemory implements UserNodeStatusRepos
     private final Map<UserNodeStatusKey, UserNodeStatusPersistence> store = new HashMap<>();
 
     @Override
-    public Optional<UserNodeStatusPersistence> findByUserIdAndNodeId(int userId, int nodeId) {
+    public Optional<UserNodeStatusPersistence> findByIdUserIdAndIdNodeId(int userId, int nodeId) {
         return Optional.ofNullable(store.get(new UserNodeStatusKey(userId, nodeId)));
     }
 
@@ -174,4 +174,6 @@ public class UserNodeStatusTestRepositoryInMemory implements UserNodeStatusRepos
     public Page<UserNodeStatusPersistence> findAll(Pageable pageable) {
         return null;
     }
+
+
 }
