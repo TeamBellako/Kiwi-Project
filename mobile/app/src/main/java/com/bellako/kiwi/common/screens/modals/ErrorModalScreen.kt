@@ -46,7 +46,7 @@ fun ErrorModalScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(LocalKiwiColors.current.color2),
         contentAlignment = Alignment.Center,
     ) {
         ErrorModalLayout(
@@ -92,7 +92,7 @@ private fun ErrorModalLayout(
         Kiwi_H2(
             KiwiTextArguments(
                 message,
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.colorF,
                 textAlign = TextAlign.Center,
                 bold = true,
             ),
@@ -104,7 +104,7 @@ private fun ErrorModalLayout(
             KiwiTextArguments(
                 subMessage,
                 TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline,
+                color = kiwiColors.colorF1,
                 modifier =
                     Modifier
                         .testTag(CommonTestTags.ERROR_MODAL),
@@ -118,7 +118,8 @@ private fun ErrorModalLayout(
                 textArguments =
                     KiwiTextArguments(
                         buttonMessage,
-                        color = kiwiColors.color6,
+                        color = kiwiColors.color7,
+                        bold = true,
                     ),
                 onClick = onButtonClick,
                 color = kiwiColors.color5A,

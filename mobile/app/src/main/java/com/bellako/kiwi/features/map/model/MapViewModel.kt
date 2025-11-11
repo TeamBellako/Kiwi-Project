@@ -30,7 +30,6 @@ class MapViewModel
         private var initialScale: Float = 0f
         private var minScale: Float = 0f
         private var maxScale: Float = 0f
-        private var initialPosition: Offset = Offset(0f, 0f)
         private var dragLimitFactor: Float = 0f
 
         private val _state = MutableStateFlow(MapState(scale = initialScale))
@@ -48,7 +47,6 @@ class MapViewModel
             initialScale: Float,
             minScale: Float,
             maxScale: Float,
-            initialPosition: Offset,
             dragLimitFactor: Float,
             mapWidthPx: Float,
             mapHeightPx: Float,
@@ -56,32 +54,24 @@ class MapViewModel
             viewportHeightPx: Float,
         ) {
             this.initialScale = initialScale
-            _state.value = _state.value.copy(scale = this.initialScale)
-            _state.value = _state.value.copy(scaleBase = viewportHeightPx / viewportWidthPx)
-
             this.minScale = minScale
             this.maxScale = maxScale
-            this.initialPosition = initialPosition
             this.dragLimitFactor = dragLimitFactor
 
-            _state.value = _state.value.copy(viewportWidthPx = viewportWidthPx)
-            _state.value = _state.value.copy(viewportHeightPx = viewportHeightPx)
-            _state.value = _state.value.copy(mapWidthPx = mapWidthPx * (viewportHeightPx / mapWidthPx))
-            _state.value = _state.value.copy(mapHeightPx = mapHeightPx * (viewportHeightPx / mapWidthPx))
+            val scaledMapWidth = mapWidthPx * (viewportHeightPx / mapWidthPx)
+            val scaledMapHeight = mapHeightPx * (viewportHeightPx / mapWidthPx)
 
-            setInitialPositionScale()
+            _state.value =
+                _state.value.copy(
+                    scale = initialScale,
+                    scaleBase = viewportHeightPx / viewportWidthPx,
+                    viewportWidthPx = viewportWidthPx,
+                    viewportHeightPx = viewportHeightPx,
+                    mapWidthPx = scaledMapWidth,
+                    mapHeightPx = scaledMapHeight,
+                )
+
             updatePreviousState()
-        }
-
-        private fun setInitialPositionScale() {
-            setScale(initialScale)
-            setOffset(
-                Offset(
-                    -_state.value.mapWidthPx * initialPosition.x.coerceIn(-1f, 1f),
-                    -_state.value.mapHeightPx * initialPosition.y.coerceIn(-1f, 1f),
-                ),
-            )
-            updateScale(1f, Offset(0f, 0f))
         }
 
         private fun setScale(newScale: Float) {

@@ -7,10 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,8 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.analytics.FirebaseEventNames
-import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -41,6 +42,8 @@ import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
+import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
@@ -57,8 +60,6 @@ import com.bellako.kiwi.ui.getScreenWidth
 /**
  * @param minZoom how small (zoom out) the map can be, considering 1 the full map on screen
  * @param maxZoom how big (zoom in) the map can be, considering 1 the full map on screen
- * @param initialZoom (minZoom..maxZoom)
- * @param initialPosition (-1,1) relative to the center of the map
  * @param dragLimitFactor (0,1) padding for the map limit
  * @param mapResourceId image to show as the map
  * @param title
@@ -66,30 +67,38 @@ import com.bellako.kiwi.ui.getScreenWidth
  */
 @Composable
 fun MapScreen(
-    minZoom: Float = 1.5f,
-    maxZoom: Float = 6f,
-    initialZoom: Float = 2f,
-    initialPosition: Offset = @Suppress("MagicNumber") Offset(-0.4f, -0.4f),
+    maxZoom: Float = 8f,
     dragLimitFactor: Float = 1f,
     mapResourceId: Int = R.drawable.map_hd,
     title: String = "WORLD MAP",
-    viewModel: MapViewModel? = null,
 ) {
     val kiwiColors = LocalKiwiColors.current
-    val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
+    val mapViewModel = hiltViewModel<MapViewModel>()
     val density = LocalDensity.current
     val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
+    val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
+
+    @Suppress("MagicNumber")
+    val viewportHeightPx =
+        with(density) { getScreenHeight().dp.toPx() } * 0.85f
+
+    val scaledMapHeight = imageBitmap.height * (viewportHeightPx / imageBitmap.width)
+    val minZoom = viewportHeightPx / scaledMapHeight
+
+    val nodesViewModel = hiltViewModel<NodesViewModel>()
+    LaunchedEffect(Unit) {
+        nodesViewModel.loadNodes()
+    }
 
     mapViewModel.setParameters(
         minScale = minZoom,
         maxScale = maxZoom,
-        initialScale = initialZoom,
-        initialPosition = initialPosition,
+        initialScale = minZoom,
         dragLimitFactor = dragLimitFactor,
         mapWidthPx = imageBitmap.width.toFloat(),
         mapHeightPx = imageBitmap.height.toFloat(),
-        viewportWidthPx = with(density) { getScreenWidth().dp.toPx() },
-        viewportHeightPx = with(density) { getScreenHeight(withoutInsetTop = true, withoutInsetBottom = true).dp.toPx() },
+        viewportWidthPx = viewportWidthPx,
+        viewportHeightPx = viewportHeightPx,
     )
 
     Column(
@@ -112,6 +121,7 @@ fun MapScreen(
         InteractiveMap(
             mapResourceId = mapResourceId,
             viewModel = mapViewModel,
+            nodesViewModel = nodesViewModel,
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -121,9 +131,11 @@ fun MapScreen(
 private fun InteractiveMap(
     mapResourceId: Int,
     viewModel: MapViewModel,
+    nodesViewModel: NodesViewModel,
     modifier: Modifier = Modifier,
 ) {
     val mapState by viewModel.state.collectAsState()
+    val nodes by nodesViewModel.nodes.collectAsState()
 
     Box(
         modifier =
@@ -137,16 +149,6 @@ private fun InteractiveMap(
                         },
                         onGestureEnd = {
                             viewModel.startFling()
-
-                            if (viewModel.previousState.value.scale != viewModel.state.value.scale) {
-                                firebaseLogEvent(
-                                    FirebaseEventNames.MAP_PERFORM_ZOOM,
-                                    mapOf(
-                                        "scale_old" to viewModel.previousState.value.scale,
-                                        "scale_new" to viewModel.state.value.scale,
-                                    ),
-                                )
-                            }
                             viewModel.updatePreviousState()
                         },
                     )
@@ -166,6 +168,13 @@ private fun InteractiveMap(
                         translationY = mapState.offset.y,
                     ),
         )
+
+        nodes.forEach { node ->
+            NodeOnMap(
+                node = node,
+                mapState = mapState,
+            )
+        }
     }
 }
 

@@ -105,13 +105,13 @@ fun PermissionsModalScreen(
 @Composable
 private fun PermissionRequestLayout(context: Context) {
 
-    val kiwicolors = LocalKiwiColors.current
+    val kiwiColors = LocalKiwiColors.current
 
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(kiwiColors.color2)
                 .testTag(CommonTestTags.PERMISSIONS_REQUEST_MODAL),
         contentAlignment = Alignment.Center,
     ) {
@@ -132,7 +132,7 @@ private fun PermissionRequestLayout(context: Context) {
             Icon(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = "Error icon",
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = kiwiColors.color8A,
                 modifier =
                     Modifier
                         .size(getResponsiveSizeHeight(50.dp)),
@@ -143,7 +143,7 @@ private fun PermissionRequestLayout(context: Context) {
             Kiwi_H2(
                 KiwiTextArguments(
                     "Permissions Required",
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = kiwiColors.colorF,
                     textAlign = TextAlign.Center,
                     bold = true,
                 ),
@@ -155,7 +155,7 @@ private fun PermissionRequestLayout(context: Context) {
                 KiwiTextArguments(
                     "GrowTale requires permissions to access metrics such as apps usage time.",
                     TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = kiwiColors.colorF1,
                 ),
             )
 
@@ -165,7 +165,7 @@ private fun PermissionRequestLayout(context: Context) {
                 KiwiTextArguments(
                     "Please click below to activate them before proceeding.",
                     TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = kiwiColors.colorF1,
                 ),
             )
 
@@ -175,11 +175,11 @@ private fun PermissionRequestLayout(context: Context) {
                 textArguments =
                     KiwiTextArguments(
                         "ENABLE APP USAGE ACCESS",
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color7,
                         textAlign = TextAlign.Center,
                         bold = true,
                     ),
-                color = kiwicolors.color5A,
+                color = kiwiColors.color5A,
                 onClick = {
                     context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                 },
