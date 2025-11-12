@@ -3,7 +3,6 @@ package com.kiwi.nodes;
 import com.kiwi.features.nodes.controllers.NodesRepository;
 import com.kiwi.features.nodes.data.NodesPersistence;
 import com.kiwi.features.nodes.data.UserNodeStatusPersistence;
-import com.kiwi.features.users.data.UsersPersistence;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +14,7 @@ import java.util.function.Function;
 
 public class NodesTestRepositoryInMemory implements NodesRepository {
 
-    private final Map<Long, NodesPersistence> nodeStore = new HashMap<>();
+    private final Map<Integer, NodesPersistence> nodeStore = new HashMap<>();
     private final Map<String, UserNodeStatusPersistence> statusStore = new HashMap<>();
 
     private long idSequence = 1;
@@ -77,7 +76,7 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
 
     }
 
-    public Optional<NodesPersistence> findById(Long id) {
+    public Optional<NodesPersistence> findById(int id) {
         return Optional.ofNullable(nodeStore.get(id));
     }
 
@@ -88,7 +87,7 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     // ---- USER NODE STATUS ----
-    public Optional<UserNodeStatusPersistence> findUserStatus(Long userId, Long nodeId) {
+    public Optional<UserNodeStatusPersistence> findUserStatus(int userId, int nodeId) {
         return Optional.ofNullable(statusStore.get(userId + "-" + nodeId));
     }
 
@@ -190,5 +189,12 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     @Override
     public Page<NodesPersistence> findAll(Pageable pageable) {
         return null;
+    }
+
+    @Override
+    public List<NodesPersistence> findAllByNodeOrder(int nodeOrder) {
+        return nodeStore.values().stream()
+                .filter(node -> node.getNodeOrder() == nodeOrder)
+                .toList();
     }
 }

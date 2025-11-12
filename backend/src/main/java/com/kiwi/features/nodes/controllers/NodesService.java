@@ -29,31 +29,6 @@ public class NodesService {
         this.progressService = progressService;
     }
 
-    public NodesDTO getNode(int nodeId) {
-        NodesPersistence node = nodesRepository.findById(nodeId)
-                .orElseThrow(() -> new NodeNotFoundException(nodeId));
-        return NodesDataMapper.toDTO(node, null);
-
-    }
-
-    public NodesDTO getNodeForUser(int userId, int nodeId) {
-        NodesPersistence node = nodesRepository.findById(nodeId)
-                .orElseThrow(() -> new NodeNotFoundException(nodeId));
-
-        UserNodeStatusPersistence userStatus = userNodeStatusRepository
-                .findByIdUserIdAndIdNodeId(userId, node.getId())
-                .orElse(null);
-
-        if (userStatus != null) {
-            NodesDomain domain = NodesDomainFactory.create(node, userStatus);
-            return NodesDataMapper.toDTO(domain);
-        }
-        else {
-            return NodesDataMapper.toDTO(node, null);
-        }
-
-    }
-
     public List<NodesDTO> getNodesForUser(@NotNull int userId) {
         List<NodesPersistence> nodes = nodesRepository.findAll();
 
@@ -69,7 +44,7 @@ public class NodesService {
     }
 
     @Transactional
-    public NodesDTO markNextNodeAsLocked(int userId, int nodeId) {
+    public List<NodesDTO> markNextNodesAsLocked(int userId, int nodeId) {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
@@ -77,12 +52,19 @@ public class NodesService {
             return null;
         }
 
-        NodesDomain domain = NodesDataMapper.toDomain(node, null);
-        NodesDomain locked = progressService.lock(domain);
+        int nextOrder = node.getNodeOrder() + 1;
 
-        UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
-        userNodeStatusRepository.save(persistence);
-        return NodesDataMapper.toDTO(node, persistence);
+        List<NodesPersistence> nodes = nodesRepository.findAllByNodeOrder(nextOrder);
+
+        return nodes.stream().map(n -> {
+            NodesDomain domain = NodesDataMapper.toDomain(n, null);
+            NodesDomain locked = progressService.lock(domain);
+
+            UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
+            userNodeStatusRepository.save(persistence);
+            return NodesDataMapper.toDTO(n, persistence);
+
+        }).collect(Collectors.toList());
     }
 
     @Transactional

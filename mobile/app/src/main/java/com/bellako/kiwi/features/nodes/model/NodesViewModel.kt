@@ -27,12 +27,7 @@ class NodesViewModel
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val nodesList =
-                        repository.getNodes().map {
-                            val (x, y) = getNodePositionById(it.id)
-                            it.copy(posX = x, posY = y)
-                        }
-                    _nodes.value = nodesList
+                    _nodes.value = repository.getNodes()
                     setUiState(UIState.Idle)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -43,32 +38,27 @@ class NodesViewModel
             }
         }
 
-        fun unlockNode(nodeId: Int) = updateNodeSafe { repository.unlockNode(nodeId) }
+        fun unlockNode(nodeId: Int) = updateNodesSafe { listOf(repository.unlockNode(nodeId)) }
 
-        fun completeNode(nodeId: Int, nodeOrder: Int) {
-            updateNodeSafe { repository.completeNode(nodeId) }
-            updateNodeSafe { repository.markNextNodeAsLocked(nodeId + 1) } // AQUI DEVOLVERA LIST Y TENDRE QUE CAMBIAR LA FUNCION
-            // ESTO NO ESTÁ HACIENDO LO QUE YO QUIERO, AHI HABRIA QUE PASAR EL ID DEL NODO DE AHORA
-            // Y QUE BUSCASE TODOS LOS NODOS DEL SIGUIENTE ORDER Y LOS DESBLOQUEE
+        fun completeNode(nodeId: Int) {
+            updateNodesSafe { listOf(repository.completeNode(nodeId)) }
+            updateNodesSafe { repository.markNextNodesAsLocked(nodeId) }
         }
 
         // -----------------------------------------------------------------------------------------
 
-        private fun updateNodeSafe(block: suspend () -> NodesDomain) {
+        private fun updateNodesSafe(block: suspend () -> List<NodesDomain>) {
             viewModelScope.launch {
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val updatedNode = block()
-                    val (x, y) = getNodePositionById(updatedNode.id) // TODO HACK WARRO MIENTRAS NO EXISTE LA POS EN EL BACKEND
+                    val updatedNodes = block()
+
                     _nodes.value =
-                        _nodes.value.map {
-                            if (it.id == updatedNode.id) {
-                                updatedNode.copy(posX = x, posY = y)
-                            } else {
-                                it
-                            }
+                        _nodes.value.map { n ->
+                            updatedNodes.find { it.id == n.id } ?: n
                         }
+
                     setUiState(UIState.Success(Unit))
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -78,14 +68,4 @@ class NodesViewModel
                 }
             }
         }
-
-        // -----------------------------------------------------------------------------------------
-
-        private fun getNodePositionById(id: Int): Pair<Float, Float> =
-            when (id) {
-                1 -> 0.5f to 0.6f
-                2 -> 0.25f to 0.25f
-                3 -> 0.5f to 0.5f
-                else -> 0.5f to 0.90f
-            }
     }

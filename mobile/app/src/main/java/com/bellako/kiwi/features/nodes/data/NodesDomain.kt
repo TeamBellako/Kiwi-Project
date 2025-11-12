@@ -2,11 +2,11 @@ package com.bellako.kiwi.features.nodes.data
 
 data class NodesDomain(
     val id: Int,
-    val order: Int,
+    val nodeOrder: Int,
     val status: NodeStatus,
     val price: Int? = null,
-    val posX: Float,
-    val posY: Float,
+    val cord_x: Float,
+    val cord_y: Float,
 )
 
 enum class NodeStatus {
@@ -14,9 +14,4 @@ enum class NodeStatus {
     LOCKED,
     OPEN,
     COMPLETED,
-    ;
-
-    fun isCompleted() = this == COMPLETED
-
-    fun isAccessible() = this != INACCESSIBLE
 }

@@ -77,9 +77,12 @@ CREATE TABLE IF NOT EXISTS personality (
 
 -- Create nodes table
 CREATE TABLE nodes (
-  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
   node_order INT NOT NULL,
-  price INT DEFAULT NULL
+  price INT NOT NULL,
+  cord_x FLOAT  NOT NULL,
+  cord_y FLOAT NOT NULL ,
+  CHECK (cord_x >= 0.0 & cord_x <= 1.0 & cord_y >= 0.0 & cord_y <= 1.0)
 );
 
 -- Create user_nodes_status table
@@ -88,8 +91,8 @@ CREATE TABLE user_node_status (
   node_id BIGINT NOT NULL,
   status ENUM('LOCKED', 'OPEN', 'COMPLETED') NOT NULL,
   PRIMARY KEY (user_id, node_id),
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (node_id) REFERENCES nodes(id)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
 

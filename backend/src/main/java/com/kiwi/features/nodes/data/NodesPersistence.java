@@ -13,8 +13,14 @@ public class NodesPersistence {
     private int id;
 
     @Column(name = "node_order", nullable = false)
-    private int order;
+    private int nodeOrder;
 
-    @Column(name = "price")
-    private Integer price;
+    @Column(name = "price", nullable = false)
+    private int price;
+
+    @Column(name = "cord_x", nullable = false)
+    private int cord_x;
+
+    @Column(name = "cord_y", nullable = false)
+    private int cord_y;
 }

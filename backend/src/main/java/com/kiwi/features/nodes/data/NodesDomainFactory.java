@@ -9,9 +9,11 @@ public class NodesDomainFactory {
 
         return new NodesDomain(
                 node.getId(),
-                node.getOrder(),
+                node.getNodeOrder(),
                 status,
-                node.getPrice()
+                node.getPrice(),
+                node.getCord_x(),
+                node.getCord_y()
         );
     }
 }

@@ -5,12 +5,4 @@ public enum NodeStatus {
     LOCKED,
     OPEN,
     COMPLETED;
-
-    public boolean isCompleted() {
-        return this == COMPLETED;
-    }
-
-    public boolean isUnlocked() {
-        return this == LOCKED || this == OPEN || this == COMPLETED;
-    }
 }

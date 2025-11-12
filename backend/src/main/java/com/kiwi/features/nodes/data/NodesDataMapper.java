@@ -10,18 +10,22 @@ public class NodesDataMapper {
     public static NodesDTO toDTO(NodesDomain node) {
         return new NodesDTO(
                 node.getId(),
-                node.getOrder(),
+                node.getNodeOrder(),
                 node.getStatus().name(),
-                node.getPrice()
+                node.getPrice(),
+                node.getCord_x(),
+                node.getCord_y()
         );
     }
 
     public static NodesDTO toDTO(NodesPersistence node, UserNodeStatusPersistence status) {
         return new NodesDTO(
                 node.getId(),
-                node.getOrder(),
-                status != null ? status.getStatus().name() : null,
-                node.getPrice()
+                node.getNodeOrder(),
+                status.getStatus().name(),
+                node.getPrice(),
+                node.getCord_x(),
+                node.getCord_y()
         );
     }
 

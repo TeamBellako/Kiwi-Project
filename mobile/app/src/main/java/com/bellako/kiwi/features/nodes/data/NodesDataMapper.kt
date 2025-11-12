@@ -7,20 +7,20 @@ object NodesDataMapper {
     fun toDomain(dto: NodesDTO): NodesDomain =
         NodesDomain(
             id = dto.id,
-            order = dto.order,
+            nodeOrder = dto.nodeOrder,
             status = NodeStatus.valueOf(dto.status),
             price = dto.price,
-            posX = dto.posX,
-            posY = dto.posY,
+            cord_x = dto.cord_x,
+            cord_y = dto.cord_y,
         )
 
     fun toDTO(domain: NodesDomain): NodesDTO =
         NodesDTO(
             id = domain.id,
-            order = domain.order,
+            nodeOrder = domain.nodeOrder,
             status = domain.status.name,
             price = domain.price,
-            posX = domain.posX,
-            posY = domain.posY,
+            cord_x = domain.cord_x,
+            cord_y = domain.cord_y,
         )
 }

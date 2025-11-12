@@ -48,34 +48,15 @@ public class NodesControllerTests {
 
     private final String baseAPIUrl = "/api/nodes";
 
-    // ✅ GET node
-    @Test
-    @WithMockUser(username = "test@test.com")
-    public void getNode_valid() throws Exception {
-        NodesDTO dto = dtoNode(1, 1, NodeStatus.OPEN, 100 );
 
-        when(nodesService.getNode(1)).thenReturn(dto);
-
-        mockMvc.perform(get(baseAPIUrl + "/1"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = "test@test.com")
-    public void getNode_notFound() throws Exception {
-        when(nodesService.getNode(99)).thenThrow(new NodeNotFoundException(99));
-
-        mockMvc.perform(get(baseAPIUrl + "/99"))
-                .andExpect(status().isNotFound());
-    }
 
     // ✅ LIST nodes
     @Test
     @WithMockUser(username = "test@test.com")
     public void listNodes_valid() throws Exception {
         when(nodesService.getNodesForUser(1)).thenReturn(List.of(
-                dtoNode(1, 1, NodeStatus.OPEN, 100),
-                dtoNode(2, 2, NodeStatus.LOCKED, 120)
+                dtoNode(1, 1, NodeStatus.OPEN, 100, 0.5f,0.5f),
+                dtoNode(2, 2, NodeStatus.LOCKED, 120, 0.7f,0.25f)
         ));
 
         mockMvc.perform(get(baseAPIUrl + "?userId=1"))
@@ -87,7 +68,7 @@ public class NodesControllerTests {
     @WithMockUser(username = "test@test.com")
     public void unlockNode_valid() throws Exception {
         when(nodesService.unlockNode(1, 2))
-                .thenReturn(dtoNode(2, 2, NodeStatus.OPEN, 120));
+                .thenReturn(dtoNode(2, 2, NodeStatus.OPEN, 120, 0.5f,0.5f));
 
         mockMvc.perform(
                 getPostRequestBuilder(baseAPIUrl + "/2/unlock", userIdDTO(1))
@@ -110,7 +91,7 @@ public class NodesControllerTests {
     @WithMockUser(username = "test@test.com")
     public void completeNode_valid() throws Exception {
         when(nodesService.completeNode(1, 2))
-                .thenReturn(dtoNode(2, 2, NodeStatus.COMPLETED, 120));
+                .thenReturn(dtoNode(2, 2, NodeStatus.COMPLETED, 120, 0.15f,0.25f));
 
         mockMvc.perform(
                 getPostRequestBuilder(baseAPIUrl + "/2/complete", userIdDTO(1))

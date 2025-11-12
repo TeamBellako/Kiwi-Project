@@ -171,7 +171,7 @@ private fun InteractiveMap(
                 isSelected = node.id == mapViewModel.getSelectedNode(),
                 onNodeClick = { x, y, id -> mapViewModel.selectNode(id, x, y) },
                 onUnlockNode = { id -> nodesViewModel.unlockNode(id) },
-                onCompleteNode = { id, order -> nodesViewModel.completeNode(id, order) },
+                onCompleteNode = { id -> nodesViewModel.completeNode(id) },
             )
         }
     }

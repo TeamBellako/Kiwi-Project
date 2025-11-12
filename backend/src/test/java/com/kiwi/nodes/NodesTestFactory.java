@@ -9,10 +9,10 @@ import com.kiwi.features.nodes.data.UserNodeStatusKey;
 
 public class NodesTestFactory {
 
-    public static NodesPersistence persistenceNode(int id, int order, int price) {
+    public static NodesPersistence persistenceNode(int id, int nodeOrder, int price) {
         NodesPersistence n = new NodesPersistence();
         n.setId(id);
-        n.setOrder(order);
+        n.setNodeOrder(nodeOrder);
         n.setPrice(price);
         return n;
     }
@@ -25,16 +25,16 @@ public class NodesTestFactory {
         return s;
     }
 
-    public static NodesDomain domainNode(int id, int order, NodeStatus status, int price) {
-        return new NodesDomain(id, order, status, price);
+    public static NodesDomain domainNode(int id, int nodeOrder, NodeStatus status, int price, float cord_x, float cord_y) {
+        return new NodesDomain(id, nodeOrder, status, price, cord_x, cord_y);
     }
 
     public static Object userIdDTO(int id) {
         return new Object() { public int userId = id; };
     }
 
-    public static NodesDTO dtoNode(int id, int order, NodeStatus status, int price) {
-        return new NodesDTO(id, order, status.name(), price);
+    public static NodesDTO dtoNode(int id, int nodeOrder, NodeStatus status, int price, float cord_x, float cord_y) {
+        return new NodesDTO(id, nodeOrder, status.name(), price, cord_x, cord_y);
     }
 
     // Helpers para tests

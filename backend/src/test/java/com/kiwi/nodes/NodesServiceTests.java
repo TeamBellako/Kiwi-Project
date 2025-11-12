@@ -20,19 +20,6 @@ public class NodesServiceTests {
     private final NodesService service = new NodesService(nodeRepo, statusRepo, progress);
 
     @Test
-    public void getExistingNode() {
-        nodeRepo.save(persistenceNode(1, 1, 100));
-
-        var result = service.getNode(1);
-        assertEquals(1L, result.getId());
-    }
-
-    @Test(expected = NodeNotFoundException.class)
-    public void getNonExistingNode() {
-        service.getNode(99);
-    }
-
-    @Test
     public void getNodesForUser() {
         nodeRepo.save(persistenceNode(1, 1, 100));
         nodeRepo.save(persistenceNode(2, 2, 200));

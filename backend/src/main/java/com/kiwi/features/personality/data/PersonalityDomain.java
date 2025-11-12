@@ -1,9 +1,14 @@
 package com.kiwi.features.personality.data;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Setter
+@Getter
 public class PersonalityDomain {
     private String realName;
     private String knightName;
@@ -28,54 +33,6 @@ public class PersonalityDomain {
         this.build = build;
         this.goodApps = goodApps;
         this.badApps = badApps;
-        this.neutralApps = neutralApps;
-    }
-
-    public String getRealName() {
-        return realName;
-    }
-
-    public void setRealName(String realName) {
-        this.realName = realName;
-    }
-
-    public String getKnightName() {
-        return knightName;
-    }
-
-    public void setKnightName(String knightName) {
-        this.knightName = knightName;
-    }
-
-    public String getBuild() {
-        return build;
-    }
-
-    public void setBuild(String build) {
-        this.build = build;
-    }
-
-    public List<String> getGoodApps() {
-        return goodApps;
-    }
-
-    public void setGoodApps(List<String> goodApps) {
-        this.goodApps = goodApps;
-    }
-
-    public List<String> getBadApps() {
-        return badApps;
-    }
-
-    public void setBadApps(List<String> badApps) {
-        this.badApps = badApps;
-    }
-
-    public List<String> getNeutralApps() {
-        return neutralApps;
-    }
-
-    public void setNeutralApps(List<String> neutralApps) {
         this.neutralApps = neutralApps;
     }
 

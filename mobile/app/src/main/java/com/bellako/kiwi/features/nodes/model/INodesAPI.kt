@@ -25,7 +25,7 @@ interface INodesAPI {
     ): NodesDTO
 
     @POST("api/nodes/{nodeId}/lock-next")
-    suspend fun markNextNodeAsLocked(
+    suspend fun markNextNodesAsLocked(
         @Path("nodeId") nodeId: Int,
-    ): NodesDTO
+    ): List<NodesDTO>
 }
