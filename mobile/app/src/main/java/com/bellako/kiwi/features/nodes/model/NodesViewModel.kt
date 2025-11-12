@@ -33,7 +33,7 @@ class NodesViewModel
                             it.copy(posX = x, posY = y)
                         }
                     _nodes.value = nodesList
-                    setUiState(UIState.Idle) // usamos Unit, igual que en PersonalityViewModel
+                    setUiState(UIState.Idle)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     setUiState(mapExceptionToUIState(e))
@@ -45,9 +45,12 @@ class NodesViewModel
 
         fun unlockNode(nodeId: Int) = updateNodeSafe { repository.unlockNode(nodeId) }
 
-        fun completeNode(nodeId: Int) = updateNodeSafe { repository.completeNode(nodeId) }
-
-        fun lockNextNode(nodeId: Int) = updateNodeSafe { repository.markNextNodeAsLocked(nodeId) }
+        fun completeNode(nodeId: Int, nodeOrder: Int) {
+            updateNodeSafe { repository.completeNode(nodeId) }
+            updateNodeSafe { repository.markNextNodeAsLocked(nodeId + 1) } // AQUI DEVOLVERA LIST Y TENDRE QUE CAMBIAR LA FUNCION
+            // ESTO NO ESTÁ HACIENDO LO QUE YO QUIERO, AHI HABRIA QUE PASAR EL ID DEL NODO DE AHORA
+            // Y QUE BUSCASE TODOS LOS NODOS DEL SIGUIENTE ORDER Y LOS DESBLOQUEE
+        }
 
         // -----------------------------------------------------------------------------------------
 
@@ -57,8 +60,16 @@ class NodesViewModel
                 setUiState(UIState.Loading)
                 try {
                     val updatedNode = block()
-                    _nodes.value = _nodes.value.map { if (it.id == updatedNode.id) updatedNode else it }
-                    setUiState(UIState.Success(Unit)) // igual que PersonalityViewModel
+                    val (x, y) = getNodePositionById(updatedNode.id) // TODO HACK WARRO MIENTRAS NO EXISTE LA POS EN EL BACKEND
+                    _nodes.value =
+                        _nodes.value.map {
+                            if (it.id == updatedNode.id) {
+                                updatedNode.copy(posX = x, posY = y)
+                            } else {
+                                it
+                            }
+                        }
+                    setUiState(UIState.Success(Unit))
                 } catch (e: Exception) {
                     e.printStackTrace()
                     setUiState(mapExceptionToUIState(e))

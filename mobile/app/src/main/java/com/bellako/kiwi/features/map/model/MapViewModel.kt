@@ -36,6 +36,9 @@ class MapViewModel
         override val state: StateFlow<MapState> = _state.asStateFlow()
         override val previousState = MutableStateFlow(MapState())
 
+        private val _selectedNodeId = MutableStateFlow<Int?>(null)
+        val selectedNodeId: StateFlow<Int?> = _selectedNodeId.asStateFlow()
+
         private var flingJob: Job? = null
         private var flingLastPosition = Offset(0f, 0f)
         private var flingLastTime = 0L
@@ -96,6 +99,7 @@ class MapViewModel
             val newOffset = calculateOffsetForZoom(_state.value, newScale, centroid)
             setScale(newScale)
             setOffset(newOffset)
+            unSelectNode()
         }
 
         override fun updateOffset(delta: Offset) {
@@ -111,10 +115,8 @@ class MapViewModel
         ): Offset {
             val scaleFactor = newScale / state.scale
 
-            // Calculate the position of the centroid relative to the center of the viewport
             val centroidRelativeToCenter = centroid - Offset(state.viewportWidthPx / 2f, state.viewportHeightPx / 2f)
 
-            // Formula: newOffset = oldOffset + (centroidRelativeToCenter * (1 - scaleFactor))
             val offsetDelta = centroidRelativeToCenter * (1f - scaleFactor)
             val newOffset = (state.offset + offsetDelta) * scaleFactor
 
@@ -155,7 +157,7 @@ class MapViewModel
         }
 
         fun startFling() {
-            flingJob?.cancel() // cancel previous sling if any
+            flingJob?.cancel()
             var velocity = flingVelocity
             flingJob =
                 viewModelScope.launch {
@@ -166,5 +168,43 @@ class MapViewModel
                         delay(FRAME_MILLIS)
                     }
                 }
+        }
+
+        fun selectNode(
+            nodeId: Int,
+            nodeX: Float,
+            nodeY: Float,
+        ) {
+            setSelectedNode(nodeId)
+            focusOnNode(nodeX, nodeY)
+        }
+
+        fun unSelectNode() {
+            _selectedNodeId.value = null
+        }
+
+        fun getSelectedNode(): Int? = _selectedNodeId.value
+
+        fun setSelectedNode(nodeId: Int) {
+            _selectedNodeId.value = nodeId
+        }
+
+        fun focusOnNode(
+            nodeX: Float,
+            nodeY: Float,
+        ) {
+            val state = _state.value.copy(scale = maxScale)
+
+            val scaledMapWidth = state.mapWidthPx * state.scale
+            val scaledMapHeight = state.mapHeightPx * state.scale
+
+            val nodePosX = (nodeX - 0.5f) * scaledMapWidth
+            val nodePosY = (0.5f - nodeY) * scaledMapHeight
+
+            val newOffset = Offset(-nodePosX, -nodePosY)
+            val constrainedOffset = calculateConstrainedOffset(newOffset, state)
+
+            _state.value = state.copy(offset = constrainedOffset)
+            updatePreviousState()
         }
     }

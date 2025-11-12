@@ -7,9 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -19,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -58,12 +55,10 @@ import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 
 /**
- * @param minZoom how small (zoom out) the map can be, considering 1 the full map on screen
  * @param maxZoom how big (zoom in) the map can be, considering 1 the full map on screen
  * @param dragLimitFactor (0,1) padding for the map limit
  * @param mapResourceId image to show as the map
  * @param title
- * @param viewModel Optional parameter for testing
  */
 @Composable
 fun MapScreen(
@@ -120,7 +115,7 @@ fun MapScreen(
 
         InteractiveMap(
             mapResourceId = mapResourceId,
-            viewModel = mapViewModel,
+            mapViewModel = mapViewModel,
             nodesViewModel = nodesViewModel,
             modifier = Modifier.fillMaxSize(),
         )
@@ -130,11 +125,11 @@ fun MapScreen(
 @Composable
 private fun InteractiveMap(
     mapResourceId: Int,
-    viewModel: MapViewModel,
+    mapViewModel: MapViewModel,
     nodesViewModel: NodesViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val mapState by viewModel.state.collectAsState()
+    val mapState by mapViewModel.state.collectAsState()
     val nodes by nodesViewModel.nodes.collectAsState()
 
     Box(
@@ -144,12 +139,12 @@ private fun InteractiveMap(
                 .pointerInput(Unit) {
                     detectTransformGesturesAndEnd(
                         onGesture = { centroid, pan, zoom, _ ->
-                            viewModel.updateScale(zoom, centroid)
-                            viewModel.updateOffset(pan)
+                            mapViewModel.updateScale(zoom, centroid)
+                            mapViewModel.updateOffset(pan)
                         },
                         onGestureEnd = {
-                            viewModel.startFling()
-                            viewModel.updatePreviousState()
+                            mapViewModel.startFling()
+                            mapViewModel.updatePreviousState()
                         },
                     )
                 },
@@ -173,6 +168,10 @@ private fun InteractiveMap(
             NodeOnMap(
                 node = node,
                 mapState = mapState,
+                isSelected = node.id == mapViewModel.getSelectedNode(),
+                onNodeClick = { x, y, id -> mapViewModel.selectNode(id, x, y) },
+                onUnlockNode = { id -> nodesViewModel.unlockNode(id) },
+                onCompleteNode = { id, order -> nodesViewModel.completeNode(id, order) },
             )
         }
     }
