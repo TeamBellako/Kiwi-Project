@@ -198,7 +198,10 @@ class MapViewModel
             val scaledMapWidth = state.mapWidthPx * state.scale
             val scaledMapHeight = state.mapHeightPx * state.scale
 
+            @Suppress("MagicNumber")
             val nodePosX = (nodeX - 0.5f) * scaledMapWidth
+
+            @Suppress("MagicNumber")
             val nodePosY = (0.5f - nodeY) * scaledMapHeight
 
             val newOffset = Offset(-nodePosX, -nodePosY)

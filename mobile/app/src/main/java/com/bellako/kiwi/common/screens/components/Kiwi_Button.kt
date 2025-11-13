@@ -94,7 +94,6 @@ fun Kiwi_Button(
         }
     }
 }
-
 @Composable
 fun Kiwi_HoldButton(
     modifier: Modifier = Modifier,
@@ -121,23 +120,80 @@ fun Kiwi_HoldButton(
         label = "holdProgress",
     )
 
+    HandleHoldLogic(
+        isHolding = isHolding,
+        holdDurationMillis = holdDurationMillis,
+        startTime = startTime,
+        onProgressChange = { targetProgress = it },
+        onComplete = {
+            AudioManager.playSFX(context, R.raw.snd_ui_button)
+            onHoldComplete()
+        },
+    )
+
+    HoldButtonContent(
+        modifier = modifier,
+        isEnabled = enabled,
+        onHoldStart = {
+            view.parent?.requestDisallowInterceptTouchEvent(true)
+            isHolding = true
+            startTime = System.currentTimeMillis()
+        },
+        onHoldEnd = {
+            isHolding = false
+            view.parent?.requestDisallowInterceptTouchEvent(false)
+        },
+        color = color,
+        fillColor = fillColor,
+        animatedProgress = animatedProgress,
+        textArguments = textArguments,
+        contentPaddingHorizontal = contentPaddingHorizontal,
+        contentPaddingVertical = contentPaddingVertical,
+        testTag = testTag,
+    )
+}
+
+@Composable
+private fun HandleHoldLogic(
+    isHolding: Boolean,
+    holdDurationMillis: Long,
+    startTime: Long,
+    onProgressChange: (Float) -> Unit,
+    onComplete: () -> Unit,
+) {
     LaunchedEffect(isHolding, startTime) {
         if (isHolding) {
-            while (isActive && isHolding) {
+            while (isActive) {
                 val elapsed = System.currentTimeMillis() - startTime
-                targetProgress = (elapsed.toFloat() / holdDurationMillis).coerceIn(0f, 1f)
-                if (targetProgress >= 1f) {
-                    AudioManager.playSFX(context, R.raw.snd_ui_button)
-                    onHoldComplete()
+                val progress = (elapsed.toFloat() / holdDurationMillis).coerceIn(0f, 1f)
+                onProgressChange(progress)
+                if (progress >= 1f) {
+                    onComplete()
                     break
                 }
+                @Suppress("MagicNumber")
                 delay(16)
             }
         } else {
-            targetProgress = 0f
+            onProgressChange(0f)
         }
     }
+}
 
+@Composable
+private fun HoldButtonContent(
+    modifier: Modifier,
+    isEnabled: Boolean,
+    onHoldStart: () -> Unit,
+    onHoldEnd: () -> Unit,
+    color: Color,
+    fillColor: Color,
+    animatedProgress: Float,
+    textArguments: KiwiTextArguments,
+    contentPaddingHorizontal: Dp,
+    contentPaddingVertical: Dp,
+    testTag: String,
+) {
     Box(
         modifier =
             modifier
@@ -146,38 +202,14 @@ fun Kiwi_HoldButton(
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
                 .background(color)
                 .testTag(testTag)
-                .pointerInput(enabled) {
-                    if (!enabled) return@pointerInput
-                    while (true) {
-                        awaitPointerEventScope {
-                            val down = awaitFirstDown(requireUnconsumed = false)
-                            view.parent?.requestDisallowInterceptTouchEvent(true)
-                            isHolding = true
-                            startTime = System.currentTimeMillis()
-                            while (isHolding) {
-                                val event = awaitPointerEvent()
-
-                                event.changes.forEach { change ->
-                                    if (!change.pressed) {
-                                        isHolding = false
-                                    }
-                                    if (change.changedToDown() || change.changedToUp() || change.positionChanged()) {
-                                        change.consume()
-                                    }
-                                }
-                            }
-
-                            view.parent?.requestDisallowInterceptTouchEvent(false)
-                        }
-                    }
-                },
+                .holdGestureHandler(isEnabled, onHoldStart, onHoldEnd),
     ) {
         Box(
             modifier =
                 Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(animatedProgress)
-                    .background(if (enabled) fillColor else fillColor.copy(alpha = 0.3f)),
+                    .background(if (isEnabled) fillColor else fillColor.copy(alpha = 0.3f)),
         )
 
         Box(
@@ -190,13 +222,33 @@ fun Kiwi_HoldButton(
                     ),
             contentAlignment = Alignment.Center,
         ) {
-            val actualTextArguments =
-                if (enabled) {
-                    textArguments
-                } else {
-                    textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+            val actualTextArgs =
+                if (isEnabled) textArguments
+                else textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+            Kiwi_Label1(actualTextArgs)
+        }
+    }
+}
+
+private fun Modifier.holdGestureHandler(
+    enabled: Boolean,
+    onHoldStart: () -> Unit,
+    onHoldEnd: () -> Unit,
+): Modifier = pointerInput(enabled) {
+    if (!enabled) return@pointerInput
+    while (true) {
+        awaitPointerEventScope {
+            awaitFirstDown(requireUnconsumed = false)
+            onHoldStart()
+            while (true) {
+                val event = awaitPointerEvent()
+                val isPressed = event.changes.any { it.pressed }
+                if (!isPressed) {
+                    onHoldEnd()
+                    break
                 }
-            Kiwi_Label1(actualTextArguments)
+                event.changes.forEach { it.consume() }
+            }
         }
     }
 }

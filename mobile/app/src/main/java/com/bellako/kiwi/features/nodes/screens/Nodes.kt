@@ -69,6 +69,8 @@ fun NodeOnMap(
     onCompleteNode: (Int) -> Unit,
 ) {
     val density = LocalDensity.current
+
+    @Suppress("MagicNumber")
     val scaleSelected = if (isSelected) 1.3f else 1f
 
     val baseNodeSizeDP = getResponsiveSizeHeight(4.dp)
@@ -93,6 +95,8 @@ fun NodeOnMap(
         Node(node, with(density) { scaledNodeSize.toDp() })
     }
 
+    val buttonYPadding = getResponsiveSizeHeight(8.dp)
+
     if (isSelected) {
         Box(
             modifier =
@@ -100,7 +104,7 @@ fun NodeOnMap(
                     .offset {
                         IntOffset(
                             scaledX.roundToInt(),
-                            (scaledY + scaledNodeSize * 1.5f).roundToInt(),
+                            (scaledY + scaledNodeSize + buttonYPadding.toPx()).roundToInt(),
                         )
                     },
         ) {

@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -54,6 +55,8 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 
 /**
  * @param maxZoom how big (zoom in) the map can be, considering 1 the full map on screen
@@ -63,13 +66,14 @@ import com.bellako.kiwi.ui.getScreenWidth
  */
 @Composable
 fun MapScreen(
+    nodesViewModel: NodesViewModel = hiltViewModel<NodesViewModel>(),
+    mapViewModel: MapViewModel = hiltViewModel<MapViewModel>(),
     maxZoom: Float = 8f,
     dragLimitFactor: Float = 1f,
     mapResourceId: Int = R.drawable.map_4k,
     title: String = "WORLD MAP",
 ) {
     val kiwiColors = LocalKiwiColors.current
-    val mapViewModel = hiltViewModel<MapViewModel>()
     val density = LocalDensity.current
     val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
@@ -81,26 +85,24 @@ fun MapScreen(
     val scaledMapHeight = imageBitmap.height * (viewportHeightPx / imageBitmap.width)
     val minZoom = viewportHeightPx / scaledMapHeight
 
-    val nodesViewModel = hiltViewModel<NodesViewModel>()
+    val nodesState by nodesViewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
         nodesViewModel.loadNodes()
+        snapshotFlow { nodesState.nodes }
+            .filter { it.isNotEmpty() }
+            .first()
+            .let { nodesList ->
+                val firstOpenOrLocked =
+                    nodesList.firstOrNull {
+                        it.status == NodeStatus.OPEN || it.status == NodeStatus.LOCKED
+                    }
+                firstOpenOrLocked?.let { node ->
+                    mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+                }
+            }
     }
 
-    val nodes by nodesViewModel.nodes.collectAsState()
-/*
-    LaunchedEffect(nodes) {
-        if (nodes.isNotEmpty() && mapViewModel.getSelectedNode() == null) {
-            val firstOpenOrLocked =
-                nodes.firstOrNull {
-                    it.status == NodeStatus.OPEN || it.status == NodeStatus.LOCKED
-                }
-            firstOpenOrLocked?.let { node ->
-                mapViewModel.selectNode(node.id, node.cordX, node.cordY)
-            }
-        }
-    }
-*/
     mapViewModel.setParameters(
         minScale = minZoom,
         maxScale = maxZoom,
@@ -146,7 +148,7 @@ private fun InteractiveMap(
     modifier: Modifier = Modifier,
 ) {
     val mapState by mapViewModel.state.collectAsState()
-    val nodes by nodesViewModel.nodes.collectAsState()
+    val nodesState by nodesViewModel.state.collectAsState()
 
     Box(
         modifier =
@@ -180,7 +182,7 @@ private fun InteractiveMap(
                     ),
         )
 
-        nodes.forEach { node ->
+        nodesState.nodes.forEach { node ->
             NodeOnMap(
                 node = node,
                 mapState = mapState,
