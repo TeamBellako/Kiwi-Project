@@ -2,6 +2,7 @@ package com.kiwi.users;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.features.users.data.*;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
@@ -12,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -129,4 +132,16 @@ public class UsersIntegrationTest {
     
     private LoginDTO getValidLoginDTO() { return new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword()); }
     private LoginDTO getinValidLoginDTO() { return new LoginDTO(invalidUserDTO().getEmail(), invalidUserDTO().getPassword()); }
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public NodesService nodesService() {
+            return new NodesService(null,null,null) {
+                @Override
+                public void initializeUserProgress(int userId) {
+                }
+            };
+        }
+    }
 }
