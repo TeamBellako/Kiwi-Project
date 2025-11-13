@@ -3,7 +3,6 @@ package com.kiwi.nodes;
 import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.nodes.controllers.NodesProgressService;
 import com.kiwi.features.nodes.data.NodeStatus;
-import com.kiwi.features.nodes.exceptions.NodeLockedException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
 import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.*;

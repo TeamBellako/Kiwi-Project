@@ -48,3 +48,19 @@ CREATE TABLE IF NOT EXISTS personality (
     user_id BIGINT NOT NULL,
     CONSTRAINT fk_personality_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+DROP TABLE IF EXISTS nodes;
+
+CREATE TABLE nodes (
+    id INT PRIMARY KEY,
+    node_order INT NOT NULL,
+    price INT NOT NULL,
+    cord_x FLOAT NOT NULL,
+    cord_y FLOAT NOT NULL
+);
+
+INSERT INTO nodes(id, node_order, price, cord_x, cord_y)
+VALUES (1,1,100,0,0),
+       (2,2,150,0,0),
+       (3,3,200,0,0),
+       (4,4,200,0,0);

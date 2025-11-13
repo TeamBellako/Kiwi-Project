@@ -22,7 +22,6 @@ public class NodesController {
         this.usersService = usersService;
     }
 
-
     @GetMapping
     public ResponseEntity<List<NodesDTO>> getNodesForUser(
             @AuthenticationPrincipal UserDetails userDetails
