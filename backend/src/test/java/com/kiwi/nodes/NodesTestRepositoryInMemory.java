@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.FluentQuery;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class NodesTestRepositoryInMemory implements NodesRepository {
 
@@ -19,25 +20,32 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
 
     private long idSequence = 1;
 
+    // NodesTestRepositoryInMemory
+    @Override
+    public List<NodesPersistence> findAll() { return new ArrayList<>(nodeStore.values()); }
+
+    @Override
+    public Optional<NodesPersistence> findById(Integer id) { return Optional.ofNullable(nodeStore.get(id)); }
+
+    @Override
+    public NodesPersistence saveAndFlush(NodesPersistence node) { nodeStore.put(node.getId(), node); return node; }
+
+    @Override
+    public List<NodesPersistence> findAllByNodeOrder(int nodeOrder) { return nodeStore.values().stream().filter(n -> n.getNodeOrder() == nodeOrder).collect(Collectors.toList()); }
+
+
     @Override
     public <S extends NodesPersistence> List<S> saveAll(Iterable<S> entities) {
         return List.of();
     }
 
-    @Override
-    public Optional<NodesPersistence> findById(Integer integer) {
-        return Optional.empty();
-    }
+
 
     @Override
     public boolean existsById(Integer integer) {
         return false;
     }
 
-    // ---- NODE ----
-    public List<NodesPersistence> findAll() {
-        return new ArrayList<>(nodeStore.values());
-    }
 
     @Override
     public List<NodesPersistence> findAllById(Iterable<Integer> integers) {
@@ -99,11 +107,6 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     @Override
     public void flush() {
 
-    }
-
-    @Override
-    public <S extends NodesPersistence> S saveAndFlush(S entity) {
-        return null;
     }
 
     @Override
@@ -190,11 +193,5 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     public Page<NodesPersistence> findAll(Pageable pageable) {
         return null;
     }
-
-    @Override
-    public List<NodesPersistence> findAllByNodeOrder(int nodeOrder) {
-        return nodeStore.values().stream()
-                .filter(node -> node.getNodeOrder() == nodeOrder)
-                .toList();
-    }
+    
 }

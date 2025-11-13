@@ -9,11 +9,13 @@ import com.kiwi.features.nodes.data.UserNodeStatusKey;
 
 public class NodesTestFactory {
 
-    public static NodesPersistence persistenceNode(int id, int nodeOrder, int price) {
+    public static NodesPersistence persistenceNode(int id, int nodeOrder, int price, float cordX, float cordY) {
         NodesPersistence n = new NodesPersistence();
         n.setId(id);
         n.setNodeOrder(nodeOrder);
         n.setPrice(price);
+        n.setCordX(cordX);
+        n.setCordY(cordY);
         return n;
     }
 

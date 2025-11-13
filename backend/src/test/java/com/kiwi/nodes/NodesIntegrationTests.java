@@ -75,9 +75,9 @@ public class NodesIntegrationTests {
 
         // Insert sample nodes
         List.of(
-                persistenceNode(1, 1, 100),
-                persistenceNode(2, 2, 150),
-                persistenceNode(3, 3, 200)
+                persistenceNode(1, 1, 100,0,0),
+                persistenceNode(2, 2, 150,0,0),
+                persistenceNode(3, 3, 200, 0,0)
         ).forEach(nodesRepository::saveAndFlush);
 
         // Initial open node for user
