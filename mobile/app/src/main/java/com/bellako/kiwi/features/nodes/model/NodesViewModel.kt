@@ -41,8 +41,12 @@ class NodesViewModel
         fun unlockNode(nodeId: Int) = updateNodesSafe { listOf(repository.unlockNode(nodeId)) }
 
         fun completeNode(nodeId: Int) {
-            updateNodesSafe { listOf(repository.completeNode(nodeId)) }
-            updateNodesSafe { repository.markNextNodesAsLocked(nodeId) }
+            viewModelScope.launch {
+                val completedNode = repository.completeNode(nodeId)
+                updateNodesSafe { listOf(completedNode) }
+                val lockedNodes = repository.markNextNodesAsLocked(nodeId)
+                updateNodesSafe { lockedNodes }
+            }
         }
 
         // -----------------------------------------------------------------------------------------

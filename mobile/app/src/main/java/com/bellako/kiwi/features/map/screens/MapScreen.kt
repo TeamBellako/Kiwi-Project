@@ -88,7 +88,7 @@ fun MapScreen(
     }
 
     val nodes by nodesViewModel.nodes.collectAsState()
-
+/*
     LaunchedEffect(nodes) {
         if (nodes.isNotEmpty() && mapViewModel.getSelectedNode() == null) {
             val firstOpenOrLocked =
@@ -100,7 +100,7 @@ fun MapScreen(
             }
         }
     }
-
+*/
     mapViewModel.setParameters(
         minScale = minZoom,
         maxScale = maxZoom,

@@ -127,6 +127,8 @@ fun Kiwi_HoldButton(
                 val elapsed = System.currentTimeMillis() - startTime
                 targetProgress = (elapsed.toFloat() / holdDurationMillis).coerceIn(0f, 1f)
                 if (targetProgress >= 1f) {
+                    AudioManager.playSFX(context, R.raw.snd_ui_button)
+                    onHoldComplete()
                     break
                 }
                 delay(16)
@@ -149,13 +151,9 @@ fun Kiwi_HoldButton(
                     while (true) {
                         awaitPointerEventScope {
                             val down = awaitFirstDown(requireUnconsumed = false)
-
                             view.parent?.requestDisallowInterceptTouchEvent(true)
-
                             isHolding = true
                             startTime = System.currentTimeMillis()
-                            var success = false
-
                             while (isHolding) {
                                 val event = awaitPointerEvent()
 
@@ -167,23 +165,9 @@ fun Kiwi_HoldButton(
                                         change.consume()
                                     }
                                 }
-
-                                val elapsed = System.currentTimeMillis() - startTime
-                                if (elapsed >= holdDurationMillis) {
-                                    success = true
-                                    break
-                                }
-                            }
-
-                            if (success) {
-                                AudioManager.playSFX(context, R.raw.snd_ui_button)
-                                onHoldComplete()
                             }
 
                             view.parent?.requestDisallowInterceptTouchEvent(false)
-
-                            isHolding = false
-                            targetProgress = 0f
                         }
                     }
                 },

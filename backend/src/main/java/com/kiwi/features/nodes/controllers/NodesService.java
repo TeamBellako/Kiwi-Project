@@ -1,8 +1,10 @@
 package com.kiwi.features.nodes.controllers;
 
 import com.kiwi.features.nodes.data.*;
+import com.kiwi.features.nodes.exceptions.NodeMarkAsLockedException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
 import com.kiwi.features.nodes.exceptions.NodeLockedException;
+import com.kiwi.features.nodes.exceptions.NodeSatusNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,8 +50,12 @@ public class NodesService {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
-        if (userNodeStatusRepository.findByIdUserIdAndIdNodeId(userId, nodeId).isPresent()) {
-            return null;
+        UserNodeStatusPersistence nodeStatusPersistence = userNodeStatusRepository
+                .findByIdUserIdAndIdNodeId(userId, nodeId)
+                .orElseThrow(() -> new NodeSatusNotFoundException(nodeId));
+
+        if(nodeStatusPersistence.getStatus() != NodeStatus.COMPLETED){
+            throw new NodeMarkAsLockedException(nodeId);
         }
 
         int nextOrder = node.getNodeOrder() + 1;
@@ -61,7 +67,7 @@ public class NodesService {
             NodesDomain locked = progressService.lock(domain);
 
             UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
-            userNodeStatusRepository.save(persistence);
+            userNodeStatusRepository.saveAndFlush(persistence);
             return NodesDataMapper.toDTO(n, persistence);
 
         }).collect(Collectors.toList());
@@ -81,7 +87,7 @@ public class NodesService {
 
         UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, opened);
 
-        userNodeStatusRepository.save(persistence);
+        userNodeStatusRepository.saveAndFlush(persistence);
         return NodesDataMapper.toDTO(node, persistence);
     }
 
@@ -98,10 +104,19 @@ public class NodesService {
         NodesDomain completed = progressService.complete(domain);
 
         UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, completed);
-        userNodeStatusRepository.save(persistence);
+        userNodeStatusRepository.saveAndFlush(persistence);
         return NodesDataMapper.toDTO(node, persistence);
     }
 
 
+    public void initializeUserProgress(int userId) {
+        NodesPersistence firstNode = nodesRepository.findById(1)
+                .orElseThrow(() -> new NodeNotFoundException(1));
 
+        NodesDomain domain = NodesDataMapper.toDomain(firstNode, null);
+        NodesDomain locked = progressService.lock(domain);
+
+        UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
+        userNodeStatusRepository.saveAndFlush(persistence);
+    }
 }
