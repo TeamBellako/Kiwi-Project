@@ -9,11 +9,6 @@ interface INodesAPI {
     @GET("api/nodes")
     suspend fun getNodesForUser(): List<NodesDTO>
 
-    @GET("api/nodes/{nodeId}")
-    suspend fun getNode(
-        @Path("nodeId") nodeId: Int,
-    ): NodesDTO
-
     @POST("api/nodes/{nodeId}/unlock")
     suspend fun unlockNode(
         @Path("nodeId") nodeId: Int,

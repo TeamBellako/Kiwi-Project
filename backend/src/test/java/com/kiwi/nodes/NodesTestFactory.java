@@ -25,16 +25,16 @@ public class NodesTestFactory {
         return s;
     }
 
-    public static NodesDomain domainNode(int id, int nodeOrder, NodeStatus status, int price, float cord_x, float cord_y) {
-        return new NodesDomain(id, nodeOrder, status, price, cord_x, cord_y);
+    public static NodesDomain domainNode(int id, int nodeOrder, NodeStatus status, int price, float cordX, float cordY) {
+        return new NodesDomain(id, nodeOrder, status, price, cordX, cordY);
     }
 
     public static Object userIdDTO(int id) {
         return new Object() { public int userId = id; };
     }
 
-    public static NodesDTO dtoNode(int id, int nodeOrder, NodeStatus status, int price, float cord_x, float cord_y) {
-        return new NodesDTO(id, nodeOrder, status.name(), price, cord_x, cord_y);
+    public static NodesDTO dtoNode(int id, int nodeOrder, NodeStatus status, int price, float cordX, float cordY) {
+        return new NodesDTO(id, nodeOrder, status.name(), price, cordX, cordY);
     }
 
     // Helpers para tests

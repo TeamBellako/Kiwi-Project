@@ -1,8 +1,5 @@
 package com.bellako.kiwi.features.nodes.data
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-
 object NodesDataMapper {
     fun toDomain(dto: NodesDTO): NodesDomain =
         NodesDomain(
@@ -10,8 +7,8 @@ object NodesDataMapper {
             nodeOrder = dto.nodeOrder,
             status = NodeStatus.valueOf(dto.status),
             price = dto.price,
-            cord_x = dto.cord_x,
-            cord_y = dto.cord_y,
+            cordX = dto.cordX,
+            cordY = dto.cordY,
         )
 
     fun toDTO(domain: NodesDomain): NodesDTO =
@@ -20,7 +17,7 @@ object NodesDataMapper {
             nodeOrder = domain.nodeOrder,
             status = domain.status.name,
             price = domain.price,
-            cord_x = domain.cord_x,
-            cord_y = domain.cord_y,
+            cordX = domain.cordX,
+            cordY = domain.cordY,
         )
 }

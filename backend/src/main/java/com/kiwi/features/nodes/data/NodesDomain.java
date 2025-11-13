@@ -11,16 +11,16 @@ public class NodesDomain {
     private final int nodeOrder;
     private final NodeStatus status;
     private final int price;
-    private final float cord_x;
-    private final float cord_y;
+    private final float cordX;
+    private final float cordY;
 
     public NodesDomain(int id, int nodeOrder, NodeStatus status, Integer price, float cordX, float cordY) {
         this.id = id;
         this.nodeOrder = nodeOrder;
         this.status = status;
         this.price = price;
-        cord_x = cordX;
-        cord_y = cordY;
+        this.cordX = cordX;
+        this.cordY = cordY;
     }
 
 }

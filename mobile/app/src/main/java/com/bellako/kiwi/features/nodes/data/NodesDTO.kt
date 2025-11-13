@@ -5,6 +5,6 @@ data class NodesDTO(
     val nodeOrder: Int,
     val status: String,
     val price: Int? = null,
-    val cord_x: Float,
-    val cord_y: Float,
+    val cordX: Float,
+    val cordY: Float,
 )

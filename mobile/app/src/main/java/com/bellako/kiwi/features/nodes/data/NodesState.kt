@@ -5,6 +5,6 @@ data class NodesState(
     val nodeOrder: Int,
     val status: String,
     val price: Int? = null,
-    val posX: Float,
-    val posY: Float,
+    val cordX: Float,
+    val cordY: Float,
 )

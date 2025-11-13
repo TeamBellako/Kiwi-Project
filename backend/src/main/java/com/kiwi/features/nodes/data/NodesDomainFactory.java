@@ -12,8 +12,8 @@ public class NodesDomainFactory {
                 node.getNodeOrder(),
                 status,
                 node.getPrice(),
-                node.getCord_x(),
-                node.getCord_y()
+                node.getCordX(),
+                node.getCordY()
         );
     }
 }

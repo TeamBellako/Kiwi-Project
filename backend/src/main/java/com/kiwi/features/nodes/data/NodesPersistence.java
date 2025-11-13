@@ -19,8 +19,8 @@ public class NodesPersistence {
     private int price;
 
     @Column(name = "cord_x", nullable = false)
-    private int cord_x;
+    private float cordX;
 
     @Column(name = "cord_y", nullable = false)
-    private int cord_y;
+    private float cordY;
 }

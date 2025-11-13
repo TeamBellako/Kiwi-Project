@@ -75,8 +75,8 @@ fun NodeOnMap(
     val baseNodeSizePx = with(density) { baseNodeSizeDP.toPx() }
     val scaledNodeSize = baseNodeSizePx * mapState.scale * scaleSelected
 
-    val mapX = node.cord_x * mapState.mapWidthPx - mapState.mapWidthPx / 2
-    val mapY = (1f - node.cord_y) * mapState.mapHeightPx - mapState.mapHeightPx / 2
+    val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2
+    val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2
     val scaledX = (mapX * mapState.scale) + mapState.offset.x
     val scaledY = (mapY * mapState.scale) + mapState.offset.y
 
@@ -86,7 +86,7 @@ fun NodeOnMap(
                 .wrapContentSize()
                 .offset { IntOffset(scaledX.roundToInt(), scaledY.roundToInt()) }
                 .pointerInput(Unit) {
-                    detectTapGestures { onNodeClick(node.cord_x, node.cord_y, node.id) }
+                    detectTapGestures { onNodeClick(node.cordX, node.cordY, node.id) }
                 },
         contentAlignment = Alignment.Center,
     ) {

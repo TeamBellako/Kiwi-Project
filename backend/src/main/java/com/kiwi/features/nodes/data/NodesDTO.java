@@ -5,10 +5,10 @@ import lombok.*;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @EqualsAndHashCode @ToString
 public class NodesDTO {
     public int id;
-    public int nodeorder;
+    public int nodeOrder;
     public String status;
     public int price;
-    public float cord_x;
-    public float cord_y;
+    public float cordX;
+    public float cordY;
 
 }

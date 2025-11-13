@@ -39,6 +39,7 @@ import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
+import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -64,7 +65,7 @@ import com.bellako.kiwi.ui.getScreenWidth
 fun MapScreen(
     maxZoom: Float = 8f,
     dragLimitFactor: Float = 1f,
-    mapResourceId: Int = R.drawable.map_hd,
+    mapResourceId: Int = R.drawable.map_4k,
     title: String = "WORLD MAP",
 ) {
     val kiwiColors = LocalKiwiColors.current
@@ -81,8 +82,23 @@ fun MapScreen(
     val minZoom = viewportHeightPx / scaledMapHeight
 
     val nodesViewModel = hiltViewModel<NodesViewModel>()
+
     LaunchedEffect(Unit) {
         nodesViewModel.loadNodes()
+    }
+
+    val nodes by nodesViewModel.nodes.collectAsState()
+
+    LaunchedEffect(nodes) {
+        if (nodes.isNotEmpty() && mapViewModel.getSelectedNode() == null) {
+            val firstOpenOrLocked =
+                nodes.firstOrNull {
+                    it.status == NodeStatus.OPEN || it.status == NodeStatus.LOCKED
+                }
+            firstOpenOrLocked?.let { node ->
+                mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+            }
+        }
     }
 
     mapViewModel.setParameters(

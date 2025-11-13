@@ -5,8 +5,8 @@ data class NodesDomain(
     val nodeOrder: Int,
     val status: NodeStatus,
     val price: Int? = null,
-    val cord_x: Float,
-    val cord_y: Float,
+    val cordX: Float,
+    val cordY: Float,
 )
 
 enum class NodeStatus {

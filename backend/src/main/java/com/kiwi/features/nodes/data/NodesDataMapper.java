@@ -13,8 +13,8 @@ public class NodesDataMapper {
                 node.getNodeOrder(),
                 node.getStatus().name(),
                 node.getPrice(),
-                node.getCord_x(),
-                node.getCord_y()
+                node.getCordX(),
+                node.getCordY()
         );
     }
 
@@ -24,8 +24,8 @@ public class NodesDataMapper {
                 node.getNodeOrder(),
                 status.getStatus().name(),
                 node.getPrice(),
-                node.getCord_x(),
-                node.getCord_y()
+                node.getCordX(),
+                node.getCordY()
         );
     }
 
