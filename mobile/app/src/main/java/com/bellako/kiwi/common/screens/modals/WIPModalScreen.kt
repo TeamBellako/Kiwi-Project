@@ -45,7 +45,7 @@ fun WIPModalScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(LocalKiwiColors.current.color2),
         contentAlignment = Alignment.Center,
     ) {
         WIPModalLayout(
@@ -80,7 +80,7 @@ private fun WIPModalLayout(
         Icon(
             imageVector = Icons.Filled.Handyman,
             contentDescription = "WIP icon",
-            tint = MaterialTheme.colorScheme.secondary,
+            tint = kiwiColors.color0A,
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(50.dp)),
@@ -91,7 +91,7 @@ private fun WIPModalLayout(
         Kiwi_H2(
             KiwiTextArguments(
                 message,
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.colorF,
                 textAlign = TextAlign.Center,
                 bold = true,
             ),
@@ -103,7 +103,7 @@ private fun WIPModalLayout(
             KiwiTextArguments(
                 subMessage,
                 TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline,
+                color = kiwiColors.colorF1,
                 modifier =
                     Modifier
                         .testTag(CommonTestTags.ERROR_MODAL),
@@ -117,7 +117,8 @@ private fun WIPModalLayout(
                 textArguments =
                     KiwiTextArguments(
                         buttonMessage,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color7,
+                        bold = true,
                     ),
                 color = kiwiColors.color5A,
                 onClick = onButtonClick,

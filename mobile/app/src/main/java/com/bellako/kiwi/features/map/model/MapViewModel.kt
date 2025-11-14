@@ -30,12 +30,14 @@ class MapViewModel
         private var initialScale: Float = 0f
         private var minScale: Float = 0f
         private var maxScale: Float = 0f
-        private var initialPosition: Offset = Offset(0f, 0f)
         private var dragLimitFactor: Float = 0f
 
         private val _state = MutableStateFlow(MapState(scale = initialScale))
         override val state: StateFlow<MapState> = _state.asStateFlow()
         override val previousState = MutableStateFlow(MapState())
+
+        private val _selectedNodeId = MutableStateFlow<Int?>(null)
+        val selectedNodeId: StateFlow<Int?> = _selectedNodeId.asStateFlow()
 
         private var flingJob: Job? = null
         private var flingLastPosition = Offset(0f, 0f)
@@ -48,7 +50,6 @@ class MapViewModel
             initialScale: Float,
             minScale: Float,
             maxScale: Float,
-            initialPosition: Offset,
             dragLimitFactor: Float,
             mapWidthPx: Float,
             mapHeightPx: Float,
@@ -56,32 +57,24 @@ class MapViewModel
             viewportHeightPx: Float,
         ) {
             this.initialScale = initialScale
-            _state.value = _state.value.copy(scale = this.initialScale)
-            _state.value = _state.value.copy(scaleBase = viewportHeightPx / viewportWidthPx)
-
             this.minScale = minScale
             this.maxScale = maxScale
-            this.initialPosition = initialPosition
             this.dragLimitFactor = dragLimitFactor
 
-            _state.value = _state.value.copy(viewportWidthPx = viewportWidthPx)
-            _state.value = _state.value.copy(viewportHeightPx = viewportHeightPx)
-            _state.value = _state.value.copy(mapWidthPx = mapWidthPx * (viewportHeightPx / mapWidthPx))
-            _state.value = _state.value.copy(mapHeightPx = mapHeightPx * (viewportHeightPx / mapWidthPx))
+            val scaledMapWidth = mapWidthPx * (viewportHeightPx / mapWidthPx)
+            val scaledMapHeight = mapHeightPx * (viewportHeightPx / mapWidthPx)
 
-            setInitialPositionScale()
+            _state.value =
+                _state.value.copy(
+                    scale = initialScale,
+                    scaleBase = viewportHeightPx / viewportWidthPx,
+                    viewportWidthPx = viewportWidthPx,
+                    viewportHeightPx = viewportHeightPx,
+                    mapWidthPx = scaledMapWidth,
+                    mapHeightPx = scaledMapHeight,
+                )
+
             updatePreviousState()
-        }
-
-        private fun setInitialPositionScale() {
-            setScale(initialScale)
-            setOffset(
-                Offset(
-                    -_state.value.mapWidthPx * initialPosition.x.coerceIn(-1f, 1f),
-                    -_state.value.mapHeightPx * initialPosition.y.coerceIn(-1f, 1f),
-                ),
-            )
-            updateScale(1f, Offset(0f, 0f))
         }
 
         private fun setScale(newScale: Float) {
@@ -106,6 +99,7 @@ class MapViewModel
             val newOffset = calculateOffsetForZoom(_state.value, newScale, centroid)
             setScale(newScale)
             setOffset(newOffset)
+            unSelectNode()
         }
 
         override fun updateOffset(delta: Offset) {
@@ -121,10 +115,8 @@ class MapViewModel
         ): Offset {
             val scaleFactor = newScale / state.scale
 
-            // Calculate the position of the centroid relative to the center of the viewport
             val centroidRelativeToCenter = centroid - Offset(state.viewportWidthPx / 2f, state.viewportHeightPx / 2f)
 
-            // Formula: newOffset = oldOffset + (centroidRelativeToCenter * (1 - scaleFactor))
             val offsetDelta = centroidRelativeToCenter * (1f - scaleFactor)
             val newOffset = (state.offset + offsetDelta) * scaleFactor
 
@@ -165,7 +157,7 @@ class MapViewModel
         }
 
         fun startFling() {
-            flingJob?.cancel() // cancel previous sling if any
+            flingJob?.cancel()
             var velocity = flingVelocity
             flingJob =
                 viewModelScope.launch {
@@ -176,5 +168,46 @@ class MapViewModel
                         delay(FRAME_MILLIS)
                     }
                 }
+        }
+
+        fun selectNode(
+            nodeId: Int,
+            nodeX: Float,
+            nodeY: Float,
+        ) {
+            setSelectedNode(nodeId)
+            focusOnNode(nodeX, nodeY)
+        }
+
+        fun unSelectNode() {
+            _selectedNodeId.value = null
+        }
+
+        fun getSelectedNode(): Int? = _selectedNodeId.value
+
+        fun setSelectedNode(nodeId: Int) {
+            _selectedNodeId.value = nodeId
+        }
+
+        fun focusOnNode(
+            nodeX: Float,
+            nodeY: Float,
+        ) {
+            val state = _state.value.copy(scale = maxScale)
+
+            val scaledMapWidth = state.mapWidthPx * state.scale
+            val scaledMapHeight = state.mapHeightPx * state.scale
+
+            @Suppress("MagicNumber")
+            val nodePosX = (nodeX - 0.5f) * scaledMapWidth
+
+            @Suppress("MagicNumber")
+            val nodePosY = (0.5f - nodeY) * scaledMapHeight
+
+            val newOffset = Offset(-nodePosX, -nodePosY)
+            val constrainedOffset = calculateConstrainedOffset(newOffset, state)
+
+            _state.value = state.copy(offset = constrainedOffset)
+            updatePreviousState()
         }
     }

@@ -14,6 +14,7 @@ import java.util.Optional;
 import static com.kiwi.users.UsersTestFactory.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+
 public class UsersServiceTests {
     private final UsersTestRepositoryInMemory usersTestRepositoryInMemory = new UsersTestRepositoryInMemory();
     private final UsersService usersService = new UsersService(usersTestRepositoryInMemory, new PasswordEncoder() {
@@ -26,7 +27,7 @@ public class UsersServiceTests {
         public boolean matches(CharSequence rawPassword, String encodedPassword) {
             return true;
         }
-    });
+    },null);
     
     private final String validEmailString = validUserDTO().getEmail(); 
     

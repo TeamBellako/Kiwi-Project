@@ -1,5 +1,6 @@
 package com.kiwi.features.users.controllers;
 
+import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.users.data.*;
 import com.kiwi.features.users.exceptions.CreateUserConflictException;
 import com.kiwi.common.types.Email;
@@ -20,11 +21,13 @@ import static com.kiwi.common.utils.FormatUtils.formatDate;
 public class UsersService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final NodesService nodesService;
     
     @Autowired
-    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, NodesService nodesService) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
+        this.nodesService = nodesService;
     }
 
     @Transactional
@@ -44,6 +47,10 @@ public class UsersService {
         String hashedPassword = passwordEncoder.encode(userDomain.getPassword().value());
         UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, hashedPassword);
         usersRepository.saveAndFlush(usersPersistence);
+
+        if (nodesService != null) {
+            nodesService.initializeUserProgress(usersPersistence.getId());
+        }
     }
 
     public Optional<UsersPersistence> getUserByEmail(@NotNull Email email) {

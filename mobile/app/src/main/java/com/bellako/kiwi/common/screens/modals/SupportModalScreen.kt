@@ -50,7 +50,7 @@ fun SupportModalScreen(navController: NavController) {
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(LocalKiwiColors.current.color2),
         contentAlignment = Alignment.Center,
     ) {
         SupportScreenLayout(navController)
@@ -74,7 +74,7 @@ private fun SupportScreenLayout(navController: NavController) {
         Kiwi_H2(
             KiwiTextArguments(
                 "SUPPORT",
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.colorF,
                 bold = true,
             ),
         )
@@ -86,7 +86,7 @@ private fun SupportScreenLayout(navController: NavController) {
                 withStyle(
                     style =
                         SpanStyle(
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = kiwiColors.colorF1,
                         ),
                 ) {
                     append("If you have any questions or need support, feel free to reach out to us at ")
@@ -104,7 +104,7 @@ private fun SupportScreenLayout(navController: NavController) {
                     withStyle(
                         style =
                             SpanStyle(
-                                color = MaterialTheme.colorScheme.inversePrimary,
+                                color = kiwiColors.color7B,
                                 textDecoration = TextDecoration.Underline,
                             ),
                     ) {
@@ -126,7 +126,7 @@ private fun SupportScreenLayout(navController: NavController) {
             textArguments =
                 KiwiTextArguments(
                     "BACK",
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = kiwiColors.color7,
                     bold = true,
                     modifier =
                         Modifier

@@ -2,10 +2,14 @@ package com.kiwi.features.users.data;
 
 import com.kiwi.common.types.Email;
 import com.kiwi.common.types.Password;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Setter
+@Getter
 public class UsersDomain {
     private Email email;
     private Password password;
@@ -16,16 +20,6 @@ public class UsersDomain {
         this.password = password;
         this.registerDate = registerDate;
     }
-
-    public Email getEmail() { return email; }
-    public void setEmail(Email email) { this.email = email; }
-
-    public Password getPassword() { return password; }
-    public void setPassword(Password password) { this.password = password; }
-
-
-    public LocalDate getRegisterDate() { return registerDate; }
-    public void setRegisterDate(LocalDate registerDate) { this.registerDate = registerDate; }
 
     @Override
     public boolean equals(Object o) {

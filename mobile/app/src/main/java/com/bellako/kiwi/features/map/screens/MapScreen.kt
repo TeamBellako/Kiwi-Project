@@ -11,12 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -28,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.analytics.FirebaseEventNames
-import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -41,6 +40,10 @@ import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
+import com.bellako.kiwi.features.nodes.data.NodeStatus
+import com.bellako.kiwi.features.nodes.model.INodesViewModel
+import com.bellako.kiwi.features.nodes.screens.NodeOnMap
+import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
@@ -53,43 +56,62 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 
 /**
- * @param minZoom how small (zoom out) the map can be, considering 1 the full map on screen
  * @param maxZoom how big (zoom in) the map can be, considering 1 the full map on screen
- * @param initialZoom (minZoom..maxZoom)
- * @param initialPosition (-1,1) relative to the center of the map
  * @param dragLimitFactor (0,1) padding for the map limit
  * @param mapResourceId image to show as the map
  * @param title
- * @param viewModel Optional parameter for testing
  */
 @Composable
 fun MapScreen(
-    minZoom: Float = 1.5f,
-    maxZoom: Float = 6f,
-    initialZoom: Float = 2f,
-    initialPosition: Offset = @Suppress("MagicNumber") Offset(-0.4f, -0.4f),
+    maxZoom: Float = 8f,
     dragLimitFactor: Float = 1f,
-    mapResourceId: Int = R.drawable.map_hd,
+    mapResourceId: Int = R.drawable.map_4k,
     title: String = "WORLD MAP",
-    viewModel: MapViewModel? = null,
+    nodesViewModel: INodesViewModel,
+    mapViewModel: MapViewModel = hiltViewModel(),
 ) {
     val kiwiColors = LocalKiwiColors.current
-    val mapViewModel = viewModel ?: hiltViewModel<MapViewModel>()
     val density = LocalDensity.current
+
     val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
+    val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
+
+    @Suppress("MagicNumber")
+    val viewportHeightPx =
+        with(density) { getScreenHeight().dp.toPx() } * 0.85f
+    val scaledMapHeight = imageBitmap.height * (viewportHeightPx / imageBitmap.width)
+    val minZoom = viewportHeightPx / scaledMapHeight
+
+    val nodesState by nodesViewModel.state.collectAsState()
+    LaunchedEffect(Unit) {
+        nodesViewModel.loadNodes()
+        snapshotFlow { nodesState?.nodes }
+            .filter { it?.isNotEmpty() == true }
+            .first()
+            .let { nodesList ->
+                val firstOpenOrLocked =
+                    nodesList?.firstOrNull {
+                        it.status == NodeStatus.OPEN || it.status == NodeStatus.LOCKED
+                    }
+                firstOpenOrLocked?.let { node ->
+                    mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+                }
+            }
+    }
 
     mapViewModel.setParameters(
         minScale = minZoom,
         maxScale = maxZoom,
-        initialScale = initialZoom,
-        initialPosition = initialPosition,
+        initialScale = minZoom,
         dragLimitFactor = dragLimitFactor,
         mapWidthPx = imageBitmap.width.toFloat(),
         mapHeightPx = imageBitmap.height.toFloat(),
-        viewportWidthPx = with(density) { getScreenWidth().dp.toPx() },
-        viewportHeightPx = with(density) { getScreenHeight(withoutInsetTop = true, withoutInsetBottom = true).dp.toPx() },
+        viewportWidthPx = viewportWidthPx,
+        viewportHeightPx = viewportHeightPx,
     )
 
     Column(
@@ -111,7 +133,8 @@ fun MapScreen(
 
         InteractiveMap(
             mapResourceId = mapResourceId,
-            viewModel = mapViewModel,
+            mapViewModel = mapViewModel,
+            nodesViewModel = nodesViewModel,
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -120,10 +143,12 @@ fun MapScreen(
 @Composable
 private fun InteractiveMap(
     mapResourceId: Int,
-    viewModel: MapViewModel,
+    mapViewModel: MapViewModel,
+    nodesViewModel: INodesViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val mapState by viewModel.state.collectAsState()
+    val mapState by mapViewModel.state.collectAsState()
+    val nodesState by nodesViewModel.state.collectAsState()
 
     Box(
         modifier =
@@ -132,22 +157,12 @@ private fun InteractiveMap(
                 .pointerInput(Unit) {
                     detectTransformGesturesAndEnd(
                         onGesture = { centroid, pan, zoom, _ ->
-                            viewModel.updateScale(zoom, centroid)
-                            viewModel.updateOffset(pan)
+                            mapViewModel.updateScale(zoom, centroid)
+                            mapViewModel.updateOffset(pan)
                         },
                         onGestureEnd = {
-                            viewModel.startFling()
-
-                            if (viewModel.previousState.value.scale != viewModel.state.value.scale) {
-                                firebaseLogEvent(
-                                    FirebaseEventNames.MAP_PERFORM_ZOOM,
-                                    mapOf(
-                                        "scale_old" to viewModel.previousState.value.scale,
-                                        "scale_new" to viewModel.state.value.scale,
-                                    ),
-                                )
-                            }
-                            viewModel.updatePreviousState()
+                            mapViewModel.startFling()
+                            mapViewModel.updatePreviousState()
                         },
                     )
                 },
@@ -166,6 +181,17 @@ private fun InteractiveMap(
                         translationY = mapState.offset.y,
                     ),
         )
+
+        nodesState?.nodes?.forEach { node ->
+            NodeOnMap(
+                node = node,
+                mapState = mapState,
+                isSelected = node.id == mapViewModel.getSelectedNode(),
+                onNodeClick = { x, y, id -> mapViewModel.selectNode(id, x, y) },
+                onUnlockNode = { id -> nodesViewModel.unlockNode(id) },
+                onCompleteNode = { id -> nodesViewModel.completeNode(id) },
+            )
+        }
     }
 }
 
@@ -185,7 +211,9 @@ fun MapScreen_Preview() {
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
-                    MapScreen()
+                    MapScreen(
+                        nodesViewModel = NodesFakeViewModel(),
+                    )
                     DashboardScreen(
                         usersViewModel =
                             UsersFakeViewModel(

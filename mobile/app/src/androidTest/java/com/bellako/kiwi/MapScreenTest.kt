@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
+import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -20,24 +21,23 @@ class MapScreenTest {
     val composeTestRule = createComposeRule()
 
     private lateinit var viewModel: MapViewModel
+    private lateinit var nodesModel: NodesFakeViewModel
 
-    private val minZoom = 1.5f
-    private val maxZoom = 6f
+    private val maxZoom = 8f
 
     @Before
     fun setUp() {
         AudioManager.setEnabled(false)
 
         viewModel = MapViewModel()
+        nodesModel = NodesFakeViewModel()
 
         composeTestRule.setContent {
             MapScreen(
-                minZoom = minZoom,
                 maxZoom = maxZoom,
-                initialZoom = 2f,
-                initialPosition = Offset(0f, 0f),
                 dragLimitFactor = 1f,
-                viewModel = viewModel,
+                mapViewModel = viewModel,
+                nodesViewModel = nodesModel,
             )
         }
 
@@ -68,7 +68,6 @@ class MapScreenTest {
 
         val newScale = viewModel.state.value.scale
         assert(newScale < initialScale)
-        assert(newScale >= minZoom)
     }
 
     @Test
@@ -81,7 +80,7 @@ class MapScreenTest {
         val initialSwipe = Offset(screenWidth / 2f, screenHeight / 2f)
 
         composeTestRule.onRoot().performTouchInput {
-            swipe(start = initialSwipe, end = initialSwipe + Offset(0f, mapHeight * 0.25f))
+            swipe(start = initialSwipe, end = initialSwipe + Offset(mapHeight * 0.25f, 0f))
         }
 
         assert(viewModel.state.value.offset != initialOffset)
@@ -100,7 +99,7 @@ class MapScreenTest {
         val initialSwipe = Offset(screenWidth / 2f, screenHeight / 2f)
 
         composeTestRule.onRoot().performTouchInput {
-            swipe(start = initialSwipe + Offset(0f, mapHeight * 2), end = initialSwipe)
+            swipe(start = initialSwipe + Offset(mapHeight * 2, 0f), end = initialSwipe)
         }
 
         assert(viewModel.state.value.offset == initialOffset)
