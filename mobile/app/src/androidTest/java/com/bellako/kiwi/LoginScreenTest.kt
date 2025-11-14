@@ -15,6 +15,10 @@ import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
+import com.bellako.kiwi.features.nodes.data.NodeStatus
+import com.bellako.kiwi.features.nodes.data.NodesDomain
+import com.bellako.kiwi.features.nodes.data.NodesState
+import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
@@ -38,7 +42,10 @@ class LoginScreenTest {
     val rule = createComposeRule()
 
     private lateinit var usersState: UsersState
+    private lateinit var nodesState: NodesState
     private lateinit var usersFakeViewModel: UsersFakeViewModel
+    private lateinit var mapviewModel: MapViewModel
+    private lateinit var nodesFakeViewModel: NodesFakeViewModel
 
     private lateinit var personalityState: PersonalityState
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
@@ -50,6 +57,9 @@ class LoginScreenTest {
 
         usersState = UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)
         usersFakeViewModel = UsersFakeViewModel(usersState)
+        nodesState = NodesState(List<NodesDomain>(1) { NodesDomain(1, 1, NodeStatus.INACCESSIBLE, 0, 0.0f, 0.0f) })
+        nodesFakeViewModel = NodesFakeViewModel(nodesState)
+        mapviewModel = MapViewModel()
 
         personalityState =
             PersonalityState(
@@ -73,7 +83,10 @@ class LoginScreenTest {
                     )
                 }
                 composable(ScreenRoutes.HOME) {
-                    MapScreen(viewModel = MapViewModel())
+                    MapScreen(
+                        mapViewModel = mapviewModel,
+                        nodesViewModel = nodesFakeViewModel,
+                    )
                 }
                 composable(ScreenRoutes.SIGNUP3_TEST) {
                     SignUpScreen3_Test(

@@ -20,13 +20,14 @@ class NodesViewModel
     @Inject
     constructor(
         private val repository: NodesRepository,
-    ) : BaseViewModel() {
+    ) : BaseViewModel(),
+        INodesViewModel {
         private val _state = MutableStateFlow(NodesState())
-        val state: StateFlow<NodesState> = _state.asStateFlow()
+        override val state: StateFlow<NodesState> = _state.asStateFlow()
 
         // -----------------------------------------------------------------------------------------
 
-        fun loadNodes() {
+        override fun loadNodes() {
             viewModelScope.launch {
                 setIsLoading(true)
                 setUiState(UIState.Loading)
@@ -44,9 +45,9 @@ class NodesViewModel
             }
         }
 
-        fun unlockNode(nodeId: Int) = updateNodesSafe { listOf(repository.unlockNode(nodeId)) }
+        override fun unlockNode(nodeId: Int) = updateNodesSafe { listOf(repository.unlockNode(nodeId)) }
 
-        fun completeNode(nodeId: Int) {
+        override fun completeNode(nodeId: Int) {
             viewModelScope.launch {
                 val completedNode = repository.completeNode(nodeId)
                 updateNodesSafe { listOf(completedNode) }

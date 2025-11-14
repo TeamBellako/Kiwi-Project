@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
@@ -51,6 +52,7 @@ import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
+import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -359,6 +361,7 @@ fun DashboardModal_Preview_Expanded_Calendar() {
 fun DashboardModal_Preview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
+    nodesViewModel: NodesViewModel = hiltViewModel(),
 ) {
     Kiwi_Theme {
         Scaffold(
@@ -367,7 +370,7 @@ fun DashboardModal_Preview(
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
-                    MapScreen()
+                    MapScreen(nodesViewModel = nodesViewModel)
                     DashboardScreen(
                         usersViewModel =
                             UsersFakeViewModel(

@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.nodes.model
 
 import com.bellako.kiwi.BuildConfig
 import com.bellako.kiwi.features.users.model.JwtAuthInterceptor
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

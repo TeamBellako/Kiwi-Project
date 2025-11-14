@@ -41,8 +41,9 @@ import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
-import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
+import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
@@ -66,35 +67,34 @@ import kotlinx.coroutines.flow.first
  */
 @Composable
 fun MapScreen(
-    nodesViewModel: NodesViewModel = hiltViewModel<NodesViewModel>(),
-    mapViewModel: MapViewModel = hiltViewModel<MapViewModel>(),
     maxZoom: Float = 8f,
     dragLimitFactor: Float = 1f,
     mapResourceId: Int = R.drawable.map_4k,
     title: String = "WORLD MAP",
+    nodesViewModel: INodesViewModel,
+    mapViewModel: MapViewModel = hiltViewModel(),
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
+
     val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
 
     @Suppress("MagicNumber")
     val viewportHeightPx =
         with(density) { getScreenHeight().dp.toPx() } * 0.85f
-
     val scaledMapHeight = imageBitmap.height * (viewportHeightPx / imageBitmap.width)
     val minZoom = viewportHeightPx / scaledMapHeight
 
     val nodesState by nodesViewModel.state.collectAsState()
-
     LaunchedEffect(Unit) {
         nodesViewModel.loadNodes()
-        snapshotFlow { nodesState.nodes }
-            .filter { it.isNotEmpty() }
+        snapshotFlow { nodesState?.nodes }
+            .filter { it?.isNotEmpty() == true }
             .first()
             .let { nodesList ->
                 val firstOpenOrLocked =
-                    nodesList.firstOrNull {
+                    nodesList?.firstOrNull {
                         it.status == NodeStatus.OPEN || it.status == NodeStatus.LOCKED
                     }
                 firstOpenOrLocked?.let { node ->
@@ -144,7 +144,7 @@ fun MapScreen(
 private fun InteractiveMap(
     mapResourceId: Int,
     mapViewModel: MapViewModel,
-    nodesViewModel: NodesViewModel,
+    nodesViewModel: INodesViewModel,
     modifier: Modifier = Modifier,
 ) {
     val mapState by mapViewModel.state.collectAsState()
@@ -182,7 +182,7 @@ private fun InteractiveMap(
                     ),
         )
 
-        nodesState.nodes.forEach { node ->
+        nodesState?.nodes?.forEach { node ->
             NodeOnMap(
                 node = node,
                 mapState = mapState,
@@ -211,7 +211,9 @@ fun MapScreen_Preview() {
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
-                    MapScreen()
+                    MapScreen(
+                        nodesViewModel = NodesFakeViewModel(),
+                    )
                     DashboardScreen(
                         usersViewModel =
                             UsersFakeViewModel(
