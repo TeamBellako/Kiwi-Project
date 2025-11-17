@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Display1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -239,6 +241,7 @@ fun CalendarWeekView(
                         day = day,
                         isSelected = isSelected,
                         onClicked = {
+                            AudioManager.playSFX(context, R.raw.snd_ui_tap)
                             selectedDayIndex = index
                             selectDay(
                                 coroutineScope,
@@ -416,6 +419,7 @@ fun CalendarMonth(
                                 day = dayDate,
                                 isSelected = stringToDate(metricsState.date) == dayDate,
                                 onClicked = {
+                                    AudioManager.playSFX(context, R.raw.snd_ui_tap)
                                     selectDay(
                                         coroutineScope,
                                         metricsViewModel,
@@ -573,6 +577,7 @@ fun ShowCalendarButton(
     isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
 ) {
+    AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_button)
     Box(
         modifier =
             Modifier
