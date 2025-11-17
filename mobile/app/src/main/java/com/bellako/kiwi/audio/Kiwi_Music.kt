@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.R
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Music_Login() {
     val context = LocalContext.current
@@ -19,6 +20,7 @@ fun Kiwi_Music_Login() {
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Music_SignUp() {
     val context = LocalContext.current
@@ -33,6 +35,7 @@ fun Kiwi_Music_SignUp() {
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Music_Home() {
     val context = LocalContext.current
@@ -47,6 +50,7 @@ fun Kiwi_Music_Home() {
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Music_Settings() {
     val context = LocalContext.current
