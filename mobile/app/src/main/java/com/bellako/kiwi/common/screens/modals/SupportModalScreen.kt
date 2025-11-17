@@ -30,6 +30,8 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.BuildConfig
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -53,6 +55,8 @@ fun SupportModalScreen(navController: NavController) {
                 .background(LocalKiwiColors.current.color2),
         contentAlignment = Alignment.Center,
     ) {
+        AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_modalopen)
+
         SupportScreenLayout(navController)
     }
 }

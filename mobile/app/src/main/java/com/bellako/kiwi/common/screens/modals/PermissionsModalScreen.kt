@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -39,8 +38,10 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -95,6 +96,7 @@ fun PermissionsModalScreen(
     }
 
     if (isPreview || (!hasPermissions.value && !isExclusion)) {
+        AudioManager.playSFX(context, R.raw.snd_ui_modalopen)
         PermissionRequestLayout(context)
     } else {
         withPermissions()
@@ -104,7 +106,6 @@ fun PermissionsModalScreen(
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 private fun PermissionRequestLayout(context: Context) {
-
     val kiwiColors = LocalKiwiColors.current
 
     Box(

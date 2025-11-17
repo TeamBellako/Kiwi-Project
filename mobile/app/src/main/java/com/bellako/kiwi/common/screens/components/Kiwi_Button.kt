@@ -28,10 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.changedToDown
-import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
@@ -94,6 +91,7 @@ fun Kiwi_Button(
         }
     }
 }
+
 @Composable
 fun Kiwi_HoldButton(
     modifier: Modifier = Modifier,
@@ -126,7 +124,7 @@ fun Kiwi_HoldButton(
         startTime = startTime,
         onProgressChange = { targetProgress = it },
         onComplete = {
-            AudioManager.playSFX(context, R.raw.snd_ui_button)
+            AudioManager.playSFX(context, R.raw.snd_ui_tap2)
             onHoldComplete()
         },
     )
@@ -223,8 +221,11 @@ private fun HoldButtonContent(
             contentAlignment = Alignment.Center,
         ) {
             val actualTextArgs =
-                if (isEnabled) textArguments
-                else textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                if (isEnabled) {
+                    textArguments
+                } else {
+                    textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                }
             Kiwi_Label1(actualTextArgs)
         }
     }
@@ -234,24 +235,25 @@ private fun Modifier.holdGestureHandler(
     enabled: Boolean,
     onHoldStart: () -> Unit,
     onHoldEnd: () -> Unit,
-): Modifier = pointerInput(enabled) {
-    if (!enabled) return@pointerInput
-    while (true) {
-        awaitPointerEventScope {
-            awaitFirstDown(requireUnconsumed = false)
-            onHoldStart()
-            while (true) {
-                val event = awaitPointerEvent()
-                val isPressed = event.changes.any { it.pressed }
-                if (!isPressed) {
-                    onHoldEnd()
-                    break
+): Modifier =
+    pointerInput(enabled) {
+        if (!enabled) return@pointerInput
+        while (true) {
+            awaitPointerEventScope {
+                awaitFirstDown(requireUnconsumed = false)
+                onHoldStart()
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val isPressed = event.changes.any { it.pressed }
+                    if (!isPressed) {
+                        onHoldEnd()
+                        break
+                    }
+                    event.changes.forEach { it.consume() }
                 }
-                event.changes.forEach { it.consume() }
             }
         }
     }
-}
 
 // -------------------------------------------------------------------------------------------------
 

@@ -24,12 +24,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.appbar.data.appBarItems
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -55,6 +58,7 @@ fun AppBarScreen(navController: NavController) {
 fun AppBarModalLayout(navController: NavController) {
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
     val kiwiColors = LocalKiwiColors.current
+    val context = LocalContext.current
 
     NavigationBar(
         modifier =
@@ -77,6 +81,7 @@ fun AppBarModalLayout(navController: NavController) {
                 enabled = item.enabled,
                 selected = selectedNavigationIndex.intValue == index,
                 onClick = {
+                    AudioManager.playSFX(context, R.raw.snd_ui_navigationtransition)
                     selectedNavigationIndex.intValue = index
                     navController.navigate(item.route)
                 },
