@@ -264,5 +264,5 @@ public class QuestService {
                 .completedQuest(completedQuestDTO)
                 .build();
     }
-    
+
 }
