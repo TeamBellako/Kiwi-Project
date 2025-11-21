@@ -1,5 +1,7 @@
 package com.kiwi.features.quests.data;
 
+import com.kiwi.features.quests.controllers.SubquestRepository;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,12 +36,12 @@ public class SubquestMapper {
     ) {
         if (subquests == null) return Collections.emptyList();
 
-        Map<Long, UserSubquestStatusPersistence> statusBySubId = (userStatuses == null)
+        Map<Integer, UserSubquestStatusPersistence> statusBySubId = (userStatuses == null)
                 ? Collections.emptyMap()
                 : userStatuses.stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(
-                        s -> Long.valueOf(s.getId().getSubquestId()),
+                        s -> s.getId().getSubquestId(),
                         s -> s,
                         (a, b) -> a
                 ));
@@ -66,18 +68,23 @@ public class SubquestMapper {
     }
 
     // Domain -> UserSubquestStatusPersistence (guardar estado del usuario)
-    public static UserSubquestStatusPersistence toPersistence(int userId, SubquestDomain domain) {
+    public static UserSubquestStatusPersistence toPersistence(int userId, SubquestDomain domain, SubquestRepository subRepo) {
         UserSubquestStatusPersistence persistence = new UserSubquestStatusPersistence();
-        persistence.setId(new UserSubquestStatusKey(userId, domain.getSubquestId().intValue()));
+        persistence.setId(new UserSubquestStatusKey(userId, domain.getSubquestId()));
+
         persistence.setStatus(domain.getStatus());
+        SubquestPersistence subquestPersistence = subRepo.findById(domain.getSubquestId())
+                .orElseThrow(() -> new IllegalStateException("Subquest no encontrada: " + domain.getSubquestId()));
+        persistence.setSubquest(subquestPersistence);
         return persistence;
     }
 
     // Persistence + desired status -> UserSubquestStatusPersistence (inicializar subquests)
     public static UserSubquestStatusPersistence toPersistence(int userId, SubquestPersistence sq, SubquestStatus status) {
         UserSubquestStatusPersistence persistence = new UserSubquestStatusPersistence();
-        persistence.setId(new UserSubquestStatusKey(userId, sq.getId().intValue()));
+        persistence.setId(new UserSubquestStatusKey(userId, sq.getId()));
         persistence.setStatus(status);
+        persistence.setSubquest(sq);
         return persistence;
     }
 }

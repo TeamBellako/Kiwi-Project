@@ -4,7 +4,7 @@ import lombok.*;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @EqualsAndHashCode @ToString
 public class SubquestDTO {
-    private Long subquestId;
+    private int subquestId;
     private String name;
     private int experience;
     private int order;

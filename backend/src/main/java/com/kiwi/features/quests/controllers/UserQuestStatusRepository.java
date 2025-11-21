@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface UserQuestStatusRepository extends JpaRepository<UserQuestStatusPersistence, UserQuestStatusKey> {
 
-    List<UserQuestStatusPersistence> findByIdUserId(long userId);
+    List<UserQuestStatusPersistence> findByIdUserId(int userId);
 
-    Optional<UserQuestStatusPersistence> findByIdUserIdAndIdQuestId(long userId, long questId);
+    Optional<UserQuestStatusPersistence> findByIdUserIdAndIdQuestId(int userId, int questId);
 }

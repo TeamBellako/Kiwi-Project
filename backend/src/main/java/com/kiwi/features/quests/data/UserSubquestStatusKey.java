@@ -10,8 +10,8 @@ import lombok.*;
 public class UserSubquestStatusKey implements Serializable {
 
     @Column(name = "user_id")
-    private long userId;
+    private int userId;
 
     @Column(name = "subquest_id")
-    private long subquestId;
+    private int subquestId;
 }

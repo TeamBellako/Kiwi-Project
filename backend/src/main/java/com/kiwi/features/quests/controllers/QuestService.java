@@ -2,7 +2,6 @@ package com.kiwi.features.quests.controllers;
 
 import com.kiwi.features.quests.data.*;
 import com.kiwi.features.quests.exceptions.*;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,7 +62,7 @@ public class QuestService {
                     List<UserSubquestStatusPersistence> userSubs =
                             userSubquestStatusRepository.findByUserIdAndQuestIdOrdered(
                                     userId,
-                                    quest.getId().intValue()
+                                    quest.getId()
                             );
 
                     List<SubquestDomain> subDomains =
@@ -82,7 +81,7 @@ public class QuestService {
     // ============================================================================================
 
     @Transactional
-    public QuestDTO giveQuestToUser(int userId, long questId) {
+    public QuestDTO giveQuestToUser(int userId, int questId) {
 
         QuestPersistence quest = questRepository.findById(questId)
                 .orElseThrow(() -> new QuestNotFoundException(questId));
@@ -140,22 +139,23 @@ public class QuestService {
     // ============================================================================================
 
     @Transactional
-    public void initializeSubquests(int userId, long questId) {
+    public void initializeSubquests(int userId, int questId) {
 
         List<SubquestPersistence> subquests =
                 subquestRepository.findAllByQuestIdOrderByOrderIndex(questId);
 
         for (int i = 0; i < subquests.size(); i++) {
 
-            SubquestPersistence sq = subquests.get(i);
+            SubquestPersistence subquest = subquests.get(i);
 
-            UserSubquestStatusPersistence us = new UserSubquestStatusPersistence();
-            us.setId(new UserSubquestStatusKey(userId, sq.getId().intValue()));
+            UserSubquestStatusPersistence subquestStatus = new UserSubquestStatusPersistence();
+            subquestStatus.setId(new UserSubquestStatusKey(userId, subquest.getId()));
 
             // primera subquest = ACTIVE, resto LOCKED
-            us.setStatus(i == 0 ? SubquestStatus.ACTIVE : SubquestStatus.LOCKED);
+            subquestStatus.setStatus(i == 0 ? SubquestStatus.ACTIVE : SubquestStatus.LOCKED);
+            subquestStatus.setSubquest(subquest);
 
-            userSubquestStatusRepository.save(us);
+            userSubquestStatusRepository.save(subquestStatus);
         }
     }
 
@@ -164,23 +164,23 @@ public class QuestService {
     // ============================================================================================
 
     @Transactional
-    public SubquestResultDTO completeSubquest(int userId, long subquestId) {
+    public SubquestResultDTO completeSubquest(int userId, int subquestId) {
         return processSubquestUpdate(userId, subquestId, false);
     }
 
     @Transactional
-    public SubquestResultDTO failSubquest(int userId, long subquestId) {
+    public SubquestResultDTO failSubquest(int userId, int subquestId) {
         return processSubquestUpdate(userId, subquestId, true);
     }
 
     @Transactional
-    private SubquestResultDTO processSubquestUpdate(int userId, long subquestId, boolean isFail) {
+    private SubquestResultDTO processSubquestUpdate(int userId, int subquestId, boolean isFail) {
 
         SubquestPersistence subquest = subquestRepository.findById(subquestId)
                 .orElseThrow(() -> new SubquestNotFoundException(subquestId));
 
         UserSubquestStatusPersistence current =
-                userSubquestStatusRepository.findByIdUserIdAndIdSubquestId(userId, (int) subquestId)
+                userSubquestStatusRepository.findByIdUserIdAndIdSubquestId(userId, subquestId)
                         .orElseThrow(() -> new SubquestStatusNotFoundException(subquestId));
 
         // --- Convertir a dominio ---
@@ -192,7 +192,7 @@ public class QuestService {
 
         // --- Guardar nuevo estado ---
         UserSubquestStatusPersistence persistence =
-                SubquestMapper.toPersistence(userId, updated);
+                SubquestMapper.toPersistence(userId, updated, subquestRepository);
 
         userSubquestStatusRepository.save(persistence);
 
@@ -206,7 +206,7 @@ public class QuestService {
 
         int index = -1;
         for (int i = 0; i < questSubs.size(); i++) {
-            if (questSubs.get(i).getId().equals(subquestId)) {
+            if (questSubs.get(i).getId() == subquestId) {
                 index = i;
                 break;
             }
@@ -216,7 +216,7 @@ public class QuestService {
             SubquestPersistence next = questSubs.get(index + 1);
 
             UserSubquestStatusPersistence nextStatus =
-                    userSubquestStatusRepository.findByIdUserIdAndIdSubquestId(userId, next.getId().intValue())
+                    userSubquestStatusRepository.findByIdUserIdAndIdSubquestId(userId, next.getId())
                             .orElseThrow();
 
             if (nextStatus.getStatus() == SubquestStatus.LOCKED) {
@@ -224,7 +224,7 @@ public class QuestService {
                 SubquestDomain unlocked = progress.unlockSubquest(nextDomain);
 
                 UserSubquestStatusPersistence saved =
-                        userSubquestStatusRepository.save(SubquestMapper.toPersistence(userId, unlocked));
+                        userSubquestStatusRepository.save(SubquestMapper.toPersistence(userId, unlocked, subquestRepository));
 
                 nextSubquestDTO = SubquestMapper.toDTO(unlocked);
             }
@@ -244,7 +244,7 @@ public class QuestService {
 
             UserQuestStatusPersistence questStatus =
                     userQuestStatusRepository
-                            .findByIdUserIdAndIdQuestId(userId, subquest.getQuest().getId().intValue())
+                            .findByIdUserIdAndIdQuestId(userId, subquest.getQuest().getId())
                             .orElseThrow();
 
             QuestDomain questDomain =

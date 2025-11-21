@@ -92,7 +92,7 @@ public class QuestControllerTests {
                     setEmail("test@test.com");
                 }}));
 
-        when(questService.giveQuestToUser(1, 1L)).thenReturn(new QuestDTO());
+        when(questService.giveQuestToUser(1, 1)).thenReturn(new QuestDTO());
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/1/give", null)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -108,7 +108,7 @@ public class QuestControllerTests {
                     setEmail("test@test.com");
                 }}));
 
-        when(questService.completeSubquest(1, 1L))
+        when(questService.completeSubquest(1, 1))
                 .thenReturn(SubquestResultDTO.builder().build());
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/subquests/1/complete", null)
@@ -125,7 +125,7 @@ public class QuestControllerTests {
                     setEmail("test@test.com");
                 }}));
 
-        when(questService.failSubquest(1, 1L))
+        when(questService.failSubquest(1, 1))
                 .thenReturn(SubquestResultDTO.builder().build());
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/subquests/1/fail", null)

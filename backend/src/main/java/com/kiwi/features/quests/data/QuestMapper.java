@@ -69,7 +69,7 @@ public class QuestMapper {
     // --------------------------------------------------------------------------------------------
     public static UserQuestStatusPersistence toPersistence(int userId, QuestDomain domain) {
         UserQuestStatusPersistence persistence = new UserQuestStatusPersistence();
-        persistence.setId(new UserQuestStatusKey(userId, domain.getQuestId().intValue()));
+        persistence.setId(new UserQuestStatusKey(userId, domain.getQuestId()));
         persistence.setStatus(domain.getStatus());
         return persistence;
     }
@@ -81,7 +81,7 @@ public class QuestMapper {
     // --------------------------------------------------------------------------------------------
     public static UserQuestStatusPersistence toPersistence(int userId, QuestPersistence quest, QuestStatus status) {
         UserQuestStatusPersistence persistence = new UserQuestStatusPersistence();
-        persistence.setId(new UserQuestStatusKey(userId, quest.getId().intValue()));
+        persistence.setId(new UserQuestStatusKey(userId, quest.getId()));
         persistence.setStatus(status);
         return persistence;
     }

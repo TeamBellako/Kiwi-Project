@@ -58,7 +58,7 @@ public class QuestController {
     @PostMapping("/{questId}/give")
     public ResponseEntity<QuestDTO> giveQuest(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable long questId
+            @PathVariable int questId
     ) {
         int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
@@ -75,7 +75,7 @@ public class QuestController {
     @PostMapping("/subquests/{subquestId}/complete")
     public ResponseEntity<SubquestResultDTO> completeSubquest(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable long subquestId
+            @PathVariable int subquestId
     ) {
         int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
@@ -88,7 +88,7 @@ public class QuestController {
     @PostMapping("/subquests/{subquestId}/fail")
     public ResponseEntity<SubquestResultDTO> failSubquest(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable long subquestId
+            @PathVariable int subquestId
     ) {
         int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()

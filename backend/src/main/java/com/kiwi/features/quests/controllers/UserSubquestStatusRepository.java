@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface UserSubquestStatusRepository extends JpaRepository<UserSubquestStatusPersistence, UserSubquestStatusKey> {
 
-    Optional<UserSubquestStatusPersistence> findByIdUserIdAndIdSubquestId(long userId, int subquestId);
+    Optional<UserSubquestStatusPersistence> findByIdUserIdAndIdSubquestId(int userId, int subquestId);
 
     @Query("""
         SELECT us
@@ -22,7 +22,7 @@ public interface UserSubquestStatusRepository extends JpaRepository<UserSubquest
         ORDER BY s.orderIndex
     """)
     List<UserSubquestStatusPersistence> findByUserIdAndQuestIdOrdered(
-            @Param("userId") long userId,
-            @Param("questId") long questId
+            @Param("userId") int userId,
+            @Param("questId") int questId
     );
 }
