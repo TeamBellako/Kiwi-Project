@@ -69,7 +69,7 @@ public class QuestServiceTests {
         SubquestPersistence s1 = subRepo.saveAndFlush(subquest(100, questObj, 1));
         SubquestPersistence s2 = subRepo.saveAndFlush(subquest(101, questObj, 2));
 
-        QuestDTO dto = service.giveQuestToUser(userId, 10);
+        QuestDTO dto = service.giveQuestToUser(userId, questObj.getId());
 
         assertEquals(questObj.getId(), dto.getQuestId());
         assertEquals(QuestStatus.ACTIVE.name(), dto.getStatus());
@@ -97,7 +97,7 @@ public class QuestServiceTests {
 
         service.giveQuestToUser(userId, questObj.getId());
 
-        SubquestResultDTO result = service.completeSubquest(userId, 10);
+        SubquestResultDTO result = service.completeSubquest(userId, questObj.getId());
 
         assertEquals(SubquestStatus.COMPLETED.name(), result.getUpdatedSubquest().getStatus());
         assertNotNull(result.getNextSubquest());

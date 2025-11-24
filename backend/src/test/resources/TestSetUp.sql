@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS personality (
     CONSTRAINT fk_personality_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Create nodes table (needed to restart id count)
 DROP TABLE IF EXISTS nodes;
-
 CREATE TABLE nodes (
     id INT PRIMARY KEY,
     node_order INT NOT NULL,
@@ -64,3 +64,7 @@ VALUES (1,1,100,0,0),
        (2,2,150,0,0),
        (3,3,200,0,0),
        (4,4,200,0,0);
+
+
+
+

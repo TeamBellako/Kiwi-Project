@@ -4,6 +4,7 @@ import com.kiwi.common.types.Email;
 import com.kiwi.features.quests.data.QuestDTO;
 import com.kiwi.features.quests.data.SubquestResultDTO;
 import com.kiwi.features.users.controllers.UsersService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,7 +30,7 @@ public class QuestController {
 
     @GetMapping("/active")
     public ResponseEntity<List<QuestDTO>> getActiveQuests(
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal @NotNull UserDetails userDetails
     ) {
         int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()

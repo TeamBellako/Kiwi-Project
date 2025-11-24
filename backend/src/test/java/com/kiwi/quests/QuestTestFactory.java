@@ -10,7 +10,6 @@ public class QuestTestFactory {
 
     public static QuestPersistence quest(int id) {
         QuestPersistence q = new QuestPersistence();
-        q.setId(id);
         q.setName("Quest"+id);
         q.setDescription("Description of "+id);
         q.setExperience(100+id);
@@ -23,7 +22,6 @@ public class QuestTestFactory {
 
     public static SubquestPersistence subquest(int id, QuestPersistence quest, int orderIndex) {
         SubquestPersistence s = new SubquestPersistence();
-        s.setId(id);
         s.setQuest(quest);
         s.setOrderIndex(orderIndex);
         s.setName("Sub" + id);
