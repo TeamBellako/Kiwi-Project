@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
@@ -46,7 +45,6 @@ fun Kiwi_InputField(
     testTag: String,
     modifier: Modifier = Modifier,
 ) {
-
     Box(
         modifier =
             Modifier
@@ -113,8 +111,7 @@ private fun ShowPasswordTrailingIcon(shouldShowPasswordState: MutableState<Boole
         painter =
             if (shouldShowPasswordState.value) {
                 painterResource(R.drawable.ic_eye_open)
-            }
-            else {
+            } else {
                 painterResource(R.drawable.ic_eye_closed)
             },
         tint = LocalKiwiColors.current.color5A,

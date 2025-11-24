@@ -38,6 +38,7 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
@@ -219,6 +220,12 @@ fun AppNavHost(
             AppScreenWrapper {
                 Kiwi_Music_Home()
                 MapScreen(nodesViewModel = nodesViewModel)
+            }
+        }
+
+        composable(ScreenRoutes.OBJECTIVES) {
+            AppScreenWrapper {
+                ObjectivesScreen()
             }
         }
 
