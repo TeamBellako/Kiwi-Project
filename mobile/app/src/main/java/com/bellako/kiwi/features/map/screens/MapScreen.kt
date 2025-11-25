@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
@@ -141,6 +142,16 @@ fun MapScreen(
 }
 
 @Composable
+fun BackgroundLayer() {
+    Kiwi_Image(
+        painterResourceId = R.drawable.tile_texture,
+        alt = "Background",
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.FillBounds,
+    )
+}
+
+@Composable
 private fun InteractiveMap(
     mapResourceId: Int,
     mapViewModel: MapViewModel,
@@ -168,6 +179,8 @@ private fun InteractiveMap(
                 },
         contentAlignment = Alignment.Center,
     ) {
+        BackgroundLayer()
+
         Kiwi_Image(
             painterResourceId = mapResourceId,
             alt = "Interactive Map",

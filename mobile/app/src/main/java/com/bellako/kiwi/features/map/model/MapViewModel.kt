@@ -102,9 +102,28 @@ class MapViewModel
             unSelectNode()
         }
 
+        private val elasticity = 0.25f
+
         override fun updateOffset(delta: Offset) {
-            val newOffset = calculateConstrainedOffset(_state.value.offset + delta, _state.value)
-            setOffset(newOffset)
+            val state = _state.value
+            val maxOffset = getMaxOffset(state)
+            val targetOffset = state.offset + delta
+
+            val x =
+                when {
+                    targetOffset.x < -maxOffset.x -> -maxOffset.x + (targetOffset.x + maxOffset.x) * elasticity
+                    targetOffset.x > maxOffset.x -> maxOffset.x + (targetOffset.x - maxOffset.x) * elasticity
+                    else -> targetOffset.x
+                }
+
+            val y =
+                when {
+                    targetOffset.y < -maxOffset.y -> -maxOffset.y + (targetOffset.y + maxOffset.y) * elasticity
+                    targetOffset.y > maxOffset.y -> maxOffset.y + (targetOffset.y - maxOffset.y) * elasticity
+                    else -> targetOffset.y
+                }
+
+            setOffset(Offset(x, y))
             updateFling(delta)
         }
 
