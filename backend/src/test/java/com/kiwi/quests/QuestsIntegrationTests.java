@@ -193,7 +193,7 @@ public class QuestsIntegrationTests {
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void faiLastSubquest() throws Exception {
+    public void failLastSubquest() throws Exception {
         var user = createUser();
 
         var quest = createQuestWithSubquests(1, 7, 8);
