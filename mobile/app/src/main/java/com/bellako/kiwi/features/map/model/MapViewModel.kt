@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 
@@ -31,6 +32,7 @@ class MapViewModel
         private var minScale: Float = 1f
         private var maxScale: Float = 0f
         private var dragLimitFactor: Float = 0f
+        private var mapMarginFactor: Float = 0.05f // 5% de margen proporcional al tamaño del mapa
 
         private val _state = MutableStateFlow(MapState(scale = initialScale))
         override val state: StateFlow<MapState> = _state.asStateFlow()
@@ -53,9 +55,16 @@ class MapViewModel
             mapHeightPx: Float,
             viewportWidthPx: Float,
             viewportHeightPx: Float,
+            mapMarginFactor: Float = 0.08f,
         ) {
             this.maxScale = maxScale
             this.dragLimitFactor = dragLimitFactor
+            this.mapMarginFactor = mapMarginFactor
+
+            val scaleX = (viewportWidthPx - 2 * mapWidthPx * mapMarginFactor) / mapWidthPx
+            val scaleY = (viewportHeightPx - 2 * mapHeightPx * mapMarginFactor) / mapHeightPx
+            minScale = min(scaleX, scaleY)
+            initialScale = minScale
 
             _state.value =
                 MapState(
@@ -98,7 +107,7 @@ class MapViewModel
             unSelectNode()
         }
 
-        private val elasticity = 0.25f
+        private val elasticity = 0.35f
 
         override fun updateOffset(delta: Offset) {
             val state = _state.value
@@ -141,9 +150,13 @@ class MapViewModel
         fun getMaxOffset(state: MapState): Offset {
             val scaledMapWidth = state.mapWidthPx * state.scale
             val scaledMapHeight = state.mapHeightPx * state.scale
+
+            val marginX = scaledMapWidth * mapMarginFactor
+            val marginY = scaledMapHeight * mapMarginFactor
+
             return Offset(
-                max(0f, (scaledMapWidth - state.viewportWidthPx) / 2f) * dragLimitFactor,
-                max(0f, (scaledMapHeight - state.viewportHeightPx) / 2f) * dragLimitFactor,
+                max(0f, (scaledMapWidth - state.viewportWidthPx) / 2f + marginX) * dragLimitFactor,
+                max(0f, (scaledMapHeight - state.viewportHeightPx) / 2f + marginY) * dragLimitFactor,
             )
         }
 
@@ -212,10 +225,7 @@ class MapViewModel
             val scaledMapWidth = state.mapWidthPx * state.scale
             val scaledMapHeight = state.mapHeightPx * state.scale
 
-            @Suppress("MagicNumber")
             val nodePosX = (nodeX - 0.5f) * scaledMapWidth
-
-            @Suppress("MagicNumber")
             val nodePosY = (0.5f - nodeY) * scaledMapHeight
 
             val newOffset = Offset(-nodePosX, -nodePosY)
