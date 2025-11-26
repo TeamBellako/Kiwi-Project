@@ -77,7 +77,6 @@ fun NodeOnMap(
     val baseNodeSizePx = with(density) { baseNodeSizeDP.toPx() }
     val scaledNodeSize = baseNodeSizePx * mapState.scale * scaleSelected
 
-    // Añadimos mapOffsetExtra a la posición
     val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2
     val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2
     val scaledX = (mapX * mapState.scale) + mapState.offset.x

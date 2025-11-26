@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +60,8 @@ import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * @param maxZoom how big (zoom in) the map can be, considering 1 the full map on screen
@@ -70,7 +73,7 @@ import kotlinx.coroutines.flow.first
 fun MapScreen(
     maxZoom: Float = 8f,
     dragLimitFactor: Float = 1f,
-    mapResourceId: Int = R.drawable.map_4k,
+    mapResourceId: Int = R.drawable.mindveil_4k,
     title: String = "WORLD MAP",
     nodesViewModel: INodesViewModel,
     mapViewModel: MapViewModel = hiltViewModel(),
@@ -78,14 +81,33 @@ fun MapScreen(
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
 
-    val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
-    val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
-
     @Suppress("MagicNumber")
     val viewportHeightPx =
-        with(density) { getScreenHeight().dp.toPx() } * 0.85f
-    val scaledMapHeight = imageBitmap.height * (viewportHeightPx / imageBitmap.width)
-    val minZoom = viewportHeightPx / scaledMapHeight
+        with(density) { getScreenHeight().dp.toPx() } * 0.84f // TODO CALCULAR REAL HEIGHT
+    val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
+
+    val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
+
+    val imageW = imageBitmap.width.toFloat()
+    val imageH = imageBitmap.height.toFloat()
+
+    val fitScale =
+        min(
+            viewportWidthPx / imageW,
+            viewportHeightPx / imageH,
+        )
+
+    val displayWidthPx = imageW * fitScale
+    val displayHeightPx = imageH * fitScale
+
+    mapViewModel.setParameters(
+        maxScale = maxZoom,
+        dragLimitFactor = dragLimitFactor,
+        mapWidthPx = displayWidthPx,
+        mapHeightPx = displayHeightPx,
+        viewportWidthPx = viewportWidthPx,
+        viewportHeightPx = viewportHeightPx,
+    )
 
     val nodesState by nodesViewModel.state.collectAsState()
     LaunchedEffect(Unit) {
@@ -103,17 +125,6 @@ fun MapScreen(
                 }
             }
     }
-
-    mapViewModel.setParameters(
-        minScale = minZoom,
-        maxScale = maxZoom,
-        initialScale = minZoom,
-        dragLimitFactor = dragLimitFactor,
-        mapWidthPx = imageBitmap.width.toFloat(),
-        mapHeightPx = imageBitmap.height.toFloat(),
-        viewportWidthPx = viewportWidthPx,
-        viewportHeightPx = viewportHeightPx,
-    )
 
     Column(
         modifier =
@@ -181,15 +192,18 @@ private fun InteractiveMap(
     ) {
         BackgroundLayer()
 
+        val imageWidthDp = with(LocalDensity.current) { mapState.mapWidthPx.toDp() }
+        val imageHeightDp = with(LocalDensity.current) { mapState.mapHeightPx.toDp() }
+
         Kiwi_Image(
             painterResourceId = mapResourceId,
             alt = "Interactive Map",
             modifier =
                 Modifier
-                    .fillMaxSize()
+                    .size(width = imageWidthDp, height = imageHeightDp)
                     .graphicsLayer(
-                        scaleX = mapState.scale * mapState.scaleBase,
-                        scaleY = mapState.scale * mapState.scaleBase,
+                        scaleX = mapState.scale,
+                        scaleY = mapState.scale,
                         translationX = mapState.offset.x,
                         translationY = mapState.offset.y,
                     ),

@@ -27,8 +27,8 @@ class MapViewModel
     constructor() :
     BaseViewModel(),
         IMapViewModel {
-        private var initialScale: Float = 0f
-        private var minScale: Float = 0f
+        private var initialScale: Float = 1f
+        private var minScale: Float = 1f
         private var maxScale: Float = 0f
         private var dragLimitFactor: Float = 0f
 
@@ -47,8 +47,6 @@ class MapViewModel
         // ---------------------------------------------------------------------------------------------
 
         fun setParameters(
-            initialScale: Float,
-            minScale: Float,
             maxScale: Float,
             dragLimitFactor: Float,
             mapWidthPx: Float,
@@ -56,24 +54,22 @@ class MapViewModel
             viewportWidthPx: Float,
             viewportHeightPx: Float,
         ) {
-            this.initialScale = initialScale
-            this.minScale = minScale
             this.maxScale = maxScale
             this.dragLimitFactor = dragLimitFactor
 
-            val scaledMapWidth = mapWidthPx * (viewportHeightPx / mapWidthPx)
-            val scaledMapHeight = mapHeightPx * (viewportHeightPx / mapWidthPx)
-
             _state.value =
-                _state.value.copy(
+                MapState(
                     scale = initialScale,
-                    scaleBase = viewportHeightPx / viewportWidthPx,
+                    offset = Offset(0f, 0f),
                     viewportWidthPx = viewportWidthPx,
                     viewportHeightPx = viewportHeightPx,
-                    mapWidthPx = scaledMapWidth,
-                    mapHeightPx = scaledMapHeight,
+                    mapWidthPx = mapWidthPx,
+                    mapHeightPx = mapHeightPx,
                 )
 
+            flingVelocity = Offset.Zero
+            flingLastPosition = Offset.Zero
+            flingLastTime = 0L
             updatePreviousState()
         }
 
@@ -145,7 +141,6 @@ class MapViewModel
         fun getMaxOffset(state: MapState): Offset {
             val scaledMapWidth = state.mapWidthPx * state.scale
             val scaledMapHeight = state.mapHeightPx * state.scale
-            // Half the difference between the scaled map size and the viewport size
             return Offset(
                 max(0f, (scaledMapWidth - state.viewportWidthPx) / 2f) * dragLimitFactor,
                 max(0f, (scaledMapHeight - state.viewportHeightPx) / 2f) * dragLimitFactor,
