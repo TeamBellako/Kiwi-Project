@@ -1,6 +1,5 @@
 package com.bellako.kiwi.features.map.screens
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +21,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
@@ -60,7 +58,7 @@ fun MapScreen(
     val density = LocalDensity.current
 
     val viewportHeightPx =
-        with(density) { getScreenHeight().dp.toPx() } * 0.84f // TODO CALCULATE REAL SPACE
+        with(density) { getScreenHeight().dp.toPx() } * 0.84f // approximate usable space
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
 
     val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
@@ -72,14 +70,17 @@ fun MapScreen(
     val displayWidthPx = imageW * fitScale
     val displayHeightPx = imageH * fitScale
 
-    mapViewModel.setParameters(
-        maxScale = maxZoom,
-        dragLimitFactor = dragLimitFactor,
-        mapWidthPx = displayWidthPx,
-        mapHeightPx = displayHeightPx,
-        viewportWidthPx = viewportWidthPx,
-        viewportHeightPx = viewportHeightPx,
-    )
+    // ensure setParameters is called once per composition with stable inputs
+    LaunchedEffect(maxZoom, dragLimitFactor, displayWidthPx, displayHeightPx, viewportWidthPx, viewportHeightPx) {
+        mapViewModel.setParameters(
+            maxScale = maxZoom,
+            dragLimitFactor = dragLimitFactor,
+            mapWidthPx = displayWidthPx,
+            mapHeightPx = displayHeightPx,
+            viewportWidthPx = viewportWidthPx,
+            viewportHeightPx = viewportHeightPx,
+        )
+    }
 
     val nodesState by nodesViewModel.state.collectAsState()
     LaunchedEffect(Unit) {
@@ -139,6 +140,7 @@ private fun InteractiveMap(
                 .pointerInput(Unit) {
                     detectTransformGesturesAndEnd(
                         onGesture = { centroid, pan, zoom, _ ->
+                            // centroid is in pixels (local to composable)
                             mapViewModel.updateScale(zoom, centroid)
                             mapViewModel.updateOffset(pan)
                         },

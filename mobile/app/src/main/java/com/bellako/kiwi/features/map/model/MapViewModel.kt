@@ -1,25 +1,27 @@
 package com.bellako.kiwi.features.map.model
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.features.map.data.MapState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.DurationUnit
 
-private const val FLING_FRICTION = 0.9f // to brake the velocity [0..1] the lower it is, the faster it stops
-private const val FLING_MIN_VELOCITY = 10f // threshold to stop the fling
+private const val FLING_FRICTION = 0.7f // friction per frame (closer to 1 -> slower braking)
+private const val FLING_MIN_VELOCITY = 10f // px/s threshold to stop the fling
 private const val FRAME_MILLIS = 16L
 
 @HiltViewModel
@@ -30,21 +32,21 @@ class MapViewModel
         IMapViewModel {
         private var initialScale: Float = 1f
         private var minScale: Float = 1f
-        private var maxScale: Float = 0f
-        private var dragLimitFactor: Float = 0f
-        private var mapMarginFactor: Float = 0.05f // 5% de margen proporcional al tamaño del mapa
+        private var maxScale: Float = 1f
+        private var dragLimitFactor: Float = 1f
+        private var mapMarginFactor: Float = 0.05f // 5% margin relative to map size
 
-        private val _state = MutableStateFlow(MapState(scale = initialScale))
-        override val state: StateFlow<MapState> = _state.asStateFlow()
-        override val previousState = MutableStateFlow(MapState())
+        private val _state = kotlinx.coroutines.flow.MutableStateFlow(MapState(scale = initialScale))
+        override val state: kotlinx.coroutines.flow.StateFlow<MapState> = _state.asStateFlow()
+        override val previousState = kotlinx.coroutines.flow.MutableStateFlow(MapState())
 
-        private val _selectedNodeId = MutableStateFlow<Int?>(null)
-        val selectedNodeId: StateFlow<Int?> = _selectedNodeId.asStateFlow()
+        private val _selectedNodeId = kotlinx.coroutines.flow.MutableStateFlow<Int?>(null)
+        val selectedNodeId: kotlinx.coroutines.flow.StateFlow<Int?> = _selectedNodeId.asStateFlow()
 
         private var flingJob: Job? = null
-        private var flingLastPosition = Offset(0f, 0f)
-        private var flingLastTime = 0L
-        private var flingVelocity = Offset(0f, 0f)
+        private var lastPointerPosition = Offset.Zero
+        private var lastPointerTime = 0L
+        private var velocityPxPerSec = Offset.Zero
 
         // ---------------------------------------------------------------------------------------------
 
@@ -63,8 +65,8 @@ class MapViewModel
 
             val scaleX = (viewportWidthPx - 2 * mapWidthPx * mapMarginFactor) / mapWidthPx
             val scaleY = (viewportHeightPx - 2 * mapHeightPx * mapMarginFactor) / mapHeightPx
-            minScale = min(scaleX, scaleY)
-            initialScale = minScale
+            minScale = min(scaleX, scaleY).coerceAtMost(maxScale)
+            initialScale = minScale.coerceAtLeast(0.01f)
 
             _state.value =
                 MapState(
@@ -76,9 +78,9 @@ class MapViewModel
                     mapHeightPx = mapHeightPx,
                 )
 
-            flingVelocity = Offset.Zero
-            flingLastPosition = Offset.Zero
-            flingLastTime = 0L
+            velocityPxPerSec = Offset.Zero
+            lastPointerPosition = Offset.Zero
+            lastPointerTime = 0L
             updatePreviousState()
         }
 
@@ -100,8 +102,9 @@ class MapViewModel
             scaleFactor: Float,
             centroid: Offset,
         ) {
-            val newScale = (_state.value.scale * scaleFactor).coerceIn(minScale, maxScale)
-            val newOffset = calculateOffsetForZoom(_state.value, newScale, centroid)
+            val state = _state.value
+            val newScale = (state.scale * scaleFactor).coerceIn(minScale, maxScale)
+            val newOffset = calculateOffsetForZoom(state, newScale, centroid)
             setScale(newScale)
             setOffset(newOffset)
             unSelectNode()
@@ -132,18 +135,19 @@ class MapViewModel
             updateFling(delta)
         }
 
+        /**
+         * Zoom math: keep the point under the centroid steady while scaling.
+         */
         private fun calculateOffsetForZoom(
             state: MapState,
             newScale: Float,
             centroid: Offset,
         ): Offset {
+            val center = Offset(state.viewportWidthPx / 2f, state.viewportHeightPx / 2f)
+            val focus = centroid - center
             val scaleFactor = newScale / state.scale
-
-            val centroidRelativeToCenter = centroid - Offset(state.viewportWidthPx / 2f, state.viewportHeightPx / 2f)
-
-            val offsetDelta = centroidRelativeToCenter * (1f - scaleFactor)
-            val newOffset = (state.offset + offsetDelta) * scaleFactor
-
+            // (state.offset - focus) scaled, then add focus back
+            val newOffset = (state.offset - focus) * scaleFactor + focus
             return calculateConstrainedOffset(newOffset, state.copy(scale = newScale))
         }
 
@@ -174,28 +178,72 @@ class MapViewModel
 
         private fun updateFling(delta: Offset) {
             val now = System.currentTimeMillis()
-            val elapsed = now - flingLastTime
-            if (elapsed > 0L) {
-                val newPos = flingLastPosition + delta
-                flingVelocity = (newPos - flingLastPosition) / elapsed.milliseconds.toDouble(DurationUnit.SECONDS).toFloat()
-                flingLastPosition = newPos
-                flingLastTime = now
+            if (lastPointerTime == 0L) {
+                lastPointerTime = now
+                lastPointerPosition = delta
+                return
             }
+            val elapsed = now - lastPointerTime
+            if (elapsed <= 0L) {
+                lastPointerTime = now
+                lastPointerPosition = lastPointerPosition + delta
+                return
+            }
+            // compute velocity in px/sec
+            val newPos = lastPointerPosition + delta
+            val vx = (newPos.x - lastPointerPosition.x) / (elapsed / 1000f)
+            val vy = (newPos.y - lastPointerPosition.y) / (elapsed / 1000f)
+            velocityPxPerSec = Offset(vx, vy)
+            lastPointerPosition = newPos
+            lastPointerTime = now
         }
 
+        /**
+         * Smooth fling implemented as a coroutine loop updating offset at ~60fps applying friction.
+         * Uses safe main-thread state updates via viewModelScope.
+         */
         fun startFling() {
             flingJob?.cancel()
-            var velocity = flingVelocity
+            // copy velocity start
+            var vel = velocityPxPerSec
+            // quick guard
+            if (abs(vel.x) < FLING_MIN_VELOCITY && abs(vel.y) < FLING_MIN_VELOCITY) {
+                velocityPxPerSec = Offset.Zero
+                return
+            }
             flingJob =
                 viewModelScope.launch {
-                    while (abs(velocity.x) > FLING_MIN_VELOCITY || abs(velocity.y) > FLING_MIN_VELOCITY) {
-                        val delta = velocity * FRAME_MILLIS.milliseconds.toDouble(DurationUnit.SECONDS).toFloat() // Calculate displacement
-                        velocity *= FLING_FRICTION // Brake
-                        updateOffset(delta)
+                    // animate until both velocity components drop under threshold
+                    while (isActive && (abs(vel.x) > FLING_MIN_VELOCITY || abs(vel.y) > FLING_MIN_VELOCITY)) {
+                        // displacement for this frame (px)
+                        val dtSec = FRAME_MILLIS / 1000f
+                        val delta = vel * dtSec
+                        val state = _state.value
+                        val maxOffset = getMaxOffset(state)
+                        // compute tentative new offset and clamp
+                        val tentative = state.offset + delta
+                        val constrained = calculateConstrainedOffset(tentative, state)
+                        setOffset(constrained)
+
+                        // apply friction to velocity
+                        vel = vel * FLING_FRICTION
+
+                        // If we hit bounds, reflect a bit (soft collision) and reduce velocity
+                        val hitX = constrained.x == -maxOffset.x || constrained.x == maxOffset.x
+                        val hitY = constrained.y == -maxOffset.y || constrained.y == maxOffset.y
+                        if (hitX) vel = Offset(-vel.x * 0.35f, vel.y)
+                        if (hitY) vel = Offset(vel.x, -vel.y * 0.35f)
+
                         delay(FRAME_MILLIS)
                     }
+                    // clear velocities
+                    velocityPxPerSec = Offset.Zero
+                    lastPointerTime = 0L
+                    lastPointerPosition = Offset.Zero
                 }
         }
+
+        // ---------------------------------------------------------------------------------------------
 
         fun selectNode(
             nodeId: Int,
@@ -203,7 +251,7 @@ class MapViewModel
             nodeY: Float,
         ) {
             setSelectedNode(nodeId)
-            focusOnNode(nodeX, nodeY)
+            focusOnNodeAnimated(nodeX, nodeY)
         }
 
         fun unSelectNode() {
@@ -216,22 +264,82 @@ class MapViewModel
             _selectedNodeId.value = nodeId
         }
 
-        fun focusOnNode(
+        fun focusOnNodeAnimated(
             nodeX: Float,
             nodeY: Float,
         ) {
-            val state = _state.value.copy(scale = maxScale)
+            flingJob?.cancel()
 
-            val scaledMapWidth = state.mapWidthPx * state.scale
-            val scaledMapHeight = state.mapHeightPx * state.scale
+            viewModelScope.launch(AndroidUiDispatcher.Main) {
+                val startState = _state.value
 
-            val nodePosX = (nodeX - 0.5f) * scaledMapWidth
-            val nodePosY = (0.5f - nodeY) * scaledMapHeight
+                val targetScale = maxScale.coerceAtLeast(startState.scale)
 
-            val newOffset = Offset(-nodePosX, -nodePosY)
-            val constrainedOffset = calculateConstrainedOffset(newOffset, state)
+                val scaledMapWidth = startState.mapWidthPx * targetScale
+                val scaledMapHeight = startState.mapHeightPx * targetScale
 
-            _state.value = state.copy(offset = constrainedOffset)
-            updatePreviousState()
+                val nodePosX = (nodeX - 0.5f) * scaledMapWidth
+                val nodePosY = (0.5f - nodeY) * scaledMapHeight
+                val desiredOffset = Offset(-nodePosX, -nodePosY)
+
+                val constrainedTargetOffset =
+                    calculateConstrainedOffset(desiredOffset, startState.copy(scale = targetScale))
+
+                val scaleAnim = Animatable(startState.scale)
+                val offsetAnim = Animatable(startState.offset, Offset.VectorConverter)
+
+                val animationScope = this
+
+                val offsetJob =
+                    animationScope.launch {
+                        offsetAnim.animateTo(
+                            targetValue = constrainedTargetOffset,
+                            animationSpec =
+                                tween(
+                                    durationMillis = 400,
+                                    easing = FastOutSlowInEasing,
+                                ),
+                        )
+                    }
+
+                val scaleJob =
+                    animationScope.launch {
+                        scaleAnim.animateTo(
+                            targetValue = targetScale,
+                            animationSpec =
+                                tween(
+                                    durationMillis = 400,
+                                    easing = FastOutSlowInEasing,
+                                ),
+                        )
+                    }
+
+                while (offsetJob.isActive || scaleJob.isActive) {
+                    setScale(scaleAnim.value)
+
+                    val constrained =
+                        calculateConstrainedOffset(
+                            offsetAnim.value,
+                            _state.value.copy(scale = scaleAnim.value),
+                        )
+                    setOffset(constrained)
+
+                    delay(FRAME_MILLIS)
+                }
+
+                setScale(scaleAnim.value)
+                setOffset(
+                    calculateConstrainedOffset(
+                        offsetAnim.value,
+                        _state.value.copy(scale = scaleAnim.value),
+                    ),
+                )
+                updatePreviousState()
+            }
+        }
+
+        override fun onCleared() {
+            super.onCleared()
+            flingJob?.cancel()
         }
     }
