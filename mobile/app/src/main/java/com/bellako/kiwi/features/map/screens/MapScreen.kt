@@ -36,6 +36,7 @@ import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
+import com.bellako.kiwi.ui.KiwiColors
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -140,7 +141,6 @@ private fun InteractiveMap(
                 .pointerInput(Unit) {
                     detectTransformGesturesAndEnd(
                         onGesture = { centroid, pan, zoom, _ ->
-                            // centroid is in pixels (local to composable)
                             mapViewModel.updateScale(zoom, centroid)
                             mapViewModel.updateOffset(pan)
                         },
@@ -190,7 +190,7 @@ fun Background() {
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(Color(0xFF007CAC)),
+                .background(LocalKiwiColors.current.colorOcean),
     )
     // val imageBitmap: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.tile_texture)
     //  Canvas(modifier = Modifier.fillMaxSize()) {

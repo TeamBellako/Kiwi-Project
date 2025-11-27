@@ -1,6 +1,5 @@
 package com.bellako.kiwi.ui
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 @Suppress("MagicNumber")
@@ -122,3 +121,6 @@ val KiwiColorR = Color(0xFFBF4039)
 
 @Suppress("MagicNumber")
 val KiwiColorR1 = Color(0xFF752723)
+
+@Suppress("MagicNumber")
+val KiwiColorOcean = Color(0xFF007DAD)
