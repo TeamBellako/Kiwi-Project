@@ -15,10 +15,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -36,7 +33,6 @@ import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
-import com.bellako.kiwi.ui.KiwiColors
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -50,6 +46,8 @@ import kotlin.math.min
 fun MapScreen(
     maxZoom: Float = 8f,
     dragLimitFactor: Float = 1f,
+    mapMarginFactor: Float = 0.08f,
+    elasticityFactor: Float = 0.4f,
     mapResourceId: Int = R.drawable.mindveil_4k,
     title: String = "WORLD MAP",
     nodesViewModel: INodesViewModel,
@@ -58,6 +56,7 @@ fun MapScreen(
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
 
+    @Suppress("MagicNumber")
     val viewportHeightPx =
         with(density) { getScreenHeight().dp.toPx() } * 0.84f // approximate usable space
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
@@ -80,6 +79,8 @@ fun MapScreen(
             mapHeightPx = displayHeightPx,
             viewportWidthPx = viewportWidthPx,
             viewportHeightPx = viewportHeightPx,
+            mapMarginFactor = mapMarginFactor,
+            elasticityFactor = elasticityFactor,
         )
     }
 
@@ -197,7 +198,7 @@ fun Background() {
     //    drawTiledBitmap(imageBitmap)
     // }
 }
-
+/*
 private fun DrawScope.drawTiledBitmap(bitmap: ImageBitmap) {
     val tileWidth = bitmap.width.toFloat()
     val tileHeight = bitmap.height.toFloat()
@@ -214,3 +215,4 @@ private fun DrawScope.drawTiledBitmap(bitmap: ImageBitmap) {
         y += tileHeight
     }
 }
+*/

@@ -12,6 +12,7 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 
 @Composable
 fun ObjectivesScreen() {
+    // TODO
 }
 
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)

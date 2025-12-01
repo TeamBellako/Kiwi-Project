@@ -34,7 +34,8 @@ class MapViewModel
         private var minScale: Float = 1f
         private var maxScale: Float = 1f
         private var dragLimitFactor: Float = 1f
-        private var mapMarginFactor: Float = 0.05f // 5% margin relative to map size
+        private var mapMarginFactor: Float = 0f
+        private var elasticityFactor = 0f
 
         private val _state = kotlinx.coroutines.flow.MutableStateFlow(MapState(scale = initialScale))
         override val state: kotlinx.coroutines.flow.StateFlow<MapState> = _state.asStateFlow()
@@ -57,16 +58,18 @@ class MapViewModel
             mapHeightPx: Float,
             viewportWidthPx: Float,
             viewportHeightPx: Float,
-            mapMarginFactor: Float = 0.08f,
+            mapMarginFactor: Float,
+            elasticityFactor: Float,
         ) {
             this.maxScale = maxScale
             this.dragLimitFactor = dragLimitFactor
             this.mapMarginFactor = mapMarginFactor
+            this.elasticityFactor = elasticityFactor
 
             val scaleX = (viewportWidthPx - 2 * mapWidthPx * mapMarginFactor) / mapWidthPx
             val scaleY = (viewportHeightPx - 2 * mapHeightPx * mapMarginFactor) / mapHeightPx
             minScale = min(scaleX, scaleY).coerceAtMost(maxScale)
-            initialScale = minScale.coerceAtLeast(0.01f)
+            initialScale = minScale
 
             _state.value =
                 MapState(
@@ -110,8 +113,6 @@ class MapViewModel
             unSelectNode()
         }
 
-        private val elasticity = 0.35f
-
         override fun updateOffset(delta: Offset) {
             val state = _state.value
             val maxOffset = getMaxOffset(state)
@@ -119,15 +120,15 @@ class MapViewModel
 
             val x =
                 when {
-                    targetOffset.x < -maxOffset.x -> -maxOffset.x + (targetOffset.x + maxOffset.x) * elasticity
-                    targetOffset.x > maxOffset.x -> maxOffset.x + (targetOffset.x - maxOffset.x) * elasticity
+                    targetOffset.x < -maxOffset.x -> -maxOffset.x + (targetOffset.x + maxOffset.x) * elasticityFactor
+                    targetOffset.x > maxOffset.x -> maxOffset.x + (targetOffset.x - maxOffset.x) * elasticityFactor
                     else -> targetOffset.x
                 }
 
             val y =
                 when {
-                    targetOffset.y < -maxOffset.y -> -maxOffset.y + (targetOffset.y + maxOffset.y) * elasticity
-                    targetOffset.y > maxOffset.y -> maxOffset.y + (targetOffset.y - maxOffset.y) * elasticity
+                    targetOffset.y < -maxOffset.y -> -maxOffset.y + (targetOffset.y + maxOffset.y) * elasticityFactor
+                    targetOffset.y > maxOffset.y -> maxOffset.y + (targetOffset.y - maxOffset.y) * elasticityFactor
                     else -> targetOffset.y
                 }
 
@@ -176,6 +177,7 @@ class MapViewModel
 
         // ---------------------------------------------------------------------------------------------
 
+        @Suppress("MagicNumber")
         private fun updateFling(delta: Offset) {
             val now = System.currentTimeMillis()
             if (lastPointerTime == 0L) {
@@ -202,6 +204,7 @@ class MapViewModel
          * Smooth fling implemented as a coroutine loop updating offset at ~60fps applying friction.
          * Uses safe main-thread state updates via viewModelScope.
          */
+        @Suppress("MagicNumber")
         fun startFling() {
             flingJob?.cancel()
             // copy velocity start
@@ -264,6 +267,7 @@ class MapViewModel
             _selectedNodeId.value = nodeId
         }
 
+        @Suppress("MagicNumber")
         fun focusOnNodeAnimated(
             nodeX: Float,
             nodeY: Float,
