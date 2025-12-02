@@ -30,7 +30,9 @@ CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    register_date DATE NOT NULL
+    register_date DATE NOT NULL,
+    current_points INT NOT NULL DEFAULT 0,
+    total_points INT NOT NULL DEFAULT 0
 );
 
 -- Create settings table
@@ -79,7 +81,9 @@ CREATE TABLE IF NOT EXISTS personality (
 -- Create goals table with a foreign key to users
 CREATE TABLE IF NOT EXISTS goals (
     id VARCHAR(36) PRIMARY KEY,
-    objective VARCHAR(255) NOT NULL,
+    objective BIGINT NOT NULL,
+    description TEXT,
+    type ENUM('EXERCISE', 'SLEEP', 'MEDITATION', 'NUTRITION', 'PRODUCTIVITY') NOT NULL,
     category ENUM('DAILY_CHALLENGES', 'APP_USAGE') NOT NULL,
     status ENUM('COMPLETED', 'NOT_COMPLETED', 'REVIEW') NOT NULL,
     points INT NOT NULL,
