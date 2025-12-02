@@ -12,14 +12,16 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -41,11 +43,13 @@ fun WIPModalScreen(
     buttonMessage: String = "BACK",
     onButtonClick: (() -> Unit)? = null,
 ) {
+    AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_error)
+
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(LocalKiwiColors.current.color2),
         contentAlignment = Alignment.Center,
     ) {
         WIPModalLayout(
@@ -80,7 +84,7 @@ private fun WIPModalLayout(
         Icon(
             imageVector = Icons.Filled.Handyman,
             contentDescription = "WIP icon",
-            tint = MaterialTheme.colorScheme.secondary,
+            tint = kiwiColors.color0A,
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(50.dp)),
@@ -91,7 +95,7 @@ private fun WIPModalLayout(
         Kiwi_H2(
             KiwiTextArguments(
                 message,
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.colorF,
                 textAlign = TextAlign.Center,
                 bold = true,
             ),
@@ -103,7 +107,7 @@ private fun WIPModalLayout(
             KiwiTextArguments(
                 subMessage,
                 TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline,
+                color = kiwiColors.colorF1,
                 modifier =
                     Modifier
                         .testTag(CommonTestTags.ERROR_MODAL),
@@ -117,7 +121,8 @@ private fun WIPModalLayout(
                 textArguments =
                     KiwiTextArguments(
                         buttonMessage,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color7,
+                        bold = true,
                     ),
                 color = kiwiColors.color5A,
                 onClick = onButtonClick,

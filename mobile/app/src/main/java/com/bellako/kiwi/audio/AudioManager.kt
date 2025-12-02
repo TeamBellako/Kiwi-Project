@@ -12,12 +12,12 @@ import androidx.media3.exoplayer.ExoPlayer
 
 data class AudioLayer(
     val resId: Int,
-    val isActive: Boolean,
+    var baseVolume: Float = 1f,
+    var isActive: Boolean,
 )
 
 class AudioLayerPlayer(
-    val resId: Int,
-    var isActive: Boolean,
+    var layer: AudioLayer,
     val player: ExoPlayer,
     var fade: Runnable?,
 )
@@ -72,12 +72,12 @@ class AudioManagerBase {
      */
     fun onBackgroundResume() {
         for ((_, player) in currentLayers) {
-            playPlayer(player, DEFAULT_FADE_DURATION_FAST)
+            playLayer(player, DEFAULT_FADE_DURATION_FAST)
         }
     }
 
     /** Updates a layer, active or not. Creates a player or fades (in or our) if already existing. */
-    fun setLayerActive(
+    fun updateOrCreateLayer(
         context: Context,
         layer: AudioLayer,
         fadeDuration: Long,
@@ -87,10 +87,12 @@ class AudioManagerBase {
             return
         }
 
-        val targetVolume = if (layer.isActive) globalVolume else 0f
+        val targetVolume = if (layer.isActive) globalVolume * layer.baseVolume else 0f
 
         val existingLayerPlayer = currentLayers[layer.resId]
         if (existingLayerPlayer != null) {
+            existingLayerPlayer.layer.isActive = layer.isActive
+            existingLayerPlayer.layer.baseVolume = layer.baseVolume
             fade(existingLayerPlayer, existingLayerPlayer.player.volume, targetVolume, fadeDuration)
             return
         }
@@ -106,21 +108,21 @@ class AudioManagerBase {
         player.setMediaItem(MediaItem.fromUri(uri))
         player.repeatMode = if (looping) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
         player.prepare()
-        val newLayerPlayer = AudioLayerPlayer(layer.resId, layer.isActive, player, null)
+        val newLayerPlayer = AudioLayerPlayer(layer, player, null)
 
         if (!looping) {
             player.addListener(
                 object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_ENDED) {
-                            stopPlayer(newLayerPlayer, 0)
+                            stopLayer(newLayerPlayer, 0)
                         }
                     }
                 },
             )
         }
 
-        playPlayer(newLayerPlayer, fadeDuration)
+        playLayer(newLayerPlayer, fadeDuration)
         currentLayers.put(layer.resId, newLayerPlayer)
     }
 
@@ -131,45 +133,45 @@ class AudioManagerBase {
     ) {
         val layerPlayer = currentLayers[layer.resId]
         if (layerPlayer != null) {
-            stopPlayer(layerPlayer, fadeDuration)
+            stopLayer(layerPlayer, fadeDuration)
         }
     }
 
     /** Pause all current layers. */
     fun pauseAll(fadeDuration: Long = DEFAULT_FADE_DURATION_FAST) {
         for ((_, player) in currentLayers) {
-            pausePlayer(player, fadeDuration)
+            pauseLayer(player, fadeDuration)
         }
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private fun playPlayer(
-        player: AudioLayerPlayer,
+    private fun playLayer(
+        layerPlayer: AudioLayerPlayer,
         fadeDuration: Long,
     ) {
-        val targetVolume = if (player.isActive) globalVolume else 0f
-        val fadeDuration = if (player.isActive) fadeDuration else 0
-        fade(player, 0f, targetVolume, fadeDuration, null)
-        player.player.play()
+        val targetVolume = if (layerPlayer.layer.isActive) globalVolume * layerPlayer.layer.baseVolume else 0f
+        val fadeDuration = if (layerPlayer.layer.isActive) fadeDuration else 0
+        fade(layerPlayer, 0f, targetVolume, fadeDuration, null)
+        layerPlayer.player.play()
     }
 
-    private fun pausePlayer(
-        player: AudioLayerPlayer,
+    private fun pauseLayer(
+        layerPlayer: AudioLayerPlayer,
         fadeDuration: Long,
     ) {
-        fade(player, player.player.volume, 0f, fadeDuration) {
-            player.player.pause()
+        fade(layerPlayer, layerPlayer.player.volume, 0f, fadeDuration) {
+            layerPlayer.player.pause()
         }
     }
 
-    private fun stopPlayer(
-        player: AudioLayerPlayer,
+    private fun stopLayer(
+        layerPlayer: AudioLayerPlayer,
         fadeDuration: Long,
     ) {
-        fade(player, player.player.volume, 0f, fadeDuration) {
-            player.player.stop()
-            currentLayers.remove(player.resId)
+        fade(layerPlayer, layerPlayer.player.volume, 0f, fadeDuration) {
+            layerPlayer.player.stop()
+            currentLayers.remove(layerPlayer.layer.resId)
         }
     }
 
@@ -218,8 +220,8 @@ class AudioManagerBase {
 
     private fun updateCurrentLayersVolume() {
         for ((_, player) in currentLayers) {
-            if (player.isActive) {
-                fade(player, player.player.volume, globalVolume, DEFAULT_FADE_DURATION_FAST)
+            if (player.layer.isActive) {
+                fade(player, player.player.volume, globalVolume * player.layer.baseVolume, DEFAULT_FADE_DURATION_FAST)
             }
         }
     }
@@ -263,15 +265,22 @@ object AudioManager {
         val layersToRemove = mutableStateListOf<AudioLayer>()
         for (existingLayer in musicManager.getLayers()) {
             if (!(layers.map { audioLayer -> audioLayer.resId }.contains(existingLayer.key))) {
-                layersToRemove.add(AudioLayer(existingLayer.value.resId, existingLayer.value.isActive))
+                layersToRemove.add(
+                    AudioLayer(
+                        existingLayer.value.layer.resId,
+                        existingLayer.value.layer.baseVolume,
+                        existingLayer.value.layer.isActive,
+                    ),
+                )
             }
         }
         for (layerToRemove in layersToRemove) {
             musicManager.removeLayer(layerToRemove, fadeDuration)
         }
 
+        // Add or update
         for (newLayer in layers) {
-            musicManager.setLayerActive(context, newLayer, fadeDuration, true)
+            musicManager.updateOrCreateLayer(context, newLayer, fadeDuration, true)
         }
     }
 
@@ -279,8 +288,9 @@ object AudioManager {
     fun playSFX(
         context: Context,
         resId: Int,
+        baseVolume: Float = 1f,
     ) {
-        sfxManager.setLayerActive(context, AudioLayer(resId, true), 0, false)
+        sfxManager.updateOrCreateLayer(context, AudioLayer(resId, baseVolume, true), 0, false)
     }
 
     /**

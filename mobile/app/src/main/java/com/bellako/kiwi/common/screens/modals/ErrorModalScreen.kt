@@ -16,10 +16,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -42,11 +45,13 @@ fun ErrorModalScreen(
     buttonMessage: String = "RETRY",
     onButtonClick: (() -> Unit)? = null,
 ) {
+    AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_error)
+
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(LocalKiwiColors.current.color2),
         contentAlignment = Alignment.Center,
     ) {
         ErrorModalLayout(
@@ -92,7 +97,7 @@ private fun ErrorModalLayout(
         Kiwi_H2(
             KiwiTextArguments(
                 message,
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.colorF,
                 textAlign = TextAlign.Center,
                 bold = true,
             ),
@@ -104,7 +109,7 @@ private fun ErrorModalLayout(
             KiwiTextArguments(
                 subMessage,
                 TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline,
+                color = kiwiColors.colorF1,
                 modifier =
                     Modifier
                         .testTag(CommonTestTags.ERROR_MODAL),
@@ -118,7 +123,8 @@ private fun ErrorModalLayout(
                 textArguments =
                     KiwiTextArguments(
                         buttonMessage,
-                        color = kiwiColors.color6,
+                        color = kiwiColors.color7,
+                        bold = true,
                     ),
                 onClick = onButtonClick,
                 color = kiwiColors.color5A,

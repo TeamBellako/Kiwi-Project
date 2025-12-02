@@ -30,6 +30,8 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.BuildConfig
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -50,9 +52,11 @@ fun SupportModalScreen(navController: NavController) {
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .background(LocalKiwiColors.current.color2),
         contentAlignment = Alignment.Center,
     ) {
+        AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_modalopen)
+
         SupportScreenLayout(navController)
     }
 }
@@ -74,7 +78,7 @@ private fun SupportScreenLayout(navController: NavController) {
         Kiwi_H2(
             KiwiTextArguments(
                 "SUPPORT",
-                color = MaterialTheme.colorScheme.secondary,
+                color = kiwiColors.colorF,
                 bold = true,
             ),
         )
@@ -86,7 +90,7 @@ private fun SupportScreenLayout(navController: NavController) {
                 withStyle(
                     style =
                         SpanStyle(
-                            color = MaterialTheme.colorScheme.secondary,
+                            color = kiwiColors.colorF1,
                         ),
                 ) {
                     append("If you have any questions or need support, feel free to reach out to us at ")
@@ -104,7 +108,7 @@ private fun SupportScreenLayout(navController: NavController) {
                     withStyle(
                         style =
                             SpanStyle(
-                                color = MaterialTheme.colorScheme.inversePrimary,
+                                color = kiwiColors.color7B,
                                 textDecoration = TextDecoration.Underline,
                             ),
                     ) {
@@ -126,7 +130,7 @@ private fun SupportScreenLayout(navController: NavController) {
             textArguments =
                 KiwiTextArguments(
                     "BACK",
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = kiwiColors.color7,
                     bold = true,
                     modifier =
                         Modifier

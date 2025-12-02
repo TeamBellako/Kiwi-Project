@@ -14,14 +14,14 @@ fun Kiwi_Image(
     alt: String,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
-    alignment: Alignment = Alignment.Center
+    alignment: Alignment = Alignment.Center,
 ) {
     Image(
         painter = painter,
         contentDescription = alt,
         modifier = modifier,
         contentScale = contentScale,
-        alignment = alignment
+        alignment = alignment,
     )
 }
 
@@ -31,13 +31,13 @@ fun Kiwi_Image(
     alt: String,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
-    alignment: Alignment = Alignment.Center
+    alignment: Alignment = Alignment.Center,
 ) {
     Kiwi_Image(
         painter = painterResource(id = painterResourceId),
         alt = alt,
         modifier = modifier,
         contentScale = contentScale,
-        alignment = alignment
+        alignment = alignment,
     )
 }

@@ -36,6 +36,9 @@ import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
+import com.bellako.kiwi.features.nodes.model.INodesViewModel
+import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
@@ -55,6 +58,7 @@ fun MainScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
+    nodesViewModel: NodesViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -76,6 +80,7 @@ fun MainScreen(
             settingsViewModel = settingsViewModel,
             personalityViewModel = personalityViewModel,
             metricsViewModel = metricsViewModel,
+            nodesViewModel = nodesViewModel,
         )
     }
 }
@@ -95,6 +100,7 @@ private fun AppScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
+    nodesViewModel: NodesViewModel = hiltViewModel(),
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -122,6 +128,7 @@ private fun AppScreen(
                     usersViewModel = usersViewModel,
                     settingsViewModel = settingsViewModel,
                     personalityViewModel = personalityViewModel,
+                    nodesViewModel = nodesViewModel,
                 )
 
                 if (showDashboard) {
@@ -150,6 +157,7 @@ fun AppNavHost(
     usersViewModel: UsersViewModel = hiltViewModel(),
     settingsViewModel: ISettingsViewModel,
     personalityViewModel: IPersonalityViewModel,
+    nodesViewModel: INodesViewModel,
 ) {
     NavHost(
         navController = navController,
@@ -211,7 +219,13 @@ fun AppNavHost(
         composable(ScreenRoutes.HOME) {
             AppScreenWrapper {
                 Kiwi_Music_Home()
-                MapScreen()
+                MapScreen(nodesViewModel = nodesViewModel)
+            }
+        }
+
+        composable(ScreenRoutes.OBJECTIVES) {
+            AppScreenWrapper {
+                ObjectivesScreen()
             }
         }
 

@@ -133,7 +133,6 @@ private fun SettingsScreenContainer(
 
 @Composable
 private fun SettingsInfoFields(usersState: UsersState?) {
-
     val kiwiColors = LocalKiwiColors.current
     usersState?.let { currentUsersState ->
 
@@ -189,12 +188,13 @@ private fun SettingsEditFields(
         }
 
         Kiwi_Slider(
-            KiwiTextArguments (
+            KiwiTextArguments(
                 "SFX Volume",
                 modifier =
-                    Modifier.padding(getResponsiveSizeWidth(Spacing.medium), 0.dp)
-                            .fillMaxWidth(),
-                color = kiwiColors.color6
+                    Modifier
+                        .padding(getResponsiveSizeWidth(Spacing.medium), 0.dp)
+                        .fillMaxWidth(),
+                color = kiwiColors.color6,
             ),
             value = soundSliderPosition,
             onValueChange = { newValue ->
@@ -214,9 +214,10 @@ private fun SettingsEditFields(
             KiwiTextArguments(
                 "Music Volume",
                 modifier =
-                    Modifier.padding(getResponsiveSizeHeight(Spacing.medium), 0.dp)
-                            .fillMaxWidth(),
-                color = kiwiColors.color6
+                    Modifier
+                        .padding(getResponsiveSizeHeight(Spacing.medium), 0.dp)
+                        .fillMaxWidth(),
+                color = kiwiColors.color6,
             ),
             value = musicSliderPosition,
             onValueChange = { newValue ->

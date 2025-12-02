@@ -21,10 +21,10 @@ val appBarItems =
         ),
         AppBarItem(
             icon = R.drawable.ic_objectives,
-            route = ScreenRoutes.WIP,
+            route = ScreenRoutes.OBJECTIVES,
         ),
         AppBarItem(
-            icon = R.drawable.ic_glossary,
+            icon = R.drawable.ic_troops,
             route = ScreenRoutes.WIP,
         ),
         AppBarItem(

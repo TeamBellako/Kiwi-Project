@@ -97,6 +97,86 @@ CREATE TABLE IF NOT EXISTS goals (
     INDEX idx_user_date (user_id, date)
 );
 
+-- Create nodes table
+CREATE TABLE IF NOT EXISTS nodes (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  node_order INT NOT NULL,
+  price INT NOT NULL,
+  cord_x FLOAT  NOT NULL,
+  cord_y FLOAT NOT NULL ,
+  CHECK (cord_x >= 0.0 & cord_x <= 1.0 & cord_y >= 0.0 & cord_y <= 1.0)
+);
+
+-- Create user_nodes_status table
+CREATE TABLE IF NOT EXISTS user_node_status (
+  user_id BIGINT NOT NULL,
+  node_id BIGINT NOT NULL,
+  status ENUM('LOCKED', 'OPEN', 'COMPLETED') NOT NULL,
+  PRIMARY KEY (user_id, node_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
+);
+
+-- Insert placeholder values for user_nodes_status
+INSERT INTO nodes VALUES (1,1,120,0.57,0.25),(2,2,140,0.61,0.33),(3,3,100,0.58,0.44),(4,4,180,0.59,0.55);
+
+-- Create quest table
+CREATE TABLE IF NOT EXISTS quests (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    experience INT NOT NULL
+);
+
+-- Create subquests table
+CREATE TABLE IF NOT EXISTS subquests (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    quest_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    experience INT NOT NULL,
+    order_index INT NOT NULL,
+
+    FOREIGN KEY (quest_id) REFERENCES quests(id)
+);
+
+-- Create user_quest_status table
+CREATE TABLE IF NOT EXISTS user_quest_status (
+    user_id BIGINT NOT NULL,
+    quest_id BIGINT NOT NULL,
+
+    status ENUM('ACTIVE', 'COMPLETED') NOT NULL,
+
+    PRIMARY KEY (user_id, quest_id),
+    FOREIGN KEY (quest_id) REFERENCES quests(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Create user_subquest_status table
+CREATE TABLE IF NOT EXISTS user_subquest_status (
+    user_id BIGINT NOT NULL,
+    subquest_id BIGINT NOT NULL,
+    status ENUM('LOCKED','ACTIVE','COMPLETED','FAILED') NOT NULL,
+    PRIMARY KEY (user_id, subquest_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (subquest_id) REFERENCES subquests(id)
+);
+
+-- Trigger to DELETE ON CASCADE user_quest_status table
+DELIMITER $$
+
+CREATE TRIGGER user_quest_status_after_delete
+AFTER DELETE ON user_quest_status
+FOR EACH ROW
+BEGIN
+    DELETE FROM user_subquests
+    WHERE user_id = OLD.user_id
+      AND subquest_id IN (
+          SELECT id FROM subquests WHERE quest_id = OLD.quest_id
+      );    
+END$$
+
+DELIMITER ;
+--
 
 CREATE USER '${BACKEND_DB_USERNAME}'@'%' IDENTIFIED BY '${BACKEND_DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${BACKEND_DB_USERNAME}'@'%';

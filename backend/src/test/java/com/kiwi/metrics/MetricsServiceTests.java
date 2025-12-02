@@ -35,7 +35,7 @@ public class MetricsServiceTests {
         public boolean matches(CharSequence rawPassword, String encodedPassword) {
             return true;
         }
-    });
+    }, null);
     
     private final MetricsTestRepositoryInMemory metricsTestRepositoryInMemory = new MetricsTestRepositoryInMemory();
     private final MetricsService metricsService = new MetricsService(metricsTestRepositoryInMemory, usersService);

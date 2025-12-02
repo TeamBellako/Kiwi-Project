@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.R
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Music_Login() {
     val context = LocalContext.current
@@ -12,13 +13,14 @@ fun Kiwi_Music_Login() {
         AudioManager.playMusic(
             context,
             listOf(
-                AudioLayer(R.raw.growtale_stepswithin, true),
-                AudioLayer(R.raw.growtale_stepswithin_enigma, false),
+                AudioLayer(R.raw.growtale_stepswithin, 0.6f, true),
+                AudioLayer(R.raw.growtale_stepswithin_enigma, 0.6f, false),
             ),
         )
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Music_SignUp() {
     val context = LocalContext.current
@@ -26,13 +28,14 @@ fun Kiwi_Music_SignUp() {
         AudioManager.playMusic(
             context,
             listOf(
-                AudioLayer(R.raw.growtale_stepswithin, false),
-                AudioLayer(R.raw.growtale_stepswithin_enigma, true),
+                AudioLayer(R.raw.growtale_stepswithin, 0.6f, false),
+                AudioLayer(R.raw.growtale_stepswithin_enigma, 0.6f, true),
             ),
         )
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Music_Home() {
     val context = LocalContext.current
@@ -40,13 +43,14 @@ fun Kiwi_Music_Home() {
         AudioManager.playMusic(
             context,
             listOf(
-                AudioLayer(R.raw.growtale_maintheme, true),
-                AudioLayer(R.raw.growtale_maintheme_chiptunesynth, false),
+                AudioLayer(R.raw.growtale_maintheme, 0.6f, true),
+                AudioLayer(R.raw.growtale_maintheme_chiptunesynth, 0.6f, false),
             ),
         )
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Music_Settings() {
     val context = LocalContext.current
@@ -54,8 +58,8 @@ fun Kiwi_Music_Settings() {
         AudioManager.playMusic(
             context,
             listOf(
-                AudioLayer(R.raw.growtale_maintheme, false),
-                AudioLayer(R.raw.growtale_maintheme_chiptunesynth, true),
+                AudioLayer(R.raw.growtale_maintheme, 0.6f, false),
+                AudioLayer(R.raw.growtale_maintheme_chiptunesynth, 0.6f, true),
             ),
         )
     }

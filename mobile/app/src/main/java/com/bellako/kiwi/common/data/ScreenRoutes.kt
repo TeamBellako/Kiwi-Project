@@ -10,4 +10,6 @@ object ScreenRoutes {
     const val SETTINGS = "SETTINGS"
     const val HELP = "HELP"
     const val WIP = "WIP"
+
+    const val OBJECTIVES = "OBJECTIVES"
 }

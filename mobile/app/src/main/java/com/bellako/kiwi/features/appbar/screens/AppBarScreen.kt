@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -25,12 +24,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.appbar.data.appBarItems
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -43,7 +45,8 @@ fun AppBarScreen(navController: NavController) {
     Box(
         modifier =
             Modifier
-                .wrapContentSize(),
+                .wrapContentSize()
+                .background(LocalKiwiColors.current.color2),
     ) {
         AppBarModalLayout(
             navController,
@@ -55,18 +58,17 @@ fun AppBarScreen(navController: NavController) {
 fun AppBarModalLayout(navController: NavController) {
     val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
     val kiwiColors = LocalKiwiColors.current
+    val context = LocalContext.current
 
     NavigationBar(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(40.dp), getResponsiveSizeHeight(40.dp), 0.dp, 0.dp))
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(30.dp), getResponsiveSizeHeight(30.dp), 0.dp, 0.dp))
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .height(getResponsiveSizeHeight(100.dp))
+                .height(getResponsiveSizeHeight(90.dp))
                 .testTag(CommonTestTags.BOTTOM_APPBAR),
-        contentColor = kiwiColors.color1,
         containerColor = kiwiColors.color1,
-
     ) {
         Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
 
@@ -79,6 +81,7 @@ fun AppBarModalLayout(navController: NavController) {
                 enabled = item.enabled,
                 selected = selectedNavigationIndex.intValue == index,
                 onClick = {
+                    AudioManager.playSFX(context, R.raw.snd_ui_navigationtransition)
                     selectedNavigationIndex.intValue = index
                     navController.navigate(item.route)
                 },

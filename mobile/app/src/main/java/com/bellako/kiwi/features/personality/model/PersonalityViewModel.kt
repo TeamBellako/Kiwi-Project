@@ -131,7 +131,7 @@ class PersonalityViewModel
         override fun onAppsChanged(
             goodApps: List<String>,
             badApps: List<String>,
-            neutralApps: List<String>
+            neutralApps: List<String>,
         ) {
             _state.value = _state.value.copy(goodApps = goodApps)
             _state.value = _state.value.copy(badApps = badApps)
@@ -144,7 +144,6 @@ class PersonalityViewModel
             val result =
                 repository.updateApps(
                     PersonalityAppsDTO(_state.value.goodApps, _state.value.badApps, neutralApps = _state.value.neutralApps),
-
                 )
             setIsLoading(false)
             setUiState(UIState.Idle)

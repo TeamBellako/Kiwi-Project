@@ -8,4 +8,5 @@ object DashboardModalTestTags {
     const val CALENDAR_VIEW = "dashboard_calendar_view"
     const val CALENDAR_VIEW_BUTTON = "dashboard_calendar_view_button"
     const val SELECTED_MONTH_TEXT = "dashboard_selected_month_text"
+    const val SELECTED_DAY_TEXT = "dashboard_selected_day_text"
 }

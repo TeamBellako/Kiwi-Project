@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -39,8 +38,10 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -95,6 +96,7 @@ fun PermissionsModalScreen(
     }
 
     if (isPreview || (!hasPermissions.value && !isExclusion)) {
+        AudioManager.playSFX(context, R.raw.snd_ui_modalopen)
         PermissionRequestLayout(context)
     } else {
         withPermissions()
@@ -104,14 +106,13 @@ fun PermissionsModalScreen(
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 private fun PermissionRequestLayout(context: Context) {
-
-    val kiwicolors = LocalKiwiColors.current
+    val kiwiColors = LocalKiwiColors.current
 
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(kiwiColors.color2)
                 .testTag(CommonTestTags.PERMISSIONS_REQUEST_MODAL),
         contentAlignment = Alignment.Center,
     ) {
@@ -132,7 +133,7 @@ private fun PermissionRequestLayout(context: Context) {
             Icon(
                 imageVector = Icons.Filled.Warning,
                 contentDescription = "Error icon",
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = kiwiColors.color8A,
                 modifier =
                     Modifier
                         .size(getResponsiveSizeHeight(50.dp)),
@@ -143,7 +144,7 @@ private fun PermissionRequestLayout(context: Context) {
             Kiwi_H2(
                 KiwiTextArguments(
                     "Permissions Required",
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = kiwiColors.colorF,
                     textAlign = TextAlign.Center,
                     bold = true,
                 ),
@@ -155,7 +156,7 @@ private fun PermissionRequestLayout(context: Context) {
                 KiwiTextArguments(
                     "GrowTale requires permissions to access metrics such as apps usage time.",
                     TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = kiwiColors.colorF1,
                 ),
             )
 
@@ -165,7 +166,7 @@ private fun PermissionRequestLayout(context: Context) {
                 KiwiTextArguments(
                     "Please click below to activate them before proceeding.",
                     TextAlign.Center,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = kiwiColors.colorF1,
                 ),
             )
 
@@ -175,11 +176,11 @@ private fun PermissionRequestLayout(context: Context) {
                 textArguments =
                     KiwiTextArguments(
                         "ENABLE APP USAGE ACCESS",
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = kiwiColors.color7,
                         textAlign = TextAlign.Center,
                         bold = true,
                     ),
-                color = kiwicolors.color5A,
+                color = kiwiColors.color5A,
                 onClick = {
                     context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                 },
