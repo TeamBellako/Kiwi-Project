@@ -31,7 +31,7 @@ public class NodesService {
         this.progressService = progressService;
     }
 
-    public List<NodesDTO> getNodesForUser(@NotNull int userId) {
+    public List<NodesDTO> getNodesForUser(@NotNull Long userId) {
         List<NodesPersistence> nodes = nodesRepository.findAll();
 
         return nodes.stream().map(n -> {
@@ -46,7 +46,7 @@ public class NodesService {
     }
 
     @Transactional
-    public List<NodesDTO> markNextNodesAsLocked(int userId, int nodeId) {
+    public List<NodesDTO> markNextNodesAsLocked(Long userId, int nodeId) {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
@@ -74,7 +74,7 @@ public class NodesService {
     }
 
     @Transactional
-    public NodesDTO unlockNode(int userId, int nodeId) {
+    public NodesDTO unlockNode(Long userId, int nodeId) {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
@@ -92,7 +92,7 @@ public class NodesService {
     }
 
     @Transactional
-    public NodesDTO completeNode(int userId, int nodeId) {
+    public NodesDTO completeNode(Long userId, int nodeId) {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
@@ -109,7 +109,7 @@ public class NodesService {
     }
 
 
-    public void initializeUserProgress(int userId) {
+    public void initializeUserProgress(Long userId) {
         NodesPersistence firstNode = nodesRepository.findById(1)
                 .orElseThrow(() -> new NodeNotFoundException(1));
 

@@ -55,11 +55,11 @@ public class NodesControllerTests {
     public void listNodes_valid_returnsOk() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.getNodesForUser(1)).thenReturn(List.of(
+        when(nodesService.getNodesForUser(1L)).thenReturn(List.of(
                 dtoNode(1, 1, NodeStatus.OPEN, 100, 0.5f,0.5f),
                 dtoNode(2, 2, NodeStatus.LOCKED, 120, 0.7f,0.25f)
         ));
@@ -74,11 +74,11 @@ public class NodesControllerTests {
     public void unlockNode_valid_returnsOk() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.unlockNode(1, 1))
+        when(nodesService.unlockNode(1L, 1))
                 .thenReturn(dtoNode(1, 1, NodeStatus.OPEN, 100, 0.5f,0.5f));
 
         mockMvc.perform(
@@ -92,11 +92,11 @@ public class NodesControllerTests {
     public void unlockNode_locked_returnsLockedStatus() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.unlockNode(1, 2))
+        when(nodesService.unlockNode(1L, 2))
                 .thenThrow(new NodeLockedException(2));
 
         mockMvc.perform(
@@ -110,11 +110,11 @@ public class NodesControllerTests {
     public void completeNode_valid_returnsOk() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.completeNode(1, 2))
+        when(nodesService.completeNode(1L, 2))
                 .thenReturn(dtoNode(2, 2, NodeStatus.COMPLETED, 120, 0.15f,0.25f));
 
         mockMvc.perform(
@@ -128,11 +128,11 @@ public class NodesControllerTests {
     public void completeNode_locked_throwsException() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.completeNode(1, 2))
+        when(nodesService.completeNode(1L, 2))
                 .thenThrow(new NodeLockedException(2));
 
         mockMvc.perform(

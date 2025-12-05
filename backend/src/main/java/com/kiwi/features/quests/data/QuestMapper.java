@@ -67,7 +67,7 @@ public class QuestMapper {
     // QUEST DOMAIN → USER QUEST STATUS PERSISTENCE
     // usado en completeQuest
     // --------------------------------------------------------------------------------------------
-    public static UserQuestStatusPersistence toPersistence(int userId, QuestDomain domain) {
+    public static UserQuestStatusPersistence toPersistence(Long userId, QuestDomain domain) {
         UserQuestStatusPersistence persistence = new UserQuestStatusPersistence();
         persistence.setId(new UserQuestStatusKey(userId, domain.getQuestId()));
         persistence.setStatus(domain.getStatus());
@@ -79,7 +79,7 @@ public class QuestMapper {
     // QUEST PERSISTENCE + NEW STATUS → USER QUEST STATUS PERSISTENCE
     // usado al inicializar una quest
     // --------------------------------------------------------------------------------------------
-    public static UserQuestStatusPersistence toPersistence(int userId, QuestPersistence quest, QuestStatus status) {
+    public static UserQuestStatusPersistence toPersistence(Long userId, QuestPersistence quest, QuestStatus status) {
         UserQuestStatusPersistence persistence = new UserQuestStatusPersistence();
         persistence.setId(new UserQuestStatusKey(userId, quest.getId()));
         persistence.setStatus(status);

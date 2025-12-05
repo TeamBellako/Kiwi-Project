@@ -54,11 +54,11 @@ public class QuestControllerTests {
     public void getActiveQuests_valid_returnsOk() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(questService.getActiveQuestsForUser(1))
+        when(questService.getActiveQuestsForUser(1L))
                 .thenReturn(List.of(new QuestDTO(), new QuestDTO()));
 
         mockMvc.perform(get(baseAPIUrl + "/active")
@@ -71,11 +71,11 @@ public class QuestControllerTests {
     public void getCompletedQuests_valid_returnsOk() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(questService.getCompletedQuestsForUser(1))
+        when(questService.getCompletedQuestsForUser(1L))
                 .thenReturn(List.of(new QuestDTO()));
 
         mockMvc.perform(get(baseAPIUrl + "/completed")
@@ -88,11 +88,11 @@ public class QuestControllerTests {
     public void giveQuest_valid_returnsOk() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(questService.giveQuestToUser(1, 1)).thenReturn(new QuestDTO());
+        when(questService.giveQuestToUser(1L, 1)).thenReturn(new QuestDTO());
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/1/give", null)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -104,11 +104,11 @@ public class QuestControllerTests {
     public void completeSubquest_valid_returnsOk() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(questService.completeSubquest(1, 1))
+        when(questService.completeSubquest(1L, 1))
                 .thenReturn(SubquestResultDTO.builder().build());
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/subquests/1/complete", null)
@@ -121,11 +121,11 @@ public class QuestControllerTests {
     public void failSubquest_valid_returnsOk() throws Exception {
         when(usersService.getUserByEmail(any()))
                 .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1);
+                    setId(1L);
                     setEmail("test@test.com");
                 }}));
 
-        when(questService.failSubquest(1, 1))
+        when(questService.failSubquest(1L, 1))
                 .thenReturn(SubquestResultDTO.builder().build());
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/subquests/1/fail", null)
