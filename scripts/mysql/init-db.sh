@@ -19,6 +19,8 @@ USE ${MYSQL_DATABASE};
 USE kiwi_db_dev;
 
 -- Drop tables if they exist
+DROP TABLE IF EXISTS user_node_status;
+DROP TABLE IF EXISTS nodes;
 DROP TABLE IF EXISTS metrics;
 DROP TABLE IF EXISTS personality;
 DROP TABLE IF EXISTS settings;
