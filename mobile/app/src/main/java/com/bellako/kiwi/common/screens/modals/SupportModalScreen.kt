@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +48,12 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun SupportModalScreen(navController: NavController) {
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        AudioManager.playSFX(context, R.raw.snd_ui_modalopen)
+    }
+
     Box(
         modifier =
             Modifier
@@ -55,8 +61,6 @@ fun SupportModalScreen(navController: NavController) {
                 .background(LocalKiwiColors.current.color2),
         contentAlignment = Alignment.Center,
     ) {
-        AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_modalopen)
-
         SupportScreenLayout(navController)
     }
 }

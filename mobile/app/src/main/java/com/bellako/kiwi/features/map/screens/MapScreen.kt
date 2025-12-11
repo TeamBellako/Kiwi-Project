@@ -35,11 +35,11 @@ import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.YesterdayGoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
-import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -72,7 +72,7 @@ fun MapScreen(
     title: String = "WORLD MAP",
     nodesViewModel: INodesViewModel,
     mapViewModel: MapViewModel = hiltViewModel(),
-    goalsViewModel: GoalsViewModel? = null,
+    goalsViewModel: IGoalsViewModel? = null,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current

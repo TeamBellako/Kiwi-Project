@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,7 +45,11 @@ fun ErrorModalScreen(
     buttonMessage: String = "RETRY",
     onButtonClick: (() -> Unit)? = null,
 ) {
-    AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_error)
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        AudioManager.playSFX(context, R.raw.snd_ui_error)
+    }
 
     Box(
         modifier =
