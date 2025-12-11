@@ -24,6 +24,12 @@ DROP TABLE IF EXISTS metrics;
 DROP TABLE IF EXISTS personality;
 DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS user_node_status;
+DROP TABLE IF EXISTS nodes;
+DROP TABLE IF EXISTS user_quest_status;
+DROP TABLE IF EXISTS user_subquest_status;
+DROP TABLE IF EXISTS subquests;
+DROP TABLE IF EXISTS quests;
 
 -- Create users table with a foreign key to settings
 CREATE TABLE IF NOT EXISTS users (
