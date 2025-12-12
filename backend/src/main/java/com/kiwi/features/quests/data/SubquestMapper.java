@@ -68,7 +68,7 @@ public class SubquestMapper {
     }
 
     // Domain -> UserSubquestStatusPersistence (guardar estado del usuario)
-    public static UserSubquestStatusPersistence toPersistence(int userId, SubquestDomain domain, SubquestRepository subRepo) {
+    public static UserSubquestStatusPersistence toPersistence(Long userId, SubquestDomain domain, SubquestRepository subRepo) {
         UserSubquestStatusPersistence persistence = new UserSubquestStatusPersistence();
         persistence.setId(new UserSubquestStatusKey(userId, domain.getSubquestId()));
 
@@ -80,7 +80,7 @@ public class SubquestMapper {
     }
 
     // Persistence + desired status -> UserSubquestStatusPersistence (inicializar subquests)
-    public static UserSubquestStatusPersistence toPersistence(int userId, SubquestPersistence sq, SubquestStatus status) {
+    public static UserSubquestStatusPersistence toPersistence(Long userId, SubquestPersistence sq, SubquestStatus status) {
         UserSubquestStatusPersistence persistence = new UserSubquestStatusPersistence();
         persistence.setId(new UserSubquestStatusKey(userId, sq.getId()));
         persistence.setStatus(status);

@@ -139,7 +139,7 @@ public class UsersIntegrationTest {
         public NodesService nodesService() {
             return new NodesService(null,null,null) {
                 @Override
-                public void initializeUserProgress(int userId) {
+                public void initializeUserProgress(Long userId) {
                 }
             };
         }

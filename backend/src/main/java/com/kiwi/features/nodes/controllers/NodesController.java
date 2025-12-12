@@ -26,7 +26,7 @@ public class NodesController {
     public ResponseEntity<List<NodesDTO>> getNodesForUser(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
@@ -39,7 +39,7 @@ public class NodesController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int nodeId
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
@@ -52,7 +52,7 @@ public class NodesController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int nodeId
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
@@ -65,7 +65,7 @@ public class NodesController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int nodeId
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
