@@ -1,5 +1,8 @@
 package com.bellako.kiwi.features.map.screens
 
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +21,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
@@ -28,7 +32,11 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.goals.model.GoalsViewModel
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.screens.YesterdayGoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -40,8 +48,10 @@ import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import java.time.LocalDate
 import kotlin.math.min
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MapScreen(
     maxZoom: Float = 8f,
@@ -52,6 +62,7 @@ fun MapScreen(
     title: String = "WORLD MAP",
     nodesViewModel: INodesViewModel,
     mapViewModel: MapViewModel = hiltViewModel(),
+    goalsViewModel: IGoalsViewModel? = null,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
@@ -64,6 +75,8 @@ fun MapScreen(
     val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
     val imageW = imageBitmap.width.toFloat()
     val imageH = imageBitmap.height.toFloat()
+
+    val context = LocalContext.current
 
     val fitScale = min(viewportWidthPx / imageW, viewportHeightPx / imageH)
 
@@ -123,6 +136,24 @@ fun MapScreen(
             modifier = Modifier.fillMaxSize(),
         )
     }
+
+    val actualGoalsViewModel = goalsViewModel ?: hiltViewModel<GoalsViewModel>()
+    // Verificar si ya se mostró el modal hoy
+    LaunchedEffect(Unit) {
+        val prefs = context.getSharedPreferences("kiwi_goals_prefs", Context.MODE_PRIVATE)
+        val lastShownDate = prefs.getString("last_yesterday_goals_check", "")
+        val today = dateToString(LocalDate.now())
+
+        // Solo cargar si no se ha revisado hoy
+        if (lastShownDate != today) {
+            actualGoalsViewModel.loadYesterdayDailyChallenges()
+
+            // Guardar la fecha de hoy
+            prefs.edit().putString("last_yesterday_goals_check", today).apply()
+        }
+    }
+    // Mostrar el modal de Yesterday Goals (el ViewModel controla su visibilidad)
+    YesterdayGoalsModal(viewModel = actualGoalsViewModel)
 }
 
 @Composable

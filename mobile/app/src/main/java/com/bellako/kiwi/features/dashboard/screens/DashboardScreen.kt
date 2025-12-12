@@ -47,6 +47,7 @@ import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
@@ -225,6 +226,7 @@ suspend fun loadMetrics(
 
     val metricsState = metricsViewModel.state.value!!
     val personalityState = personalityViewModel.state.value!!
+
     var deviceMetrics = MetricsProvider.getDeviceMetrics(context, metricsState, personalityState)
     metricsViewModel.loadMetrics(date).fold(
         onSuccess = { _ ->
@@ -364,13 +366,18 @@ fun DashboardModal_Preview(
     nodesViewModel: NodesViewModel = hiltViewModel(),
 ) {
     Kiwi_Theme {
+        val goalsViewModel = GoalsFakeViewModel()
+
         Scaffold(
             bottomBar = {
                 AppBarScreen(navController = rememberNavController())
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
-                    MapScreen(nodesViewModel = nodesViewModel)
+                    MapScreen(
+                        nodesViewModel = nodesViewModel,
+                        goalsViewModel = goalsViewModel,
+                    )
                     DashboardScreen(
                         usersViewModel =
                             UsersFakeViewModel(

@@ -293,6 +293,7 @@ fun CalendarMonthView(
                             transitionDirection = -1
                             selectYearMonth(selectedMonth, selectedMonth.value.minusMonths(1))
                         }
+
                         totalDragOffsetX < -dragThreshold -> {
                             transitionDirection = 1
                             selectYearMonth(selectedMonth, selectedMonth.value.plusMonths(1))
