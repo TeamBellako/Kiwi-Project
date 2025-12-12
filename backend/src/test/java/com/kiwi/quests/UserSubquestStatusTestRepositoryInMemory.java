@@ -28,13 +28,13 @@ public class UserSubquestStatusTestRepositoryInMemory implements UserSubquestSta
     }
 
     @Override
-    public Optional<UserSubquestStatusPersistence> findByIdUserIdAndIdSubquestId(int userId, int subquestId) {
+    public Optional<UserSubquestStatusPersistence> findByIdUserIdAndIdSubquestId(Long userId, int subquestId) {
         return Optional.ofNullable(db.userSubquests.get(new UserSubquestStatusKey(userId, subquestId)));
     }
 
 
     @Override
-    public List<UserSubquestStatusPersistence> findByUserIdAndQuestIdOrdered(int userId, int questId) {
+    public List<UserSubquestStatusPersistence> findByUserIdAndQuestIdOrdered(Long userId, int questId) {
         return db.userSubquests.values().stream()
                 .filter(s -> s.getId().getUserId() == userId)
                 .filter(s -> s.getSubquest().getQuest().getId() == questId)

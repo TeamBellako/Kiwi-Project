@@ -33,15 +33,15 @@ public class QuestTestFactory {
     // QUEST STATUS
     // =========================================================================
 
-    public static UserQuestStatusPersistence activeQuestStatus(int userId, QuestPersistence quest) {
+    public static UserQuestStatusPersistence activeQuestStatus(Long userId, QuestPersistence quest) {
         return questStatus(userId, quest, QuestStatus.ACTIVE);
     }
 
-    public static UserQuestStatusPersistence completedQuestStatus(int userId, QuestPersistence quest) {
+    public static UserQuestStatusPersistence completedQuestStatus(Long userId, QuestPersistence quest) {
         return questStatus(userId, quest, QuestStatus.COMPLETED);
     }
 
-    private static UserQuestStatusPersistence questStatus(int userId, QuestPersistence quest, QuestStatus status) {
+    private static UserQuestStatusPersistence questStatus(Long userId, QuestPersistence quest, QuestStatus status) {
         UserQuestStatusPersistence p = new UserQuestStatusPersistence();
         p.setId(new UserQuestStatusKey(userId, quest.getId()));
         p.setStatus(status);
@@ -53,23 +53,23 @@ public class QuestTestFactory {
     // SUBQUEST STATUS
     // =========================================================================
 
-    public static UserSubquestStatusPersistence activeSubquestStatus(int userId, SubquestPersistence subquest) {
+    public static UserSubquestStatusPersistence activeSubquestStatus(Long userId, SubquestPersistence subquest) {
         return subquestStatus(userId, subquest, SubquestStatus.ACTIVE);
     }
 
-    public static UserSubquestStatusPersistence lockedSubquestStatus(int userId, SubquestPersistence subquest) {
+    public static UserSubquestStatusPersistence lockedSubquestStatus(Long userId, SubquestPersistence subquest) {
         return subquestStatus(userId, subquest, SubquestStatus.LOCKED);
     }
 
-    public static UserSubquestStatusPersistence completedSubquestStatus(int userId, SubquestPersistence subquest) {
+    public static UserSubquestStatusPersistence completedSubquestStatus(Long userId, SubquestPersistence subquest) {
         return subquestStatus(userId, subquest, SubquestStatus.COMPLETED);
     }
 
-    public static UserSubquestStatusPersistence failedSubquestStatus(int userId, SubquestPersistence subquest) {
+    public static UserSubquestStatusPersistence failedSubquestStatus(Long userId, SubquestPersistence subquest) {
         return subquestStatus(userId, subquest, SubquestStatus.FAILED);
     }
 
-    private static UserSubquestStatusPersistence subquestStatus(int userId, SubquestPersistence subquest, SubquestStatus status) {
+    private static UserSubquestStatusPersistence subquestStatus(Long userId, SubquestPersistence subquest, SubquestStatus status) {
         UserSubquestStatusPersistence p = new UserSubquestStatusPersistence();
         p.setId(new UserSubquestStatusKey(userId, subquest.getId()));
         p.setStatus(status);

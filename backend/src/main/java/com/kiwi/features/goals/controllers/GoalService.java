@@ -1,0 +1,167 @@
+package com.kiwi.features.goals.controllers;
+
+import com.kiwi.features.goals.data.*;
+import com.kiwi.features.goals.exceptions.GoalNotFoundException;
+import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
+import com.kiwi.features.users.data.UsersPersistence;
+import com.kiwi.features.users.controllers.UsersRepository;
+import com.kiwi.features.users.controllers.UsersService;
+import com.kiwi.features.users.exceptions.UsersNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class GoalService {
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+    
+    private final GoalRepository goalRepository;
+    private final UsersRepository usersRepository;
+    private final UsersService usersService;
+
+    public GoalService(GoalRepository goalRepository, UsersRepository usersRepository, UsersService usersService) {
+        this.goalRepository = goalRepository;
+        this.usersRepository = usersRepository;
+        this.usersService = usersService;
+    }
+
+    private UsersPersistence getUserFromAuthentication(Authentication authentication) {
+        String email = authentication.getName();
+        return usersRepository.findByEmail(email)
+                .orElseThrow(() -> new UsersNotFoundException(email));
+    }
+
+    @Transactional
+    public GoalsListDTO createGoals(GoalsListDTO goalsListDTO, Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+        LocalDate date = LocalDate.parse(goalsListDTO.getDate(), DATE_FORMATTER);
+
+        // Eliminar goals existentes para esta fecha
+        List<GoalPersistence> existingGoals = goalRepository.findByUserAndDate(user, date);
+        goalRepository.deleteAll(existingGoals);
+
+        // Crear nuevas goals
+        List<GoalPersistence> newGoals = goalsListDTO.getGoals().stream()
+                .map(dto -> GoalDataMapper.toEntity(dto, user, date))
+                .collect(Collectors.toList());
+
+        List<GoalPersistence> savedGoals = goalRepository.saveAll(newGoals);
+
+        return GoalDataMapper.toGoalsListDTO(date, savedGoals);
+    }
+
+    /**
+     * Marca un goal como completado y añade puntos al usuario.
+     * SOLO puede completar el propietario del goal.
+     */
+    @Transactional
+    public GoalDTO completeGoal(String goalId, Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        GoalPersistence goal = goalRepository.findById(goalId)
+                .orElseThrow(() -> new GoalNotFoundException(goalId));
+
+        // Verificar que el goal pertenece al usuario autenticado
+        if (!goal.getUser().getId().equals(user.getId())) {
+            throw new GoalUnauthorizedException("You are not authorized to complete this goal");
+        }
+
+        // Verificar que el goal está en REVIEW
+        if (goal.getStatus() != GoalStatus.REVIEW) {
+            return GoalDataMapper.toDTO(goal);
+        }
+
+        // Añadir puntos al usuario ANTES de cambiar el estado
+        usersService.addPointsToUser(user.getId(), goal.getPoints());
+
+        // Cambiar estado y guardar
+        goal.setStatus(GoalStatus.COMPLETED);
+        GoalPersistence savedGoal = goalRepository.save(goal);
+
+        return GoalDataMapper.toDTO(savedGoal);
+    }
+
+    /**
+     * Desmarca un goal completado y resta los puntos al usuario.
+     * SOLO puede descompletar el propietario del goal.
+     */
+    @Transactional
+    public GoalDTO uncompleteGoal(String goalId, Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        GoalPersistence goal = goalRepository.findById(goalId)
+                .orElseThrow(() -> new GoalNotFoundException(goalId));
+
+
+        // Verificar que el goal pertenece al usuario autenticado
+        if (!goal.getUser().getId().equals(user.getId())) {
+            throw new GoalUnauthorizedException("You are not authorized to uncomplete this goal");
+        }
+
+        // Verificar que el goal está en REVIEW
+        if (goal.getStatus() != GoalStatus.REVIEW) {
+            return GoalDataMapper.toDTO(goal);
+        }
+
+        // Cambiar estado y guardar
+        goal.setStatus(GoalStatus.NOT_COMPLETED);
+        GoalPersistence savedGoal = goalRepository.saveAndFlush(goal);
+        
+        return GoalDataMapper.toDTO(savedGoal);
+    }
+
+    @Transactional(readOnly = true)
+    public GoalsListDTO getGoalsByDate(String dateString, Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+        LocalDate date = LocalDate.parse(dateString, DATE_FORMATTER);
+
+        List<GoalPersistence> goals = goalRepository.findByUserAndDate(user, date);
+
+        return GoalDataMapper.toGoalsListDTO(date, goals);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GoalsListDTO> getAllGoals(Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        List<GoalPersistence> allGoals = goalRepository.findByUserOrderByDateDesc(user);
+
+        // Agrupar por fecha
+        Map<LocalDate, List<GoalPersistence>> goalsByDate = allGoals.stream()
+                .collect(Collectors.groupingBy(GoalPersistence::getDate));
+
+        // Convertir a lista de GoalsListDTO
+        return goalsByDate.entrySet().stream()
+                .map(entry -> GoalDataMapper.toGoalsListDTO(entry.getKey(), entry.getValue()))
+                .sorted((a, b) -> b.getDate().compareTo(a.getDate())) // Ordenar descendente por fecha
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<GoalsListDTO> getGoalsToReview(Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+        LocalDate today = LocalDate.now();
+
+        List<GoalPersistence> allGoals = goalRepository.findByUserOrderByDateDesc(user);
+        
+        // Filtrar solo los goals con estado REVIEW y fecha anterior a hoy (excluye hoy)
+        List<GoalPersistence> goalsToReview = allGoals.stream()
+                .filter(goal -> goal.getStatus() == GoalStatus.REVIEW && goal.getDate().isBefore(today))
+                .collect(Collectors.toList());
+
+        // Agrupar por fecha
+        Map<LocalDate, List<GoalPersistence>> goalsByDate = goalsToReview.stream()
+                .collect(Collectors.groupingBy(GoalPersistence::getDate));
+
+        // Convertir a lista de GoalsListDTO
+        return goalsByDate.entrySet().stream()
+                .map(entry -> GoalDataMapper.toGoalsListDTO(entry.getKey(), entry.getValue()))
+                .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
+                .collect(Collectors.toList());
+    }
+}

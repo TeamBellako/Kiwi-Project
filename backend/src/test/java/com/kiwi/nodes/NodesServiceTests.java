@@ -16,7 +16,7 @@ public class NodesServiceTests {
 
     private final NodesService service = new NodesService(nodeRepo, statusRepo, progress);
 
-    private final int userId = 1;
+    private final Long userId = 1L;
 
     @Test
     public void getNodesForUser_returnsAllNodes() {

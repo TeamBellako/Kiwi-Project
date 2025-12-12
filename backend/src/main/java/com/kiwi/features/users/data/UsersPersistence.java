@@ -12,7 +12,7 @@ public class UsersPersistence {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
     
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -22,4 +22,12 @@ public class UsersPersistence {
 
     @Column(name = "register_date", nullable = false)
     private LocalDate registerDate;
+
+    @Builder.Default
+    @Column(name = "current_points", nullable = false)
+    private Integer currentPoints = 0;
+
+    @Builder.Default
+    @Column(name = "total_points", nullable = false)
+    private Integer totalPoints = 0;
 }

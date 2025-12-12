@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class UserQuestStatusKey implements Serializable {
 
     @Column(name = "user_id")
-    private int userId;
+    private Long userId;
 
     @Column(name = "quest_id")
     private int questId;
