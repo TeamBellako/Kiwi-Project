@@ -19,19 +19,26 @@ USE ${MYSQL_DATABASE};
 USE kiwi_db_dev;
 
 -- Drop tables if they exist
-DROP TABLE IF EXISTS user_node_status;
-DROP TABLE IF EXISTS nodes;
+DROP TABLE IF EXISTS goals;
 DROP TABLE IF EXISTS metrics;
 DROP TABLE IF EXISTS personality;
 DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS user_node_status;
+DROP TABLE IF EXISTS nodes;
+DROP TABLE IF EXISTS user_quest_status;
+DROP TABLE IF EXISTS user_subquest_status;
+DROP TABLE IF EXISTS subquests;
+DROP TABLE IF EXISTS quests;
 
 -- Create users table with a foreign key to settings
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    register_date DATE NOT NULL
+    register_date DATE NOT NULL,
+    current_points INT NOT NULL DEFAULT 0,
+    total_points INT NOT NULL DEFAULT 0
 );
 
 -- Create settings table
@@ -75,6 +82,25 @@ CREATE TABLE IF NOT EXISTS personality (
     -- Foreign key to users table
     user_id BIGINT NOT NULL,
     CONSTRAINT fk_personality_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create goals table with a foreign key to users
+CREATE TABLE IF NOT EXISTS goals (
+    id VARCHAR(36) PRIMARY KEY,
+    objective BIGINT NOT NULL,
+    description TEXT,
+    type ENUM('EXERCISE', 'SLEEP', 'MEDITATION', 'NUTRITION', 'PRODUCTIVITY') NOT NULL,
+    category ENUM('DAILY_CHALLENGES', 'APP_USAGE') NOT NULL,
+    status ENUM('COMPLETED', 'NOT_COMPLETED', 'REVIEW') NOT NULL,
+    points INT NOT NULL,
+    date DATE NOT NULL,
+
+    -- Foreign key to users table
+    user_id BIGINT NOT NULL,
+    CONSTRAINT fk_goals_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+
+    -- Add index for efficient queries by user and date
+    INDEX idx_user_date (user_id, date)
 );
 
 -- Create nodes table
