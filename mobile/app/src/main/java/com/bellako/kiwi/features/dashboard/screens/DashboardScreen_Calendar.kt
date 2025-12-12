@@ -578,7 +578,7 @@ fun ShowCalendarButton(
     isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
 ) {
-    AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_button)
+    val context = LocalContext.current
     Box(
         modifier =
             Modifier
@@ -588,6 +588,7 @@ fun ShowCalendarButton(
                 .clickable(
                     enabled = !isLoading,
                 ) {
+                    AudioManager.playSFX(context, R.raw.snd_ui_button)
                     onCalendarViewClicked()
                 }.testTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON),
         contentAlignment = Alignment.Center,
