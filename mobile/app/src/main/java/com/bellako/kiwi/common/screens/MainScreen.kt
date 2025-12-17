@@ -41,6 +41,8 @@ import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
+import com.bellako.kiwi.features.quests.model.IQuestsViewModel
+import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
 import com.bellako.kiwi.features.settings.screens.SettingsScreen
@@ -101,6 +103,7 @@ private fun AppScreen(
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
     nodesViewModel: NodesViewModel = hiltViewModel(),
+    questsViewModel: QuestsViewModel = hiltViewModel(),
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -129,6 +132,7 @@ private fun AppScreen(
                     settingsViewModel = settingsViewModel,
                     personalityViewModel = personalityViewModel,
                     nodesViewModel = nodesViewModel,
+                    questsViewModel = questsViewModel,
                 )
 
                 if (showDashboard) {
@@ -158,6 +162,7 @@ fun AppNavHost(
     settingsViewModel: ISettingsViewModel,
     personalityViewModel: IPersonalityViewModel,
     nodesViewModel: INodesViewModel,
+    questsViewModel: IQuestsViewModel,
 ) {
     NavHost(
         navController = navController,
@@ -225,7 +230,7 @@ fun AppNavHost(
 
         composable(ScreenRoutes.OBJECTIVES) {
             AppScreenWrapper {
-                ObjectivesScreen()
+                ObjectivesScreen(questsViewModel = questsViewModel)
             }
         }
 

@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS user_node_status (
   FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
--- Insert placeholder values for user_nodes_status
+-- Insert placeholder values for nodes
 INSERT INTO nodes VALUES (1,1,120,0.57,0.25),(2,2,140,0.61,0.33),(3,3,100,0.58,0.44),(4,4,180,0.59,0.55);
 
 -- Create quest table
@@ -154,6 +154,13 @@ BEGIN
 END$$
 
 DELIMITER ;
+--
+
+-- Insert placeholder values for quests
+INSERT INTO quests VALUES (1,"First Quest", "Complete your first challenge", 100),(2,"Second Quest", "A longer mission with multiple steps", 100)
+INSERT INTO subquests VALUES (1,1,"Objective 1",20,1),(2,1,"Objective 2",20,2),(3,1,"Objective 3",20,3),(4,2,"Objective 1",20,1),(5,2,"Objective 2",20,2),(6,2,"Objective 3",20,3),(7,2,"Objective 4",20,4)
+INSERT INTO user_quest_status VALUES (1,1,'ACTIVE'),(1,2,'ACTIVE')
+INSERT INTO user_subquest_status VALUES (1,1,'COMPLETED'),(1,2,'COMPLETED'),(1,3,'ACTIVE'),(1,4,'COMPLETED'),(1,5,'COMPLETED'),(1,6,'ACTIVE'),(1,7,'LOCKED')
 --
 
 CREATE USER '${BACKEND_DB_USERNAME}'@'%' IDENTIFIED BY '${BACKEND_DB_PASSWORD}';
