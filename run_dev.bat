@@ -1,5 +1,20 @@
 @echo off
 
+wsl.exe docker info >nul 2>&1
+if %errorlevel% neq 0 (
+    echo ===========================================================
+    echo Docker no esta ejecutandose. Iniciando Docker Desktop...
+    echo ===========================================================
+    start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+    echo Esperando a que Docker inicie...
+    :wait_docker
+    timeout /t 5 >nul
+    wsl.exe docker info >nul 2>&1
+    if %errorlevel% neq 0 (
+        goto wait_docker
+    )
+    echo Docker esta ahora en ejecución.
+)
 set CLEAN=false
 if "%1"=="clean" (
     set CLEAN=true

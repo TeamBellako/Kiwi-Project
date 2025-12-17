@@ -20,6 +20,7 @@ USE kiwi_db_dev;
 
 -- Drop tables if they exist
 DROP TABLE IF EXISTS goals;
+DROP TABLE IF EXISTS suggested_goals;
 DROP TABLE IF EXISTS metrics;
 DROP TABLE IF EXISTS personality;
 DROP TABLE IF EXISTS settings;
@@ -101,6 +102,17 @@ CREATE TABLE IF NOT EXISTS goals (
 
     -- Add index for efficient queries by user and date
     INDEX idx_user_date (user_id, date)
+);
+
+-- Create suggested_goals table with a foreign key to users
+CREATE TABLE IF NOT EXISTS suggested_goals (
+    id VARCHAR(36) PRIMARY KEY,
+    objective BIGINT NOT NULL,
+    description TEXT,
+    type ENUM('EXERCISE', 'SLEEP', 'MEDITATION', 'NUTRITION', 'PRODUCTIVITY') NOT NULL,
+    category ENUM('DAILY_CHALLENGES', 'APP_USAGE') NOT NULL,
+    status ENUM('COMPLETED', 'NOT_COMPLETED', 'REVIEW') NOT NULL,
+    points INT NOT NULL
 );
 
 -- Create nodes table
