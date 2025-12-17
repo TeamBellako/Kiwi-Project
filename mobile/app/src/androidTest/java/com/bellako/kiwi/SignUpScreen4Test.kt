@@ -13,6 +13,7 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.data.NodeStatus
@@ -46,6 +47,7 @@ class SignUpScreen4Test {
     private lateinit var mapviewModel: MapViewModel
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
     private lateinit var personalityState: PersonalityState
+    private lateinit var goalsFakeViewModel: GoalsFakeViewModel
 
     @SuppressLint("ViewModelConstructorInComposable")
     @Before
@@ -69,6 +71,7 @@ class SignUpScreen4Test {
         nodesState = NodesState(List<NodesDomain>(1) { NodesDomain(1, 1, NodeStatus.INACCESSIBLE, 0, 0.0f, 0.0f) })
         nodesFakeViewModel = NodesFakeViewModel(nodesState)
         mapviewModel = MapViewModel()
+        goalsFakeViewModel = GoalsFakeViewModel()
 
         rule.setContent {
             val navController = rememberNavController()
@@ -80,7 +83,11 @@ class SignUpScreen4Test {
                     )
                 }
                 composable(ScreenRoutes.HOME) {
-                    MapScreen(nodesViewModel = nodesFakeViewModel, mapViewModel = mapviewModel)
+                    MapScreen(
+                        nodesViewModel = nodesFakeViewModel,
+                        mapViewModel = mapviewModel,
+                        goalsViewModel = goalsFakeViewModel,
+                    )
                 }
             }
         }
