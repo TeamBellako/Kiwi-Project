@@ -8,4 +8,5 @@ data class GoalDTO(
     val category: String,
     val status: String,
     val points: Int,
+    val date: String = "",
 )

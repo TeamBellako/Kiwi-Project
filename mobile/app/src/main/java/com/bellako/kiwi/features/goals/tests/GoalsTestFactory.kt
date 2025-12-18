@@ -2,7 +2,6 @@ package com.bellako.kiwi.features.goals.tests
 
 import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListState
-import com.bellako.kiwi.features.goals.data.YesterdayGoalsState
 
 object GoalsTestFactory {
     fun validGoalState(
@@ -34,25 +33,6 @@ object GoalsTestFactory {
         error: String? = null,
     ) = GoalsListState(
         goals = goals,
-        isLoading = isLoading,
-        error = error,
-    )
-
-    fun validYesterdayGoalsState(
-        goals: List<GoalState> =
-            listOf(
-                validGoalState(id = "1", description = "Exercise for 30 minutes"),
-                validGoalState(id = "2", description = "Read for 20 minutes"),
-                validGoalState(id = "3", description = "Meditate for 10 minutes"),
-            ),
-        currentGoalIndex: Int = 0,
-        isVisible: Boolean = true,
-        isLoading: Boolean = false,
-        error: String? = null,
-    ) = YesterdayGoalsState(
-        goals = goals,
-        currentGoalIndex = currentGoalIndex,
-        isVisible = isVisible,
         isLoading = isLoading,
         error = error,
     )

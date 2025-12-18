@@ -10,6 +10,7 @@ object GoalDataMapper {
             category = stringToCategory(dto.category),
             status = stringToStatus(dto.status),
             points = dto.points,
+            date = dto.date,
         )
 
     fun toDomain(state: GoalState): GoalDomain =
@@ -21,6 +22,7 @@ object GoalDataMapper {
             category = stringToCategory(state.category),
             status = stringToStatus(state.status),
             points = state.points,
+            date = state.date,
         )
 
     fun toState(domain: GoalDomain): GoalState =
@@ -32,6 +34,7 @@ object GoalDataMapper {
             category = categoryToString(domain.category),
             status = statusToString(domain.status),
             points = domain.points,
+            date = domain.date,
         )
 
     fun toState(dto: GoalDTO): GoalState = toState(toDomain(dto))
@@ -45,6 +48,7 @@ object GoalDataMapper {
             category = categoryToString(domain.category),
             status = statusToString(domain.status),
             points = domain.points,
+            date = domain.date,
         )
 
     fun toDTO(state: GoalState): GoalDTO = toDTO(toDomain(state))
@@ -85,14 +89,14 @@ object GoalDataMapper {
         when (status?.uppercase()) {
             "COMPLETED" -> GoalStatus.COMPLETED
             "NOT_COMPLETED" -> GoalStatus.NOT_COMPLETED
-            "REVIEW" -> GoalStatus.REVIEW
-            else -> GoalStatus.REVIEW
+            "IN_PROGRESS" -> GoalStatus.IN_PROGRESS
+            else -> GoalStatus.IN_PROGRESS
         }
 
     private fun statusToString(status: GoalStatus): String =
         when (status) {
             GoalStatus.COMPLETED -> "COMPLETED"
             GoalStatus.NOT_COMPLETED -> "NOT_COMPLETED"
-            GoalStatus.REVIEW -> "REVIEW"
+            GoalStatus.IN_PROGRESS -> "IN_PROGRESS"
         }
 }

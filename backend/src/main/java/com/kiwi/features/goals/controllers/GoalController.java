@@ -52,9 +52,9 @@ public class GoalController {
         return ResponseEntity.ok(goals);
     }
 
-    @GetMapping("/review")
-    public ResponseEntity<List<GoalsListDTO>> getReviewGoals(Authentication authentication) {
-        List<GoalsListDTO> goals = goalService.getGoalsToReview(authentication);
+    @GetMapping("/in_progress")
+    public ResponseEntity<List<GoalsListDTO>> getInProgressGoals(Authentication authentication) {
+        List<GoalsListDTO> goals = goalService.getGoalsInProgress(authentication);
         return ResponseEntity.ok().body(goals);
     }
     

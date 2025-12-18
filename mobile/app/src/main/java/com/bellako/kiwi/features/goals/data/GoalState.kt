@@ -8,4 +8,5 @@ data class GoalState(
     val category: String = "DAILY_CHALLENGES",
     val status: String = "REVIEW",
     val points: Int = 0,
+    val date: String = "",
 )

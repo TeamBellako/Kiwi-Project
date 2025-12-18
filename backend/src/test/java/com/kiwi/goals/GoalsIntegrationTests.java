@@ -74,8 +74,8 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now();
         GoalsListDTO request = goalsListDTO(
                 date.toString(),
-                reviewGoalDTO(null),
-                reviewGoalDTO(null)
+                inProgressGoalDTO(null),
+                inProgressGoalDTO(null)
         );
 
         mockMvc.perform(getPostRequestBuilder(API_URL, request)
@@ -93,14 +93,14 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now();
         
         // Create initial goals (sin IDs manuales)
-        goalRepository.save(reviewGoalPersistence(null, date, user));
-        goalRepository.save(reviewGoalPersistence(null, date, user));
+        goalRepository.save(inProgressGoalPersistence(null, date, user));
+        goalRepository.save(inProgressGoalPersistence(null, date, user));
         goalRepository.flush();
 
         // Replace with new goals
         GoalsListDTO request = goalsListDTO(
                 date.toString(),
-                reviewGoalDTO(null)
+                inProgressGoalDTO(null)
         );
 
         mockMvc.perform(getPostRequestBuilder(API_URL, request)
@@ -125,8 +125,8 @@ public class GoalsIntegrationTests {
         UsersPersistence user = createUser();
         
         LocalDate date = LocalDate.now();
-        goalRepository.save(reviewGoalPersistence(null, date, user));
-        goalRepository.save(reviewGoalPersistence(null, date, user));
+        goalRepository.save(inProgressGoalPersistence(null, date, user));
+        goalRepository.save(inProgressGoalPersistence(null, date, user));
         goalRepository.flush();
 
         mockMvc.perform(get(API_URL)
@@ -145,9 +145,9 @@ public class GoalsIntegrationTests {
         LocalDate date1 = LocalDate.now();
         LocalDate date2 = LocalDate.now().minusDays(1);
 
-        goalRepository.save(reviewGoalPersistence(null, date1, user));
-        goalRepository.save(reviewGoalPersistence(null, date1, user));
-        goalRepository.save(reviewGoalPersistence(null, date2, user));
+        goalRepository.save(inProgressGoalPersistence(null, date1, user));
+        goalRepository.save(inProgressGoalPersistence(null, date1, user));
+        goalRepository.save(inProgressGoalPersistence(null, date2, user));
         goalRepository.flush();
 
         mockMvc.perform(get(API_URL + "/all")
@@ -162,29 +162,29 @@ public class GoalsIntegrationTests {
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void getGoalsToReview_valid_returnsOnlyReviewGoalsBeforeToday() throws Exception {
+    public void getGoalsInProgress_valid_returnsOnlyInProgressGoalsBeforeToday() throws Exception {
         UsersPersistence user = createUser();
         
         LocalDate yesterday = LocalDate.now().minusDays(1);
         LocalDate today = LocalDate.now();
 
-        // REVIEW goals from yesterday (should be included)
-        goalRepository.save(reviewGoalPersistence(null, yesterday, user));
+        // IN_PROGRESS goals from yesterday (should be included)
+        goalRepository.save(inProgressGoalPersistence(null, yesterday, user));
         
-        // REVIEW goal from today (should NOT be included)
-        goalRepository.save(reviewGoalPersistence(null, today, user));
+        // IN_PROGRESS goal from today (should NOT be included)
+        goalRepository.save(inProgressGoalPersistence(null, today, user));
         
         // COMPLETED goal from yesterday (should NOT be included)
         goalRepository.save(completedGoalPersistence(null, yesterday, user));
         goalRepository.flush();
 
-        mockMvc.perform(get(API_URL + "/review")
+        mockMvc.perform(get(API_URL + "/in_progress")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].date").value(yesterday.toString()))
                 .andExpect(jsonPath("$[0].goals.length()").value(1))
-                .andExpect(jsonPath("$[0].goals[0].status").value("REVIEW"));
+                .andExpect(jsonPath("$[0].goals[0].status").value("IN_PROGRESS"));
     }
 
     // ============================================================
@@ -198,7 +198,7 @@ public class GoalsIntegrationTests {
         int initialPoints = user.getCurrentPoints();
         
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = reviewGoalPersistence(null, date, user);
+        GoalPersistence goal = inProgressGoalPersistence(null, date, user);
         goal = goalRepository.saveAndFlush(goal);
         String goalId = goal.getId();
 
@@ -237,7 +237,7 @@ public class GoalsIntegrationTests {
         otherUser = usersRepository.saveAndFlush(otherUser);
         
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = reviewGoalPersistence(null, date, otherUser);
+        GoalPersistence goal = inProgressGoalPersistence(null, date, otherUser);
         goal = goalRepository.saveAndFlush(goal);
         String goalId = goal.getId();
 
@@ -256,7 +256,7 @@ public class GoalsIntegrationTests {
         UsersPersistence user = createUser();
         
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = reviewGoalPersistence(null, date, user);
+        GoalPersistence goal = inProgressGoalPersistence(null, date, user);
         goal = goalRepository.saveAndFlush(goal);
         String goalId = goal.getId();
 

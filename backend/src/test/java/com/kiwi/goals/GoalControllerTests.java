@@ -54,8 +54,8 @@ public class GoalControllerTests {
     @WithMockUser(username = "test@test.com")
     public void createGoals_valid_returnsCreated() throws Exception {
         String date = LocalDate.now().toString();
-        GoalsListDTO request = goalsListDTO(date, reviewGoalDTO("goal-1"));
-        GoalsListDTO response = goalsListDTO(date, reviewGoalDTO("goal-1"));
+        GoalsListDTO request = goalsListDTO(date, inProgressGoalDTO("goal-1"));
+        GoalsListDTO response = goalsListDTO(date, inProgressGoalDTO("goal-1"));
 
         when(goalService.createGoals(any(), any())).thenReturn(response);
 
@@ -68,7 +68,7 @@ public class GoalControllerTests {
     @WithMockUser(username = "test@test.com")
     public void getGoalsByDate_valid_returnsOk() throws Exception {
         String date = LocalDate.now().toString();
-        GoalsListDTO response = goalsListDTO(date, reviewGoalDTO("goal-1"));
+        GoalsListDTO response = goalsListDTO(date, inProgressGoalDTO("goal-1"));
 
         when(goalService.getGoalsByDate(eq(date), any())).thenReturn(response);
 
@@ -82,7 +82,7 @@ public class GoalControllerTests {
     @WithMockUser(username = "test@test.com")
     public void getAllGoals_valid_returnsOk() throws Exception {
         String date = LocalDate.now().toString();
-        List<GoalsListDTO> response = List.of(goalsListDTO(date, reviewGoalDTO("goal-1")));
+        List<GoalsListDTO> response = List.of(goalsListDTO(date, inProgressGoalDTO("goal-1")));
 
         when(goalService.getAllGoals(any())).thenReturn(response);
 
@@ -93,13 +93,13 @@ public class GoalControllerTests {
 
     @Test
     @WithMockUser(username = "test@test.com")
-    public void getReviewGoals_valid_returnsOk() throws Exception {
+    public void getInProgressGoals_valid_returnsOk() throws Exception {
         String date = LocalDate.now().minusDays(1).toString();
-        List<GoalsListDTO> response = List.of(goalsListDTO(date, reviewGoalDTO("goal-1")));
+        List<GoalsListDTO> response = List.of(goalsListDTO(date, inProgressGoalDTO("goal-1")));
 
-        when(goalService.getGoalsToReview(any())).thenReturn(response);
+        when(goalService.getGoalsInProgress(any())).thenReturn(response);
 
-        mockMvc.perform(get(baseAPIUrl + "/review")
+        mockMvc.perform(get(baseAPIUrl + "/in_progress")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }

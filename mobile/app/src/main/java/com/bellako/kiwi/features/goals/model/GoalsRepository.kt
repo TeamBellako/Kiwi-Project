@@ -36,8 +36,8 @@ class GoalsRepository(
             api.getAllGoals()
         }
 
-    suspend fun getGoalsToReview(): Result<List<GoalsListDTO>> =
+    suspend fun getGoalsInProgress(): Result<List<GoalsListDTO>> =
         runCatching {
-            api.getGoalsToReview()
+            api.getGoalsInProgress()
         }
 }

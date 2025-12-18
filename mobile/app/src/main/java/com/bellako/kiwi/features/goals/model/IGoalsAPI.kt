@@ -33,6 +33,6 @@ interface IGoalsAPI {
     @GET("api/user/goals/all")
     suspend fun getAllGoals(): List<GoalsListDTO>
 
-    @GET("api/user/goals/review")
-    suspend fun getGoalsToReview(): List<GoalsListDTO>
+    @GET("api/user/goals/in_progress")
+    suspend fun getGoalsInProgress(): List<GoalsListDTO>
 }

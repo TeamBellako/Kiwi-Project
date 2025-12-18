@@ -8,4 +8,6 @@ data class GoalDomain(
     val category: GoalCategory,
     val status: GoalStatus,
     val points: Int,
+    val progress: Float = 0f,
+    val date: String = "",
 )

@@ -71,8 +71,8 @@ public class GoalService {
             throw new GoalUnauthorizedException("You are not authorized to complete this goal");
         }
 
-        // Verificar que el goal está en REVIEW
-        if (goal.getStatus() != GoalStatus.REVIEW) {
+        // Verificar que el goal está en IN_PROGRESS
+        if (goal.getStatus() != GoalStatus.IN_PROGRESS) {
             return GoalDataMapper.toDTO(goal);
         }
 
@@ -103,8 +103,8 @@ public class GoalService {
             throw new GoalUnauthorizedException("You are not authorized to uncomplete this goal");
         }
 
-        // Verificar que el goal está en REVIEW
-        if (goal.getStatus() != GoalStatus.REVIEW) {
+        // Verificar que el goal está en IN_PROGRESS
+        if (goal.getStatus() != GoalStatus.IN_PROGRESS) {
             return GoalDataMapper.toDTO(goal);
         }
 
@@ -143,19 +143,19 @@ public class GoalService {
     }
 
     @Transactional(readOnly = true)
-    public List<GoalsListDTO> getGoalsToReview(Authentication authentication) {
+    public List<GoalsListDTO> getGoalsInProgress(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
         LocalDate today = LocalDate.now();
 
         List<GoalPersistence> allGoals = goalRepository.findByUserOrderByDateDesc(user);
         
-        // Filtrar solo los goals con estado REVIEW y fecha anterior a hoy (excluye hoy)
-        List<GoalPersistence> goalsToReview = allGoals.stream()
-                .filter(goal -> goal.getStatus() == GoalStatus.REVIEW && goal.getDate().isBefore(today))
+        // Filtrar solo los goals con estado IN_PROGRESS y fecha anterior a hoy (excluye hoy)
+        List<GoalPersistence> goalsInProgress = allGoals.stream()
+                .filter(goal -> goal.getStatus() == GoalStatus.IN_PROGRESS && goal.getDate().isBefore(today))
                 .collect(Collectors.toList());
 
         // Agrupar por fecha
-        Map<LocalDate, List<GoalPersistence>> goalsByDate = goalsToReview.stream()
+        Map<LocalDate, List<GoalPersistence>> goalsByDate = goalsInProgress.stream()
                 .collect(Collectors.groupingBy(GoalPersistence::getDate));
 
         // Convertir a lista de GoalsListDTO

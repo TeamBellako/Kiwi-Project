@@ -86,7 +86,6 @@ class SignUpScreen4Test {
                     MapScreen(
                         nodesViewModel = nodesFakeViewModel,
                         mapViewModel = mapviewModel,
-                        goalsViewModel = goalsFakeViewModel,
                     )
                 }
             }

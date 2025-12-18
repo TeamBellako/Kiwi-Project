@@ -2,15 +2,14 @@ package com.bellako.kiwi.features.goals.model
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListState
-import com.bellako.kiwi.features.goals.data.YesterdayGoalsState
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 
 interface IGoalsViewModel {
     val state: StateFlow<GoalsListState>
-    val yesterdayGoalsState: StateFlow<YesterdayGoalsState>
 
     fun onDateChanged(newDate: LocalDate)
 
@@ -23,17 +22,9 @@ interface IGoalsViewModel {
 
     suspend fun uncompleteGoal(goalId: String): Result<Unit>
 
-    suspend fun loadGoalsByDate(date: String): Result<Unit>
+    suspend fun getGoalsByDate(date: String): Result<List<GoalDomain>>
+
+    suspend fun getGoalsInProgress(): Result<List<GoalDomain>>
 
     suspend fun loadAllGoals(): Result<Unit>
-
-    suspend fun loadYesterdayDailyChallenges(): Result<Unit>
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun markYesterdayGoalAsCompleted(
-        goalId: String,
-        completed: Boolean,
-    )
-
-    fun closeYesterdayGoalsModal()
 }

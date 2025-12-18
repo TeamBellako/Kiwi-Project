@@ -63,14 +63,14 @@ public class GoalsTestFactory {
     // HELPERS
     // =========================================================================
 
-    public static GoalDTO reviewGoalDTO(String id) {
+    public static GoalDTO inProgressGoalDTO(String id) {
         return goalDTO(
                 id,
                 30L,
                 "Exercise for 30 minutes",
                 GoalType.EXERCISE,
                 GoalCategory.DAILY_CHALLENGES,
-                GoalStatus.REVIEW,
+                GoalStatus.IN_PROGRESS,
                 10
         );
     }
@@ -99,14 +99,14 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalPersistence reviewGoalPersistence(String id, LocalDate date, UsersPersistence user) {
+    public static GoalPersistence inProgressGoalPersistence(String id, LocalDate date, UsersPersistence user) {
         return goalPersistence(
                 id,
                 30L,
                 "Exercise for 30 minutes",
                 GoalType.EXERCISE,
                 GoalCategory.DAILY_CHALLENGES,
-                GoalStatus.REVIEW,
+                GoalStatus.IN_PROGRESS,
                 10,
                 date,
                 user

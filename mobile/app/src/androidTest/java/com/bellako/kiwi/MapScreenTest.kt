@@ -43,7 +43,6 @@ class MapScreenTest {
                 dragLimitFactor = 1f,
                 mapViewModel = viewModel,
                 nodesViewModel = nodesModel,
-                goalsViewModel = goalsViewModel,
             )
         }
 
