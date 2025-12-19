@@ -84,8 +84,8 @@ class LoginScreenTest {
                 }
                 composable(ScreenRoutes.HOME) {
                     MapScreen(
-                        mapViewModel = mapviewModel,
                         nodesViewModel = nodesFakeViewModel,
+                        mapViewModel = mapviewModel,,
                     )
                 }
                 composable(ScreenRoutes.SIGNUP3_TEST) {

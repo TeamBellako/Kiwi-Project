@@ -19,8 +19,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -30,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
@@ -56,9 +56,11 @@ fun AppBarScreen(navController: NavController) {
 
 @Composable
 fun AppBarModalLayout(navController: NavController) {
-    val selectedNavigationIndex = rememberSaveable { mutableIntStateOf(0) }
     val kiwiColors = LocalKiwiColors.current
     val context = LocalContext.current
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(
         modifier =
@@ -73,16 +75,18 @@ fun AppBarModalLayout(navController: NavController) {
         Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
 
         appBarItems.forEachIndexed { index, item ->
-            val tint =
-                kiwiColors.colorF.copy(
-                    alpha = if (item.enabled) 1f else 0.4f,
-                )
+            val isSelected =
+                if (item.route == "OBJECTIVES") {
+                    currentRoute?.startsWith("OBJECTIVES") == true
+                } else {
+                    currentRoute == item.route
+                }
+
             NavigationBarItem(
                 enabled = item.enabled,
-                selected = selectedNavigationIndex.intValue == index,
+                selected = isSelected,
                 onClick = {
                     AudioManager.playSFX(context, R.raw.snd_ui_navigationtransition)
-                    selectedNavigationIndex.intValue = index
                     navController.navigate(item.route)
                 },
                 icon = {
@@ -91,7 +95,7 @@ fun AppBarModalLayout(navController: NavController) {
                             Modifier
                                 .background(
                                     color =
-                                        if (selectedNavigationIndex.intValue == index) {
+                                        if (isSelected) {
                                             kiwiColors.color5A
                                         } else {
                                             Color.Transparent
@@ -102,7 +106,7 @@ fun AppBarModalLayout(navController: NavController) {
                         Icon(
                             painter = painterResource(id = item.icon),
                             contentDescription = "",
-                            tint = tint,
+                            tint = kiwiColors.colorF,
                             modifier = Modifier.size(getResponsiveSizeHeight(50.dp)),
                         )
                     }

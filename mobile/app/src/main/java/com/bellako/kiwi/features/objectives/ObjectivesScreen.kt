@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,12 +29,30 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
-fun ObjectivesScreen(questsViewModel: IQuestsViewModel) {
+fun ObjectivesScreen(
+    questsViewModel: IQuestsViewModel,
+    focusedQuestId: Int? = null,
+) {
     val questsState by questsViewModel.state.collectAsState()
     val kiwiColors = LocalKiwiColors.current
+    val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         questsViewModel.loadActiveQuests()
+    }
+
+    LaunchedEffect(questsState, focusedQuestId) {
+        if (focusedQuestId == null) return@LaunchedEffect
+
+        val index =
+            questsState
+                ?.quests
+                ?.indexOfFirst { it.id == focusedQuestId }
+                ?: -1
+
+        if (index >= 0) {
+            listState.animateScrollToItem(index)
+        }
     }
 
     LazyColumn(
@@ -60,7 +79,8 @@ fun ObjectivesScreen(questsViewModel: IQuestsViewModel) {
             items(quests) { quest ->
                 Quest(
                     quest = quest,
-                    modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.medium)),
+                    isExpanded = quest.id == focusedQuestId,
+                    modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.small)),
                 )
             }
         }

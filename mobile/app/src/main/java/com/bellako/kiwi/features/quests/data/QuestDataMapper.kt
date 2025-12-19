@@ -3,7 +3,7 @@ package com.bellako.kiwi.features.quests.data
 object QuestDataMapper {
     fun toDomain(dto: QuestDTO): QuestDomain =
         QuestDomain(
-            id = dto.id,
+            id = dto.questId,
             name = dto.name,
             description = dto.description,
             experience = dto.experience,
@@ -13,7 +13,7 @@ object QuestDataMapper {
 
     fun toDomain(dto: SubquestDTO): SubquestDomain =
         SubquestDomain(
-            id = dto.id,
+            id = dto.subquestId,
             name = dto.name,
             experience = dto.experience,
             order = dto.order,
@@ -22,7 +22,7 @@ object QuestDataMapper {
 
     fun toDto(domain: QuestDomain): QuestDTO =
         QuestDTO(
-            id = domain.id,
+            questId = domain.id,
             name = domain.name,
             description = domain.description,
             experience = domain.experience,
@@ -32,7 +32,7 @@ object QuestDataMapper {
 
     fun toDto(domain: SubquestDomain): SubquestDTO =
         SubquestDTO(
-            id = domain.id,
+            subquestId = domain.id,
             name = domain.name,
             experience = domain.experience,
             order = domain.order,

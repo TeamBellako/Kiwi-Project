@@ -19,10 +19,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.audio.Kiwi_Music_Home
 import com.bellako.kiwi.audio.Kiwi_Music_Login
@@ -224,7 +226,7 @@ fun AppNavHost(
         composable(ScreenRoutes.HOME) {
             AppScreenWrapper {
                 Kiwi_Music_Home()
-                MapScreen(nodesViewModel = nodesViewModel)
+                MapScreen(nodesViewModel = nodesViewModel, navController = navController)
             }
         }
 
@@ -232,6 +234,18 @@ fun AppNavHost(
             AppScreenWrapper {
                 ObjectivesScreen(questsViewModel = questsViewModel)
             }
+        }
+
+        composable(
+            route = ScreenRoutes.OBJECTIVES_FOCUS,
+            arguments = listOf(navArgument("questId") { type = NavType.IntType }),
+        ) { backStackEntry ->
+            val questId = backStackEntry.arguments?.getInt("questId")
+
+            ObjectivesScreen(
+                questsViewModel = questsViewModel,
+                focusedQuestId = questId,
+            )
         }
 
         composable(ScreenRoutes.SETTINGS) {

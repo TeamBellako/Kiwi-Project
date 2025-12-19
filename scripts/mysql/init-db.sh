@@ -103,7 +103,8 @@ CREATE TABLE IF NOT EXISTS quests (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    experience INT NOT NULL
+    experience INT NOT NULL,
+	icon INT NOT NULL
 );
 
 -- Create subquests table
@@ -146,7 +147,7 @@ CREATE TRIGGER user_quest_status_after_delete
 AFTER DELETE ON user_quest_status
 FOR EACH ROW
 BEGIN
-    DELETE FROM user_subquests
+    DELETE FROM user_subquest_status
     WHERE user_id = OLD.user_id
       AND subquest_id IN (
           SELECT id FROM subquests WHERE quest_id = OLD.quest_id
@@ -157,7 +158,7 @@ DELIMITER ;
 --
 
 -- Insert placeholder values for quests
-INSERT INTO quests VALUES (1,"First Quest", "Complete your first challenge", 100),(2,"Second Quest", "A longer mission with multiple steps", 100)
+INSERT INTO quests VALUES (1,"First Quest", "Complete your first challenge", 100,9),(2,"Second Quest", "A longer mission with multiple steps", 100,1)
 INSERT INTO subquests VALUES (1,1,"Objective 1",20,1),(2,1,"Objective 2",20,2),(3,1,"Objective 3",20,3),(4,2,"Objective 1",20,1),(5,2,"Objective 2",20,2),(6,2,"Objective 3",20,3),(7,2,"Objective 4",20,4)
 INSERT INTO user_quest_status VALUES (1,1,'ACTIVE'),(1,2,'ACTIVE')
 INSERT INTO user_subquest_status VALUES (1,1,'COMPLETED'),(1,2,'COMPLETED'),(1,3,'ACTIVE'),(1,4,'COMPLETED'),(1,5,'COMPLETED'),(1,6,'ACTIVE'),(1,7,'LOCKED')

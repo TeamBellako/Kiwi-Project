@@ -33,7 +33,6 @@ class MapViewModel
         private var initialScale: Float = 1f
         private var minScale: Float = 1f
         private var maxScale: Float = 1f
-        private var dragLimitFactor: Float = 1f
         private var mapMarginFactor: Float = 0f
         private var elasticityFactor = 0f
 
@@ -53,7 +52,6 @@ class MapViewModel
 
         fun setParameters(
             maxScale: Float,
-            dragLimitFactor: Float,
             mapWidthPx: Float,
             mapHeightPx: Float,
             viewportWidthPx: Float,
@@ -62,7 +60,6 @@ class MapViewModel
             elasticityFactor: Float,
         ) {
             this.maxScale = maxScale
-            this.dragLimitFactor = dragLimitFactor
             this.mapMarginFactor = mapMarginFactor
             this.elasticityFactor = elasticityFactor
 
@@ -160,8 +157,8 @@ class MapViewModel
             val marginY = scaledMapHeight * mapMarginFactor
 
             return Offset(
-                max(0f, (scaledMapWidth - state.viewportWidthPx) / 2f + marginX) * dragLimitFactor,
-                max(0f, (scaledMapHeight - state.viewportHeightPx) / 2f + marginY) * dragLimitFactor,
+                max(0f, (scaledMapWidth - state.viewportWidthPx) / 2f + marginX),
+                max(0f, (scaledMapHeight - state.viewportHeightPx) / 2f + marginY),
             )
         }
 

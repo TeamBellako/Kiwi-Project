@@ -17,7 +17,7 @@ object QuestsTestFactory {
                 ),
         )
 
-    private fun questWithThreeSubquests(): QuestDomain =
+    fun questWithThreeSubquests(): QuestDomain =
         QuestDomain(
             id = 1,
             name = "First Quest",
@@ -32,7 +32,7 @@ object QuestsTestFactory {
                 ),
         )
 
-    private fun questWithFourSubquests(): QuestDomain =
+    fun questWithFourSubquests(): QuestDomain =
         QuestDomain(
             id = 2,
             name = "Second Quest",
@@ -45,6 +45,19 @@ object QuestsTestFactory {
                     subquest(5, "Objective 2", SubquestStatus.COMPLETED),
                     subquest(6, "Objective 3", SubquestStatus.ACTIVE),
                     subquest(7, "Objective 4", SubquestStatus.LOCKED),
+                ),
+        )
+
+    fun questCompleted(): QuestDomain =
+        QuestDomain(
+            id = 2,
+            name = "Third Quest",
+            description = "A short mission",
+            experience = 200,
+            status = QuestStatus.COMPLETED,
+            subquests =
+                listOf(
+                    subquest(8, "Objective 1", SubquestStatus.COMPLETED),
                 ),
         )
 

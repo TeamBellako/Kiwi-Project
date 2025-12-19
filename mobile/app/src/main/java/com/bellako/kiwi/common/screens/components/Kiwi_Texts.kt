@@ -1,18 +1,34 @@
 package com.bellako.kiwi.common.screens.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
+
+// -------------------------------------------------------------------------------------------------
+
+@SuppressLint("ConfigurationScreenWidthHeight")
+@Composable
+fun rememberTextWidthScale(): Float {
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp.toFloat()
+    val designWidth = 360f
+    val scale = screenWidthDp / designWidth
+    return scale.coerceIn(0.8f, 1.25f)
+}
 
 // -------------------------------------------------------------------------------------------------
 
@@ -38,6 +54,8 @@ private fun Kiwi_Text(
     arguments: KiwiTextArguments,
     bodyStyle: TextStyle,
 ) {
+    val scale = rememberTextWidthScale()
+
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
@@ -47,7 +65,7 @@ private fun Kiwi_Text(
             bodyStyle.copy(
                 fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
                 fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal,
-                fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp,
+                fontSize = (bodyStyle.fontSize.value * scale).sp,
             ),
     )
 }
@@ -122,11 +140,13 @@ private fun Kiwi_AnnotatedString_P(
     arguments: KiwiAnnotatedStringArguments,
     bodyStyle: TextStyle,
 ) {
+    val scale = rememberTextWidthScale()
+
     Text(
         text = arguments.text,
         textAlign = arguments.textAlign,
         modifier = arguments.modifier,
-        style = bodyStyle.copy(fontSize = getResponsiveSizeHeight(bodyStyle.fontSize.value.toInt()).sp),
+        style = bodyStyle.copy(fontSize = bodyStyle.fontSize * scale),
     )
 }
 

@@ -363,14 +363,15 @@ fun DashboardModal_Preview(
     initialStateIndex: Int = 0,
     nodesViewModel: NodesViewModel = hiltViewModel(),
 ) {
+    val nav = rememberNavController()
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarScreen(navController = rememberNavController())
+                AppBarScreen(navController = nav)
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
-                    MapScreen(nodesViewModel = nodesViewModel)
+                    MapScreen(nodesViewModel = nodesViewModel, navController = nav)
                     DashboardScreen(
                         usersViewModel =
                             UsersFakeViewModel(

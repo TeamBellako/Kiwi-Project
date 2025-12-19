@@ -1,7 +1,7 @@
 package com.bellako.kiwi.features.quests.data
 
 data class QuestDTO(
-    val id: Int,
+    val questId: Int,
     val name: String,
     val description: String,
     val experience: Int,

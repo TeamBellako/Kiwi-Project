@@ -35,9 +35,8 @@ class MapScreenTest {
         composeTestRule.setContent {
             MapScreen(
                 maxZoom = maxZoom,
-                dragLimitFactor = 1f,
-                mapViewModel = viewModel,
                 nodesViewModel = nodesModel,
+                mapViewModel = viewModel,,
             )
         }
 

@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,19 +25,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_Display2
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label1
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.quests.data.QuestDomain
 import com.bellako.kiwi.features.quests.data.QuestStatus
 import com.bellako.kiwi.features.quests.data.SubquestDomain
 import com.bellako.kiwi.features.quests.data.SubquestStatus
+import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -46,8 +56,10 @@ fun Quest(
     modifier: Modifier = Modifier,
     isExpanded: Boolean = false,
 ) {
-    var expanded by remember { mutableStateOf(isExpanded) }
     val kiwiColors = LocalKiwiColors.current
+    var expanded by remember(isExpanded) {
+        mutableStateOf(isExpanded)
+    }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -56,21 +68,23 @@ fun Quest(
         Box(
             modifier =
                 Modifier
-                    .fillMaxWidth()
                     .clickable { expanded = !expanded }
                     .zIndex(1f),
         ) {
             // Background image
             Kiwi_Image(
-                R.drawable.card_goals_selected,
+                if (expanded) {
+                    R.drawable.card_goals_selected
+                } else {
+                    R.drawable.card_goals
+                },
                 "Quest background",
-                modifier = Modifier.fillMaxWidth(),
             )
 
             Row(
                 modifier =
                     Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .align(Alignment.Center),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -121,7 +135,7 @@ fun Quest(
                     Modifier
                         .fillMaxWidth()
                         .offset(y = (-getResponsiveSizeHeight(11.dp)))
-                        .zIndex(0f)
+                        .zIndex(0f),
             ) {
                 // Background image
                 Kiwi_Image(
@@ -138,10 +152,10 @@ fun Quest(
                             .padding(
                                 vertical = getResponsiveSizeHeight(Spacing.medium),
                                 horizontal = getResponsiveSizeHeight(28.dp),
-                            )
+                            ),
                 ) {
                     quest.subquests.forEachIndexed { index, subquest ->
-                        SubquestItem(
+                        Subquest(
                             subquest = subquest,
                             isLast = index == quest.subquests.lastIndex,
                         )
@@ -155,7 +169,7 @@ fun Quest(
 }
 
 @Composable
-fun SubquestItem(
+fun Subquest(
     subquest: SubquestDomain,
     isLast: Boolean,
     modifier: Modifier = Modifier,
@@ -212,19 +226,119 @@ fun SubquestItem(
     }
 }
 
+@Composable
+private fun QuestNotification(
+    quest: QuestDomain,
+    isCompleted: Boolean = false,
+    onClick: () -> Unit,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Box(
+        modifier =
+            Modifier
+                .wrapContentSize()
+                .clickable { onClick() }
+                .zIndex(1f),
+    ) {
+        // Background image
+        Kiwi_Image(
+            if (isCompleted) {
+                R.drawable.notification_quest_completed
+            } else {
+                R.drawable.notification_quest_new
+            },
+            "Quest notification background",
+        )
+
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center)
+                    .padding(getResponsiveSizeHeight(Spacing.medium)),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // ICON
+            Column {
+                Kiwi_Image(
+                    questIconFor(quest),
+                    "Quest Icon",
+                    modifier =
+                        Modifier
+                            .size(getResponsiveSizeHeight(68.dp)),
+                )
+            }
+
+            // TEXT
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Kiwi_H1(
+                    KiwiTextArguments(
+                        color = kiwiColors.colorF,
+                        text = quest.name,
+                    ),
+                )
+
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        color = kiwiColors.colorF,
+                        text = if (isCompleted) "Quest Completed!" else "Your have a New Quest!",
+                        italic = true,
+                        modifier =
+                            Modifier
+                                .offset(
+                                    y = -getResponsiveSizeHeight(Spacing.xSmall),
+                                ),
+                    ),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun QuestCompletedNotification(
+    quest: QuestDomain,
+) {
+    QuestNotification(
+        quest = quest,        isCompleted = true,
+
+        onClick = {},
+    )
+}
+
+@Composable
+fun NewQuestNotification(
+    quest: QuestDomain,
+    navController: NavController,
+) {
+    QuestNotification(
+        quest = quest,
+        isCompleted = false,
+        onClick = {
+            navController.navigate("objectives/${quest.id}")
+        },
+    )
+}
+
 // HELPERS
 @DrawableRes
 fun questIconFor(quest: QuestDomain): Int =
-    when (quest.status) { // TODO cambiar para usar enum de la BBDD
-        QuestStatus.ACTIVE -> R.drawable.ic_goal_star
-        QuestStatus.COMPLETED -> R.drawable.ic_goal_star
+    when (quest.status) { // TODO cambiar para usar icon de la BBDD
+        QuestStatus.ACTIVE -> R.drawable.ic_quest_comet
+        QuestStatus.COMPLETED -> R.drawable.ic_quest_star
     }
 
 @DrawableRes
 fun subquestStatusIcon(status: SubquestStatus): Int =
     when (status) {
         SubquestStatus.COMPLETED -> R.drawable.ic_dropdown_tick
-        SubquestStatus.FAILED -> R.drawable.ic_daily_challenges_plus // TODO icono fail
+        SubquestStatus.FAILED -> R.drawable.ic_dropdown_fail
         SubquestStatus.ACTIVE -> R.drawable.ic_dropdown_location
         SubquestStatus.LOCKED -> R.drawable.ic_dropdown_lock
     }
@@ -236,3 +350,37 @@ fun subquestStatusText(status: SubquestStatus): String =
         SubquestStatus.ACTIVE -> "Current Objective"
         SubquestStatus.LOCKED -> "Upcoming"
     }
+
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Composable
+private fun NewQuestNotification_Preview() {
+    val nav = rememberNavController()
+    Kiwi_Theme {
+        Scaffold(
+            bottomBar = {
+                AppBarScreen(navController = nav)
+            },
+        ) { paddingValues ->
+            Box(
+                modifier =
+                    Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .padding(
+                                vertical = getResponsiveSizeHeight(Spacing.large),
+                                horizontal = getResponsiveSizeHeight(Spacing.xLarge),
+                            ),
+                ) {
+                    NewQuestNotification(QuestsTestFactory.questWithFourSubquests(), nav)
+                    QuestCompletedNotification(QuestsTestFactory.questWithThreeSubquests())
+                }
+            }
+        }
+    }
+}
