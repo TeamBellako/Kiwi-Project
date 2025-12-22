@@ -32,7 +32,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Display2
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label1
@@ -302,12 +301,10 @@ private fun QuestNotification(
 }
 
 @Composable
-fun QuestCompletedNotification(
-    quest: QuestDomain,
-) {
+fun QuestCompletedNotification(quest: QuestDomain) {
     QuestNotification(
-        quest = quest,        isCompleted = true,
-
+        quest = quest,
+        isCompleted = true,
         onClick = {},
     )
 }
@@ -360,7 +357,7 @@ private fun NewQuestNotification_Preview() {
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarScreen(navController = nav)
+                AppBarScreen(navController = nav, )
             },
         ) { paddingValues ->
             Box(

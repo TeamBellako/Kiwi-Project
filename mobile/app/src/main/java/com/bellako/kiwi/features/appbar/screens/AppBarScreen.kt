@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -19,7 +20,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -28,45 +32,75 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.features.appbar.data.appBarItems
+import com.bellako.kiwi.features.appbar.model.AppBarViewModel
+import com.bellako.kiwi.features.appbar.model.IAppBarViewModel
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
+// -------------------------------------------------------------------------------------------------
+
 @Composable
-fun AppBarScreen(navController: NavController) {
+fun AppBarScreen(
+    navController: NavController,
+    appBarViewModel: AppBarViewModel = hiltViewModel(),
+) {
     Box(
         modifier =
             Modifier
                 .wrapContentSize()
                 .background(LocalKiwiColors.current.color2),
     ) {
-        AppBarModalLayout(
-            navController,
-        )
+        AppBarModalLayout(navController, appBarViewModel)
     }
 }
 
+// -------------------------------------------------------------------------------------------------
+
 @Composable
-fun AppBarModalLayout(navController: NavController) {
+fun AppBarModalLayout(
+    navController: NavController,
+    appBarViewModel: IAppBarViewModel,
+) {
     val kiwiColors = LocalKiwiColors.current
     val context = LocalContext.current
 
+    val state by appBarViewModel.state.collectAsState()
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val objectivesRoute = ScreenRoutes.OBJECTIVES
+
+    LaunchedEffect(currentRoute) {
+        currentRoute?.let {
+            if (it.startsWith(objectivesRoute)) {
+                appBarViewModel.onNewContentVisited(ScreenRoutes.OBJECTIVES)
+            } else {
+                appBarViewModel.onNewContentVisited(currentRoute)
+            }
+        }
+    }
 
     NavigationBar(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(getResponsiveSizeHeight(30.dp), getResponsiveSizeHeight(30.dp), 0.dp, 0.dp))
-                .fillMaxWidth()
+                .clip(
+                    RoundedCornerShape(
+                        getResponsiveSizeHeight(30.dp),
+                        getResponsiveSizeHeight(30.dp),
+                        0.dp,
+                        0.dp,
+                    ),
+                ).fillMaxWidth()
                 .navigationBarsPadding()
                 .height(getResponsiveSizeHeight(90.dp))
                 .testTag(CommonTestTags.BOTTOM_APPBAR),
@@ -74,51 +108,83 @@ fun AppBarModalLayout(navController: NavController) {
     ) {
         Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
 
-        appBarItems.forEachIndexed { index, item ->
+        state.items.forEach { item ->
             val isSelected =
-                if (item.route == "OBJECTIVES") {
-                    currentRoute?.startsWith("OBJECTIVES") == true
+                if (item.route == objectivesRoute) {
+                    currentRoute?.startsWith(objectivesRoute) == true
                 } else {
                     currentRoute == item.route
                 }
 
             NavigationBarItem(
-                enabled = item.enabled,
                 selected = isSelected,
+                enabled = true,
                 onClick = {
-                    AudioManager.playSFX(context, R.raw.snd_ui_navigationtransition)
+                    AudioManager.playSFX(
+                        context,
+                        R.raw.snd_ui_navigationtransition,
+                    )
                     navController.navigate(item.route)
                 },
                 icon = {
-                    Box(
-                        modifier =
-                            Modifier
-                                .background(
-                                    color =
-                                        if (isSelected) {
-                                            kiwiColors.color5A
-                                        } else {
-                                            Color.Transparent
-                                        },
-                                    shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
-                                ).padding(getResponsiveSizeHeight(Spacing.xSmall)),
-                    ) {
-                        Icon(
-                            painter = painterResource(id = item.icon),
-                            contentDescription = "",
-                            tint = kiwiColors.colorF,
-                            modifier = Modifier.size(getResponsiveSizeHeight(50.dp)),
-                        )
-                    }
+                    AppBarIcon(
+                        icon = item.icon,
+                        selected = isSelected,
+                        showBadge = item.hasNewContent,
+                    )
                 },
                 colors =
                     NavigationBarItemDefaults.colors(
-                        indicatorColor = Color.Transparent, // Override default container color behavior
+                        indicatorColor = Color.Transparent,
                     ),
             )
         }
 
         Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+@Composable
+private fun AppBarIcon(
+    icon: Int,
+    selected: Boolean,
+    showBadge: Boolean,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Box(
+        modifier =
+            Modifier
+                .background(
+                    color =
+                        if (selected) {
+                            kiwiColors.color5A
+                        } else {
+                            Color.Transparent
+                        },
+                    shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
+                ).padding(getResponsiveSizeHeight(Spacing.xSmall)),
+    ) {
+        Box {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = kiwiColors.colorF,
+                modifier = Modifier.size(getResponsiveSizeHeight(50.dp)),
+            )
+
+            if (showBadge) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(getResponsiveSizeHeight(8.dp))
+                            .background(kiwiColors.color8A, CircleShape)
+                            .align(Alignment.TopEnd),
+                )
+            }
+        }
     }
 }
 

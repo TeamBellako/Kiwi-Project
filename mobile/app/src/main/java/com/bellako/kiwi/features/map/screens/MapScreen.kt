@@ -73,9 +73,9 @@ fun MapScreen(
     elasticityFactor: Float = 1.4f,
     mapResourceId: Int = R.drawable.mindveil_4k,
     title: String = "MINDVEIL",
-    nodesViewModel: INodesViewModel,
     mapViewModel: MapViewModel = hiltViewModel(),
-    questsViewModel: QuestsViewModel = hiltViewModel(),
+    nodesViewModel: INodesViewModel,
+    questsViewModel: IQuestsViewModel,
     navController: NavHostController,
 ) {
     val kiwiColors = LocalKiwiColors.current
@@ -148,7 +148,7 @@ fun MapScreen(
             )
         }
 
-        DevCompleteSubquestButton( 2)
+        DevCompleteSubquestButton(2, questsViewModel)
 
         QuestNotificationsOverlay(
             questsViewModel,
@@ -294,9 +294,11 @@ fun QuestNotificationsOverlay(
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
-fun DevCompleteSubquestButton(questId: Int) {
+fun DevCompleteSubquestButton(
+    questId: Int,
+    questsViewModel: IQuestsViewModel,
+) {
     val kiwiColors = LocalKiwiColors.current
-    val questViewModel: QuestsViewModel = hiltViewModel()
 
     val scope = rememberCoroutineScope()
 
@@ -309,7 +311,7 @@ fun DevCompleteSubquestButton(questId: Int) {
             ),
         onClick = {
             scope.launch {
-                questViewModel.giveQuest(questId)
+                questsViewModel.giveQuest(questId)
             }
         },
         color = kiwiColors.color5A,

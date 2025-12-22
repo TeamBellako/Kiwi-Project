@@ -34,6 +34,7 @@ import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.SupportModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
+import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.map.screens.MapScreen
@@ -44,6 +45,7 @@ import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
+import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
 import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
@@ -63,6 +65,8 @@ fun MainScreen(
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
     nodesViewModel: NodesViewModel = hiltViewModel(),
+    questsViewModel: QuestsViewModel = hiltViewModel(),
+    appBarViewModel: AppBarViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -85,6 +89,8 @@ fun MainScreen(
             personalityViewModel = personalityViewModel,
             metricsViewModel = metricsViewModel,
             nodesViewModel = nodesViewModel,
+            questsViewModel = questsViewModel,
+            appBarViewModel = appBarViewModel,
         )
     }
 }
@@ -100,12 +106,13 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 @Composable
 private fun AppScreen(
     navController: NavHostController,
-    usersViewModel: UsersViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
-    personalityViewModel: PersonalityViewModel = hiltViewModel(),
-    metricsViewModel: MetricsViewModel = hiltViewModel(),
-    nodesViewModel: NodesViewModel = hiltViewModel(),
-    questsViewModel: QuestsViewModel = hiltViewModel(),
+    usersViewModel: UsersViewModel,
+    settingsViewModel: SettingsViewModel,
+    personalityViewModel: PersonalityViewModel,
+    metricsViewModel: MetricsViewModel,
+    nodesViewModel: NodesViewModel,
+    questsViewModel: QuestsViewModel,
+    appBarViewModel: AppBarViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -120,10 +127,25 @@ private fun AppScreen(
 
     val showDashboard = route == ScreenRoutes.HOME
 
+    LaunchedEffect(Unit) {
+        questsViewModel.getNotifications().collect { event ->
+            when (event) {
+                is QuestNotificationEvent.NewQuest -> {
+                    appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
+                }
+                is QuestNotificationEvent.QuestCompleted -> {
+                }
+            }
+        }
+    }
+
     Scaffold(
         bottomBar = {
             if (!isLoginScreen && isLoginCompleted) {
-                AppBarScreen(navController = navController)
+                AppBarScreen(
+                    navController = navController,
+                    appBarViewModel = appBarViewModel,
+                )
             }
         },
         content = { paddingValues ->
@@ -160,7 +182,7 @@ private fun AppScreen(
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    usersViewModel: UsersViewModel = hiltViewModel(),
+    usersViewModel: UsersViewModel,
     settingsViewModel: ISettingsViewModel,
     personalityViewModel: IPersonalityViewModel,
     nodesViewModel: INodesViewModel,
@@ -226,7 +248,11 @@ fun AppNavHost(
         composable(ScreenRoutes.HOME) {
             AppScreenWrapper {
                 Kiwi_Music_Home()
-                MapScreen(nodesViewModel = nodesViewModel, navController = navController)
+                MapScreen(
+                    nodesViewModel = nodesViewModel,
+                    questsViewModel = questsViewModel,
+                    navController = navController,
+                )
             }
         }
 

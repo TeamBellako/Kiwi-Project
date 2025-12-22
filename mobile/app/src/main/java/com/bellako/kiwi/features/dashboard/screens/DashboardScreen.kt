@@ -46,6 +46,7 @@ import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
+import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -57,6 +58,7 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
@@ -362,6 +364,7 @@ fun DashboardModal_Preview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
     nodesViewModel: NodesViewModel = hiltViewModel(),
+    questsViewModel: QuestsViewModel = hiltViewModel(),
 ) {
     val nav = rememberNavController()
     Kiwi_Theme {
@@ -371,7 +374,11 @@ fun DashboardModal_Preview(
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
-                    MapScreen(nodesViewModel = nodesViewModel, navController = nav)
+                    MapScreen(
+                        nodesViewModel = nodesViewModel,
+                        questsViewModel = questsViewModel,
+                        navController = nav,
+                    )
                     DashboardScreen(
                         usersViewModel =
                             UsersFakeViewModel(
