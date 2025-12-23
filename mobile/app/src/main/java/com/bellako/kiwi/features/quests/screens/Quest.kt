@@ -49,7 +49,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.quests.data.QuestDomain
-import com.bellako.kiwi.features.quests.data.QuestStatus
 import com.bellako.kiwi.features.quests.data.SubquestDomain
 import com.bellako.kiwi.features.quests.data.SubquestStatus
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
@@ -61,6 +60,8 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.yield
+
+// ACTIVE QUESTS
 
 @Composable
 fun Quest(
@@ -107,7 +108,7 @@ fun Quest(
                             .padding(getResponsiveSizeHeight(12.dp)),
                 ) {
                     Kiwi_Image(
-                        questIconFor(quest),
+                        questIconFor(quest.icon),
                         "Quest Icon",
                         modifier =
                             Modifier
@@ -238,11 +239,20 @@ fun Subquest(
     }
 }
 
+// NOTIFICATIONS
+
+enum class NotificationType {
+    NEW,
+    QUEST_COMPLETED,
+    SUBQUEST_COMPLETED,
+    SUBQUEST_FAILED,
+}
+
 @Composable
 private fun QuestNotification(
-    quest: QuestDomain,
     name: String,
-    isCompleted: Boolean = false,
+    questIcon: Int,
+    type: NotificationType,
     onClick: () -> Unit,
 ) {
     val kiwiColors = LocalKiwiColors.current
@@ -256,10 +266,11 @@ private fun QuestNotification(
     ) {
         // Background image
         Kiwi_Image(
-            if (isCompleted) {
-                R.drawable.notification_quest_completed
-            } else {
-                R.drawable.notification_quest_new
+            when (type) {
+                NotificationType.NEW -> R.drawable.notification_quest_new
+                NotificationType.QUEST_COMPLETED -> R.drawable.notification_quest_completed
+                NotificationType.SUBQUEST_COMPLETED -> R.drawable.notification_quest_completed
+                NotificationType.SUBQUEST_FAILED -> R.drawable.notification_quest_failed
             },
             "Quest notification background",
         )
@@ -275,7 +286,7 @@ private fun QuestNotification(
             // ICON
             Column {
                 Kiwi_Image(
-                    questIconFor(quest),
+                    questIconFor(questIcon),
                     "Quest Icon",
                     modifier =
                         Modifier
@@ -300,7 +311,13 @@ private fun QuestNotification(
                 Kiwi_Label2(
                     KiwiTextArguments(
                         color = kiwiColors.colorF,
-                        text = if (isCompleted) "Quest Completed!" else "Your have a New Quest!",
+                        text =
+                            when (type) {
+                                NotificationType.NEW -> "Your have a New Quest!"
+                                NotificationType.QUEST_COMPLETED -> "Quest Completed!"
+                                NotificationType.SUBQUEST_COMPLETED -> "Objective Completed!"
+                                NotificationType.SUBQUEST_FAILED -> "Objective Failed"
+                            },
                         italic = true,
                         modifier =
                             Modifier
@@ -317,31 +334,51 @@ private fun QuestNotification(
 @Composable
 fun QuestCompletedNotification(quest: QuestDomain) {
     QuestNotification(
-        quest = quest,
         name = quest.name,
-        isCompleted = true,
+        questIcon = quest.icon,
+        type = NotificationType.QUEST_COMPLETED,
         onClick = {},
     )
 }
 
 @Composable
-fun SubquestCompletedNotification(quest: QuestDomain) {
-    QuestNotification(
-        quest = quest,
-        name = quest.name,
-        isCompleted = true,
-        onClick = {},
-    )
+fun SubquestCompletedNotification(
+    quest: QuestDomain,
+    subquestId: Int,
+    navController: NavController,
+) {
+    val subquest: SubquestDomain? = quest.subquests.find { it.id == subquestId }
+
+    subquest?.let {
+        QuestNotification(
+            name = subquest.name,
+            questIcon = quest.icon,
+            type = NotificationType.SUBQUEST_COMPLETED,
+            onClick = {
+                navController.navigate("objectives/${quest.id}")
+            },
+        )
+    }
 }
 
 @Composable
-fun SubquestFailedNotification(quest: QuestDomain) {
-    QuestNotification(
-        quest = quest,
-        name = quest.name,
-        isCompleted = true,
-        onClick = {},
-    )
+fun SubquestFailedNotification(
+    quest: QuestDomain,
+    subquestId: Int,
+    navController: NavController,
+) {
+    val subquest: SubquestDomain? = quest.subquests.find { it.id == subquestId }
+
+    subquest?.let {
+        QuestNotification(
+            name = subquest.name,
+            questIcon = quest.icon,
+            type = NotificationType.SUBQUEST_FAILED,
+            onClick = {
+                navController.navigate("objectives/${quest.id}")
+            },
+        )
+    }
 }
 
 @Composable
@@ -350,19 +387,14 @@ fun NewQuestNotification(
     navController: NavController,
 ) {
     QuestNotification(
-        quest = quest,
         name = quest.name,
-        isCompleted = false,
+        questIcon = quest.icon,
+        type = NotificationType.NEW,
         onClick = {
             navController.navigate("objectives/${quest.id}")
         },
     )
 }
-
-data class NotificationItem(
-    val event: QuestNotificationEvent,
-    val visible: MutableState<Boolean> = mutableStateOf(false),
-)
 
 @Composable
 fun QuestNotificationsOverlay(
@@ -370,73 +402,90 @@ fun QuestNotificationsOverlay(
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
-    val notifications = remember { mutableStateListOf<NotificationItem>() }
     val context = LocalContext.current
+
+    val queue = remember { mutableStateListOf<QuestNotificationEvent>() }
+    var current by remember { mutableStateOf<QuestNotificationEvent?>(null) }
+    var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         questsViewModel.getNotifications().collect { event ->
-            val item = NotificationItem(event, visible = mutableStateOf(false))
-            notifications += item
+            queue += event
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            if (current == null && queue.isNotEmpty()) {
+                current = queue.removeAt(0)
+                visible = true
+
+                when (current) {
+                    is QuestNotificationEvent.NewQuest ->
+                        AudioManager.playSFX(context, R.raw.snd_ui_newquest)
+
+                    is QuestNotificationEvent.QuestCompleted,
+                    is QuestNotificationEvent.SubquestCompleted,
+                    ->
+                        AudioManager.playSFX(context, R.raw.snd_ui_questcompleted)
+
+                    is QuestNotificationEvent.SubquestFailed ->
+                        AudioManager.playSFX(context, R.raw.snd_ui_questfailed)
+
+                    else -> {}
+                }
+
+                delay(4000)
+
+                visible = false
+                delay(300)
+
+                current = null
+                delay(250)
+            }
+
+            delay(16) // busy-loop
         }
     }
 
     Box(modifier = modifier) {
-        Column(modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.large))) {
-            notifications.forEach { item ->
-                key(item) {
-                    LaunchedEffect(item) {
-                        yield()
-                        item.visible.value = true
+        Column(
+            modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.large)),
+        ) {
+            AnimatedVisibility(
+                visible = visible,
+                enter =
+                    slideInVertically(
+                        initialOffsetY = { -it },
+                        animationSpec = tween(300),
+                    ),
+                exit =
+                    slideOutVertically(
+                        targetOffsetY = { -it },
+                        animationSpec = tween(300),
+                    ),
+            ) {
+                current?.let { event ->
+                    when (event) {
+                        is QuestNotificationEvent.NewQuest ->
+                            NewQuestNotification(event.quest, navController)
 
-                        when (item.event) {
-                            is QuestNotificationEvent.NewQuest -> {
-                                AudioManager.playSFX(
-                                    context,
-                                    R.raw.snd_ui_check,
-                                )
-                            }
-                            is QuestNotificationEvent.QuestCompleted -> {
-                                AudioManager.playSFX(
-                                    context,
-                                    R.raw.snd_ui_confirmationsuccess,
-                                )
-                            }
+                        is QuestNotificationEvent.QuestCompleted ->
+                            QuestCompletedNotification(event.quest)
 
-                            is QuestNotificationEvent.SubquestCompleted -> {
-                                AudioManager.playSFX(
-                                    context,
-                                    R.raw.snd_ui_confirmationsuccess,
-                                )
-                            }
-                            is QuestNotificationEvent.SubquestFailed -> TODO()
-                        }
+                        is QuestNotificationEvent.SubquestCompleted ->
+                            SubquestCompletedNotification(
+                                event.quest,
+                                event.subquestId,
+                                navController,
+                            )
 
-                        delay(4000)
-
-                        item.visible.value = false
-                        delay(300)
-                        notifications.remove(item)
-                    }
-
-                    AnimatedVisibility(
-                        visible = item.visible.value,
-                        enter =
-                            slideInVertically(
-                                initialOffsetY = { -it },
-                                animationSpec = tween(durationMillis = 300),
-                            ),
-                        exit =
-                            slideOutVertically(
-                                targetOffsetY = { -it },
-                                animationSpec = tween(durationMillis = 300),
-                            ),
-                    ) {
-                        when (item.event) {
-                            is QuestNotificationEvent.NewQuest -> NewQuestNotification(item.event.quest, navController)
-                            is QuestNotificationEvent.QuestCompleted -> QuestCompletedNotification(item.event.quest)
-                            is QuestNotificationEvent.SubquestCompleted -> TODO()
-                            is QuestNotificationEvent.SubquestFailed -> TODO()
-                        }
+                        is QuestNotificationEvent.SubquestFailed ->
+                            SubquestFailedNotification(
+                                event.quest,
+                                event.subquestId,
+                                navController,
+                            )
                     }
                 }
             }
@@ -446,10 +495,11 @@ fun QuestNotificationsOverlay(
 
 // HELPERS
 @DrawableRes
-fun questIconFor(quest: QuestDomain): Int =
-    when (quest.status) { // TODO cambiar para usar icon de la BBDD
-        QuestStatus.ACTIVE -> R.drawable.ic_quest_comet
-        QuestStatus.COMPLETED -> R.drawable.ic_quest_star
+fun questIconFor(questIcon: Int): Int =
+    when (questIcon) {
+        1 -> R.drawable.ic_quest_comet
+        2 -> R.drawable.ic_quest_star
+        else -> R.drawable.ic_quest_star
     }
 
 @DrawableRes

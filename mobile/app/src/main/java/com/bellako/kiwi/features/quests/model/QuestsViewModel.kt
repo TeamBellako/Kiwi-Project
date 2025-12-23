@@ -4,8 +4,10 @@ import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
+import com.bellako.kiwi.features.quests.data.QuestDTO
 import com.bellako.kiwi.features.quests.data.QuestDataMapper
 import com.bellako.kiwi.features.quests.data.QuestDomain
+import com.bellako.kiwi.features.quests.data.QuestStatus
 import com.bellako.kiwi.features.quests.data.QuestsState
 import com.bellako.kiwi.features.quests.data.SubquestResultDTO
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,10 +31,12 @@ sealed class QuestNotificationEvent {
 
     data class SubquestCompleted(
         val quest: QuestDomain,
+        val subquestId: Int,
     ) : QuestNotificationEvent()
 
     data class SubquestFailed(
         val quest: QuestDomain,
+        val subquestId: Int,
     ) : QuestNotificationEvent()
 }
 
@@ -63,21 +67,21 @@ class QuestsViewModel
             notify(QuestNotificationEvent.QuestCompleted(quest))
         }
 
-    override suspend fun notifySubquestCompleted(
-        quest: QuestDomain,
-        subquestId: Int
-    ) {
-        TODO("Not yet implemented")
-    }
+        override suspend fun notifySubquestCompleted(
+            quest: QuestDomain,
+            subquestId: Int,
+        ) {
+            notify(QuestNotificationEvent.SubquestCompleted(quest, subquestId))
+        }
 
-    override suspend fun notifySubquestFailed(
-        quest: QuestDomain,
-        subquestId: Int
-    ) {
-        TODO("Not yet implemented")
-    }
+        override suspend fun notifySubquestFailed(
+            quest: QuestDomain,
+            subquestId: Int,
+        ) {
+            notify(QuestNotificationEvent.SubquestFailed(quest, subquestId))
+        }
 
-    // LOAD QUESTS
+        // LOAD QUESTS
         override fun loadActiveQuests() {
             viewModelScope.launch {
                 setIsLoading(true)
@@ -140,12 +144,12 @@ class QuestsViewModel
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val result = repository.completeSubquest(subquestId)
-                    updateStateFromSubquestResult(result)
+                    val questUpdated = repository.completeSubquest(subquestId)
+                    updateState(questUpdated)
 
-                  //  notifySubquestCompleted(QuestDataMapper.toDomain(updatedSubquest))
-                    result.completedQuest?.let { completedQuest ->
-                        notifyQuestCompleted(QuestDataMapper.toDomain(completedQuest))
+                    notifySubquestCompleted(QuestDataMapper.toDomain(questUpdated), subquestId)
+                    if (questUpdated.status == QuestStatus.COMPLETED.toString()) {
+                        notifyQuestCompleted(QuestDataMapper.toDomain(questUpdated))
                     }
 
                     setUiState(UIState.Success(Unit))
@@ -164,10 +168,12 @@ class QuestsViewModel
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val result = repository.failSubquest(subquestId)
-                    updateStateFromSubquestResult(result)
-                    result.completedQuest?.let { completedQuest ->
-                        notifyQuestCompleted(QuestDataMapper.toDomain(completedQuest))
+                    val questUpdated = repository.failSubquest(subquestId)
+                    updateState(questUpdated)
+
+                    notifySubquestFailed(QuestDataMapper.toDomain(questUpdated), subquestId)
+                    if (questUpdated.status == QuestStatus.COMPLETED.toString()) {
+                        notifyQuestCompleted(QuestDataMapper.toDomain(questUpdated))
                     }
                     setUiState(UIState.Success(Unit))
                 } catch (e: Exception) {
@@ -180,30 +186,14 @@ class QuestsViewModel
         }
 
         // STATE UPDATE
-        private fun updateStateFromSubquestResult(dto: SubquestResultDTO) {
-            val updatedSubquest = dto.updatedSubquest?.let { QuestDataMapper.toDomain(it) } ?: return
-            val nextSubquest = dto.nextSubquest?.let { QuestDataMapper.toDomain(it) }
-            val completedQuest = dto.completedQuest?.let { QuestDataMapper.toDomain(it) }
-
+        private fun updateState(dto: QuestDTO) {
             val updatedQuests =
                 _state.value.quests.map { quest ->
-                    if (completedQuest != null && quest.id == completedQuest.id) {
-                        return@map completedQuest
+                    if (quest.id == dto.questId) {
+                        QuestDataMapper.toDomain(dto)
+                    } else {
+                        quest
                     }
-
-                    if (quest.subquests.any { it.id == updatedSubquest.id }) {
-                        val newSubquests =
-                            quest.subquests.map { sub ->
-                                when (sub.id) {
-                                    updatedSubquest.id -> updatedSubquest
-                                    nextSubquest?.id -> nextSubquest
-                                    else -> sub
-                                }
-                            }
-                        return@map quest.copy(subquests = newSubquests)
-                    }
-
-                    quest
                 }
 
             _state.value = _state.value.copy(quests = updatedQuests)

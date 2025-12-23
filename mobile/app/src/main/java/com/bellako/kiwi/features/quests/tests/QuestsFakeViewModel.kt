@@ -37,6 +37,20 @@ class QuestsFakeViewModel(
         _notifications.emit(QuestNotificationEvent.QuestCompleted(quest))
     }
 
+    override suspend fun notifySubquestCompleted(
+        quest: QuestDomain,
+        subquestId: Int,
+    ) {
+        _notifications.emit(QuestNotificationEvent.SubquestCompleted(quest, subquestId))
+    }
+
+    override suspend fun notifySubquestFailed(
+        quest: QuestDomain,
+        subquestId: Int,
+    ) {
+        _notifications.emit(QuestNotificationEvent.SubquestFailed(quest, subquestId))
+    }
+
     // LOAD
     override fun loadActiveQuests() {
         if (fakeError) {

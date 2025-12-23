@@ -23,6 +23,7 @@ object QuestsTestFactory {
             name = "First Quest",
             description = "Complete your first challenge",
             experience = 100,
+            icon = 1,
             status = QuestStatus.ACTIVE,
             subquests =
                 listOf(
@@ -38,6 +39,7 @@ object QuestsTestFactory {
             name = "Second Quest",
             description = "A longer mission with multiple steps",
             experience = 200,
+            icon = 2,
             status = QuestStatus.ACTIVE,
             subquests =
                 listOf(
@@ -54,6 +56,7 @@ object QuestsTestFactory {
             name = "Third Quest",
             description = "A short mission",
             experience = 200,
+            icon = 2,
             status = QuestStatus.COMPLETED,
             subquests =
                 listOf(

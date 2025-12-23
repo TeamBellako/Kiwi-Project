@@ -21,10 +21,10 @@ interface IQuestsAPI {
     @POST("api/quests/subquests/{subquestId}/complete")
     suspend fun completeSubquest(
         @Path("subquestId") subquestId: Int,
-    ): SubquestResultDTO
+    ): QuestDTO
 
     @POST("api/quests/subquests/{subquestId}/fail")
     suspend fun failSubquest(
         @Path("subquestId") subquestId: Int,
-    ): SubquestResultDTO
+    ): QuestDTO
 }

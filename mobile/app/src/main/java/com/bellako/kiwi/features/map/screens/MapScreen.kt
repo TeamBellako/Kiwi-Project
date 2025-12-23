@@ -35,7 +35,6 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -49,21 +48,15 @@ import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
-import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
-import com.bellako.kiwi.features.quests.model.QuestsViewModel
-import com.bellako.kiwi.features.quests.screens.NewQuestNotification
-import com.bellako.kiwi.features.quests.screens.QuestCompletedNotification
 import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import kotlin.collections.forEach
 import kotlin.math.min
 
@@ -149,7 +142,7 @@ fun MapScreen(
             )
         }
 
-        DevCompleteSubquestButton(2, questsViewModel)
+        DevCompleteSubquestButton(questsViewModel)
 
         QuestNotificationsOverlay(
             questsViewModel,
@@ -236,10 +229,7 @@ fun Background() {
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
-fun DevCompleteSubquestButton(
-    questId: Int,
-    questsViewModel: IQuestsViewModel,
-) {
+fun DevCompleteSubquestButton(questsViewModel: IQuestsViewModel) {
     val kiwiColors = LocalKiwiColors.current
 
     val scope = rememberCoroutineScope()
@@ -247,13 +237,13 @@ fun DevCompleteSubquestButton(
     Kiwi_Button(
         textArguments =
             KiwiTextArguments(
-                "DEV · Give quest $questId",
+                "DEV",
                 color = kiwiColors.color7,
                 bold = true,
             ),
         onClick = {
             scope.launch {
-                questsViewModel.giveQuest(questId)
+                questsViewModel.failSubquest(7)
             }
         },
         color = kiwiColors.color5A,

@@ -158,10 +158,8 @@ DELIMITER ;
 --
 
 -- Insert placeholder values for quests
-INSERT INTO quests VALUES (1,"First Quest", "Complete your first challenge", 100,0),(2,"Second Quest", "A longer mission with multiple steps", 100,1)
-INSERT INTO subquests VALUES (1,1,"Objective 1",20,1),(2,1,"Objective 2",20,2),(3,1,"Objective 3",20,3),(4,2,"Objective 1",20,1),(5,2,"Objective 2",20,2),(6,2,"Objective 3",20,3),(7,2,"Objective 4",20,4)
-INSERT INTO user_quest_status VALUES (1,1,'ACTIVE'),(1,2,'ACTIVE')
-INSERT INTO user_subquest_status VALUES (1,1,'COMPLETED'),(1,2,'COMPLETED'),(1,3,'ACTIVE'),(1,4,'COMPLETED'),(1,5,'COMPLETED'),(1,6,'ACTIVE'),(1,7,'LOCKED')
+INSERT INTO quests VALUES (1,"First Quest", "Complete your first challenge", 100,1),(2,"Second Quest", "A longer mission with multiple steps", 100,2);
+INSERT INTO subquests VALUES (1,1,"Objective 1",20,1),(2,1,"Objective 2",20,2),(3,1,"Objective 3",20,3),(4,2,"Objective 1",20,1),(5,2,"Objective 2",20,2),(6,2,"Objective 3",20,3),(7,2,"Objective 4",20,4);
 --
 
 CREATE USER '${BACKEND_DB_USERNAME}'@'%' IDENTIFIED BY '${BACKEND_DB_PASSWORD}';

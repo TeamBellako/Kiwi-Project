@@ -130,11 +130,8 @@ private fun AppScreen(
     LaunchedEffect(Unit) {
         questsViewModel.getNotifications().collect { event ->
             when (event) {
-                is QuestNotificationEvent.NewQuest -> {
-                    appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
-                }
-                is QuestNotificationEvent.QuestCompleted -> {
-                }
+                is QuestNotificationEvent.QuestCompleted -> {}
+                else -> appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
             }
         }
     }
