@@ -53,6 +53,7 @@ import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
 import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.quests.screens.NewQuestNotification
 import com.bellako.kiwi.features.quests.screens.QuestCompletedNotification
+import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -229,65 +230,6 @@ fun Background() {
                 .fillMaxSize()
                 .background(LocalKiwiColors.current.colorOcean),
     )
-}
-
-data class NotificationItem(
-    val event: QuestNotificationEvent,
-    val visible: MutableState<Boolean> = mutableStateOf(false),
-)
-
-@Composable
-fun QuestNotificationsOverlay(
-    questsViewModel: IQuestsViewModel,
-    navController: NavController,
-    modifier: Modifier = Modifier,
-) {
-    val notifications = remember { mutableStateListOf<NotificationItem>() }
-
-    LaunchedEffect(Unit) {
-        questsViewModel.getNotifications().collect { event ->
-            val item = NotificationItem(event, visible = mutableStateOf(false))
-            notifications += item
-        }
-    }
-
-    Box(modifier = modifier) {
-        Column(modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.large))) {
-            notifications.forEach { item ->
-                key(item) {
-                    LaunchedEffect(item) {
-                        yield()
-                        item.visible.value = true
-
-                        delay(4000)
-
-                        item.visible.value = false
-                        delay(300)
-                        notifications.remove(item)
-                    }
-
-                    AnimatedVisibility(
-                        visible = item.visible.value,
-                        enter =
-                            slideInVertically(
-                                initialOffsetY = { -it },
-                                animationSpec = tween(durationMillis = 300),
-                            ),
-                        exit =
-                            slideOutVertically(
-                                targetOffsetY = { -it },
-                                animationSpec = tween(durationMillis = 300),
-                            ),
-                    ) {
-                        when (item.event) {
-                            is QuestNotificationEvent.NewQuest -> NewQuestNotification(item.event.quest, navController)
-                            is QuestNotificationEvent.QuestCompleted -> QuestCompletedNotification(item.event.quest)
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 // TODO QUITAR

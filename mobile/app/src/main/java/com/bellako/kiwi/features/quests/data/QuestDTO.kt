@@ -5,6 +5,7 @@ data class QuestDTO(
     val name: String,
     val description: String,
     val experience: Int,
+    val icon: Int,
     val status: String,
     val subquests: List<SubquestDTO>,
 )

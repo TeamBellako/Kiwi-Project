@@ -6,7 +6,6 @@ import com.kiwi.features.quests.exceptions.*;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static com.kiwi.quests.QuestTestFactory.*;
@@ -97,12 +96,18 @@ public class QuestServiceTests {
 
         service.giveQuestToUser(userId, questObj.getId());
 
-        SubquestResultDTO result = service.completeSubquest(userId, questObj.getId());
+        QuestDTO result = service.completeSubquest(userId, s1.getId());
 
-        assertEquals(SubquestStatus.COMPLETED.name(), result.getUpdatedSubquest().getStatus());
-        assertNotNull(result.getNextSubquest());
-        assertEquals(SubquestStatus.ACTIVE.name(), result.getNextSubquest().getStatus());
+        assertEquals(QuestStatus.ACTIVE.name(), result.getStatus());
+        assertEquals(2, result.getSubquests().size());
+
+        assertEquals(SubquestStatus.COMPLETED.name(),
+                result.getSubquests().get(0).getStatus());
+
+        assertEquals(SubquestStatus.ACTIVE.name(),
+                result.getSubquests().get(1).getStatus());
     }
+
 
     @Test
     public void completeSubquest_completesQuestWhenAllFinished() {
@@ -112,15 +117,20 @@ public class QuestServiceTests {
         SubquestPersistence s2 = subRepo.saveAndFlush(subquest(11, questObj, 2));
 
         userQuestRepo.save(activeQuestStatus(userId, questObj));
-
         userSubRepo.save(completedSubquestStatus(userId, s1));
         userSubRepo.save(activeSubquestStatus(userId, s2));
 
-        SubquestResultDTO result = service.completeSubquest(userId, s2.getId());
+        QuestDTO result = service.completeSubquest(userId, s2.getId());
 
-        assertNotNull(result.getCompletedQuest());
-        assertEquals(QuestStatus.COMPLETED.name(), result.getCompletedQuest().getStatus());
+        assertEquals(QuestStatus.COMPLETED.name(), result.getStatus());
+
+        assertTrue(result.getSubquests().stream()
+                .allMatch(s ->
+                        s.getStatus().equals(SubquestStatus.COMPLETED.name())
+                                || s.getStatus().equals(SubquestStatus.FAILED.name())
+                ));
     }
+
 
     @Test(expected = SubquestNotFoundException.class)
     public void completeSubquest_failsIfSubquestDoesNotExist() {
@@ -143,8 +153,13 @@ public class QuestServiceTests {
 
         service.giveQuestToUser(userId, questObj.getId());
 
-        SubquestResultDTO result = service.failSubquest(userId, s1.getId());
+        QuestDTO result = service.failSubquest(userId, s1.getId());
 
-        assertEquals(SubquestStatus.FAILED.name(), result.getUpdatedSubquest().getStatus());
+        assertEquals(SubquestStatus.FAILED.name(),
+                result.getSubquests().get(0).getStatus());
+
+        assertEquals(SubquestStatus.ACTIVE.name(),
+                result.getSubquests().get(1).getStatus());
     }
+
 }

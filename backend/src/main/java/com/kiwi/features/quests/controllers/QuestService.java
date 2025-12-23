@@ -46,33 +46,10 @@ public class QuestService {
 
     private List<QuestDTO> getQuestsForUserByStatus(int userId, QuestStatus status) {
 
-        // cargar estados de quest SOLO para este usuario
-        List<UserQuestStatusPersistence> userQuests =
-                userQuestStatusRepository.findByIdUserId(userId);
-
-        return userQuests.stream()
+        return userQuestStatusRepository.findByIdUserId(userId).stream()
                 .filter(qs -> qs.getStatus() == status)
-                .map(qs -> {
-                    QuestPersistence quest = qs.getQuest();
-
-                    // cargar subquests de la quest y sus estados en lote
-                    List<SubquestPersistence> subquests =
-                            subquestRepository.findAllByQuestIdOrderByOrderIndex(quest.getId());
-
-                    List<UserSubquestStatusPersistence> userSubs =
-                            userSubquestStatusRepository.findByUserIdAndQuestIdOrdered(
-                                    userId,
-                                    quest.getId()
-                            );
-
-                    List<SubquestDomain> subDomains =
-                            SubquestMapper.toDomainList(subquests, userSubs);
-
-                    QuestDomain domain =
-                            QuestDomainFactory.create(quest, qs, subDomains);
-
-                    return QuestMapper.toDTO(domain);
-                })
+                .map(qs -> buildQuestDomain(userId, qs.getQuest().getId()))
+                .map(QuestMapper::toDTO)
                 .toList();
     }
 
@@ -86,60 +63,29 @@ public class QuestService {
         QuestPersistence quest = questRepository.findById(questId)
                 .orElseThrow(() -> new QuestNotFoundException(questId));
 
-        // 1) Crear dominio sin estado
-        QuestDomain domain = new QuestDomain(
-                quest.getId(),
-                quest.getName(),
-                quest.getDescription(),
-                quest.getExperience(),
-                null,
-                List.of()
+        QuestDomain activated =
+                progress.activateQuest(new QuestDomain(
+                        quest.getId(),
+                        quest.getName(),
+                        quest.getDescription(),
+                        quest.getExperience(),
+                        quest.getIcon(),
+                        null,
+                        List.of()
+                ));
+
+        userQuestStatusRepository.save(
+                QuestMapper.toPersistence(userId, activated)
         );
 
-        // 2) Activar quest
-        QuestDomain activated = progress.activateQuest(domain);
-
-        // 3) Guardar estado de quest
-        UserQuestStatusPersistence persistence =
-                QuestMapper.toPersistence(userId, activated);
-
-        userQuestStatusRepository.save(persistence);
-
-        // 4) Inicializar subquests
         initializeSubquests(userId, questId);
 
-        // 5) Recargar subquests + estados
-        List<SubquestPersistence> subquests =
-                subquestRepository.findAllByQuestIdOrderByOrderIndex(questId);
-
-        List<UserSubquestStatusPersistence> userSubs =
-                userSubquestStatusRepository.findByUserIdAndQuestIdOrdered(
-                        userId,
-                        (int) questId
-                );
-
-        List<SubquestDomain> subDomains =
-                SubquestMapper.toDomainList(subquests, userSubs);
-
-        // 6) Montar quest completa
-        QuestDomain full = new QuestDomain(
-                quest.getId(),
-                quest.getName(),
-                quest.getDescription(),
-                quest.getExperience(),
-                activated.getStatus(),
-                subDomains
+        return QuestMapper.toDTO(
+                buildQuestDomain(userId, questId)
         );
-
-        return QuestMapper.toDTO(full);
     }
 
-    // ============================================================================================
-    // INITIALIZE SUBQUESTS
-    // ============================================================================================
-
-    @Transactional
-    public void initializeSubquests(int userId, int questId) {
+    private void initializeSubquests(int userId, int questId) {
 
         List<SubquestPersistence> subquests =
                 subquestRepository.findAllByQuestIdOrderByOrderIndex(questId);
@@ -148,14 +94,12 @@ public class QuestService {
 
             SubquestPersistence subquest = subquests.get(i);
 
-            UserSubquestStatusPersistence subquestStatus = new UserSubquestStatusPersistence();
-            subquestStatus.setId(new UserSubquestStatusKey(userId, subquest.getId()));
+            UserSubquestStatusPersistence status = new UserSubquestStatusPersistence();
+            status.setId(new UserSubquestStatusKey(userId, subquest.getId()));
+            status.setStatus(i == 0 ? SubquestStatus.ACTIVE : SubquestStatus.LOCKED);
+            status.setSubquest(subquest);
 
-            // primera subquest = ACTIVE, resto LOCKED
-            subquestStatus.setStatus(i == 0 ? SubquestStatus.ACTIVE : SubquestStatus.LOCKED);
-            subquestStatus.setSubquest(subquest);
-
-            userSubquestStatusRepository.save(subquestStatus);
+            userSubquestStatusRepository.save(status);
         }
     }
 
@@ -164,105 +108,119 @@ public class QuestService {
     // ============================================================================================
 
     @Transactional
-    public SubquestResultDTO completeSubquest(int userId, int subquestId) {
+    public QuestDTO completeSubquest(int userId, int subquestId) {
         return processSubquestUpdate(userId, subquestId, false);
     }
 
     @Transactional
-    public SubquestResultDTO failSubquest(int userId, int subquestId) {
+    public QuestDTO failSubquest(int userId, int subquestId) {
         return processSubquestUpdate(userId, subquestId, true);
     }
 
-    @Transactional
-    private SubquestResultDTO processSubquestUpdate(int userId, int subquestId, boolean isFail) {
+    private QuestDTO processSubquestUpdate(int userId, int subquestId, boolean isFail) {
 
         SubquestPersistence subquest = subquestRepository.findById(subquestId)
                 .orElseThrow(() -> new SubquestNotFoundException(subquestId));
 
-        UserSubquestStatusPersistence current =
-                userSubquestStatusRepository.findByIdUserIdAndIdSubquestId(userId, subquestId)
-                        .orElseThrow(() -> new SubquestStatusNotFoundException(subquestId));
+        UserSubquestStatusPersistence subquestStatus = userSubquestStatusRepository
+                .findByIdUserIdAndIdSubquestId(userId, subquestId)
+                .orElseThrow(() -> new SubquestStatusNotFoundException(subquestId));
 
-        // --- Convertir a dominio ---
-        SubquestDomain domain = SubquestMapper.toDomain(subquest, current);
+        updateCurrentSubquest(userId, subquest, subquestStatus, isFail);
+        unlockNextSubquestIfNeeded(userId, subquest);
 
-        SubquestDomain updated =
-                isFail ? progress.failSubquest(domain)
-                        : progress.completeSubquest(domain);
+        QuestDomain quest = buildQuestDomain(userId, subquest.getQuest().getId());
 
-        // --- Guardar nuevo estado ---
-        UserSubquestStatusPersistence persistence =
-                SubquestMapper.toPersistence(userId, updated, subquestRepository);
-
-        userSubquestStatusRepository.save(persistence);
-
-        SubquestDTO updatedDTO = SubquestMapper.toDTO(updated);
-
-        // --- Activar siguiente subquest ---
-        SubquestDTO nextSubquestDTO = null;
-
-        List<SubquestPersistence> questSubs =
-                subquestRepository.findAllByQuestIdOrderByOrderIndex(subquest.getQuest().getId());
-
-        int index = -1;
-        for (int i = 0; i < questSubs.size(); i++) {
-            if (questSubs.get(i).getId() == subquestId) {
-                index = i;
-                break;
-            }
+        if (isQuestCompleted(quest)) {
+            QuestDomain completed = progress.completeQuest(quest);
+            userQuestStatusRepository.save(
+                    QuestMapper.toPersistence(userId, completed)
+            );
+            quest = completed;
         }
 
-        if (index != -1 && index + 1 < questSubs.size()) {
-            SubquestPersistence next = questSubs.get(index + 1);
-
-            UserSubquestStatusPersistence nextStatus =
-                    userSubquestStatusRepository.findByIdUserIdAndIdSubquestId(userId, next.getId())
-                            .orElseThrow();
-
-            if (nextStatus.getStatus() == SubquestStatus.LOCKED) {
-                SubquestDomain nextDomain = SubquestMapper.toDomain(next, nextStatus);
-                SubquestDomain unlocked = progress.unlockSubquest(nextDomain);
-
-                UserSubquestStatusPersistence saved =
-                        userSubquestStatusRepository.save(SubquestMapper.toPersistence(userId, unlocked, subquestRepository));
-
-                nextSubquestDTO = SubquestMapper.toDTO(unlocked);
-            }
-        }
-
-        // --- Completar quest si no quedan subquests ---
-        QuestDTO completedQuestDTO = null;
-
-        List<UserSubquestStatusPersistence> allStatuses =
-                userSubquestStatusRepository.findByUserIdAndQuestIdOrdered(userId, subquest.getQuest().getId());
-
-        boolean allDone = allStatuses.stream()
-                .allMatch(s -> s.getStatus() == SubquestStatus.COMPLETED
-                        || s.getStatus() == SubquestStatus.FAILED);
-
-        if (allDone) {
-
-            UserQuestStatusPersistence questStatus =
-                    userQuestStatusRepository
-                            .findByIdUserIdAndIdQuestId(userId, subquest.getQuest().getId())
-                            .orElseThrow();
-
-            QuestDomain questDomain =
-                    QuestMapper.toDomain(subquest.getQuest(), questStatus, List.of());
-
-            QuestDomain completedQuest = progress.completeQuest(questDomain);
-
-            userQuestStatusRepository.save(QuestMapper.toPersistence(userId, completedQuest));
-
-            completedQuestDTO = QuestMapper.toDTO(completedQuest);
-        }
-
-        // --- Respuesta final ---
-        return SubquestResultDTO.builder()
-                .updatedSubquest(updatedDTO)
-                .nextSubquest(nextSubquestDTO)
-                .completedQuest(completedQuestDTO)
-                .build();
+        return QuestMapper.toDTO(quest);
     }
 
+    // ============================================================================================
+    // AUXILIARY METHODS
+    // ============================================================================================
+
+    private void updateCurrentSubquest(
+            int userId,
+            SubquestPersistence subquest,
+            UserSubquestStatusPersistence currentStatus,
+            boolean isFail
+    ) {
+
+        SubquestDomain updated =
+                isFail
+                        ? progress.failSubquest(SubquestMapper.toDomain(subquest, currentStatus))
+                        : progress.completeSubquest(SubquestMapper.toDomain(subquest, currentStatus));
+
+        userSubquestStatusRepository.save(
+                SubquestMapper.toPersistence(userId, updated, subquestRepository)
+        );
+    }
+
+    private void unlockNextSubquestIfNeeded(int userId, SubquestPersistence current) {
+
+        List<SubquestPersistence> subquests =
+                subquestRepository.findAllByQuestIdOrderByOrderIndex(
+                        current.getQuest().getId()
+                );
+
+        int index = subquests.indexOf(current);
+        if (index == -1 || index + 1 >= subquests.size())
+        {
+            return;
+        }
+
+        SubquestPersistence nextSubquest = subquests.get(index + 1);
+
+        UserSubquestStatusPersistence nextSubquestStatus =
+                userSubquestStatusRepository
+                        .findByIdUserIdAndIdSubquestId(userId, nextSubquest.getId())
+                        .orElseThrow();
+
+        if (nextSubquestStatus.getStatus() == SubquestStatus.LOCKED)
+        {
+            SubquestDomain unlocked =
+                    progress.unlockSubquest(
+                            SubquestMapper.toDomain(nextSubquest, nextSubquestStatus)
+                    );
+
+            userSubquestStatusRepository.save(
+                    SubquestMapper.toPersistence(userId, unlocked, subquestRepository)
+            );
+        }
+    }
+
+    private QuestDomain buildQuestDomain(int userId, int questId) {
+
+        UserQuestStatusPersistence questStatus =
+                userQuestStatusRepository
+                        .findByIdUserIdAndIdQuestId(userId, questId)
+                        .orElseThrow();
+
+        List<SubquestPersistence> subquests =
+                subquestRepository.findAllByQuestIdOrderByOrderIndex(questId);
+
+        List<UserSubquestStatusPersistence> subquestsStatuses =
+                userSubquestStatusRepository.findByUserIdAndQuestIdOrdered(userId, questId);
+
+        return QuestMapper.toDomain(
+                questStatus.getQuest(),
+                questStatus,
+                SubquestMapper.toDomainList(subquests, subquestsStatuses)
+        );
+    }
+
+    private boolean isQuestCompleted(QuestDomain quest) {
+        return quest.getSubquests().stream()
+                .allMatch(s ->
+                        s.getStatus() == SubquestStatus.COMPLETED
+                                || s.getStatus() == SubquestStatus.FAILED
+                );
+    }
 }

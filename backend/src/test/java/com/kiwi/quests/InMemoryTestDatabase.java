@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InMemoryTestDatabase {
-    // Auto-increment simulados
+    // Auto-increment simulated
     public final AtomicInteger questId = new AtomicInteger(1);
     public final AtomicInteger subquestId = new AtomicInteger(1);
 
@@ -17,7 +17,6 @@ public class InMemoryTestDatabase {
     public final Map<UserQuestStatusKey, UserQuestStatusPersistence> userQuests = new HashMap<>();
     public final Map<UserSubquestStatusKey, UserSubquestStatusPersistence> userSubquests = new HashMap<>();
 
-    // Métodos auxiliares para crear quests/subquests
     public QuestPersistence saveQuest(QuestPersistence quest) {
         if (quest.getId() == 0) quest.setId(questId.getAndIncrement());
         quests.put(quest.getId(), quest);

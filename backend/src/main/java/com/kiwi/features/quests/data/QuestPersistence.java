@@ -21,4 +21,7 @@ public class QuestPersistence {
     @Column(nullable = false)
     private int experience;
 
+    @Column(nullable = false)
+    private int icon;
+
 }

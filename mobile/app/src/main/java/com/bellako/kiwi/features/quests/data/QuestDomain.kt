@@ -5,6 +5,7 @@ data class QuestDomain(
     val name: String,
     val description: String,
     val experience: Int,
+    val icon: Int,
     val status: QuestStatus,
     val subquests: List<SubquestDomain>,
 )

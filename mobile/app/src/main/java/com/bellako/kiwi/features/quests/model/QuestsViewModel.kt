@@ -26,6 +26,14 @@ sealed class QuestNotificationEvent {
     data class QuestCompleted(
         val quest: QuestDomain,
     ) : QuestNotificationEvent()
+
+    data class SubquestCompleted(
+        val quest: QuestDomain,
+    ) : QuestNotificationEvent()
+
+    data class SubquestFailed(
+        val quest: QuestDomain,
+    ) : QuestNotificationEvent()
 }
 
 @HiltViewModel
@@ -55,7 +63,21 @@ class QuestsViewModel
             notify(QuestNotificationEvent.QuestCompleted(quest))
         }
 
-        // LOAD QUESTS
+    override suspend fun notifySubquestCompleted(
+        quest: QuestDomain,
+        subquestId: Int
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun notifySubquestFailed(
+        quest: QuestDomain,
+        subquestId: Int
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    // LOAD QUESTS
         override fun loadActiveQuests() {
             viewModelScope.launch {
                 setIsLoading(true)
@@ -120,9 +142,12 @@ class QuestsViewModel
                 try {
                     val result = repository.completeSubquest(subquestId)
                     updateStateFromSubquestResult(result)
+
+                  //  notifySubquestCompleted(QuestDataMapper.toDomain(updatedSubquest))
                     result.completedQuest?.let { completedQuest ->
                         notifyQuestCompleted(QuestDataMapper.toDomain(completedQuest))
                     }
+
                     setUiState(UIState.Success(Unit))
                 } catch (e: Exception) {
                     warn("Error completing subquest: ${e.message}")

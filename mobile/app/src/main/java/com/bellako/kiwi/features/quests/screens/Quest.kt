@@ -2,6 +2,9 @@ package com.bellako.kiwi.features.quests.screens
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,19 +21,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -43,11 +52,15 @@ import com.bellako.kiwi.features.quests.data.QuestDomain
 import com.bellako.kiwi.features.quests.data.QuestStatus
 import com.bellako.kiwi.features.quests.data.SubquestDomain
 import com.bellako.kiwi.features.quests.data.SubquestStatus
+import com.bellako.kiwi.features.quests.model.IQuestsViewModel
+import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
 import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.yield
 
 @Composable
 fun Quest(
@@ -228,6 +241,7 @@ fun Subquest(
 @Composable
 private fun QuestNotification(
     quest: QuestDomain,
+    name: String,
     isCompleted: Boolean = false,
     onClick: () -> Unit,
 ) {
@@ -279,7 +293,7 @@ private fun QuestNotification(
                 Kiwi_H1(
                     KiwiTextArguments(
                         color = kiwiColors.colorF,
-                        text = quest.name,
+                        text = name,
                     ),
                 )
 
@@ -304,6 +318,27 @@ private fun QuestNotification(
 fun QuestCompletedNotification(quest: QuestDomain) {
     QuestNotification(
         quest = quest,
+        name = quest.name,
+        isCompleted = true,
+        onClick = {},
+    )
+}
+
+@Composable
+fun SubquestCompletedNotification(quest: QuestDomain) {
+    QuestNotification(
+        quest = quest,
+        name = quest.name,
+        isCompleted = true,
+        onClick = {},
+    )
+}
+
+@Composable
+fun SubquestFailedNotification(quest: QuestDomain) {
+    QuestNotification(
+        quest = quest,
+        name = quest.name,
         isCompleted = true,
         onClick = {},
     )
@@ -316,11 +351,97 @@ fun NewQuestNotification(
 ) {
     QuestNotification(
         quest = quest,
+        name = quest.name,
         isCompleted = false,
         onClick = {
             navController.navigate("objectives/${quest.id}")
         },
     )
+}
+
+data class NotificationItem(
+    val event: QuestNotificationEvent,
+    val visible: MutableState<Boolean> = mutableStateOf(false),
+)
+
+@Composable
+fun QuestNotificationsOverlay(
+    questsViewModel: IQuestsViewModel,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+) {
+    val notifications = remember { mutableStateListOf<NotificationItem>() }
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        questsViewModel.getNotifications().collect { event ->
+            val item = NotificationItem(event, visible = mutableStateOf(false))
+            notifications += item
+        }
+    }
+
+    Box(modifier = modifier) {
+        Column(modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.large))) {
+            notifications.forEach { item ->
+                key(item) {
+                    LaunchedEffect(item) {
+                        yield()
+                        item.visible.value = true
+
+                        when (item.event) {
+                            is QuestNotificationEvent.NewQuest -> {
+                                AudioManager.playSFX(
+                                    context,
+                                    R.raw.snd_ui_check,
+                                )
+                            }
+                            is QuestNotificationEvent.QuestCompleted -> {
+                                AudioManager.playSFX(
+                                    context,
+                                    R.raw.snd_ui_confirmationsuccess,
+                                )
+                            }
+
+                            is QuestNotificationEvent.SubquestCompleted -> {
+                                AudioManager.playSFX(
+                                    context,
+                                    R.raw.snd_ui_confirmationsuccess,
+                                )
+                            }
+                            is QuestNotificationEvent.SubquestFailed -> TODO()
+                        }
+
+                        delay(4000)
+
+                        item.visible.value = false
+                        delay(300)
+                        notifications.remove(item)
+                    }
+
+                    AnimatedVisibility(
+                        visible = item.visible.value,
+                        enter =
+                            slideInVertically(
+                                initialOffsetY = { -it },
+                                animationSpec = tween(durationMillis = 300),
+                            ),
+                        exit =
+                            slideOutVertically(
+                                targetOffsetY = { -it },
+                                animationSpec = tween(durationMillis = 300),
+                            ),
+                    ) {
+                        when (item.event) {
+                            is QuestNotificationEvent.NewQuest -> NewQuestNotification(item.event.quest, navController)
+                            is QuestNotificationEvent.QuestCompleted -> QuestCompletedNotification(item.event.quest)
+                            is QuestNotificationEvent.SubquestCompleted -> TODO()
+                            is QuestNotificationEvent.SubquestFailed -> TODO()
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // HELPERS
@@ -357,7 +478,7 @@ private fun NewQuestNotification_Preview() {
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
-                AppBarScreen(navController = nav, )
+                AppBarScreen(navController = nav)
             },
         ) { paddingValues ->
             Box(

@@ -2,7 +2,6 @@ package com.kiwi.features.quests.controllers;
 
 import com.kiwi.common.types.Email;
 import com.kiwi.features.quests.data.QuestDTO;
-import com.kiwi.features.quests.data.SubquestResultDTO;
 import com.kiwi.features.users.controllers.UsersService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +73,7 @@ public class QuestController {
     // ============================================================================================
 
     @PostMapping("/subquests/{subquestId}/complete")
-    public ResponseEntity<SubquestResultDTO> completeSubquest(
+    public ResponseEntity<QuestDTO> completeSubquest(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int subquestId
     ) {
@@ -82,12 +81,12 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        SubquestResultDTO result = questService.completeSubquest(userId, subquestId);
+        QuestDTO result = questService.completeSubquest(userId, subquestId);
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/subquests/{subquestId}/fail")
-    public ResponseEntity<SubquestResultDTO> failSubquest(
+    public ResponseEntity<QuestDTO> failSubquest(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int subquestId
     ) {
@@ -95,7 +94,7 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        SubquestResultDTO result = questService.failSubquest(userId, subquestId);
+        QuestDTO result = questService.failSubquest(userId, subquestId);
         return ResponseEntity.ok(result);
     }
 }

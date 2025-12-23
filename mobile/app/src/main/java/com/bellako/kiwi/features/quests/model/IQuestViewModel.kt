@@ -12,6 +12,9 @@ interface IQuestsViewModel : IBaseViewModel<QuestsState> {
 
     suspend fun notifyQuestCompleted(quest: QuestDomain)
 
+    suspend fun notifySubquestCompleted(quest: QuestDomain, subquestId: Int)
+    suspend fun notifySubquestFailed(quest: QuestDomain, subquestId: Int)
+
     fun loadActiveQuests()
 
     fun loadCompletedQuests()

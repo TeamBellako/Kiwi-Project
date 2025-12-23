@@ -7,6 +7,7 @@ object QuestDataMapper {
             name = dto.name,
             description = dto.description,
             experience = dto.experience,
+            icon = dto.icon,
             status = QuestStatus.valueOf(dto.status),
             subquests = dto.subquests.map { toDomain(it) },
         )
@@ -26,6 +27,7 @@ object QuestDataMapper {
             name = domain.name,
             description = domain.description,
             experience = domain.experience,
+            icon = domain.icon,
             status = domain.status.toString(),
             subquests = domain.subquests.map { toDto(it) },
         )

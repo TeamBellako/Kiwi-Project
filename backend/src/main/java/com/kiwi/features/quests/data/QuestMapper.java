@@ -22,9 +22,20 @@ public class QuestMapper {
                 quest.getName(),
                 quest.getDescription(),
                 quest.getExperience(),
+                quest.getIcon(),
                 status != null ? status.getStatus() : null,
                 orderedSubquests
         );
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // QUEST DOMAIN → PERSISTENCE
+    // --------------------------------------------------------------------------------------------
+
+    public static QuestPersistence toPersistence(QuestDomain domain) {
+        QuestPersistence quest = new QuestPersistence();
+        quest.setId(domain.getQuestId());
+        return quest;
     }
 
     // --------------------------------------------------------------------------------------------
@@ -36,6 +47,7 @@ public class QuestMapper {
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());
         dto.setExperience(domain.getExperience());
+        dto.setIcon(domain.getIcon());
         dto.setStatus(domain.getStatus() != null ? domain.getStatus().name() : null);
 
         List<SubquestDTO> subquestDTOs = domain.getSubquests().stream()
@@ -49,7 +61,6 @@ public class QuestMapper {
 
     // --------------------------------------------------------------------------------------------
     // QUEST PERSISTENCE + STATUS → DTO
-    // (usado al dar una quest al usuario)
     // --------------------------------------------------------------------------------------------
     public static QuestDTO toDTO(QuestPersistence quest, UserQuestStatusPersistence status) {
         QuestDTO dto = new QuestDTO();
@@ -57,32 +68,21 @@ public class QuestMapper {
         dto.setName(quest.getName());
         dto.setDescription(quest.getDescription());
         dto.setExperience(quest.getExperience());
+        dto.setIcon(quest.getIcon());
         dto.setStatus(status != null ? status.getStatus().name() : null);
-        dto.setSubquests(List.of()); // cuando se inicializa la quest no hace falta cargar subquests
+        dto.setSubquests(List.of());
         return dto;
     }
 
 
     // --------------------------------------------------------------------------------------------
     // QUEST DOMAIN → USER QUEST STATUS PERSISTENCE
-    // usado en completeQuest
     // --------------------------------------------------------------------------------------------
     public static UserQuestStatusPersistence toPersistence(int userId, QuestDomain domain) {
         UserQuestStatusPersistence persistence = new UserQuestStatusPersistence();
         persistence.setId(new UserQuestStatusKey(userId, domain.getQuestId()));
         persistence.setStatus(domain.getStatus());
-        return persistence;
-    }
-
-
-    // --------------------------------------------------------------------------------------------
-    // QUEST PERSISTENCE + NEW STATUS → USER QUEST STATUS PERSISTENCE
-    // usado al inicializar una quest
-    // --------------------------------------------------------------------------------------------
-    public static UserQuestStatusPersistence toPersistence(int userId, QuestPersistence quest, QuestStatus status) {
-        UserQuestStatusPersistence persistence = new UserQuestStatusPersistence();
-        persistence.setId(new UserQuestStatusKey(userId, quest.getId()));
-        persistence.setStatus(status);
+        persistence.setQuest(toPersistence(domain));
         return persistence;
     }
 
