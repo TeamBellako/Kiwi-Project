@@ -32,10 +32,6 @@ public class SuggestedGoalPersistence {
     @Column(name = "category", nullable = false)
     private GoalCategory category;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private GoalStatus status;
-
     @Column(name = "points", nullable = false)
     private Integer points;
 }

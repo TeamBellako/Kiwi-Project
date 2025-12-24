@@ -15,6 +15,5 @@ public class SuggestedGoalDTO {
     private String description;
     private String type;
     private String category;
-    private String status;
     private Integer points;
 }
