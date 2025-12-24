@@ -1,6 +1,7 @@
 package com.bellako.kiwi
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,6 +14,7 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
@@ -75,18 +77,21 @@ class SignUpScreen4Test {
 
         rule.setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP4_APPS) {
-                composable(ScreenRoutes.SIGNUP4_APPS) {
-                    SignUpScreen4_Apps(
-                        personalityViewModel = personalityFakeViewModel,
-                        navController = navController,
-                    )
-                }
-                composable(ScreenRoutes.HOME) {
-                    MapScreen(
-                        nodesViewModel = nodesFakeViewModel,
-                        mapViewModel = mapviewModel,
-                    )
+
+            CompositionLocalProvider(LocalGoalsViewModel provides goalsFakeViewModel) {
+                NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP4_APPS) {
+                    composable(ScreenRoutes.SIGNUP4_APPS) {
+                        SignUpScreen4_Apps(
+                            personalityViewModel = personalityFakeViewModel,
+                            navController = navController,
+                        )
+                    }
+                    composable(ScreenRoutes.HOME) {
+                        MapScreen(
+                            nodesViewModel = nodesFakeViewModel,
+                            mapViewModel = mapviewModel,
+                        )
+                    }
                 }
             }
         }

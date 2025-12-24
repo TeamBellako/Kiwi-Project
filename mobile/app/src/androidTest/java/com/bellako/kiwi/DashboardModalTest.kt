@@ -1,5 +1,6 @@
 package com.bellako.kiwi
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -20,6 +21,8 @@ import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
+import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.MetricsFactory
@@ -52,6 +55,8 @@ class DashboardModalTest {
     private lateinit var personalityState: PersonalityState
     private lateinit var fakePersonalityViewModel: PersonalityFakeViewModel
 
+    private lateinit var goalsFakeViewModel: GoalsFakeViewModel
+
     private var screenHeightDp = 0.dp
     private val states = listOf(150, 260, 650)
     private var statesBottom: List<Float> = listOf()
@@ -81,6 +86,8 @@ class DashboardModalTest {
                 validPersonalityDTO().neutralApps,
             )
         fakePersonalityViewModel = PersonalityFakeViewModel(personalityState)
+
+        goalsFakeViewModel = GoalsFakeViewModel()
     }
 
     @Test
@@ -339,7 +346,16 @@ class DashboardModalTest {
         rule.setContent {
             screenHeightDp = getScreenHeight(withoutInsetTop = true).dp
             statesBottom = states.map { state -> getResponsiveSizeHeight(state).toFloat() }
-            DashboardScreen(usersFakeViewModel, fakeMetricsViewModel, fakePersonalityViewModel, showCalendarView, initialStateIndex)
+
+            CompositionLocalProvider(LocalGoalsViewModel provides goalsFakeViewModel) {
+                DashboardScreen(
+                    usersFakeViewModel,
+                    fakeMetricsViewModel,
+                    fakePersonalityViewModel,
+                    showCalendarView,
+                    initialStateIndex,
+                )
+            }
         }
         rule.waitUntil {
             screenHeightDp > 0.dp

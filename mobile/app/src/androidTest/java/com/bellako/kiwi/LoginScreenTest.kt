@@ -1,6 +1,7 @@
 package com.bellako.kiwi
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,6 +14,7 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
@@ -77,26 +79,29 @@ class LoginScreenTest {
 
         rule.setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
-                composable(ScreenRoutes.LOGIN) {
-                    LogInScreen(
-                        usersViewModel = usersFakeViewModel,
-                        personalityViewModel = personalityFakeViewModel,
-                        navController = navController,
-                    )
-                }
-                composable(ScreenRoutes.HOME) {
-                    MapScreen(
-                        mapViewModel = mapviewModel,
-                        nodesViewModel = nodesFakeViewModel,
-                    )
-                }
-                composable(ScreenRoutes.SIGNUP3_TEST) {
-                    SignUpScreen3_Test(
-                        usersViewModel = usersFakeViewModel,
-                        personalityViewModel = personalityFakeViewModel,
-                        navController = navController,
-                    )
+
+            CompositionLocalProvider(LocalGoalsViewModel provides goalsFakeViewModel) {
+                NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
+                    composable(ScreenRoutes.LOGIN) {
+                        LogInScreen(
+                            usersViewModel = usersFakeViewModel,
+                            personalityViewModel = personalityFakeViewModel,
+                            navController = navController,
+                        )
+                    }
+                    composable(ScreenRoutes.HOME) {
+                        MapScreen(
+                            mapViewModel = mapviewModel,
+                            nodesViewModel = nodesFakeViewModel,
+                        )
+                    }
+                    composable(ScreenRoutes.SIGNUP3_TEST) {
+                        SignUpScreen3_Test(
+                            usersViewModel = usersFakeViewModel,
+                            personalityViewModel = personalityFakeViewModel,
+                            navController = navController,
+                        )
+                    }
                 }
             }
         }
