@@ -78,7 +78,7 @@ public class QuestMapper {
     // --------------------------------------------------------------------------------------------
     // QUEST DOMAIN → USER QUEST STATUS PERSISTENCE
     // --------------------------------------------------------------------------------------------
-    public static UserQuestStatusPersistence toPersistence(int userId, QuestDomain domain) {
+    public static UserQuestStatusPersistence toPersistence(Long userId, QuestDomain domain) {
         UserQuestStatusPersistence persistence = new UserQuestStatusPersistence();
         persistence.setId(new UserQuestStatusKey(userId, domain.getQuestId()));
         persistence.setStatus(domain.getStatus());

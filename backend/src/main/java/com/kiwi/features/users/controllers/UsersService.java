@@ -56,4 +56,43 @@ public class UsersService {
     public Optional<UsersPersistence> getUserByEmail(@NotNull Email email) {
         return usersRepository.findByEmail(email.value());
     }
+
+    public Optional<UserPointsDTO> getUserPoints(@NotNull Email email) {
+        return usersRepository.findByEmail(email.value())
+                .map(UsersDataMapper::toPointsDTO);
+    }
+
+    public Optional<UserPointsDTO> getUserPointsById(@NotNull Long userId) {
+        return usersRepository.findById(userId)
+                .map(UsersDataMapper::toPointsDTO);
+    }
+
+    // Gestion de puntos. ONLY BACKEND METHODS
+    @Transactional
+    public void addPointsToUser(@NotNull Long userId, @NotNull Integer pointsToAdd) {
+        if (pointsToAdd <= 0) {
+            throw new IllegalArgumentException("Points to add must be positive");
+        }
+        
+        UsersPersistence user = usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        
+        user.setCurrentPoints(user.getCurrentPoints() + pointsToAdd);
+        user.setTotalPoints(user.getTotalPoints() + pointsToAdd);
+        usersRepository.saveAndFlush(user);
+    }
+
+    @Transactional
+    public void subtractPointsToUser(@NotNull Long userId, @NotNull Integer pointsToSubtract) {
+        if (pointsToSubtract <= 0) {
+            throw new IllegalArgumentException("Points to subtract must be positive");
+        }
+        
+        UsersPersistence user = usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        
+        int newCurrentPoints = Math.max(0, user.getCurrentPoints() - pointsToSubtract);
+        user.setCurrentPoints(newCurrentPoints);
+        usersRepository.saveAndFlush(user);
+    }
 }

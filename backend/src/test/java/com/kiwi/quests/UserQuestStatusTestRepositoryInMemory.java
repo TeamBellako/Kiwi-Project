@@ -23,14 +23,14 @@ public class UserQuestStatusTestRepositoryInMemory implements UserQuestStatusRep
     }
 
     @Override
-    public List<UserQuestStatusPersistence> findByIdUserId(int userId) {
+    public List<UserQuestStatusPersistence> findByIdUserId(Long userId) {
         return db.userQuests.values().stream()
                 .filter(s -> s.getId().getUserId() == userId)
                 .toList();
     }
 
     @Override
-    public Optional<UserQuestStatusPersistence> findByIdUserIdAndIdQuestId(int userId, int questId) {
+    public Optional<UserQuestStatusPersistence> findByIdUserIdAndIdQuestId(Long userId, int questId) {
         return Optional.ofNullable(db.userQuests.get(new UserQuestStatusKey(userId, questId)));
     }
 

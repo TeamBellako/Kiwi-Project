@@ -65,8 +65,8 @@ public class SubquestMapper {
         return toDTO(toDomain(sq, userStatus));
     }
 
-    // Domain -> UserSubquestStatusPersistence
-    public static UserSubquestStatusPersistence toPersistence(int userId, SubquestDomain domain, SubquestRepository subRepo) {
+    // Domain -> UserSubquestStatusPersistence (guardar estado del usuario)
+    public static UserSubquestStatusPersistence toPersistence(Long userId, SubquestDomain domain, SubquestRepository subRepo) {
         UserSubquestStatusPersistence persistence = new UserSubquestStatusPersistence();
         persistence.setId(new UserSubquestStatusKey(userId, domain.getSubquestId()));
 

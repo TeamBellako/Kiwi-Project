@@ -9,7 +9,7 @@ import lombok.*;
 public class UserNodeStatusKey implements Serializable {
 
     @Column(name = "user_id")
-    private int userId;
+    private Long userId;
 
     @Column(name = "node_id")
     private int nodeId;

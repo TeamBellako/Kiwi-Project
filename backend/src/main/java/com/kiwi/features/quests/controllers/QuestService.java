@@ -36,15 +36,15 @@ public class QuestService {
     // GET USER QUESTS
     // ============================================================================================
 
-    public List<QuestDTO> getActiveQuestsForUser(int userId) {
+    public List<QuestDTO> getActiveQuestsForUser(Long userId) {
         return getQuestsForUserByStatus(userId, QuestStatus.ACTIVE);
     }
 
-    public List<QuestDTO> getCompletedQuestsForUser(int userId) {
+    public List<QuestDTO> getCompletedQuestsForUser(Long userId) {
         return getQuestsForUserByStatus(userId, QuestStatus.COMPLETED);
     }
 
-    private List<QuestDTO> getQuestsForUserByStatus(int userId, QuestStatus status) {
+    private List<QuestDTO> getQuestsForUserByStatus(Long userId, QuestStatus status) {
 
         return userQuestStatusRepository.findByIdUserId(userId).stream()
                 .filter(qs -> qs.getStatus() == status)
@@ -58,7 +58,7 @@ public class QuestService {
     // ============================================================================================
 
     @Transactional
-    public QuestDTO giveQuestToUser(int userId, int questId) {
+    public QuestDTO giveQuestToUser(Long userId, int questId) {
 
         QuestPersistence quest = questRepository.findById(questId)
                 .orElseThrow(() -> new QuestNotFoundException(questId));
@@ -85,7 +85,12 @@ public class QuestService {
         );
     }
 
-    private void initializeSubquests(int userId, int questId) {
+    // ============================================================================================
+    // INITIALIZE SUBQUESTS
+    // ============================================================================================
+
+    @Transactional
+    public void initializeSubquests(Long userId, int questId) {
 
         List<SubquestPersistence> subquests =
                 subquestRepository.findAllByQuestIdOrderByOrderIndex(questId);
@@ -108,16 +113,17 @@ public class QuestService {
     // ============================================================================================
 
     @Transactional
-    public QuestDTO completeSubquest(int userId, int subquestId) {
+    public SubquestResultDTO completeSubquest(Long userId, int subquestId) {
         return processSubquestUpdate(userId, subquestId, false);
     }
 
     @Transactional
-    public QuestDTO failSubquest(int userId, int subquestId) {
+    public SubquestResultDTO failSubquest(Long userId, int subquestId) {
         return processSubquestUpdate(userId, subquestId, true);
     }
 
-    private QuestDTO processSubquestUpdate(int userId, int subquestId, boolean isFail) {
+    @Transactional
+    private SubquestResultDTO processSubquestUpdate(Long userId, int subquestId, boolean isFail) {
 
         SubquestPersistence subquest = subquestRepository.findById(subquestId)
                 .orElseThrow(() -> new SubquestNotFoundException(subquestId));

@@ -29,7 +29,7 @@ public class NodesDataMapper {
         );
     }
 
-    public static UserNodeStatusPersistence toPersistence(int userId, NodesDomain node) {
+    public static UserNodeStatusPersistence toPersistence(Long userId, NodesDomain node) {
         if (node.getStatus() == NodeStatus.INACCESSIBLE) {
             return null;
         }

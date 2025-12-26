@@ -19,7 +19,7 @@ public class NodesTestFactory {
         return n;
     }
 
-    public static UserNodeStatusPersistence persistenceStatus(int userId, int nodeId, NodeStatus status) {
+    public static UserNodeStatusPersistence persistenceStatus(Long userId, int nodeId, NodeStatus status) {
         UserNodeStatusKey key = new UserNodeStatusKey(userId, nodeId);
         UserNodeStatusPersistence s = new UserNodeStatusPersistence();
         s.setId(key);
@@ -31,8 +31,8 @@ public class NodesTestFactory {
         return new NodesDomain(id, nodeOrder, status, price, cordX, cordY);
     }
 
-    public static Object userIdDTO(int id) {
-        return new Object() { public int userId = id; };
+    public static Object userIdDTO(Long id) {
+        return new Object() { public Long userId = id; };
     }
 
     public static NodesDTO dtoNode(int id, int nodeOrder, NodeStatus status, int price, float cordX, float cordY) {
@@ -40,19 +40,19 @@ public class NodesTestFactory {
     }
 
     // Helpers para tests
-    public static UserNodeStatusPersistence inaccessibleStatus(int userId, int nodeId) {
+    public static UserNodeStatusPersistence inaccessibleStatus(Long userId, int nodeId) {
         return persistenceStatus(userId, nodeId, NodeStatus.INACCESSIBLE);
     }
 
-    public static UserNodeStatusPersistence lockedStatus(int userId, int nodeId) {
+    public static UserNodeStatusPersistence lockedStatus(Long userId, int nodeId) {
         return persistenceStatus(userId, nodeId, NodeStatus.LOCKED);
     }
 
-    public static UserNodeStatusPersistence openStatus(int userId, int nodeId) {
+    public static UserNodeStatusPersistence openStatus(Long userId, int nodeId) {
         return persistenceStatus(userId, nodeId, NodeStatus.OPEN);
     }
 
-    public static UserNodeStatusPersistence completeStatus(int userId, int nodeId) {
+    public static UserNodeStatusPersistence completeStatus(Long userId, int nodeId) {
         return persistenceStatus(userId, nodeId, NodeStatus.COMPLETED);
     }
 }

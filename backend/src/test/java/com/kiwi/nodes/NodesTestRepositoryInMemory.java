@@ -95,7 +95,7 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     // ---- USER NODE STATUS ----
-    public Optional<UserNodeStatusPersistence> findUserStatus(int userId, int nodeId) {
+    public Optional<UserNodeStatusPersistence> findUserStatus(Long userId, int nodeId) {
         return Optional.ofNullable(statusStore.get(userId + "-" + nodeId));
     }
 

@@ -31,7 +31,7 @@ public class QuestController {
     public ResponseEntity<List<QuestDTO>> getActiveQuests(
             @AuthenticationPrincipal @NotNull UserDetails userDetails
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
@@ -43,7 +43,7 @@ public class QuestController {
     public ResponseEntity<List<QuestDTO>> getCompletedQuests(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
@@ -60,7 +60,7 @@ public class QuestController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int questId
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
@@ -77,7 +77,7 @@ public class QuestController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int subquestId
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
@@ -90,7 +90,7 @@ public class QuestController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable int subquestId
     ) {
-        int userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 

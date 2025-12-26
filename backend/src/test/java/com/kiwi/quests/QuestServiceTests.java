@@ -23,7 +23,7 @@ public class QuestServiceTests {
     private final QuestService service =
             new QuestService(questRepo, subRepo, userQuestRepo, userSubRepo, progress);
 
-    private final int userId = 1;
+    private final Long userId = 1L;
 
     // ============================================================================================
     // GET QUESTS
