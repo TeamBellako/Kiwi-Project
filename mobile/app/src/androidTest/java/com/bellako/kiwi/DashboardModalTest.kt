@@ -267,8 +267,8 @@ class DashboardModalTest {
         val originalMonth = originalMonthYearText.toInt()
         val newMonth = newMonthYearText.toInt()
 
-        if (originalMonth == 12) {
-            assert(originalMonth < newMonth)
+        if (originalMonth == 1) {
+            assert(newMonth > originalMonth)
         } else {
             assert(newMonth < originalMonth)
         }
