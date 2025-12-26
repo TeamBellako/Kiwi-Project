@@ -1,0 +1,194 @@
+package com.bellako.kiwi.features.goals.model
+
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.bellako.kiwi.common.data.UIState
+import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
+import com.bellako.kiwi.features.goals.data.GoalDataMapper
+import com.bellako.kiwi.features.goals.data.GoalDomain
+import com.bellako.kiwi.features.goals.data.GoalState
+import com.bellako.kiwi.features.goals.data.GoalsListDTO
+import com.bellako.kiwi.features.goals.data.GoalsListState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import java.time.LocalDate
+
+@HiltViewModel
+class GoalsViewModel
+    @Inject
+    constructor(
+        private val repository: GoalsRepository,
+    ) : BaseViewModel(),
+        IGoalsViewModel {
+        private val _state = MutableStateFlow(GoalsListState())
+        override val state: StateFlow<GoalsListState> = _state.asStateFlow()
+
+        override fun onDateChanged(newDate: LocalDate) {
+            // El cambio de fecha ya no actualiza el estado, se maneja externamente
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun createGoals(
+            date: String,
+            goals: List<GoalState>,
+        ): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            _state.value = _state.value.copy(isLoading = true, error = null)
+
+            val goalsDTO = goals.map { GoalDataMapper.toDTO(it) }
+            val dto = GoalsListDTO(date = date, goals = goalsDTO)
+            val result = repository.createGoals(dto)
+
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+
+            return handleResult(result) {
+                val resultDTO = result.getOrNull()!!
+                _state.value =
+                    _state.value.copy(
+                        goals = resultDTO.goals.map { GoalDataMapper.toState(it) },
+                        isLoading = false,
+                        error = null,
+                    )
+            }.also {
+                if (it.isFailure) {
+                    _state.value =
+                        _state.value.copy(
+                            isLoading = false,
+                            error = it.exceptionOrNull()?.message,
+                        )
+                }
+            }
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun completeGoal(goalId: String): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            _state.value = _state.value.copy(isLoading = true, error = null)
+
+            val result = repository.completeGoal(goalId)
+
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+
+            return handleResult(result) {
+                val updatedGoal = GoalDataMapper.toState(result.getOrNull()!!)
+                val updatedGoals =
+                    _state.value.goals.map {
+                        if (it.id == updatedGoal.id) updatedGoal else it
+                    }
+                _state.value =
+                    _state.value.copy(
+                        goals = updatedGoals,
+                        isLoading = false,
+                        error = null,
+                    )
+            }.also {
+                if (it.isFailure) {
+                    _state.value =
+                        _state.value.copy(
+                            isLoading = false,
+                            error = it.exceptionOrNull()?.message,
+                        )
+                }
+            }
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun uncompleteGoal(goalId: String): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            _state.value = _state.value.copy(isLoading = true, error = null)
+
+            val result = repository.uncompleteGoal(goalId)
+
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+
+            return handleResult(result) {
+                val updatedGoal = GoalDataMapper.toState(result.getOrNull()!!)
+                val updatedGoals =
+                    _state.value.goals.map {
+                        if (it.id == updatedGoal.id) updatedGoal else it
+                    }
+                _state.value =
+                    _state.value.copy(
+                        goals = updatedGoals,
+                        isLoading = false,
+                        error = null,
+                    )
+            }.also {
+                if (it.isFailure) {
+                    _state.value =
+                        _state.value.copy(
+                            isLoading = false,
+                            error = it.exceptionOrNull()?.message,
+                        )
+                }
+            }
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun getGoalsByDate(date: String): Result<List<GoalDomain>> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+
+            val result = repository.getGoalsByDate(stringToDate(date))
+
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+
+            return result.map { goalsListDTO ->
+                goalsListDTO?.goals?.map { GoalDataMapper.toDomain(it) } ?: emptyList()
+            }
+        }
+
+        override suspend fun loadAllGoals(): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            _state.value = _state.value.copy(isLoading = true, error = null)
+
+            val result = repository.getAllGoals()
+
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+
+            return handleResult(result) {
+                _state.value =
+                    _state.value.copy(
+                        isLoading = false,
+                        error = null,
+                    )
+            }.also {
+                if (it.isFailure) {
+                    _state.value =
+                        _state.value.copy(
+                            isLoading = false,
+                            error = it.exceptionOrNull()?.message,
+                        )
+                }
+            }
+        }
+
+        override suspend fun getGoalsInProgress(): Result<List<GoalDomain>> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+
+            val result = repository.getGoalsInProgress()
+
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+
+            return result.map { goalsListDTOs ->
+                goalsListDTOs.flatMap { goalsListDTO ->
+                    goalsListDTO.goals.map { GoalDataMapper.toDomain(it) }
+                }
+            }
+        }
+    }

@@ -1,6 +1,7 @@
 package com.bellako.kiwi
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,6 +14,8 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.data.NodeStatus
@@ -46,6 +49,7 @@ class SignUpScreen4Test {
     private lateinit var mapviewModel: MapViewModel
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
     private lateinit var personalityState: PersonalityState
+    private lateinit var goalsFakeViewModel: GoalsFakeViewModel
 
     @SuppressLint("ViewModelConstructorInComposable")
     @Before
@@ -69,18 +73,25 @@ class SignUpScreen4Test {
         nodesState = NodesState(List<NodesDomain>(1) { NodesDomain(1, 1, NodeStatus.INACCESSIBLE, 0, 0.0f, 0.0f) })
         nodesFakeViewModel = NodesFakeViewModel(nodesState)
         mapviewModel = MapViewModel()
+        goalsFakeViewModel = GoalsFakeViewModel()
 
         rule.setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP4_APPS) {
-                composable(ScreenRoutes.SIGNUP4_APPS) {
-                    SignUpScreen4_Apps(
-                        personalityViewModel = personalityFakeViewModel,
-                        navController = navController,
-                    )
-                }
-                composable(ScreenRoutes.HOME) {
-                    MapScreen(nodesViewModel = nodesFakeViewModel, mapViewModel = mapviewModel)
+
+            CompositionLocalProvider(LocalGoalsViewModel provides goalsFakeViewModel) {
+                NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP4_APPS) {
+                    composable(ScreenRoutes.SIGNUP4_APPS) {
+                        SignUpScreen4_Apps(
+                            personalityViewModel = personalityFakeViewModel,
+                            navController = navController,
+                        )
+                    }
+                    composable(ScreenRoutes.HOME) {
+                        MapScreen(
+                            nodesViewModel = nodesFakeViewModel,
+                            mapViewModel = mapviewModel,
+                        )
+                    }
                 }
             }
         }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +30,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
@@ -47,12 +47,17 @@ import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.goals.data.GoalDomain
+import com.bellako.kiwi.features.goals.data.GoalState
+import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
-import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -65,6 +70,8 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
@@ -225,6 +232,7 @@ suspend fun loadMetrics(
 
     val metricsState = metricsViewModel.state.value!!
     val personalityState = personalityViewModel.state.value!!
+
     var deviceMetrics = MetricsProvider.getDeviceMetrics(context, metricsState, personalityState)
     metricsViewModel.loadMetrics(date).fold(
         onSuccess = { _ ->
@@ -323,36 +331,144 @@ fun SelectedMetricsTime(
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Hidden() {
-    DashboardModal_Preview(false, 0)
+    val mockViewModel =
+        remember {
+            object : IGoalsViewModel {
+                override val state: StateFlow<GoalsListState> = MutableStateFlow(GoalsListState())
+
+                override fun onDateChanged(newDate: LocalDate) {}
+
+                override suspend fun createGoals(
+                    date: String,
+                    goals: List<GoalState>,
+                ): Result<Unit> = Result.success(Unit)
+
+                override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun uncompleteGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun loadAllGoals(): Result<Unit> = Result.success(Unit)
+
+                override suspend fun getGoalsByDate(date: String) = Result.success(emptyList<GoalDomain>())
+
+                override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
+            }
+        }
+
+    CompositionLocalProvider(LocalGoalsViewModel provides mockViewModel) {
+        DashboardModal_Preview(false, 0)
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Collapsed() {
-    DashboardModal_Preview(false, 1)
+    val mockViewModel =
+        remember {
+            object : IGoalsViewModel {
+                override val state: StateFlow<GoalsListState> = MutableStateFlow(GoalsListState())
+
+                override fun onDateChanged(newDate: LocalDate) {}
+
+                override suspend fun createGoals(
+                    date: String,
+                    goals: List<GoalState>,
+                ): Result<Unit> = Result.success(Unit)
+
+                override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun uncompleteGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun loadAllGoals(): Result<Unit> = Result.success(Unit)
+
+                override suspend fun getGoalsByDate(date: String) = Result.success(emptyList<GoalDomain>())
+
+                override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
+            }
+        }
+
+    CompositionLocalProvider(LocalGoalsViewModel provides mockViewModel) {
+        DashboardModal_Preview(false, 1)
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Expanded() {
-    DashboardModal_Preview(false, 2)
+    val mockViewModel =
+        remember {
+            object : IGoalsViewModel {
+                override val state: StateFlow<GoalsListState> = MutableStateFlow(GoalsListState())
+
+                override fun onDateChanged(newDate: LocalDate) {}
+
+                override suspend fun createGoals(
+                    date: String,
+                    goals: List<GoalState>,
+                ): Result<Unit> = Result.success(Unit)
+
+                override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun uncompleteGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun loadAllGoals(): Result<Unit> = Result.success(Unit)
+
+                override suspend fun getGoalsByDate(date: String) = Result.success(emptyList<GoalDomain>())
+
+                override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
+            }
+        }
+
+    CompositionLocalProvider(LocalGoalsViewModel provides mockViewModel) {
+        DashboardModal_Preview(false, 2)
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Expanded_Calendar() {
-    DashboardModal_Preview(true, 2)
+    val mockViewModel =
+        remember {
+            object : IGoalsViewModel {
+                override val state: StateFlow<GoalsListState> = MutableStateFlow(GoalsListState())
+
+                override fun onDateChanged(newDate: LocalDate) {}
+
+                override suspend fun createGoals(
+                    date: String,
+                    goals: List<GoalState>,
+                ): Result<Unit> = Result.success(Unit)
+
+                override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun uncompleteGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun loadAllGoals(): Result<Unit> = Result.success(Unit)
+
+                override suspend fun getGoalsByDate(date: String) = Result.success(emptyList<GoalDomain>())
+
+                override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
+            }
+        }
+
+    CompositionLocalProvider(LocalGoalsViewModel provides mockViewModel) {
+        DashboardModal_Preview(true, 2)
+    }
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -361,7 +477,7 @@ fun DashboardModal_Preview_Expanded_Calendar() {
 fun DashboardModal_Preview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
-    nodesViewModel: NodesViewModel = hiltViewModel(),
+    nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(),
 ) {
     Kiwi_Theme {
         Scaffold(
@@ -370,7 +486,9 @@ fun DashboardModal_Preview(
             },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
-                    MapScreen(nodesViewModel = nodesViewModel)
+                    MapScreen(
+                        nodesViewModel = nodesViewModel,
+                    )
                     DashboardScreen(
                         usersViewModel =
                             UsersFakeViewModel(

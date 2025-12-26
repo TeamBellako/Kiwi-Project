@@ -57,8 +57,8 @@ public class GoalServiceTests {
         LocalDate date = LocalDate.now();
         GoalsListDTO request = goalsListDTO(
                 date.toString(),
-                reviewGoalDTO(null),
-                reviewGoalDTO(null)
+                inProgressGoalDTO(null),
+                inProgressGoalDTO(null)
         );
 
         GoalsListDTO result = goalService.createGoals(request, authentication);
@@ -73,15 +73,15 @@ public class GoalServiceTests {
         LocalDate date = LocalDate.now();
         
         // Create initial goals
-        goalRepository.save(reviewGoalPersistence("goal-1", date, testUser));
-        goalRepository.save(reviewGoalPersistence("goal-2", date, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-1", date, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-2", date, testUser));
 
         assertEquals(2, goalRepository.count());
 
         // Create new goals for same date
         GoalsListDTO request = goalsListDTO(
                 date.toString(),
-                reviewGoalDTO(null)
+                inProgressGoalDTO(null)
         );
 
         GoalsListDTO result = goalService.createGoals(request, authentication);
@@ -99,9 +99,9 @@ public class GoalServiceTests {
         LocalDate date = LocalDate.now();
         LocalDate otherDate = LocalDate.now().minusDays(1);
 
-        goalRepository.save(reviewGoalPersistence("goal-1", date, testUser));
-        goalRepository.save(reviewGoalPersistence("goal-2", date, testUser));
-        goalRepository.save(reviewGoalPersistence("goal-3", otherDate, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-1", date, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-2", date, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-3", otherDate, testUser));
 
         GoalsListDTO result = goalService.getGoalsByDate(date.toString(), authentication);
 
@@ -114,9 +114,9 @@ public class GoalServiceTests {
         LocalDate date1 = LocalDate.now();
         LocalDate date2 = LocalDate.now().minusDays(1);
 
-        goalRepository.save(reviewGoalPersistence("goal-1", date1, testUser));
-        goalRepository.save(reviewGoalPersistence("goal-2", date1, testUser));
-        goalRepository.save(reviewGoalPersistence("goal-3", date2, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-1", date1, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-2", date1, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-3", date2, testUser));
 
         List<GoalsListDTO> result = goalService.getAllGoals(authentication);
 
@@ -130,22 +130,22 @@ public class GoalServiceTests {
     }
 
     @Test
-    public void getGoalsToReview_valid_returnsOnlyReviewGoalsBeforeToday() {
+    public void getGoalsInProgress_valid_returnsOnlyInProgressGoalsBeforeToday() {
         LocalDate yesterday = LocalDate.now().minusDays(1);
         LocalDate today = LocalDate.now();
         LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
 
-        // REVIEW goals from yesterday and two days ago
-        goalRepository.save(reviewGoalPersistence("goal-1", yesterday, testUser));
-        goalRepository.save(reviewGoalPersistence("goal-2", twoDaysAgo, testUser));
+        // IN_PROGRESS goals from yesterday and two days ago
+        goalRepository.save(inProgressGoalPersistence("goal-1", yesterday, testUser));
+        goalRepository.save(inProgressGoalPersistence("goal-2", twoDaysAgo, testUser));
         
-        // REVIEW goal from today (should NOT be included)
-        goalRepository.save(reviewGoalPersistence("goal-3", today, testUser));
+        // IN_PROGRESS goal from today (should NOT be included)
+        goalRepository.save(inProgressGoalPersistence("goal-3", today, testUser));
         
         // COMPLETED goal from yesterday (should NOT be included)
         goalRepository.save(completedGoalPersistence("goal-4", yesterday, testUser));
 
-        List<GoalsListDTO> result = goalService.getGoalsToReview(authentication);
+        List<GoalsListDTO> result = goalService.getGoalsInProgress(authentication);
 
         assertEquals(2, result.size());
         assertEquals(yesterday.toString(), result.get(0).getDate());
@@ -161,7 +161,7 @@ public class GoalServiceTests {
     @Test
     public void completeGoal_valid_changesStatusAndAddsPoints() {
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = reviewGoalPersistence("goal-1", date, testUser);
+        GoalPersistence goal = inProgressGoalPersistence("goal-1", date, testUser);
         goalRepository.save(goal);
 
         GoalDTO result = goalService.completeGoal("goal-1", authentication);
@@ -183,7 +183,7 @@ public class GoalServiceTests {
     }
 
     @Test
-    public void completeGoal_notInReview_doesNotChangeStatus() {
+    public void completeGoal_notInProgress_doesNotChangeStatus() {
         LocalDate date = LocalDate.now().minusDays(1);
         GoalPersistence goal = notCompletedGoalPersistence("goal-1", date, testUser);
         goalRepository.save(goal);
@@ -210,7 +210,7 @@ public class GoalServiceTests {
         usersRepository.save(otherUser);
 
         // Create goal for other user
-        GoalPersistence goal = reviewGoalPersistence("goal-1", date, otherUser);
+        GoalPersistence goal = inProgressGoalPersistence("goal-1", date, otherUser);
         goalRepository.save(goal);
 
         // Try to complete with current user
@@ -224,7 +224,7 @@ public class GoalServiceTests {
     @Test
     public void uncompleteGoal_valid_changesStatus() {
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = reviewGoalPersistence("goal-1", date, testUser);
+        GoalPersistence goal = inProgressGoalPersistence("goal-1", date, testUser);
         goalRepository.save(goal);
 
         GoalDTO result = goalService.uncompleteGoal("goal-1", authentication);
@@ -233,7 +233,7 @@ public class GoalServiceTests {
     }
 
     @Test
-    public void uncompleteGoal_notInReview_doesNotChangeStatus() {
+    public void uncompleteGoal_notInProgress_doesNotChangeStatus() {
         LocalDate date = LocalDate.now().minusDays(1);
         GoalPersistence goal = completedGoalPersistence("goal-1", date, testUser);
         goalRepository.save(goal);
@@ -259,7 +259,7 @@ public class GoalServiceTests {
         usersRepository.save(otherUser);
 
         // Create goal for other user
-        GoalPersistence goal = reviewGoalPersistence("goal-1", date, otherUser);
+        GoalPersistence goal = inProgressGoalPersistence("goal-1", date, otherUser);
         goalRepository.save(goal);
 
         // Try to uncomplete with current user

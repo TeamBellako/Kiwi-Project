@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,7 +44,11 @@ fun WIPModalScreen(
     buttonMessage: String = "BACK",
     onButtonClick: (() -> Unit)? = null,
 ) {
-    AudioManager.playSFX(LocalContext.current, R.raw.snd_ui_error)
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        AudioManager.playSFX(context, R.raw.snd_ui_error)
+    }
 
     Box(
         modifier =
