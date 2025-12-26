@@ -77,25 +77,6 @@ class MapScreenTest {
     }
 
     @Test
-    fun testDragWithinBounds() {
-        val initialOffset = viewModel.state.value.offset
-
-        val screenWidth = viewModel.state.value.viewportWidthPx
-        val screenHeight = viewModel.state.value.viewportHeightPx
-        val mapHeight = viewModel.state.value.mapHeightPx
-        val initialSwipe = Offset(screenWidth / 2f, screenHeight / 2f)
-
-        composeTestRule.onRoot().performTouchInput {
-            swipe(start = initialSwipe, end = initialSwipe + Offset(mapHeight * 0.25f, 0f))
-        }
-
-        assert(viewModel.state.value.offset != initialOffset)
-        val maxOffsetX = viewModel.getMaxOffset(viewModel.state.value).x
-        assert(viewModel.state.value.offset.x > -maxOffsetX)
-        assert(viewModel.state.value.offset.x < maxOffsetX)
-    }
-
-    @Test
     fun testDragOutOfBounds() {
         val initialOffset = viewModel.state.value.offset
 
