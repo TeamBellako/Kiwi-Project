@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,7 +31,6 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label1
-import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
@@ -137,87 +135,87 @@ fun GoalComponent(goal: GoalDomain) {
     }
 }
 
-@Composable
-private fun ExpandedGoalComponent(goal: GoalDomain) {
-    val kiwiColors = LocalKiwiColors.current
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-            Modifier
-                .size(getResponsiveSizeHeight(230.dp), getResponsiveSizeHeight(46.dp)),
-    ) {
-        Kiwi_Image(
-            R.drawable.daily_challenges_bg,
-            "Bar bg",
-            modifier =
-                Modifier
-                    .fillMaxSize(),
-        )
-
-        Kiwi_Image(
-            R.drawable.daily_challenges_fill,
-            "Bar fill",
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        clip = true
-                        shape =
-                            object : Shape {
-                                override fun createOutline(
-                                    size: Size,
-                                    layoutDirection: LayoutDirection,
-                                    density: Density,
-                                ): Outline {
-                                    val w = size.width * goal.progress.coerceIn(0f, 1f)
-                                    return Outline.Rectangle(Rect(0f, 0f, w, size.height))
-                                }
-                            }
-                    },
-        )
-
-        Box(
-            modifier =
-                Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = getResponsiveSizeHeight(10.dp)),
-        ) {
-            Kiwi_Image(
-                getIcon(goal.type),
-                "Quest Indicator For: ${goal.objective}",
-                modifier =
-                    Modifier
-                        .size(getResponsiveSizeHeight(22.dp)),
-            )
-        }
-        Box(
-            modifier = Modifier.align(Alignment.Center),
-        ) {
-            Kiwi_Label3(
-                KiwiTextArguments(
-                    goal.objective,
-                    TextAlign.Center,
-                    kiwiColors.color6,
-                ),
-            )
-        }
-
-        Box(
-            modifier =
-                Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = getResponsiveSizeHeight(16.dp)),
-        ) {
-            Kiwi_Image(
-                R.drawable.ic_daily_challenges_plus,
-                "Quest Indicator For: ${goal.objective}",
-                modifier =
-                    Modifier
-                        .size(getResponsiveSizeHeight(14.dp)),
-            )
-        }
-    }
-}
+// @Composable
+// private fun ExpandedGoalComponent(goal: GoalDomain) {
+//    val kiwiColors = LocalKiwiColors.current
+//    Box(
+//        contentAlignment = Alignment.Center,
+//        modifier =
+//            Modifier
+//                .size(getResponsiveSizeHeight(230.dp), getResponsiveSizeHeight(46.dp)),
+//    ) {
+//        Kiwi_Image(
+//            R.drawable.daily_challenges_bg,
+//            "Bar bg",
+//            modifier =
+//                Modifier
+//                    .fillMaxSize(),
+//        )
+//
+//        Kiwi_Image(
+//            R.drawable.daily_challenges_fill,
+//            "Bar fill",
+//            modifier =
+//                Modifier
+//                    .fillMaxSize()
+//                    .graphicsLayer {
+//                        clip = true
+//                        shape =
+//                            object : Shape {
+//                                override fun createOutline(
+//                                    size: Size,
+//                                    layoutDirection: LayoutDirection,
+//                                    density: Density,
+//                                ): Outline {
+//                                    val w = size.width * goal.progress.coerceIn(0f, 1f)
+//                                    return Outline.Rectangle(Rect(0f, 0f, w, size.height))
+//                                }
+//                            }
+//                    },
+//        )
+//
+//        Box(
+//            modifier =
+//                Modifier
+//                    .align(Alignment.CenterStart)
+//                    .padding(start = getResponsiveSizeHeight(10.dp)),
+//        ) {
+//            Kiwi_Image(
+//                getIcon(goal.type),
+//                "Quest Indicator For: ${goal.objective}",
+//                modifier =
+//                    Modifier
+//                        .size(getResponsiveSizeHeight(22.dp)),
+//            )
+//        }
+//        Box(
+//            modifier = Modifier.align(Alignment.Center),
+//        ) {
+//            Kiwi_Label3(
+//                KiwiTextArguments(
+//                    goal.objective,
+//                    TextAlign.Center,
+//                    kiwiColors.color6,
+//                ),
+//            )
+//        }
+//
+//        Box(
+//            modifier =
+//                Modifier
+//                    .align(Alignment.CenterEnd)
+//                    .padding(end = getResponsiveSizeHeight(16.dp)),
+//        ) {
+//            Kiwi_Image(
+//                R.drawable.ic_daily_challenges_plus,
+//                "Quest Indicator For: ${goal.objective}",
+//                modifier =
+//                    Modifier
+//                        .size(getResponsiveSizeHeight(14.dp)),
+//            )
+//        }
+//    }
+// }
 
 fun getIcon(goalType: GoalType): Int =
     when (goalType) {
