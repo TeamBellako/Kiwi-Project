@@ -8,34 +8,40 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.R
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
+import com.bellako.kiwi.features.goals.data.GoalCategory
+import com.bellako.kiwi.features.goals.data.GoalDomain
+import com.bellako.kiwi.features.goals.data.GoalState
+import com.bellako.kiwi.features.goals.data.GoalStatus
+import com.bellako.kiwi.features.goals.data.GoalType
+import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.model.GoalsViewModel
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.screens.GoalComponent
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -44,6 +50,11 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
+
+val LocalGoalsViewModel = compositionLocalOf<IGoalsViewModel?> { null }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -58,7 +69,6 @@ fun DashboardScreen2_Expanded(
     isLoading: Boolean,
 ) {
     ComposableEngagementMeasuring("expanded")
-
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -118,7 +128,7 @@ private fun ExpandedProgressBox(state: MetricsState) {
 
             Kiwi_Spacer(Spacing.small)
 
-            ExpandedSummaryCard()
+            ExpandedSummaryCard(state)
 
             Kiwi_Spacer(Spacing.small)
         }
@@ -176,7 +186,18 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
 }
 
 @Composable
-private fun ExpandedSummaryCard() {
+private fun ExpandedSummaryCard(metricsState: MetricsState) {
+    val localViewModel = LocalGoalsViewModel.current
+    val viewModel = localViewModel ?: hiltViewModel<GoalsViewModel>()
+    var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
+
+    LaunchedEffect(metricsState.date) {
+        val result = viewModel.getGoalsByDate(metricsState.date)
+        if (result.isSuccess) {
+            goals = result.getOrNull() ?: emptyList()
+        }
+    }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Kiwi_P2(
             KiwiTextArguments(
@@ -190,106 +211,12 @@ private fun ExpandedSummaryCard() {
             ),
         )
 
-        @Suppress("MagicNumber")
-        ExpandedQuestProgress(
-            "Use Duolingo 20 Minutes",
-            R.drawable.ic_daily_challenge_mental,
-            0.5f,
-        )
-
-        Kiwi_Spacer(Spacing.xSmall)
-
-        @Suppress("MagicNumber")
-        ExpandedQuestProgress(
-            "Do 3 Sets Of 10 Push-Ups",
-            R.drawable.ic_daily_challenge_physical,
-            0.8f,
-        )
-    }
-}
-
-@Composable
-private fun ExpandedQuestProgress(
-    title: String,
-    imageRes: Int,
-    progress: Float,
-) {
-    val kiwiColors = LocalKiwiColors.current
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-            Modifier
-                .size(getResponsiveSizeHeight(230.dp), getResponsiveSizeHeight(46.dp)),
-    ) {
-        Kiwi_Image(
-            R.drawable.daily_challenges_bg,
-            "Bar bg",
-            modifier =
-                Modifier
-                    .fillMaxSize(),
-        )
-
-        Kiwi_Image(
-            R.drawable.daily_challenges_fill,
-            "Bar fill",
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        clip = true
-                        shape =
-                            object : Shape {
-                                override fun createOutline(
-                                    size: Size,
-                                    layoutDirection: LayoutDirection,
-                                    density: Density,
-                                ): Outline {
-                                    val w = size.width * progress.coerceIn(0f, 1f)
-                                    return Outline.Rectangle(Rect(0f, 0f, w, size.height))
-                                }
-                            }
-                    },
-        )
-
-        Box(
-            modifier =
-                Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = getResponsiveSizeHeight(10.dp)),
-        ) {
-            Kiwi_Image(
-                imageRes,
-                "Quest Indicator For: $title",
-                modifier =
-                    Modifier
-                        .size(getResponsiveSizeHeight(22.dp)),
-            )
-        }
-        Box(
-            modifier = Modifier.align(Alignment.Center),
-        ) {
-            Kiwi_Label3(
-                KiwiTextArguments(
-                    title,
-                    TextAlign.Center,
-                    kiwiColors.color6,
-                ),
-            )
-        }
-
-        Box(
-            modifier =
-                Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = getResponsiveSizeHeight(16.dp)),
-        ) {
-            Kiwi_Image(
-                R.drawable.ic_daily_challenges_plus,
-                "Quest Indicator For: $title",
-                modifier =
-                    Modifier
-                        .size(getResponsiveSizeHeight(14.dp)),
-            )
+        goals.forEach { goal ->
+            key(goal.id) {
+                GoalComponent(goal)
+//                ExpandedGoalComponent(goal)
+                Kiwi_Spacer(Spacing.xSmall)
+            }
         }
     }
 }
@@ -300,16 +227,118 @@ private fun ExpandedQuestProgress(
 @Preview(name = "Small Phone", widthDp = 360, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 411, heightDp = 891)
 @Preview(name = "Large Phone", widthDp = 412, heightDp = 915)
+@Suppress("MagicNumber", "EmptyFunctionBlock")
 @Composable
 fun DashboardModal2_Preview_Expanded() {
-    DashboardModal_Preview(false, 2)
+    val mockViewModel =
+        remember {
+            object : IGoalsViewModel {
+                override val state: StateFlow<GoalsListState> = MutableStateFlow(GoalsListState())
+
+                override fun onDateChanged(newDate: LocalDate) {}
+
+                override suspend fun createGoals(
+                    date: String,
+                    goals: List<GoalState>,
+                ): Result<Unit> = Result.success(Unit)
+
+                override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun uncompleteGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun loadAllGoals(): Result<Unit> = Result.success(Unit)
+
+                override suspend fun getGoalsByDate(date: String) =
+                    Result.success(
+                        listOf<GoalDomain>(
+                            GoalDomain(
+                                "1",
+                                "Test objective",
+                                "Test description",
+                                GoalType.EXERCISE,
+                                GoalCategory.DAILY_CHALLENGES,
+                                GoalStatus.NOT_COMPLETED,
+                                100,
+                                0.5f,
+                            ),
+                            GoalDomain(
+                                "2",
+                                "Test objective 2",
+                                "Test description 2",
+                                GoalType.MEDITATION,
+                                GoalCategory.DAILY_CHALLENGES,
+                                GoalStatus.NOT_COMPLETED,
+                                200,
+                                0.7f,
+                            ),
+                        ),
+                    )
+
+                override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
+            }
+        }
+
+    CompositionLocalProvider(LocalGoalsViewModel provides mockViewModel) {
+        DashboardModal_Preview(false, 2)
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 360, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 411, heightDp = 891)
 @Preview(name = "Large Phone", widthDp = 412, heightDp = 915)
+@Suppress("MagicNumber", "EmptyFunctionBlock")
 @Composable
 fun DashboardModal2_Expanded_Calendar_Preview() {
-    DashboardModal_Preview(true, 2)
+    val mockViewModel =
+        remember {
+            object : IGoalsViewModel {
+                override val state: StateFlow<GoalsListState> = MutableStateFlow(GoalsListState())
+
+                override fun onDateChanged(newDate: LocalDate) {}
+
+                override suspend fun createGoals(
+                    date: String,
+                    goals: List<GoalState>,
+                ): Result<Unit> = Result.success(Unit)
+
+                override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun uncompleteGoal(goalId: String): Result<Unit> = Result.success(Unit)
+
+                override suspend fun loadAllGoals(): Result<Unit> = Result.success(Unit)
+
+                override suspend fun getGoalsByDate(date: String) =
+                    Result.success(
+                        listOf<GoalDomain>(
+                            GoalDomain(
+                                "1",
+                                "Test objective",
+                                "Test description",
+                                GoalType.EXERCISE,
+                                GoalCategory.DAILY_CHALLENGES,
+                                GoalStatus.NOT_COMPLETED,
+                                100,
+                                0.5f,
+                            ),
+                            GoalDomain(
+                                "2",
+                                "Test objective 2",
+                                "Test description 2",
+                                GoalType.MEDITATION,
+                                GoalCategory.DAILY_CHALLENGES,
+                                GoalStatus.NOT_COMPLETED,
+                                200,
+                                0.7f,
+                            ),
+                        ),
+                    )
+
+                override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
+            }
+        }
+
+    CompositionLocalProvider(LocalGoalsViewModel provides mockViewModel) {
+        DashboardModal_Preview(true, 2)
+    }
 }

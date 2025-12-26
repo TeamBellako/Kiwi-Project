@@ -15,7 +15,6 @@ public class SuggestedGoalDataMapper {
                 .description(dto.getDescription())
                 .type(GoalType.valueOf(dto.getType()))
                 .category(GoalCategory.valueOf(dto.getCategory()))
-                .status(GoalStatus.valueOf(dto.getStatus()))
                 .points(dto.getPoints())
                 .build();
     }
@@ -27,7 +26,6 @@ public class SuggestedGoalDataMapper {
                 .description(goal.getDescription())
                 .type(goal.getType().name())
                 .category(goal.getCategory().name())
-                .status(goal.getStatus().name())
                 .points(goal.getPoints())
                 .build();
     }

@@ -1,6 +1,7 @@
 package com.bellako.kiwi
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,6 +14,8 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.data.NodeStatus
@@ -50,6 +53,7 @@ class LoginScreenTest {
     private lateinit var mapviewModel: MapViewModel
     private lateinit var questsFakeViewModel: QuestsFakeViewModel
     private lateinit var nodesFakeViewModel: NodesFakeViewModel
+    private lateinit var goalsFakeViewModel: GoalsFakeViewModel
 
     private lateinit var personalityState: PersonalityState
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
@@ -64,6 +68,7 @@ class LoginScreenTest {
         nodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState())
         questsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
         mapviewModel = MapViewModel()
+        goalsFakeViewModel = GoalsFakeViewModel()
 
         personalityState =
             PersonalityState(

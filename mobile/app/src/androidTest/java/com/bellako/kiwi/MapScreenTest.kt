@@ -1,13 +1,18 @@
 package com.bellako.kiwi
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
@@ -25,6 +30,7 @@ class MapScreenTest {
     private lateinit var viewModel: MapViewModel
     private lateinit var nodesModel: NodesFakeViewModel
     private lateinit var questsFakeViewModel: QuestsFakeViewModel
+    private lateinit var goalsViewModel: GoalsFakeViewModel
 
     private val maxZoom = 8f
 
@@ -34,17 +40,18 @@ class MapScreenTest {
 
         viewModel = MapViewModel()
         nodesModel = NodesFakeViewModel()
-        questsFakeViewModel = QuestsFakeViewModel()
+        goalsViewModel = GoalsFakeViewModel()
 
         composeTestRule.setContent {
-            val navController = rememberNavController()
-            MapScreen(
-                maxZoom = maxZoom,
-                nodesViewModel = nodesModel,
-                mapViewModel = viewModel,
-                questsViewModel = questsFakeViewModel,
-                navController = navController,
-            )
+            CompositionLocalProvider(LocalGoalsViewModel provides goalsViewModel) {
+                MapScreen(
+                  maxZoom = maxZoom,
+                  nodesViewModel = nodesModel,
+                  mapViewModel = viewModel,
+                  questsViewModel = questsFakeViewModel,
+                  navController = navController,
+                )
+            }
         }
 
         composeTestRule.waitForIdle()
@@ -85,7 +92,7 @@ class MapScreenTest {
         val mapHeight = viewModel.state.value.mapHeightPx
         val initialSwipe = Offset(screenWidth / 2f, screenHeight / 2f)
 
-        composeTestRule.onRoot().performTouchInput {
+        composeTestRule.onNodeWithTag(CommonTestTags.HOME_SCREEN).performTouchInput {
             swipe(start = initialSwipe + Offset(mapHeight * 2, 0f), end = initialSwipe)
         }
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -15,6 +16,7 @@ fun Kiwi_Image(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
     alignment: Alignment = Alignment.Center,
+    colorFilter: ColorFilter? = null,
 ) {
     Image(
         painter = painter,
@@ -22,6 +24,7 @@ fun Kiwi_Image(
         modifier = modifier,
         contentScale = contentScale,
         alignment = alignment,
+        colorFilter = colorFilter,
     )
 }
 
@@ -32,6 +35,7 @@ fun Kiwi_Image(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
     alignment: Alignment = Alignment.Center,
+    colorFilter: ColorFilter? = null,
 ) {
     Kiwi_Image(
         painter = painterResource(id = painterResourceId),
@@ -39,5 +43,6 @@ fun Kiwi_Image(
         modifier = modifier,
         contentScale = contentScale,
         alignment = alignment,
+        colorFilter = colorFilter,
     )
 }
