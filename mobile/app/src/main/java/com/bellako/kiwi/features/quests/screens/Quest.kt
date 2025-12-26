@@ -22,9 +22,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,10 +57,8 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.yield
 
 // ACTIVE QUESTS
-
 @Composable
 fun Quest(
     quest: QuestDomain,
@@ -396,6 +392,7 @@ fun NewQuestNotification(
     )
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun QuestNotificationsOverlay(
     questsViewModel: IQuestsViewModel,
@@ -523,7 +520,7 @@ fun subquestStatusText(status: SubquestStatus): String =
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun NewQuestNotification_Preview() {
+fun NewQuestNotification_Preview() {
     val nav = rememberNavController()
     Kiwi_Theme {
         Scaffold(

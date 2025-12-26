@@ -64,6 +64,22 @@ object QuestsTestFactory {
                 ),
         )
 
+    fun newQuest(): QuestDomain =
+        QuestDomain(
+            id = 2,
+            name = "Fourth Quest",
+            description = "A short mission",
+            experience = 200,
+            icon = 2,
+            status = QuestStatus.ACTIVE,
+            subquests =
+                listOf(
+                    subquest(9, "Objective 1", SubquestStatus.LOCKED),
+                    subquest(10, "Objective 2", SubquestStatus.LOCKED),
+                    subquest(11, "Objective 3", SubquestStatus.LOCKED),
+                ),
+        )
+
     private fun subquest(
         id: Int,
         name: String,

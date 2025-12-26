@@ -25,7 +25,11 @@ class QuestsFakeViewModel(
     var fakeException: Exception = Exception("Simulated error")
 
     // NOTIFICATIONS
-    private val _notifications = MutableSharedFlow<QuestNotificationEvent>()
+    private val _notifications =
+        MutableSharedFlow<QuestNotificationEvent>(
+            extraBufferCapacity = 10,
+            onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+        )
 
     override fun getNotifications(): SharedFlow<QuestNotificationEvent> = _notifications.asSharedFlow()
 

@@ -1,10 +1,6 @@
 package com.bellako.kiwi.features.map.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,13 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -56,7 +47,6 @@ import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlin.collections.forEach
 import kotlin.math.min
 
@@ -142,8 +132,7 @@ fun MapScreen(
             )
         }
 
-        DevCompleteSubquestButton(questsViewModel)
-
+        @Suppress("MagicNumber")
         QuestNotificationsOverlay(
             questsViewModel,
             navController,
@@ -222,33 +211,5 @@ fun Background() {
             Modifier
                 .fillMaxSize()
                 .background(LocalKiwiColors.current.colorOcean),
-    )
-}
-
-// TODO QUITAR
-
-@SuppressLint("ViewModelConstructorInComposable")
-@Composable
-fun DevCompleteSubquestButton(questsViewModel: IQuestsViewModel) {
-    val kiwiColors = LocalKiwiColors.current
-
-    val scope = rememberCoroutineScope()
-
-    Kiwi_Button(
-        textArguments =
-            KiwiTextArguments(
-                "DEV",
-                color = kiwiColors.color7,
-                bold = true,
-            ),
-        onClick = {
-            scope.launch {
-                questsViewModel.failSubquest(7)
-            }
-        },
-        color = kiwiColors.color5A,
-        modifier =
-            Modifier
-                .padding(getResponsiveSizeHeight(Spacing.large)),
     )
 }

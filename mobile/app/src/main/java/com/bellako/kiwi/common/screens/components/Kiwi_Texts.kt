@@ -21,6 +21,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
 // -------------------------------------------------------------------------------------------------
 
+@Suppress("MagicNumber")
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun rememberTextWidthScale(): Float {

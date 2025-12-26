@@ -5,11 +5,13 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
+import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -22,6 +24,7 @@ class MapScreenTest {
 
     private lateinit var viewModel: MapViewModel
     private lateinit var nodesModel: NodesFakeViewModel
+    private lateinit var questsFakeViewModel: QuestsFakeViewModel
 
     private val maxZoom = 8f
 
@@ -31,12 +34,16 @@ class MapScreenTest {
 
         viewModel = MapViewModel()
         nodesModel = NodesFakeViewModel()
+        questsFakeViewModel = QuestsFakeViewModel()
 
         composeTestRule.setContent {
+            val navController = rememberNavController()
             MapScreen(
                 maxZoom = maxZoom,
                 nodesViewModel = nodesModel,
-                mapViewModel = viewModel,,
+                mapViewModel = viewModel,
+                questsViewModel = questsFakeViewModel,
+                navController = navController,
             )
         }
 
