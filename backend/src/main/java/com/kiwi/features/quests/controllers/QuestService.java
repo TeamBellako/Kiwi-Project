@@ -113,17 +113,17 @@ public class QuestService {
     // ============================================================================================
 
     @Transactional
-    public SubquestResultDTO completeSubquest(Long userId, int subquestId) {
+    public QuestDTO completeSubquest(Long userId, int subquestId) {
         return processSubquestUpdate(userId, subquestId, false);
     }
 
     @Transactional
-    public SubquestResultDTO failSubquest(Long userId, int subquestId) {
+    public QuestDTO failSubquest(Long userId, int subquestId) {
         return processSubquestUpdate(userId, subquestId, true);
     }
 
     @Transactional
-    private SubquestResultDTO processSubquestUpdate(Long userId, int subquestId, boolean isFail) {
+    private QuestDTO processSubquestUpdate(Long userId, int subquestId, boolean isFail) {
 
         SubquestPersistence subquest = subquestRepository.findById(subquestId)
                 .orElseThrow(() -> new SubquestNotFoundException(subquestId));
@@ -153,7 +153,7 @@ public class QuestService {
     // ============================================================================================
 
     private void updateCurrentSubquest(
-            int userId,
+            Long userId,
             SubquestPersistence subquest,
             UserSubquestStatusPersistence currentStatus,
             boolean isFail
@@ -169,7 +169,7 @@ public class QuestService {
         );
     }
 
-    private void unlockNextSubquestIfNeeded(int userId, SubquestPersistence current) {
+    private void unlockNextSubquestIfNeeded(Long userId, SubquestPersistence current) {
 
         List<SubquestPersistence> subquests =
                 subquestRepository.findAllByQuestIdOrderByOrderIndex(
@@ -202,7 +202,7 @@ public class QuestService {
         }
     }
 
-    private QuestDomain buildQuestDomain(int userId, int questId) {
+    private QuestDomain buildQuestDomain(Long userId, int questId) {
 
         UserQuestStatusPersistence questStatus =
                 userQuestStatusRepository
