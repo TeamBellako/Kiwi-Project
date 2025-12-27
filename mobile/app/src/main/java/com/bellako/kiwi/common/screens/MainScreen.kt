@@ -19,10 +19,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.audio.Kiwi_Music_Home
 import com.bellako.kiwi.audio.Kiwi_Music_Login
@@ -32,8 +34,11 @@ import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.SupportModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
+import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
+import com.bellako.kiwi.features.goals.model.GoalsViewModel
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -41,6 +46,9 @@ import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
+import com.bellako.kiwi.features.quests.model.IQuestsViewModel
+import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
+import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
 import com.bellako.kiwi.features.settings.screens.SettingsScreen
@@ -59,6 +67,9 @@ fun MainScreen(
     personalityViewModel: PersonalityViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
     nodesViewModel: NodesViewModel = hiltViewModel(),
+    questsViewModel: QuestsViewModel = hiltViewModel(),
+    goalsViewModel: GoalsViewModel = hiltViewModel(),
+    appBarViewModel: AppBarViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -81,6 +92,9 @@ fun MainScreen(
             personalityViewModel = personalityViewModel,
             metricsViewModel = metricsViewModel,
             nodesViewModel = nodesViewModel,
+            questsViewModel = questsViewModel,
+            goalsViewModel = goalsViewModel,
+            appBarViewModel = appBarViewModel,
         )
     }
 }
@@ -96,11 +110,14 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 @Composable
 private fun AppScreen(
     navController: NavHostController,
-    usersViewModel: UsersViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
-    personalityViewModel: PersonalityViewModel = hiltViewModel(),
-    metricsViewModel: MetricsViewModel = hiltViewModel(),
-    nodesViewModel: NodesViewModel = hiltViewModel(),
+    usersViewModel: UsersViewModel,
+    settingsViewModel: SettingsViewModel,
+    personalityViewModel: PersonalityViewModel,
+    metricsViewModel: MetricsViewModel,
+    nodesViewModel: NodesViewModel,
+    questsViewModel: QuestsViewModel,
+    goalsViewModel: GoalsViewModel,
+    appBarViewModel: AppBarViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -115,10 +132,22 @@ private fun AppScreen(
 
     val showDashboard = route == ScreenRoutes.HOME
 
+    LaunchedEffect(Unit) {
+        questsViewModel.getNotifications().collect { event ->
+            when (event) {
+                is QuestNotificationEvent.QuestCompleted -> {}
+                else -> appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
+            }
+        }
+    }
+
     Scaffold(
         bottomBar = {
             if (!isLoginScreen && isLoginCompleted) {
-                AppBarScreen(navController = navController)
+                AppBarScreen(
+                    navController = navController,
+                    appBarViewModel = appBarViewModel,
+                )
             }
         },
         content = { paddingValues ->
@@ -129,6 +158,8 @@ private fun AppScreen(
                     settingsViewModel = settingsViewModel,
                     personalityViewModel = personalityViewModel,
                     nodesViewModel = nodesViewModel,
+                    questsViewModel = questsViewModel,
+                    goalsViewModel = goalsViewModel,
                 )
 
                 if (showDashboard) {
@@ -154,10 +185,12 @@ private fun AppScreen(
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    usersViewModel: UsersViewModel = hiltViewModel(),
+    usersViewModel: UsersViewModel,
     settingsViewModel: ISettingsViewModel,
     personalityViewModel: IPersonalityViewModel,
     nodesViewModel: INodesViewModel,
+    questsViewModel: IQuestsViewModel,
+    goalsViewModel: IGoalsViewModel,
 ) {
     NavHost(
         navController = navController,
@@ -219,14 +252,32 @@ fun AppNavHost(
         composable(ScreenRoutes.HOME) {
             AppScreenWrapper {
                 Kiwi_Music_Home()
-                MapScreen(nodesViewModel = nodesViewModel)
+                MapScreen(
+                    nodesViewModel = nodesViewModel,
+                    questsViewModel = questsViewModel,
+                    navController = navController,
+                    goalsViewModel = goalsViewModel,
+                    mapViewModel = hiltViewModel()
+                )
             }
         }
 
         composable(ScreenRoutes.OBJECTIVES) {
             AppScreenWrapper {
-                ObjectivesScreen()
+                ObjectivesScreen(questsViewModel = questsViewModel)
             }
+        }
+
+        composable(
+            route = ScreenRoutes.OBJECTIVES_FOCUS,
+            arguments = listOf(navArgument("questId") { type = NavType.IntType }),
+        ) { backStackEntry ->
+            val questId = backStackEntry.arguments?.getInt("questId")
+
+            ObjectivesScreen(
+                questsViewModel = questsViewModel,
+                focusedQuestId = questId,
+            )
         }
 
         composable(ScreenRoutes.SETTINGS) {

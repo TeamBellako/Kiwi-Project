@@ -4,9 +4,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -15,6 +15,7 @@ import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
+import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,7 +28,8 @@ class MapScreenTest {
 
     private lateinit var viewModel: MapViewModel
     private lateinit var nodesModel: NodesFakeViewModel
-    private lateinit var goalsViewModel: GoalsFakeViewModel
+    private lateinit var questsFakeViewModel: QuestsFakeViewModel
+    private lateinit var goalsFakeViewModel: GoalsFakeViewModel
 
     private val maxZoom = 8f
 
@@ -37,17 +39,19 @@ class MapScreenTest {
 
         viewModel = MapViewModel()
         nodesModel = NodesFakeViewModel()
-        goalsViewModel = GoalsFakeViewModel()
+        goalsFakeViewModel = GoalsFakeViewModel()
+        questsFakeViewModel = QuestsFakeViewModel()
 
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalGoalsViewModel provides goalsViewModel) {
-                MapScreen(
-                    maxZoom = maxZoom,
-                    dragLimitFactor = 1f,
-                    mapViewModel = viewModel,
-                    nodesViewModel = nodesModel,
-                )
-            }
+            val navController = rememberNavController()
+            MapScreen(
+                maxZoom = maxZoom,
+                nodesViewModel = nodesModel,
+                mapViewModel = viewModel,
+                questsViewModel = questsFakeViewModel,
+                goalsViewModel = goalsFakeViewModel,
+                navController = navController,
+            )
         }
 
         composeTestRule.waitForIdle()

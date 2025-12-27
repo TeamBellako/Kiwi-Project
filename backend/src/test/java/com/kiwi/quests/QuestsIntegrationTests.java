@@ -140,73 +140,72 @@ public class QuestsIntegrationTests {
     @WithMockUser(username = "finn@thehuman.com")
     public void completeSubquest() throws Exception {
         var user = createUser();
-
         var quest = createQuestWithSubquests(1, 7, 8);
         List<SubquestPersistence> subquests = subquestRepository.findAllByQuestIdOrderByOrderIndex(quest.getId());
 
         mockMvc.perform(post(API_URL + "/" + quest.getId() + "/give"));
 
-        mockMvc.perform(post(API_URL + "/subquests/" +  subquests.get(0).getId() + "/complete"))
+        mockMvc.perform(post(API_URL + "/subquests/" + subquests.get(0).getId() + "/complete"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.updatedSubquest.subquestId").value( subquests.get(0).getId()))
-                .andExpect(jsonPath("$.updatedSubquest.status").value(SubquestStatus.COMPLETED.toString()))
-                .andExpect(jsonPath("$.nextSubquest.subquestId").value( subquests.get(1).getId()))
-                .andExpect(jsonPath("$.nextSubquest.status").value(SubquestStatus.ACTIVE.toString()));
+                .andExpect(jsonPath("$.questId").value(quest.getId()))
+                .andExpect(jsonPath("$.status").value(QuestStatus.ACTIVE.toString()))
+                .andExpect(jsonPath("$.subquests[0].subquestId").value(subquests.get(0).getId()))
+                .andExpect(jsonPath("$.subquests[0].status").value(SubquestStatus.COMPLETED.toString()))
+                .andExpect(jsonPath("$.subquests[1].status").value(SubquestStatus.ACTIVE.toString()));
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void failSubquest() throws Exception {
         var user = createUser();
-
         var quest = createQuestWithSubquests(1, 7, 8);
         List<SubquestPersistence> subquests = subquestRepository.findAllByQuestIdOrderByOrderIndex(quest.getId());
 
         mockMvc.perform(post(API_URL + "/" + quest.getId() + "/give"));
 
-        mockMvc.perform(post(API_URL + "/subquests/" +  subquests.get(0).getId() + "/fail"))
+        mockMvc.perform(post(API_URL + "/subquests/" + subquests.get(0).getId() + "/fail"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.updatedSubquest.subquestId").value( subquests.get(0).getId()))
-                .andExpect(jsonPath("$.updatedSubquest.status").value(SubquestStatus.FAILED.toString()))
-                .andExpect(jsonPath("$.nextSubquest.subquestId").value( subquests.get(1).getId()))
-                .andExpect(jsonPath("$.nextSubquest.status").value(SubquestStatus.ACTIVE.toString()));
+                .andExpect(jsonPath("$.questId").value(quest.getId()))
+                .andExpect(jsonPath("$.status").value(QuestStatus.ACTIVE.toString()))
+                .andExpect(jsonPath("$.subquests[0].subquestId").value(subquests.get(0).getId()))
+                .andExpect(jsonPath("$.subquests[0].status").value(SubquestStatus.FAILED.toString()))
+                .andExpect(jsonPath("$.subquests[1].status").value(SubquestStatus.ACTIVE.toString()));
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void completeLastSubquest() throws Exception {
         var user = createUser();
-
         var quest = createQuestWithSubquests(1, 7, 8);
         List<SubquestPersistence> subquests = subquestRepository.findAllByQuestIdOrderByOrderIndex(quest.getId());
 
         mockMvc.perform(post(API_URL + "/" + quest.getId() + "/give"));
-        mockMvc.perform(post(API_URL + "/subquests/" +  subquests.get(0).getId() + "/complete"));
+        mockMvc.perform(post(API_URL + "/subquests/" + subquests.get(0).getId() + "/complete"));
 
-        mockMvc.perform(post(API_URL + "/subquests/" +  subquests.get(1).getId() + "/complete"))
+        mockMvc.perform(post(API_URL + "/subquests/" + subquests.get(1).getId() + "/complete"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.updatedSubquest.subquestId").value( subquests.get(1).getId()))
-                .andExpect(jsonPath("$.updatedSubquest.status").value(SubquestStatus.COMPLETED.toString()))
-                .andExpect(jsonPath("$.completedQuest.questId").value( quest.getId()))
-                .andExpect(jsonPath("$.completedQuest.status").value(QuestStatus.COMPLETED.toString()));
+                .andExpect(jsonPath("$.questId").value(quest.getId()))
+                .andExpect(jsonPath("$.status").value(QuestStatus.COMPLETED.toString()))
+                .andExpect(jsonPath("$.subquests[0].status").value(SubquestStatus.COMPLETED.toString()))
+                .andExpect(jsonPath("$.subquests[1].status").value(SubquestStatus.COMPLETED.toString()));
     }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void failLastSubquest() throws Exception {
         var user = createUser();
-
         var quest = createQuestWithSubquests(1, 7, 8);
         List<SubquestPersistence> subquests = subquestRepository.findAllByQuestIdOrderByOrderIndex(quest.getId());
 
         mockMvc.perform(post(API_URL + "/" + quest.getId() + "/give"));
-        mockMvc.perform(post(API_URL + "/subquests/" +  subquests.get(0).getId() + "/complete"));
+        mockMvc.perform(post(API_URL + "/subquests/" + subquests.get(0).getId() + "/complete"));
 
-        mockMvc.perform(post(API_URL + "/subquests/" +  subquests.get(1).getId() + "/fail"))
+        mockMvc.perform(post(API_URL + "/subquests/" + subquests.get(1).getId() + "/fail"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.updatedSubquest.subquestId").value( subquests.get(1).getId()))
-                .andExpect(jsonPath("$.updatedSubquest.status").value(SubquestStatus.FAILED.toString()))
-                .andExpect(jsonPath("$.completedQuest.questId").value( quest.getId()))
-                .andExpect(jsonPath("$.completedQuest.status").value(QuestStatus.COMPLETED.toString()));
+                .andExpect(jsonPath("$.questId").value(quest.getId()))
+                .andExpect(jsonPath("$.status").value(QuestStatus.COMPLETED.toString()))
+                .andExpect(jsonPath("$.subquests[0].status").value(SubquestStatus.COMPLETED.toString()))
+                .andExpect(jsonPath("$.subquests[1].status").value(SubquestStatus.FAILED.toString()));
     }
+
 }

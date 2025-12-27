@@ -22,10 +22,13 @@ import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.data.NodesDomain
 import com.bellako.kiwi.features.nodes.data.NodesState
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
+import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
+import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
@@ -44,8 +47,8 @@ class SignUpScreen4Test {
 
     private lateinit var usersFakeViewModel: UsersFakeViewModel
     private lateinit var usersState: UsersState
-    private lateinit var nodesState: NodesState
     private lateinit var nodesFakeViewModel: NodesFakeViewModel
+    private lateinit var questsFakeViewModel: QuestsFakeViewModel
     private lateinit var mapviewModel: MapViewModel
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
     private lateinit var personalityState: PersonalityState
@@ -70,8 +73,8 @@ class SignUpScreen4Test {
         usersFakeViewModel = UsersFakeViewModel(usersState)
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
-        nodesState = NodesState(List<NodesDomain>(1) { NodesDomain(1, 1, NodeStatus.INACCESSIBLE, 0, 0.0f, 0.0f) })
-        nodesFakeViewModel = NodesFakeViewModel(nodesState)
+        nodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState())
+        questsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
         mapviewModel = MapViewModel()
         goalsFakeViewModel = GoalsFakeViewModel()
 
@@ -90,6 +93,9 @@ class SignUpScreen4Test {
                         MapScreen(
                             nodesViewModel = nodesFakeViewModel,
                             mapViewModel = mapviewModel,
+                            questsViewModel = questsFakeViewModel,
+                            goalsViewModel = goalsFakeViewModel,
+                            navController = navController,
                         )
                     }
                 }

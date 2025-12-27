@@ -11,6 +11,7 @@ public class QuestDomainFactory {
                 quest.getName(),
                 quest.getDescription(),
                 quest.getExperience(),
+                quest.getIcon(),
                 questStatus.getStatus(),
                 subquests.stream()
                         .sorted((a, b) -> Integer.compare(a.getOrder(), b.getOrder()))

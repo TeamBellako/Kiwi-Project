@@ -1,6 +1,5 @@
 package com.bellako.kiwi.features.map.screens
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -24,12 +23,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.zIndex
+import androidx.navigation.NavHostController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
@@ -37,17 +36,16 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
-import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
-import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalModalType
-import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
+import com.bellako.kiwi.features.quests.model.IQuestsViewModel
+import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -56,19 +54,22 @@ import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
+import kotlin.collections.forEach
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MapScreen(
     maxZoom: Float = 8f,
-    dragLimitFactor: Float = 1f,
     mapMarginFactor: Float = 0.08f,
-    elasticityFactor: Float = 0.4f,
+    elasticityFactor: Float = 1.4f,
     mapResourceId: Int = R.drawable.mindveil_4k,
-    title: String = "WORLD MAP",
+    title: String = "MINDVEIL",
+    mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
-    mapViewModel: MapViewModel = hiltViewModel(),
+    questsViewModel: IQuestsViewModel,
+    navController: NavHostController,
+    goalsViewModel: IGoalsViewModel,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
@@ -87,11 +88,9 @@ fun MapScreen(
     val displayWidthPx = imageW * fitScale
     val displayHeightPx = imageH * fitScale
 
-    // ensure setParameters is called once per composition with stable inputs
-    LaunchedEffect(maxZoom, dragLimitFactor, displayWidthPx, displayHeightPx, viewportWidthPx, viewportHeightPx) {
+    LaunchedEffect(maxZoom, displayWidthPx, displayHeightPx, viewportWidthPx, viewportHeightPx) {
         mapViewModel.setParameters(
             maxScale = maxZoom,
-            dragLimitFactor = dragLimitFactor,
             mapWidthPx = displayWidthPx,
             mapHeightPx = displayHeightPx,
             viewportWidthPx = viewportWidthPx,
@@ -116,32 +115,42 @@ fun MapScreen(
             }
     }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(kiwiColors.color2)
-                .testTag(CommonTestTags.HOME_SCREEN),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Kiwi_H2(
-            KiwiTextArguments(
-                title,
-                color = kiwiColors.colorF,
-                modifier = Modifier.padding(0.dp, getResponsiveSizeHeight(Spacing.small)),
-            ),
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(kiwiColors.color2)
+                    .testTag(CommonTestTags.HOME_SCREEN),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Kiwi_H2(
+                KiwiTextArguments(
+                    title,
+                    color = kiwiColors.colorF,
+                    modifier = Modifier.padding(0.dp, getResponsiveSizeHeight(Spacing.small)),
+                ),
+            )
 
-        InteractiveMap(
-            mapResourceId = mapResourceId,
-            mapViewModel = mapViewModel,
-            nodesViewModel = nodesViewModel,
-            modifier = Modifier.fillMaxSize(),
+            InteractiveMap(
+                mapResourceId = mapResourceId,
+                mapViewModel = mapViewModel,
+                nodesViewModel = nodesViewModel,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        @Suppress("MagicNumber")
+        QuestNotificationsOverlay(
+            questsViewModel,
+            navController,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .zIndex(10f),
         )
     }
-    val localGoalsViewModel = LocalGoalsViewModel.current
-    val goalsViewModel: IGoalsViewModel = localGoalsViewModel ?: hiltViewModel<GoalsViewModel>()
     var notTodaygoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
     var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
 //    var newGoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
@@ -245,26 +254,4 @@ fun Background() {
                 .fillMaxSize()
                 .background(LocalKiwiColors.current.colorOcean),
     )
-    // val imageBitmap: ImageBitmap = ImageBitmap.imageResource(id = R.drawable.tile_texture)
-    //  Canvas(modifier = Modifier.fillMaxSize()) {
-    //    drawTiledBitmap(imageBitmap)
-    // }
 }
-/*
-private fun DrawScope.drawTiledBitmap(bitmap: ImageBitmap) {
-    val tileWidth = bitmap.width.toFloat()
-    val tileHeight = bitmap.height.toFloat()
-
-    var y = 0f
-    while (y < size.height) {
-        var x = 0f
-        while (x < size.width) {
-            translate(left = x, top = y) {
-                drawImage(bitmap)
-            }
-            x += tileWidth
-        }
-        y += tileHeight
-    }
-}
-*/

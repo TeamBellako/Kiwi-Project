@@ -13,8 +13,8 @@ fun Kiwi_Music_Login() {
         AudioManager.playMusic(
             context,
             listOf(
-                AudioLayer(R.raw.growtale_stepswithin, 0.6f, true),
-                AudioLayer(R.raw.growtale_stepswithin_enigma, 0.6f, false),
+                AudioLayer(R.raw.growtale_stepswithin, 0.35f, true),
+                AudioLayer(R.raw.growtale_stepswithin_enigma, 0.35f, false),
             ),
         )
     }
@@ -28,8 +28,8 @@ fun Kiwi_Music_SignUp() {
         AudioManager.playMusic(
             context,
             listOf(
-                AudioLayer(R.raw.growtale_stepswithin, 0.6f, false),
-                AudioLayer(R.raw.growtale_stepswithin_enigma, 0.6f, true),
+                AudioLayer(R.raw.growtale_stepswithin, 0.35f, false),
+                AudioLayer(R.raw.growtale_stepswithin_enigma, 0.35f, true),
             ),
         )
     }
@@ -43,8 +43,8 @@ fun Kiwi_Music_Home() {
         AudioManager.playMusic(
             context,
             listOf(
-                AudioLayer(R.raw.growtale_maintheme, 0.6f, true),
-                AudioLayer(R.raw.growtale_maintheme_chiptunesynth, 0.6f, false),
+                AudioLayer(R.raw.growtale_maintheme, 0.35f, true),
+                AudioLayer(R.raw.growtale_maintheme_chiptunesynth, 0.35f, false),
             ),
         )
     }
@@ -58,8 +58,8 @@ fun Kiwi_Music_Settings() {
         AudioManager.playMusic(
             context,
             listOf(
-                AudioLayer(R.raw.growtale_maintheme, 0.6f, false),
-                AudioLayer(R.raw.growtale_maintheme_chiptunesynth, 0.6f, true),
+                AudioLayer(R.raw.growtale_maintheme, 0.35f, false),
+                AudioLayer(R.raw.growtale_maintheme_chiptunesynth, 0.35f, true),
             ),
         )
     }

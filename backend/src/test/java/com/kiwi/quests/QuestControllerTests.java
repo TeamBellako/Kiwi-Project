@@ -6,7 +6,6 @@ import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.quests.controllers.QuestController;
 import com.kiwi.features.quests.controllers.QuestService;
 import com.kiwi.features.quests.data.QuestDTO;
-import com.kiwi.features.quests.data.SubquestResultDTO;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.security.AuthEntryPointJwt;
@@ -109,7 +108,7 @@ public class QuestControllerTests {
                 }}));
 
         when(questService.completeSubquest(1L, 1))
-                .thenReturn(SubquestResultDTO.builder().build());
+                .thenReturn(new QuestDTO());
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/subquests/1/complete", null)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -126,7 +125,7 @@ public class QuestControllerTests {
                 }}));
 
         when(questService.failSubquest(1L, 1))
-                .thenReturn(SubquestResultDTO.builder().build());
+                .thenReturn(new QuestDTO());
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/subquests/1/fail", null)
                         .contentType(MediaType.APPLICATION_JSON))

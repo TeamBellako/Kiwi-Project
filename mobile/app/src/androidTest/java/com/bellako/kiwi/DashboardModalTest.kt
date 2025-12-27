@@ -277,7 +277,6 @@ class DashboardModalTest {
         if (originalMonth == 1) {
             assert(newMonth == 12) { "Expected month 12 (December) but got $newMonth" }
         } else {
-            // En cualquier otro mes, el nuevo mes debe ser menor
             assert(newMonth == originalMonth - 1) { "Expected month ${originalMonth - 1} but got $newMonth" }
         }
     }

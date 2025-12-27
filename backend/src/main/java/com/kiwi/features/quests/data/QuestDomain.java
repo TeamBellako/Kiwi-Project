@@ -11,15 +11,17 @@ public class QuestDomain {
     private final String name;
     private final String description;
     private final int experience;
+    private final int icon;
     private final QuestStatus status;
     private final List<SubquestDomain> subquests;
 
     public QuestDomain(int questId, String name, String description, int experience,
-                       QuestStatus status, List<SubquestDomain> subquests) {
+                int icon, QuestStatus status, List<SubquestDomain> subquests) {
         this.questId = questId;
         this.name = name;
         this.description = description;
         this.experience = experience;
+        this.icon = icon;
         this.status = status;
         this.subquests = subquests;
     }

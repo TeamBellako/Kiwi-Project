@@ -13,6 +13,7 @@ public class QuestTestFactory {
         q.setName("Quest"+id);
         q.setDescription("Description of "+id);
         q.setExperience(100+id);
+        q.setIcon(1);
         return q;
     }
 

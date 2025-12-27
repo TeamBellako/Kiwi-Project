@@ -19,6 +19,7 @@ public class QuestProgressService {
                 quest.getName(),
                 quest.getDescription(),
                 quest.getExperience(),
+                quest.getIcon(),
                 QuestStatus.ACTIVE,
                 quest.getSubquests()
         );
@@ -33,6 +34,7 @@ public class QuestProgressService {
                 quest.getName(),
                 quest.getDescription(),
                 quest.getExperience(),
+                quest.getIcon(),
                 QuestStatus.COMPLETED,
                 quest.getSubquests()
         );

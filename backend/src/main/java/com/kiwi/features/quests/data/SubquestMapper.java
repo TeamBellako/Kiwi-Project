@@ -28,8 +28,6 @@ public class SubquestMapper {
         );
     }
 
-    // Lista: Persistence list + lista de user statuses -> lista de Domain
-    // Empareja por subquest id. Si no hay status, status será null.
     public static List<SubquestDomain> toDomainList(
             List<SubquestPersistence> subquests,
             List<UserSubquestStatusPersistence> userStatuses
@@ -73,18 +71,11 @@ public class SubquestMapper {
         persistence.setId(new UserSubquestStatusKey(userId, domain.getSubquestId()));
 
         persistence.setStatus(domain.getStatus());
+
         SubquestPersistence subquestPersistence = subRepo.findById(domain.getSubquestId())
-                .orElseThrow(() -> new IllegalStateException("Subquest no encontrada: " + domain.getSubquestId()));
+                .orElseThrow(() -> new IllegalStateException("Subquest not found: " + domain.getSubquestId()));
         persistence.setSubquest(subquestPersistence);
         return persistence;
     }
 
-    // Persistence + desired status -> UserSubquestStatusPersistence (inicializar subquests)
-    public static UserSubquestStatusPersistence toPersistence(Long userId, SubquestPersistence sq, SubquestStatus status) {
-        UserSubquestStatusPersistence persistence = new UserSubquestStatusPersistence();
-        persistence.setId(new UserSubquestStatusKey(userId, sq.getId()));
-        persistence.setStatus(status);
-        persistence.setSubquest(sq);
-        return persistence;
-    }
 }
