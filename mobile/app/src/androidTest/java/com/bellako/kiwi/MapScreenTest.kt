@@ -4,7 +4,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.navigation.compose.rememberNavController
@@ -30,7 +29,7 @@ class MapScreenTest {
     private lateinit var viewModel: MapViewModel
     private lateinit var nodesModel: NodesFakeViewModel
     private lateinit var questsFakeViewModel: QuestsFakeViewModel
-    private lateinit var goalsViewModel: GoalsFakeViewModel
+    private lateinit var goalsFakeViewModel: GoalsFakeViewModel
 
     private val maxZoom = 8f
 
@@ -40,18 +39,19 @@ class MapScreenTest {
 
         viewModel = MapViewModel()
         nodesModel = NodesFakeViewModel()
-        goalsViewModel = GoalsFakeViewModel()
+        goalsFakeViewModel = GoalsFakeViewModel()
+        questsFakeViewModel = QuestsFakeViewModel()
 
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalGoalsViewModel provides goalsViewModel) {
-                MapScreen(
-                  maxZoom = maxZoom,
-                  nodesViewModel = nodesModel,
-                  mapViewModel = viewModel,
-                  questsViewModel = questsFakeViewModel,
-                  navController = navController,
-                )
-            }
+            val navController = rememberNavController()
+            MapScreen(
+                maxZoom = maxZoom,
+                nodesViewModel = nodesModel,
+                mapViewModel = viewModel,
+                questsViewModel = questsFakeViewModel,
+                goalsViewModel = goalsFakeViewModel,
+                navController = navController,
+            )
         }
 
         composeTestRule.waitForIdle()

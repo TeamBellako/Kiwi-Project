@@ -14,20 +14,15 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
-import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
-import com.bellako.kiwi.features.nodes.data.NodeStatus
-import com.bellako.kiwi.features.nodes.data.NodesDomain
-import com.bellako.kiwi.features.nodes.data.NodesState
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
 import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.features.users.data.UsersState
@@ -54,7 +49,6 @@ class LoginScreenTest {
     private lateinit var questsFakeViewModel: QuestsFakeViewModel
     private lateinit var nodesFakeViewModel: NodesFakeViewModel
     private lateinit var goalsFakeViewModel: GoalsFakeViewModel
-
     private lateinit var personalityState: PersonalityState
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
 
@@ -67,8 +61,8 @@ class LoginScreenTest {
         usersFakeViewModel = UsersFakeViewModel(usersState)
         nodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState())
         questsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
-        mapviewModel = MapViewModel()
         goalsFakeViewModel = GoalsFakeViewModel()
+        mapviewModel = MapViewModel()
 
         personalityState =
             PersonalityState(
@@ -96,6 +90,7 @@ class LoginScreenTest {
                         nodesViewModel = nodesFakeViewModel,
                         mapViewModel = mapviewModel,
                         questsViewModel = questsFakeViewModel,
+                        goalsViewModel = goalsFakeViewModel,
                         navController = navController,
                     )
                 }

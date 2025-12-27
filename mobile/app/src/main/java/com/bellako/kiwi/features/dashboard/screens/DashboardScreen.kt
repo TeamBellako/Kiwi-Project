@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
@@ -46,19 +47,18 @@ import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
-import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
-import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
-import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
+import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -481,6 +481,7 @@ fun DashboardModal_Preview(
     initialStateIndex: Int = 0,
     nodesViewModel: NodesViewModel = hiltViewModel(),
     questsViewModel: QuestsViewModel = hiltViewModel(),
+    goalsViewModel: GoalsViewModel = hiltViewModel(),
 ) {
     val nav = rememberNavController()
     Kiwi_Theme {
@@ -494,6 +495,8 @@ fun DashboardModal_Preview(
                         nodesViewModel = nodesViewModel,
                         questsViewModel = questsViewModel,
                         navController = nav,
+                        goalsViewModel = goalsViewModel,
+                        mapViewModel = hiltViewModel(),
                     )
                     DashboardScreen(
                         usersViewModel =

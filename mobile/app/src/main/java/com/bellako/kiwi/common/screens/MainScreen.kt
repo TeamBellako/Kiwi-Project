@@ -37,6 +37,8 @@ import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
+import com.bellako.kiwi.features.goals.model.GoalsViewModel
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -66,6 +68,7 @@ fun MainScreen(
     metricsViewModel: MetricsViewModel = hiltViewModel(),
     nodesViewModel: NodesViewModel = hiltViewModel(),
     questsViewModel: QuestsViewModel = hiltViewModel(),
+    goalsViewModel: GoalsViewModel = hiltViewModel(),
     appBarViewModel: AppBarViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
@@ -90,6 +93,7 @@ fun MainScreen(
             metricsViewModel = metricsViewModel,
             nodesViewModel = nodesViewModel,
             questsViewModel = questsViewModel,
+            goalsViewModel = goalsViewModel,
             appBarViewModel = appBarViewModel,
         )
     }
@@ -112,6 +116,7 @@ private fun AppScreen(
     metricsViewModel: MetricsViewModel,
     nodesViewModel: NodesViewModel,
     questsViewModel: QuestsViewModel,
+    goalsViewModel: GoalsViewModel,
     appBarViewModel: AppBarViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
@@ -154,6 +159,7 @@ private fun AppScreen(
                     personalityViewModel = personalityViewModel,
                     nodesViewModel = nodesViewModel,
                     questsViewModel = questsViewModel,
+                    goalsViewModel = goalsViewModel,
                 )
 
                 if (showDashboard) {
@@ -184,6 +190,7 @@ fun AppNavHost(
     personalityViewModel: IPersonalityViewModel,
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
+    goalsViewModel: IGoalsViewModel,
 ) {
     NavHost(
         navController = navController,
@@ -249,6 +256,8 @@ fun AppNavHost(
                     nodesViewModel = nodesViewModel,
                     questsViewModel = questsViewModel,
                     navController = navController,
+                    goalsViewModel = goalsViewModel,
+                    mapViewModel = hiltViewModel()
                 )
             }
         }

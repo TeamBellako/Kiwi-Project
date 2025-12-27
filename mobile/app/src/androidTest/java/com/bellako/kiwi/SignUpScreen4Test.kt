@@ -47,7 +47,6 @@ class SignUpScreen4Test {
 
     private lateinit var usersFakeViewModel: UsersFakeViewModel
     private lateinit var usersState: UsersState
-    private lateinit var nodesState: NodesState
     private lateinit var nodesFakeViewModel: NodesFakeViewModel
     private lateinit var questsFakeViewModel: QuestsFakeViewModel
     private lateinit var mapviewModel: MapViewModel
@@ -95,6 +94,7 @@ class SignUpScreen4Test {
                             nodesViewModel = nodesFakeViewModel,
                             mapViewModel = mapviewModel,
                             questsViewModel = questsFakeViewModel,
+                            goalsViewModel = goalsFakeViewModel,
                             navController = navController,
                         )
                     }

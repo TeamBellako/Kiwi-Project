@@ -1,7 +1,5 @@
 package com.bellako.kiwi.features.map.screens
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -15,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,27 +23,21 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
-import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
-import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalModalType
-import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
@@ -62,8 +53,8 @@ import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlin.collections.forEach
 import java.time.LocalDate
+import kotlin.collections.forEach
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -74,10 +65,11 @@ fun MapScreen(
     elasticityFactor: Float = 1.4f,
     mapResourceId: Int = R.drawable.mindveil_4k,
     title: String = "MINDVEIL",
-    mapViewModel: MapViewModel = hiltViewModel(),
+    mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
     navController: NavHostController,
+    goalsViewModel: IGoalsViewModel,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
@@ -159,8 +151,6 @@ fun MapScreen(
                     .zIndex(10f),
         )
     }
-    val localGoalsViewModel = LocalGoalsViewModel.current
-    val goalsViewModel: IGoalsViewModel = localGoalsViewModel ?: hiltViewModel<GoalsViewModel>()
     var notTodaygoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
     var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
 //    var newGoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
