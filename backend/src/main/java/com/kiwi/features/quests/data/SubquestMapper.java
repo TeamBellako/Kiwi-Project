@@ -65,15 +65,14 @@ public class SubquestMapper {
         return toDTO(toDomain(sq, userStatus));
     }
 
-    // Domain -> UserSubquestStatusPersistence (guardar estado del usuario)
-    public static UserSubquestStatusPersistence toPersistence(Long userId, SubquestDomain domain, SubquestRepository subRepo) {
+    // Domain -> UserSubquestStatusPersistence
+    public static UserSubquestStatusPersistence toPersistence(Long userId, SubquestStatus status,
+                                                              SubquestPersistence subquestPersistence) {
         UserSubquestStatusPersistence persistence = new UserSubquestStatusPersistence();
-        persistence.setId(new UserSubquestStatusKey(userId, domain.getSubquestId()));
+        persistence.setId(new UserSubquestStatusKey(userId, subquestPersistence.getId()));
 
-        persistence.setStatus(domain.getStatus());
+        persistence.setStatus(status);
 
-        SubquestPersistence subquestPersistence = subRepo.findById(domain.getSubquestId())
-                .orElseThrow(() -> new IllegalStateException("Subquest not found: " + domain.getSubquestId()));
         persistence.setSubquest(subquestPersistence);
         return persistence;
     }

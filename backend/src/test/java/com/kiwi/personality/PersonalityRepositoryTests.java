@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 import static com.kiwi.personality.PersonalityTestFactory.personalityDTO;
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -39,8 +40,8 @@ public class PersonalityRepositoryTests {
 
     @Test
     public void findPersonality() {
-        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validLoginDTO().getPassword()));
         UsersPersistence savedUser = usersRepository.findByEmail(validUserDTO().getEmail()).orElse(null);
 
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());

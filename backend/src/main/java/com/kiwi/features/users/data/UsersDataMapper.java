@@ -1,7 +1,7 @@
 package com.kiwi.features.users.data;
 
 import com.kiwi.common.types.Email;
-import com.kiwi.common.types.Password;
+import com.kiwi.common.types.PositiveOrZeroInteger;
 
 import java.time.LocalDate;
 
@@ -9,38 +9,32 @@ import static com.kiwi.common.utils.FormatUtils.formatDate;
 
 public class UsersDataMapper {
 
-    public static UsersDomain toDomain(UsersDTO dto) {
+    public static UsersDomain toDomainWithoutPoints(UsersDTO dto) {
         return (dto == null) ? null :
                 new UsersDomain(
                         new Email(dto.getEmail()),
-                        new Password(dto.getPassword()),
                         LocalDate.parse(dto.getRegisterDate())
                 );
     }
 
-    public static UsersDTO toDTO(UsersDomain domain) {
+    public static UsersDTO toUsersDTO(UsersDomain domain) {
         return (domain == null) ? null :
                 new UsersDTO(
                         domain.getEmail().value(),
-                        domain.getPassword().value(),
                         formatDate(domain.getRegisterDate())
                 );
     }
 
-    // Cannot convert from persistence to anything because the password is hashed
-
-    public static UsersDomain toDomainFromPersistence(UsersPersistence persistence, String plainPassword) {
+    public static UsersDomain toDomain(UsersPersistence persistence) {
         if (persistence == null) return null;
         
         UsersDomain domain = new UsersDomain(
                 new Email(persistence.getEmail()),
-                new Password(plainPassword),
                 persistence.getRegisterDate()
         );
         
-        // Establecer puntos usando métodos internos
-        domain.setCurrentPointsInternal(persistence.getCurrentPoints());
-        domain.setTotalPointsInternal(persistence.getTotalPoints());
+        domain.setCurrentPoints(new PositiveOrZeroInteger(persistence.getCurrentPoints()));
+        domain.setTotalPoints(new PositiveOrZeroInteger(persistence.getTotalPoints()));
         
         return domain;
     }
@@ -51,13 +45,13 @@ public class UsersDataMapper {
                         .email(domain.getEmail().value())
                         .hashedPassword(hashedPassword)
                         .registerDate(domain.getRegisterDate())
-                        .currentPoints(domain.getCurrentPoints())
-                        .totalPoints(domain.getTotalPoints())
+                        .currentPoints(domain.getCurrentPoints().value())
+                        .totalPoints(domain.getTotalPoints().value())
                         .build();
     }
 
-    public static UsersPersistence toPersistence(UsersDTO dto, String hashedPassword) {
-        return toPersistence(toDomain(dto), hashedPassword);
+    public static UsersPersistence toPersistenceWithoutPoints(UsersDTO dto, String hashedPassword) {
+        return toPersistence(toDomainWithoutPoints(dto), hashedPassword);
     }
 
     public static UserPointsDTO toPointsDTO(UsersPersistence persistence) {
@@ -71,8 +65,8 @@ public class UsersDataMapper {
     public static UserPointsDTO toPointsDTO(UsersDomain domain) {
         return (domain == null) ? null :
                 UserPointsDTO.builder()
-                        .currentPoints(domain.getCurrentPoints())
-                        .totalPoints(domain.getTotalPoints())
+                        .currentPoints(domain.getCurrentPoints().value())
+                        .totalPoints(domain.getTotalPoints().value())
                         .build();
     }
 }

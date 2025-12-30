@@ -4,7 +4,10 @@ data class NodesDTO(
     val id: Int,
     val nodeOrder: Int,
     val status: String,
-    val price: Int? = null,
+    val price: Int,
     val cordX: Float,
     val cordY: Float,
+    val eventOnExecution: Int,
+    val name: String,
+    val displayName: String,
 )

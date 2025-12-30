@@ -15,8 +15,7 @@ import org.mockito.Mockito;
 import java.util.Optional;
 
 import static com.kiwi.personality.PersonalityTestFactory.*;
-import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
-import static com.kiwi.users.UsersTestFactory.validUserDTO;
+import static com.kiwi.users.UsersTestFactory.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +51,7 @@ public class PersonalityServiceTests {
     @Test
     public void updateRealName() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
@@ -66,7 +65,7 @@ public class PersonalityServiceTests {
     @Test(expected = NullPointerException.class)
     public void updateRealName_nullInput_throwsNullPointerException() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         personalityService.updateRealName(validUserDTO().getEmail(), null);
     }
@@ -74,7 +73,7 @@ public class PersonalityServiceTests {
     @Test
     public void updateKnightName() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
@@ -88,7 +87,7 @@ public class PersonalityServiceTests {
     @Test(expected = NullPointerException.class)
     public void updateKnightName_nullInput_throwsNullPointerException() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         personalityService.updateKnightName(validUserDTO().getEmail(), null);
     }
@@ -96,7 +95,7 @@ public class PersonalityServiceTests {
     @Test
     public void updateBuild() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
@@ -110,7 +109,7 @@ public class PersonalityServiceTests {
     @Test(expected = NullPointerException.class)
     public void updateBuild_nullInput_throwsNullPointerException() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         personalityService.updateBuild(validUserDTO().getEmail(), null);
     }
@@ -118,7 +117,7 @@ public class PersonalityServiceTests {
     @Test
     public void updateApps() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         PersonalityPersistence personalityPersistence = PersonalityDataMapper.toPersistence(savedUser, personalityDTO());
@@ -132,7 +131,7 @@ public class PersonalityServiceTests {
     @Test(expected = NullPointerException.class)
     public void updateApps_nullInput_throwsNullPointerException() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         personalityService.updateApps(validUserDTO().getEmail(), null);
     }

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,8 +34,8 @@ public class UsersRepositoryTests {
     
     @Test
     public void createValidUser() {
-        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
-        String hashedPassword = validUserDTO().getPassword();
+        UsersDomain userDomain = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        String hashedPassword = validLoginDTO().getPassword();
         UsersPersistence userPersistence = UsersDataMapper.toPersistence(userDomain, hashedPassword);
         usersRepository.saveAndFlush(userPersistence);
         assertTrue(usersRepository.findByEmail(validUserDTO().getEmail()).isPresent());

@@ -10,11 +10,11 @@ object NodesTestFactory {
         NodesState(
             nodes =
                 listOf(
-                    validNodeDomain(1, NodeStatus.COMPLETED, 0.5f, 0.5f, 1),
-                    validNodeDomain(2, NodeStatus.COMPLETED, 0.5f, 0.55f, 2),
-                    validNodeDomain(3, NodeStatus.OPEN, 0.6f, 0.65f, 3),
-                    validNodeDomain(4, NodeStatus.LOCKED, 0.7f, 0.65f, 3),
-                    validNodeDomain(4, NodeStatus.INACCESSIBLE, 0.5f, 0.65f, 4),
+                    validNodeDomain(1, NodeStatus.COMPLETED, 0.5f, 0.5f, 1, 100, 1, "node1", "Node 1"),
+                    validNodeDomain(2, NodeStatus.COMPLETED, 0.5f, 0.55f, 2, 100, 2, "node2", ""),
+                    validNodeDomain(3, NodeStatus.OPEN, 0.6f, 0.65f, 3, 100, 4, "node3", ""),
+                    validNodeDomain(4, NodeStatus.LOCKED, 0.7f, 0.65f, 3, 100, 5, "node4", ""),
+                    validNodeDomain(5, NodeStatus.INACCESSIBLE, 0.5f, 0.65f, 4, 100, 6, "node5", "Node 5"),
                 ),
         )
 
@@ -24,6 +24,10 @@ object NodesTestFactory {
         cordX: Float,
         cordY: Float,
         order: Int,
+        price: Int,
+        eventOnExecution: Int,
+        name: String,
+        displayName: String,
     ): NodesDomain =
         NodesDomain(
             id = id,
@@ -31,5 +35,9 @@ object NodesTestFactory {
             cordX = cordX,
             cordY = cordY,
             nodeOrder = order,
+            price = price,
+            eventOnExecution = eventOnExecution,
+            name = name,
+            displayName = displayName,
         )
 }

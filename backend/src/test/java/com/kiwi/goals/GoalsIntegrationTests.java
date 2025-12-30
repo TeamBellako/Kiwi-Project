@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.kiwi.goals.GoalsTestFactory.*;
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -57,8 +58,8 @@ public class GoalsIntegrationTests {
 
     private UsersPersistence createUser() {
         var dto = validUserDTO();
-        UsersDomain domain = UsersDataMapper.toDomain(dto);
-        UsersPersistence user = UsersDataMapper.toPersistence(domain, dto.getPassword());
+        UsersDomain domain = UsersDataMapper.toDomainWithoutPoints(dto);
+        UsersPersistence user = UsersDataMapper.toPersistence(domain, validLoginDTO().getPassword());
         return usersRepository.saveAndFlush(user);
     }
 

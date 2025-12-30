@@ -1,5 +1,7 @@
 package com.kiwi.features.users.controllers;
 
+import com.kiwi.common.types.Password;
+import com.kiwi.common.types.PositiveOrZeroInteger;
 import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.users.data.*;
 import com.kiwi.features.users.exceptions.CreateUserConflictException;
@@ -32,20 +34,22 @@ public class UsersService {
 
     @Transactional
     public void createUser(@Valid @NotNull LoginDTO loginDTO) {
-        UsersDomain userDomain;
+
+        String email = loginDTO.getEmail();
+        if (usersRepository.existsByEmail(email)) {
+            throw new CreateUserConflictException(email);
+        }
+        UsersDTO userDto = new UsersDTO(email, formatDate(LocalDate.now()));
+
+        Password validPassword;
         try {
-            userDomain = UsersDataMapper.toDomain(new UsersDTO(loginDTO.getEmail(), loginDTO.getPassword(), formatDate(LocalDate.now())));
+            validPassword = new Password(loginDTO.getPassword());
         } catch (IllegalArgumentException e) {
             throw new CreateUserInvalidException(e.getMessage());
         }
 
-        String email = userDomain.getEmail().value();
-        if (usersRepository.existsByEmail(email)) {
-            throw new CreateUserConflictException(email);
-        }
-
-        String hashedPassword = passwordEncoder.encode(userDomain.getPassword().value());
-        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, hashedPassword);
+        String hashedPassword = passwordEncoder.encode(validPassword.value());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistenceWithoutPoints(userDto, hashedPassword);
         usersRepository.saveAndFlush(usersPersistence);
 
         if (nodesService != null) {
@@ -67,7 +71,7 @@ public class UsersService {
                 .map(UsersDataMapper::toPointsDTO);
     }
 
-    // Gestion de puntos. ONLY BACKEND METHODS
+    //POINTS
     @Transactional
     public void addPointsToUser(@NotNull Long userId, @NotNull Integer pointsToAdd) {
         if (pointsToAdd <= 0) {
@@ -76,9 +80,12 @@ public class UsersService {
         
         UsersPersistence user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
-        
-        user.setCurrentPoints(user.getCurrentPoints() + pointsToAdd);
-        user.setTotalPoints(user.getTotalPoints() + pointsToAdd);
+
+        UsersDomain domain = UsersDataMapper.toDomain(user);
+        domain.addPoints(new PositiveOrZeroInteger(pointsToAdd));
+
+        user.setCurrentPoints(domain.getCurrentPoints().value());
+        user.setTotalPoints(domain.getTotalPoints().value());
         usersRepository.saveAndFlush(user);
     }
 
@@ -90,9 +97,12 @@ public class UsersService {
         
         UsersPersistence user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
-        
-        int newCurrentPoints = Math.max(0, user.getCurrentPoints() - pointsToSubtract);
-        user.setCurrentPoints(newCurrentPoints);
+
+        UsersDomain domain = UsersDataMapper.toDomain(user);
+        domain.subtractCurrentPoints(new PositiveOrZeroInteger(pointsToSubtract));
+
+        user.setCurrentPoints(domain.getCurrentPoints().value());
+        user.setTotalPoints(domain.getTotalPoints().value());
         usersRepository.saveAndFlush(user);
     }
 }

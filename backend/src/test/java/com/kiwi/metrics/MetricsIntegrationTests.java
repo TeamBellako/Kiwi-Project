@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -69,8 +70,8 @@ public class MetricsIntegrationTests {
 
     @Before
     public void setUp() {
-        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
-        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validUserDTO().getPassword());
+        UsersDomain userDomain = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validLoginDTO().getPassword());
         validUserPersistence = usersRepository.saveAndFlush(usersPersistence);
     }
     

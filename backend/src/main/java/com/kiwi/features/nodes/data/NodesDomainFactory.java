@@ -13,7 +13,10 @@ public class NodesDomainFactory {
                 status,
                 node.getPrice(),
                 node.getCordX(),
-                node.getCordY()
+                node.getCordY(),
+                node.getEventOnExecution(),
+                node.getName(),
+                node.getDisplayName()
         );
     }
 }

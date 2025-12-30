@@ -29,16 +29,6 @@ public class QuestMapper {
     }
 
     // --------------------------------------------------------------------------------------------
-    // QUEST DOMAIN → PERSISTENCE
-    // --------------------------------------------------------------------------------------------
-
-    public static QuestPersistence toPersistence(QuestDomain domain) {
-        QuestPersistence quest = new QuestPersistence();
-        quest.setId(domain.getQuestId());
-        return quest;
-    }
-
-    // --------------------------------------------------------------------------------------------
     // QUEST DOMAIN → DTO
     // --------------------------------------------------------------------------------------------
     public static QuestDTO toDTO(QuestDomain domain) {
@@ -58,31 +48,14 @@ public class QuestMapper {
         return dto;
     }
 
-
-    // --------------------------------------------------------------------------------------------
-    // QUEST PERSISTENCE + STATUS → DTO
-    // --------------------------------------------------------------------------------------------
-    public static QuestDTO toDTO(QuestPersistence quest, UserQuestStatusPersistence status) {
-        QuestDTO dto = new QuestDTO();
-        dto.setQuestId(quest.getId());
-        dto.setName(quest.getName());
-        dto.setDescription(quest.getDescription());
-        dto.setExperience(quest.getExperience());
-        dto.setIcon(quest.getIcon());
-        dto.setStatus(status != null ? status.getStatus().name() : null);
-        dto.setSubquests(List.of());
-        return dto;
-    }
-
-
     // --------------------------------------------------------------------------------------------
     // QUEST DOMAIN → USER QUEST STATUS PERSISTENCE
     // --------------------------------------------------------------------------------------------
-    public static UserQuestStatusPersistence toPersistence(Long userId, QuestDomain domain) {
+    public static UserQuestStatusPersistence toPersistence(Long userId, QuestStatus status,QuestPersistence questPersistence) {
         UserQuestStatusPersistence persistence = new UserQuestStatusPersistence();
-        persistence.setId(new UserQuestStatusKey(userId, domain.getQuestId()));
-        persistence.setStatus(domain.getStatus());
-        persistence.setQuest(toPersistence(domain));
+        persistence.setId(new UserQuestStatusKey(userId, questPersistence.getId()));
+        persistence.setStatus(status);
+        persistence.setQuest(questPersistence);
         return persistence;
     }
 

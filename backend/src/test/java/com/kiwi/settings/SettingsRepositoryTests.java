@@ -21,8 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 import static com.kiwi.settings.SettingsTestFactory.settingsDTO;
-import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
-import static com.kiwi.users.UsersTestFactory.validUserDTO;
+import static com.kiwi.users.UsersTestFactory.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(SpringRunner.class)
@@ -41,8 +40,8 @@ public class SettingsRepositoryTests {
 
     @Before
     public void setUp() {
-        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
-        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validUserDTO().getPassword());
+        UsersDomain userDomain = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validLoginDTO().getPassword());
         usersRepository.saveAndFlush(usersPersistence);
     }
 

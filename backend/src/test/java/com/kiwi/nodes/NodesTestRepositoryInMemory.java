@@ -15,17 +15,15 @@ import java.util.stream.Collectors;
 
 public class NodesTestRepositoryInMemory implements NodesRepository {
 
-    private final Map<Integer, NodesPersistence> nodeStore = new HashMap<>();
+    private final Map<Long, NodesPersistence> nodeStore = new HashMap<>();
     private final Map<String, UserNodeStatusPersistence> statusStore = new HashMap<>();
-
-    private long idSequence = 1;
 
     // NodesTestRepositoryInMemory
     @Override
     public List<NodesPersistence> findAll() { return new ArrayList<>(nodeStore.values()); }
 
     @Override
-    public Optional<NodesPersistence> findById(Integer id) { return Optional.ofNullable(nodeStore.get(id)); }
+    public Optional<NodesPersistence> findById(Long id) { return Optional.ofNullable(nodeStore.get(id)); }
 
     @Override
     public NodesPersistence saveAndFlush(NodesPersistence node) { nodeStore.put(node.getId(), node); return node; }
@@ -42,13 +40,13 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
 
 
     @Override
-    public boolean existsById(Integer integer) {
+    public boolean existsById(Long id) {
         return false;
     }
 
 
     @Override
-    public List<NodesPersistence> findAllById(Iterable<Integer> integers) {
+    public List<NodesPersistence> findAllById(Iterable<Long> ids) {
         return List.of();
     }
 
@@ -59,7 +57,7 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public void deleteById(Integer integer) {
+    public void deleteById(Long ids) {
 
     }
 
@@ -70,7 +68,7 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public void deleteAllById(Iterable<? extends Integer> integers) {
+    public void deleteAllById(Iterable<? extends Long> ids) {
 
     }
 
@@ -84,23 +82,9 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
 
     }
 
-    public Optional<NodesPersistence> findById(int id) {
-        return Optional.ofNullable(nodeStore.get(id));
-    }
-
-
     @Override
     public <S extends NodesPersistence> S save(S entity) {
         return null;
-    }
-
-    // ---- USER NODE STATUS ----
-    public Optional<UserNodeStatusPersistence> findUserStatus(Long userId, int nodeId) {
-        return Optional.ofNullable(statusStore.get(userId + "-" + nodeId));
-    }
-
-    public void saveUserStatus(UserNodeStatusPersistence s) {
-        statusStore.put(s.getId().getUserId() + "-" + s.getId().getNodeId(), s);
     }
 
 
@@ -125,7 +109,7 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public void deleteAllByIdInBatch(Iterable<Integer> integers) {
+    public void deleteAllByIdInBatch(Iterable<Long> ids) {
 
     }
 
@@ -135,17 +119,17 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public NodesPersistence getOne(Integer integer) {
+    public NodesPersistence getOne(Long id) {
         return null;
     }
 
     @Override
-    public NodesPersistence getById(Integer integer) {
+    public NodesPersistence getById(Long id) {
         return null;
     }
 
     @Override
-    public NodesPersistence getReferenceById(Integer integer) {
+    public NodesPersistence getReferenceById(Long id) {
         return null;
     }
 

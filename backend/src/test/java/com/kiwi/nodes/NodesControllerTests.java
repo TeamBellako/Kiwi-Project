@@ -6,6 +6,7 @@ import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.nodes.controllers.NodesController;
 import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.nodes.data.NodeStatus;
+import com.kiwi.features.nodes.data.NodesDTO;
 import com.kiwi.features.nodes.exceptions.NodeLockedException;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.AuthEntryPointJwt;
@@ -60,8 +61,8 @@ public class NodesControllerTests {
                 }}));
 
         when(nodesService.getNodesForUser(1L)).thenReturn(List.of(
-                dtoNode(1, 1, NodeStatus.OPEN, 100, 0.5f,0.5f),
-                dtoNode(2, 2, NodeStatus.LOCKED, 120, 0.7f,0.25f)
+                new NodesDTO(1L, 1, NodeStatus.OPEN.name(), 100, 0.5f,0.5f, 1L, "node1", "Node 1"),
+                new NodesDTO(2L, 2, NodeStatus.LOCKED.name(), 120, 0.7f,0.25f,4L, "node2", "Node 2")
         ));
 
         mockMvc.perform(get(baseAPIUrl)
@@ -78,8 +79,8 @@ public class NodesControllerTests {
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.unlockNode(1L, 1))
-                .thenReturn(dtoNode(1, 1, NodeStatus.OPEN, 100, 0.5f,0.5f));
+        when(nodesService.unlockNode(1L, 1L))
+                .thenReturn(new NodesDTO(1L, 1, NodeStatus.OPEN.name(), 100, 0.5f,0.5f,1L,"node1","Node 1"));
 
         mockMvc.perform(
                         getPostRequestBuilder(baseAPIUrl + "/1/unlock", userIdDTO(1L))
@@ -96,8 +97,8 @@ public class NodesControllerTests {
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.unlockNode(1L, 2))
-                .thenThrow(new NodeLockedException(2));
+        when(nodesService.unlockNode(1L, 2L))
+                .thenThrow(new NodeLockedException(2L));
 
         mockMvc.perform(
                         getPostRequestBuilder(baseAPIUrl + "/2/unlock", userIdDTO(1L))
@@ -114,8 +115,8 @@ public class NodesControllerTests {
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.completeNode(1L, 2))
-                .thenReturn(dtoNode(2, 2, NodeStatus.COMPLETED, 120, 0.15f,0.25f));
+        when(nodesService.completeNode(1L, 2L))
+                .thenReturn(new NodesDTO(2L, 2, NodeStatus.COMPLETED.name(), 120, 0.15f,0.25f, 2L, "node2", ""));
 
         mockMvc.perform(
                         getPostRequestBuilder(baseAPIUrl + "/2/complete", userIdDTO(1L))
@@ -132,8 +133,8 @@ public class NodesControllerTests {
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.completeNode(1L, 2))
-                .thenThrow(new NodeLockedException(2));
+        when(nodesService.completeNode(1L, 2L))
+                .thenThrow(new NodeLockedException(2L));
 
         mockMvc.perform(
                         getPostRequestBuilder(baseAPIUrl + "/2/complete", userIdDTO(1L))

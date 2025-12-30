@@ -18,8 +18,7 @@ import java.util.Optional;
 
 import static com.kiwi.settings.SettingsTestFactory.*;
 
-import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
-import static com.kiwi.users.UsersTestFactory.validUserDTO;
+import static com.kiwi.users.UsersTestFactory.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,7 +32,7 @@ public class SettingsServiceTests {
     @Test
     public void getSettings_validInput_returnsSettings() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(savedUser, settingsDTO());
@@ -60,7 +59,7 @@ public class SettingsServiceTests {
     @Test
     public void updateSettings_validInput_settingsUpdated() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         UsersPersistence savedUser = usersService.getUserByEmail(new Email(validUserDTO().getEmail())).orElse(null);
         SettingsPersistence settingsPersistence = SettingsDataMapper.toPersistence(savedUser, settingsDTO());
@@ -76,7 +75,7 @@ public class SettingsServiceTests {
     @Test(expected = NullPointerException.class)
     public void updateSettings_nullInput_throwsNullPointerException() {
         when(usersService.getUserByEmail(new Email(validUserDTO().getEmail())))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(validUserDTO(), validUserDTO().getPassword())));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistenceWithoutPoints(validUserDTO(), validLoginDTO().getPassword())));
 
         settingsService.updateSettings(validUserDTO().getEmail(), null);
     }
