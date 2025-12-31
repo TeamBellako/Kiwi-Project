@@ -9,6 +9,9 @@ val KiwiColor1 = Color(0xFF17212B)
 val KiwiColor1A = Color(0xFF092533)
 
 @Suppress("MagicNumber")
+val KiwiColor1B = Color(0xFF0E3353)
+
+@Suppress("MagicNumber")
 val KiwiColor2 = Color(0xFF000C15)
 
 @Suppress("MagicNumber")

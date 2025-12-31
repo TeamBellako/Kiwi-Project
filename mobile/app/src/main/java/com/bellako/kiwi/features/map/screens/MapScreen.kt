@@ -182,7 +182,7 @@ fun MapScreen(
 // //            prefs.edit().putString("last_yesterday_goals_check", today).apply()
 //        }
     }
-    GoalsModal(GoalModalType.YESTERDAY, notTodaygoals)
+    // GoalsModal(GoalModalType.YESTERDAY, notTodaygoals)
 //    GoalsModal(GoalModalType.NEW, newGoals)
 }
 

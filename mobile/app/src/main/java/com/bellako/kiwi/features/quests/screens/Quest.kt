@@ -104,7 +104,7 @@ fun Quest(
                             .padding(getResponsiveSizeHeight(12.dp)),
                 ) {
                     Kiwi_Image(
-                        questIconFor(quest.icon),
+                        questIcon(quest.icon),
                         "Quest Icon",
                         modifier =
                             Modifier
@@ -282,7 +282,7 @@ private fun QuestNotification(
             // ICON
             Column {
                 Kiwi_Image(
-                    questIconFor(questIcon),
+                    questIcon(questIcon),
                     "Quest Icon",
                     modifier =
                         Modifier
@@ -492,7 +492,7 @@ fun QuestNotificationsOverlay(
 
 // HELPERS
 @DrawableRes
-fun questIconFor(questIcon: Int): Int =
+private fun questIcon(questIcon: Int): Int =
     when (questIcon) {
         1 -> R.drawable.ic_quest_comet
         2 -> R.drawable.ic_quest_star
@@ -500,7 +500,7 @@ fun questIconFor(questIcon: Int): Int =
     }
 
 @DrawableRes
-fun subquestStatusIcon(status: SubquestStatus): Int =
+private fun subquestStatusIcon(status: SubquestStatus): Int =
     when (status) {
         SubquestStatus.COMPLETED -> R.drawable.ic_dropdown_tick
         SubquestStatus.FAILED -> R.drawable.ic_dropdown_fail
@@ -508,7 +508,7 @@ fun subquestStatusIcon(status: SubquestStatus): Int =
         SubquestStatus.LOCKED -> R.drawable.ic_dropdown_lock
     }
 
-fun subquestStatusText(status: SubquestStatus): String =
+private fun subquestStatusText(status: SubquestStatus): String =
     when (status) {
         SubquestStatus.COMPLETED -> "Completed"
         SubquestStatus.FAILED -> "Failed"
