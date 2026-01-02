@@ -144,10 +144,11 @@ CREATE TABLE IF NOT EXISTS user_node_status (
 -- Insert placeholder values for nodes
 INSERT INTO nodes ( id, node_order, price, cord_x, cord_y, event_on_execution, name, display_name ) 
 VALUES 
-(1, 1, 120, 0.57, 0.25, 0, 'node_1', NULL), 
-(2, 2, 140, 0.61, 0.33, 0, 'node_2', NULL), 
-(3, 3, 100, 0.58, 0.44, 0, 'node_3', NULL), 
-(4, 4, 180, 0.59, 0.55, 0, 'node_4', 'Node 4');
+(1,1,120,0.585,0.12,0,'node_1','START'), 
+(2,2,140,0.623,0.175,0,'node_2',NULL), 
+(3,3,100,0.598,0.228,0,'node_3','CAVE OF THE DEEP BREATH'), 
+(4,4,180,0.66,0.275,0,'node_4',NULL),
+(5,5,140,0.615,0.295,0,'node_5','CITY');
 
 -- Create quest table
 CREATE TABLE IF NOT EXISTS quests (

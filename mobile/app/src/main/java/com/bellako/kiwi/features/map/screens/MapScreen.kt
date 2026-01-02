@@ -43,6 +43,7 @@ import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
+import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
 import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
@@ -219,9 +220,7 @@ private fun InteractiveMap(
         val imageWidthDp = with(LocalDensity.current) { mapState.mapWidthPx.toDp() }
         val imageHeightDp = with(LocalDensity.current) { mapState.mapHeightPx.toDp() }
 
-        Kiwi_Image(
-            painterResourceId = mapResourceId,
-            alt = "Interactive Map",
+        Box(
             modifier =
                 Modifier
                     .size(width = imageWidthDp, height = imageHeightDp)
@@ -231,7 +230,20 @@ private fun InteractiveMap(
                         translationX = mapState.offset.x,
                         translationY = mapState.offset.y,
                     ),
-        )
+            contentAlignment = Alignment.Center,
+        ) {
+            Kiwi_Image(
+                painterResourceId = mapResourceId,
+                alt = "Interactive Map",
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            NodeConnections(
+                nodes = nodesState?.nodes.orEmpty(),
+                mapState = mapState,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
 
         nodesState?.nodes?.forEach { node ->
             NodeOnMap(

@@ -1,28 +1,41 @@
 package com.bellako.kiwi.features.nodes.screens
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
-import com.bellako.kiwi.common.screens.components.Kiwi_Display2
+import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_HoldButton
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.features.map.data.MapState
@@ -56,7 +69,7 @@ fun NodeOnMap(
                 },
         contentAlignment = Alignment.Center,
     ) {
-        Node(true, isSelected, node.status, mapState.scale, node.displayName)
+        Node(isSelected, isSelected, node.status, mapState.scale, node.displayName)
 
         if (isSelected) {
             Box(
@@ -67,6 +80,47 @@ fun NodeOnMap(
                     NodeStatus.OPEN -> PlayButton("Complete") { onCompleteNode(node.id) }
                     NodeStatus.COMPLETED -> PlayButton("Replay") { /* TODO */ }
                     else -> {}
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NodeConnections(
+    nodes: List<NodesDomain>,
+    mapState: MapState,
+    modifier: Modifier = Modifier,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Canvas(
+        modifier = modifier,
+    ) {
+        val nodesByOrder = nodes.groupBy { it.nodeOrder }
+
+        nodesByOrder.forEach { (order, fromNodes) ->
+            val toNodes = nodesByOrder[order + 1] ?: return@forEach
+
+            fromNodes.forEach { from ->
+                toNodes.forEach { to ->
+                    val fromPos = nodeToScreen(from, mapState)
+                    val toPos = nodeToScreen(to, mapState)
+
+                    val color =
+                        when (to.status) {
+                            NodeStatus.COMPLETED -> kiwiColors.colorF
+                            NodeStatus.OPEN -> kiwiColors.color7E
+                            else -> kiwiColors.color0C
+                        }
+
+                    drawLine(
+                        color = color,
+                        start = fromPos,
+                        end = toPos,
+                        strokeWidth = 2.dp.toPx(),
+                        cap = StrokeCap.Round,
+                    )
                 }
             }
         }
@@ -89,11 +143,11 @@ fun Node(
     @Suppress("MagicNumber")
     val baseScale = 0.1f
 
-    val nodeHeight = getResponsiveSizeHeight(30.dp)
+    val nodeHeight = getResponsiveSizeHeight(34.dp)
     val offset = getResponsiveSizeHeight(12.dp)
 
     val indicatorOffset = offset + nodeHeight * selectedScale / 2
-    val displayOffset = offset + nodeHeight + nodeHeight * selectedScale / 2
+    val displayOffset = offset + getResponsiveSizeHeight(12.dp) + nodeHeight * selectedScale / 2
 
     Box(
         modifier =
@@ -123,7 +177,7 @@ fun Node(
                 "node icon",
                 modifier =
                     Modifier
-                        .size(getResponsiveSizeHeight(30.dp)),
+                        .size(nodeHeight),
             )
         }
 
@@ -153,33 +207,63 @@ fun DisplayName(
     displayOffset: Dp,
 ) {
     val kiwiColors = LocalKiwiColors.current
-    val shape = RoundedCornerShape(getResponsiveSizeHeight(30.dp))
+    val shape = RoundedCornerShape(getResponsiveSizeHeight(60.dp))
+
+    var heightPx by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+
+    val correctedOffset =
+        with(density) {
+            displayOffset + (heightPx / 2).toDp()
+        }
 
     Box(
         modifier =
             Modifier
-                .wrapContentSize()
-                .offset(
-                    y = displayOffset,
-                ).background(
+                .offset(y = correctedOffset)
+                .onSizeChanged { heightPx = it.height }
+                .widthIn(max = getResponsiveSizeHeight(260.dp))
+                .background(
                     color = kiwiColors.color1B,
                     shape = shape,
                 ).border(
-                    width = getResponsiveSizeHeight(3.dp),
+                    width = getResponsiveSizeHeight(4.dp),
                     color = kiwiColors.colorF,
                     shape = shape,
                 ).padding(
-                    horizontal = getResponsiveSizeHeight(16.dp),
+                    horizontal = getResponsiveSizeHeight(30.dp),
                     vertical = getResponsiveSizeHeight(6.dp),
                 ),
     ) {
-        Kiwi_Display2(
+        Kiwi_H1(
             KiwiTextArguments(
                 text,
                 color = kiwiColors.colorF,
+                textAlign = TextAlign.Center,
             ),
         )
     }
+}
+
+@DrawableRes
+private fun nodeIcon(
+    nodeStatus: NodeStatus,
+    // TODO nodeType
+): Int =
+    when (nodeStatus) {
+        NodeStatus.LOCKED -> R.drawable.node_locked
+        NodeStatus.OPEN -> R.drawable.node_base
+        NodeStatus.COMPLETED -> R.drawable.node_completed
+        else -> R.drawable.node_blocked
+    }
+
+private fun nodeToScreen(
+    node: NodesDomain,
+    mapState: MapState,
+): Offset {
+    val x = node.cordX * mapState.mapWidthPx
+    val y = (1f - node.cordY) * mapState.mapHeightPx
+    return Offset(x, y)
 }
 
 @Composable
@@ -228,15 +312,3 @@ fun UnlockButton(
                 .padding(getResponsiveSizeHeight(Spacing.large)),
     )
 }
-
-@DrawableRes
-private fun nodeIcon(
-    nodeStatus: NodeStatus,
-    // TODO nodeType
-): Int =
-    when (nodeStatus) {
-        NodeStatus.LOCKED -> R.drawable.node_locked
-        NodeStatus.OPEN -> R.drawable.node_base
-        NodeStatus.COMPLETED -> R.drawable.node_completed
-        else -> R.drawable.node_blocked
-    }

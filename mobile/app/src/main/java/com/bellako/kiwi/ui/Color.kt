@@ -78,6 +78,9 @@ val KiwiColor7C = Color(0xFF2AA1AF)
 val KiwiColor7D = Color(0xFF007980)
 
 @Suppress("MagicNumber")
+val KiwiColor7E = Color(0xFF61FEFD)
+
+@Suppress("MagicNumber")
 val KiwiColor8 = Color(0xFFA58749)
 
 @Suppress("MagicNumber")
