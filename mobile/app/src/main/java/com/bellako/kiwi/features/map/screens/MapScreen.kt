@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
+import com.bellako.kiwi.features.nodes.screens.NodeAction
 import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
@@ -232,12 +234,14 @@ private fun InteractiveMap(
                     ),
             contentAlignment = Alignment.Center,
         ) {
+            // MAP
             Kiwi_Image(
                 painterResourceId = mapResourceId,
                 alt = "Interactive Map",
                 modifier = Modifier.fillMaxSize(),
             )
 
+            // NODE CONNECTIONS
             NodeConnections(
                 nodes = nodesState?.nodes.orEmpty(),
                 mapState = mapState,
@@ -245,15 +249,28 @@ private fun InteractiveMap(
             )
         }
 
+        // NODES
         nodesState?.nodes?.forEach { node ->
             NodeOnMap(
                 node = node,
                 mapState = mapState,
                 isSelected = node.id == mapViewModel.getSelectedNode(),
                 onNodeClick = { x, y, id -> mapViewModel.selectNode(id, x, y) },
-                onUnlockNode = { id -> nodesViewModel.unlockNode(id) },
-                onCompleteNode = { id -> nodesViewModel.completeNode(id) },
             )
+        }
+
+        // NODE ACTION BUTTON
+        mapViewModel.getSelectedNode()?.let { selectedNodeId ->
+            nodesState
+                ?.nodes
+                ?.find { it.id == selectedNodeId }
+                ?.let { selectedNode ->
+                    NodeAction(
+                        node = selectedNode,
+                        onUnlockNode = { id -> nodesViewModel.unlockNode(id) },
+                        onCompleteNode = { id -> nodesViewModel.completeNode(id) },
+                    )
+                }
         }
     }
 }

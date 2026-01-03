@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -77,7 +78,6 @@ fun Kiwi_Button(
                 ),
             modifier =
                 Modifier
-                    .fillMaxWidth()
                     .testTag(testTag),
             shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
         ) {
@@ -195,7 +195,6 @@ private fun HoldButtonContent(
     Box(
         modifier =
             modifier
-                .fillMaxWidth()
                 .height(IntrinsicSize.Min)
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
                 .background(color)
@@ -213,7 +212,6 @@ private fun HoldButtonContent(
         Box(
             modifier =
                 Modifier
-                    .fillMaxWidth()
                     .padding(
                         horizontal = getResponsiveSizeHeight(contentPaddingHorizontal),
                         vertical = getResponsiveSizeHeight(contentPaddingVertical),

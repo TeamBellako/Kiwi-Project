@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -32,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
@@ -46,86 +45,8 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlin.math.roundToInt
 
-@Composable
-fun NodeOnMap(
-    node: NodesDomain,
-    mapState: MapState,
-    isSelected: Boolean,
-    onNodeClick: (Float, Float, Int) -> Unit,
-    onUnlockNode: (Int) -> Unit,
-    onCompleteNode: (Int) -> Unit,
-) {
-    val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2
-    val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2
-    val scaledX = (mapX * mapState.scale) + mapState.offset.x
-    val scaledY = (mapY * mapState.scale) + mapState.offset.y
-
-    Box(
-        modifier =
-            Modifier
-                .offset { IntOffset(scaledX.roundToInt(), scaledY.roundToInt()) }
-                .pointerInput(Unit) {
-                    detectTapGestures { onNodeClick(node.cordX, node.cordY, node.id) }
-                },
-        contentAlignment = Alignment.Center,
-    ) {
-        Node(isSelected, isSelected, node.status, mapState.scale, node.displayName)
-
-        if (isSelected) {
-            Box(
-                modifier = Modifier.offset(y = -getResponsiveSizeHeight(64.dp)),
-            ) {
-                when (node.status) {
-                    NodeStatus.LOCKED -> UnlockButton("Unlock") { onUnlockNode(node.id) }
-                    NodeStatus.OPEN -> PlayButton("Complete") { onCompleteNode(node.id) }
-                    NodeStatus.COMPLETED -> PlayButton("Replay") { /* TODO */ }
-                    else -> {}
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NodeConnections(
-    nodes: List<NodesDomain>,
-    mapState: MapState,
-    modifier: Modifier = Modifier,
-) {
-    val kiwiColors = LocalKiwiColors.current
-
-    Canvas(
-        modifier = modifier,
-    ) {
-        val nodesByOrder = nodes.groupBy { it.nodeOrder }
-
-        nodesByOrder.forEach { (order, fromNodes) ->
-            val toNodes = nodesByOrder[order + 1] ?: return@forEach
-
-            fromNodes.forEach { from ->
-                toNodes.forEach { to ->
-                    val fromPos = nodeToScreen(from, mapState)
-                    val toPos = nodeToScreen(to, mapState)
-
-                    val color =
-                        when (to.status) {
-                            NodeStatus.COMPLETED -> kiwiColors.colorF
-                            NodeStatus.OPEN -> kiwiColors.color7E
-                            else -> kiwiColors.color0C
-                        }
-
-                    drawLine(
-                        color = color,
-                        start = fromPos,
-                        end = toPos,
-                        strokeWidth = 2.dp.toPx(),
-                        cap = StrokeCap.Round,
-                    )
-                }
-            }
-        }
-    }
-}
+@Suppress("MagicNumber")
+private val selectedScale = 1.6f
 
 @Composable
 fun Node(
@@ -134,24 +55,24 @@ fun Node(
     nodeStatus: NodeStatus,
     mapScale: Float,
     displayName: String,
+    modifier: Modifier = Modifier,
 ) {
     val kiwiColors = LocalKiwiColors.current
 
-    @Suppress("MagicNumber")
-    val selectedScale = if (isSelected) 1.6f else 1f
+    val nodeScale = if (isSelected) selectedScale else 1f
 
     @Suppress("MagicNumber")
     val baseScale = 0.1f
 
+    val offset = getResponsiveSizeHeight(14.dp)
     val nodeHeight = getResponsiveSizeHeight(34.dp)
-    val offset = getResponsiveSizeHeight(12.dp)
 
-    val indicatorOffset = offset + nodeHeight * selectedScale / 2
-    val displayOffset = offset + getResponsiveSizeHeight(12.dp) + nodeHeight * selectedScale / 2
+    val indicatorOffset = offset + nodeHeight * nodeScale / 2
+    val displayOffset = offset + nodeHeight * nodeScale / 2
 
     Box(
         modifier =
-            Modifier
+            modifier
                 .wrapContentSize()
                 .scale(mapScale * baseScale),
         contentAlignment = Alignment.Center,
@@ -159,16 +80,18 @@ fun Node(
         Box(
             modifier =
                 Modifier
-                    .scale(selectedScale)
+                    .scale(nodeScale)
                     .then(
                         if (isPlayer) {
-                            Modifier.border(
-                                width = getResponsiveSizeHeight(2.dp),
-                                color = kiwiColors.colorF,
-                                shape = CircleShape,
-                            )
+                            Modifier
+                                .border(
+                                    width = getResponsiveSizeHeight(2.dp),
+                                    color = kiwiColors.colorF,
+                                    shape = CircleShape,
+                                ).padding(getResponsiveSizeHeight(2.dp))
                         } else {
                             Modifier
+                                .padding(getResponsiveSizeHeight(2.dp))
                         },
                     ),
         ) {
@@ -200,6 +123,18 @@ fun Node(
         }
     }
 }
+
+@DrawableRes
+private fun nodeIcon(
+    nodeStatus: NodeStatus,
+    // TODO nodeType
+): Int =
+    when (nodeStatus) {
+        NodeStatus.LOCKED -> R.drawable.node_locked
+        NodeStatus.OPEN -> R.drawable.node_base
+        NodeStatus.COMPLETED -> R.drawable.node_completed
+        else -> R.drawable.node_blocked
+    }
 
 @Composable
 fun DisplayName(
@@ -245,25 +180,56 @@ fun DisplayName(
     }
 }
 
-@DrawableRes
-private fun nodeIcon(
-    nodeStatus: NodeStatus,
-    // TODO nodeType
-): Int =
-    when (nodeStatus) {
-        NodeStatus.LOCKED -> R.drawable.node_locked
-        NodeStatus.OPEN -> R.drawable.node_base
-        NodeStatus.COMPLETED -> R.drawable.node_completed
-        else -> R.drawable.node_blocked
-    }
-
-private fun nodeToScreen(
+@Composable
+fun NodeOnMap(
     node: NodesDomain,
     mapState: MapState,
-): Offset {
-    val x = node.cordX * mapState.mapWidthPx
-    val y = (1f - node.cordY) * mapState.mapHeightPx
-    return Offset(x, y)
+    isSelected: Boolean,
+    onNodeClick: (Float, Float, Int) -> Unit,
+) {
+    val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2
+    val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2
+    val scaledX = (mapX * mapState.scale) + mapState.offset.x
+    val scaledY = (mapY * mapState.scale) + mapState.offset.y
+
+    Box(
+        modifier =
+            Modifier
+                .offset { IntOffset(scaledX.roundToInt(), scaledY.roundToInt()) }
+                .pointerInput(Unit) {
+                    detectTapGestures { onNodeClick(node.cordX, node.cordY, node.id) }
+                },
+        contentAlignment = Alignment.Center,
+    ) {
+        Node(
+            isSelected,
+            isSelected,
+            node.status,
+            mapState.scale,
+            node.displayName,
+            modifier = Modifier.zIndex(5f),
+        )
+    }
+}
+
+@Composable
+fun NodeAction(
+    node: NodesDomain,
+    onUnlockNode: (Int) -> Unit,
+    onCompleteNode: (Int) -> Unit,
+) {
+    Box(
+        modifier =
+            Modifier
+                .offset(y = -getResponsiveSizeHeight(64.dp)),
+    ) {
+        when (node.status) {
+            NodeStatus.LOCKED -> UnlockButton("Unlock (" + node.price + ")") { onUnlockNode(node.id) }
+            NodeStatus.OPEN -> PlayButton("Play") { onCompleteNode(node.id) }
+            NodeStatus.COMPLETED -> PlayButton("Replay") { /* TODO */ }
+            else -> {}
+        }
+    }
 }
 
 @Composable
@@ -277,14 +243,12 @@ fun PlayButton(
         textArguments =
             KiwiTextArguments(
                 text,
-                color = kiwiColors.color7,
+                color = kiwiColors.colorF,
                 bold = true,
             ),
+        contentPaddingHorizontal = Spacing.xLarge,
+        color = kiwiColors.color7D,
         onClick = onClick,
-        color = kiwiColors.color5A,
-        modifier =
-            Modifier
-                .padding(getResponsiveSizeHeight(Spacing.large)),
     )
 }
 
@@ -301,14 +265,62 @@ fun UnlockButton(
         textArguments =
             KiwiTextArguments(
                 text,
-                color = kiwiColors.color7,
+                color = kiwiColors.colorF,
                 bold = true,
             ),
-        onHoldComplete = onHoldComplete,
+        contentPaddingHorizontal = Spacing.xLarge,
         color = kiwiColors.color8,
         fillColor = kiwiColors.color8A,
-        modifier =
-            Modifier
-                .padding(getResponsiveSizeHeight(Spacing.large)),
+        onHoldComplete = onHoldComplete,
     )
+}
+
+@Composable
+fun NodeConnections(
+    nodes: List<NodesDomain>,
+    mapState: MapState,
+    modifier: Modifier = Modifier,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Canvas(
+        modifier = modifier,
+    ) {
+        val nodesByOrder = nodes.groupBy { it.nodeOrder }
+
+        nodesByOrder.forEach { (order, fromNodes) ->
+            val toNodes = nodesByOrder[order + 1] ?: return@forEach
+
+            fromNodes.forEach { from ->
+                toNodes.forEach { to ->
+                    val fromPos = nodeToScreen(from, mapState)
+                    val toPos = nodeToScreen(to, mapState)
+
+                    val color =
+                        when (to.status) {
+                            NodeStatus.COMPLETED -> kiwiColors.colorF
+                            NodeStatus.OPEN -> kiwiColors.color7E
+                            else -> kiwiColors.color0C
+                        }
+
+                    drawLine(
+                        color = color,
+                        start = fromPos,
+                        end = toPos,
+                        strokeWidth = 2.0f,
+                        cap = StrokeCap.Butt,
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun nodeToScreen(
+    node: NodesDomain,
+    mapState: MapState,
+): Offset {
+    val x = node.cordX * mapState.mapWidthPx
+    val y = (1f - node.cordY) * mapState.mapHeightPx
+    return Offset(x, y)
 }
