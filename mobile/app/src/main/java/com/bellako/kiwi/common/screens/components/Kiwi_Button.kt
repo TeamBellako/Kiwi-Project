@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -54,13 +57,14 @@ fun Kiwi_Button(
     enabled: Boolean = true,
     color: Color,
     testTag: String = "",
+    sound: Int = R.raw.snd_ui_button
 ) {
     val context = LocalContext.current
 
     Box(modifier = modifier) {
         Button(
             onClick = {
-                AudioManager.playSFX(context, R.raw.snd_ui_button)
+                AudioManager.playSFX(context, sound)
                 onClick.invoke()
             },
             enabled = enabled,
@@ -104,6 +108,7 @@ fun Kiwi_HoldButton(
     color: Color,
     fillColor: Color,
     testTag: String = "",
+    sound: Int = R.raw.snd_ui_button
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -124,7 +129,7 @@ fun Kiwi_HoldButton(
         startTime = startTime,
         onProgressChange = { targetProgress = it },
         onComplete = {
-            AudioManager.playSFX(context, R.raw.snd_ui_tap2)
+            AudioManager.playSFX(context, sound)
             onHoldComplete()
         },
     )
@@ -196,8 +201,9 @@ private fun HoldButtonContent(
         modifier =
             modifier
                 .height(IntrinsicSize.Min)
+                .width(IntrinsicSize.Max)
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
-                .background(color)
+                .background(if (isEnabled) color else color.copy(alpha = 0.3f))
                 .testTag(testTag)
                 .holdGestureHandler(isEnabled, onHoldStart, onHoldEnd),
     ) {
@@ -206,7 +212,7 @@ private fun HoldButtonContent(
                 Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(animatedProgress)
-                    .background(if (isEnabled) fillColor else fillColor.copy(alpha = 0.3f)),
+                    .background(fillColor),
         )
 
         Box(

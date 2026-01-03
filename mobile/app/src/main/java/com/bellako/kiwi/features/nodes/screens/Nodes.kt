@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -30,7 +29,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Button
@@ -50,12 +48,11 @@ private val selectedScale = 1.6f
 
 @Composable
 fun Node(
-    isPlayer: Boolean,
+    isPlayerNode: Boolean,
     isSelected: Boolean,
     nodeStatus: NodeStatus,
     mapScale: Float,
     displayName: String,
-    modifier: Modifier = Modifier,
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -64,16 +61,14 @@ fun Node(
     @Suppress("MagicNumber")
     val baseScale = 0.1f
 
-    val offset = getResponsiveSizeHeight(14.dp)
     val nodeHeight = getResponsiveSizeHeight(34.dp)
 
-    val indicatorOffset = offset + nodeHeight * nodeScale / 2
-    val displayOffset = offset + nodeHeight * nodeScale / 2
+    val indicatorOffset = getResponsiveSizeHeight(14.dp) + nodeHeight * nodeScale / 2
+    val displayOffset = getResponsiveSizeHeight(10.dp) + nodeHeight * nodeScale / 2
 
     Box(
         modifier =
-            modifier
-                .wrapContentSize()
+            Modifier
                 .scale(mapScale * baseScale),
         contentAlignment = Alignment.Center,
     ) {
@@ -82,7 +77,7 @@ fun Node(
                 Modifier
                     .scale(nodeScale)
                     .then(
-                        if (isPlayer) {
+                        if (isPlayerNode) {
                             Modifier
                                 .border(
                                     width = getResponsiveSizeHeight(2.dp),
@@ -104,7 +99,7 @@ fun Node(
             )
         }
 
-        if (isPlayer) {
+        if (isPlayerNode) {
             Kiwi_Image(
                 R.drawable.ic_player_indicator,
                 "player indicator",
@@ -184,6 +179,7 @@ fun DisplayName(
 fun NodeOnMap(
     node: NodesDomain,
     mapState: MapState,
+    isPlayerNode: Boolean,
     isSelected: Boolean,
     onNodeClick: (Float, Float, Int) -> Unit,
 ) {
@@ -197,31 +193,34 @@ fun NodeOnMap(
             Modifier
                 .offset { IntOffset(scaledX.roundToInt(), scaledY.roundToInt()) }
                 .pointerInput(Unit) {
-                    detectTapGestures { onNodeClick(node.cordX, node.cordY, node.id) }
+                    detectTapGestures {
+                        onNodeClick(node.cordX, node.cordY, node.id)
+                    }
                 },
         contentAlignment = Alignment.Center,
     ) {
         Node(
-            isSelected,
+            isPlayerNode,
             isSelected,
             node.status,
             mapState.scale,
             node.displayName,
-            modifier = Modifier.zIndex(5f),
         )
     }
 }
 
 @Composable
 fun NodeAction(
+    isPlayerNode: Boolean,
     node: NodesDomain,
     onUnlockNode: (Int) -> Unit,
     onCompleteNode: (Int) -> Unit,
 ) {
+    val offset = if (isPlayerNode) 64.dp else 48.dp
     Box(
         modifier =
             Modifier
-                .offset(y = -getResponsiveSizeHeight(64.dp)),
+                .offset(y = -getResponsiveSizeHeight(offset)),
     ) {
         when (node.status) {
             NodeStatus.LOCKED -> UnlockButton("Unlock (" + node.price + ")") { onUnlockNode(node.id) }
@@ -249,6 +248,7 @@ fun PlayButton(
         contentPaddingHorizontal = Spacing.xLarge,
         color = kiwiColors.color7D,
         onClick = onClick,
+        sound = R.raw.snd_node_execution,
     )
 }
 
@@ -272,6 +272,7 @@ fun UnlockButton(
         color = kiwiColors.color8,
         fillColor = kiwiColors.color8A,
         onHoldComplete = onHoldComplete,
+        sound = R.raw.snd_node_unlocked,
     )
 }
 

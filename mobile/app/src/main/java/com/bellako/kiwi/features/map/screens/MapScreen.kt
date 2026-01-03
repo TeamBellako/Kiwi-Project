@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -38,9 +40,7 @@ import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
-import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -114,6 +114,7 @@ fun MapScreen(
                     nodesList?.firstOrNull { it.status == NodeStatus.OPEN || it.status == NodeStatus.LOCKED }
                 firstOpenOrLocked?.let { node ->
                     mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+                    mapViewModel.setPlayerNode(node.id)
                 }
             }
     }
@@ -196,6 +197,7 @@ private fun InteractiveMap(
     nodesViewModel: INodesViewModel,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val mapState by mapViewModel.state.collectAsState()
     val nodesState by nodesViewModel.state.collectAsState()
 
@@ -211,7 +213,6 @@ private fun InteractiveMap(
                         },
                         onGestureEnd = {
                             mapViewModel.startFling()
-                            mapViewModel.updatePreviousState()
                         },
                     )
                 },
@@ -254,23 +255,34 @@ private fun InteractiveMap(
             NodeOnMap(
                 node = node,
                 mapState = mapState,
-                isSelected = node.id == mapViewModel.getSelectedNode(),
+                isPlayerNode = node.id == mapState.playerNode,
+                isSelected = node.id == mapState.selectedNodeId,
                 onNodeClick = { x, y, id -> mapViewModel.selectNode(id, x, y) },
             )
         }
 
         // NODE ACTION BUTTON
-        mapViewModel.getSelectedNode()?.let { selectedNodeId ->
-            nodesState
-                ?.nodes
-                ?.find { it.id == selectedNodeId }
-                ?.let { selectedNode ->
-                    NodeAction(
-                        node = selectedNode,
-                        onUnlockNode = { id -> nodesViewModel.unlockNode(id) },
-                        onCompleteNode = { id -> nodesViewModel.completeNode(id) },
-                    )
-                }
+        if (!mapState.isFocusingNode) {
+            mapState.selectedNodeId?.let { selectedNodeId ->
+                nodesState
+                    ?.nodes
+                    ?.find { it.id == selectedNodeId }
+                    ?.let { selectedNode ->
+                        AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
+                        NodeAction(
+                            selectedNodeId == mapState.playerNode,
+                            node = selectedNode,
+                            onUnlockNode = { id ->
+                                nodesViewModel.unlockNode(id)
+                                mapViewModel.setPlayerNode(id)
+                            },
+                            onCompleteNode = { id ->
+                                nodesViewModel.completeNode(id)
+                                AudioManager.playSFX(context, R.raw.snd_node_completed)
+                            },
+                        )
+                    }
+            }
         }
     }
 }
