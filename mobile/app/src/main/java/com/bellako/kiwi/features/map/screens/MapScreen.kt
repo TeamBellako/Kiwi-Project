@@ -3,6 +3,10 @@ package com.bellako.kiwi.features.map.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +25,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -41,12 +46,15 @@ import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.map.data.MapState
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.NodeAction
 import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
+import com.bellako.kiwi.features.nodes.screens.distance
+import com.bellako.kiwi.features.nodes.screens.screenToMap
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
 import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -204,7 +212,6 @@ private fun InteractiveMap(
     Box(
         modifier =
             modifier
-                .clipToBounds()
                 .pointerInput(Unit) {
                     detectTransformGesturesAndEnd(
                         onGesture = { centroid, pan, zoom, _ ->
@@ -239,7 +246,37 @@ private fun InteractiveMap(
             Kiwi_Image(
                 painterResourceId = mapResourceId,
                 alt = "Interactive Map",
-                modifier = Modifier.fillMaxSize(),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                val down = awaitFirstDown(requireUnconsumed = false)
+                                val up = waitForUpOrCancellation()
+
+                                if (up != null) {
+                                    val tap = up.position
+
+                                    val nodes = nodesState?.nodes.orEmpty()
+                                    if (nodes.isEmpty()) return@awaitEachGesture
+
+                                    val clickRadius = 50f / mapState.mapWidthPx
+                                    val normalizedTap = screenToMap(tap, mapState)
+
+                                    val clickedNode =
+                                        nodes
+                                            .minByOrNull {
+                                                distance(Offset(it.cordX, it.cordY), normalizedTap)
+                                            }?.takeIf {
+                                                distance(Offset(it.cordX, it.cordY), normalizedTap) < clickRadius
+                                            }
+
+                                    clickedNode?.let {
+                                        mapViewModel.selectNode(it.id, it.cordX, it.cordY)
+                                    }
+                                }
+                            }
+                        },
             )
 
             // NODE CONNECTIONS
@@ -257,7 +294,6 @@ private fun InteractiveMap(
                 mapState = mapState,
                 isPlayerNode = node.id == mapState.playerNode,
                 isSelected = node.id == mapState.selectedNodeId,
-                onNodeClick = { x, y, id -> mapViewModel.selectNode(id, x, y) },
             )
         }
 

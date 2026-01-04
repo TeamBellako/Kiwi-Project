@@ -119,18 +119,6 @@ fun Node(
     }
 }
 
-@DrawableRes
-private fun nodeIcon(
-    nodeStatus: NodeStatus,
-    // TODO nodeType
-): Int =
-    when (nodeStatus) {
-        NodeStatus.LOCKED -> R.drawable.node_locked
-        NodeStatus.OPEN -> R.drawable.node_base
-        NodeStatus.COMPLETED -> R.drawable.node_completed
-        else -> R.drawable.node_blocked
-    }
-
 @Composable
 fun DisplayName(
     text: String,
@@ -181,7 +169,6 @@ fun NodeOnMap(
     mapState: MapState,
     isPlayerNode: Boolean,
     isSelected: Boolean,
-    onNodeClick: (Float, Float, Int) -> Unit,
 ) {
     val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2
     val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2
@@ -191,12 +178,7 @@ fun NodeOnMap(
     Box(
         modifier =
             Modifier
-                .offset { IntOffset(scaledX.roundToInt(), scaledY.roundToInt()) }
-                .pointerInput(Unit) {
-                    detectTapGestures {
-                        onNodeClick(node.cordX, node.cordY, node.id)
-                    }
-                },
+                .offset { IntOffset(scaledX.roundToInt(), scaledY.roundToInt()) },
         contentAlignment = Alignment.Center,
     ) {
         Node(
@@ -317,11 +299,43 @@ fun NodeConnections(
     }
 }
 
-private fun nodeToScreen(
+//HELPERS
+@DrawableRes
+private fun nodeIcon(
+    nodeStatus: NodeStatus,
+    // TODO nodeType
+): Int =
+    when (nodeStatus) {
+        NodeStatus.LOCKED -> R.drawable.node_locked
+        NodeStatus.OPEN -> R.drawable.node_base
+        NodeStatus.COMPLETED -> R.drawable.node_completed
+        else -> R.drawable.node_blocked
+    }
+
+fun nodeToScreen(
     node: NodesDomain,
     mapState: MapState,
 ): Offset {
     val x = node.cordX * mapState.mapWidthPx
     val y = (1f - node.cordY) * mapState.mapHeightPx
     return Offset(x, y)
+}
+
+fun screenToMap(
+    tap: Offset,
+    mapState: MapState,
+): Offset {
+    val normalizedX = tap.x / mapState.mapWidthPx
+    val normalizedY = 1f - (tap.y / mapState.mapHeightPx)
+
+    return Offset(normalizedX, normalizedY)
+}
+
+fun distance(
+    p1: Offset,
+    p2: Offset,
+): Float {
+    val dx = p1.x - p2.x
+    val dy = p1.y - p2.y
+    return kotlin.math.sqrt(dx * dx + dy * dy)
 }
