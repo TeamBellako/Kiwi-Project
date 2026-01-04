@@ -53,6 +53,9 @@ fun GoalsModal(
         }
     val kiwiColor = LocalKiwiColors.current
 
+    @Suppress("MagicNumber")
+    val buttonPercentage = 0.5f
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -120,7 +123,7 @@ fun GoalsModal(
                 color = kiwiColor.color7D,
                 modifier =
                     Modifier
-                        .weight(0.5f),
+                        .weight(buttonPercentage),
                 onClick = {},
             )
             Kiwi_FixedSizeButton(
@@ -133,7 +136,7 @@ fun GoalsModal(
                 color = kiwiColor.color8,
                 modifier =
                     Modifier
-                        .weight(0.5f),
+                        .weight(buttonPercentage),
                 onClick = {},
             )
         }

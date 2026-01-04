@@ -251,7 +251,7 @@ private fun InteractiveMap(
                         .fillMaxSize()
                         .pointerInput(Unit) {
                             awaitEachGesture {
-                                val down = awaitFirstDown(requireUnconsumed = false)
+                                awaitFirstDown(requireUnconsumed = false)
                                 val up = waitForUpOrCancellation()
 
                                 if (up != null) {
@@ -260,6 +260,7 @@ private fun InteractiveMap(
                                     val nodes = nodesState?.nodes.orEmpty()
                                     if (nodes.isEmpty()) return@awaitEachGesture
 
+                                    @Suppress("MagicNumber")
                                     val clickRadius = 50f / mapState.mapWidthPx
                                     val normalizedTap = screenToMap(tap, mapState)
 
