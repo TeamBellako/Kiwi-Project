@@ -50,7 +50,7 @@ import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
@@ -268,13 +268,14 @@ fun AppClassificationColumns(
         }
 
         Kiwi_Spacer(Spacing.large)
-        Kiwi_Button(
+
+        Kiwi_FixedSizeButton(
+            horizontalMargin = Spacing.xLarge,
             textArguments =
                 KiwiTextArguments(
                     "CONTINUE",
                     textAlign = TextAlign.Center,
                 ),
-            modifier = Modifier.fillMaxWidth(),
             color = kiwiColors.color5A,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {

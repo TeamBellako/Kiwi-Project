@@ -4,6 +4,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,27 +46,30 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
+import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
 @Composable
-fun Kiwi_Button(
-    modifier: Modifier = Modifier,
-    contentPaddingHorizontal: Dp = 8.dp,
-    contentPaddingVertical: Dp = 8.dp,
+private fun Kiwi_Button(
+    modifier: Modifier,
+    contentPaddingHorizontal: Dp,
+    contentPaddingVertical: Dp,
+    horizontalMargin: Dp?,
     textArguments: KiwiTextArguments,
     onClick: () -> Unit,
     enabled: Boolean = true,
     color: Color,
     testTag: String = "",
+    sound: Int = R.raw.snd_ui_button
 ) {
     val context = LocalContext.current
 
-    Box(modifier = modifier) {
+    Box(modifier) {
         Button(
             onClick = {
-                AudioManager.playSFX(context, R.raw.snd_ui_button)
+                AudioManager.playSFX(context, sound)
                 onClick.invoke()
             },
             enabled = enabled,
@@ -77,8 +87,15 @@ fun Kiwi_Button(
                 ),
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .testTag(testTag),
+
+                    .testTag(testTag)
+                    .then(
+                        horizontalMargin?.let {
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = getResponsiveSizeHeight(it))
+                        } ?: Modifier
+                    ),
             shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
         ) {
             val actualTextArguments =
@@ -93,6 +110,58 @@ fun Kiwi_Button(
 }
 
 @Composable
+fun Kiwi_FixedSizeButton(
+    modifier: Modifier = Modifier,
+    contentPaddingVertical: Dp = 8.dp,
+    horizontalMargin: Dp = 0.dp,
+    textArguments: KiwiTextArguments,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    color: Color,
+    testTag: String = "",
+    sound: Int = R.raw.snd_ui_button
+) {
+    Kiwi_Button(
+        modifier,
+        0.dp,
+        contentPaddingVertical,
+        horizontalMargin,
+        textArguments,
+        onClick,
+        enabled,
+        color,
+        testTag,
+        sound
+    )
+}
+
+@Composable
+fun Kiwi_AdaptableSizeButton(
+    modifier: Modifier = Modifier,
+    contentPaddingHorizontal: Dp = 8.dp,
+    contentPaddingVertical: Dp = 8.dp,
+    textArguments: KiwiTextArguments,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    color: Color,
+    testTag: String = "",
+    sound: Int = R.raw.snd_ui_button
+) {
+    Kiwi_Button(
+        modifier,
+        contentPaddingHorizontal,
+        contentPaddingVertical,
+        null,
+        textArguments,
+        onClick,
+        enabled,
+        color,
+        testTag,
+        sound
+    )
+}
+
+@Composable
 fun Kiwi_HoldButton(
     modifier: Modifier = Modifier,
     holdDurationMillis: Long = 2000,
@@ -104,6 +173,7 @@ fun Kiwi_HoldButton(
     color: Color,
     fillColor: Color,
     testTag: String = "",
+    sound: Int = R.raw.snd_ui_button
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -124,7 +194,7 @@ fun Kiwi_HoldButton(
         startTime = startTime,
         onProgressChange = { targetProgress = it },
         onComplete = {
-            AudioManager.playSFX(context, R.raw.snd_ui_tap2)
+            AudioManager.playSFX(context, sound)
             onHoldComplete()
         },
     )
@@ -195,10 +265,10 @@ private fun HoldButtonContent(
     Box(
         modifier =
             modifier
-                .fillMaxWidth()
                 .height(IntrinsicSize.Min)
+                .width(IntrinsicSize.Max)
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
-                .background(color)
+                .background(if (isEnabled) color else color.copy(alpha = 0.3f))
                 .testTag(testTag)
                 .holdGestureHandler(isEnabled, onHoldStart, onHoldEnd),
     ) {
@@ -207,13 +277,12 @@ private fun HoldButtonContent(
                 Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(animatedProgress)
-                    .background(if (isEnabled) fillColor else fillColor.copy(alpha = 0.3f)),
+                    .background(fillColor),
         )
 
         Box(
             modifier =
                 Modifier
-                    .fillMaxWidth()
                     .padding(
                         horizontal = getResponsiveSizeHeight(contentPaddingHorizontal),
                         vertical = getResponsiveSizeHeight(contentPaddingVertical),
@@ -266,7 +335,7 @@ fun Kiwi_Button_Preview() {
 
     Kiwi_Theme {
         Column {
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
                         "BUTTON",
@@ -279,7 +348,7 @@ fun Kiwi_Button_Preview() {
 
             Kiwi_Spacer()
 
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
                         "BUTTON",

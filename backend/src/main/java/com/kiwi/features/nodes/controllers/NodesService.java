@@ -46,7 +46,7 @@ public class NodesService {
     }
 
     @Transactional
-    public List<NodesDTO> markNextNodesAsLocked(Long userId, int nodeId) {
+    public List<NodesDTO> markNextNodesAsLocked(Long userId, Long nodeId) {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
@@ -74,7 +74,7 @@ public class NodesService {
     }
 
     @Transactional
-    public NodesDTO unlockNode(Long userId, int nodeId) {
+    public NodesDTO unlockNode(Long userId, Long nodeId) {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
@@ -92,7 +92,7 @@ public class NodesService {
     }
 
     @Transactional
-    public NodesDTO completeNode(Long userId, int nodeId) {
+    public NodesDTO completeNode(Long userId, Long nodeId) {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
@@ -110,8 +110,8 @@ public class NodesService {
 
 
     public void initializeUserProgress(Long userId) {
-        NodesPersistence firstNode = nodesRepository.findById(1)
-                .orElseThrow(() -> new NodeNotFoundException(1));
+        NodesPersistence firstNode = nodesRepository.findById(1L)
+                .orElseThrow(() -> new NodeNotFoundException(1L));
 
         NodesDomain domain = NodesDataMapper.toDomain(firstNode, null);
         NodesDomain locked = progressService.lock(domain);

@@ -7,13 +7,13 @@ import java.util.List;
 @Setter
 public class QuestDomain {
 
-    private final int questId;
-    private final String name;
-    private final String description;
-    private final int experience;
-    private final int icon;
-    private final QuestStatus status;
-    private final List<SubquestDomain> subquests;
+    private int questId;
+    private String name;
+    private String description;
+    private int experience;
+    private int icon;
+    private QuestStatus status;
+    private List<SubquestDomain> subquests;
 
     public QuestDomain(int questId, String name, String description, int experience,
                 int icon, QuestStatus status, List<SubquestDomain> subquests) {

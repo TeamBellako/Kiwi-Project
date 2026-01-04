@@ -29,6 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.kiwi.nodes.NodesTestFactory.*;
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -46,9 +47,7 @@ public class NodesIntegrationTests {
     private final String API_URL = "/api/nodes";
 
     @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
     @Autowired private UsersRepository usersRepository;
-    @Autowired private NodesRepository nodesRepository;
     @Autowired private UserNodeStatusRepository statusRepository;
 
     @Autowired
@@ -56,13 +55,13 @@ public class NodesIntegrationTests {
 
     @Before
     public void setUp() {
-        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
-        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validUserDTO().getPassword());
+        UsersDomain userDomain = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validLoginDTO().getPassword());
         usersRepository.saveAndFlush(usersPersistence);
 
-        statusRepository.saveAndFlush(lockedStatus(usersPersistence.getId(), 1));
-        statusRepository.saveAndFlush(openStatus(usersPersistence.getId(), 2));
-        statusRepository.saveAndFlush(completeStatus(usersPersistence.getId(), 3));
+        statusRepository.saveAndFlush(lockedStatus(usersPersistence.getId(), 1L));
+        statusRepository.saveAndFlush(openStatus(usersPersistence.getId(), 2L));
+        statusRepository.saveAndFlush(completeStatus(usersPersistence.getId(), 3L));
     }
 
     /* ------------------- GET NODES --------------------- */

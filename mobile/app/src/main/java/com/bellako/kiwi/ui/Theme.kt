@@ -23,6 +23,7 @@ fun Kiwi_Theme(content: @Composable () -> Unit) {
 data class KiwiColorsData(
     val color1: Color,
     val color1A: Color,
+    val color1B: Color,
     val color2: Color,
     val color2A: Color,
     val color2B: Color,
@@ -45,6 +46,7 @@ data class KiwiColorsData(
     val color7B: Color,
     val color7C: Color,
     val color7D: Color,
+    val color7E: Color,
     val color8: Color,
     val color8A: Color,
     val color8B: Color,
@@ -68,6 +70,7 @@ val KiwiColors =
     KiwiColorsData(
         color1 = KiwiColor1,
         color1A = KiwiColor1A,
+        color1B = KiwiColor1B,
         color2 = KiwiColor2,
         color2A = KiwiColor2A,
         color2B = KiwiColor2B,
@@ -90,6 +93,7 @@ val KiwiColors =
         color7B = KiwiColor7B,
         color7C = KiwiColor7C,
         color7D = KiwiColor7D,
+        color7E = KiwiColor7E,
         color8 = KiwiColor8,
         color8A = KiwiColor8A,
         color8B = KiwiColor8B,

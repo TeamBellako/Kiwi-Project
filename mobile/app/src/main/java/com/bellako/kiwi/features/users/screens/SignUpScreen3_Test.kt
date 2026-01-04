@@ -27,7 +27,7 @@ import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
@@ -114,7 +114,7 @@ private fun Question(
 
                 currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
 
-                    Kiwi_Button(
+                    Kiwi_FixedSizeButton(
                         textArguments =
                             KiwiTextArguments(
                                 option,

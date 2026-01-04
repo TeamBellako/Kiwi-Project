@@ -37,7 +37,7 @@ public class NodesController {
     @PostMapping("/{nodeId}/lock-next")
     public ResponseEntity<List<NodesDTO>> markNextNodesAsLocked(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable int nodeId
+            @PathVariable Long nodeId
     ) {
         Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
@@ -50,7 +50,7 @@ public class NodesController {
     @PostMapping("/{nodeId}/unlock")
     public ResponseEntity<NodesDTO> unlockNode(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable int nodeId
+            @PathVariable Long nodeId
     ) {
         Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
@@ -63,7 +63,7 @@ public class NodesController {
     @PostMapping("/{nodeId}/complete")
     public ResponseEntity<NodesDTO> completeNode(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable int nodeId
+            @PathVariable Long nodeId
     ) {
         Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()

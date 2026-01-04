@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,7 +56,7 @@ public class UsersControllerTest {
     
     @Test
     public void validSignup() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/signup", loginDTO))
                 .andExpect(status().isCreated());
     }
@@ -65,11 +66,11 @@ public class UsersControllerTest {
         String mockToken = "myToken";
         when(jwtUtils.generateToken(anyString())).thenReturn(mockToken);
 
-        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
+        UsersDomain user = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
         when(usersService.getUserByEmail(any(Email.class)))
-                .thenReturn(Optional.of(UsersDataMapper.toPersistence(user, passwordEncoder.encode(validUserDTO().getPassword()))));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(user, passwordEncoder.encode(validLoginDTO().getPassword()))));
 
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/login", loginDTO))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwt").value(mockToken));

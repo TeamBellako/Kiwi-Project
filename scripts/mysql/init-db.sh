@@ -24,13 +24,13 @@ DROP TABLE IF EXISTS suggested_goals;
 DROP TABLE IF EXISTS metrics;
 DROP TABLE IF EXISTS personality;
 DROP TABLE IF EXISTS settings;
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS user_node_status;
 DROP TABLE IF EXISTS nodes;
 DROP TABLE IF EXISTS user_quest_status;
 DROP TABLE IF EXISTS user_subquest_status;
 DROP TABLE IF EXISTS subquests;
 DROP TABLE IF EXISTS quests;
+DROP TABLE IF EXISTS users;
 
 -- Create users table with a foreign key to settings
 CREATE TABLE IF NOT EXISTS users (
@@ -119,9 +119,16 @@ CREATE TABLE IF NOT EXISTS nodes (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   node_order INT NOT NULL,
   price INT NOT NULL,
-  cord_x FLOAT  NOT NULL,
-  cord_y FLOAT NOT NULL ,
-  CHECK (cord_x >= 0.0 & cord_x <= 1.0 & cord_y >= 0.0 & cord_y <= 1.0)
+  cord_x FLOAT NOT NULL,
+  cord_y FLOAT NOT NULL,
+  event_on_execution BIGINT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  display_name VARCHAR(255),
+  CONSTRAINT uq_nodes_name UNIQUE (name),
+  CHECK (
+    cord_x >= 0.0 AND cord_x <= 1.0
+    AND cord_y >= 0.0 AND cord_y <= 1.0
+  )
 );
 
 -- Create user_nodes_status table
@@ -135,7 +142,13 @@ CREATE TABLE IF NOT EXISTS user_node_status (
 );
 
 -- Insert placeholder values for nodes
-INSERT INTO nodes VALUES (1,1,120,0.57,0.25),(2,2,140,0.61,0.33),(3,3,100,0.58,0.44),(4,4,180,0.59,0.55);
+INSERT INTO nodes ( id, node_order, price, cord_x, cord_y, event_on_execution, name, display_name ) 
+VALUES 
+(1,1,120,0.585,0.12,0,'node_1','START'), 
+(2,2,140,0.623,0.175,0,'node_2',NULL), 
+(3,3,100,0.598,0.228,0,'node_3','CAVE OF THE DEEP BREATH'), 
+(4,4,180,0.66,0.275,0,'node_4',NULL),
+(5,5,140,0.615,0.295,0,'node_5','CITY');
 
 -- Create quest table
 CREATE TABLE IF NOT EXISTS quests (

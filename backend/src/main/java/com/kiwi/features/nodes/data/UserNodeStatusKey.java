@@ -12,5 +12,5 @@ public class UserNodeStatusKey implements Serializable {
     private Long userId;
 
     @Column(name = "node_id")
-    private int nodeId;
+    private Long nodeId;
 }

@@ -28,7 +28,7 @@ import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
@@ -93,7 +93,8 @@ private fun Welcome(
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        Kiwi_Button(
+        Kiwi_FixedSizeButton(
+            horizontalMargin = Spacing.medium,
             textArguments =
                 KiwiTextArguments(
                     "LET'S DO IT",

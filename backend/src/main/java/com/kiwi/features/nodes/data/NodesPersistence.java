@@ -10,7 +10,7 @@ public class NodesPersistence {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "node_order", nullable = false)
     private int nodeOrder;
@@ -23,4 +23,17 @@ public class NodesPersistence {
 
     @Column(name = "cord_y", nullable = false)
     private float cordY;
+
+    @Column(name = "event_on_execution", nullable = false)
+    private Long eventOnExecution;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "display_name")
+    private String displayName;
+
+    public String getDisplayName() {
+        return displayName != null ? displayName : "";
+    }
 }

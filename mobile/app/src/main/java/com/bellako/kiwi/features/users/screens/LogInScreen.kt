@@ -43,7 +43,7 @@ import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
@@ -275,7 +275,7 @@ private fun LogInForm(
 
         Kiwi_Spacer()
 
-        Kiwi_Button(
+        Kiwi_FixedSizeButton(
             textArguments =
                 KiwiTextArguments(
                     "LOG IN",

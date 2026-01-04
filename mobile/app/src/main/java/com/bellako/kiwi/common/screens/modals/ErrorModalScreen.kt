@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -123,7 +123,7 @@ private fun ErrorModalLayout(
         Kiwi_Spacer(Spacing.xLarge)
 
         if (onButtonClick != null) {
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
                         buttonMessage,
@@ -132,9 +132,7 @@ private fun ErrorModalLayout(
                     ),
                 onClick = onButtonClick,
                 color = kiwiColors.color5A,
-                modifier =
-                    Modifier
-                        .padding(getResponsiveSizeHeight(Spacing.large)),
+                horizontalMargin = Spacing.xLarge,
             )
         }
     }

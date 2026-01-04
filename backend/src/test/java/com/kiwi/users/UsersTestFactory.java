@@ -19,10 +19,10 @@ public class UsersTestFactory {
     private static final String DATE = formatDate(LocalDate.of(2025, 1, 1));
 
     public static UsersDTO validUserDTO() {
-        return new UsersDTO(validLoginDTO().getEmail(), validLoginDTO().getPassword(), DATE);
+        return new UsersDTO(validLoginDTO().getEmail(), DATE);
     }
 
     public static UsersDTO invalidUserDTO() {
-        return new UsersDTO(invalidLoginDTO().getEmail(), invalidLoginDTO().getPassword(), DATE);
+        return new UsersDTO(invalidLoginDTO().getEmail(), DATE);
     }
 }

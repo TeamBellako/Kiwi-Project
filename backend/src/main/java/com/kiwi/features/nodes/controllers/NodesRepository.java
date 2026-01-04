@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface NodesRepository extends JpaRepository<NodesPersistence, Integer> {
+public interface NodesRepository extends JpaRepository<NodesPersistence, Long> {
     List<NodesPersistence> findAllByNodeOrder(int nodeOrder);
 }

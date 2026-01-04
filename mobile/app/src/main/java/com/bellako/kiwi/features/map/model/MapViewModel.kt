@@ -38,10 +38,6 @@ class MapViewModel
 
         private val _state = kotlinx.coroutines.flow.MutableStateFlow(MapState(scale = initialScale))
         override val state: kotlinx.coroutines.flow.StateFlow<MapState> = _state.asStateFlow()
-        override val previousState = kotlinx.coroutines.flow.MutableStateFlow(MapState())
-
-        private val _selectedNodeId = kotlinx.coroutines.flow.MutableStateFlow<Int?>(null)
-        val selectedNodeId: kotlinx.coroutines.flow.StateFlow<Int?> = _selectedNodeId.asStateFlow()
 
         private var flingJob: Job? = null
         private var lastPointerPosition = Offset.Zero
@@ -81,7 +77,6 @@ class MapViewModel
             velocityPxPerSec = Offset.Zero
             lastPointerPosition = Offset.Zero
             lastPointerTime = 0L
-            updatePreviousState()
         }
 
         private fun setScale(newScale: Float) {
@@ -93,10 +88,6 @@ class MapViewModel
         }
 
         // ---------------------------------------------------------------------------------------------
-
-        override fun updatePreviousState() {
-            previousState.value = _state.value
-        }
 
         override fun updateScale(
             scaleFactor: Float,
@@ -250,18 +241,19 @@ class MapViewModel
             nodeX: Float,
             nodeY: Float,
         ) {
-            setSelectedNode(nodeId)
+            if (_state.value.selectedNodeId == nodeId) {
+                return
+            }
+            _state.value = _state.value.copy(selectedNodeId = nodeId)
             focusOnNodeAnimated(nodeX, nodeY)
         }
 
         fun unSelectNode() {
-            _selectedNodeId.value = null
+            _state.value = _state.value.copy(selectedNodeId = null)
         }
 
-        fun getSelectedNode(): Int? = _selectedNodeId.value
-
-        fun setSelectedNode(nodeId: Int) {
-            _selectedNodeId.value = nodeId
+        fun setPlayerNode(nodeId: Int) {
+            _state.value = _state.value.copy(playerNode = nodeId)
         }
 
         @Suppress("MagicNumber")
@@ -272,6 +264,8 @@ class MapViewModel
             flingJob?.cancel()
 
             viewModelScope.launch(AndroidUiDispatcher.Main) {
+                _state.value = _state.value.copy(isFocusingNode = true)
+
                 val startState = _state.value
 
                 val targetScale = maxScale.coerceAtLeast(startState.scale)
@@ -289,53 +283,30 @@ class MapViewModel
                 val scaleAnim = Animatable(startState.scale)
                 val offsetAnim = Animatable(startState.offset, Offset.VectorConverter)
 
-                val animationScope = this
-
-                val offsetJob =
-                    animationScope.launch {
-                        offsetAnim.animateTo(
-                            targetValue = constrainedTargetOffset,
-                            animationSpec =
-                                tween(
-                                    durationMillis = 400,
-                                    easing = FastOutSlowInEasing,
-                                ),
-                        )
+                launch {
+                    scaleAnim.animateTo(targetScale, tween(400, easing = FastOutSlowInEasing)) {
+                        _state.value =
+                            _state.value.copy(
+                                scale = this.value,
+                                offset = calculateConstrainedOffset(offsetAnim.value, _state.value.copy(scale = this.value)),
+                            )
                     }
-
-                val scaleJob =
-                    animationScope.launch {
-                        scaleAnim.animateTo(
-                            targetValue = targetScale,
-                            animationSpec =
-                                tween(
-                                    durationMillis = 400,
-                                    easing = FastOutSlowInEasing,
-                                ),
-                        )
-                    }
-
-                while (offsetJob.isActive || scaleJob.isActive) {
-                    setScale(scaleAnim.value)
-
-                    val constrained =
-                        calculateConstrainedOffset(
-                            offsetAnim.value,
-                            _state.value.copy(scale = scaleAnim.value),
-                        )
-                    setOffset(constrained)
-
-                    delay(FRAME_MILLIS)
                 }
 
-                setScale(scaleAnim.value)
-                setOffset(
-                    calculateConstrainedOffset(
-                        offsetAnim.value,
-                        _state.value.copy(scale = scaleAnim.value),
-                    ),
-                )
-                updatePreviousState()
+                launch {
+                    offsetAnim.animateTo(constrainedTargetOffset, tween(400, easing = FastOutSlowInEasing)) {
+                        _state.value =
+                            _state.value.copy(
+                                scale = scaleAnim.value,
+                                offset = calculateConstrainedOffset(this.value, _state.value.copy(scale = scaleAnim.value)),
+                            )
+                    }
+                }
+
+                launch {
+                    delay(390)
+                    _state.value = _state.value.copy(isFocusingNode = false)
+                }
             }
         }
 

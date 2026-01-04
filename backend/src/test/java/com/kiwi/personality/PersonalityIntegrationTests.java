@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.kiwi.personality.PersonalityTestFactory.*;
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -57,8 +58,8 @@ public class PersonalityIntegrationTests {
 
     @Before
     public void setUp() {
-        UsersDomain userDomain = UsersDataMapper.toDomain(validUserDTO());
-        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validUserDTO().getPassword());
+        UsersDomain userDomain = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        UsersPersistence usersPersistence = UsersDataMapper.toPersistence(userDomain, validLoginDTO().getPassword());
         usersRepository.saveAndFlush(usersPersistence);
     }
 

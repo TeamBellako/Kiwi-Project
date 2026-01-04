@@ -9,4 +9,7 @@ data class MapState(
     val mapHeightPx: Float = 0f,
     val viewportWidthPx: Float = 0f,
     val viewportHeightPx: Float = 0f,
+    val selectedNodeId: Int? = null,
+    val playerNode: Int = 0,
+    val isFocusingNode: Boolean = false,
 )

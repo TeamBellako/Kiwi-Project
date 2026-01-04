@@ -55,8 +55,8 @@ public class UsersServiceTests {
 
     @Test
     public void getValidUser() {
-        UsersDomain user = UsersDataMapper.toDomain(validUserDTO());
-        usersTestRepositoryInMemory.saveAndFlush(UsersDataMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        usersTestRepositoryInMemory.saveAndFlush(UsersDataMapper.toPersistence(user, validLoginDTO().getPassword()));
         assertTrue(usersTestRepositoryInMemory.findByEmail(getValidEmail().value()).isPresent());
     }
 

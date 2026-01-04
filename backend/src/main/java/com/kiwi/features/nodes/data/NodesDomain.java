@@ -1,26 +1,26 @@
 package com.kiwi.features.nodes.data;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class NodesDomain {
 
-    private final int id;
-    private final int nodeOrder;
-    private final NodeStatus status;
-    private final int price;
-    private final float cordX;
-    private final float cordY;
+    private Long id;
+    private int nodeOrder;
+    private NodeStatus status;
+    private int price;
+    private float cordX;
+    private float cordY;
+    private Long eventOnExecution;
+    private String name;
+    private String displayName;
 
-    public NodesDomain(int id, int nodeOrder, NodeStatus status, Integer price, float cordX, float cordY) {
-        this.id = id;
-        this.nodeOrder = nodeOrder;
-        this.status = status;
-        this.price = price;
-        this.cordX = cordX;
-        this.cordY = cordY;
-    }
+
 
 }

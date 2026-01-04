@@ -35,6 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static com.kiwi.quests.QuestTestFactory.*;
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -68,8 +69,8 @@ public class QuestsIntegrationTests {
 
     private UsersPersistence createUser() {
         var dto = validUserDTO();
-        UsersDomain domain = UsersDataMapper.toDomain(dto);
-        UsersPersistence user = UsersDataMapper.toPersistence(domain, dto.getPassword());
+        UsersDomain domain = UsersDataMapper.toDomainWithoutPoints(dto);
+        UsersPersistence user = UsersDataMapper.toPersistence(domain, validLoginDTO().getPassword());
         return usersRepository.saveAndFlush(user);
     }
 
