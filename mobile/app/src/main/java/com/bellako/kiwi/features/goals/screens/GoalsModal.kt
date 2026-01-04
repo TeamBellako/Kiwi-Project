@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -83,7 +82,7 @@ fun GoalsModal(
                             ),
                     ),
                 )
-                Kiwi_Spacer(getResponsiveSizeHeight(Spacing.medium))
+                Kiwi_Spacer(Spacing.medium)
                 Kiwi_P2(
                     KiwiTextArguments(
                         body,
@@ -92,12 +91,12 @@ fun GoalsModal(
                         modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.medium)),
                     ),
                 )
-                Kiwi_Spacer(getResponsiveSizeHeight(Spacing.large))
+                Kiwi_Spacer(Spacing.large)
 //                Column(modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.medium)))
 //                {
                 for (goal in goals) {
                     GoalComponent(goal)
-                    Kiwi_Spacer(getResponsiveSizeHeight(Spacing.small))
+                    Kiwi_Spacer(Spacing.small)
                 }
 //                }
             }
@@ -111,7 +110,7 @@ fun GoalsModal(
                 androidx.compose.foundation.layout.Arrangement
                     .spacedBy(12.dp),
         ) {
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
                         "Modify",
@@ -121,11 +120,10 @@ fun GoalsModal(
                 color = kiwiColor.color7D,
                 modifier =
                     Modifier
-                        .weight(1f)
-                        .height(48.dp),
+                        .weight(0.5f),
                 onClick = {},
             )
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
                         if (goalModalType == GoalModalType.NEW) "Let's go!" else "Done",
@@ -135,8 +133,7 @@ fun GoalsModal(
                 color = kiwiColor.color8,
                 modifier =
                     Modifier
-                        .weight(1f)
-                        .height(48.dp),
+                        .weight(0.5f),
                 onClick = {},
             )
         }
@@ -160,7 +157,7 @@ fun GoalsModal_Preview() {
             GoalsModal(
                 goalModalType = GoalModalType.NEW,
                 goals =
-                    listOf<GoalDomain>(
+                    listOf(
                         GoalDomain(
                             "1",
                             "Hacer el modal",

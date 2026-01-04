@@ -31,7 +31,7 @@ import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
@@ -257,7 +257,8 @@ private fun SettingsButtons(
                     .testTag(CommonTestTags.SETTINGS_SCREEN),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
                         "SUPPORT",
@@ -270,7 +271,8 @@ private fun SettingsButtons(
 
             Kiwi_Spacer()
 
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
                         "LOG OUT",
@@ -290,7 +292,8 @@ private fun SettingsButtons(
 
             Kiwi_Spacer()
 
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
                         "RESET PROGRESS",

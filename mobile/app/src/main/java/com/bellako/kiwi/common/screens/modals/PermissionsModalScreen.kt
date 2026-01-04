@@ -43,7 +43,7 @@ import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -172,7 +172,8 @@ private fun PermissionRequestLayout(context: Context) {
 
             Kiwi_Spacer(Spacing.xLarge)
 
-            Kiwi_Button(
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
                         "ENABLE APP USAGE ACCESS",

@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -31,7 +30,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Button
+import com.bellako.kiwi.common.screens.components.Kiwi_AdaptableSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_HoldButton
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -220,7 +219,7 @@ fun PlayButton(
 ) {
     val kiwiColors = LocalKiwiColors.current
 
-    Kiwi_Button(
+    Kiwi_AdaptableSizeButton(
         textArguments =
             KiwiTextArguments(
                 text,
@@ -299,7 +298,7 @@ fun NodeConnections(
     }
 }
 
-//HELPERS
+// HELPERS
 @DrawableRes
 private fun nodeIcon(
     nodeStatus: NodeStatus,
