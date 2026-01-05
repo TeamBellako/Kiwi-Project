@@ -1,7 +1,6 @@
 package com.kiwi.features.nodes.data;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class NodesDataMapper {
 
@@ -14,6 +13,7 @@ public class NodesDataMapper {
         return new NodesDTO(
                 node.getId(),
                 node.getStatus().name(),
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
@@ -33,6 +33,7 @@ public class NodesDataMapper {
         return new NodesDTO(
                 node.getId(),
                 status.getStatus().name(),
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),

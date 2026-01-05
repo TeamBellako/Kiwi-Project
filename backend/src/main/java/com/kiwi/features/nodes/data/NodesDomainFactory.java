@@ -1,7 +1,6 @@
 package com.kiwi.features.nodes.data;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class NodesDomainFactory {
 
@@ -18,6 +17,7 @@ public class NodesDomainFactory {
         return new NodesDomain(
                 node.getId(),
                 status,
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),

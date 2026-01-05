@@ -11,6 +11,7 @@ public class NodesProgressService {
         if (node.getStatus() == NodeStatus.INACCESSIBLE) {
             return new NodesDomain(node.getId(),
                     NodeStatus.LOCKED,
+                    node.getIcon(),
                     node.getPrice(),
                     node.getCordX(),
                     node.getCordY(),
@@ -28,6 +29,7 @@ public class NodesProgressService {
         }
         return new NodesDomain(node.getId(),
                 NodeStatus.OPEN,
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
@@ -43,6 +45,7 @@ public class NodesProgressService {
         }
         return new NodesDomain(node.getId(),
                 NodeStatus.COMPLETED,
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),

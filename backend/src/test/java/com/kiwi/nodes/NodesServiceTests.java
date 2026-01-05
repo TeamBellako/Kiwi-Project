@@ -26,7 +26,7 @@ public class NodesServiceTests {
     private final Long userId = 1L;
 
     @Test
-    public void getNodesForUser_returnsAllNodes() {
+    public void getNodesForUser() {
 
         var node1 =  persistenceNode( 1L);
         var node2 = persistenceNode( 2L);
@@ -36,8 +36,11 @@ public class NodesServiceTests {
         nodeRepo.saveAndFlush(node2);
         nodeRepo.saveAndFlush(node3);
 
+        statusRepo.saveUserStatus(openStatus(userId, node1.getId()));
+        statusRepo.saveUserStatus(lockedStatus(userId, node2.getId()));
+
         var result = service.getNodesForUser(userId);
-        assertEquals(3, result.size());
+        assertEquals(2, result.size());
     }
 
     @Test

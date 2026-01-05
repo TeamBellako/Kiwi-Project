@@ -10,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class NodesService {
@@ -32,17 +30,22 @@ public class NodesService {
     }
 
     public List<NodesDTO> getNodesForUser(@NotNull Long userId) {
-        List<NodesPersistence> nodes = nodesRepository.findAll();
+        List<UserNodeStatusPersistence> statuses =
+                userNodeStatusRepository.findByIdUserId(userId);
 
-        return nodes.stream().map(n -> {
-            UserNodeStatusPersistence userStatus = userNodeStatusRepository
-                    .findByIdUserIdAndIdNodeId(userId, n.getId())
-                    .orElse(null);
+        return statuses.stream()
+                .map(status -> {
+                    NodesPersistence node = nodesRepository.findById(status.getId().getNodeId())
+                            .orElseThrow(() -> new NodeNotFoundException(
+                                    status.getId().getNodeId()
+                            ));
 
-            NodesDomain domain = NodesDomainFactory.create(n, userStatus);
-            return NodesDataMapper.toDTO(domain);
+                    NodesDomain domain =
+                            NodesDomainFactory.create(node, status);
 
-        }).collect(Collectors.toList());
+                    return NodesDataMapper.toDTO(domain);
+                })
+                .toList();
     }
 
     //FOR FUTURE CONDITION EDGES

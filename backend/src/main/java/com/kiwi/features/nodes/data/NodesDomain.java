@@ -15,6 +15,7 @@ public class NodesDomain {
 
     private Long id;
     private NodeStatus status;
+    private int icon;
     private int price;
     private float cordX;
     private float cordY;

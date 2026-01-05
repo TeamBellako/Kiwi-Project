@@ -8,6 +8,7 @@ import java.util.List;
 public class NodesDTO {
     public Long id;
     public String status;
+    public int icon;
     public int price;
     public float cordX;
     public float cordY;

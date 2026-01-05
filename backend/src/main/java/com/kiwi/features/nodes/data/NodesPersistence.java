@@ -15,6 +15,9 @@ public class NodesPersistence {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "icon", nullable = false)
+    private int icon;
+
     @Column(name = "price", nullable = false)
     private int price;
 
@@ -33,10 +36,11 @@ public class NodesPersistence {
     @Column(name = "display_name")
     private String displayName;
 
+    @OneToMany(mappedBy = "fromNode", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NodeEdgePersistence> outgoingEdges = new ArrayList<>();
+
     public String getDisplayName() {
         return displayName != null ? displayName : "";
     }
 
-    @OneToMany(mappedBy = "fromNode", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<NodeEdgePersistence> outgoingEdges = new ArrayList<>();
 }

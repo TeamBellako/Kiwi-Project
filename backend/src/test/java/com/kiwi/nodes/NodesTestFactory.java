@@ -16,6 +16,20 @@ public class NodesTestFactory {
         return n;
     }
 
+    public static void connectNodes(
+            NodesPersistence from,
+            NodesPersistence... toNodes
+    ) {
+        for (NodesPersistence to : toNodes) {
+            NodeEdgePersistence edge = NodeEdgePersistence.builder()
+                    .fromNode(from)
+                    .toNode(to)
+                    .build();
+
+            from.getOutgoingEdges().add(edge);
+        }
+    }
+
     public static UserNodeStatusPersistence persistenceStatus(
             Long userId, Long nodeId, NodeStatus status
     ) {
@@ -47,6 +61,7 @@ public class NodesTestFactory {
         return new NodesDTO(
                 id,
                 status.name(),
+                0,
                 100,
                 0f,
                 0f,

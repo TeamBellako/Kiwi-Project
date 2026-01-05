@@ -121,20 +121,29 @@ public class NodesIntegrationTests {
     @WithMockUser(username = "finn@thehuman.com")
     public void completeNodeSuccess() throws Exception {
         var user = createUser();
-        var node = createNode(2L);
+        var node1 = createNode(1L);
+        var node2 = createNode(2L);
+        var node3 = createNode(3L);
 
-        statusRepository.saveAndFlush(openStatus(user.getId(), node.getId()));
+        connectNodes(node1, node2, node3);
+        nodesRepository.saveAndFlush(node1);
 
-        mockMvc.perform(post(API_URL + "/" + node.getId() + "/complete"))
+        statusRepository.saveAndFlush(openStatus(user.getId(), node1.getId()));
+
+        mockMvc.perform(post(API_URL + "/" + node1.getId() + "/complete"))
+                .andExpect(status().isOk())
                 .andExpect(result -> {
                     var response = result.getResponse().getContentAsString();
 
-                    for (var nextNode : node.getOutgoingEdges()) {
-                        assertTrue(response.contains(nextNode.getToNode().getId().toString()));
+                    for (var edge : node1.getOutgoingEdges()) {
+                        Long nextId = edge.getToNode().getId();
+                        assertTrue(response.contains(nextId.toString()));
                     }
 
-                    var status = statusRepository.findByIdUserIdAndIdNodeId(user.getId(), node.getId())
+                    var status = statusRepository
+                            .findByIdUserIdAndIdNodeId(user.getId(), node1.getId())
                             .orElseThrow();
+
                     assertEquals(NodeStatus.COMPLETED, status.getStatus());
                 });
     }
