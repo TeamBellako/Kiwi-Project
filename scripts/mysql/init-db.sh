@@ -117,7 +117,6 @@ CREATE TABLE IF NOT EXISTS suggested_goals (
 -- Create nodes table
 CREATE TABLE IF NOT EXISTS nodes (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  node_order INT NOT NULL,
   price INT NOT NULL,
   cord_x FLOAT NOT NULL,
   cord_y FLOAT NOT NULL,
@@ -141,14 +140,43 @@ CREATE TABLE IF NOT EXISTS user_node_status (
   FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
+CREATE TABLE node_edges (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    from_node_id BIGINT NOT NULL,
+    to_node_id BIGINT NOT NULL,
+
+    PRIMARY KEY (id),
+
+    CONSTRAINT fk_node_edges_from
+        FOREIGN KEY (from_node_id)
+        REFERENCES nodes(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_node_edges_to
+        FOREIGN KEY (to_node_id)
+        REFERENCES nodes(id)
+        ON DELETE CASCADE,
+
+    UNIQUE KEY uq_node_edge (from_node_id, to_node_id)
+);
+
 -- Insert placeholder values for nodes
-INSERT INTO nodes ( id, node_order, price, cord_x, cord_y, event_on_execution, name, display_name ) 
+INSERT INTO nodes ( id, price, cord_x, cord_y, event_on_execution, name, display_name ) 
 VALUES 
-(1,1,120,0.585,0.12,0,'node_1','START'), 
-(2,2,140,0.623,0.175,0,'node_2',NULL), 
-(3,3,100,0.598,0.228,0,'node_3','CAVE OF THE DEEP BREATH'), 
-(4,4,180,0.66,0.275,0,'node_4',NULL),
-(5,5,140,0.615,0.295,0,'node_5','CITY');
+(1,120,0.585,0.12,0,'node_1','START'), 
+(2,140,0.623,0.175,0,'node_2',NULL), 
+(3,180,0.598,0.275,0,'node_3',NULL),
+(4,100,0.598,0.228,0,'node_4','CAVE OF THE DEEP BREATH'), 
+(5,180,0.66,0.275,0,'node_5',NULL),
+(6,140,0.615,0.295,0,'node_6','CITY');
+
+INSERT INTO node_edges ( from_node_id, to_node_id ) 
+VALUES
+(1,2),
+(2,3),
+(3,4),
+(3,5),
+(5,6);
 
 -- Create quest table
 CREATE TABLE IF NOT EXISTS quests (

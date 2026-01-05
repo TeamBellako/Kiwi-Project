@@ -16,91 +16,48 @@ import java.util.stream.Collectors;
 public class NodesTestRepositoryInMemory implements NodesRepository {
 
     private final Map<Long, NodesPersistence> nodeStore = new HashMap<>();
-    private final Map<String, UserNodeStatusPersistence> statusStore = new HashMap<>();
-
-    // NodesTestRepositoryInMemory
-    @Override
-    public List<NodesPersistence> findAll() { return new ArrayList<>(nodeStore.values()); }
-
-    @Override
-    public Optional<NodesPersistence> findById(Long id) { return Optional.ofNullable(nodeStore.get(id)); }
-
-    @Override
-    public NodesPersistence saveAndFlush(NodesPersistence node) { nodeStore.put(node.getId(), node); return node; }
-
-    @Override
-    public List<NodesPersistence> findAllByNodeOrder(int nodeOrder) { return nodeStore.values().stream().filter(n -> n.getNodeOrder() == nodeOrder).collect(Collectors.toList()); }
-
 
     @Override
     public <S extends NodesPersistence> List<S> saveAll(Iterable<S> entities) {
         return List.of();
     }
 
-
-
     @Override
-    public boolean existsById(Long id) {
-        return false;
+    public List<NodesPersistence> findAll() {
+        return new ArrayList<>(nodeStore.values());
     }
 
-
     @Override
-    public List<NodesPersistence> findAllById(Iterable<Long> ids) {
+    public List<NodesPersistence> findAllById(Iterable<Long> longs) {
         return List.of();
     }
 
-
     @Override
-    public long count() {
-        return 0;
+    public Optional<NodesPersistence> findById(Long id) {
+        return Optional.ofNullable(nodeStore.get(id));
     }
 
     @Override
-    public void deleteById(Long ids) {
-
-    }
-
-
-    @Override
-    public void delete(NodesPersistence entity) {
-
-    }
-
-    @Override
-    public void deleteAllById(Iterable<? extends Long> ids) {
-
+    public NodesPersistence saveAndFlush(NodesPersistence node) {
+        if (node.getId() == null) {
+            node.setId(generateNextId());
+        }
+        nodeStore.put(node.getId(), node);
+        return node;
     }
 
     @Override
-    public void deleteAll(Iterable<? extends NodesPersistence> entities) {
-
+    public boolean existsById(Long id) {
+        return nodeStore.containsKey(id);
     }
 
-    @Override
-    public void deleteAll() {
-
-    }
-
-    @Override
-    public <S extends NodesPersistence> S save(S entity) {
-        return null;
-    }
-
-
-    @Override
-    public void flush() {
-
-    }
+    // Métodos irrelevantes para el test
+    @Override public <S extends NodesPersistence> S save(S entity) { return (S) saveAndFlush(entity); }
+    @Override public void flush() { }
 
     @Override
     public <S extends NodesPersistence> List<S> saveAllAndFlush(Iterable<S> entities) {
         return List.of();
-    }
-
-    @Override
-    public void deleteInBatch(Iterable<NodesPersistence> entities) {
-        NodesRepository.super.deleteInBatch(entities);
     }
 
     @Override
@@ -109,7 +66,7 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public void deleteAllByIdInBatch(Iterable<Long> ids) {
+    public void deleteAllByIdInBatch(Iterable<Long> longs) {
 
     }
 
@@ -119,17 +76,17 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
-    public NodesPersistence getOne(Long id) {
+    public NodesPersistence getOne(Long aLong) {
         return null;
     }
 
     @Override
-    public NodesPersistence getById(Long id) {
+    public NodesPersistence getById(Long aLong) {
         return null;
     }
 
     @Override
-    public NodesPersistence getReferenceById(Long id) {
+    public NodesPersistence getReferenceById(Long aLong) {
         return null;
     }
 
@@ -168,6 +125,38 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
         return null;
     }
 
+    @Override public long count() { return nodeStore.size(); }
+
+    @Override
+    public void deleteById(Long aLong) {
+
+    }
+
+    @Override
+    public void delete(NodesPersistence entity) {
+
+    }
+
+    @Override
+    public void deleteAllById(Iterable<? extends Long> longs) {
+
+    }
+
+    @Override
+    public void deleteAll(Iterable<? extends NodesPersistence> entities) {
+
+    }
+
+    @Override
+    public void deleteAll() {
+
+    }
+
+    private long nextId = 1;
+    private long generateNextId() {
+        return nextId++;
+    }
+
     @Override
     public List<NodesPersistence> findAll(Sort sort) {
         return List.of();
@@ -177,5 +166,4 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     public Page<NodesPersistence> findAll(Pageable pageable) {
         return null;
     }
-    
 }

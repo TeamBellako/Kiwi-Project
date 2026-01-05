@@ -3,6 +3,7 @@ package com.kiwi.nodes;
 import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.nodes.controllers.NodesProgressService;
 import com.kiwi.features.nodes.data.NodeStatus;
+import com.kiwi.features.nodes.exceptions.NodeInaccessibleException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
 import org.junit.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,38 +11,56 @@ import static com.kiwi.nodes.NodesTestFactory.*;
 
 public class NodesServiceTests {
 
-    private final NodesTestRepositoryInMemory nodeRepo = new NodesTestRepositoryInMemory();
-    private final UserNodeStatusTestRepositoryInMemory statusRepo = new UserNodeStatusTestRepositoryInMemory();
-    private final NodesProgressService progress = new NodesProgressService();
+    private final NodesTestRepositoryInMemory nodeRepo =
+            new NodesTestRepositoryInMemory();
 
-    private final NodesService service = new NodesService(nodeRepo, statusRepo, progress);
+    private final UserNodeStatusTestRepositoryInMemory statusRepo =
+            new UserNodeStatusTestRepositoryInMemory();
+
+    private final NodesProgressService progress =
+            new NodesProgressService();
+
+    private final NodesService service =
+            new NodesService(nodeRepo, statusRepo, progress);
 
     private final Long userId = 1L;
 
     @Test
     public void getNodesForUser_returnsAllNodes() {
-        nodeRepo.saveAndFlush(persistenceNode(1L, 1, 100, 0, 0));
-        nodeRepo.saveAndFlush(persistenceNode(2L, 2, 200, 0, 0));
+
+        var node1 =  persistenceNode( 1L);
+        var node2 = persistenceNode( 2L);
+        var node3 = persistenceNode( 3L);
+
+        nodeRepo.saveAndFlush(node1);
+        nodeRepo.saveAndFlush(node2);
+        nodeRepo.saveAndFlush(node3);
 
         var result = service.getNodesForUser(userId);
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    public void lockNode_success() {
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L));
+        var result = service.lockNode(userId, node.getId());
+
+        assertEquals(NodeStatus.LOCKED.name(), result.getStatus());
     }
 
     @Test
     public void unlockNode_success() {
-        nodeRepo.saveAndFlush(persistenceNode(1L, 1, 100, 0, 0));
-        statusRepo.saveUserStatus(lockedStatus(userId, 1L));
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L));
+        statusRepo.saveUserStatus(lockedStatus(userId, node.getId()));
 
-        var result = service.unlockNode(userId, 1L);
+        var result = service.unlockNode(userId, node.getId());
         assertEquals(NodeStatus.OPEN.name(), result.getStatus());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void unlockNode_failsIfNotLocked() {
-        nodeRepo.saveAndFlush(persistenceNode(1L, 1, 100, 0, 0));
-        statusRepo.saveUserStatus(inaccessibleStatus(userId, 1L));
-
-        service.unlockNode(userId, 1L);
+    @Test(expected = NodeInaccessibleException.class)
+    public void unlockNode_failsIfNoStatus() {
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L));
+        service.unlockNode(userId, node.getId());
     }
 
     @Test(expected = NodeNotFoundException.class)
@@ -51,19 +70,21 @@ public class NodesServiceTests {
 
     @Test
     public void completeNode_success() {
-        nodeRepo.saveAndFlush(persistenceNode(2L, 2, 200, 0, 0));
-        statusRepo.saveUserStatus(openStatus(userId, 2L));
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 2L));
+        statusRepo.saveUserStatus(openStatus(userId, node.getId()));
 
-        var result = service.completeNode(userId, 2L);
-        assertEquals(NodeStatus.COMPLETED.name(), result.getStatus());
+        var result = service.completeNode(userId, node.getId());
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty()); // no edges
     }
 
     @Test(expected = IllegalStateException.class)
     public void completeNode_lockedFails() {
-        nodeRepo.saveAndFlush(persistenceNode(2L, 2, 200, 0, 0));
-        statusRepo.saveUserStatus(lockedStatus(userId, 2L));
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 2L));
+        statusRepo.saveUserStatus(lockedStatus(userId, node.getId()));
 
-        service.completeNode(userId, 2L);
+        service.completeNode(userId, node.getId());
     }
 
     @Test(expected = NodeNotFoundException.class)
