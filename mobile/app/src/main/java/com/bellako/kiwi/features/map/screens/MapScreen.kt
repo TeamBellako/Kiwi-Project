@@ -5,13 +5,11 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -24,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -45,8 +42,9 @@ import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.data.GoalDomain
+import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
-import com.bellako.kiwi.features.map.data.MapState
+import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -165,6 +163,7 @@ fun MapScreen(
     }
     var notTodaygoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
     var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
+    var showYesterdayGoalsModal by remember { mutableStateOf(false) }
 //    var newGoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
 
     @Suppress("ForbiddenComment")
@@ -176,25 +175,25 @@ fun MapScreen(
             if (goals.isNotEmpty()) {
                 notTodaygoals = goals.filter { it.date != today }
                 goals = goals.filter { it.date == today }
+                // Mostrar el modal si hay goals del día anterior
+                if (notTodaygoals.isNotEmpty()) {
+                    showYesterdayGoalsModal = true
+                }
             }
-            // TODO: call to defaultGoals for new Goals
+            if (goals.isEmpty()) {
+                // TODO: call to defaultGoals for new Goals
+            }
         }
-//        val prefs = context.getSharedPreferences("kiwi_goals_prefs", Context.MODE_PRIVATE)
-//        val lastShownDate = prefs.getString("last_yesterday_goals_check", "")
-//        val today = dateToString(LocalDate.now())
-//        if (lastShownDate != today) {
-//            val result = goalsViewModel.getGoalsByDate(dateToString(LocalDate.now().minusDays(1)))
-//            if (result.isSuccess) {
-//                goals = result.getOrNull() ?: emptyList()
-//                if (goals.isNotEmpty()) {
-//                    goals = goals.filter { it.category == GoalCategory.DAILY_CHALLENGES }
-//                }
-//            }
-// //            // Guardar que ya se mostró hoy
-// //            prefs.edit().putString("last_yesterday_goals_check", today).apply()
-//        }
     }
-    // GoalsModal(GoalModalType.YESTERDAY, notTodaygoals)
+
+    // Mostrar el modal de goals de ayer si hay goals del día anterior
+    if (showYesterdayGoalsModal && notTodaygoals.isNotEmpty()) {
+        GoalsModal(
+            goalModalType = GoalModalType.YESTERDAY,
+            goals = notTodaygoals,
+            onDismiss = { showYesterdayGoalsModal = false },
+        )
+    }
 //    GoalsModal(GoalModalType.NEW, newGoals)
 }
 

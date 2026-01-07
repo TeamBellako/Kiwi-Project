@@ -10,13 +10,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
@@ -37,7 +43,10 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 fun GoalsModal(
     goalModalType: GoalModalType,
     goals: List<GoalDomain>,
+    onDismiss: () -> Unit = {},
 ) {
+    var showWorkInProgressPopup by remember { mutableStateOf(false) }
+
     val header =
         if (goalModalType == GoalModalType.NEW) {
             "New Daily Challenges!"
@@ -124,7 +133,7 @@ fun GoalsModal(
                 modifier =
                     Modifier
                         .weight(buttonPercentage),
-                onClick = {},
+                onClick = { showWorkInProgressPopup = true },
             )
             Kiwi_FixedSizeButton(
                 textArguments =
@@ -137,8 +146,52 @@ fun GoalsModal(
                 modifier =
                     Modifier
                         .weight(buttonPercentage),
-                onClick = {},
+                onClick = { onDismiss() },
             )
+        }
+    }
+
+    // Popup de "Work in progress"
+    if (showWorkInProgressPopup) {
+        Dialog(
+            onDismissRequest = { showWorkInProgressPopup = false },
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = kiwiColor.color0,
+                            shape = RoundedCornerShape(16.dp),
+                        ).padding(getResponsiveSizeHeight(Spacing.large)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement =
+                        androidx.compose.foundation.layout.Arrangement
+                            .spacedBy(getResponsiveSizeHeight(Spacing.medium)),
+                ) {
+                    Kiwi_H1(
+                        KiwiTextArguments(
+                            "Work in progress",
+                            TextAlign.Center,
+                            bold = true,
+                        ),
+                    )
+                    Kiwi_FixedSizeButton(
+                        textArguments =
+                            KiwiTextArguments(
+                                "Close",
+                                color = kiwiColor.colorF,
+                                bold = false,
+                            ),
+                        color = kiwiColor.color8,
+                        modifier = Modifier.fillMaxWidth(0.6f),
+                        onClick = { showWorkInProgressPopup = false },
+                    )
+                }
+            }
         }
     }
 }
