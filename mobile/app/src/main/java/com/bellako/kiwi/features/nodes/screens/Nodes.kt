@@ -207,31 +207,10 @@ fun NodeAction(
         when (node.status) {
             NodeStatus.LOCKED -> UnlockButton("Unlock (" + node.price + ")") { onUnlockNode(node.id) }
             NodeStatus.OPEN -> PlayButton("Play") { onCompleteNode(node.id) }
-            NodeStatus.COMPLETED -> PlayButton("Replay") { /* TODO */ }
+            NodeStatus.COMPLETED -> PlayButton("Replay") { replayFirebaseEvent(node.id) }
             else -> {}
         }
     }
-}
-
-@Composable
-fun PlayButton(
-    text: String,
-    onClick: () -> Unit,
-) {
-    val kiwiColors = LocalKiwiColors.current
-
-    Kiwi_AdaptableSizeButton(
-        textArguments =
-            KiwiTextArguments(
-                text,
-                color = kiwiColors.colorF,
-                bold = true,
-            ),
-        contentPaddingHorizontal = Spacing.xLarge,
-        color = kiwiColors.color7D,
-        onClick = onClick,
-        sound = R.raw.snd_node_execution,
-    )
 }
 
 @Composable
@@ -256,6 +235,37 @@ fun UnlockButton(
         onHoldComplete = onHoldComplete,
         sound = R.raw.snd_node_unlocked,
     )
+}
+
+@Composable
+fun PlayButton(
+    text: String,
+    onClick: () -> Unit,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Kiwi_AdaptableSizeButton(
+        textArguments =
+            KiwiTextArguments(
+                text,
+                color = kiwiColors.colorF,
+                bold = true,
+            ),
+        contentPaddingHorizontal = Spacing.xLarge,
+        color = kiwiColors.color7D,
+        onClick = onClick,
+        sound = R.raw.snd_node_execution,
+    )
+}
+
+@Suppress("UnusedParameter")
+private fun replayFirebaseEvent(id: Long) {
+ /*   firebaseLogEvent(
+        FirebaseEventNames.NODES_REPLAY_COMPLETED_NODE,
+        mapOf(
+            "node_id" to Long,
+        ),
+    ) // Uncomment when added event on firebase server */
 }
 
 @Composable
