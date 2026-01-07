@@ -62,7 +62,7 @@ private fun Kiwi_Button(
     enabled: Boolean = true,
     color: Color,
     testTag: String = "",
-    sound: Int = R.raw.snd_ui_button
+    sound: Int = R.raw.snd_ui_button,
 ) {
     val context = LocalContext.current
 
@@ -87,14 +87,13 @@ private fun Kiwi_Button(
                 ),
             modifier =
                 Modifier
-
                     .testTag(testTag)
                     .then(
                         horizontalMargin?.let {
                             Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = getResponsiveSizeHeight(it))
-                        } ?: Modifier
+                        } ?: Modifier,
                     ),
             shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
         ) {
@@ -119,7 +118,7 @@ fun Kiwi_FixedSizeButton(
     enabled: Boolean = true,
     color: Color,
     testTag: String = "",
-    sound: Int = R.raw.snd_ui_button
+    sound: Int = R.raw.snd_ui_button,
 ) {
     Kiwi_Button(
         modifier,
@@ -131,7 +130,7 @@ fun Kiwi_FixedSizeButton(
         enabled,
         color,
         testTag,
-        sound
+        sound,
     )
 }
 
@@ -145,7 +144,7 @@ fun Kiwi_AdaptableSizeButton(
     enabled: Boolean = true,
     color: Color,
     testTag: String = "",
-    sound: Int = R.raw.snd_ui_button
+    sound: Int = R.raw.snd_ui_button,
 ) {
     Kiwi_Button(
         modifier,
@@ -157,7 +156,7 @@ fun Kiwi_AdaptableSizeButton(
         enabled,
         color,
         testTag,
-        sound
+        sound,
     )
 }
 
@@ -173,7 +172,7 @@ fun Kiwi_HoldButton(
     color: Color,
     fillColor: Color,
     testTag: String = "",
-    sound: Int = R.raw.snd_ui_button
+    sound: Int = R.raw.snd_ui_button,
 ) {
     val context = LocalContext.current
     val view = LocalView.current

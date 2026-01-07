@@ -388,8 +388,8 @@ fun AppItem(
     dragOffset: Offset = Offset.Zero,
     onPositionChanged: (Rect) -> Unit = {},
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier =
             Modifier
                 .padding(getResponsiveSizeHeight(Spacing.xSmall))

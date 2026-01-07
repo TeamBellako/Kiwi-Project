@@ -32,7 +32,6 @@ import com.bellako.kiwi.audio.Kiwi_Music_Settings
 import com.bellako.kiwi.audio.Kiwi_Music_SignUp
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
-import com.bellako.kiwi.common.screens.modals.SupportModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
@@ -257,7 +256,7 @@ fun AppNavHost(
                     questsViewModel = questsViewModel,
                     navController = navController,
                     goalsViewModel = goalsViewModel,
-                    mapViewModel = hiltViewModel()
+                    mapViewModel = hiltViewModel(),
                 )
             }
         }
@@ -288,13 +287,6 @@ fun AppNavHost(
                     settingsViewModel = settingsViewModel,
                     navController = navController,
                 )
-            }
-        }
-
-        composable(ScreenRoutes.HELP) {
-            AppScreenWrapper {
-                Kiwi_Music_Settings()
-                SupportModalScreen(navController = navController)
             }
         }
 
