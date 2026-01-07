@@ -1,6 +1,11 @@
 package com.bellako.kiwi.features.settings.screens
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.AndroidRuntimeException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.BuildConfig
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
@@ -41,6 +47,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.settings.data.SettingsState
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
@@ -261,12 +268,38 @@ private fun SettingsButtons(
                 horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
-                        "SUPPORT",
+                        "CHANGE GOOD/BAD APPS",
                         color = kiwiColors.color6,
                         bold = true,
                     ),
                 color = kiwiColors.color5A,
-                onClick = { navController.navigate(ScreenRoutes.HELP) },
+                onClick = { navController.navigate(ScreenRoutes.SIGNUP4_APPS) },
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
+                textArguments =
+                    KiwiTextArguments(
+                        "CONTACT US",
+                        color = kiwiColors.color6,
+                        bold = true,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { openLinkInBrowser(context, BuildConfig.CONCIERGE_FORM_LINK) },
+            )
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
+                textArguments =
+                    KiwiTextArguments(
+                        "REPORT A BUG",
+                        color = kiwiColors.color6,
+                        bold = true,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { openLinkInBrowser(context, BuildConfig.BUG_FORM_LINK) },
             )
 
             Kiwi_Spacer()
@@ -307,6 +340,21 @@ private fun SettingsButtons(
                 },
             )
         }
+    }
+}
+
+private fun openLinkInBrowser(
+    context: Context,
+    url: String,
+) {
+    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+
+    try {
+        context.startActivity(browserIntent)
+    } catch (e: ActivityNotFoundException) {
+        warn("No browser app found: ${e.message}")
+    } catch (e: AndroidRuntimeException) {
+        warn("Runtime error: ${e.message}")
     }
 }
 

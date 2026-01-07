@@ -8,7 +8,6 @@ object ScreenRoutes {
     const val SIGNUP4_APPS = "SIGNUP4_APPS"
     const val HOME = "HOME"
     const val SETTINGS = "SETTINGS"
-    const val HELP = "HELP"
     const val WIP = "WIP"
     const val OBJECTIVES = "OBJECTIVES"
     const val OBJECTIVES_FOCUS = "OBJECTIVES/{questId}"
