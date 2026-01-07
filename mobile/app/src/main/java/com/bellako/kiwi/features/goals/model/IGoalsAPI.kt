@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.goals.model
 
 import com.bellako.kiwi.features.goals.data.GoalDTO
 import com.bellako.kiwi.features.goals.data.GoalsListDTO
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDTO
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PATCH
@@ -35,4 +36,7 @@ interface IGoalsAPI {
 
     @GET("api/user/goals/in_progress")
     suspend fun getGoalsInProgress(): List<GoalsListDTO>
+
+    @GET("api/user/goals/suggestions")
+    suspend fun getSuggestedGoals(): List<SuggestedGoalDTO>
 }

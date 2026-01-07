@@ -1,10 +1,9 @@
 package com.bellako.kiwi.features.goals.model
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 
@@ -27,4 +26,6 @@ interface IGoalsViewModel {
     suspend fun getGoalsInProgress(): Result<List<GoalDomain>>
 
     suspend fun loadAllGoals(): Result<Unit>
+
+    suspend fun getSuggestedGoals(): Result<List<SuggestedGoalDomain>>
 }

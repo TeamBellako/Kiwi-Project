@@ -35,6 +35,7 @@ import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
+import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -42,7 +43,43 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Suppress("MagicNumber")
 @Composable
+fun GoalComponent(goal: IGoal) {
+    when (goal) {
+        is GoalDomain -> {
+            GoalComponent(goal)
+        }
+
+        else -> {
+            // Para SuggestedGoalDomain u otros IGoal, usamos valores por defecto
+            GoalComponentBase(
+                objective = goal.objective,
+                type = goal.type,
+                progress = 0f,
+                status = GoalStatus.IN_PROGRESS,
+            )
+        }
+    }
+}
+
+@Suppress("MagicNumber")
+@Composable
 fun GoalComponent(goal: GoalDomain) {
+    GoalComponentBase(
+        objective = goal.objective,
+        type = goal.type,
+        progress = goal.progress,
+        status = goal.status,
+    )
+}
+
+@Suppress("MagicNumber")
+@Composable
+private fun GoalComponentBase(
+    objective: String,
+    type: GoalType,
+    progress: Float,
+    status: GoalStatus,
+) {
     val kiwiColors = LocalKiwiColors.current
     Box(
         contentAlignment = Alignment.Center,
@@ -60,7 +97,7 @@ fun GoalComponent(goal: GoalDomain) {
         )
 
         Kiwi_Image(
-            if (goal.progress == 1f) R.drawable.daily_challenges_completed else R.drawable.daily_challenges_fill,
+            if (progress == 1f) R.drawable.daily_challenges_completed else R.drawable.daily_challenges_fill,
             "Bar fill",
             modifier =
                 Modifier
@@ -74,7 +111,7 @@ fun GoalComponent(goal: GoalDomain) {
                                     layoutDirection: LayoutDirection,
                                     density: Density,
                                 ): Outline {
-                                    val w = size.width * goal.progress.coerceIn(0f, 1f)
+                                    val w = size.width * progress.coerceIn(0f, 1f)
                                     return Outline.Rectangle(Rect(0f, 0f, w, size.height))
                                 }
                             }
@@ -94,10 +131,10 @@ fun GoalComponent(goal: GoalDomain) {
                 contentAlignment = Alignment.Center,
             ) {
                 Kiwi_Image(
-                    getIcon(goal.type),
-                    "Quest Indicator For: ${goal.objective}",
+                    getIcon(type),
+                    "Quest Indicator For: $objective",
                     colorFilter =
-                        ColorFilter.tint(if (goal.status == GoalStatus.NOT_COMPLETED) kiwiColors.colorF1 else kiwiColors.color8C),
+                        ColorFilter.tint(if (status == GoalStatus.NOT_COMPLETED) kiwiColors.colorF1 else kiwiColors.color8C),
                     contentScale = ContentScale.FillWidth,
                 )
             }
@@ -108,7 +145,7 @@ fun GoalComponent(goal: GoalDomain) {
             ) {
                 Kiwi_Label1(
                     KiwiTextArguments(
-                        goal.objective,
+                        objective,
                         TextAlign.Center,
                         kiwiColors.color6,
                     ),
@@ -120,14 +157,14 @@ fun GoalComponent(goal: GoalDomain) {
                 contentAlignment = Alignment.Center,
             ) {
                 Kiwi_Image(
-                    if (goal.status ==
+                    if (status ==
                         GoalStatus.NOT_COMPLETED
                     ) {
                         R.drawable.ic_daily_challenges_plus
                     } else {
                         R.drawable.ic_daily_challenges_tick
                     },
-                    "Quest Indicator For: ${goal.objective}",
+                    "Quest Indicator For: $objective",
 //                    modifier = Modifier.height(getResponsiveSizeHeight(Spacing.large)),
                 )
             }

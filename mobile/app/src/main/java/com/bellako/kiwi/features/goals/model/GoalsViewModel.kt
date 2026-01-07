@@ -10,6 +10,8 @@ import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListDTO
 import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDataMapper
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -189,6 +191,20 @@ class GoalsViewModel
                 goalsListDTOs.flatMap { goalsListDTO ->
                     goalsListDTO.goals.map { GoalDataMapper.toDomain(it) }
                 }
+            }
+        }
+
+        override suspend fun getSuggestedGoals(): Result<List<SuggestedGoalDomain>> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+
+            val result = repository.getSuggestedGoals()
+
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+
+            return result.map { suggestedGoalDTOs ->
+                suggestedGoalDTOs.map { SuggestedGoalDataMapper.toDomain(it) }
             }
         }
     }

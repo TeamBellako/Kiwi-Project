@@ -43,6 +43,7 @@ import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalModalType
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
@@ -164,7 +165,8 @@ fun MapScreen(
     var notTodaygoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
     var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
     var showYesterdayGoalsModal by remember { mutableStateOf(false) }
-//    var newGoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
+    var newGoals by remember { mutableStateOf<List<SuggestedGoalDomain>>(emptyList()) }
+    var showNewGoalsModal by remember { mutableStateOf(false) }
 
     @Suppress("ForbiddenComment")
     LaunchedEffect(Unit) {
@@ -181,7 +183,13 @@ fun MapScreen(
                 }
             }
             if (goals.isEmpty()) {
-                // TODO: call to defaultGoals for new Goals
+                val result = goalsViewModel.getSuggestedGoals()
+                if (result.isSuccess) {
+                    newGoals = result.getOrNull() ?: emptyList()
+                    if (newGoals.isNotEmpty()) {
+                        showNewGoalsModal = true
+                    }
+                }
             }
         }
     }
@@ -194,7 +202,16 @@ fun MapScreen(
             onDismiss = { showYesterdayGoalsModal = false },
         )
     }
-//    GoalsModal(GoalModalType.NEW, newGoals)
+    if (showNewGoalsModal && newGoals.isNotEmpty()) {
+        GoalsModal(
+            goalModalType = GoalModalType.NEW,
+            goals = newGoals,
+            onDismiss = {
+                // TODO: aceptar newGoals con llamada a API
+                showNewGoalsModal = false
+            },
+        )
+    }
 }
 
 @Composable

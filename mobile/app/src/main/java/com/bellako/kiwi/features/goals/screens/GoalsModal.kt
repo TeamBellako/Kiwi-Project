@@ -34,6 +34,7 @@ import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
+import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -42,7 +43,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 @Composable
 fun GoalsModal(
     goalModalType: GoalModalType,
-    goals: List<GoalDomain>,
+    goals: List<IGoal>,
     onDismiss: () -> Unit = {},
 ) {
     var showWorkInProgressPopup by remember { mutableStateOf(false) }

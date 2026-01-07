@@ -1,13 +1,10 @@
 package com.bellako.kiwi.features.goals.data
 
-data class GoalDomain(
+data class SuggestedGoalDomain(
     override val id: String,
     override val objective: String,
     override val description: String,
     override val type: GoalType,
     override val category: GoalCategory,
-    val status: GoalStatus,
     override val points: Int,
-    val progress: Float = 0f,
-    val date: String = "",
 ) : IGoal

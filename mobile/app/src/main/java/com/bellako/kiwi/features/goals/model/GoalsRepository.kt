@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.features.goals.data.GoalDTO
 import com.bellako.kiwi.features.goals.data.GoalsListDTO
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDTO
 import java.time.LocalDate
 
 class GoalsRepository(
@@ -39,5 +40,10 @@ class GoalsRepository(
     suspend fun getGoalsInProgress(): Result<List<GoalsListDTO>> =
         runCatching {
             api.getGoalsInProgress()
+        }
+
+    suspend fun getSuggestedGoals(): Result<List<SuggestedGoalDTO>> =
+        runCatching {
+            api.getSuggestedGoals()
         }
 }
