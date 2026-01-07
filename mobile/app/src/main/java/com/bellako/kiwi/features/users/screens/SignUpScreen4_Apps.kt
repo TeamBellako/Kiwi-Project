@@ -393,6 +393,7 @@ fun AppItem(
         modifier =
             Modifier
                 .padding(getResponsiveSizeHeight(Spacing.xSmall))
+                .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->
                     onPositionChanged(coordinates.boundsInWindow())
                 }.offset { IntOffset(dragOffset.x.toInt(), dragOffset.y.toInt()) }

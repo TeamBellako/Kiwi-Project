@@ -2,9 +2,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val mobileApiUrl: String = System.getenv("MOBILE_API_URL") ?: "http://10.0.2.2:8080"
 val companyEmail: String = System.getenv("MOBILE_COMPANY_EMAIL") ?: "simon@petrikov.com"
-val bugFormLink: String = System.getenv("BUG_FORM_LINK") ?: ""
+val bugFormLink: String = System.getenv("BUG_FORM_LINK") ?: "https://danielrobledo.notion.site/2df7734f3c7b80168948cc11346b5960?pvs=105"
 val conciergeFormLink: String =
-    System.getenv("CONCIERGE_FORM_LINK") ?: "https://danielrobledo.notion.site/2df7734f3c7b80168948cc11346b5960?pvs=105"
+    System.getenv("CONCIERGE_FORM_LINK") ?: "https://danielrobledo.notion.site/2df7734f3c7b80ed9a0bcca6b6e06d30?pvs=105"
 
 plugins {
     alias(libs.plugins.android.application)
