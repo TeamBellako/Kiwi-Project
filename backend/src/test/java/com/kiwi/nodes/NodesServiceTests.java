@@ -79,7 +79,7 @@ public class NodesServiceTests {
         var result = service.completeNode(userId, node.getId());
 
         assertNotNull(result);
-        assertTrue(result.isEmpty()); // no edges
+        assertEquals(1, result.size()); // no edges, just the completed node
     }
 
     @Test(expected = IllegalStateException.class)

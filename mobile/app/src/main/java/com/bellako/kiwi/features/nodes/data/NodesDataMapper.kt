@@ -4,7 +4,7 @@ object NodesDataMapper {
     fun toDomain(dto: NodesDTO): NodesDomain =
         NodesDomain(
             id = dto.id,
-            nodeOrder = dto.nodeOrder,
+            icon = dto.icon,
             status = NodeStatus.valueOf(dto.status),
             price = dto.price,
             cordX = dto.cordX,
@@ -12,12 +12,13 @@ object NodesDataMapper {
             eventOnExecution = dto.eventOnExecution,
             name = dto.name,
             displayName = dto.displayName,
+            connectedNodeIds = dto.connectedNodeIds,
         )
 
     fun toDTO(domain: NodesDomain): NodesDTO =
         NodesDTO(
             id = domain.id,
-            nodeOrder = domain.nodeOrder,
+            icon = domain.icon,
             status = domain.status.name,
             price = domain.price,
             cordX = domain.cordX,
@@ -25,5 +26,6 @@ object NodesDataMapper {
             eventOnExecution = domain.eventOnExecution,
             name = domain.name,
             displayName = domain.displayName,
+            connectedNodeIds = domain.connectedNodeIds,
         )
 }

@@ -1,8 +1,8 @@
 package com.bellako.kiwi.features.nodes.data
 
 data class NodesDTO(
-    val id: Int,
-    val nodeOrder: Int,
+    val id: Long,
+    val icon: Int,
     val status: String,
     val price: Int,
     val cordX: Float,
@@ -10,4 +10,5 @@ data class NodesDTO(
     val eventOnExecution: Int,
     val name: String,
     val displayName: String,
+    val connectedNodeIds: List<Long>,
 )

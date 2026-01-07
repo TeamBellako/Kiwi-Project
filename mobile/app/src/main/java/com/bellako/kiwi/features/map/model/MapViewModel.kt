@@ -237,7 +237,7 @@ class MapViewModel
         // ---------------------------------------------------------------------------------------------
 
         fun selectNode(
-            nodeId: Int,
+            nodeId: Long,
             nodeX: Float,
             nodeY: Float,
         ) {
@@ -252,7 +252,7 @@ class MapViewModel
             _state.value = _state.value.copy(selectedNodeId = null)
         }
 
-        fun setPlayerNode(nodeId: Int) {
+        fun setPlayerNode(nodeId: Long) {
             _state.value = _state.value.copy(playerNode = nodeId)
         }
 
