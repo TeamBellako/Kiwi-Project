@@ -6,7 +6,7 @@ import com.bellako.kiwi.features.nodes.data.NodesState
 interface INodesViewModel : IBaseViewModel<NodesState> {
     fun loadNodes()
 
-    fun unlockNode(nodeId: Int)
+    fun unlockNode(nodeId: Long)
 
-    fun completeNode(nodeId: Int)
+    fun completeNode(nodeId: Long)
 }

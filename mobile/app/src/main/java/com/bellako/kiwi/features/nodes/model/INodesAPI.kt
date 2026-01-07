@@ -11,16 +11,11 @@ interface INodesAPI {
 
     @POST("api/nodes/{nodeId}/unlock")
     suspend fun unlockNode(
-        @Path("nodeId") nodeId: Int,
+        @Path("nodeId") nodeId: Long,
     ): NodesDTO
 
     @POST("api/nodes/{nodeId}/complete")
     suspend fun completeNode(
-        @Path("nodeId") nodeId: Int,
-    ): NodesDTO
-
-    @POST("api/nodes/{nodeId}/lock-next")
-    suspend fun markNextNodesAsLocked(
-        @Path("nodeId") nodeId: Int,
+        @Path("nodeId") nodeId: Long,
     ): List<NodesDTO>
 }

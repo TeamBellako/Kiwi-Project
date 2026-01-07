@@ -5,13 +5,11 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -24,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -46,7 +43,6 @@ import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
-import com.bellako.kiwi.features.map.data.MapState
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -63,6 +59,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import kotlin.collections.forEach
@@ -110,17 +107,27 @@ fun MapScreen(
             elasticityFactor = elasticityFactor,
         )
     }
-
     val nodesState by nodesViewModel.state.collectAsState()
+
     LaunchedEffect(Unit) {
         nodesViewModel.loadNodes()
+
         snapshotFlow { nodesState?.nodes }
-            .filter { it?.isNotEmpty() == true }
+            .filterNotNull()
+            .filter { it.isNotEmpty() }
             .first()
-            .let { nodesList ->
-                val firstOpenOrLocked =
-                    nodesList?.firstOrNull { it.status == NodeStatus.OPEN || it.status == NodeStatus.LOCKED }
-                firstOpenOrLocked?.let { node ->
+            .let { nodesMap ->
+                val nodesList = nodesMap.values.toList()
+
+                val lastOpen = nodesList.lastOrNull { it.status == NodeStatus.OPEN }
+
+                val lastCompleted = nodesList.lastOrNull { it.status == NodeStatus.COMPLETED }
+
+                val defaultNode = nodesList.firstOrNull()
+
+                val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
+
+                selectedNode?.let { node ->
                     mapViewModel.selectNode(node.id, node.cordX, node.cordY)
                     mapViewModel.setPlayerNode(node.id)
                 }
@@ -257,7 +264,7 @@ private fun InteractiveMap(
                                 if (up != null) {
                                     val tap = up.position
 
-                                    val nodes = nodesState?.nodes.orEmpty()
+                                    val nodes = nodesState?.nodes?.values.orEmpty()
                                     if (nodes.isEmpty()) return@awaitEachGesture
 
                                     @Suppress("MagicNumber")
@@ -289,7 +296,7 @@ private fun InteractiveMap(
         }
 
         // NODES
-        nodesState?.nodes?.forEach { node ->
+        nodesState?.nodes?.values?.forEach { node ->
             NodeOnMap(
                 node = node,
                 mapState = mapState,
@@ -302,8 +309,7 @@ private fun InteractiveMap(
         if (!mapState.isFocusingNode) {
             mapState.selectedNodeId?.let { selectedNodeId ->
                 nodesState
-                    ?.nodes
-                    ?.find { it.id == selectedNodeId }
+                    ?.nodes[selectedNodeId]
                     ?.let { selectedNode ->
                         AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
                         NodeAction(

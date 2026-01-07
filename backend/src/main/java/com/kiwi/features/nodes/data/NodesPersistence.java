@@ -3,6 +3,9 @@ package com.kiwi.features.nodes.data;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @EqualsAndHashCode @ToString
 @Entity
 @Table(name = "nodes")
@@ -12,8 +15,8 @@ public class NodesPersistence {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "node_order", nullable = false)
-    private int nodeOrder;
+    @Column(name = "icon", nullable = false)
+    private int icon;
 
     @Column(name = "price", nullable = false)
     private int price;
@@ -33,7 +36,11 @@ public class NodesPersistence {
     @Column(name = "display_name")
     private String displayName;
 
+    @OneToMany(mappedBy = "fromNode", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NodeEdgePersistence> outgoingEdges = new ArrayList<>();
+
     public String getDisplayName() {
         return displayName != null ? displayName : "";
     }
+
 }

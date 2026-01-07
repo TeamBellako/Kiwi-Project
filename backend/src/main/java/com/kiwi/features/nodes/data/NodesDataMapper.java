@@ -1,5 +1,7 @@
 package com.kiwi.features.nodes.data;
 
+import java.util.List;
+
 public class NodesDataMapper {
 
     public static NodesDomain toDomain(NodesPersistence node, UserNodeStatusPersistence userStatus) {
@@ -10,28 +12,35 @@ public class NodesDataMapper {
     public static NodesDTO toDTO(NodesDomain node) {
         return new NodesDTO(
                 node.getId(),
-                node.getNodeOrder(),
                 node.getStatus().name(),
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
                 node.getEventOnExecution(),
                 node.getName(),
-                node.getDisplayName()
+                node.getDisplayName(),
+                node.getConnectedNodeIds()
         );
     }
 
     public static NodesDTO toDTO(NodesPersistence node, UserNodeStatusPersistence status) {
+        List<Long> connectedNodeIds = node.getOutgoingEdges()
+                .stream()
+                .map(edge -> edge.getToNode().getId())
+                .toList();
+
         return new NodesDTO(
                 node.getId(),
-                node.getNodeOrder(),
                 status.getStatus().name(),
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
                 node.getEventOnExecution(),
                 node.getName(),
-                node.getDisplayName()
+                node.getDisplayName(),
+                connectedNodeIds
         );
     }
 

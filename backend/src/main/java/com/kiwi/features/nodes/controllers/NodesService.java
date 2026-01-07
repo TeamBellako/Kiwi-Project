@@ -1,17 +1,16 @@
 package com.kiwi.features.nodes.controllers;
 
 import com.kiwi.features.nodes.data.*;
-import com.kiwi.features.nodes.exceptions.NodeMarkAsLockedException;
+import com.kiwi.features.nodes.exceptions.NodeInaccessibleException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
-import com.kiwi.features.nodes.exceptions.NodeLockedException;
-import com.kiwi.features.nodes.exceptions.NodeSatusNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 public class NodesService {
@@ -32,46 +31,48 @@ public class NodesService {
     }
 
     public List<NodesDTO> getNodesForUser(@NotNull Long userId) {
-        List<NodesPersistence> nodes = nodesRepository.findAll();
+        List<UserNodeStatusPersistence> statuses =
+                userNodeStatusRepository.findByIdUserId(userId);
 
-        return nodes.stream().map(n -> {
-            UserNodeStatusPersistence userStatus = userNodeStatusRepository
-                    .findByIdUserIdAndIdNodeId(userId, n.getId())
-                    .orElse(null);
+        return statuses.stream()
+                .map(status -> {
+                    NodesPersistence node = nodesRepository.findById(status.getId().getNodeId())
+                            .orElseThrow(() -> new NodeNotFoundException(
+                                    status.getId().getNodeId()
+                            ));
 
-            NodesDomain domain = NodesDomainFactory.create(n, userStatus);
-            return NodesDataMapper.toDTO(domain);
+                    NodesDomain domain =
+                            NodesDomainFactory.create(node, status);
 
-        }).collect(Collectors.toList());
+                    return NodesDataMapper.toDTO(domain);
+                })
+                .toList();
     }
 
+    //FOR FUTURE CONDITION EDGES
     @Transactional
-    public List<NodesDTO> markNextNodesAsLocked(Long userId, Long nodeId) {
+    public NodesDTO lockNode(Long userId, Long nodeId) {
+
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
-        UserNodeStatusPersistence nodeStatusPersistence = userNodeStatusRepository
-                .findByIdUserIdAndIdNodeId(userId, nodeId)
-                .orElseThrow(() -> new NodeSatusNotFoundException(nodeId));
+        UserNodeStatusPersistence existingStatus =
+                userNodeStatusRepository
+                        .findByIdUserIdAndIdNodeId(userId, nodeId)
+                        .orElse(null);
 
-        if(nodeStatusPersistence.getStatus() != NodeStatus.COMPLETED){
-            throw new NodeMarkAsLockedException(nodeId);
-        }
+        NodesDomain domain = NodesDataMapper.toDomain(node, existingStatus);
 
-        int nextOrder = node.getNodeOrder() + 1;
+        NodesDomain locked = progressService.lock(domain);
 
-        List<NodesPersistence> nodes = nodesRepository.findAllByNodeOrder(nextOrder);
+        UserNodeStatusPersistence persistence =
+                NodesDataMapper.toPersistence(userId, locked);
 
-        return nodes.stream().map(n -> {
-            NodesDomain domain = NodesDataMapper.toDomain(n, null);
-            NodesDomain locked = progressService.lock(domain);
+        userNodeStatusRepository.saveAndFlush(persistence);
 
-            UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
-            userNodeStatusRepository.saveAndFlush(persistence);
-            return NodesDataMapper.toDTO(n, persistence);
-
-        }).collect(Collectors.toList());
+        return NodesDataMapper.toDTO(node, persistence);
     }
+
 
     @Transactional
     public NodesDTO unlockNode(Long userId, Long nodeId) {
@@ -80,7 +81,7 @@ public class NodesService {
 
         UserNodeStatusPersistence current = userNodeStatusRepository
                 .findByIdUserIdAndIdNodeId(userId, nodeId)
-                .orElseThrow(() -> new NodeLockedException(nodeId));
+                .orElseThrow(() -> new NodeInaccessibleException(nodeId));
 
         NodesDomain domain = NodesDataMapper.toDomain(node, current);
         NodesDomain opened = progressService.unlock(domain);
@@ -92,22 +93,35 @@ public class NodesService {
     }
 
     @Transactional
-    public NodesDTO completeNode(Long userId, Long nodeId) {
+    public List<NodesDTO> completeNode(Long userId, Long nodeId) {
+
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
         UserNodeStatusPersistence current = userNodeStatusRepository
                 .findByIdUserIdAndIdNodeId(userId, nodeId)
-                .orElseThrow(() -> new NodeLockedException(nodeId));
+                .orElseThrow(() -> new NodeInaccessibleException(nodeId));
 
         NodesDomain domain = NodesDataMapper.toDomain(node, current);
         NodesDomain completed = progressService.complete(domain);
 
-        UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, completed);
-        userNodeStatusRepository.saveAndFlush(persistence);
-        return NodesDataMapper.toDTO(node, persistence);
-    }
+        UserNodeStatusPersistence completedPersistence =
+                NodesDataMapper.toPersistence(userId, completed);
 
+        userNodeStatusRepository.saveAndFlush(completedPersistence);
+
+        List<NodesDTO> result = new ArrayList<>();
+
+        result.add(NodesDataMapper.toDTO(completed));
+
+        node.getOutgoingEdges()
+                .stream()
+                .map(edge -> edge.getToNode().getId())
+                .map(nextNodeId -> lockNode(userId, nextNodeId))
+                .forEach(result::add);
+
+        return result;
+    }
 
     public void initializeUserProgress(Long userId) {
         NodesPersistence firstNode = nodesRepository.findById(1L)

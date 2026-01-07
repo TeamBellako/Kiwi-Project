@@ -9,35 +9,36 @@ object NodesTestFactory {
     fun validNodesState(): NodesState =
         NodesState(
             nodes =
-                listOf(
-                    validNodeDomain(1, NodeStatus.COMPLETED, 0.5f, 0.5f, 1, 100, 1, "node1", "Node 1"),
-                    validNodeDomain(2, NodeStatus.COMPLETED, 0.5f, 0.55f, 2, 100, 2, "node2", ""),
-                    validNodeDomain(3, NodeStatus.OPEN, 0.6f, 0.65f, 3, 100, 4, "node3", ""),
-                    validNodeDomain(4, NodeStatus.LOCKED, 0.7f, 0.65f, 3, 100, 5, "node4", ""),
-                    validNodeDomain(5, NodeStatus.INACCESSIBLE, 0.5f, 0.65f, 4, 100, 6, "node5", "Node 5"),
+                mapOf(
+                    Pair(1L, validNodeDomain(1L, NodeStatus.COMPLETED, 0.5f, 0.5f, 1, 100, 1, "node1", "Node 1", listOf(2L))),
+                    Pair(2L, validNodeDomain(2L, NodeStatus.COMPLETED, 0.5f, 0.55f, 2, 100, 2, "node2", "", listOf(3L))),
+                    Pair(3L, validNodeDomain(3L, NodeStatus.OPEN, 0.6f, 0.65f, 3, 100, 4, "node3", "", listOf(4L))),
+                    Pair(4L, validNodeDomain(4L, NodeStatus.LOCKED, 0.7f, 0.65f, 3, 100, 5, "node4", "", listOf())),
                 ),
         )
 
     fun validNodeDomain(
-        id: Int,
+        id: Long,
         status: NodeStatus,
         cordX: Float,
         cordY: Float,
-        order: Int,
+        icon: Int,
         price: Int,
         eventOnExecution: Int,
         name: String,
         displayName: String,
+        connectedNodeIds: List<Long>,
     ): NodesDomain =
         NodesDomain(
             id = id,
             status = status,
             cordX = cordX,
             cordY = cordY,
-            nodeOrder = order,
+            icon = icon,
             price = price,
             eventOnExecution = eventOnExecution,
             name = name,
             displayName = displayName,
+            connectedNodeIds = connectedNodeIds,
         )
 }

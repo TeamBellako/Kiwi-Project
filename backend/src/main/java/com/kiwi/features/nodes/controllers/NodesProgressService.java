@@ -8,18 +8,19 @@ import org.springframework.stereotype.Service;
 public class NodesProgressService {
 
     public NodesDomain lock(NodesDomain node) {
-        if (node.getStatus() != NodeStatus.INACCESSIBLE) {
-            throw new IllegalStateException("Only INACCESSIBLE nodes can be LOCKED");
+        if (node.getStatus() == NodeStatus.INACCESSIBLE) {
+            return new NodesDomain(node.getId(),
+                    NodeStatus.LOCKED,
+                    node.getIcon(),
+                    node.getPrice(),
+                    node.getCordX(),
+                    node.getCordY(),
+                    node.getEventOnExecution(),
+                    node.getName(),
+                    node.getDisplayName(),
+                    node.getConnectedNodeIds());
         }
-        return new NodesDomain(node.getId(),
-                node.getNodeOrder(),
-                NodeStatus.LOCKED,
-                node.getPrice(),
-                node.getCordX(),
-                node.getCordY(),
-                node.getEventOnExecution(),
-                node.getName(),
-                node.getDisplayName());
+        return node;
     }
 
     public NodesDomain unlock(NodesDomain node) {
@@ -27,15 +28,15 @@ public class NodesProgressService {
             throw new IllegalStateException("Only LOCKED nodes can be OPEN");
         }
         return new NodesDomain(node.getId(),
-                node.getNodeOrder(),
                 NodeStatus.OPEN,
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
                 node.getEventOnExecution(),
                 node.getName(),
-                node.getDisplayName()
-        );
+                node.getDisplayName(),
+                node.getConnectedNodeIds());
     }
 
     public NodesDomain complete(NodesDomain node) {
@@ -43,13 +44,14 @@ public class NodesProgressService {
             throw new IllegalStateException("Only OPEN nodes can be COMPLETED");
         }
         return new NodesDomain(node.getId(),
-                node.getNodeOrder(),
                 NodeStatus.COMPLETED,
+                node.getIcon(),
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
                 node.getEventOnExecution(),
                 node.getName(),
-                node.getDisplayName());
+                node.getDisplayName(),
+                node.getConnectedNodeIds());
     }
 }
