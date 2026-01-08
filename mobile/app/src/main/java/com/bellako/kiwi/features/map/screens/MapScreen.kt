@@ -18,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
@@ -41,9 +43,11 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
+import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
@@ -63,12 +67,14 @@ import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.collections.forEach
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("ComplexMethod")
 fun MapScreen(
     maxZoom: Float = 8f,
     mapMarginFactor: Float = 0.08f,
@@ -79,10 +85,10 @@ fun MapScreen(
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
     navController: NavHostController,
-    goalsViewModel: IGoalsViewModel,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
+    val coroutineScope = rememberCoroutineScope()
 
     @Suppress("MagicNumber")
     val viewportHeightPx =
@@ -162,6 +168,8 @@ fun MapScreen(
                     .zIndex(10f),
         )
     }
+    val localGoalsViewModel = LocalGoalsViewModel.current
+    val goalsViewModel: IGoalsViewModel = localGoalsViewModel ?: hiltViewModel<GoalsViewModel>()
     var notTodaygoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
     var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
     var showYesterdayGoalsModal by remember { mutableStateOf(false) }
@@ -207,7 +215,9 @@ fun MapScreen(
             goalModalType = GoalModalType.NEW,
             goals = newGoals,
             onDismiss = {
-                // TODO: aceptar newGoals con llamada a API
+                coroutineScope.launch {
+                    goalsViewModel.createGoalsFromSuggestions(newGoals)
+                }
                 showNewGoalsModal = false
             },
         )

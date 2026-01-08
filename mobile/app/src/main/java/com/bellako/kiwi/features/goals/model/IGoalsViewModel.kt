@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.goals.model
 
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import kotlinx.coroutines.flow.StateFlow
@@ -12,10 +11,7 @@ interface IGoalsViewModel {
 
     fun onDateChanged(newDate: LocalDate)
 
-    suspend fun createGoals(
-        date: String,
-        goals: List<GoalState>,
-    ): Result<Unit>
+    suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit>
 
     suspend fun completeGoal(goalId: String): Result<Unit>
 

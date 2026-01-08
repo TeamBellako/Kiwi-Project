@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.features.goals.data.GoalDataMapper
 import com.bellako.kiwi.features.goals.data.GoalDomain
@@ -34,7 +35,7 @@ class GoalsViewModel
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override suspend fun createGoals(
+        private suspend fun createGoals(
             date: String,
             goals: List<GoalState>,
         ): Result<Unit> {
@@ -66,6 +67,13 @@ class GoalsViewModel
                         )
                 }
             }
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> {
+            val today = dateToString(LocalDate.now())
+            val goalsToCreate = suggestedGoals.map { SuggestedGoalDataMapper.toGoalState(it, today) }
+            return createGoals(today, goalsToCreate)
         }
 
         @RequiresApi(Build.VERSION_CODES.O)

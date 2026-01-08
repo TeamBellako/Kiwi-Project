@@ -159,7 +159,6 @@ private fun AppScreen(
                     personalityViewModel = personalityViewModel,
                     nodesViewModel = nodesViewModel,
                     questsViewModel = questsViewModel,
-                    goalsViewModel = goalsViewModel,
                 )
 
                 if (showDashboard) {
@@ -190,7 +189,6 @@ fun AppNavHost(
     personalityViewModel: IPersonalityViewModel,
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
-    goalsViewModel: IGoalsViewModel,
 ) {
     NavHost(
         navController = navController,
@@ -256,7 +254,6 @@ fun AppNavHost(
                     nodesViewModel = nodesViewModel,
                     questsViewModel = questsViewModel,
                     navController = navController,
-                    goalsViewModel = goalsViewModel,
                     mapViewModel = hiltViewModel()
                 )
             }

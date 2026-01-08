@@ -41,6 +41,7 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
+@Suppress("LongMethod, MagicNumber")
 fun GoalsModal(
     goalModalType: GoalModalType,
     goals: List<IGoal>,

@@ -35,10 +35,10 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalComponent
@@ -237,10 +237,8 @@ fun DashboardModal2_Preview_Expanded() {
 
                 override fun onDateChanged(newDate: LocalDate) {}
 
-                override suspend fun createGoals(
-                    date: String,
-                    goals: List<GoalState>,
-                ): Result<Unit> = Result.success(Unit)
+                override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> =
+                    Result.success(Unit)
 
                 override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
 
@@ -275,6 +273,8 @@ fun DashboardModal2_Preview_Expanded() {
                     )
 
                 override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
+
+                override suspend fun getSuggestedGoals() = Result.success(emptyList<SuggestedGoalDomain>())
             }
         }
 
@@ -297,10 +297,8 @@ fun DashboardModal2_Expanded_Calendar_Preview() {
 
                 override fun onDateChanged(newDate: LocalDate) {}
 
-                override suspend fun createGoals(
-                    date: String,
-                    goals: List<GoalState>,
-                ): Result<Unit> = Result.success(Unit)
+                override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> =
+                    Result.success(Unit)
 
                 override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
 
@@ -335,6 +333,8 @@ fun DashboardModal2_Expanded_Calendar_Preview() {
                     )
 
                 override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
+
+                override suspend fun getSuggestedGoals() = Result.success(emptyList<SuggestedGoalDomain>())
             }
         }
 

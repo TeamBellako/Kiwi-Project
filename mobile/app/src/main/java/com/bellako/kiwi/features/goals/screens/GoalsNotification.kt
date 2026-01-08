@@ -36,6 +36,7 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
+@Suppress("MagicNumber")
 fun GoalsNotification(
     type: GoalModalType,
     goals: List<GoalDomain>,
@@ -113,6 +114,7 @@ fun GoalsNotification(
                     )
                 }
                 Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier =
                         Modifier
                             .weight(0.75f)

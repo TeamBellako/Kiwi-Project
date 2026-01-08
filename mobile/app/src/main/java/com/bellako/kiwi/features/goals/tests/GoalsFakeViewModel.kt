@@ -2,8 +2,8 @@ package com.bellako.kiwi.features.goals.tests
 
 import com.bellako.kiwi.common.model.BaseFakeViewModel
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,10 +25,7 @@ class GoalsFakeViewModel(
 
     override fun onDateChanged(newDate: LocalDate) {}
 
-    override suspend fun createGoals(
-        date: String,
-        goals: List<GoalState>,
-    ): Result<Unit> =
+    override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -74,6 +71,15 @@ class GoalsFakeViewModel(
         }
 
     override suspend fun getGoalsInProgress(): Result<List<GoalDomain>> =
+        if (fakeError) {
+            handleError(fakeException)
+            Result.failure(fakeException)
+        } else {
+            handleSuccess()
+            Result.success(emptyList())
+        }
+
+    override suspend fun getSuggestedGoals(): Result<List<SuggestedGoalDomain>> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)

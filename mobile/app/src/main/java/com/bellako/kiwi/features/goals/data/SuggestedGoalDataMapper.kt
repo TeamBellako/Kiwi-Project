@@ -21,6 +21,21 @@ object SuggestedGoalDataMapper {
             points = domain.points,
         )
 
+    fun toGoalState(
+        domain: SuggestedGoalDomain,
+        date: String,
+    ): GoalState =
+        GoalState(
+            id = domain.id,
+            objective = domain.objective.toLongOrNull() ?: 0L,
+            description = domain.description,
+            type = typeToString(domain.type),
+            category = categoryToString(domain.category),
+            status = "IN_PROGRESS",
+            points = domain.points,
+            date = date,
+        )
+
     private fun stringToCategory(category: String?): GoalCategory =
         when (category?.uppercase()) {
             "DAILY_CHALLENGES" -> GoalCategory.DAILY_CHALLENGES
@@ -32,5 +47,14 @@ object SuggestedGoalDataMapper {
         when (category) {
             GoalCategory.DAILY_CHALLENGES -> "DAILY_CHALLENGES"
             GoalCategory.APP_USAGE -> "APP_USAGE"
+        }
+
+    private fun typeToString(type: GoalType): String =
+        when (type) {
+            GoalType.EXERCISE -> "EXERCISE"
+            GoalType.SLEEP -> "SLEEP"
+            GoalType.MEDITATION -> "MEDITATION"
+            GoalType.NUTRITION -> "NUTRITION"
+            GoalType.PRODUCTIVITY -> "PRODUCTIVITY"
         }
 }
