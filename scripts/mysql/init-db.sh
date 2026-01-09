@@ -165,7 +165,7 @@ INSERT INTO nodes ( id, icon, price, cord_x, cord_y, event_on_execution, name, d
 VALUES 
 (1,1,120,0.585,0.12,0,'node_1','START'), 
 (2,0,140,0.623,0.175,0,'node_2',NULL), 
-(3,0,180,0.598,0.275,0,'node_3',NULL),
+(3,0,180,0.66,0.228,0,'node_3',NULL),
 (4,2,100,0.598,0.228,0,'node_4','CAVE OF THE DEEP BREATH'), 
 (5,0,180,0.66,0.275,0,'node_5',NULL),
 (6,3,140,0.615,0.295,0,'node_6','CITY');

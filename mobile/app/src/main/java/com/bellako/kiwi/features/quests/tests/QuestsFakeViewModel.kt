@@ -21,6 +21,10 @@ class QuestsFakeViewModel(
     private val _state = MutableStateFlow(initialState)
     override val state: StateFlow<QuestsState> = _state.asStateFlow()
 
+    var fakeCompletedQuests = mutableSetOf<Int>()
+    var fakeCompletedSubquests = mutableSetOf<Int>()
+    var fakeFailedSubquests = mutableSetOf<Int>()
+
     var fakeError: Boolean = false
     var fakeException: Exception = Exception("Simulated error")
 
@@ -70,6 +74,13 @@ class QuestsFakeViewModel(
         handleSuccess()
         setUiState(UIState.Success(Unit))
     }
+
+    // CHECK QUESTS AND SUBQUESTS STATUS
+    override suspend fun isQuestCompleted(questId: Int): Boolean = fakeCompletedQuests.contains(questId)
+
+    override suspend fun isSubquestCompleted(subquestId: Int): Boolean = fakeCompletedSubquests.contains(subquestId)
+
+    override suspend fun isSubquestFailed(subquestId: Int): Boolean = fakeFailedSubquests.contains(subquestId)
 
     // GIVE QUEST
     override fun giveQuest(questId: Int) {
