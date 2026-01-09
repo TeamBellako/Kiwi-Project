@@ -26,7 +26,7 @@ public class QuestServiceTests {
     private final Long userId = 1L;
 
     // ============================================================================================
-    // GET QUESTS
+    // GET USER QUESTS
     // ============================================================================================
 
     @Test
@@ -56,6 +56,53 @@ public class QuestServiceTests {
         assertEquals(1, result.size());
         assertEquals(q2.getId(), result.get(0).getQuestId());
     }
+
+    // ============================================================================================
+    // GET QUEST FOR USER
+    // ============================================================================================
+
+    @Test
+    public void getQuestForUser_returnsQuestWithSubquestsAndStatuses() {
+        QuestPersistence questObj = questRepo.saveAndFlush(quest(1));
+
+        SubquestPersistence s1 = subRepo.saveAndFlush(subquest(10, questObj, 1));
+        SubquestPersistence s2 = subRepo.saveAndFlush(subquest(11, questObj, 2));
+
+        userQuestRepo.save(activeQuestStatus(userId, questObj));
+        userSubRepo.save(activeSubquestStatus(userId, s1));
+        userSubRepo.save(lockedSubquestStatus(userId, s2));
+
+        QuestDTO result = service.getQuestForUser(userId, questObj.getId());
+
+        assertEquals(questObj.getId(), result.getQuestId());
+        assertEquals(QuestStatus.ACTIVE.name(), result.getStatus());
+        assertEquals(2, result.getSubquests().size());
+
+        assertEquals(SubquestStatus.ACTIVE.name(),
+                result.getSubquests().get(0).getStatus());
+
+        assertEquals(SubquestStatus.LOCKED.name(),
+                result.getSubquests().get(1).getStatus());
+    }
+
+    // ============================================================================================
+    // GET SUBQUEST FOR USER
+    // ============================================================================================
+
+    @Test
+    public void getSubquestForUser_returnsSubquestWithUserStatus() {
+        QuestPersistence questObj = questRepo.saveAndFlush(quest(1));
+        SubquestPersistence subquestObj = subRepo.saveAndFlush(subquest(10, questObj, 1));
+
+        userQuestRepo.save(activeQuestStatus(userId, questObj));
+        userSubRepo.save(completedSubquestStatus(userId, subquestObj));
+
+        SubquestDTO result = service.getSubquestForUser(userId, subquestObj.getId());
+
+        assertEquals(subquestObj.getId(), result.getSubquestId());
+        assertEquals(SubquestStatus.COMPLETED.name(), result.getStatus());
+    }
+
 
     // ============================================================================================
     // GIVE QUEST

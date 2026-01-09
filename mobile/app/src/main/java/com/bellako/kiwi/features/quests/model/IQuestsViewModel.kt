@@ -26,6 +26,12 @@ interface IQuestsViewModel : IBaseViewModel<QuestsState> {
 
     fun loadCompletedQuests()
 
+    suspend fun isQuestCompleted(questId: Int): Boolean
+
+    suspend fun isSubquestCompleted(subquestId: Int): Boolean
+
+    suspend fun isSubquestFailed(subquestId: Int): Boolean
+
     fun giveQuest(questId: Int)
 
     fun completeSubquest(subquestId: Int)

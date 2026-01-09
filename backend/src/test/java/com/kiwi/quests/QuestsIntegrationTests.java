@@ -122,6 +122,51 @@ public class QuestsIntegrationTests {
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
+    public void getQuestForUser() throws Exception {
+        var user = createUser();
+        var quest = createQuestWithSubquests(10, 20, 21);
+
+        questStatusRepository.saveAndFlush(activeQuestStatus(user.getId(), quest));
+
+        List<SubquestPersistence> subquests =
+                subquestRepository.findAllByQuestIdOrderByOrderIndex(quest.getId());
+
+        subquestStatusRepository.saveAndFlush(activeSubquestStatus(user.getId(), subquests.get(0)));
+        subquestStatusRepository.saveAndFlush(lockedSubquestStatus(user.getId(), subquests.get(1)));
+
+        mockMvc.perform(get(API_URL + "/" + quest.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.questId").value(quest.getId()))
+                .andExpect(jsonPath("$.status").value(QuestStatus.ACTIVE.toString()))
+                .andExpect(jsonPath("$.subquests.length()").value(2))
+                .andExpect(jsonPath("$.subquests[0].status")
+                        .value(SubquestStatus.ACTIVE.toString()))
+                .andExpect(jsonPath("$.subquests[1].status")
+                        .value(SubquestStatus.LOCKED.toString()));
+    }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void getSubquestForUser() throws Exception {
+        var user = createUser();
+        var quest = createQuestWithSubquests(30, 40);
+
+        questStatusRepository.saveAndFlush(activeQuestStatus(user.getId(), quest));
+
+        SubquestPersistence subquest =
+                subquestRepository.findAllByQuestIdOrderByOrderIndex(quest.getId()).get(0);
+
+        subquestStatusRepository.saveAndFlush(completedSubquestStatus(user.getId(), subquest));
+
+        mockMvc.perform(get(API_URL + "/subquests/" + subquest.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subquestId").value(subquest.getId()))
+                .andExpect(jsonPath("$.status")
+                        .value(SubquestStatus.COMPLETED.toString()));
+    }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void giveQuest() throws Exception {
         var user = createUser();
 

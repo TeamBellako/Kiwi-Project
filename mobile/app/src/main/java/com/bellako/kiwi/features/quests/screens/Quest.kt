@@ -83,9 +83,9 @@ fun Quest(
             // Background image
             Kiwi_Image(
                 if (expanded) {
-                    R.drawable.card_goals_selected
+                    R.drawable.quest_bg_selected
                 } else {
-                    R.drawable.card_goals
+                    R.drawable.quest_bg
                 },
                 "Quest background",
             )
@@ -148,7 +148,7 @@ fun Quest(
             ) {
                 // Background image
                 Kiwi_Image(
-                    R.drawable.dropdown_bg,
+                    R.drawable.subquest_bg,
                     "Subquest background",
                     modifier = Modifier.matchParentSize(),
                     contentScale = ContentScale.Crop,

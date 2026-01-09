@@ -1,7 +1,7 @@
 package com.bellako.kiwi.features.quests.model
 
 import com.bellako.kiwi.features.quests.data.QuestDTO
-import com.bellako.kiwi.features.quests.data.SubquestResultDTO
+import com.bellako.kiwi.features.quests.data.SubquestDTO
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -12,6 +12,16 @@ interface IQuestsAPI {
 
     @GET("api/quests/completed")
     suspend fun getCompletedQuests(): List<QuestDTO>
+
+    @GET("api/quests/{questId}")
+    suspend fun getQuest(
+        @Path("questId") questId: Int,
+    ): QuestDTO
+
+    @GET("api/quests/subquests/{subquestId}")
+    suspend fun getSubquest(
+        @Path("subquestId") subquestId: Int,
+    ): SubquestDTO
 
     @POST("api/quests/{questId}/give")
     suspend fun giveQuest(
