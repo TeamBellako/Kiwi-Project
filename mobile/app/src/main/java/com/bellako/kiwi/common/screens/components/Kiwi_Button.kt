@@ -4,25 +4,21 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +35,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,6 +48,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
+@Suppress("LongParameterList")
 @Composable
 private fun Kiwi_Button(
     modifier: Modifier,
@@ -62,7 +60,10 @@ private fun Kiwi_Button(
     enabled: Boolean = true,
     color: Color,
     testTag: String = "",
-    sound: Int = R.raw.snd_ui_button
+    sound: Int = R.raw.snd_ui_button,
+    iconRes: Int? = null,
+    iconSize: Dp = 10.dp,
+    iconSpacer: Dp = Spacing.small,
 ) {
     val context = LocalContext.current
 
@@ -87,24 +88,37 @@ private fun Kiwi_Button(
                 ),
             modifier =
                 Modifier
-
                     .testTag(testTag)
                     .then(
                         horizontalMargin?.let {
                             Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = getResponsiveSizeHeight(it))
-                        } ?: Modifier
+                        } ?: Modifier,
                     ),
             shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
         ) {
-            val actualTextArguments =
-                if (enabled) {
-                    textArguments
-                } else {
-                    textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (iconRes != null) {
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = null,
+                        tint = textArguments.color,
+                        modifier = Modifier.height(getResponsiveSizeHeight(iconSize)),
+                    )
+                    Kiwi_Spacer_Horizontal(iconSpacer)
                 }
-            Kiwi_Label1(actualTextArguments)
+
+                val actualTextArguments =
+                    if (enabled) {
+                        textArguments
+                    } else {
+                        textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                    }
+                Kiwi_Label1(actualTextArguments)
+            }
         }
     }
 }
@@ -119,7 +133,10 @@ fun Kiwi_FixedSizeButton(
     enabled: Boolean = true,
     color: Color,
     testTag: String = "",
-    sound: Int = R.raw.snd_ui_button
+    sound: Int = R.raw.snd_ui_button,
+    iconRes: Int? = null,
+    iconSize: Dp = 10.dp,
+    iconSpacer: Dp = Spacing.small,
 ) {
     Kiwi_Button(
         modifier,
@@ -131,7 +148,10 @@ fun Kiwi_FixedSizeButton(
         enabled,
         color,
         testTag,
-        sound
+        sound,
+        iconRes,
+        iconSize,
+        iconSpacer,
     )
 }
 
@@ -145,7 +165,7 @@ fun Kiwi_AdaptableSizeButton(
     enabled: Boolean = true,
     color: Color,
     testTag: String = "",
-    sound: Int = R.raw.snd_ui_button
+    sound: Int = R.raw.snd_ui_button,
 ) {
     Kiwi_Button(
         modifier,
@@ -157,7 +177,7 @@ fun Kiwi_AdaptableSizeButton(
         enabled,
         color,
         testTag,
-        sound
+        sound,
     )
 }
 
@@ -173,7 +193,7 @@ fun Kiwi_HoldButton(
     color: Color,
     fillColor: Color,
     testTag: String = "",
-    sound: Int = R.raw.snd_ui_button
+    sound: Int = R.raw.snd_ui_button,
 ) {
     val context = LocalContext.current
     val view = LocalView.current
@@ -359,6 +379,37 @@ fun Kiwi_Button_Preview() {
                 onClick = {},
                 enabled = false,
             )
+            Kiwi_Spacer()
+            Row {
+                Kiwi_FixedSizeButton(
+                    textArguments =
+                        KiwiTextArguments(
+                            "BUTTON",
+                            color = kiwiColors.colorF,
+                            bold = true,
+                        ),
+                    color = kiwiColors.color5,
+                    onClick = {},
+                    modifier = Modifier.weight(0.5f),
+                )
+
+                Kiwi_Spacer()
+
+                Kiwi_FixedSizeButton(
+                    textArguments =
+                        KiwiTextArguments(
+                            "BUTTON",
+                            color = kiwiColors.colorF,
+                            bold = true,
+                        ),
+                    color = kiwiColors.color5,
+                    onClick = {},
+                    modifier = Modifier.weight(0.5f),
+                    enabled = false,
+                    iconRes = R.drawable.ic_eye_open,
+                    iconSize = 15.dp,
+                )
+            }
         }
     }
 }
