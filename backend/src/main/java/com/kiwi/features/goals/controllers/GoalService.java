@@ -37,22 +37,35 @@ public class GoalService {
     }
 
     @Transactional
-    public GoalsListDTO createGoals(GoalsListDTO goalsListDTO, Authentication authentication) {
+    public List<GoalDTO> createGoals(List<GoalDTO> goals, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
-        LocalDate date = LocalDate.parse(goalsListDTO.getDate(), DATE_FORMATTER);
+        // Si no se proporciona fecha en los goals, usar la fecha actual
+        LocalDate defaultDate = LocalDate.now();
+        
+        // Si los goals tienen fecha, usar la primera (todas deberían tener la misma fecha)
+        final LocalDate date;
+        if (!goals.isEmpty() && goals.get(0).getDate() != null && !goals.get(0).getDate().isEmpty()) {
+            date = LocalDate.parse(goals.get(0).getDate(), DATE_FORMATTER);
+        } else {
+            date = defaultDate;
+        }
 
         // Eliminar goals existentes para esta fecha
-        List<GoalPersistence> existingGoals = goalRepository.findByUserAndDate(user, date);
-        goalRepository.deleteAll(existingGoals);
+        // List<GoalPersistence> existingGoals = goalRepository.findByUserAndDate(user, date);
+        // goalRepository.deleteAll(existingGoals);
 
-        // Crear nuevas goals
-        List<GoalPersistence> newGoals = goalsListDTO.getGoals().stream()
-                .map(dto -> GoalDataMapper.toEntity(dto, user, date))
+        List<GoalPersistence> newGoals = goals.stream()
+                .map(dto -> {
+                    dto.setId(null); // Forzar id a null para nuevas entidades
+                    return GoalDataMapper.toEntity(dto, user, date);
+                })
                 .collect(Collectors.toList());
 
         List<GoalPersistence> savedGoals = goalRepository.saveAll(newGoals);
 
-        return GoalDataMapper.toGoalsListDTO(date, savedGoals);
+        return savedGoals.stream()
+                .map(GoalDataMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -60,11 +73,11 @@ public class GoalService {
      * SOLO puede completar el propietario del goal.
      */
     @Transactional
-    public GoalDTO completeGoal(String goalId, Authentication authentication) {
+    public GoalDTO completeGoal(Long goalId, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
         GoalPersistence goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId));
+                .orElseThrow(() -> new GoalNotFoundException(goalId.toString()));
 
         // Verificar que el goal pertenece al usuario autenticado
         if (!goal.getUser().getId().equals(user.getId())) {
@@ -91,11 +104,11 @@ public class GoalService {
      * SOLO puede descompletar el propietario del goal.
      */
     @Transactional
-    public GoalDTO uncompleteGoal(String goalId, Authentication authentication) {
+    public GoalDTO uncompleteGoal(Long goalId, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
         GoalPersistence goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId));
+                .orElseThrow(() -> new GoalNotFoundException(goalId.toString()));
 
 
         // Verificar que el goal pertenece al usuario autenticado
@@ -116,52 +129,39 @@ public class GoalService {
     }
 
     @Transactional(readOnly = true)
-    public GoalsListDTO getGoalsByDate(String dateString, Authentication authentication) {
+    public List<GoalDTO> getGoalsByDate(String dateString, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
         LocalDate date = LocalDate.parse(dateString, DATE_FORMATTER);
 
         List<GoalPersistence> goals = goalRepository.findByUserAndDate(user, date);
 
-        return GoalDataMapper.toGoalsListDTO(date, goals);
-    }
-
-    @Transactional(readOnly = true)
-    public List<GoalsListDTO> getAllGoals(Authentication authentication) {
-        UsersPersistence user = getUserFromAuthentication(authentication);
-
-        List<GoalPersistence> allGoals = goalRepository.findByUserOrderByDateDesc(user);
-
-        // Agrupar por fecha
-        Map<LocalDate, List<GoalPersistence>> goalsByDate = allGoals.stream()
-                .collect(Collectors.groupingBy(GoalPersistence::getDate));
-
-        // Convertir a lista de GoalsListDTO
-        return goalsByDate.entrySet().stream()
-                .map(entry -> GoalDataMapper.toGoalsListDTO(entry.getKey(), entry.getValue()))
-                .sorted((a, b) -> b.getDate().compareTo(a.getDate())) // Ordenar descendente por fecha
+        return goals.stream()
+                .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<GoalsListDTO> getGoalsInProgress(Authentication authentication) {
+    public List<GoalDTO> getAllGoals(Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        List<GoalPersistence> allGoals = goalRepository.findByUserOrderByDateDesc(user);
+
+        return allGoals.stream()
+                .map(GoalDataMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<GoalDTO> getGoalsInProgress(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
         LocalDate today = LocalDate.now();
 
         List<GoalPersistence> allGoals = goalRepository.findByUserOrderByDateDesc(user);
         
         // Filtrar solo los goals con estado IN_PROGRESS y fecha anterior a hoy (excluye hoy)
-        List<GoalPersistence> goalsInProgress = allGoals.stream()
+        return allGoals.stream()
                 .filter(goal -> goal.getStatus() == GoalStatus.IN_PROGRESS && goal.getDate().isBefore(today))
-                .collect(Collectors.toList());
-
-        // Agrupar por fecha
-        Map<LocalDate, List<GoalPersistence>> goalsByDate = goalsInProgress.stream()
-                .collect(Collectors.groupingBy(GoalPersistence::getDate));
-
-        // Convertir a lista de GoalsListDTO
-        return goalsByDate.entrySet().stream()
-                .map(entry -> GoalDataMapper.toGoalsListDTO(entry.getKey(), entry.getValue()))
-                .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
+                .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
 }

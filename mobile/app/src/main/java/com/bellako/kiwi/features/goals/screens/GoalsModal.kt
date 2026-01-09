@@ -15,9 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,19 +37,25 @@ import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.IGoal
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import kotlinx.coroutines.launch
 
 @Composable
-@Suppress("LongMethod, MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 fun GoalsModal(
     goalModalType: GoalModalType,
     goals: List<IGoal>,
+    goalsViewModel: IGoalsViewModel,
     onDismiss: () -> Unit = {},
 ) {
     var showWorkInProgressPopup by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     val header =
         if (goalModalType == GoalModalType.NEW) {
@@ -67,89 +75,114 @@ fun GoalsModal(
     @Suppress("MagicNumber")
     val buttonPercentage = 0.5f
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    // Box con fondo difuminado
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.6f)),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        Box(
-            contentAlignment = Alignment.TopCenter,
-            modifier = Modifier.padding(top = getResponsiveSizeHeight(24.dp)).padding(horizontal = getResponsiveSizeHeight(24.dp)),
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.goals_modal),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth(),
+            Box(
+                contentAlignment = Alignment.TopCenter,
+                modifier =
+                    Modifier
+                        .padding(top = getResponsiveSizeHeight(24.dp))
+                        .padding(horizontal = getResponsiveSizeHeight(24.dp)),
             ) {
-                Kiwi_H1(
-                    KiwiTextArguments(
-                        header,
-                        TextAlign.Center,
-                        bold = true,
-                        modifier =
-                            Modifier.padding(
-                                top = getResponsiveSizeHeight(Spacing.medium),
-                                bottom = getResponsiveSizeHeight(Spacing.small),
-                            ),
-                    ),
+                Image(
+                    painter = painterResource(id = R.drawable.goals_modal),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                Kiwi_Spacer(Spacing.medium)
-                Kiwi_P2(
-                    KiwiTextArguments(
-                        body,
-                        TextAlign.Center,
-                        color = kiwiColor.color6,
-                        modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.medium)),
-                    ),
-                )
-                Kiwi_Spacer(Spacing.large)
-//                Column(modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.medium)))
-//                {
-                for (goal in goals) {
-                    GoalComponent(goal)
-                    Kiwi_Spacer(Spacing.small)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Kiwi_H1(
+                        KiwiTextArguments(
+                            header,
+                            TextAlign.Center,
+                            bold = true,
+                            modifier =
+                                Modifier.padding(
+                                    top = getResponsiveSizeHeight(Spacing.medium),
+                                    bottom = getResponsiveSizeHeight(Spacing.small),
+                                ),
+                        ),
+                    )
+                    Kiwi_Spacer(Spacing.medium)
+                    Kiwi_P2(
+                        KiwiTextArguments(
+                            body,
+                            TextAlign.Center,
+                            color = kiwiColor.color6,
+                            modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.medium)),
+                        ),
+                    )
+                    Kiwi_Spacer(Spacing.large)
+                    for (goal in goals) {
+                        GoalComponent(goal, goalsViewModel)
+                        Kiwi_Spacer(Spacing.small)
+                    }
                 }
-//                }
             }
-        }
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 0.dp),
-            horizontalArrangement =
-                androidx.compose.foundation.layout.Arrangement
-                    .spacedBy(12.dp),
-        ) {
-            Kiwi_FixedSizeButton(
-                textArguments =
-                    KiwiTextArguments(
-                        "Modify",
-                        color = kiwiColor.colorF,
-                        bold = false,
-                    ),
-                color = kiwiColor.color7D,
+            Row(
                 modifier =
                     Modifier
-                        .weight(buttonPercentage),
-                onClick = { showWorkInProgressPopup = true },
-            )
-            Kiwi_FixedSizeButton(
-                textArguments =
-                    KiwiTextArguments(
-                        if (goalModalType == GoalModalType.NEW) "Let's go!" else "Done",
-                        color = kiwiColor.colorF,
-                        bold = false,
-                    ),
-                color = kiwiColor.color8,
-                modifier =
-                    Modifier
-                        .weight(buttonPercentage),
-                onClick = { onDismiss() },
-            )
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 0.dp),
+                horizontalArrangement =
+                    androidx.compose.foundation.layout.Arrangement
+                        .spacedBy(12.dp),
+            ) {
+                Kiwi_FixedSizeButton(
+                    textArguments =
+                        KiwiTextArguments(
+                            "Modify",
+                            color = kiwiColor.colorF,
+                            bold = false,
+                        ),
+                    color = kiwiColor.color7D,
+                    modifier =
+                        Modifier
+                            .weight(buttonPercentage),
+                    onClick = { showWorkInProgressPopup = true },
+                )
+                Kiwi_FixedSizeButton(
+                    textArguments =
+                        KiwiTextArguments(
+                            if (goalModalType == GoalModalType.NEW) "Let's go!" else "Done",
+                            color = kiwiColor.colorF,
+                            bold = false,
+                        ),
+                    color = kiwiColor.color8,
+                    modifier =
+                        Modifier
+                            .weight(buttonPercentage),
+                    onClick = {
+                        if (goalModalType == GoalModalType.NEW) {
+                            val suggestedGoals = goals.filterIsInstance<SuggestedGoalDomain>()
+                            coroutineScope.launch {
+                                goalsViewModel.createGoalsFromSuggestions(suggestedGoals)
+                            }
+                        } else {
+                            coroutineScope.launch {
+                                for (goal in goals) {
+                                    if (goal is GoalDomain && goal.status != GoalStatus.COMPLETED) {
+                                        goalsViewModel.uncompleteGoal(goalId = goal.id)
+                                    }
+                                }
+                            }
+                        }
+                        onDismiss()
+                    },
+                )
+            }
         }
     }
 
@@ -237,6 +270,7 @@ fun GoalsModal_Preview() {
                             progress = 0.5f,
                         ),
                     ),
+                goalsViewModel = GoalsFakeViewModel(),
             )
         }
     }

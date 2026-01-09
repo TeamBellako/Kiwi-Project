@@ -1,7 +1,10 @@
 package com.bellako.kiwi.features.goals.tests
 
 import com.bellako.kiwi.common.model.BaseFakeViewModel
+import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
+import com.bellako.kiwi.features.goals.data.GoalStatus
+import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
@@ -58,7 +61,30 @@ class GoalsFakeViewModel(
             Result.failure(fakeException)
         } else {
             handleSuccess()
-            Result.success(emptyList())
+            Result.success(
+                listOf(
+                    GoalDomain(
+                        "1",
+                        "Complete daily meditation",
+                        "Meditate for at least 10 minutes",
+                        GoalType.MEDITATION,
+                        GoalCategory.DAILY_CHALLENGES,
+                        GoalStatus.IN_PROGRESS,
+                        150,
+                        progress = 0.0f,
+                    ),
+                    GoalDomain(
+                        "2",
+                        "Exercise routine",
+                        "Complete your workout session",
+                        GoalType.EXERCISE,
+                        GoalCategory.DAILY_CHALLENGES,
+                        GoalStatus.IN_PROGRESS,
+                        200,
+                        progress = 0.5f,
+                    ),
+                ),
+            )
         }
 
     override suspend fun loadAllGoals(): Result<Unit> =

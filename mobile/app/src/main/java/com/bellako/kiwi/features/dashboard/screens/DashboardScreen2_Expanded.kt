@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -39,7 +38,6 @@ import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
-import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalComponent
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -65,6 +63,7 @@ fun DashboardScreen2_Expanded(
     metricsViewModel: IMetricsViewModel,
     metricsState: MetricsState,
     personalityViewModel: IPersonalityViewModel,
+    goalsViewModel: IGoalsViewModel,
     shouldShowCalendarView: MutableState<Boolean>,
     isLoading: Boolean,
 ) {
@@ -106,13 +105,16 @@ fun DashboardScreen2_Expanded(
                 shouldShowCalendarView.value = true
             }
 
-            ExpandedProgressBox(metricsState)
+            ExpandedProgressBox(metricsState, goalsViewModel)
         }
     }
 }
 
 @Composable
-private fun ExpandedProgressBox(state: MetricsState) {
+private fun ExpandedProgressBox(
+    state: MetricsState,
+    goalsViewModel: IGoalsViewModel,
+) {
     Box(
         modifier =
             Modifier
@@ -128,7 +130,7 @@ private fun ExpandedProgressBox(state: MetricsState) {
 
             Kiwi_Spacer(Spacing.small)
 
-            ExpandedSummaryCard(state)
+            ExpandedSummaryCard(state, goalsViewModel)
 
             Kiwi_Spacer(Spacing.small)
         }
@@ -186,13 +188,14 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
 }
 
 @Composable
-private fun ExpandedSummaryCard(metricsState: MetricsState) {
-    val localViewModel = LocalGoalsViewModel.current
-    val viewModel = localViewModel ?: hiltViewModel<GoalsViewModel>()
+private fun ExpandedSummaryCard(
+    metricsState: MetricsState,
+    goalsViewModel: IGoalsViewModel,
+) {
     var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
 
     LaunchedEffect(metricsState.date) {
-        val result = viewModel.getGoalsByDate(metricsState.date)
+        val result = goalsViewModel.getGoalsByDate(metricsState.date)
         if (result.isSuccess) {
             goals = result.getOrNull() ?: emptyList()
         }
@@ -213,7 +216,7 @@ private fun ExpandedSummaryCard(metricsState: MetricsState) {
 
         goals.forEach { goal ->
             key(goal.id) {
-                GoalComponent(goal)
+                GoalComponent(goal, goalsViewModel)
 //                ExpandedGoalComponent(goal)
                 Kiwi_Spacer(Spacing.xSmall)
             }

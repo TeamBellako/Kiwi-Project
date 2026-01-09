@@ -10,11 +10,12 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 public class GoalDTO {
-    private String id;
+    private Long id;
     private Long objective;
     private String description;
     private String type;
     private String category;
     private String status;
     private Integer points;
+    private String date;
 }

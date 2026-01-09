@@ -72,9 +72,7 @@ public class GoalsIntegrationTests {
     public void createGoals_valid_returnsCreated() throws Exception {
         createUser();
         
-        LocalDate date = LocalDate.now();
-        GoalsListDTO request = goalsListDTO(
-                date.toString(),
+        List<GoalDTO> request = List.of(
                 inProgressGoalDTO(null),
                 inProgressGoalDTO(null)
         );
@@ -82,8 +80,7 @@ public class GoalsIntegrationTests {
         mockMvc.perform(getPostRequestBuilder(API_URL, request)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.date").value(date.toString()))
-                .andExpect(jsonPath("$.goals.length()").value(2));        
+                .andExpect(jsonPath("$.length()").value(2));        
         goalRepository.flush();    }
 
     @Test
@@ -99,15 +96,14 @@ public class GoalsIntegrationTests {
         goalRepository.flush();
 
         // Replace with new goals
-        GoalsListDTO request = goalsListDTO(
-                date.toString(),
+        List<GoalDTO> request = List.of(
                 inProgressGoalDTO(null)
         );
 
         mockMvc.perform(getPostRequestBuilder(API_URL, request)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.goals.length()").value(1));
+                .andExpect(jsonPath("$.length()").value(1));
 
         goalRepository.flush();
         
@@ -201,7 +197,7 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now().minusDays(1);
         GoalPersistence goal = inProgressGoalPersistence(null, date, user);
         goal = goalRepository.saveAndFlush(goal);
-        String goalId = goal.getId();
+        Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/complete")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -240,7 +236,7 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now().minusDays(1);
         GoalPersistence goal = inProgressGoalPersistence(null, date, otherUser);
         goal = goalRepository.saveAndFlush(goal);
-        String goalId = goal.getId();
+        Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/complete")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -259,7 +255,7 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now().minusDays(1);
         GoalPersistence goal = inProgressGoalPersistence(null, date, user);
         goal = goalRepository.saveAndFlush(goal);
-        String goalId = goal.getId();
+        Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/uncompleted")
                         .contentType(MediaType.APPLICATION_JSON))

@@ -12,6 +12,5 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 public class GoalsListDTO {
-    private String date;
     private List<GoalDTO> goals;
 }

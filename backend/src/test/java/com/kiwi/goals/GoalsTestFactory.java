@@ -12,7 +12,7 @@ public class GoalsTestFactory {
     // =========================================================================
 
     public static GoalPersistence goalPersistence(
-            String id,
+            Long id,
             Long objective,
             String description,
             GoalType type,
@@ -40,7 +40,7 @@ public class GoalsTestFactory {
     // =========================================================================
 
     public static GoalDTO goalDTO(
-            String id,
+            Long id,
             Long objective,
             String description,
             GoalType type,
@@ -63,7 +63,7 @@ public class GoalsTestFactory {
     // HELPERS
     // =========================================================================
 
-    public static GoalDTO inProgressGoalDTO(String id) {
+    public static GoalDTO inProgressGoalDTO(Long id) {
         return goalDTO(
                 id,
                 30L,
@@ -75,7 +75,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalDTO completedGoalDTO(String id) {
+    public static GoalDTO completedGoalDTO(Long id) {
         return goalDTO(
                 id,
                 30L,
@@ -87,7 +87,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalDTO notCompletedGoalDTO(String id) {
+    public static GoalDTO notCompletedGoalDTO(Long id) {
         return goalDTO(
                 id,
                 30L,
@@ -99,7 +99,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalPersistence inProgressGoalPersistence(String id, LocalDate date, UsersPersistence user) {
+    public static GoalPersistence inProgressGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
         return goalPersistence(
                 id,
                 30L,
@@ -113,7 +113,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalPersistence completedGoalPersistence(String id, LocalDate date, UsersPersistence user) {
+    public static GoalPersistence completedGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
         return goalPersistence(
                 id,
                 30L,
@@ -127,7 +127,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalPersistence notCompletedGoalPersistence(String id, LocalDate date, UsersPersistence user) {
+    public static GoalPersistence notCompletedGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
         return goalPersistence(
                 id,
                 30L,
@@ -139,12 +139,5 @@ public class GoalsTestFactory {
                 date,
                 user
         );
-    }
-
-    public static GoalsListDTO goalsListDTO(String date, GoalDTO... goals) {
-        return GoalsListDTO.builder()
-                .date(date)
-                .goals(java.util.List.of(goals))
-                .build();
     }
 }

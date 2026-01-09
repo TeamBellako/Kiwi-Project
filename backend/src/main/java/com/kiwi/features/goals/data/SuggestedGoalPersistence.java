@@ -11,7 +11,7 @@ import lombok.*;
 @EqualsAndHashCode
 @ToString
 @Entity
-@Table(name = "default_goals")
+@Table(name = "suggested_goals")
 public class SuggestedGoalPersistence {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -9,7 +9,6 @@ import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.features.goals.data.GoalDataMapper
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalState
-import com.bellako.kiwi.features.goals.data.GoalsListDTO
 import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDataMapper
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
@@ -44,17 +43,16 @@ class GoalsViewModel
             _state.value = _state.value.copy(isLoading = true, error = null)
 
             val goalsDTO = goals.map { GoalDataMapper.toDTO(it) }
-            val dto = GoalsListDTO(date = date, goals = goalsDTO)
-            val result = repository.createGoals(dto)
+            val result = repository.createGoals(goalsDTO)
 
             setIsLoading(false)
             setUiState(UIState.Idle)
 
             return handleResult(result) {
-                val resultDTO = result.getOrNull()!!
+                val resultDTOs = result.getOrNull()!!
                 _state.value =
                     _state.value.copy(
-                        goals = resultDTO.goals.map { GoalDataMapper.toState(it) },
+                        goals = resultDTOs.map { GoalDataMapper.toState(it) },
                         isLoading = false,
                         error = null,
                     )
@@ -68,6 +66,36 @@ class GoalsViewModel
                 }
             }
         }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private suspend fun updateGoalProgress(goalId: String): Result<GoalDomain> {
+        setIsLoading(true)
+        setUiState(UIState.Loading)
+        _state.value = _state.value.copy(isLoading = true, error = null)
+
+        val result = repository.updateGoalProgress(goalId)
+
+        setIsLoading(false)
+        setUiState(UIState.Idle)
+
+        if (result.isSuccess) {
+            val updatedDTO = result.getOrNull()!!
+            val updatedState = GoalDataMapper.toState(updatedDTO)
+            val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
+            _state.value = _state.value.copy(
+                goals = updatedGoals,
+                isLoading = false,
+                error = null,
+            )
+        } else {
+            _state.value = _state.value.copy(
+                isLoading = false,
+                error = result.exceptionOrNull()?.message,
+            )
+        }
+
+        return result.map { GoalDataMapper.toDomain(it) }
+    }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> {
@@ -154,8 +182,8 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return result.map { goalsListDTO ->
-                goalsListDTO?.goals?.map { GoalDataMapper.toDomain(it) } ?: emptyList()
+            return result.map { goalDTOs ->
+                goalDTOs?.map { GoalDataMapper.toDomain(it) } ?: emptyList()
             }
         }
 
@@ -195,10 +223,8 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return result.map { goalsListDTOs ->
-                goalsListDTOs.flatMap { goalsListDTO ->
-                    goalsListDTO.goals.map { GoalDataMapper.toDomain(it) }
-                }
+            return result.map { goalDTOs ->
+                goalDTOs.map { GoalDataMapper.toDomain(it) }
             }
         }
 

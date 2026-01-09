@@ -51,14 +51,13 @@ import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
-import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
-import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -91,6 +90,7 @@ fun DashboardScreen(
     usersViewModel: IUsersViewModel,
     metricsViewModel: IMetricsViewModel,
     personalityViewModel: IPersonalityViewModel,
+    goalsViewModel: IGoalsViewModel,
     showCalendarView: Boolean = false,
     initialStateIndex: Int = 0,
 ) {
@@ -161,6 +161,7 @@ fun DashboardScreen(
                         metricsViewModel = metricsViewModel,
                         metricsState = metricsState!!,
                         personalityViewModel = personalityViewModel,
+                        goalsViewModel = goalsViewModel,
                         shouldShowCalendarView = shouldShowCalendarView,
                         isLoading = isLoading,
                     )
@@ -482,6 +483,7 @@ fun DashboardModal_Preview(
     initialStateIndex: Int = 0,
     nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(),
     questsViewModel: QuestsViewModel = hiltViewModel(),
+    goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
 ) {
     val nav = rememberNavController()
     Kiwi_Theme {
@@ -494,6 +496,7 @@ fun DashboardModal_Preview(
                     MapScreen(
                         nodesViewModel = nodesViewModel,
                         questsViewModel = questsViewModel,
+                        goalsViewModel = goalsViewModel,
                         navController = nav,
                         mapViewModel = hiltViewModel(),
                     )
@@ -527,6 +530,7 @@ fun DashboardModal_Preview(
                                     validPersonalityDTO().neutralApps,
                                 ),
                             ),
+                        goalsViewModel = goalsViewModel,
                         showCalendarView,
                         initialStateIndex,
                     )

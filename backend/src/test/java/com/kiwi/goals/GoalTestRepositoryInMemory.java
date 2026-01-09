@@ -16,12 +16,13 @@ import java.util.stream.Collectors;
 
 public class GoalTestRepositoryInMemory implements GoalRepository {
 
-    private final Map<String, GoalPersistence> store = new HashMap<>();
+    private final Map<Long, GoalPersistence> store = new HashMap<>();
+    private long nextId = 1L;
 
     @Override
     public GoalPersistence save(GoalPersistence entity) {
         if (entity.getId() == null) {
-            entity.setId(UUID.randomUUID().toString());
+            entity.setId(nextId++);
         }
         store.put(entity.getId(), entity);
         return entity;
@@ -33,7 +34,7 @@ public class GoalTestRepositoryInMemory implements GoalRepository {
     }
 
     @Override
-    public Optional<GoalPersistence> findById(String id) {
+    public Optional<GoalPersistence> findById(Long id) {
         return Optional.ofNullable(store.get(id));
     }
 
@@ -54,7 +55,7 @@ public class GoalTestRepositoryInMemory implements GoalRepository {
     }
 
     @Override
-    public Optional<GoalPersistence> findByIdAndUser(String id, UsersPersistence user) {
+    public Optional<GoalPersistence> findByIdAndUser(Long id, UsersPersistence user) {
         return store.values().stream()
                 .filter(g -> g.getId().equals(id))
                 .filter(g -> g.getUser().getId().equals(user.getId()))
@@ -95,39 +96,39 @@ public class GoalTestRepositoryInMemory implements GoalRepository {
     public void deleteAllInBatch(Iterable<GoalPersistence> entities) {}
 
     @Override
-    public void deleteAllByIdInBatch(Iterable<String> strings) {}
+    public void deleteAllByIdInBatch(Iterable<Long> longs) {}
 
     @Override
     public void deleteAllInBatch() {}
 
     @Override
-    public GoalPersistence getOne(String s) {
+    public GoalPersistence getOne(Long id) {
         return null;
     }
 
     @Override
-    public GoalPersistence getById(String s) {
+    public GoalPersistence getById(Long id) {
         return null;
     }
 
     @Override
-    public GoalPersistence getReferenceById(String s) {
+    public GoalPersistence getReferenceById(Long id) {
         return null;
     }
 
     @Override
-    public boolean existsById(String s) {
-        return store.containsKey(s);
+    public boolean existsById(Long id) {
+        return store.containsKey(id);
     }
 
     @Override
-    public List<GoalPersistence> findAllById(Iterable<String> strings) {
+    public List<GoalPersistence> findAllById(Iterable<Long> longs) {
         return List.of();
     }
 
     @Override
-    public void deleteById(String s) {
-        store.remove(s);
+    public void deleteById(Long id) {
+        store.remove(id);
     }
 
     @Override
@@ -136,7 +137,7 @@ public class GoalTestRepositoryInMemory implements GoalRepository {
     }
 
     @Override
-    public void deleteAllById(Iterable<? extends String> strings) {}
+    public void deleteAllById(Iterable<? extends Long> longs) {}
 
     @Override
     public void deleteAll() {
