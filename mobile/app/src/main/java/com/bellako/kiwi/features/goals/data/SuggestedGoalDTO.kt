@@ -2,7 +2,7 @@ package com.bellako.kiwi.features.goals.data
 
 data class SuggestedGoalDTO(
     val id: String,
-    val objective: Long,
+    val objective: Int,
     val description: String,
     val type: GoalType,
     val category: String,

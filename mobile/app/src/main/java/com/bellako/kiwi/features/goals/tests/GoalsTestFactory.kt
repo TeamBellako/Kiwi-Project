@@ -6,7 +6,7 @@ import com.bellako.kiwi.features.goals.data.GoalsListState
 object GoalsTestFactory {
     fun validGoalState(
         id: String = "goal1",
-        objective: Long = 30L,
+        objective: Int = 30,
         description: String = "Complete 30 minutes of physical exercise",
         type: String = "EXERCISE",
         category: String = "DAILY_CHALLENGES",

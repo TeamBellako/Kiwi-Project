@@ -4,7 +4,7 @@ object SuggestedGoalDataMapper {
     fun toDomain(dto: SuggestedGoalDTO): SuggestedGoalDomain =
         SuggestedGoalDomain(
             id = dto.id,
-            objective = dto.objective.toString(),
+            objective = dto.objective.toInt(),
             description = dto.description,
             type = dto.type,
             category = stringToCategory(dto.category),
@@ -14,7 +14,7 @@ object SuggestedGoalDataMapper {
     fun toDTO(domain: SuggestedGoalDomain): SuggestedGoalDTO =
         SuggestedGoalDTO(
             id = domain.id,
-            objective = domain.objective.toLongOrNull() ?: 0L,
+            objective = domain.objective.toInt(),
             description = domain.description,
             type = domain.type,
             category = categoryToString(domain.category),
@@ -27,7 +27,7 @@ object SuggestedGoalDataMapper {
     ): GoalState =
         GoalState(
             id = domain.id,
-            objective = domain.objective.toLongOrNull() ?: 0L,
+            objective = domain.objective.toInt(),
             description = domain.description,
             type = typeToString(domain.type),
             category = categoryToString(domain.category),

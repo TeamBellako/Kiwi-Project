@@ -4,7 +4,7 @@ object GoalDataMapper {
     fun toDomain(dto: GoalDTO): GoalDomain =
         GoalDomain(
             id = dto.id,
-            objective = dto.objective.toString(),
+            objective = dto.objective.toInt(),
             description = dto.description,
             type = dto.type,
             category = stringToCategory(dto.category),
@@ -16,7 +16,7 @@ object GoalDataMapper {
     fun toDomain(state: GoalState): GoalDomain =
         GoalDomain(
             id = state.id,
-            objective = state.objective.toString(),
+            objective = state.objective.toInt(),
             description = state.description,
             type = stringToType(state.type),
             category = stringToCategory(state.category),
@@ -28,7 +28,7 @@ object GoalDataMapper {
     fun toState(domain: GoalDomain): GoalState =
         GoalState(
             id = domain.id,
-            objective = domain.objective.toLongOrNull() ?: 0L,
+            objective = domain.objective.toInt(),
             description = domain.description,
             type = typeToString(domain.type),
             category = categoryToString(domain.category),
@@ -42,7 +42,7 @@ object GoalDataMapper {
     fun toDTO(domain: GoalDomain): GoalDTO =
         GoalDTO(
             id = domain.id,
-            objective = domain.objective.toLongOrNull() ?: 0L,
+            objective = domain.objective.toInt(),
             description = domain.description,
             type = domain.type,
             category = categoryToString(domain.category),
