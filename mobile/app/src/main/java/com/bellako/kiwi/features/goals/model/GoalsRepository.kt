@@ -20,6 +20,11 @@ class GoalsRepository(
             api.updateGoalProgress(goalId)
         }
 
+    suspend fun updateGoal(goal: GoalDTO): Result<GoalDTO> =
+        runCatching {
+            api.updateGoal(goal.id, goal)
+        }
+
     suspend fun completeGoal(goalId: String): Result<GoalDTO> =
         runCatching {
             api.completeGoal(goalId)

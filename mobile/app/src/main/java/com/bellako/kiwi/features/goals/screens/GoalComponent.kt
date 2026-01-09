@@ -57,6 +57,7 @@ fun GoalComponent(
     goalsViewModel: IGoalsViewModel,
 ) {
     var currentGoal by remember { mutableStateOf(goal) }
+    var showModal by remember { mutableStateOf(false) }
     val goalDomain = currentGoal as? GoalDomain
     val progress = goalDomain?.progress ?: 0f
     val status = goalDomain?.status ?: GoalStatus.IN_PROGRESS
@@ -66,10 +67,13 @@ fun GoalComponent(
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            Modifier.width(IntrinsicSize.Max).height(IntrinsicSize.Min).padding(
-                horizontal =
-                    getResponsiveSizeHeight(Spacing.medium),
-            ),
+            Modifier
+                .width(IntrinsicSize.Max)
+                .height(IntrinsicSize.Min)
+                .padding(
+                    horizontal =
+                        getResponsiveSizeHeight(Spacing.medium),
+                ).clickable { showModal = true },
     ) {
         Kiwi_Image(
             R.drawable.daily_challenges_bg,
@@ -122,8 +126,8 @@ fun GoalComponent(
             }
 
             Box(
-                modifier = Modifier.weight(0.70f),
                 contentAlignment = Alignment.Center,
+                modifier = Modifier.weight(0.70f),
             ) {
                 Kiwi_Label1(
                     KiwiTextArguments(
@@ -162,6 +166,16 @@ fun GoalComponent(
             }
         }
     }
+    if (showModal) {
+        GoalCustomiceModal(
+            goal = currentGoal as GoalDomain,
+            goalsViewModel = goalsViewModel,
+            onDismiss = { showModal = false },
+            onGoalUpdated = { updatedGoal ->
+                currentGoal = updatedGoal
+            },
+        )
+    }
 }
 
 fun getIcon(goalType: GoalType): Int =
@@ -191,7 +205,7 @@ fun GoalComponent_Preview() {
             GoalComponent(
                 GoalDomain(
                     "1",
-                    "Goal completado",
+                    1,
                     "Programa el modal lo mejor que sepas",
                     GoalType.PRODUCTIVITY,
                     GoalCategory.DAILY_CHALLENGES,
@@ -204,7 +218,7 @@ fun GoalComponent_Preview() {
             GoalComponent(
                 GoalDomain(
                     "1",
-                    "Goal en progreso",
+                    10,
                     "Programa el modal lo mejor que sepas",
                     GoalType.EXERCISE,
                     GoalCategory.DAILY_CHALLENGES,
@@ -217,7 +231,7 @@ fun GoalComponent_Preview() {
             GoalComponent(
                 GoalDomain(
                     "1",
-                    "Goal sin empezar",
+                    20,
                     "Programa el modal lo mejor que sepas",
                     GoalType.MEDITATION,
                     GoalCategory.DAILY_CHALLENGES,

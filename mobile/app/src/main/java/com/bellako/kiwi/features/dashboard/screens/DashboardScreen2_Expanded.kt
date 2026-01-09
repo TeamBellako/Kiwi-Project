@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
@@ -32,14 +31,10 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
-import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalStatus
-import com.bellako.kiwi.features.goals.data.GoalType
-import com.bellako.kiwi.features.goals.data.GoalsListState
-import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalComponent
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -48,9 +43,6 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import java.time.LocalDate
 
 val LocalGoalsViewModel = compositionLocalOf<IGoalsViewModel?> { null }
 
@@ -233,57 +225,8 @@ private fun ExpandedSummaryCard(
 @Suppress("MagicNumber", "EmptyFunctionBlock")
 @Composable
 fun DashboardModal2_Preview_Expanded() {
-    val mockViewModel =
-        remember {
-            object : IGoalsViewModel {
-                override val state: StateFlow<GoalsListState> = MutableStateFlow(GoalsListState())
-
-                override fun onDateChanged(newDate: LocalDate) {}
-
-                override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> =
-                    Result.success(Unit)
-
-                override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
-
-                override suspend fun uncompleteGoal(goalId: String): Result<Unit> = Result.success(Unit)
-
-                override suspend fun loadAllGoals(): Result<Unit> = Result.success(Unit)
-
-                override suspend fun getGoalsByDate(date: String) =
-                    Result.success(
-                        listOf<GoalDomain>(
-                            GoalDomain(
-                                "1",
-                                "Test objective",
-                                "Test description",
-                                GoalType.EXERCISE,
-                                GoalCategory.DAILY_CHALLENGES,
-                                GoalStatus.NOT_COMPLETED,
-                                100,
-                                0.5f,
-                            ),
-                            GoalDomain(
-                                "2",
-                                "Test objective 2",
-                                "Test description 2",
-                                GoalType.MEDITATION,
-                                GoalCategory.DAILY_CHALLENGES,
-                                GoalStatus.NOT_COMPLETED,
-                                200,
-                                0.7f,
-                            ),
-                        ),
-                    )
-
-                override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
-
-                override suspend fun getSuggestedGoals() = Result.success(emptyList<SuggestedGoalDomain>())
-            }
-        }
-
-    CompositionLocalProvider(LocalGoalsViewModel provides mockViewModel) {
-        DashboardModal_Preview(false, 2)
-    }
+    val fakeGoalsViewModel = remember { GoalsFakeViewModel() }
+    DashboardModal_Preview(false, 2, goalsViewModel = fakeGoalsViewModel)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -293,55 +236,6 @@ fun DashboardModal2_Preview_Expanded() {
 @Suppress("MagicNumber", "EmptyFunctionBlock")
 @Composable
 fun DashboardModal2_Expanded_Calendar_Preview() {
-    val mockViewModel =
-        remember {
-            object : IGoalsViewModel {
-                override val state: StateFlow<GoalsListState> = MutableStateFlow(GoalsListState())
-
-                override fun onDateChanged(newDate: LocalDate) {}
-
-                override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> =
-                    Result.success(Unit)
-
-                override suspend fun completeGoal(goalId: String): Result<Unit> = Result.success(Unit)
-
-                override suspend fun uncompleteGoal(goalId: String): Result<Unit> = Result.success(Unit)
-
-                override suspend fun loadAllGoals(): Result<Unit> = Result.success(Unit)
-
-                override suspend fun getGoalsByDate(date: String) =
-                    Result.success(
-                        listOf<GoalDomain>(
-                            GoalDomain(
-                                "1",
-                                "Test objective",
-                                "Test description",
-                                GoalType.EXERCISE,
-                                GoalCategory.DAILY_CHALLENGES,
-                                GoalStatus.NOT_COMPLETED,
-                                100,
-                                0.5f,
-                            ),
-                            GoalDomain(
-                                "2",
-                                "Test objective 2",
-                                "Test description 2",
-                                GoalType.MEDITATION,
-                                GoalCategory.DAILY_CHALLENGES,
-                                GoalStatus.NOT_COMPLETED,
-                                200,
-                                0.7f,
-                            ),
-                        ),
-                    )
-
-                override suspend fun getGoalsInProgress() = Result.success(emptyList<GoalDomain>())
-
-                override suspend fun getSuggestedGoals() = Result.success(emptyList<SuggestedGoalDomain>())
-            }
-        }
-
-    CompositionLocalProvider(LocalGoalsViewModel provides mockViewModel) {
-        DashboardModal_Preview(true, 2)
-    }
+    val fakeGoalsViewModel = remember { GoalsFakeViewModel() }
+    DashboardModal_Preview(true, 2, goalsViewModel = fakeGoalsViewModel)
 }

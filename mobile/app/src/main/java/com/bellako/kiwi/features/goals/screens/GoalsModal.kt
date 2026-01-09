@@ -251,7 +251,7 @@ fun GoalsModal_Preview() {
                     listOf(
                         GoalDomain(
                             "1",
-                            "Hacer el modal",
+                            2,
                             "Programa el modal lo mejor que sepas",
                             GoalType.PRODUCTIVITY,
                             GoalCategory.DAILY_CHALLENGES,
@@ -261,7 +261,7 @@ fun GoalsModal_Preview() {
                         ),
                         GoalDomain(
                             "2",
-                            "Haz que sea bonito",
+                            10,
                             "Esto está fuera de tu alcance",
                             GoalType.PRODUCTIVITY,
                             GoalCategory.DAILY_CHALLENGES,

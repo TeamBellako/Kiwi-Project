@@ -323,7 +323,7 @@ fun GoalsNotification_Card_Preview() {
                     listOf(
                         GoalDomain(
                             "1",
-                            "Hacer el modal",
+                            2,
                             "Programa el modal lo mejor que sepas",
                             GoalType.PRODUCTIVITY,
                             GoalCategory.DAILY_CHALLENGES,
@@ -333,7 +333,7 @@ fun GoalsNotification_Card_Preview() {
                         ),
                         GoalDomain(
                             "2",
-                            "Haz que sea bonito",
+                            10,
                             "Esto está fuera de tu alcance",
                             GoalType.PRODUCTIVITY,
                             GoalCategory.DAILY_CHALLENGES,
