@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -20,6 +22,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
@@ -102,6 +105,23 @@ private fun Question(
                 val kiwiColors = LocalKiwiColors.current
                 var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
+                val totalQuestions = currentPersonalityState.questions.size
+                val progress by remember(currentQuestion, totalQuestions) {
+                    derivedStateOf { (currentQuestion + 1).toFloat() / totalQuestions.toFloat() }
+                }
+
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
+                            .testTag("questionnaire_progress_bar"),
+                    color = kiwiColors.color3A,
+                    trackColor = kiwiColors.color3A.copy(alpha = 0.25f),
+                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+                )
+
                 Kiwi_H2(
                     KiwiTextArguments(
                         currentPersonalityState.questions[currentQuestion].question,
@@ -119,6 +139,8 @@ private fun Question(
                             KiwiTextArguments(
                                 option,
                                 color = kiwiColors.color6,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(8.dp),
                             ),
                         color = kiwiColors.color3A,
                         onClick = {
