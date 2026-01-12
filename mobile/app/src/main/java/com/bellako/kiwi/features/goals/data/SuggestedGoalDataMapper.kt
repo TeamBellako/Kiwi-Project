@@ -4,21 +4,21 @@ object SuggestedGoalDataMapper {
     fun toDomain(dto: SuggestedGoalDTO): SuggestedGoalDomain =
         SuggestedGoalDomain(
             id = dto.id,
-            objective = dto.objective.toInt(),
-            description = dto.description,
-            type = dto.type,
+            target = dto.target.toInt(),
+            action = dto.action,
+            type = stringToType(dto.type),
             category = stringToCategory(dto.category),
-            points = dto.points,
+            reward = dto.reward,
         )
 
     fun toDTO(domain: SuggestedGoalDomain): SuggestedGoalDTO =
         SuggestedGoalDTO(
             id = domain.id,
-            objective = domain.objective.toInt(),
-            description = domain.description,
-            type = domain.type,
+            target = domain.target.toLong(),
+            action = domain.action,
+            type = typeToString(domain.type),
             category = categoryToString(domain.category),
-            points = domain.points,
+            reward = domain.reward,
         )
 
     fun toGoalState(
@@ -27,14 +27,24 @@ object SuggestedGoalDataMapper {
     ): GoalState =
         GoalState(
             id = domain.id,
-            objective = domain.objective.toInt(),
-            description = domain.description,
+            target = domain.target,
+            action = domain.action,
             type = typeToString(domain.type),
             category = categoryToString(domain.category),
             status = "IN_PROGRESS",
-            points = domain.points,
+            reward = domain.reward,
             date = date,
         )
+
+    private fun stringToType(type: String?): GoalType =
+        when (type?.uppercase()) {
+            "EXERCISE" -> GoalType.EXERCISE
+            "SLEEP" -> GoalType.SLEEP
+            "MEDITATION" -> GoalType.MEDITATION
+            "NUTRITION" -> GoalType.NUTRITION
+            "PRODUCTIVITY" -> GoalType.PRODUCTIVITY
+            else -> GoalType.EXERCISE
+        }
 
     private fun stringToCategory(category: String?): GoalCategory =
         when (category?.uppercase()) {

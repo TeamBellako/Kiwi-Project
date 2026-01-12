@@ -2,11 +2,12 @@ package com.bellako.kiwi.features.goals.data
 
 data class GoalDTO(
     val id: String,
-    val objective: Int,
-    val description: String,
+    val target: Int,
+    val action: String,
     val type: GoalType,
     val category: String,
     val status: String,
-    val points: Int,
+    val reward: Int,
     val date: String = "",
+    val value: Int = 0,
 )

@@ -43,7 +43,7 @@ fun Kiwi_Slider(
         onValueChange = onValueChange,
         valueRange = valueRange,
         steps = steps,
-        modifier = Modifier.testTag(testTag).height(getResponsiveSizeHeight(40.dp)),
+        modifier = Modifier.fillMaxWidth().testTag(testTag).height(getResponsiveSizeHeight(40.dp)),
         enabled = enabled,
         thumb = {
             Kiwi_Diamond(

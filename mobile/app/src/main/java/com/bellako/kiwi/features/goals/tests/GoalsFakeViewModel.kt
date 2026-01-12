@@ -34,7 +34,7 @@ class GoalsFakeViewModel(
                 GoalCategory.DAILY_CHALLENGES,
                 GoalStatus.IN_PROGRESS,
                 150,
-                progress = 0.0f,
+                value = 0,
             ),
             GoalDomain(
                 "2",
@@ -44,7 +44,7 @@ class GoalsFakeViewModel(
                 GoalCategory.DAILY_CHALLENGES,
                 GoalStatus.IN_PROGRESS,
                 200,
-                progress = 0.5f,
+                value = 10,
             ),
         )
 
@@ -73,9 +73,9 @@ class GoalsFakeViewModel(
                     ?: return Result.failure(Exception("Goal with id $goalId not found"))
 
             // Simular incremento de progreso: +0.5f y clamped a 1f
-            val newProgress = (existing.progress + 0.1f).coerceAtMost(1f)
-            val newStatus = if (newProgress >= 1f) GoalStatus.COMPLETED else existing.status
-            val updated = existing.copy(progress = newProgress, status = newStatus)
+            val newValue = (existing.value + 1).coerceAtMost(existing.target)
+            val newStatus = if (newValue >= existing.target) GoalStatus.COMPLETED else existing.status
+            val updated = existing.copy(value = newValue, status = newStatus)
             fakeGoalsMap[goalId] = updated
             Result.success(updated)
         }
@@ -99,7 +99,7 @@ class GoalsFakeViewModel(
             val existing =
                 fakeGoalsMap[goalId]
                     ?: return Result.failure(Exception("Goal with id $goalId not found"))
-            val updated = existing.copy(progress = 1f, status = GoalStatus.COMPLETED)
+            val updated = existing.copy(value = 1, status = GoalStatus.COMPLETED)
             fakeGoalsMap[goalId] = updated
             Result.success(Unit)
         }
@@ -113,7 +113,7 @@ class GoalsFakeViewModel(
             val existing =
                 fakeGoalsMap[goalId]
                     ?: return Result.failure(Exception("Goal with id $goalId not found"))
-            val updated = existing.copy(progress = 0f, status = GoalStatus.IN_PROGRESS)
+            val updated = existing.copy(value = 0, status = GoalStatus.IN_PROGRESS)
             fakeGoalsMap[goalId] = updated
             Result.success(Unit)
         }

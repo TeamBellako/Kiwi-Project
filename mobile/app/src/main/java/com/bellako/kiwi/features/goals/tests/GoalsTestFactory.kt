@@ -14,12 +14,12 @@ object GoalsTestFactory {
         points: Int = 10,
     ) = GoalState(
         id = id,
-        objective = objective,
-        description = description,
+        target = objective,
+        action = description,
         type = type,
         category = category,
         status = status,
-        points = points,
+        reward = points,
     )
 
     fun validGoalsListState(

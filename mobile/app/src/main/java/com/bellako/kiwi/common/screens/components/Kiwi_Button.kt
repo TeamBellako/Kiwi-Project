@@ -123,6 +123,7 @@ private fun Kiwi_Button(
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 fun Kiwi_FixedSizeButton(
     modifier: Modifier = Modifier,

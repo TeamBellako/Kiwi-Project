@@ -36,7 +36,6 @@ public class GoalService {
                 .orElseThrow(() -> new UsersNotFoundException(email));
     }
 
-    
     @Transactional
     public GoalDTO updateGoalProgress(Long goalId, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
@@ -56,6 +55,10 @@ public class GoalService {
         int progression = (int)(existingGoal.getTarget() / 10);
         existingGoal.setValue(existingGoal.getValue() + progression);
 
+        if (existingGoal.getValue() >= existingGoal.getTarget()) {
+            return completeGoal(goalId, authentication);
+        }
+
         GoalPersistence updatedGoal = goalRepository.save(existingGoal);
 
         return GoalDataMapper.toDTO(updatedGoal);
@@ -73,11 +76,16 @@ public class GoalService {
             throw new GoalUnauthorizedException("You are not authorized to update this goal");
         }
 
-        if (existingGoal.getStatus() != GoalStatus.IN_PROGRESS) {
-            throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
-        }
+        // if (existingGoal.getStatus() != GoalStatus.IN_PROGRESS) {
+            // throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
+        // }
 
         existingGoal.setValue(goal.getValue());
+        if (existingGoal.getValue() < existingGoal.getTarget()) {
+            existingGoal.setStatus(GoalStatus.IN_PROGRESS);
+        } else {
+            existingGoal.setStatus(GoalStatus.COMPLETED);
+        }
 
         GoalPersistence updatedGoal = goalRepository.save(existingGoal);
 
@@ -118,6 +126,7 @@ public class GoalService {
 
     /**
      * Marca un goal como completado y añade puntos al usuario.
+     * SOLO se puede marccar como no completado un goal en estado IN_PROGRESS. 
      * SOLO puede completar el propietario del goal.
      */
     @Transactional
@@ -142,14 +151,16 @@ public class GoalService {
 
         // Cambiar estado y guardar
         goal.setStatus(GoalStatus.COMPLETED);
+        goal.setValue(goal.getTarget());
         GoalPersistence savedGoal = goalRepository.save(goal);
 
         return GoalDataMapper.toDTO(savedGoal);
     }
 
     /**
-     * Desmarca un goal completado y resta los puntos al usuario.
-     * SOLO puede descompletar el propietario del goal.
+     * Marca un goal como no completado.
+     * SOLO se puede marccar como no completado un goal en estado IN_PROGRESS.
+     * SOLO puedo marcarse como no completado el propietario del goal.
      */
     @Transactional
     public GoalDTO uncompleteGoal(Long goalId, Authentication authentication) {
@@ -176,6 +187,7 @@ public class GoalService {
         return GoalDataMapper.toDTO(savedGoal);
     }
 
+    // region GETTERS
     @Transactional(readOnly = true)
     public List<GoalDTO> getGoalsByDate(String dateString, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
@@ -212,4 +224,6 @@ public class GoalService {
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    // endregions
 }

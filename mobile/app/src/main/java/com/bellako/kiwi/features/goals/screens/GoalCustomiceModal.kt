@@ -16,7 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,7 +33,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AdaptableSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
@@ -48,6 +52,8 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 @Suppress("LongMethod")
@@ -60,7 +66,18 @@ fun GoalCustomice(
     val buttonsWidth = getResponsiveSizeWidth(150.dp)
     val coroutineScope = rememberCoroutineScope()
     val kiwiColor = LocalKiwiColors.current
-    val current = (goal.progress * goal.objective).toInt()
+
+    val initialProgress = goal.value.toFloat() / goal.target.toFloat()
+
+    // Estado local para el progreso del slider (inicializado con el valor del goal)
+    var sliderProgress: Float by remember { mutableStateOf(initialProgress.coerceIn(0f, 1f)) }
+
+    // Si el goal cambia (p. ej. se abre otro goal), sincronizamos el slider
+    LaunchedEffect(goal.id) {
+        sliderProgress = (goal.value.toFloat() / goal.target.toFloat()).coerceIn(0f, 1f)
+    }
+
+    val current = (sliderProgress * goal.target).roundToInt()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -90,7 +107,7 @@ fun GoalCustomice(
                 )
                 Kiwi_H2(
                     KiwiTextArguments(
-                        goal.description,
+                        goal.action,
                         TextAlign.Center,
                         modifier =
                             Modifier.padding(
@@ -100,9 +117,10 @@ fun GoalCustomice(
                         color = kiwiColor.color6,
                     ),
                 )
+                // Usar el estado local del slider y actualizarlo en onValueChange
                 Kiwi_Slider(
-                    value = goal.progress,
-                    onValueChange = { },
+                    value = sliderProgress,
+                    onValueChange = { newValue -> sliderProgress = newValue.coerceIn(0f, 1f) },
                     steps = 100,
                     testTag = "",
                     valueRange = 0f..1f,
@@ -111,13 +129,15 @@ fun GoalCustomice(
 
                 Kiwi_P2(
                     KiwiTextArguments(
-                        "$current/${goal.objective}",
+                        "${current}/${goal.target}",
                         color = kiwiColor.color7A,
                     ),
                 )
                 Kiwi_Spacer(Spacing.medium)
                 Kiwi_HorizontalLine(color = kiwiColor.color2)
+                Kiwi_Spacer(Spacing.small)
                 Kiwi_H2(KiwiTextArguments("Dificulty"))
+                Kiwi_Spacer(Spacing.small)
                 Box(
                     modifier =
                         Modifier
@@ -135,19 +155,7 @@ fun GoalCustomice(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Kiwi_AdaptableSizeButton(
-                            textArguments = KiwiTextArguments("-"),
-                            contentPaddingHorizontal = Spacing.small,
-                            color = kiwiColor.color2,
-                            onClick = {},
-                        )
-                        Kiwi_Label1(KiwiTextArguments("Easy"))
-                        Kiwi_AdaptableSizeButton(
-                            textArguments = KiwiTextArguments("+"),
-                            contentPaddingHorizontal = Spacing.small,
-                            color = kiwiColor.color2,
-                            onClick = {},
-                        )
+                        Kiwi_Label1(KiwiTextArguments("Easy", modifier = Modifier.padding(vertical = Spacing.small)))
                     }
                 }
                 Kiwi_Spacer(Spacing.medium)
@@ -160,24 +168,11 @@ fun GoalCustomice(
                     Kiwi_FixedSizeButton(
                         textArguments =
                             KiwiTextArguments(
-                                "Ban",
-                                color = kiwiColor.colorF,
-                                bold = false,
-                            ),
-                        color = kiwiColor.color8,
-                        modifier = Modifier.width(buttonsWidth),
-                        onClick = {},
-                        iconRes = R.drawable.ic_ban,
-                        iconSize = 15.dp,
-                    )
-                    Kiwi_FixedSizeButton(
-                        textArguments =
-                            KiwiTextArguments(
                                 "Swap",
                                 color = kiwiColor.colorF,
                                 bold = false,
                             ),
-                        color = kiwiColor.color7C,
+                        color = kiwiColor.color8,
                         modifier = Modifier.width(buttonsWidth),
                         onClick = {},
                         iconRes = R.drawable.ic_swap,
@@ -186,6 +181,7 @@ fun GoalCustomice(
                 }
             }
         }
+        Kiwi_Spacer(Spacing.medium)
         Kiwi_FixedSizeButton(
             textArguments =
                 KiwiTextArguments(
@@ -196,15 +192,22 @@ fun GoalCustomice(
             modifier = Modifier.width(buttonsWidth),
             color = kiwiColor.color7C,
             onClick = {
-//                TODO("Implementar en backend")
-//                coroutineScope.launch {
-//                    val result = goalsViewModel.updateGoal(goal)
-//                    result.onSuccess { updatedGoal ->
-//                        onGoalUpdated(updatedGoal)
-//                    }
-//                }
-                onGoalUpdated(goal)
-                onDismiss()
+                // Construir el goal actualizado con el nuevo valor y estado
+                val updatedGoal =
+                    goal.copy(
+                        value = current,
+                        status = if (current >= goal.target) GoalStatus.COMPLETED else goal.status,
+                    )
+
+                coroutineScope.launch {
+                    val result = goalsViewModel.updateGoal(updatedGoal)
+                    result.onSuccess { updated ->
+                        onGoalUpdated(updated)
+                        onDismiss()
+                    }.onFailure {
+                        // En preview/fake no mostramos UI de error; en la app real podríamos mostrar un toast/modal
+                    }
+                }
             },
         )
     }
@@ -276,7 +279,7 @@ fun GoalCustomiceModal_Preview() {
                         GoalCategory.DAILY_CHALLENGES,
                         GoalStatus.IN_PROGRESS,
                         100,
-                        progress = .3f,
+                        value = 2000,
                     ),
                 goalsViewModel = GoalsFakeViewModel(),
             )

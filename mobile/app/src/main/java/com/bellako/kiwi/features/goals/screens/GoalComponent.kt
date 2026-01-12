@@ -1,3 +1,4 @@
+// Kotlin
 package com.bellako.kiwi.features.goals.screens
 
 import android.os.Build
@@ -59,10 +60,16 @@ fun GoalComponent(
     var currentGoal by remember { mutableStateOf(goal) }
     var showModal by remember { mutableStateOf(false) }
     val goalDomain = currentGoal as? GoalDomain
-    val progress = goalDomain?.progress ?: 0f
     val status = goalDomain?.status ?: GoalStatus.IN_PROGRESS
     val kiwiColors = LocalKiwiColors.current
     val coroutineScope = rememberCoroutineScope()
+
+    val progress: Float =
+        if (goalDomain == null) {
+            0f
+        } else {
+            goalDomain.value.toFloat() / goalDomain.target.toFloat()
+        }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -83,7 +90,13 @@ fun GoalComponent(
         )
 
         Kiwi_Image(
-            if (progress == 1f) R.drawable.daily_challenges_completed else R.drawable.daily_challenges_fill,
+            if (goalDomain != null &&
+                (goalDomain.value == goalDomain.target)
+            ) {
+                R.drawable.daily_challenges_completed
+            } else {
+                R.drawable.daily_challenges_fill
+            },
             "Bar fill",
             modifier =
                 Modifier
@@ -97,7 +110,7 @@ fun GoalComponent(
                                     layoutDirection: LayoutDirection,
                                     density: Density,
                                 ): Outline {
-                                    val w = size.width * progress.coerceIn(0f, 1f)
+                                    val w = size.width * progress
                                     return Outline.Rectangle(Rect(0f, 0f, w, size.height))
                                 }
                             }
@@ -118,7 +131,7 @@ fun GoalComponent(
             ) {
                 Kiwi_Image(
                     getIcon(currentGoal.type),
-                    "Quest Indicator For: $currentGoal.objective",
+                    "Quest Indicator For: ${currentGoal.target}",
                     colorFilter =
                         ColorFilter.tint(if (status != GoalStatus.COMPLETED) kiwiColors.colorF1 else kiwiColors.color8C),
                     contentScale = ContentScale.FillWidth,
@@ -131,7 +144,7 @@ fun GoalComponent(
             ) {
                 Kiwi_Label1(
                     KiwiTextArguments(
-                        currentGoal.description,
+                        currentGoal.action,
                         TextAlign.Center,
                         kiwiColors.color6,
                     ),
@@ -146,7 +159,9 @@ fun GoalComponent(
                         } else {
                             coroutineScope.launch {
                                 val result = goalsViewModel.updateGoalProgress(currentGoal.id)
-                                result.onSuccess { update -> currentGoal = update }
+                                result.onSuccess { update ->
+                                    currentGoal = update
+                                }
                             }
                         }
                     },
@@ -160,13 +175,13 @@ fun GoalComponent(
                     } else {
                         R.drawable.ic_daily_challenges_tick
                     },
-                    "Quest Indicator For: $currentGoal.objective",
-//                    modifier = Modifier.height(getResponsiveSizeHeight(Spacing.large)),
+                    "Quest Indicator For: ${currentGoal.target}",
                 )
             }
         }
     }
-    if (showModal) {
+    // Abrir modal de personalización solo si el goal es GoalDomain (evitar ClassCastException)
+    if (showModal && currentGoal is GoalDomain) {
         GoalCustomiceModal(
             goal = currentGoal as GoalDomain,
             goalsViewModel = goalsViewModel,
@@ -187,7 +202,6 @@ fun getIcon(goalType: GoalType): Int =
         GoalType.NUTRITION -> R.drawable.ic_daily_challenge_mental
     }
 
-// =================================================================================================
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
@@ -195,6 +209,8 @@ fun getIcon(goalType: GoalType): Int =
 @Suppress("MagicNumber")
 @Composable
 fun GoalComponent_Preview() {
+    // Evitar construir el ViewModel directamente en la composición del preview
+    val goalFakeViewModel = remember { GoalsFakeViewModel() }
     Kiwi_Theme {
         Column(
             modifier =
@@ -211,9 +227,9 @@ fun GoalComponent_Preview() {
                     GoalCategory.DAILY_CHALLENGES,
                     GoalStatus.COMPLETED,
                     1000,
-                    progress = 1f,
+                    value = 1,
                 ),
-                GoalsFakeViewModel(),
+                goalFakeViewModel,
             )
             GoalComponent(
                 GoalDomain(
@@ -224,9 +240,9 @@ fun GoalComponent_Preview() {
                     GoalCategory.DAILY_CHALLENGES,
                     GoalStatus.NOT_COMPLETED,
                     1000,
-                    progress = 0.6f,
+                    value = 2,
                 ),
-                GoalsFakeViewModel(),
+                goalFakeViewModel,
             )
             GoalComponent(
                 GoalDomain(
@@ -237,9 +253,9 @@ fun GoalComponent_Preview() {
                     GoalCategory.DAILY_CHALLENGES,
                     GoalStatus.IN_PROGRESS,
                     1000,
-                    progress = 0.0f,
+                    value = 0,
                 ),
-                GoalsFakeViewModel(),
+                goalFakeViewModel,
             )
         }
     }

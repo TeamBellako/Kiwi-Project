@@ -24,6 +24,7 @@ fun Kiwi_Diamond(
     }
 }
 
+@Suppress("MagicNumber")
 fun DrawScope.kiwiDiamondShape(
     color: Color,
     offsetX: Float,

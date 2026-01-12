@@ -20,7 +20,7 @@ interface IGoalsAPI {
         @Path("goalId") goalId: String,
     ): GoalDTO
 
-    @PATCH("api/user/goals/{goalId}")
+    @PATCH("api/user/goals/{goalId}/update")
     suspend fun updateGoal(
         @Path("goalId") goalId: String,
         @Body goal: GoalDTO,

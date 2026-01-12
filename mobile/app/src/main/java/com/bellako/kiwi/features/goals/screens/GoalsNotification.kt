@@ -329,7 +329,7 @@ fun GoalsNotification_Card_Preview() {
                             GoalCategory.DAILY_CHALLENGES,
                             GoalStatus.COMPLETED,
                             1000,
-                            progress = 1f,
+                            value = 2,
                         ),
                         GoalDomain(
                             "2",
@@ -339,7 +339,7 @@ fun GoalsNotification_Card_Preview() {
                             GoalCategory.DAILY_CHALLENGES,
                             GoalStatus.NOT_COMPLETED,
                             1000,
-                            progress = 0.5f,
+                            value = 5,
                         ),
                     ),
             )
