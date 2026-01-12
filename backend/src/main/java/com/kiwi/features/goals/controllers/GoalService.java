@@ -36,6 +36,54 @@ public class GoalService {
                 .orElseThrow(() -> new UsersNotFoundException(email));
     }
 
+    
+    @Transactional
+    public GoalDTO updateGoalProgress(Long goalId, Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        GoalPersistence existingGoal = goalRepository.findById(goalId)
+                .orElseThrow(() -> new GoalNotFoundException(goalId.toString()));
+
+        // Verificar que el goal pertenece al usuario autenticado
+        if (!existingGoal.getUser().getId().equals(user.getId())) {
+            throw new GoalUnauthorizedException("You are not authorized to update this goal");
+        }
+
+        if (existingGoal.getStatus() != GoalStatus.IN_PROGRESS) {
+            throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
+        }
+
+        int progression = (int)(existingGoal.getTarget() / 10);
+        existingGoal.setValue(existingGoal.getValue() + progression);
+
+        GoalPersistence updatedGoal = goalRepository.save(existingGoal);
+
+        return GoalDataMapper.toDTO(updatedGoal);
+    }
+
+    @Transactional
+    public GoalDTO updateGoal(Long goalId, GoalDTO goal, Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        GoalPersistence existingGoal = goalRepository.findById(goalId)
+                .orElseThrow(() -> new GoalNotFoundException(goalId.toString()));
+
+        // Verificar que el goal pertenece al usuario autenticado
+        if (!existingGoal.getUser().getId().equals(user.getId())) {
+            throw new GoalUnauthorizedException("You are not authorized to update this goal");
+        }
+
+        if (existingGoal.getStatus() != GoalStatus.IN_PROGRESS) {
+            throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
+        }
+
+        existingGoal.setValue(goal.getValue());
+
+        GoalPersistence updatedGoal = goalRepository.save(existingGoal);
+
+        return GoalDataMapper.toDTO(updatedGoal);
+    }
+
     @Transactional
     public List<GoalDTO> createGoals(List<GoalDTO> goals, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
@@ -90,7 +138,7 @@ public class GoalService {
         }
 
         // Añadir puntos al usuario ANTES de cambiar el estado
-        usersService.addPointsToUser(user.getId(), goal.getPoints());
+        usersService.addPointsToUser(user.getId(), goal.getReward());
 
         // Cambiar estado y guardar
         goal.setStatus(GoalStatus.COMPLETED);

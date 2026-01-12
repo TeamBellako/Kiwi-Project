@@ -76,6 +76,36 @@ VALUES
 (3, 3, 100, 0.58, 0.44, 0, 'node_3', NULL),
 (4, 4, 180, 0.59, 0.55, 0, 'node_4', 'Node 4');
 
+-- Create goals table with a foreign key to users
+CREATE TABLE IF NOT EXISTS goals (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    target BIGINT NOT NULL,
+    action TEXT,
+    type VARCHAR(50) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    reward INT NOT NULL,
+    date DATE NOT NULL,
+    "value" BIGINT NOT NULL,
+
+    -- Foreign key to users table
+    user_id BIGINT NOT NULL,
+    CONSTRAINT fk_goals_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Add index for efficient queries by user and date
+CREATE INDEX IF NOT EXISTS idx_user_date ON goals (user_id, date);
+
+-- Create suggested_goals table
+CREATE TABLE IF NOT EXISTS suggested_goals (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    target BIGINT NOT NULL,
+    action TEXT,
+    type VARCHAR(50) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    reward INT NOT NULL
+);
+
 
 
 

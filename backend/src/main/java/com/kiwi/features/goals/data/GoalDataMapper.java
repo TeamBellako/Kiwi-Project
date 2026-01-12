@@ -11,13 +11,14 @@ public class GoalDataMapper {
     public static GoalPersistence toEntity(GoalDTO dto, UsersPersistence user, LocalDate date) {
         return GoalPersistence.builder()
                 .id(dto.getId())
-                .objective(dto.getObjective())
-                .description(dto.getDescription())
+                .target(dto.getTarget())
+                .action(dto.getAction())
                 .type(GoalType.valueOf(dto.getType()))
                 .category(GoalCategory.valueOf(dto.getCategory()))
                 .status(GoalStatus.valueOf(dto.getStatus()))
-                .points(dto.getPoints())
+                .reward(dto.getReward())
                 .date(date)
+                .value(dto.getValue())
                 .user(user)
                 .build();
     }
@@ -25,13 +26,14 @@ public class GoalDataMapper {
     public static GoalDTO toDTO(GoalPersistence goal) {
         return GoalDTO.builder()
                 .id(goal.getId())
-                .objective(goal.getObjective())
-                .description(goal.getDescription())
+                .target(goal.getTarget())
+                .action(goal.getAction())
                 .type(goal.getType().name())
                 .category(goal.getCategory().name())
                 .status(goal.getStatus().name())
-                .points(goal.getPoints())
+                .reward(goal.getReward())
                 .date(goal.getDate().format(DATE_FORMATTER))
+                .value(goal.getValue())
                 .build();
     }
 }

@@ -18,11 +18,11 @@ public class SuggestedGoalPersistence {
     @Column(name = "id")
     private String id;
 
-    @Column(name = "objective", nullable = false)
-    private Long objective;
+    @Column(name = "target", nullable = false)
+    private Long target;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "action", columnDefinition = "TEXT")
+    private String action;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
@@ -32,6 +32,6 @@ public class SuggestedGoalPersistence {
     @Column(name = "category", nullable = false)
     private GoalCategory category;
 
-    @Column(name = "points", nullable = false)
-    private Integer points;
+    @Column(name = "reward", nullable = false)
+    private Integer reward;
 }

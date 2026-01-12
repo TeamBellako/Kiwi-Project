@@ -6,7 +6,6 @@ import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.goals.controllers.GoalController;
 import com.kiwi.features.goals.controllers.GoalService;
 import com.kiwi.features.goals.data.GoalDTO;
-import com.kiwi.features.goals.data.GoalsListDTO;
 import com.kiwi.features.goals.exceptions.GoalNotFoundException;
 import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
 import com.kiwi.features.users.controllers.CustomUserDetailsService;

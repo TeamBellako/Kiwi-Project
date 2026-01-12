@@ -66,12 +66,12 @@ public class GoalServiceTests {
     }
 
     @Test
-    public void createGoals_replacesExistingGoalsForDate() {
+    public void createGoals_addsNewGoalsWithoutReplacing() {
         LocalDate date = LocalDate.now();
         
-        // Create initial goals
-        goalRepository.save(inProgressGoalPersistence(1L, date, testUser));
-        goalRepository.save(inProgressGoalPersistence(2L, date, testUser));
+        // Create initial goals without explicit IDs
+        goalRepository.save(inProgressGoalPersistence(null, date, testUser));
+        goalRepository.save(inProgressGoalPersistence(null, date, testUser));
 
         assertEquals(2, goalRepository.count());
 
@@ -83,7 +83,7 @@ public class GoalServiceTests {
         List<GoalDTO> result = goalService.createGoals(request, authentication);
 
         assertEquals(1, result.size());
-        assertEquals(1, goalRepository.count());
+        assertEquals(3, goalRepository.count());
     }
 
     // ============================================================================================
@@ -160,7 +160,7 @@ public class GoalServiceTests {
         GoalDTO result = goalService.completeGoal(1L, authentication);
 
         assertEquals("COMPLETED", result.getStatus());
-        verify(usersService, times(1)).addPointsToUser(testUser.getId(), goal.getPoints());
+        verify(usersService, times(1)).addPointsToUser(testUser.getId(), goal.getReward());
     }
 
     @Test
@@ -220,7 +220,7 @@ public class GoalServiceTests {
         GoalPersistence goal = inProgressGoalPersistence(1L, date, testUser);
         goalRepository.save(goal);
 
-        GoalDTO result = goalService.completeGoal(1L, authentication);
+        GoalDTO result = goalService.uncompleteGoal(1L, authentication);
 
         assertEquals("NOT_COMPLETED", result.getStatus());
     }

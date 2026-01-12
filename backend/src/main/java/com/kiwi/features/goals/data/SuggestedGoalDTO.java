@@ -11,9 +11,9 @@ import lombok.*;
 @ToString
 public class SuggestedGoalDTO {
     private String id;
-    private Long objective;
-    private String description;
+    private Long target;
+    private String action;
     private String type;
     private String category;
-    private Integer points;
+    private Integer reward;
 }

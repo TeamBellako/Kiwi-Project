@@ -13,24 +13,25 @@ public class GoalsTestFactory {
 
     public static GoalPersistence goalPersistence(
             Long id,
-            Long objective,
-            String description,
+            Long target,
+            String action,
             GoalType type,
             GoalCategory category,
             GoalStatus status,
-            Integer points,
+            Integer reward,
             LocalDate date,
             UsersPersistence user
     ) {
         return GoalPersistence.builder()
                 .id(id)
-                .objective(objective)
-                .description(description)
+                .target(target)
+                .action(action)
                 .type(type)
                 .category(category)
                 .status(status)
-                .points(points)
+                .reward(reward)
                 .date(date)
+                .value(0L)
                 .user(user)
                 .build();
     }
@@ -41,21 +42,22 @@ public class GoalsTestFactory {
 
     public static GoalDTO goalDTO(
             Long id,
-            Long objective,
-            String description,
+            Long target,
+            String action,
             GoalType type,
             GoalCategory category,
             GoalStatus status,
-            Integer points
+            Integer reward
     ) {
         return GoalDTO.builder()
                 .id(id)
-                .objective(objective)
-                .description(description)
+                .target(target)
+                .action(action)
                 .type(type.name())
                 .category(category.name())
                 .status(status.name())
-                .points(points)
+                .reward(reward)
+                .value(0L)
                 .build();
     }
 

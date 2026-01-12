@@ -83,8 +83,9 @@ public class GoalTestRepositoryInMemory implements GoalRepository {
 
     @Override
     public <S extends GoalPersistence> List<S> saveAll(Iterable<S> entities) {
-        entities.forEach(this::save);
-        return (List<S>) findAll();
+        List<S> saved = new ArrayList<>();
+        entities.forEach(e -> saved.add((S) this.save(e)));
+        return saved;
     }
 
     @Override

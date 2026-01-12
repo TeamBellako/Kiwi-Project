@@ -21,11 +21,11 @@ public class GoalPersistence {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "objective", nullable = false)
-    private Long objective;
+    @Column(name = "target", nullable = false)
+    private Long target;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+    @Column(name = "action", columnDefinition = "TEXT")
+    private String action;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
@@ -39,11 +39,14 @@ public class GoalPersistence {
     @Column(name = "status", nullable = false)
     private GoalStatus status;
 
-    @Column(name = "points", nullable = false)
-    private Integer points;
+    @Column(name = "reward", nullable = false)
+    private Integer reward;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
+
+    @Column(name = "value", nullable = false)
+    private Long value;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

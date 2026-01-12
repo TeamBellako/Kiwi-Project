@@ -27,6 +27,22 @@ public class GoalController {
         return ResponseEntity.status(201).body(createdGoals);
     }
 
+    @PatchMapping("/{goalId}/update_progress")
+    public ResponseEntity<GoalDTO> updateGoalProgress(
+            @PathVariable Long goalId,
+            Authentication authentication) {
+        GoalDTO updatedGoal = goalService.updateGoalProgress(goalId, authentication);
+        return ResponseEntity.ok(updatedGoal);
+    }
+    @PatchMapping("/{goalId}/update")
+    public ResponseEntity<GoalDTO> updateGoal(
+            @PathVariable Long goalId,
+            @RequestBody GoalDTO goal,
+            Authentication authentication) {
+        GoalDTO updatedGoal = goalService.updateGoal(goalId, goal, authentication);
+        return ResponseEntity.ok(updatedGoal);
+    }
+
     @PatchMapping("/{goalId}/complete")
     public ResponseEntity<GoalDTO> completeGoal(
             @PathVariable Long goalId,
