@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,7 +32,9 @@ import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
+import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
@@ -84,100 +87,178 @@ private fun Question(
     var localLoading by remember { mutableStateOf(false) }
     val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
 
+    var shouldShowBuildModal by remember { mutableStateOf(false) }
+
     personalityState?.let { currentPersonalityState ->
-
-        if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
-            ErrorModalScreen(onButtonClick = {
-                usersViewModel.resetUiState()
-                personalityViewModel.resetUiState()
-            })
+        if (shouldShowBuildModal) {
+            BuildModal(personalityViewModel, navController)
         } else {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(getResponsiveSizeHeight(Spacing.medium))
-                        .testTag(CommonTestTags.USERS_SCREEN),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                val kiwiColors = LocalKiwiColors.current
-                var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
-
-                val totalQuestions = currentPersonalityState.questions.size
-                val progress by remember(currentQuestion, totalQuestions) {
-                    derivedStateOf { (currentQuestion + 1).toFloat() / totalQuestions.toFloat() }
-                }
-
-                LinearProgressIndicator(
-                    progress = { progress },
+            if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
+                ErrorModalScreen(onButtonClick = {
+                    usersViewModel.resetUiState()
+                    personalityViewModel.resetUiState()
+                })
+            } else {
+                Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
-                            .testTag("questionnaire_progress_bar"),
-                    color = kiwiColors.color3A,
-                    trackColor = kiwiColors.color3A.copy(alpha = 0.25f),
-                    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                )
+                            .wrapContentHeight()
+                            .padding(getResponsiveSizeHeight(Spacing.medium))
+                            .testTag(CommonTestTags.USERS_SCREEN),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    val kiwiColors = LocalKiwiColors.current
+                    var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-                Kiwi_H2(
-                    KiwiTextArguments(
-                        currentPersonalityState.questions[currentQuestion].question,
-                        textAlign = TextAlign.Center,
-                        color = kiwiColors.color6,
-                    ),
-                )
+                    val totalQuestions = currentPersonalityState.questions.size
+                    val progress by remember(currentQuestion, totalQuestions) {
+                        derivedStateOf { (currentQuestion + 1).toFloat() / totalQuestions.toFloat() }
+                    }
 
-                Kiwi_Spacer(Spacing.large)
-
-                currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
-
-                    Kiwi_FixedSizeButton(
-                        textArguments =
-                            KiwiTextArguments(
-                                option,
-                                color = kiwiColors.color6,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(8.dp),
-                            ),
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
+                                .testTag("questionnaire_progress_bar"),
                         color = kiwiColors.color3A,
-                        onClick = {
-                            currentPersonalityState.answers[currentQuestion] = index
-
-                            firebaseLogEvent(
-                                FirebaseEventNames.PERSONALIZATION_QUESTION_ANSWERED,
-                                mapOf(
-                                    "question" to currentPersonalityState.questions[currentQuestion].question,
-                                    "answer" to currentPersonalityState.questions[currentQuestion].options[index],
-                                ),
-                            )
-
-                            if (currentQuestion + 1 < currentPersonalityState.questions.size) {
-                                ++currentQuestion
-                            } else {
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    if (personalityViewModel.updateBuild().isSuccess) {
-                                        firebaseLogEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
-
-                                        navController.navigate(ScreenRoutes.SIGNUP4_APPS)
-                                        localLoading = true
-                                    }
-                                }
-                            }
-                        },
-                        enabled = !isLoading,
+                        trackColor = kiwiColors.color3A.copy(alpha = 0.25f),
+                        strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
 
-                    Kiwi_Spacer()
+                    Kiwi_H2(
+                        KiwiTextArguments(
+                            currentPersonalityState.questions[currentQuestion].question,
+                            textAlign = TextAlign.Center,
+                            color = kiwiColors.color6,
+                        ),
+                    )
+
+                    Kiwi_Spacer(Spacing.large)
+
+                    currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
+
+                        Kiwi_FixedSizeButton(
+                            textArguments =
+                                KiwiTextArguments(
+                                    option,
+                                    color = kiwiColors.color6,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(8.dp),
+                                ),
+                            color = kiwiColors.color3A,
+                            onClick = {
+                                currentPersonalityState.answers[currentQuestion] = index
+
+                                firebaseLogEvent(
+                                    FirebaseEventNames.PERSONALIZATION_QUESTION_ANSWERED,
+                                    mapOf(
+                                        "question" to currentPersonalityState.questions[currentQuestion].question,
+                                        "answer" to currentPersonalityState.questions[currentQuestion].options[index],
+                                    ),
+                                )
+
+                                if (currentQuestion + 1 < currentPersonalityState.questions.size) {
+                                    ++currentQuestion
+                                } else {
+                                    shouldShowBuildModal = true
+                                }
+                            },
+                            enabled = !isLoading,
+                        )
+
+                        Kiwi_Spacer()
+                    }
+                }
+
+                if (isLoading || isPreview) {
+                    LoadingModal()
                 }
             }
-
-            if (isLoading || isPreview) {
-                LoadingModal()
-            }
         }
+    }
+}
+
+@Composable
+private fun BuildModal(
+    personalityViewModel: IPersonalityViewModel,
+    navController: NavController,
+) {
+    val personalityState by personalityViewModel.state.collectAsState()
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = getResponsiveSizeHeight(24.dp))
+                .padding(horizontal = getResponsiveSizeHeight(24.dp)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        val kiwiColors = LocalKiwiColors.current
+
+        Kiwi_H1(
+            KiwiTextArguments(
+                "Your initial build is...",
+                TextAlign.Center,
+                modifier =
+                    Modifier.padding(
+                        top = getResponsiveSizeHeight(Spacing.medium),
+                        bottom = getResponsiveSizeHeight(Spacing.small),
+                    ),
+            ),
+        )
+
+        Kiwi_H2(
+            KiwiTextArguments(
+                personalityState?.build ?: "",
+                TextAlign.Center,
+                bold = true,
+                modifier =
+                    Modifier.padding(
+                        top = getResponsiveSizeHeight(Spacing.medium),
+                        bottom = getResponsiveSizeHeight(Spacing.small),
+                    ),
+            ),
+        )
+
+        Kiwi_Spacer()
+
+        Kiwi_P1(
+            KiwiTextArguments(
+                text = "And these are your initial skills:",
+                TextAlign.Center,
+                modifier =
+                    Modifier.padding(
+                        top = getResponsiveSizeHeight(Spacing.medium),
+                        bottom = getResponsiveSizeHeight(Spacing.small),
+                    ),
+            ),
+        )
+
+        // TODO: Render initial skills
+
+        Kiwi_FixedSizeButton(
+            textArguments =
+                KiwiTextArguments(
+                    "Get Started",
+                    color = kiwiColors.color6,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(8.dp),
+                ),
+            color = kiwiColors.color3A,
+            onClick = {
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (personalityViewModel.updateBuild().isSuccess) {
+                        firebaseLogEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
+
+                        navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                    }
+                }
+            },
+        )
     }
 }
 
