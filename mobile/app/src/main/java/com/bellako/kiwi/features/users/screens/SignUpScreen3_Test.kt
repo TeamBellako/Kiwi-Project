@@ -123,6 +123,15 @@ private fun Question(
                         color = kiwiColors.color3A,
                         onClick = {
                             currentPersonalityState.answers[currentQuestion] = index
+
+                            firebaseLogEvent(
+                                FirebaseEventNames.PERSONALIZATION_QUESTION_ANSWERED,
+                                mapOf(
+                                    "question" to currentPersonalityState.questions[currentQuestion].question,
+                                    "answer" to currentPersonalityState.questions[currentQuestion].options[index],
+                                ),
+                            )
+
                             if (currentQuestion + 1 < currentPersonalityState.questions.size) {
                                 ++currentQuestion
                             } else {
