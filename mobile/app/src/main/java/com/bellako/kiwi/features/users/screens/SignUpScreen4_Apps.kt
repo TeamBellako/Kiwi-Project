@@ -6,17 +6,26 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -235,6 +244,7 @@ fun AppClassificationColumns(
         )
 
         Kiwi_Spacer(Spacing.large)
+
         Box(
             modifier =
                 Modifier
@@ -263,6 +273,7 @@ fun AppClassificationColumns(
                 { rect -> neutralColumnRect = rect },
                 { rect -> badColumnRect = rect },
             )
+
             // Render dragging app on top
             DraggingAppOverlay(draggingApp.value, dragItemStartPosition.value, boxPosition, dragOffset.value, isLoading)
         }
@@ -318,31 +329,57 @@ private fun AppColumnsRow(
     onNeutralColumnPositioned: (Rect) -> Unit,
     onBadColumnPositioned: (Rect) -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxSize()) {
-        ColumnApps(
-            title = "Good",
-            apps = appLists.goodApps,
-            draggingApp = draggingApp,
-            isLoading = isLoading,
-            onPositionChanged = { app, rect -> appPositions[app] = rect },
-            modifier = Modifier.weight(1f).onGloballyPositioned { onGoodColumnPositioned(it.boundsInWindow()) },
-        )
-        ColumnApps(
-            title = "Neutral",
-            apps = appLists.neutralApps,
-            draggingApp = draggingApp,
-            isLoading = isLoading,
-            onPositionChanged = { app, rect -> appPositions[app] = rect },
-            modifier = Modifier.weight(1f).onGloballyPositioned { onNeutralColumnPositioned(it.boundsInWindow()) },
-        )
-        ColumnApps(
-            title = "Evil",
-            apps = appLists.badApps,
-            draggingApp = draggingApp,
-            isLoading = isLoading,
-            onPositionChanged = { app, rect -> appPositions[app] = rect },
-            modifier = Modifier.weight(1f).onGloballyPositioned { onBadColumnPositioned(it.boundsInWindow()) },
-        )
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+        ) {
+            ColumnApps(
+                title = "Good",
+                apps = appLists.goodApps,
+                draggingApp = draggingApp,
+                isLoading = isLoading,
+                onPositionChanged = { app, rect -> appPositions[app] = rect },
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .onGloballyPositioned { onGoodColumnPositioned(it.boundsInWindow()) },
+            )
+            ColumnApps(
+                title = "Evil",
+                apps = appLists.badApps,
+                draggingApp = draggingApp,
+                isLoading = isLoading,
+                onPositionChanged = { app, rect -> appPositions[app] = rect },
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .onGloballyPositioned { onBadColumnPositioned(it.boundsInWindow()) },
+            )
+        }
+        Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            GridApps(
+                title = "Neutral",
+                apps = appLists.neutralApps,
+                draggingApp = draggingApp,
+                isLoading = isLoading,
+                onPositionChanged = { app, rect -> appPositions[app] = rect },
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .onGloballyPositioned { onNeutralColumnPositioned(it.boundsInWindow()) },
+            )
+        }
     }
 }
 
@@ -388,12 +425,14 @@ fun AppItem(
     dragOffset: Offset = Offset.Zero,
     onPositionChanged: (Rect) -> Unit = {},
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier =
             Modifier
+                .background(kiwiColors.color3, shape = RoundedCornerShape(8.dp))
                 .padding(getResponsiveSizeHeight(Spacing.xSmall))
-                .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->
                     onPositionChanged(coordinates.boundsInWindow())
                 }.offset { IntOffset(dragOffset.x.toInt(), dragOffset.y.toInt()) }
@@ -411,7 +450,7 @@ fun AppItem(
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(APP_ICON_SIZE_DP))
-                    .padding(end = getResponsiveSizeHeight(APP_ICON_PADDING_DP))
+                    .padding(horizontal = getResponsiveSizeHeight(APP_ICON_PADDING_DP))
                     .graphicsLayer { alpha = if (enabled) 1f else APP_ITEM_DISABLED_ALPHA },
         )
         Kiwi_Label2(KiwiTextArguments(app.name))
@@ -427,8 +466,13 @@ fun ColumnApps(
     onPositionChanged: (AppInfo, Rect) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val kiwiColors = LocalKiwiColors.current
+
     Column(
-        modifier = modifier,
+        modifier =
+            modifier
+                .background(kiwiColors.color1, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp),
     ) {
         Kiwi_H2(
             KiwiTextArguments(
@@ -438,7 +482,61 @@ fun ColumnApps(
             ),
         )
         Kiwi_Spacer(Spacing.small)
-        LazyColumn(modifier = Modifier.weight(1f)) {
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+        ) {
+            items(apps) { app ->
+                if (draggingApp != app) {
+                    AppItem(
+                        app = app,
+                        enabled = !isLoading,
+                        isDragging = false,
+                        dragOffset = Offset.Zero,
+                        onPositionChanged = { rect -> onPositionChanged(app, rect) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun GridApps(
+    title: String,
+    apps: List<AppInfo>,
+    draggingApp: AppInfo?,
+    isLoading: Boolean,
+    onPositionChanged: (AppInfo, Rect) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Column(
+        modifier =
+            modifier
+                .background(kiwiColors.color1, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp),
+    ) {
+        Kiwi_H2(
+            KiwiTextArguments(
+                text = title,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            ),
+        )
+        Kiwi_Spacer(Spacing.small)
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            contentPadding = PaddingValues(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             items(apps) { app ->
                 if (draggingApp != app) {
                     AppItem(
