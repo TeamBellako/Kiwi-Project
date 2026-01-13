@@ -7,7 +7,6 @@ import com.kiwi.features.nodes.controllers.NodesController;
 import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.nodes.data.NodeStatus;
 import com.kiwi.features.nodes.data.NodesDTO;
-import com.kiwi.features.nodes.exceptions.NodeLockedException;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
@@ -27,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 
-import static com.kiwi.nodes.NodesTestFactory.*;
 import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -60,10 +58,11 @@ public class NodesControllerTests {
                     setEmail("test@test.com");
                 }}));
 
-        when(nodesService.getNodesForUser(1L)).thenReturn(List.of(
-                new NodesDTO(1L, 1, NodeStatus.OPEN.name(), 100, 0.5f,0.5f, 1L, "node1", "Node 1"),
-                new NodesDTO(2L, 2, NodeStatus.LOCKED.name(), 120, 0.7f,0.25f,4L, "node2", "Node 2")
-        ));
+        when(nodesService.getNodesForUser(1L))
+                .thenReturn(List.of(
+                        new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, 1L, "node1", "Node 1", List.of(2L)),
+                        new NodesDTO(2L, NodeStatus.LOCKED.name(), 0, 120, 0.7f, 0.25f, 4L, "node2", "Node 2", List.of())
+                ));
 
         mockMvc.perform(get(baseAPIUrl)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -80,30 +79,11 @@ public class NodesControllerTests {
                 }}));
 
         when(nodesService.unlockNode(1L, 1L))
-                .thenReturn(new NodesDTO(1L, 1, NodeStatus.OPEN.name(), 100, 0.5f,0.5f,1L,"node1","Node 1"));
+                .thenReturn(new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, 1L, "node1", "Node 1", List.of(2L)));
 
-        mockMvc.perform(
-                        getPostRequestBuilder(baseAPIUrl + "/1/unlock", userIdDTO(1L))
-                                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/1/unlock", null)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = "test@test.com")
-    public void unlockNode_locked_returnsLockedStatus() throws Exception {
-        when(usersService.getUserByEmail(any()))
-                .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1L);
-                    setEmail("test@test.com");
-                }}));
-
-        when(nodesService.unlockNode(1L, 2L))
-                .thenThrow(new NodeLockedException(2L));
-
-        mockMvc.perform(
-                        getPostRequestBuilder(baseAPIUrl + "/2/unlock", userIdDTO(1L))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isLocked());
     }
 
     @Test
@@ -116,29 +96,10 @@ public class NodesControllerTests {
                 }}));
 
         when(nodesService.completeNode(1L, 2L))
-                .thenReturn(new NodesDTO(2L, 2, NodeStatus.COMPLETED.name(), 120, 0.15f,0.25f, 2L, "node2", ""));
+                .thenReturn(List.of(new NodesDTO(3L, NodeStatus.LOCKED.name(), 0, 150, 0.8f, 0.4f, 5L, "node3", "Node 3", List.of())));
 
-        mockMvc.perform(
-                        getPostRequestBuilder(baseAPIUrl + "/2/complete", userIdDTO(1L))
-                                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/2/complete", null)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = "test@test.com")
-    public void completeNode_locked_throwsException() throws Exception {
-        when(usersService.getUserByEmail(any()))
-                .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1L);
-                    setEmail("test@test.com");
-                }}));
-
-        when(nodesService.completeNode(1L, 2L))
-                .thenThrow(new NodeLockedException(2L));
-
-        mockMvc.perform(
-                        getPostRequestBuilder(baseAPIUrl + "/2/complete", userIdDTO(1L))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isLocked());
     }
 }

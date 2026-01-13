@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.nodes.tests
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
+import com.bellako.kiwi.features.nodes.data.NodesDomain
 import com.bellako.kiwi.features.nodes.data.NodesState
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ class NodesFakeViewModel(
     var fakeException: Exception = Exception("Simulated error")
 
     // ---------------------------------------------------------------------------------------------
+
     override fun loadNodes() {
         if (fakeError) {
             handleError(fakeException)
@@ -31,7 +33,8 @@ class NodesFakeViewModel(
     }
 
     // ---------------------------------------------------------------------------------------------
-    override fun unlockNode(nodeId: Int) {
+
+    override fun unlockNode(nodeId: Long) {
         if (fakeError) {
             handleError(fakeException)
             setUiState(UIState.Error(fakeException.message ?: "Error unlocking node"))
@@ -39,8 +42,11 @@ class NodesFakeViewModel(
         }
 
         val updatedNodes =
-            _state.value.nodes.map { node ->
-                if (node.id == nodeId) node.copy(status = NodeStatus.OPEN) else node
+            _state.value.nodes.toMutableMap().apply {
+                val node = this[nodeId]
+                if (node != null) {
+                    this[nodeId] = node.copy(status = NodeStatus.OPEN)
+                }
             }
 
         _state.value = _state.value.copy(nodes = updatedNodes)
@@ -49,37 +55,46 @@ class NodesFakeViewModel(
     }
 
     // ---------------------------------------------------------------------------------------------
-    override fun completeNode(nodeId: Int) {
+
+    override fun completeNode(nodeId: Long) {
         if (fakeError) {
             handleError(fakeException)
             setUiState(UIState.Error(fakeException.message ?: "Error completing node"))
             return
         }
 
-        val updatedNodes =
-            _state.value.nodes.map { node ->
-                if (node.id == nodeId) node.copy(status = NodeStatus.COMPLETED) else node
-            }
+        val currentNodes = _state.value.nodes.toMutableMap()
 
-        _state.value = _state.value.copy(nodes = updatedNodes)
-        handleSuccess()
-        setUiState(UIState.Success(Unit))
-    }
-
-    // ---------------------------------------------------------------------------------------------
-    fun markNextNodesAsLocked(nodeId: Int) {
-        if (fakeError) {
-            handleError(fakeException)
-            setUiState(UIState.Error(fakeException.message ?: "Error locking nodes"))
-            return
+        val completedNode = currentNodes[nodeId]
+        if (completedNode != null) {
+            currentNodes[nodeId] = completedNode.copy(status = NodeStatus.COMPLETED)
         }
 
-        val updatedNodes =
-            _state.value.nodes.map { node ->
-                if (node.id > nodeId) node.copy(status = NodeStatus.LOCKED) else node
-            }
+        completedNode?.connectedNodeIds?.forEach { connectedId ->
+            val connectedNode = currentNodes[connectedId]
 
-        _state.value = _state.value.copy(nodes = updatedNodes)
+            if (connectedNode != null) {
+                currentNodes[connectedId] = connectedNode.copy(status = connectedNode.status)
+            } else {
+                val newNode =
+                    NodesDomain(
+                        id = connectedId,
+                        icon = 0,
+                        status = NodeStatus.LOCKED,
+                        price = 0,
+                        cordX = 0f,
+                        cordY = 0f,
+                        eventOnExecution = 0,
+                        name = "Node $connectedId",
+                        displayName = "Node $connectedId",
+                        connectedNodeIds = emptyList(),
+                    )
+                currentNodes[connectedId] = newNode
+            }
+        }
+
+        _state.value = _state.value.copy(nodes = currentNodes)
+
         handleSuccess()
         setUiState(UIState.Success(Unit))
     }

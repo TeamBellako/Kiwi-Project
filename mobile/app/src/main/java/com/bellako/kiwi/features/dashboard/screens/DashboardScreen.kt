@@ -29,7 +29,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
@@ -52,6 +51,7 @@ import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
+import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
@@ -63,7 +63,6 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
 import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.features.users.data.UsersState
@@ -74,8 +73,6 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
@@ -387,6 +384,11 @@ fun DashboardModal_Preview(
     questsViewModel: QuestsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState()),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
 ) {
+    val nodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState())
+    val questsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
+    val goalsFakeViewModel = GoalsFakeViewModel()
+    val mapViewModel = MapViewModel()
+
     val nav = rememberNavController()
     Kiwi_Theme {
         Scaffold(
@@ -396,11 +398,11 @@ fun DashboardModal_Preview(
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen(
-                        nodesViewModel = nodesViewModel,
-                        questsViewModel = questsViewModel,
-                        goalsViewModel = goalsViewModel,
+                        nodesViewModel = nodesFakeViewModel,
+                        questsViewModel = questsFakeViewModel,
                         navController = nav,
-                        mapViewModel = hiltViewModel(),
+                        goalsViewModel = goalsFakeViewModel,
+                        mapViewModel = mapViewModel,
                     )
                     DashboardScreen(
                         usersViewModel =

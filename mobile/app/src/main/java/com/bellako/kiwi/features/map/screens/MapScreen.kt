@@ -55,6 +55,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlin.collections.forEach
 import kotlin.math.min
@@ -102,17 +103,27 @@ fun MapScreen(
             elasticityFactor = elasticityFactor,
         )
     }
-
     val nodesState by nodesViewModel.state.collectAsState()
+
     LaunchedEffect(Unit) {
         nodesViewModel.loadNodes()
+
         snapshotFlow { nodesState?.nodes }
-            .filter { it?.isNotEmpty() == true }
+            .filterNotNull()
+            .filter { it.isNotEmpty() }
             .first()
-            .let { nodesList ->
-                val firstOpenOrLocked =
-                    nodesList?.firstOrNull { it.status == NodeStatus.OPEN || it.status == NodeStatus.LOCKED }
-                firstOpenOrLocked?.let { node ->
+            .let { nodesMap ->
+                val nodesList = nodesMap.values.toList()
+
+                val lastOpen = nodesList.lastOrNull { it.status == NodeStatus.OPEN }
+
+                val lastCompleted = nodesList.lastOrNull { it.status == NodeStatus.COMPLETED }
+
+                val defaultNode = nodesList.firstOrNull()
+
+                val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
+
+                selectedNode?.let { node ->
                     mapViewModel.selectNode(node.id, node.cordX, node.cordY)
                     mapViewModel.setPlayerNode(node.id)
                 }
@@ -225,7 +236,7 @@ private fun InteractiveMap(
                                 if (up != null) {
                                     val tap = up.position
 
-                                    val nodes = nodesState?.nodes.orEmpty()
+                                    val nodes = nodesState?.nodes?.values.orEmpty()
                                     if (nodes.isEmpty()) return@awaitEachGesture
 
                                     @Suppress("MagicNumber")
@@ -257,7 +268,7 @@ private fun InteractiveMap(
         }
 
         // NODES
-        nodesState?.nodes?.forEach { node ->
+        nodesState?.nodes?.values?.forEach { node ->
             NodeOnMap(
                 node = node,
                 mapState = mapState,
@@ -270,8 +281,7 @@ private fun InteractiveMap(
         if (!mapState.isFocusingNode) {
             mapState.selectedNodeId?.let { selectedNodeId ->
                 nodesState
-                    ?.nodes
-                    ?.find { it.id == selectedNodeId }
+                    ?.nodes[selectedNodeId]
                     ?.let { selectedNode ->
                         AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
                         NodeAction(

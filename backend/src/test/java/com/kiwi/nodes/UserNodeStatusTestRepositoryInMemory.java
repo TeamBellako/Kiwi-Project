@@ -22,6 +22,17 @@ public class UserNodeStatusTestRepositoryInMemory implements UserNodeStatusRepos
     }
 
     @Override
+    public List<UserNodeStatusPersistence> findByIdUserId(Long userId) {
+        return store.values().stream()
+                .filter(status ->
+                        status.getId() != null &&
+                                status.getId().getUserId() != null &&
+                                status.getId().getUserId().equals(userId)
+                )
+                .toList();
+    }
+
+    @Override
     public <S extends UserNodeStatusPersistence> S save(S entity) {
         store.put(entity.getId(), entity);
         return entity;

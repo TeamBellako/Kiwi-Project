@@ -34,19 +34,6 @@ public class NodesController {
         return ResponseEntity.ok(nodes);
     }
 
-    @PostMapping("/{nodeId}/lock-next")
-    public ResponseEntity<List<NodesDTO>> markNextNodesAsLocked(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable Long nodeId
-    ) {
-        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
-                .orElseThrow()
-                .getId();
-
-        List<NodesDTO> nodes = nodesService.markNextNodesAsLocked(userId, nodeId);
-        return ResponseEntity.ok(nodes);
-    }
-
     @PostMapping("/{nodeId}/unlock")
     public ResponseEntity<NodesDTO> unlockNode(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -61,7 +48,7 @@ public class NodesController {
     }
 
     @PostMapping("/{nodeId}/complete")
-    public ResponseEntity<NodesDTO> completeNode(
+    public ResponseEntity<List<NodesDTO>> completeNode(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long nodeId
     ) {
@@ -69,7 +56,7 @@ public class NodesController {
                 .orElseThrow()
                 .getId();
 
-        var node = nodesService.completeNode(userId, nodeId);
-        return ResponseEntity.ok(node);
+        List<NodesDTO> nodes = nodesService.completeNode(userId, nodeId);
+        return ResponseEntity.ok(nodes);
     }
 }

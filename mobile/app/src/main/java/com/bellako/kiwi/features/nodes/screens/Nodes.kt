@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -50,6 +49,7 @@ fun Node(
     isPlayerNode: Boolean,
     isSelected: Boolean,
     nodeStatus: NodeStatus,
+    nodeIcon: Int,
     mapScale: Float,
     displayName: String,
 ) {
@@ -90,7 +90,7 @@ fun Node(
                     ),
         ) {
             Kiwi_Image(
-                nodeIcon(nodeStatus),
+                nodeIcon(nodeStatus, nodeIcon),
                 "node icon",
                 modifier =
                     Modifier
@@ -184,6 +184,7 @@ fun NodeOnMap(
             isPlayerNode,
             isSelected,
             node.status,
+            node.icon,
             mapState.scale,
             node.displayName,
         )
@@ -194,8 +195,8 @@ fun NodeOnMap(
 fun NodeAction(
     isPlayerNode: Boolean,
     node: NodesDomain,
-    onUnlockNode: (Int) -> Unit,
-    onCompleteNode: (Int) -> Unit,
+    onUnlockNode: (Long) -> Unit,
+    onCompleteNode: (Long) -> Unit,
 ) {
     val offset = if (isPlayerNode) 64.dp else 48.dp
     Box(
@@ -206,31 +207,10 @@ fun NodeAction(
         when (node.status) {
             NodeStatus.LOCKED -> UnlockButton("Unlock (" + node.price + ")") { onUnlockNode(node.id) }
             NodeStatus.OPEN -> PlayButton("Play") { onCompleteNode(node.id) }
-            NodeStatus.COMPLETED -> PlayButton("Replay") { /* TODO */ }
+            NodeStatus.COMPLETED -> PlayButton("Replay") { replayFirebaseEvent(node.id) }
             else -> {}
         }
     }
-}
-
-@Composable
-fun PlayButton(
-    text: String,
-    onClick: () -> Unit,
-) {
-    val kiwiColors = LocalKiwiColors.current
-
-    Kiwi_AdaptableSizeButton(
-        textArguments =
-            KiwiTextArguments(
-                text,
-                color = kiwiColors.colorF,
-                bold = true,
-            ),
-        contentPaddingHorizontal = Spacing.xLarge,
-        color = kiwiColors.color7D,
-        onClick = onClick,
-        sound = R.raw.snd_node_execution,
-    )
 }
 
 @Composable
@@ -258,8 +238,39 @@ fun UnlockButton(
 }
 
 @Composable
+fun PlayButton(
+    text: String,
+    onClick: () -> Unit,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Kiwi_AdaptableSizeButton(
+        textArguments =
+            KiwiTextArguments(
+                text,
+                color = kiwiColors.colorF,
+                bold = true,
+            ),
+        contentPaddingHorizontal = Spacing.xLarge,
+        color = kiwiColors.color7D,
+        onClick = onClick,
+        sound = R.raw.snd_node_execution,
+    )
+}
+
+@Suppress("UnusedParameter")
+private fun replayFirebaseEvent(id: Long) {
+ /*   firebaseLogEvent(
+        FirebaseEventNames.NODES_REPLAY_COMPLETED_NODE,
+        mapOf(
+            "node_id" to Long,
+        ),
+    ) // Uncomment when added event on firebase server */
+}
+
+@Composable
 fun NodeConnections(
-    nodes: List<NodesDomain>,
+    nodes: Map<Long, NodesDomain>,
     mapState: MapState,
     modifier: Modifier = Modifier,
 ) {
@@ -268,45 +279,49 @@ fun NodeConnections(
     Canvas(
         modifier = modifier,
     ) {
-        val nodesByOrder = nodes.groupBy { it.nodeOrder }
+        nodes.values.forEach { from ->
+            from.connectedNodeIds.forEach { toId ->
+                val to = nodes[toId] ?: return@forEach
 
-        nodesByOrder.forEach { (order, fromNodes) ->
-            val toNodes = nodesByOrder[order + 1] ?: return@forEach
+                val fromPos = nodeToScreen(from, mapState)
+                val toPos = nodeToScreen(to, mapState)
 
-            fromNodes.forEach { from ->
-                toNodes.forEach { to ->
-                    val fromPos = nodeToScreen(from, mapState)
-                    val toPos = nodeToScreen(to, mapState)
+                val color =
+                    when (to.status) {
+                        NodeStatus.COMPLETED -> kiwiColors.colorF
+                        NodeStatus.OPEN -> kiwiColors.color7E
+                        else -> kiwiColors.color0C
+                    }
 
-                    val color =
-                        when (to.status) {
-                            NodeStatus.COMPLETED -> kiwiColors.colorF
-                            NodeStatus.OPEN -> kiwiColors.color7E
-                            else -> kiwiColors.color0C
-                        }
-
-                    drawLine(
-                        color = color,
-                        start = fromPos,
-                        end = toPos,
-                        strokeWidth = 2.0f,
-                        cap = StrokeCap.Butt,
-                    )
-                }
+                drawLine(
+                    color = color,
+                    start = fromPos,
+                    end = toPos,
+                    strokeWidth = 2.0f,
+                    cap = StrokeCap.Butt,
+                )
             }
         }
     }
 }
 
 // HELPERS
+@Suppress("MagicNumber")
 @DrawableRes
 private fun nodeIcon(
     nodeStatus: NodeStatus,
-    // TODO nodeType
+    nodeIcon: Int,
 ): Int =
     when (nodeStatus) {
         NodeStatus.LOCKED -> R.drawable.node_locked
-        NodeStatus.OPEN -> R.drawable.node_base
+        NodeStatus.OPEN ->
+            when (nodeIcon) {
+                1 -> R.drawable.node_main_quest
+                2 -> R.drawable.node_side_quest
+                3 -> R.drawable.node_combat
+                4 -> R.drawable.node_tip
+                else -> R.drawable.node_base
+            }
         NodeStatus.COMPLETED -> R.drawable.node_completed
         else -> R.drawable.node_blocked
     }

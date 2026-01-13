@@ -6,6 +6,7 @@ import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.quests.controllers.QuestController;
 import com.kiwi.features.quests.controllers.QuestService;
 import com.kiwi.features.quests.data.QuestDTO;
+import com.kiwi.features.quests.data.SubquestDTO;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.security.AuthEntryPointJwt;
@@ -78,6 +79,46 @@ public class QuestControllerTests {
                 .thenReturn(List.of(new QuestDTO()));
 
         mockMvc.perform(get(baseAPIUrl + "/completed")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
+    public void getQuest_valid_returnsOk() throws Exception {
+
+        when(usersService.getUserByEmail(any()))
+                .thenReturn(Optional.of(new UsersPersistence() {{
+                    setId(1L);
+                    setEmail("test@test.com");
+                }}));
+
+        QuestDTO questDTO = new QuestDTO();
+
+        when(questService.getQuestForUser(1L, questDTO.getQuestId()))
+                .thenReturn(questDTO);
+
+        mockMvc.perform(get(baseAPIUrl + "/"+questDTO.getQuestId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
+    public void getSubquest_valid_returnsOk() throws Exception {
+
+        when(usersService.getUserByEmail(any()))
+                .thenReturn(Optional.of(new UsersPersistence() {{
+                    setId(1L);
+                    setEmail("test@test.com");
+                }}));
+
+        SubquestDTO subquestDTO = new SubquestDTO();
+
+        when(questService.getSubquestForUser(1L, subquestDTO.getSubquestId()))
+                .thenReturn(subquestDTO);
+
+        mockMvc.perform(get(baseAPIUrl + "/subquests/"+subquestDTO.getSubquestId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }

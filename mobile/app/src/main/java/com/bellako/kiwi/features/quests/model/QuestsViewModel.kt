@@ -9,6 +9,7 @@ import com.bellako.kiwi.features.quests.data.QuestDataMapper
 import com.bellako.kiwi.features.quests.data.QuestDomain
 import com.bellako.kiwi.features.quests.data.QuestStatus
 import com.bellako.kiwi.features.quests.data.QuestsState
+import com.bellako.kiwi.features.quests.data.SubquestStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -111,6 +112,39 @@ class QuestsViewModel
                     setIsLoading(false)
                 }
             }
+        }
+
+        override suspend fun isQuestCompleted(questId: Int): Boolean {
+            try {
+                return repository.getQuest(questId).status == QuestStatus.COMPLETED
+            } catch (e: HttpException) {
+                warn("HTTP error checking quest $questId completion: ${e.message}")
+            } catch (e: IOException) {
+                warn("IO error checking quest $questId completion: ${e.message}")
+            }
+            return false
+        }
+
+        override suspend fun isSubquestCompleted(subquestId: Int): Boolean {
+            try {
+                return repository.getSubquest(subquestId).status == SubquestStatus.COMPLETED
+            } catch (e: HttpException) {
+                warn("HTTP error checking subquest $subquestId completion: ${e.message}")
+            } catch (e: IOException) {
+                warn("IO error checking subquest $subquestId completion: ${e.message}")
+            }
+            return false
+        }
+
+        override suspend fun isSubquestFailed(subquestId: Int): Boolean {
+            try {
+                return repository.getSubquest(subquestId).status == SubquestStatus.FAILED
+            } catch (e: HttpException) {
+                warn("HTTP error checking subquest $subquestId failure: ${e.message}")
+            } catch (e: IOException) {
+                warn("IO error checking subquest $subquestId failure: ${e.message}")
+            }
+            return false
         }
 
         override fun giveQuest(questId: Int) {

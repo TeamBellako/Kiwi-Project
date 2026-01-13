@@ -2,6 +2,7 @@ package com.kiwi.features.quests.controllers;
 
 import com.kiwi.common.types.Email;
 import com.kiwi.features.quests.data.QuestDTO;
+import com.kiwi.features.quests.data.SubquestDTO;
 import com.kiwi.features.users.controllers.UsersService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,42 @@ public class QuestController {
 
         List<QuestDTO> quests = questService.getCompletedQuestsForUser(userId);
         return ResponseEntity.ok(quests);
+    }
+
+    // ============================================================================================
+    // GET QUEST FOR USER
+    // ============================================================================================
+
+    @GetMapping("/{questId}")
+    public ResponseEntity<QuestDTO> getQuest(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int questId
+    ) {
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+                .orElseThrow()
+                .getId();
+
+        QuestDTO quest = questService.getQuestForUser(userId, questId);
+        return ResponseEntity.ok(quest);
+    }
+
+    // ============================================================================================
+    // GET SUBQUEST FOR USER
+    // ============================================================================================
+
+    @GetMapping("/subquests/{subquestId}")
+    public ResponseEntity<SubquestDTO> getSubquest(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int subquestId
+    ) {
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+                .orElseThrow()
+                .getId();
+
+        SubquestDTO subquest =
+                questService.getSubquestForUser(userId, subquestId);
+
+        return ResponseEntity.ok(subquest);
     }
 
     // ============================================================================================

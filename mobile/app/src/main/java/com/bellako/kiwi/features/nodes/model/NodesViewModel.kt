@@ -33,7 +33,10 @@ class NodesViewModel
                 setUiState(UIState.Loading)
                 try {
                     val nodes = repository.getNodes()
-                    _state.value = _state.value.copy(nodes = nodes)
+                    _state.value =
+                        _state.value.copy(
+                            nodes = nodes.associateBy { it.id },
+                        )
                     setUiState(UIState.Idle)
                 } catch (e: GeneralSecurityException) {
                     warn("Encryption error: ${e.message}")
@@ -45,14 +48,14 @@ class NodesViewModel
             }
         }
 
-        override fun unlockNode(nodeId: Int) = updateNodesSafe { listOf(repository.unlockNode(nodeId)) }
+        override fun unlockNode(nodeId: Long) =
+            updateNodesSafe {
+                listOf(repository.unlockNode(nodeId))
+            }
 
-        override fun completeNode(nodeId: Int) {
-            viewModelScope.launch {
-                val completedNode = repository.completeNode(nodeId)
-                updateNodesSafe { listOf(completedNode) }
-                val lockedNodes = repository.markNextNodesAsLocked(nodeId)
-                updateNodesSafe { lockedNodes }
+        override fun completeNode(nodeId: Long) {
+            updateNodesSafe {
+                repository.completeNode(nodeId)
             }
         }
 
@@ -64,14 +67,17 @@ class NodesViewModel
                 setUiState(UIState.Loading)
                 try {
                     val updatedNodes = block()
+                    val currentNodes = _state.value.nodes.toMutableMap()
 
-                    val currentNodes = _state.value.nodes
-                    val newList =
-                        currentNodes.map { n ->
-                            updatedNodes.find { it.id == n.id } ?: n
-                        }
+                    updatedNodes.forEach { node ->
+                        currentNodes[node.id] = node
+                    }
 
-                    _state.value = _state.value.copy(nodes = newList)
+                    _state.value =
+                        _state.value.copy(
+                            nodes = currentNodes,
+                        )
+
                     setUiState(UIState.Success(Unit))
                 } catch (e: GeneralSecurityException) {
                     warn("Encryption error: ${e.message}")

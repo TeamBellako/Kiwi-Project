@@ -54,6 +54,37 @@ public class QuestService {
     }
 
     // ============================================================================================
+    // GET QUEST FOR USER
+    // ============================================================================================
+
+    public QuestDTO getQuestForUser(Long userId, int questId) {
+
+        QuestDomain questDomain = buildQuestDomain(userId, questId);
+        return QuestMapper.toDTO(questDomain);
+    }
+
+    // ============================================================================================
+    // GET SUBQUEST FOR USER
+    // ============================================================================================
+
+    public SubquestDTO getSubquestForUser(Long userId, int subquestId) {
+
+        SubquestPersistence subquest =
+                subquestRepository.findById(subquestId)
+                        .orElseThrow(() -> new SubquestNotFoundException(subquestId));
+
+        UserSubquestStatusPersistence status =
+                userSubquestStatusRepository
+                        .findByIdUserIdAndIdSubquestId(userId, subquestId)
+                        .orElseThrow(() -> new SubquestStatusNotFoundException(subquestId));
+
+        SubquestDomain domain =
+                SubquestMapper.toDomain(subquest, status);
+
+        return SubquestMapper.toDTO(domain);
+    }
+
+    // ============================================================================================
     // GIVE QUEST
     // ============================================================================================
 
@@ -143,7 +174,7 @@ public class QuestService {
     }
 
     // ============================================================================================
-    // AUXILIARY METHODS
+    // HELPERS
     // ============================================================================================
 
     private void updateCurrentSubquest(
