@@ -19,8 +19,10 @@ USE ${MYSQL_DATABASE};
 USE kiwi_db_dev;
 
 -- Drop tables if they exist
-DROP TABLE IF EXISTS goals;
+DROP TABLE IF EXISTS user_skill_status;
+DROP TABLE IF EXISTS skills;
 DROP TABLE IF EXISTS suggested_goals;
+DROP TABLE IF EXISTS goals;
 DROP TABLE IF EXISTS metrics;
 DROP TABLE IF EXISTS personality;
 DROP TABLE IF EXISTS settings;
@@ -252,6 +254,63 @@ DELIMITER ;
 INSERT INTO quests VALUES (1,"First Quest", "Complete your first challenge", 100,1),(2,"Second Quest", "A longer mission with multiple steps", 100,2);
 INSERT INTO subquests VALUES (1,1,"Objective 1",20,1),(2,1,"Objective 2",20,2),(3,1,"Objective 3",20,3),(4,2,"Objective 1",20,1),(5,2,"Objective 2",20,2),(6,2,"Objective 3",20,3),(7,2,"Objective 4",20,4);
 --
+
+-- Create skills table
+CREATE TABLE IF NOT EXISTS skills (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description VARCHAR(500) NOT NULL,
+    quote VARCHAR(255),
+
+    icon INT NOT NULL,
+
+    cooldown_type ENUM('GOAL', 'TIME', 'OTHER') NOT NULL,
+
+    cooldown_goal_id BIGINT,
+    cooldown_time_minutes INT,
+    cooldown_other_description VARCHAR(500),
+
+    levelup_skill_id BIGINT,
+
+    CONSTRAINT fk_skills_goal
+        FOREIGN KEY (cooldown_goal_id)
+        REFERENCES goals(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_skills_levelup
+        FOREIGN KEY (levelup_skill_id)
+        REFERENCES skills(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+-- Create user_skill_status table
+CREATE TABLE IF NOT EXISTS user_skill_status (
+    user_id BIGINT NOT NULL,
+    skill_id BIGINT NOT NULL,
+
+    is_cooldown BOOLEAN NOT NULL,
+
+    cooldown_until TIMESTAMP NULL,
+
+    deck_slot INT NOT NULL,
+
+    PRIMARY KEY (user_id, skill_id),
+
+    CONSTRAINT fk_user_skill_status_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_user_skill_status_skill
+        FOREIGN KEY (skill_id)
+        REFERENCES skills(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
 
 CREATE USER '${BACKEND_DB_USERNAME}'@'%' IDENTIFIED BY '${BACKEND_DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${BACKEND_DB_USERNAME}'@'%';
