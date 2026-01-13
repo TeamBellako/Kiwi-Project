@@ -87,6 +87,8 @@ private const val DRAG_ALPHA = 1.0f
 private const val DRAG_SCALE_X = 1.0f
 private const val DRAG_SCALE_Y = 1.0f
 
+private const val NEUTRAL_APPS_GRID_SIZE = 3
+
 @Composable
 fun SignUpScreen4_Apps(
     personalityViewModel: IPersonalityViewModel,
@@ -506,6 +508,7 @@ fun ColumnApps(
         )
         Kiwi_Spacer(Spacing.small)
         LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
                 Modifier
@@ -554,7 +557,7 @@ fun GridApps(
         Kiwi_Spacer(Spacing.small)
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
+            columns = GridCells.Fixed(NEUTRAL_APPS_GRID_SIZE),
             modifier = Modifier.fillMaxWidth().weight(1f),
             contentPadding = PaddingValues(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
