@@ -86,97 +86,108 @@ private fun Question(
     var localLoading by remember { mutableStateOf(false) }
     val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
 
+    personalityState?.let { currentPersonalityState ->
+        if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
+            ErrorModalScreen(onButtonClick = {
+                usersViewModel.resetUiState()
+                personalityViewModel.resetUiState()
+            })
+        } else {
+            Options(personalityViewModel, navController, currentPersonalityState, isLoading, isPreview)
+        }
+    }
+}
+
+@Composable
+private fun Options(
+    personalityViewModel: IPersonalityViewModel,
+    navController: NavController,
+    currentPersonalityState: PersonalityState,
+    isLoading: Boolean,
+    isPreview: Boolean,
+) {
     var shouldShowBuildModal by remember { mutableStateOf(false) }
 
-    personalityState?.let { currentPersonalityState ->
-        if (shouldShowBuildModal) {
-            BuildModal(personalityViewModel, navController)
-        } else {
-            if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
-                ErrorModalScreen(onButtonClick = {
-                    usersViewModel.resetUiState()
-                    personalityViewModel.resetUiState()
-                })
-            } else {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(getResponsiveSizeHeight(Spacing.medium))
-                            .testTag(CommonTestTags.USERS_SCREEN),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    val kiwiColors = LocalKiwiColors.current
-                    var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
+    if (shouldShowBuildModal) {
+        BuildModal(personalityViewModel, navController)
+    } else {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(getResponsiveSizeHeight(Spacing.medium))
+                    .testTag(CommonTestTags.USERS_SCREEN),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            val kiwiColors = LocalKiwiColors.current
+            var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
 
-                    val totalQuestions = currentPersonalityState.questions.size
-                    val progress by remember(currentQuestion, totalQuestions) {
-                        derivedStateOf { (currentQuestion + 1).toFloat() / totalQuestions.toFloat() }
-                    }
+            val totalQuestions = currentPersonalityState.questions.size
+            val progress by remember(currentQuestion, totalQuestions) {
+                derivedStateOf { (currentQuestion + 1).toFloat() / totalQuestions.toFloat() }
+            }
 
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
-                                .testTag("questionnaire_progress_bar"),
-                        color = kiwiColors.color3A,
-                        trackColor = kiwiColors.color3A.copy(alpha = 0.25f),
-                        strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                    )
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
+                        .testTag("questionnaire_progress_bar"),
+                color = kiwiColors.color3A,
+                trackColor = kiwiColors.color3A.copy(alpha = 0.25f),
+                strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+            )
 
-                    Kiwi_H2(
+            Kiwi_H2(
+                KiwiTextArguments(
+                    currentPersonalityState.questions[currentQuestion].question,
+                    textAlign = TextAlign.Center,
+                    color = kiwiColors.color6,
+                ),
+            )
+
+            Kiwi_Spacer(Spacing.large)
+
+            currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
+
+                Kiwi_FixedSizeButton(
+                    textArguments =
                         KiwiTextArguments(
-                            currentPersonalityState.questions[currentQuestion].question,
-                            textAlign = TextAlign.Center,
+                            option,
                             color = kiwiColors.color6,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(8.dp),
                         ),
-                    )
+                    color = kiwiColors.color3A,
+                    onClick = {
+                        currentPersonalityState.answers[currentQuestion] = index
 
-                    Kiwi_Spacer(Spacing.large)
-
-                    currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
-
-                        Kiwi_FixedSizeButton(
-                            textArguments =
-                                KiwiTextArguments(
-                                    option,
-                                    color = kiwiColors.color6,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(8.dp),
-                                ),
-                            color = kiwiColors.color3A,
-                            onClick = {
-                                currentPersonalityState.answers[currentQuestion] = index
-
-                                firebaseLogEvent(
-                                    FirebaseEventNames.PERSONALIZATION_QUESTION_ANSWERED,
-                                    mapOf(
-                                        "question" to currentPersonalityState.questions[currentQuestion].question,
-                                        "answer" to currentPersonalityState.questions[currentQuestion].options[index],
-                                    ),
-                                )
-
-                                if (currentQuestion + 1 < currentPersonalityState.questions.size) {
-                                    ++currentQuestion
-                                } else {
-                                    shouldShowBuildModal = true
-                                }
-                            },
-                            enabled = !isLoading,
+                        firebaseLogEvent(
+                            FirebaseEventNames.PERSONALIZATION_QUESTION_ANSWERED,
+                            mapOf(
+                                "question" to currentPersonalityState.questions[currentQuestion].question,
+                                "answer" to currentPersonalityState.questions[currentQuestion].options[index],
+                            ),
                         )
 
-                        Kiwi_Spacer()
-                    }
-                }
+                        if (currentQuestion + 1 < currentPersonalityState.questions.size) {
+                            ++currentQuestion
+                        } else {
+                            shouldShowBuildModal = true
+                        }
+                    },
+                    enabled = !isLoading,
+                )
 
-                if (isLoading || isPreview) {
-                    LoadingModal()
-                }
+                Kiwi_Spacer()
             }
+        }
+
+        if (isLoading || isPreview) {
+            LoadingModal()
         }
     }
 }
@@ -236,8 +247,6 @@ private fun BuildModal(
                     ),
             ),
         )
-
-        // TODO: Render initial skills
 
         Kiwi_FixedSizeButton(
             textArguments =
