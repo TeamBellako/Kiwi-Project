@@ -3,6 +3,7 @@ package com.bellako.kiwi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
 import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
@@ -20,7 +21,7 @@ class ObjectivesScreenTest {
 
         rule.setContent {
             Kiwi_Theme {
-                ObjectivesScreen(questsViewModel = fakeViewModel)
+                ObjectivesScreen(questsViewModel = fakeViewModel, GoalsFakeViewModel())
             }
         }
 
@@ -39,7 +40,7 @@ class ObjectivesScreenTest {
 
         rule.setContent {
             Kiwi_Theme {
-                ObjectivesScreen(questsViewModel = fakeViewModel, focusedQuestId = focusedQuestId)
+                ObjectivesScreen(questsViewModel = fakeViewModel, GoalsFakeViewModel(), focusedQuestId = focusedQuestId)
             }
         }
 
@@ -55,7 +56,7 @@ class ObjectivesScreenTest {
 
         rule.setContent {
             Kiwi_Theme {
-                ObjectivesScreen(questsViewModel = fakeViewModel)
+                ObjectivesScreen(questsViewModel = fakeViewModel, GoalsFakeViewModel())
             }
         }
 

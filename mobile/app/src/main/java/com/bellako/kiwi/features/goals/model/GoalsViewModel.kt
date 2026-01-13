@@ -30,10 +30,7 @@ class GoalsViewModel
         override val state: StateFlow<GoalsListState> = _state.asStateFlow()
 
         @RequiresApi(Build.VERSION_CODES.O)
-        private suspend fun createGoals(
-            date: String,
-            goals: List<GoalState>,
-        ): Result<Unit> {
+        private suspend fun createGoals(goals: List<GoalState>): Result<Unit> {
             setIsLoading(true)
             setUiState(UIState.Loading)
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -74,25 +71,26 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return result.map { updatedDTO ->
-                val updatedState = GoalDataMapper.toState(updatedDTO)
-                val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
-                _state.value =
-                    _state.value.copy(
-                        goals = updatedGoals,
-                        isLoading = false,
-                        error = null,
-                    )
-                GoalDataMapper.toDomain(updatedDTO)
-            }.also {
-                if (it.isFailure) {
+            return result
+                .map { updatedDTO ->
+                    val updatedState = GoalDataMapper.toState(updatedDTO)
+                    val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
                     _state.value =
                         _state.value.copy(
+                            goals = updatedGoals,
                             isLoading = false,
-                            error = it.exceptionOrNull()?.message,
+                            error = null,
                         )
+                    GoalDataMapper.toDomain(updatedDTO)
+                }.also {
+                    if (it.isFailure) {
+                        _state.value =
+                            _state.value.copy(
+                                isLoading = false,
+                                error = it.exceptionOrNull()?.message,
+                            )
+                    }
                 }
-            }
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
@@ -106,32 +104,33 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return result.map { updatedDTO ->
-                val updatedState = GoalDataMapper.toState(updatedDTO)
-                val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
-                _state.value =
-                    _state.value.copy(
-                        goals = updatedGoals,
-                        isLoading = false,
-                        error = null,
-                    )
-                GoalDataMapper.toDomain(updatedDTO)
-            }.also {
-                if (it.isFailure) {
+            return result
+                .map { updatedDTO ->
+                    val updatedState = GoalDataMapper.toState(updatedDTO)
+                    val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
                     _state.value =
                         _state.value.copy(
+                            goals = updatedGoals,
                             isLoading = false,
-                            error = it.exceptionOrNull()?.message,
+                            error = null,
                         )
+                    GoalDataMapper.toDomain(updatedDTO)
+                }.also {
+                    if (it.isFailure) {
+                        _state.value =
+                            _state.value.copy(
+                                isLoading = false,
+                                error = it.exceptionOrNull()?.message,
+                            )
+                    }
                 }
-            }
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> {
             val today = dateToString(LocalDate.now())
             val goalsToCreate = suggestedGoals.map { SuggestedGoalDataMapper.toGoalState(it, today) }
-            return createGoals(today, goalsToCreate)
+            return createGoals(goalsToCreate)
         }
 
         @RequiresApi(Build.VERSION_CODES.O)

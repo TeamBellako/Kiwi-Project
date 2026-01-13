@@ -24,6 +24,7 @@ class GoalsFakeViewModel(
     var fakeException: Exception = Exception("Simulated error")
 
     // Crear una lista inicial de goals y un diccionario mutable para consultas/actualizaciones
+    @Suppress("MagicNumber")
     private val initialGoals =
         listOf(
             GoalDomain(

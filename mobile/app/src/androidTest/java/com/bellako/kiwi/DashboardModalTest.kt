@@ -351,6 +351,7 @@ class DashboardModalTest {
                     usersFakeViewModel,
                     fakeMetricsViewModel,
                     fakePersonalityViewModel,
+                    GoalsFakeViewModel(),
                     showCalendarView,
                     initialStateIndex,
                 )
