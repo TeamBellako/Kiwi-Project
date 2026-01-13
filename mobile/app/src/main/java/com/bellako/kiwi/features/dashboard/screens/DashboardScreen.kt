@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -384,9 +385,9 @@ fun DashboardModal_Preview(
     questsViewModel: QuestsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState()),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
 ) {
-    val nodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState())
-    val questsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
-    val goalsFakeViewModel = GoalsFakeViewModel()
+    val nodesFakeViewModel = nodesViewModel
+    val questsFakeViewModel = questsViewModel
+    val goalsFakeViewModel = goalsViewModel
     val mapViewModel = MapViewModel()
 
     val nav = rememberNavController()

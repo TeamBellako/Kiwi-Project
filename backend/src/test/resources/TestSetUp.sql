@@ -50,12 +50,13 @@ CREATE TABLE IF NOT EXISTS personality (
 );
 
 -- Create nodes table (needed to restart id count)
+DROP TABLE IF EXISTS node_edges;
 DROP TABLE IF EXISTS nodes;
 -- Create nodes table
 CREATE TABLE IF NOT EXISTS nodes (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  node_order INT NOT NULL,
   price INT NOT NULL,
+  icon INT NOT NULL,
   cord_x FLOAT NOT NULL,
   cord_y FLOAT NOT NULL,
   event_on_execution BIGINT NOT NULL,
@@ -68,13 +69,14 @@ CREATE TABLE IF NOT EXISTS nodes (
   )
 );
 
-
-INSERT INTO nodes ( id, node_order, price, cord_x, cord_y, event_on_execution, name, display_name )
-VALUES
-(1, 1, 120, 0.57, 0.25, 0, 'node_1', NULL),
-(2, 2, 140, 0.61, 0.33, 0, 'node_2', NULL),
-(3, 3, 100, 0.58, 0.44, 0, 'node_3', NULL),
-(4, 4, 180, 0.59, 0.55, 0, 'node_4', 'Node 4');
+-- Create node_edges table
+CREATE TABLE IF NOT EXISTS node_edges (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  from_node_id BIGINT NOT NULL,
+  to_node_id BIGINT NOT NULL,
+  CONSTRAINT fk_node_edges_from_node FOREIGN KEY (from_node_id) REFERENCES nodes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_node_edges_to_node FOREIGN KEY (to_node_id) REFERENCES nodes(id) ON DELETE CASCADE
+);
 
 -- Create goals table with a foreign key to users
 CREATE TABLE IF NOT EXISTS goals (

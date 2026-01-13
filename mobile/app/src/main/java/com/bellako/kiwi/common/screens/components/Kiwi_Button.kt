@@ -350,6 +350,7 @@ private fun Modifier.holdGestureHandler(
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Suppress("MagicNumber")
 @Composable
 fun Kiwi_Button_Preview() {
     val kiwiColors = LocalKiwiColors.current
