@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -121,16 +120,40 @@ fun AppClassification(
 
     val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
 
-    // Get all installed apps
+    val excludedPackages =
+        listOf(
+            "com.google.android.webview", // Android System WebView
+            "com.android.calendar", // Calendar
+            "com.android.deskclock", // Clock
+            "com.android.contacts", // Contacts
+            "com.google.android.apps.wellbeing", // Digital Wellbeing
+            "com.google.android.apps.docs", // Google Drive
+            "com.google.android.inputmethod.latin", // Gboard
+            "com.google.android.setupwizard", // Google Partner Setup
+            "com.google.android.gms", // Google Play Services
+            "com.google.android.apps.maps", // Google Maps
+            "com.google.android.projection.gearhead", // Android Auto
+            "com.google.android.apps.fitness", // Google Fit
+            "com.google.android.apps.nbu.files", // Files by Google
+            "com.google.android.apps.photos", // Google Photos
+            "com.google.android.apps.safetyhub", // Personal Safety
+            "com.google.android.apps.privatecompute", // Private Compute Services
+            "com.google.speechrecognition", // Speech Recognition
+            "com.google.android.speech", // Speech Synthesis
+        )
+
     val realApps =
         try {
             packageManager
                 .getInstalledApplications(PackageManager.GET_META_DATA)
-                // filter not system apps
+                // Filter out system apps and known Google-related apps
                 .filter {
                     val isSystemApp = (it.flags and ApplicationInfo.FLAG_SYSTEM) != 0
                     val isUpdatedSystemApp = (it.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-                    !isSystemApp || isUpdatedSystemApp
+                    val isExcludedPackage = excludedPackages.contains(it.packageName)
+
+                    // Exclude system apps or known excluded apps
+                    !isSystemApp || isUpdatedSystemApp && !isExcludedPackage
                 }.map {
                     val name = packageManager.getApplicationLabel(it).toString()
                     val icon = packageManager.getApplicationIcon(it)
@@ -297,7 +320,7 @@ fun AppClassificationColumns(
                     }
                 }
             },
-            enabled = !isLoading,
+            enabled = !isLoading && goodApps.isNotEmpty() && badApps.isNotEmpty(),
             testTag = UsersTestTags.SIGNUP_BUTTON,
         )
     }
