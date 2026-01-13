@@ -12,25 +12,26 @@ public class GoalsTestFactory {
     // =========================================================================
 
     public static GoalPersistence goalPersistence(
-            String id,
-            Long objective,
-            String description,
+            Long id,
+            Long target,
+            String action,
             GoalType type,
             GoalCategory category,
             GoalStatus status,
-            Integer points,
+            Integer reward,
             LocalDate date,
             UsersPersistence user
     ) {
         return GoalPersistence.builder()
                 .id(id)
-                .objective(objective)
-                .description(description)
+                .target(target)
+                .action(action)
                 .type(type)
                 .category(category)
                 .status(status)
-                .points(points)
+                .reward(reward)
                 .date(date)
+                .value(0L)
                 .user(user)
                 .build();
     }
@@ -40,22 +41,23 @@ public class GoalsTestFactory {
     // =========================================================================
 
     public static GoalDTO goalDTO(
-            String id,
-            Long objective,
-            String description,
+            Long id,
+            Long target,
+            String action,
             GoalType type,
             GoalCategory category,
             GoalStatus status,
-            Integer points
+            Integer reward
     ) {
         return GoalDTO.builder()
                 .id(id)
-                .objective(objective)
-                .description(description)
+                .target(target)
+                .action(action)
                 .type(type.name())
                 .category(category.name())
                 .status(status.name())
-                .points(points)
+                .reward(reward)
+                .value(0L)
                 .build();
     }
 
@@ -63,7 +65,7 @@ public class GoalsTestFactory {
     // HELPERS
     // =========================================================================
 
-    public static GoalDTO inProgressGoalDTO(String id) {
+    public static GoalDTO inProgressGoalDTO(Long id) {
         return goalDTO(
                 id,
                 30L,
@@ -75,7 +77,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalDTO completedGoalDTO(String id) {
+    public static GoalDTO completedGoalDTO(Long id) {
         return goalDTO(
                 id,
                 30L,
@@ -87,7 +89,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalDTO notCompletedGoalDTO(String id) {
+    public static GoalDTO notCompletedGoalDTO(Long id) {
         return goalDTO(
                 id,
                 30L,
@@ -99,7 +101,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalPersistence inProgressGoalPersistence(String id, LocalDate date, UsersPersistence user) {
+    public static GoalPersistence inProgressGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
         return goalPersistence(
                 id,
                 30L,
@@ -113,7 +115,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalPersistence completedGoalPersistence(String id, LocalDate date, UsersPersistence user) {
+    public static GoalPersistence completedGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
         return goalPersistence(
                 id,
                 30L,
@@ -127,7 +129,7 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalPersistence notCompletedGoalPersistence(String id, LocalDate date, UsersPersistence user) {
+    public static GoalPersistence notCompletedGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
         return goalPersistence(
                 id,
                 30L,
@@ -139,12 +141,5 @@ public class GoalsTestFactory {
                 date,
                 user
         );
-    }
-
-    public static GoalsListDTO goalsListDTO(String date, GoalDTO... goals) {
-        return GoalsListDTO.builder()
-                .date(date)
-                .goals(java.util.List.of(goals))
-                .build();
     }
 }

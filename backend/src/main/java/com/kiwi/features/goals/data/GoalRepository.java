@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface GoalRepository extends JpaRepository<GoalPersistence, String> {
+public interface GoalRepository extends JpaRepository<GoalPersistence, Long> {
     List<GoalPersistence> findByUserAndDate(UsersPersistence user, LocalDate date);
     
     List<GoalPersistence> findByUserOrderByDateDesc(UsersPersistence user);
     
-    Optional<GoalPersistence> findByIdAndUser(String id, UsersPersistence user);
+    Optional<GoalPersistence> findByIdAndUser(Long id, UsersPersistence user);
 }

@@ -1,7 +1,6 @@
 package com.kiwi.features.goals.controllers;
 
 import com.kiwi.features.goals.data.GoalDTO;
-import com.kiwi.features.goals.data.GoalsListDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +20,32 @@ public class GoalController {
     }
 
     @PostMapping
-    public ResponseEntity<GoalsListDTO> createGoals(
-            @RequestBody GoalsListDTO goalsListDTO,
+    public ResponseEntity<List<GoalDTO>> createGoals(
+            @RequestBody List<GoalDTO> goals,
             Authentication authentication) {
-        GoalsListDTO createdGoals = goalService.createGoals(goalsListDTO, authentication);
+        List<GoalDTO> createdGoals = goalService.createGoals(goals, authentication);
         return ResponseEntity.status(201).body(createdGoals);
+    }
+
+    @PatchMapping("/{goalId}/update_progress")
+    public ResponseEntity<GoalDTO> updateGoalProgress(
+            @PathVariable Long goalId,
+            Authentication authentication) {
+        GoalDTO updatedGoal = goalService.updateGoalProgress(goalId, authentication);
+        return ResponseEntity.ok(updatedGoal);
+    }
+    @PatchMapping("/{goalId}/update")
+    public ResponseEntity<GoalDTO> updateGoal(
+            @PathVariable Long goalId,
+            @RequestBody GoalDTO goal,
+            Authentication authentication) {
+        GoalDTO updatedGoal = goalService.updateGoal(goalId, goal, authentication);
+        return ResponseEntity.ok(updatedGoal);
     }
 
     @PatchMapping("/{goalId}/complete")
     public ResponseEntity<GoalDTO> completeGoal(
-            @PathVariable String goalId,
+            @PathVariable Long goalId,
             Authentication authentication) {
         GoalDTO completedGoal = goalService.completeGoal(goalId, authentication);
         return ResponseEntity.ok(completedGoal);
@@ -38,29 +53,29 @@ public class GoalController {
 
     @PatchMapping("/{goalId}/uncompleted")
     public ResponseEntity<GoalDTO> uncompleteGoal(
-            @PathVariable String goalId,
+            @PathVariable Long goalId,
             Authentication authentication) {
         GoalDTO uncompletedGoal = goalService.uncompleteGoal(goalId, authentication);
         return ResponseEntity.ok(uncompletedGoal);
     }
 
     @GetMapping
-    public ResponseEntity<GoalsListDTO> getGoalsByDate(
+    public ResponseEntity<List<GoalDTO>> getGoalsByDate(
             @RequestParam("date") String date,
             Authentication authentication) {
-        GoalsListDTO goals = goalService.getGoalsByDate(date, authentication);
+        List<GoalDTO> goals = goalService.getGoalsByDate(date, authentication);
         return ResponseEntity.ok(goals);
     }
 
     @GetMapping("/in_progress")
-    public ResponseEntity<List<GoalsListDTO>> getInProgressGoals(Authentication authentication) {
-        List<GoalsListDTO> goals = goalService.getGoalsInProgress(authentication);
+    public ResponseEntity<List<GoalDTO>> getInProgressGoals(Authentication authentication) {
+        List<GoalDTO> goals = goalService.getGoalsInProgress(authentication);
         return ResponseEntity.ok().body(goals);
     }
     
     @GetMapping("/all")
-    public ResponseEntity<List<GoalsListDTO>> getAllGoals(Authentication authentication) {
-        List<GoalsListDTO> allGoals = goalService.getAllGoals(authentication);
+    public ResponseEntity<List<GoalDTO>> getAllGoals(Authentication authentication) {
+        List<GoalDTO> allGoals = goalService.getAllGoals(authentication);
         return ResponseEntity.ok(allGoals);
     }
 }

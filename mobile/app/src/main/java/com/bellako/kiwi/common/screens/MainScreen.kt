@@ -135,7 +135,10 @@ private fun AppScreen(
         questsViewModel.getNotifications().collect { event ->
             when (event) {
                 is QuestNotificationEvent.QuestCompleted -> {}
-                else -> appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
+
+                else -> {
+                    appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
+                }
             }
         }
     }
@@ -166,6 +169,7 @@ private fun AppScreen(
                         usersViewModel = usersViewModel,
                         metricsViewModel = metricsViewModel,
                         personalityViewModel = personalityViewModel,
+                        goalsViewModel = goalsViewModel,
                     )
                 }
 
@@ -254,8 +258,8 @@ fun AppNavHost(
                 MapScreen(
                     nodesViewModel = nodesViewModel,
                     questsViewModel = questsViewModel,
-                    navController = navController,
                     goalsViewModel = goalsViewModel,
+                    navController = navController,
                     mapViewModel = hiltViewModel(),
                 )
             }
@@ -263,7 +267,7 @@ fun AppNavHost(
 
         composable(ScreenRoutes.OBJECTIVES) {
             AppScreenWrapper {
-                ObjectivesScreen(questsViewModel = questsViewModel)
+                ObjectivesScreen(questsViewModel = questsViewModel, goalsViewModel = goalsViewModel)
             }
         }
 
@@ -276,6 +280,7 @@ fun AppNavHost(
             ObjectivesScreen(
                 questsViewModel = questsViewModel,
                 focusedQuestId = questId,
+                goalsViewModel = goalsViewModel,
             )
         }
 

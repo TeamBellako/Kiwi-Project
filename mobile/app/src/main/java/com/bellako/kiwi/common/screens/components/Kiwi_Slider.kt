@@ -1,23 +1,19 @@
 package com.bellako.kiwi.common.screens.components
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.settings.tests.SettingsTestTags
@@ -28,7 +24,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Kiwi_Slider(
-    textArguments: KiwiTextArguments,
+    textArguments: KiwiTextArguments? = null,
     value: Float,
     onValueChange: (Float) -> Unit,
     valueRange: ClosedFloatingPointRange<Float>,
@@ -38,31 +34,49 @@ fun Kiwi_Slider(
 ) {
     val kiwiColors = LocalKiwiColors.current
 
-    Kiwi_H3(textArguments)
+    if (textArguments != null) {
+        Kiwi_Label1(textArguments)
+    }
 
     Slider(
         value = value,
         onValueChange = onValueChange,
         valueRange = valueRange,
         steps = steps,
-        modifier = Modifier.testTag(testTag).height(getResponsiveSizeHeight(40.dp)),
+        modifier = Modifier.fillMaxWidth().testTag(testTag).height(getResponsiveSizeHeight(40.dp)),
         enabled = enabled,
         thumb = {
-            SliderDefaults.Thumb(
-                interactionSource = remember { MutableInteractionSource() },
-                thumbSize = DpSize(getResponsiveSizeHeight(20.dp), getResponsiveSizeHeight(20.dp)),
-                colors =
-                    SliderDefaults.colors().copy(
-                        thumbColor = kiwiColors.color7D,
-                    ),
-                modifier = Modifier.padding(getResponsiveSizeHeight(0.dp)),
+            Kiwi_Diamond(
+                size = getResponsiveSizeHeight(15.dp),
+                color = kiwiColors.color7D,
             )
         },
         track = { sliderState ->
+            val currentValue = sliderState.value
+            val startDiamondColor = if (currentValue > valueRange.start) kiwiColors.color7D else kiwiColors.color2
+            val endDiamondColor = if (currentValue >= valueRange.endInclusive) kiwiColors.color7D else kiwiColors.color2
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            val diamondSizePx = with(density) { getResponsiveSizeHeight(10.dp).toPx() }
+
             SliderDefaults.Track(
                 modifier =
                     Modifier
-                        .height(getResponsiveSizeHeight(4.dp)),
+                        .height(getResponsiveSizeHeight(6.dp))
+                        .drawWithContent {
+                            // Dibujar el track primero
+                            drawContent()
+
+                            val trackHeight = size.height
+                            val centerY = trackHeight / 2
+
+                            // Dibujar rombo al inicio
+                            val startX = 0f
+                            kiwiDiamondShape(startDiamondColor, startX, centerY, diamondSizePx)
+
+                            // Dibujar rombo al final
+                            val endX = size.width
+                            kiwiDiamondShape(endDiamondColor, endX, centerY, diamondSizePx)
+                        },
                 sliderState = sliderState,
                 colors =
                     SliderDefaults.colors().copy(

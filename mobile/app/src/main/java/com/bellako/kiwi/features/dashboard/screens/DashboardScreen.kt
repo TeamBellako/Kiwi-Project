@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +47,10 @@ import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.goals.data.GoalDomain
+import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
@@ -85,6 +90,7 @@ fun DashboardScreen(
     usersViewModel: IUsersViewModel,
     metricsViewModel: IMetricsViewModel,
     personalityViewModel: IPersonalityViewModel,
+    goalsViewModel: IGoalsViewModel,
     showCalendarView: Boolean = false,
     initialStateIndex: Int = 0,
 ) {
@@ -155,6 +161,7 @@ fun DashboardScreen(
                         metricsViewModel = metricsViewModel,
                         metricsState = metricsState!!,
                         personalityViewModel = personalityViewModel,
+                        goalsViewModel = goalsViewModel,
                         shouldShowCalendarView = shouldShowCalendarView,
                         isLoading = isLoading,
                     )
@@ -331,7 +338,8 @@ fun SelectedMetricsTime(
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Hidden() {
-    DashboardModal_Preview(false, 0)
+    val fakeGoalsViewModel = GoalsFakeViewModel()
+    DashboardModal_Preview(false, 0, goalsViewModel = fakeGoalsViewModel)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -341,7 +349,8 @@ fun DashboardModal_Preview_Hidden() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Collapsed() {
-    DashboardModal_Preview(false, 1)
+    val fakeGoalsViewModel = GoalsFakeViewModel()
+    DashboardModal_Preview(false, 1, goalsViewModel = fakeGoalsViewModel)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -351,7 +360,8 @@ fun DashboardModal_Preview_Collapsed() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Expanded() {
-    DashboardModal_Preview(false, 2)
+    val fakeGoalsViewModel = GoalsFakeViewModel()
+    DashboardModal_Preview(false, 2, goalsViewModel = fakeGoalsViewModel)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -361,7 +371,8 @@ fun DashboardModal_Preview_Expanded() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Expanded_Calendar() {
-    DashboardModal_Preview(true, 2)
+    val fakeGoalsViewModel = GoalsFakeViewModel()
+    DashboardModal_Preview(true, 2, goalsViewModel = fakeGoalsViewModel)
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -370,10 +381,13 @@ fun DashboardModal_Preview_Expanded_Calendar() {
 fun DashboardModal_Preview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
+    nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState()),
+    questsViewModel: QuestsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState()),
+    goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
 ) {
-    val nodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState())
-    val questsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
-    val goalsFakeViewModel = GoalsFakeViewModel()
+    val nodesFakeViewModel = nodesViewModel
+    val questsFakeViewModel = questsViewModel
+    val goalsFakeViewModel = goalsViewModel
     val mapViewModel = MapViewModel()
 
     val nav = rememberNavController()
@@ -421,6 +435,7 @@ fun DashboardModal_Preview(
                                     validPersonalityDTO().neutralApps,
                                 ),
                             ),
+                        goalsViewModel = goalsViewModel,
                         showCalendarView,
                         initialStateIndex,
                     )

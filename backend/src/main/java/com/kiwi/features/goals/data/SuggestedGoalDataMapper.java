@@ -11,22 +11,22 @@ public class SuggestedGoalDataMapper {
     public static SuggestedGoalPersistence toEntity(SuggestedGoalDTO dto, UsersPersistence user, LocalDate date) {
         return SuggestedGoalPersistence.builder()
                 .id(dto.getId())
-                .objective(dto.getObjective())
-                .description(dto.getDescription())
+                .target(dto.getTarget())
+                .action(dto.getAction())
                 .type(GoalType.valueOf(dto.getType()))
                 .category(GoalCategory.valueOf(dto.getCategory()))
-                .points(dto.getPoints())
+                .reward(dto.getReward())
                 .build();
     }
 
     public static SuggestedGoalDTO toDTO(SuggestedGoalPersistence goal) {
         return SuggestedGoalDTO.builder()
                 .id(goal.getId())
-                .objective(goal.getObjective())
-                .description(goal.getDescription())
+                .target(goal.getTarget())
+                .action(goal.getAction())
                 .type(goal.getType().name())
                 .category(goal.getCategory().name())
-                .points(goal.getPoints())
+                .reward(goal.getReward())
                 .build();
     }
 

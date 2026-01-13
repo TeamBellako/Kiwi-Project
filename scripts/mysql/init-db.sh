@@ -88,14 +88,15 @@ CREATE TABLE IF NOT EXISTS personality (
 
 -- Create goals table with a foreign key to users
 CREATE TABLE IF NOT EXISTS goals (
-    id VARCHAR(36) PRIMARY KEY,
-    objective BIGINT NOT NULL,
-    description TEXT,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    target BIGINT NOT NULL,
+    action TEXT,
     type ENUM('EXERCISE', 'SLEEP', 'MEDITATION', 'NUTRITION', 'PRODUCTIVITY') NOT NULL,
-    category ENUM('DAILY_CHALLENGES', 'APP_USAGE') NOT NULL,
+    category ENUM('DAILY_CHALLENGES', 'APP_USAGE', 'SKILL') NOT NULL,
     status ENUM('COMPLETED', 'NOT_COMPLETED', 'IN_PROGRESS') NOT NULL,
-    points INT NOT NULL,
+    reward INT NOT NULL,
     date DATE NOT NULL,
+    value BIGINT NOT NULL,
 
     -- Foreign key to users table
     user_id BIGINT NOT NULL,
@@ -107,13 +108,23 @@ CREATE TABLE IF NOT EXISTS goals (
 
 -- Create suggested_goals table with a foreign key to users
 CREATE TABLE IF NOT EXISTS suggested_goals (
-    id VARCHAR(36) PRIMARY KEY,
-    objective BIGINT NOT NULL,
-    description TEXT,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    target BIGINT NOT NULL,
+    action TEXT,
     type ENUM('EXERCISE', 'SLEEP', 'MEDITATION', 'NUTRITION', 'PRODUCTIVITY') NOT NULL,
     category ENUM('DAILY_CHALLENGES', 'APP_USAGE') NOT NULL,
-    points INT NOT NULL
+    reward INT NOT NULL
 );
+
+-- Insert placeholder values for suggested_goals
+INSERT INTO suggested_goals ( id, name, target, action, type, category, reward ) 
+VALUES 
+(1, "", 10000, "Da 10000 pasos", "EXERCISE", "DAILY_CHALLENGES", 100), 
+(2, "", 10, "Medita 10 minutos", "MEDITATION", "DAILY_CHALLENGES", 200),
+(3, "", 7500, "Da 7500 pasos", "EXERCISE", "DAILY_CHALLENGES", 100),
+(4, "", 10, "Usa Duolingo 10 minutos", "MEDITATION", "DAILY_CHALLENGES", 200),
+(5, "", 5, "Haz 5 flexiones", "EXERCISE", "DAILY_CHALLENGES", 100);
 
 -- Create nodes table
 CREATE TABLE IF NOT EXISTS nodes (

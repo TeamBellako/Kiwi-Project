@@ -72,9 +72,7 @@ public class GoalsIntegrationTests {
     public void createGoals_valid_returnsCreated() throws Exception {
         createUser();
         
-        LocalDate date = LocalDate.now();
-        GoalsListDTO request = goalsListDTO(
-                date.toString(),
+        List<GoalDTO> request = List.of(
                 inProgressGoalDTO(null),
                 inProgressGoalDTO(null)
         );
@@ -82,13 +80,12 @@ public class GoalsIntegrationTests {
         mockMvc.perform(getPostRequestBuilder(API_URL, request)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.date").value(date.toString()))
-                .andExpect(jsonPath("$.goals.length()").value(2));        
+                .andExpect(jsonPath("$.length()").value(2));        
         goalRepository.flush();    }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
-    public void createGoals_replacesExistingGoals() throws Exception {
+    public void createGoals_addsNewGoals() throws Exception {
         UsersPersistence user = createUser();
         
         LocalDate date = LocalDate.now();
@@ -98,22 +95,21 @@ public class GoalsIntegrationTests {
         goalRepository.save(inProgressGoalPersistence(null, date, user));
         goalRepository.flush();
 
-        // Replace with new goals
-        GoalsListDTO request = goalsListDTO(
-                date.toString(),
+        // Add new goals
+        List<GoalDTO> request = List.of(
                 inProgressGoalDTO(null)
         );
 
         mockMvc.perform(getPostRequestBuilder(API_URL, request)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.goals.length()").value(1));
+                .andExpect(jsonPath("$.length()").value(1));
 
         goalRepository.flush();
         
-        // Verify old goals are deleted
+        // Verify new goals were added (now there should be 3)
         List<GoalPersistence> remaining = goalRepository.findByUserAndDate(user, date);
-        assert remaining.size() == 1;
+        assert remaining.size() == 3;
     }
 
     // ============================================================
@@ -134,8 +130,8 @@ public class GoalsIntegrationTests {
                         .param("date", date.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.date").value(date.toString()))
-                .andExpect(jsonPath("$.goals.length()").value(2));
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].date").value(date.toString()));
     }
 
     @Test
@@ -154,11 +150,10 @@ public class GoalsIntegrationTests {
         mockMvc.perform(get(API_URL + "/all")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$.length()").value(3))
                 .andExpect(jsonPath("$[0].date").value(date1.toString()))
-                .andExpect(jsonPath("$[0].goals.length()").value(2))
-                .andExpect(jsonPath("$[1].date").value(date2.toString()))
-                .andExpect(jsonPath("$[1].goals.length()").value(1));
+                .andExpect(jsonPath("$[1].date").value(date1.toString()))
+                .andExpect(jsonPath("$[2].date").value(date2.toString()));
     }
 
     @Test
@@ -184,8 +179,7 @@ public class GoalsIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].date").value(yesterday.toString()))
-                .andExpect(jsonPath("$[0].goals.length()").value(1))
-                .andExpect(jsonPath("$[0].goals[0].status").value("IN_PROGRESS"));
+                .andExpect(jsonPath("$[0].status").value("IN_PROGRESS"));
     }
 
     // ============================================================
@@ -201,7 +195,7 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now().minusDays(1);
         GoalPersistence goal = inProgressGoalPersistence(null, date, user);
         goal = goalRepository.saveAndFlush(goal);
-        String goalId = goal.getId();
+        Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/complete")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -210,7 +204,7 @@ public class GoalsIntegrationTests {
 
         // Verify points were added
         UsersPersistence updatedUser = usersRepository.findById(user.getId()).orElseThrow();
-        assert updatedUser.getCurrentPoints() == initialPoints + goal.getPoints();
+        assert updatedUser.getCurrentPoints() == initialPoints + goal.getReward();
     }
 
     @Test
@@ -218,7 +212,7 @@ public class GoalsIntegrationTests {
     public void completeGoal_notFound_returnsNotFound() throws Exception {
         createUser();
 
-        mockMvc.perform(patch(API_URL + "/non-existent/complete")
+        mockMvc.perform(patch(API_URL + "/99999/complete")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -240,7 +234,7 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now().minusDays(1);
         GoalPersistence goal = inProgressGoalPersistence(null, date, otherUser);
         goal = goalRepository.saveAndFlush(goal);
-        String goalId = goal.getId();
+        Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/complete")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -259,7 +253,7 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now().minusDays(1);
         GoalPersistence goal = inProgressGoalPersistence(null, date, user);
         goal = goalRepository.saveAndFlush(goal);
-        String goalId = goal.getId();
+        Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/uncompleted")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -272,7 +266,7 @@ public class GoalsIntegrationTests {
     public void uncompleteGoal_notFound_returnsNotFound() throws Exception {
         createUser();
 
-        mockMvc.perform(patch(API_URL + "/non-existent/uncompleted")
+        mockMvc.perform(patch(API_URL + "/99999/uncompleted")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }

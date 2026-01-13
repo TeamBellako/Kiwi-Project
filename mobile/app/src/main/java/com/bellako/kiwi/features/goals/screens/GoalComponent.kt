@@ -1,8 +1,10 @@
+// Kotlin
 package com.bellako.kiwi.features.goals.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -13,6 +15,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -35,22 +42,45 @@ import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
+import com.bellako.kiwi.features.goals.data.IGoal
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import kotlinx.coroutines.launch
 
 @Suppress("MagicNumber")
 @Composable
-fun GoalComponent(goal: GoalDomain) {
+fun GoalComponent(
+    goal: IGoal,
+    goalsViewModel: IGoalsViewModel,
+) {
+    var currentGoal by remember { mutableStateOf(goal) }
+    var showModal by remember { mutableStateOf(false) }
+    val goalDomain = currentGoal as? GoalDomain
+    val status = goalDomain?.status ?: GoalStatus.IN_PROGRESS
     val kiwiColors = LocalKiwiColors.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val progress: Float =
+        if (goalDomain == null) {
+            0f
+        } else {
+            goalDomain.value.toFloat() / goalDomain.target.toFloat()
+        }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            Modifier.width(IntrinsicSize.Max).height(IntrinsicSize.Min).padding(
-                horizontal =
-                    getResponsiveSizeHeight(Spacing.medium),
-            ),
+            Modifier
+                .width(IntrinsicSize.Max)
+                .height(IntrinsicSize.Min)
+                .padding(
+                    horizontal =
+                        getResponsiveSizeHeight(Spacing.medium),
+                ).clickable { showModal = true },
     ) {
         Kiwi_Image(
             R.drawable.daily_challenges_bg,
@@ -60,7 +90,13 @@ fun GoalComponent(goal: GoalDomain) {
         )
 
         Kiwi_Image(
-            if (goal.progress == 1f) R.drawable.daily_challenges_completed else R.drawable.daily_challenges_fill,
+            if (goalDomain != null &&
+                (goalDomain.value == goalDomain.target)
+            ) {
+                R.drawable.daily_challenges_completed
+            } else {
+                R.drawable.daily_challenges_fill
+            },
             "Bar fill",
             modifier =
                 Modifier
@@ -74,7 +110,7 @@ fun GoalComponent(goal: GoalDomain) {
                                     layoutDirection: LayoutDirection,
                                     density: Density,
                                 ): Outline {
-                                    val w = size.width * goal.progress.coerceIn(0f, 1f)
+                                    val w = size.width * progress
                                     return Outline.Rectangle(Rect(0f, 0f, w, size.height))
                                 }
                             }
@@ -94,21 +130,21 @@ fun GoalComponent(goal: GoalDomain) {
                 contentAlignment = Alignment.Center,
             ) {
                 Kiwi_Image(
-                    getIcon(goal.type),
-                    "Quest Indicator For: ${goal.objective}",
+                    getIcon(currentGoal.type),
+                    "Quest Indicator For: ${currentGoal.target}",
                     colorFilter =
-                        ColorFilter.tint(if (goal.status == GoalStatus.NOT_COMPLETED) kiwiColors.colorF1 else kiwiColors.color8C),
+                        ColorFilter.tint(if (status != GoalStatus.COMPLETED) kiwiColors.colorF1 else kiwiColors.color8C),
                     contentScale = ContentScale.FillWidth,
                 )
             }
 
             Box(
-                modifier = Modifier.weight(0.70f),
                 contentAlignment = Alignment.Center,
+                modifier = Modifier.weight(0.70f),
             ) {
                 Kiwi_Label1(
                     KiwiTextArguments(
-                        goal.objective,
+                        currentGoal.action,
                         TextAlign.Center,
                         kiwiColors.color6,
                     ),
@@ -116,106 +152,46 @@ fun GoalComponent(goal: GoalDomain) {
             }
 
             Box(
-                modifier = Modifier.weight(0.10f).padding(getResponsiveSizeHeight(Spacing.small)),
+                modifier =
+                    Modifier.weight(0.10f).padding(getResponsiveSizeHeight(Spacing.small)).clickable {
+                        if (status == GoalStatus.COMPLETED) {
+                            return@clickable
+                        } else {
+                            coroutineScope.launch {
+                                val result = goalsViewModel.updateGoalProgress(currentGoal.id)
+                                result.onSuccess { update ->
+                                    currentGoal = update
+                                }
+                            }
+                        }
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 Kiwi_Image(
-                    if (goal.status ==
-                        GoalStatus.NOT_COMPLETED
+                    if (status !=
+                        GoalStatus.COMPLETED
                     ) {
                         R.drawable.ic_daily_challenges_plus
                     } else {
                         R.drawable.ic_daily_challenges_tick
                     },
-                    "Quest Indicator For: ${goal.objective}",
-//                    modifier = Modifier.height(getResponsiveSizeHeight(Spacing.large)),
+                    "Quest Indicator For: ${currentGoal.target}",
                 )
             }
         }
     }
+    // Abrir modal de personalización solo si el goal es GoalDomain (evitar ClassCastException)
+    if (showModal && currentGoal is GoalDomain) {
+        GoalCustomiceModal(
+            goal = currentGoal as GoalDomain,
+            goalsViewModel = goalsViewModel,
+            onDismiss = { showModal = false },
+            onGoalUpdated = { updatedGoal ->
+                currentGoal = updatedGoal
+            },
+        )
+    }
 }
-
-// @Composable
-// private fun ExpandedGoalComponent(goal: GoalDomain) {
-//    val kiwiColors = LocalKiwiColors.current
-//    Box(
-//        contentAlignment = Alignment.Center,
-//        modifier =
-//            Modifier
-//                .size(getResponsiveSizeHeight(230.dp), getResponsiveSizeHeight(46.dp)),
-//    ) {
-//        Kiwi_Image(
-//            R.drawable.daily_challenges_bg,
-//            "Bar bg",
-//            modifier =
-//                Modifier
-//                    .fillMaxSize(),
-//        )
-//
-//        Kiwi_Image(
-//            R.drawable.daily_challenges_fill,
-//            "Bar fill",
-//            modifier =
-//                Modifier
-//                    .fillMaxSize()
-//                    .graphicsLayer {
-//                        clip = true
-//                        shape =
-//                            object : Shape {
-//                                override fun createOutline(
-//                                    size: Size,
-//                                    layoutDirection: LayoutDirection,
-//                                    density: Density,
-//                                ): Outline {
-//                                    val w = size.width * goal.progress.coerceIn(0f, 1f)
-//                                    return Outline.Rectangle(Rect(0f, 0f, w, size.height))
-//                                }
-//                            }
-//                    },
-//        )
-//
-//        Box(
-//            modifier =
-//                Modifier
-//                    .align(Alignment.CenterStart)
-//                    .padding(start = getResponsiveSizeHeight(10.dp)),
-//        ) {
-//            Kiwi_Image(
-//                getIcon(goal.type),
-//                "Quest Indicator For: ${goal.objective}",
-//                modifier =
-//                    Modifier
-//                        .size(getResponsiveSizeHeight(22.dp)),
-//            )
-//        }
-//        Box(
-//            modifier = Modifier.align(Alignment.Center),
-//        ) {
-//            Kiwi_Label3(
-//                KiwiTextArguments(
-//                    goal.objective,
-//                    TextAlign.Center,
-//                    kiwiColors.color6,
-//                ),
-//            )
-//        }
-//
-//        Box(
-//            modifier =
-//                Modifier
-//                    .align(Alignment.CenterEnd)
-//                    .padding(end = getResponsiveSizeHeight(16.dp)),
-//        ) {
-//            Kiwi_Image(
-//                R.drawable.ic_daily_challenges_plus,
-//                "Quest Indicator For: ${goal.objective}",
-//                modifier =
-//                    Modifier
-//                        .size(getResponsiveSizeHeight(14.dp)),
-//            )
-//        }
-//    }
-// }
 
 fun getIcon(goalType: GoalType): Int =
     when (goalType) {
@@ -226,7 +202,6 @@ fun getIcon(goalType: GoalType): Int =
         GoalType.NUTRITION -> R.drawable.ic_daily_challenge_mental
     }
 
-// =================================================================================================
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
@@ -234,6 +209,8 @@ fun getIcon(goalType: GoalType): Int =
 @Suppress("MagicNumber")
 @Composable
 fun GoalComponent_Preview() {
+    // Evitar construir el ViewModel directamente en la composición del preview
+    val goalFakeViewModel = remember { GoalsFakeViewModel() }
     Kiwi_Theme {
         Column(
             modifier =
@@ -244,38 +221,41 @@ fun GoalComponent_Preview() {
             GoalComponent(
                 GoalDomain(
                     "1",
-                    "Goal completado",
+                    1,
                     "Programa el modal lo mejor que sepas",
                     GoalType.PRODUCTIVITY,
                     GoalCategory.DAILY_CHALLENGES,
                     GoalStatus.COMPLETED,
                     1000,
-                    progress = 1f,
+                    value = 1,
                 ),
+                goalFakeViewModel,
             )
             GoalComponent(
                 GoalDomain(
                     "1",
-                    "Goal en progreso",
+                    10,
                     "Programa el modal lo mejor que sepas",
                     GoalType.EXERCISE,
                     GoalCategory.DAILY_CHALLENGES,
                     GoalStatus.NOT_COMPLETED,
                     1000,
-                    progress = 0.6f,
+                    value = 2,
                 ),
+                goalFakeViewModel,
             )
             GoalComponent(
                 GoalDomain(
                     "1",
-                    "Goal sin empezar",
+                    20,
                     "Programa el modal lo mejor que sepas",
                     GoalType.MEDITATION,
                     GoalCategory.DAILY_CHALLENGES,
-                    GoalStatus.NOT_COMPLETED,
+                    GoalStatus.IN_PROGRESS,
                     1000,
-                    progress = 0.0f,
+                    value = 0,
                 ),
+                goalFakeViewModel,
             )
         }
     }

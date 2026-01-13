@@ -16,9 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,10 +36,9 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
-import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.screens.GoalsNotificationsOverlay
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -61,12 +57,12 @@ import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import java.time.LocalDate
 import kotlin.collections.forEach
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("ComplexMethod", "LongMethod")
 fun MapScreen(
     maxZoom: Float = 8f,
     mapMarginFactor: Float = 0.08f,
@@ -76,8 +72,8 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
-    navController: NavHostController,
     goalsViewModel: IGoalsViewModel,
+    navController: NavHostController,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
@@ -169,40 +165,16 @@ fun MapScreen(
                     .fillMaxSize()
                     .zIndex(10f),
         )
-    }
-    var notTodaygoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
-    var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
-//    var newGoals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
 
-    @Suppress("ForbiddenComment")
-    LaunchedEffect(Unit) {
-        val today = dateToString(LocalDate.now())
-        val result = goalsViewModel.getGoalsInProgress()
-        if (result.isSuccess) {
-            goals = result.getOrNull() ?: emptyList()
-            if (goals.isNotEmpty()) {
-                notTodaygoals = goals.filter { it.date != today }
-                goals = goals.filter { it.date == today }
-            }
-            // TODO: call to defaultGoals for new Goals
-        }
-//        val prefs = context.getSharedPreferences("kiwi_goals_prefs", Context.MODE_PRIVATE)
-//        val lastShownDate = prefs.getString("last_yesterday_goals_check", "")
-//        val today = dateToString(LocalDate.now())
-//        if (lastShownDate != today) {
-//            val result = goalsViewModel.getGoalsByDate(dateToString(LocalDate.now().minusDays(1)))
-//            if (result.isSuccess) {
-//                goals = result.getOrNull() ?: emptyList()
-//                if (goals.isNotEmpty()) {
-//                    goals = goals.filter { it.category == GoalCategory.DAILY_CHALLENGES }
-//                }
-//            }
-// //            // Guardar que ya se mostró hoy
-// //            prefs.edit().putString("last_yesterday_goals_check", today).apply()
-//        }
+        @Suppress("MagicNumber")
+        GoalsNotificationsOverlay(
+            goalsViewModel,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .zIndex(11f),
+        )
     }
-    // GoalsModal(GoalModalType.YESTERDAY, notTodaygoals)
-//    GoalsModal(GoalModalType.NEW, newGoals)
 }
 
 @Composable

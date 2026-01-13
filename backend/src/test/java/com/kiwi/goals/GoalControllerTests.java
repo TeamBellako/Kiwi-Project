@@ -6,7 +6,6 @@ import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.goals.controllers.GoalController;
 import com.kiwi.features.goals.controllers.GoalService;
 import com.kiwi.features.goals.data.GoalDTO;
-import com.kiwi.features.goals.data.GoalsListDTO;
 import com.kiwi.features.goals.exceptions.GoalNotFoundException;
 import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
 import com.kiwi.features.users.controllers.CustomUserDetailsService;
@@ -53,9 +52,8 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void createGoals_valid_returnsCreated() throws Exception {
-        String date = LocalDate.now().toString();
-        GoalsListDTO request = goalsListDTO(date, inProgressGoalDTO("goal-1"));
-        GoalsListDTO response = goalsListDTO(date, inProgressGoalDTO("goal-1"));
+        List<GoalDTO> request = List.of(inProgressGoalDTO(1L));
+        List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
 
         when(goalService.createGoals(any(), any())).thenReturn(response);
 
@@ -68,7 +66,7 @@ public class GoalControllerTests {
     @WithMockUser(username = "test@test.com")
     public void getGoalsByDate_valid_returnsOk() throws Exception {
         String date = LocalDate.now().toString();
-        GoalsListDTO response = goalsListDTO(date, inProgressGoalDTO("goal-1"));
+        List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
 
         when(goalService.getGoalsByDate(eq(date), any())).thenReturn(response);
 
@@ -81,8 +79,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void getAllGoals_valid_returnsOk() throws Exception {
-        String date = LocalDate.now().toString();
-        List<GoalsListDTO> response = List.of(goalsListDTO(date, inProgressGoalDTO("goal-1")));
+        List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
 
         when(goalService.getAllGoals(any())).thenReturn(response);
 
@@ -94,8 +91,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void getInProgressGoals_valid_returnsOk() throws Exception {
-        String date = LocalDate.now().minusDays(1).toString();
-        List<GoalsListDTO> response = List.of(goalsListDTO(date, inProgressGoalDTO("goal-1")));
+        List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
 
         when(goalService.getGoalsInProgress(any())).thenReturn(response);
 
@@ -107,7 +103,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void completeGoal_valid_returnsOk() throws Exception {
-        String goalId = "goal-1";
+        Long goalId = 1L;
         GoalDTO response = completedGoalDTO(goalId);
 
         when(goalService.completeGoal(eq(goalId), any())).thenReturn(response);
@@ -120,10 +116,10 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void completeGoal_notFound_returnsNotFound() throws Exception {
-        String goalId = "non-existent";
+        Long goalId = 999L;
 
         when(goalService.completeGoal(eq(goalId), any()))
-                .thenThrow(new GoalNotFoundException(goalId));
+                .thenThrow(new GoalNotFoundException(goalId.toString()));
 
         mockMvc.perform(patch(baseAPIUrl + "/" + goalId + "/complete")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -133,7 +129,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void completeGoal_unauthorized_returnsForbidden() throws Exception {
-        String goalId = "goal-1";
+        Long goalId = 1L;
 
         when(goalService.completeGoal(eq(goalId), any()))
                 .thenThrow(new GoalUnauthorizedException("You are not authorized"));
@@ -146,7 +142,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void uncompleteGoal_valid_returnsOk() throws Exception {
-        String goalId = "goal-1";
+        Long goalId = 1L;
         GoalDTO response = notCompletedGoalDTO(goalId);
 
         when(goalService.uncompleteGoal(eq(goalId), any())).thenReturn(response);
@@ -159,10 +155,10 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void uncompleteGoal_notFound_returnsNotFound() throws Exception {
-        String goalId = "non-existent";
+        Long goalId = 999L;
 
         when(goalService.uncompleteGoal(eq(goalId), any()))
-                .thenThrow(new GoalNotFoundException(goalId));
+                .thenThrow(new GoalNotFoundException(goalId.toString()));
 
         mockMvc.perform(patch(baseAPIUrl + "/" + goalId + "/uncompleted")
                         .contentType(MediaType.APPLICATION_JSON))
