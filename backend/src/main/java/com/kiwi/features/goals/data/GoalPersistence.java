@@ -45,7 +45,7 @@ public class GoalPersistence {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(name = "value", nullable = false)
+    @Column(name = "\"value\"", nullable = false)
     private Long value;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -18,6 +18,9 @@ public class SuggestedGoalPersistence {
     @Column(name = "id")
     private String id;
 
+    @Column(name = "name", nullable = false)
+    private String name;
+    
     @Column(name = "target", nullable = false)
     private Long target;
 
