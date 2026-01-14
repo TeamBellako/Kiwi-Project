@@ -40,66 +40,70 @@ fun NotificationOverlay(
     val queue = remember { mutableStateListOf<NotificationEvent>() }
     var current by remember { mutableStateOf<NotificationEvent?>(null) }
     var visible by remember { mutableStateOf(false) }
-    var isProcessing by remember { mutableStateOf(false) }
 
     // Escuchar notificaciones entrantes
     LaunchedEffect(Unit) {
         notificationManager.notifications.collect { event ->
-            queue.add(event)
+            queue += event
         }
     }
 
-//    // Procesar cola de notificaciones cuando hay elementos y no se está procesando
-//    LaunchedEffect(queue.size, isProcessing) {
-//        if (!isProcessing && queue.isNotEmpty() && current == null) {
-//            isProcessing = true
-//
-//            try {
-//                // Tomar siguiente notificación de la cola
-//                current = queue.removeAt(0)
-//                visible = true
-//
-//                // Esperar 4 segundos antes de ocultar
-//                delay(4000)
-//
-//                // Animar salida
-//                visible = false
-//                delay(300)
-//
-//                // Limpiar notificación actual
-//                current = null
-//                delay(250)
-//            } catch (e: Exception) {
-//                // Manejar cualquier error para evitar crash
-//                e.printStackTrace()
-//                current = null
-//                visible = false
-//            } finally {
-//                isProcessing = false
-//            }
-//        }
-//    }
+    // Procesar cola con busy-loop
+    LaunchedEffect(Unit) {
+        while (true) {
+            if (current == null && queue.isNotEmpty()) {
+                current = queue.removeAt(0)
 
-//    Box(modifier = modifier) {
-//        Column(
-//            modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.large)),
-//        ) {
-//            AnimatedVisibility(
-//                visible = visible,
-//                enter =
-//                    slideInVertically(
-//                        initialOffsetY = { -it },
-//                        animationSpec = tween(300),
-//                    ),
-//                exit =
-//                    slideOutVertically(
-//                        targetOffsetY = { -it },
-//                        animationSpec = tween(300),
-//                    ),
-//            ) {
-//                // Renderizar el contenido composable de la notificación
-//                current?.content?.invoke()
-//            }
-//        }
-//    }
+                visible = true
+
+                delay(4000)
+
+                visible = false
+                delay(300)
+
+                current = null
+                delay(250)
+            }
+
+            delay(16) // busy-loop
+        }
+    }
+
+    // Escuchar solicitudes externas de dismiss para animar la salida
+    LaunchedEffect(notificationManager) {
+        notificationManager.dismissRequests.collect {
+            if (current != null && visible) {
+                // Ejecutar animación de salida como si se cumpliera el timeout
+                visible = false
+                // esperar a la animación de salida
+                delay(300)
+                current = null
+                // mantener el mismo ritmo que el flujo original
+                delay(250)
+            }
+        }
+    }
+
+    Box(modifier = modifier) {
+        Column(
+            modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.large)),
+        ) {
+            AnimatedVisibility(
+                visible = visible,
+                enter =
+                    slideInVertically(
+                        initialOffsetY = { -it },
+                        animationSpec = tween(300),
+                    ),
+                exit =
+                    slideOutVertically(
+                        targetOffsetY = { -it },
+                        animationSpec = tween(300),
+                    ),
+            ) {
+                // Renderizar el contenido composable de la notificación
+                current?.content?.invoke()
+            }
+        }
+    }
 }

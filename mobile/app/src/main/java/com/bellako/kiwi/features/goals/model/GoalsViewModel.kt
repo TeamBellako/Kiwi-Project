@@ -39,6 +39,8 @@ class GoalsViewModel
         // Cache de goals por fecha
         private val cachedGoalsByDate = mutableMapOf<String, List<GoalDomain>>()
         private var cachedGoalsInProgress: List<GoalDomain>? = null
+        private var cachedSuggestedGoals: List<SuggestedGoalDomain>? = null
+
         private var cacheDate: String? = null
 
         // Mutex para proteger el acceso concurrente a la cache
@@ -176,8 +178,15 @@ class GoalsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> {
+            if (suggestedGoals.size == 0) {
+                return Result.failure(IllegalArgumentException("La lista de sugerencias está vacía"))
+            }
             val today = dateToString(LocalDate.now())
             val goalsToCreate = suggestedGoals.map { SuggestedGoalDataMapper.toGoalState(it, today) }
+            cacheMutex.withLock {
+                cachedSuggestedGoals = null
+                cachedGoalsByDate.remove(today)
+            }
             return createGoals(goalsToCreate)
         }
 
@@ -306,6 +315,12 @@ class GoalsViewModel
         }
 
         override suspend fun getSuggestedGoals(): Result<List<SuggestedGoalDomain>> {
+            cacheMutex.withLock {
+                if (cachedSuggestedGoals != null && cacheDate == getCurrentDate()) {
+                    return Result.success(cachedSuggestedGoals!!)
+                }
+            }
+
             setIsLoading(true)
             setUiState(UIState.Loading)
 
@@ -315,7 +330,11 @@ class GoalsViewModel
             setUiState(UIState.Idle)
 
             return result.map { suggestedGoalDTOs ->
-                suggestedGoalDTOs.map { SuggestedGoalDataMapper.toDomain(it) }
+                val suggestedDomains = suggestedGoalDTOs.map { SuggestedGoalDataMapper.toDomain(it) }
+                cacheMutex.withLock {
+                    cachedSuggestedGoals = suggestedDomains
+                }
+                suggestedDomains
             }
         }
 
@@ -324,6 +343,7 @@ class GoalsViewModel
             super.onCleared()
             cachedGoalsByDate.clear()
             cachedGoalsInProgress = null
+            cachedSuggestedGoals = null
             cacheDate = null
         }
 
@@ -359,7 +379,6 @@ class GoalsViewModel
 
         /**
          * Evalúa si hay notificaciones de goals que mostrar y las envía automáticamente.
-         * Esta función implementa la lógica del antiguo GoalsNotificationsOverlay:
          * 1. Verifica si hay goals de ayer en progreso (muestra primero)
          * 2. Verifica si hay goals de hoy o sugerencias (muestra después)
          *
@@ -371,47 +390,47 @@ class GoalsViewModel
             onYesterdayClick: (List<GoalDomain>) -> Unit,
             onTodayClick: (List<GoalDomain>) -> Unit,
         ) {
-//            val today = dateToString(LocalDate.now())
-//
-//            val inProgressResult = getGoalsInProgress()
-//            val yesterdayGoals = inProgressResult.getOrNull()
-//
-//            if (!yesterdayGoals.isNullOrEmpty()) {
-//                notifyYesterdayGoals(yesterdayGoals) {
-//                    onYesterdayClick(yesterdayGoals)
-//                }
-//                return // Salir para mostrar solo la de ayer primero
-//            }
-//
-//            val todayResult = getGoalsByDate(today)
-//            val todayGoals = todayResult.getOrNull()
-//
-//            if (!todayGoals.isNullOrEmpty()) {
-//                return
-//            }
-//
-//            // 3. No hay goals de hoy - obtener sugerencias
-//            val suggestedResult = getSuggestedGoals()
-//            val suggestedGoals = suggestedResult.getOrNull()
-//
-//            if (!suggestedGoals.isNullOrEmpty()) {
-//                notifyNewGoals(suggestedGoals) {
-//                    val goalsForCallback =
-//                        suggestedGoals.map { suggested ->
-//                            GoalDomain(
-//                                id = "", // Temporal hasta que se cree
-//                                target = suggested.target,
-//                                action = suggested.action,
-//                                type = suggested.type,
-//                                category = suggested.category,
-//                                status = com.bellako.kiwi.features.goals.data.GoalStatus.NOT_COMPLETED,
-//                                date = today,
-//                                value = 0,
-//                                reward = suggested.reward,
-//                            )
-//                        }
-//                    onTodayClick(goalsForCallback)
-//                }
-//            }
+            val today = dateToString(LocalDate.now())
+
+            val inProgressResult = getGoalsInProgress()
+            val yesterdayGoals = inProgressResult.getOrNull()
+
+            if (!yesterdayGoals.isNullOrEmpty()) {
+                notifyYesterdayGoals(yesterdayGoals) {
+                    onYesterdayClick(yesterdayGoals)
+                }
+                return // Salir para mostrar solo la de ayer primero
+            }
+
+            val todayResult = getGoalsByDate(today)
+            val todayGoals = todayResult.getOrNull()
+
+            if (!todayGoals.isNullOrEmpty()) {
+                return
+            }
+
+            // 3. No hay goals de hoy - obtener sugerencias
+            val suggestedResult = getSuggestedGoals()
+            val suggestedGoals = suggestedResult.getOrNull()
+
+            if (!suggestedGoals.isNullOrEmpty()) {
+                notifyNewGoals(suggestedGoals) {
+                    val goalsForCallback =
+                        suggestedGoals.map { suggested ->
+                            GoalDomain(
+                                id = "", // Temporal hasta que se cree
+                                target = suggested.target,
+                                action = suggested.action,
+                                type = suggested.type,
+                                category = suggested.category,
+                                status = com.bellako.kiwi.features.goals.data.GoalStatus.NOT_COMPLETED,
+                                date = today,
+                                value = 0,
+                                reward = suggested.reward,
+                            )
+                        }
+                    onTodayClick(goalsForCallback)
+                }
+            }
         }
     }

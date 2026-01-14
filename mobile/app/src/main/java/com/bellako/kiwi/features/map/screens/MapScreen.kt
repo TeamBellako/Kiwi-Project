@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +39,10 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.goals.data.GoalModalType
+import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -107,27 +112,6 @@ fun MapScreen(
     }
     val nodesState by nodesViewModel.state.collectAsState()
 
-    // Verificar y mostrar notificaciones de goals al cargar el mapa
-    // TODO: TEMPORALMENTE COMENTADO - Descomentar cuando se solucione el crash
-    // LaunchedEffect(Unit) {
-    //     try {
-    //         goalsViewModel.checkAndNotifyGoals(
-    //             onYesterdayClick = @Suppress("UNUSED_PARAMETER") { goals ->
-    //                 // TODO: Abrir modal de yesterday goals
-    //                 // Puedes manejar esto guardando estado y mostrando el modal
-    //             },
-    //             onTodayClick = @Suppress("UNUSED_PARAMETER") { goals ->
-    //                 // TODO: Abrir modal de new goals
-    //                 // Puedes manejar esto guardando estado y mostrando el modal
-    //             },
-    //         )
-    //     } catch (e: Exception) {
-    //         // Manejar error silenciosamente - no queremos que crashee la app
-    //         // TODO: Añadir logging si es necesario
-    //         e.printStackTrace()
-    //     }
-    // }
-
     LaunchedEffect(Unit) {
         nodesViewModel.loadNodes()
 
@@ -151,6 +135,19 @@ fun MapScreen(
                     mapViewModel.setPlayerNode(node.id)
                 }
             }
+    }
+
+    val goalsModalRequest = remember { mutableStateOf<Pair<GoalModalType, List<IGoal>>?>(null) }
+
+    LaunchedEffect(Unit) {
+        goalsViewModel.checkAndNotifyGoals(
+            onYesterdayClick = { goals ->
+                goalsModalRequest.value = Pair(GoalModalType.YESTERDAY, goals)
+            },
+            onTodayClick = { goals ->
+                goalsModalRequest.value = Pair(GoalModalType.NEW, goals)
+            },
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -179,15 +176,15 @@ fun MapScreen(
             )
         }
 
-//        @Suppress("MagicNumber")
-//        QuestNotificationsOverlay(
-//            questsViewModel,
-//            navController,
-//            modifier =
-//                Modifier
-//                    .fillMaxSize()
-//                    .zIndex(10f),
-//        )
+        @Suppress("MagicNumber")
+        QuestNotificationsOverlay(
+            questsViewModel,
+            navController,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .zIndex(10f),
+        )
 
         @Suppress("MagicNumber")
         NotificationOverlay(
@@ -197,6 +194,26 @@ fun MapScreen(
                     .fillMaxSize()
                     .zIndex(11f),
         )
+
+        @Suppress("MagicNumber")
+        goalsModalRequest.value?.let { (type, goals) ->
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .zIndex(12f),
+            ) {
+                GoalsModal(
+                    type,
+                    goals,
+                    goalsViewModel,
+                    onDismiss = {
+                        goalsModalRequest.value = null
+                        notificationManager.dismissRequests
+                    },
+                )
+            }
+        }
     }
 }
 

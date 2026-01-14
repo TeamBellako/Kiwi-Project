@@ -13,6 +13,7 @@ import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
+import com.bellako.kiwi.features.notifications.model.NotificationManager
 import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
 import org.junit.Before
 import org.junit.Rule
@@ -49,6 +50,7 @@ class MapScreenTest {
                 questsViewModel = questsFakeViewModel,
                 goalsViewModel = goalsFakeViewModel,
                 navController = navController,
+                notificationManager = NotificationManager(),
             )
         }
 
