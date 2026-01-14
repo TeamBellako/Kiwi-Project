@@ -3,13 +3,7 @@ package com.kiwi.features.skills.data;
 import lombok.*;
 import java.time.Instant;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@EqualsAndHashCode
-@ToString
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @EqualsAndHashCode @ToString
 public class SkillDTO {
 
     private Long skillId;

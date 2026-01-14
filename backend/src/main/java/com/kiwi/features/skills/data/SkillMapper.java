@@ -53,30 +53,6 @@ public class SkillMapper {
     }
 
     // --------------------------------------------------------------------------------------------
-    // PROJECTION → DOMAIN
-    // --------------------------------------------------------------------------------------------
-    public static SkillDomain toDomain(UserSkillView view) {
-        return new SkillDomain(
-                view.getSkillId(),
-                view.getName(),
-                view.getDescription(),
-                view.getQuote(),
-                view.getIcon(),
-
-                CooldownType.valueOf(view.getCooldownType()),
-                view.getCooldownGoalId(),
-                view.getCooldownTimeMinutes(),
-                view.getCooldownOtherDescription(),
-                view.getLevelupSkillId(),
-
-                view.getIsCooldown(),
-                view.getCooldownUntil(),
-                view.getDeckSlot()
-        );
-    }
-
-
-    // --------------------------------------------------------------------------------------------
     // SKILL DOMAIN → USER SKILL STATUS PERSISTENCE
     // --------------------------------------------------------------------------------------------
     public static UserSkillStatusPersistence toPersistence(

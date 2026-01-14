@@ -31,15 +31,16 @@ public class SkillService {
     // ============================================================================================
 
     public List<SkillDTO> getAllSkillsForUser(Long userId) {
-        return userSkillStatusRepository.findAllSkillsForUser(userId).stream()
-                .map(SkillMapper::toDomain)
+        return userSkillStatusRepository.findByIdUserId(userId).stream()
+                .map(this::buildSkillDomain)
                 .map(SkillMapper::toDTO)
                 .toList();
     }
 
     public List<SkillDTO> getEquippedSkillsForUser(Long userId) {
-        return userSkillStatusRepository.findEquippedSkillsForUser(userId).stream()
-                .map(SkillMapper::toDomain)
+        return userSkillStatusRepository
+                .findByIdUserIdAndDeckSlotNot(userId, 0).stream()
+                .map(this::buildSkillDomain)
                 .map(SkillMapper::toDTO)
                 .toList();
     }
@@ -70,7 +71,12 @@ public class SkillService {
     @Transactional
     public SkillDTO levelUpSkill(Long userId, Long skillId) {
 
-        SkillDomain current = buildSkillDomain(userId, skillId);
+        UserSkillStatusPersistence status =
+                userSkillStatusRepository
+                        .findByIdUserIdAndIdSkillId(userId, skillId)
+                        .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
+
+        SkillDomain current = buildSkillDomain(status);
 
         if(current.getLevelupSkillId() == null){
             throw new SkillLevelUpNotFoundException(skillId);
@@ -131,11 +137,4 @@ public class SkillService {
         return SkillMapper.toDomain(status.getSkill(), status);
     }
 
-    private SkillDomain buildSkillDomain(Long userId, Long skillId) {
-        UserSkillStatusPersistence status =
-                userSkillStatusRepository
-                        .findByIdUserIdAndIdSkillId(userId, skillId)
-                        .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
-        return buildSkillDomain(status);
-    }
 }
