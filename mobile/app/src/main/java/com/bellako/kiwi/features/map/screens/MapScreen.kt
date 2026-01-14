@@ -38,7 +38,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
-import com.bellako.kiwi.features.goals.screens.GoalsNotificationsOverlay
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -47,6 +46,8 @@ import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
 import com.bellako.kiwi.features.nodes.screens.screenToMap
+import com.bellako.kiwi.features.notifications.model.NotificationManager
+import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
 import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -73,6 +74,7 @@ fun MapScreen(
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
+    notificationManager: NotificationManager,
     navController: NavHostController,
 ) {
     val kiwiColors = LocalKiwiColors.current
@@ -104,6 +106,27 @@ fun MapScreen(
         )
     }
     val nodesState by nodesViewModel.state.collectAsState()
+
+    // Verificar y mostrar notificaciones de goals al cargar el mapa
+    // TODO: TEMPORALMENTE COMENTADO - Descomentar cuando se solucione el crash
+    // LaunchedEffect(Unit) {
+    //     try {
+    //         goalsViewModel.checkAndNotifyGoals(
+    //             onYesterdayClick = @Suppress("UNUSED_PARAMETER") { goals ->
+    //                 // TODO: Abrir modal de yesterday goals
+    //                 // Puedes manejar esto guardando estado y mostrando el modal
+    //             },
+    //             onTodayClick = @Suppress("UNUSED_PARAMETER") { goals ->
+    //                 // TODO: Abrir modal de new goals
+    //                 // Puedes manejar esto guardando estado y mostrando el modal
+    //             },
+    //         )
+    //     } catch (e: Exception) {
+    //         // Manejar error silenciosamente - no queremos que crashee la app
+    //         // TODO: Añadir logging si es necesario
+    //         e.printStackTrace()
+    //     }
+    // }
 
     LaunchedEffect(Unit) {
         nodesViewModel.loadNodes()
@@ -156,19 +179,19 @@ fun MapScreen(
             )
         }
 
-        @Suppress("MagicNumber")
-        QuestNotificationsOverlay(
-            questsViewModel,
-            navController,
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .zIndex(10f),
-        )
+//        @Suppress("MagicNumber")
+//        QuestNotificationsOverlay(
+//            questsViewModel,
+//            navController,
+//            modifier =
+//                Modifier
+//                    .fillMaxSize()
+//                    .zIndex(10f),
+//        )
 
         @Suppress("MagicNumber")
-        GoalsNotificationsOverlay(
-            goalsViewModel,
+        NotificationOverlay(
+            notificationManager = notificationManager,
             modifier =
                 Modifier
                     .fillMaxSize()

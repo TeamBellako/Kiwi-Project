@@ -42,6 +42,8 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.notifications.model.NotificationManager
+import com.bellako.kiwi.features.notifications.model.NotificationViewModel
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
@@ -69,8 +71,10 @@ fun MainScreen(
     questsViewModel: QuestsViewModel = hiltViewModel(),
     goalsViewModel: GoalsViewModel = hiltViewModel(),
     appBarViewModel: AppBarViewModel = hiltViewModel(),
+    notificationViewModel: NotificationViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
+    val notificationManager = notificationViewModel.notificationManager
 
     Kiwi_AudioHandler()
 
@@ -94,6 +98,7 @@ fun MainScreen(
             questsViewModel = questsViewModel,
             goalsViewModel = goalsViewModel,
             appBarViewModel = appBarViewModel,
+            notificationManager = notificationManager,
         )
     }
 }
@@ -117,6 +122,7 @@ private fun AppScreen(
     questsViewModel: QuestsViewModel,
     goalsViewModel: GoalsViewModel,
     appBarViewModel: AppBarViewModel,
+    notificationManager: NotificationManager,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -162,6 +168,7 @@ private fun AppScreen(
                     nodesViewModel = nodesViewModel,
                     questsViewModel = questsViewModel,
                     goalsViewModel = goalsViewModel,
+                    notificationManager = notificationManager,
                 )
 
                 if (showDashboard) {
@@ -194,6 +201,7 @@ fun AppNavHost(
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
+    notificationManager: NotificationManager,
 ) {
     NavHost(
         navController = navController,
@@ -259,6 +267,7 @@ fun AppNavHost(
                     nodesViewModel = nodesViewModel,
                     questsViewModel = questsViewModel,
                     goalsViewModel = goalsViewModel,
+                    notificationManager = notificationManager,
                     navController = navController,
                     mapViewModel = hiltViewModel(),
                 )
