@@ -17,6 +17,8 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 
 @HiltViewModel
@@ -28,6 +30,59 @@ class GoalsViewModel
         IGoalsViewModel {
         private val _state = MutableStateFlow(GoalsListState())
         override val state: StateFlow<GoalsListState> = _state.asStateFlow()
+
+        // Cache de goals por fecha
+        private val cachedGoalsByDate = mutableMapOf<String, List<GoalDomain>>()
+        private var cachedGoalsInProgress: List<GoalDomain>? = null
+        private var cacheDate: String? = null
+
+        // Mutex para proteger el acceso concurrente a la cache
+        private val cacheMutex = Mutex()
+
+        private fun getCurrentDate(): String = dateToString(LocalDate.now())
+
+        /**
+         * Actualiza un goal en todas las entradas del cache donde aparezca
+         * @param updatedGoal El goal actualizado
+         */
+        private suspend fun updateGoalInCache(updatedGoal: GoalDomain) {
+            cacheMutex.withLock {
+                // Actualizar en cachedGoalsByDate
+                val keys = cachedGoalsByDate.keys.toList()
+                keys.forEach { date ->
+                    val goals = cachedGoalsByDate[date] ?: emptyList()
+                    val updatedList = goals.map { goal -> if (goal.id == updatedGoal.id) updatedGoal else goal }
+                    cachedGoalsByDate[date] = updatedList
+                }
+
+                // Actualizar en cachedGoalsInProgress si existe
+                cachedGoalsInProgress = cachedGoalsInProgress?.map { goal -> if (goal.id == updatedGoal.id) updatedGoal else goal }
+
+                // Mantener fecha de cache actualizada
+                cacheDate = getCurrentDate()
+            }
+        }
+
+        /**
+         * Añade nuevas goals al cache de la fecha correspondiente
+         * @param newGoals Lista de goals creadas
+         * @param date Fecha en formato yyyy-MM-dd
+         */
+        @RequiresApi(Build.VERSION_CODES.O)
+        private suspend fun addGoalsToCache(
+            newGoals: List<GoalDomain>,
+            date: String,
+        ) {
+            cacheMutex.withLock {
+                val existing = cachedGoalsByDate[date]
+                if (existing == null) {
+                    cachedGoalsByDate[date] = newGoals
+                } else {
+                    cachedGoalsByDate[date] = existing + newGoals
+                }
+                cacheDate = getCurrentDate()
+            }
+        }
 
         @RequiresApi(Build.VERSION_CODES.O)
         private suspend fun createGoals(goals: List<GoalState>): Result<Unit> {
@@ -41,7 +96,7 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return handleResult(result) {
+            return handleResultSuspend(result) {
                 val resultDTOs = result.getOrNull()!!
                 _state.value =
                     _state.value.copy(
@@ -49,6 +104,9 @@ class GoalsViewModel
                         isLoading = false,
                         error = null,
                     )
+                val newGoalsDomain = resultDTOs.map { GoalDataMapper.toDomain(it) }
+                val today = dateToString(LocalDate.now())
+                addGoalsToCache(newGoalsDomain, today)
             }.also {
                 if (it.isFailure) {
                     _state.value =
@@ -71,26 +129,19 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return result
-                .map { updatedDTO ->
-                    val updatedState = GoalDataMapper.toState(updatedDTO)
-                    val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
-                    _state.value =
-                        _state.value.copy(
-                            goals = updatedGoals,
-                            isLoading = false,
-                            error = null,
-                        )
-                    GoalDataMapper.toDomain(updatedDTO)
-                }.also {
-                    if (it.isFailure) {
-                        _state.value =
-                            _state.value.copy(
-                                isLoading = false,
-                                error = it.exceptionOrNull()?.message,
-                            )
-                    }
-                }
+            // Manejar explícitamente para poder usar suspend dentro del flujo
+            return if (result.isSuccess) {
+                val updatedDTO = result.getOrNull()!!
+                val updatedState = GoalDataMapper.toState(updatedDTO)
+                val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
+                _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
+                val updatedDomain = GoalDataMapper.toDomain(updatedDTO)
+                updateGoalInCache(updatedDomain)
+                Result.success(updatedDomain)
+            } else {
+                _state.value = _state.value.copy(isLoading = false, error = result.exceptionOrNull()?.message)
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
@@ -104,26 +155,18 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return result
-                .map { updatedDTO ->
-                    val updatedState = GoalDataMapper.toState(updatedDTO)
-                    val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
-                    _state.value =
-                        _state.value.copy(
-                            goals = updatedGoals,
-                            isLoading = false,
-                            error = null,
-                        )
-                    GoalDataMapper.toDomain(updatedDTO)
-                }.also {
-                    if (it.isFailure) {
-                        _state.value =
-                            _state.value.copy(
-                                isLoading = false,
-                                error = it.exceptionOrNull()?.message,
-                            )
-                    }
-                }
+            return if (result.isSuccess) {
+                val updatedDTO = result.getOrNull()!!
+                val updatedState = GoalDataMapper.toState(updatedDTO)
+                val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
+                _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
+                val updatedDomain = GoalDataMapper.toDomain(updatedDTO)
+                updateGoalInCache(updatedDomain)
+                Result.success(updatedDomain)
+            } else {
+                _state.value = _state.value.copy(isLoading = false, error = result.exceptionOrNull()?.message)
+                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
+            }
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
@@ -144,25 +187,15 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return handleResult(result) {
+            return handleResultSuspend(result) {
                 val updatedGoal = GoalDataMapper.toState(result.getOrNull()!!)
-                val updatedGoals =
-                    _state.value.goals.map {
-                        if (it.id == updatedGoal.id) updatedGoal else it
-                    }
-                _state.value =
-                    _state.value.copy(
-                        goals = updatedGoals,
-                        isLoading = false,
-                        error = null,
-                    )
+                val updatedGoals = _state.value.goals.map { if (it.id == updatedGoal.id) updatedGoal else it }
+                _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
+                val updatedDomain = GoalDataMapper.toDomain(result.getOrNull()!!)
+                updateGoalInCache(updatedDomain)
             }.also {
                 if (it.isFailure) {
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            error = it.exceptionOrNull()?.message,
-                        )
+                    _state.value = _state.value.copy(isLoading = false, error = it.exceptionOrNull()?.message)
                 }
             }
         }
@@ -178,31 +211,28 @@ class GoalsViewModel
             setIsLoading(false)
             setUiState(UIState.Idle)
 
-            return handleResult(result) {
+            return handleResultSuspend(result) {
                 val updatedGoal = GoalDataMapper.toState(result.getOrNull()!!)
-                val updatedGoals =
-                    _state.value.goals.map {
-                        if (it.id == updatedGoal.id) updatedGoal else it
-                    }
-                _state.value =
-                    _state.value.copy(
-                        goals = updatedGoals,
-                        isLoading = false,
-                        error = null,
-                    )
+                val updatedGoals = _state.value.goals.map { if (it.id == updatedGoal.id) updatedGoal else it }
+                _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
+                val updatedDomain = GoalDataMapper.toDomain(result.getOrNull()!!)
+                updateGoalInCache(updatedDomain)
             }.also {
                 if (it.isFailure) {
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            error = it.exceptionOrNull()?.message,
-                        )
+                    _state.value = _state.value.copy(isLoading = false, error = it.exceptionOrNull()?.message)
                 }
             }
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun getGoalsByDate(date: String): Result<List<GoalDomain>> {
+            // Comprobar cache atómicamente
+            cacheMutex.withLock {
+                if (cachedGoalsByDate.containsKey(date) && cacheDate == getCurrentDate()) {
+                    return Result.success(cachedGoalsByDate[date]!!)
+                }
+            }
+
             setIsLoading(true)
             setUiState(UIState.Loading)
 
@@ -212,7 +242,12 @@ class GoalsViewModel
             setUiState(UIState.Idle)
 
             return result.map { goalDTOs ->
-                goalDTOs?.map { GoalDataMapper.toDomain(it) } ?: emptyList()
+                val domainGoals = goalDTOs?.map { GoalDataMapper.toDomain(it) } ?: emptyList()
+                cacheMutex.withLock {
+                    cachedGoalsByDate[date] = domainGoals
+                    cacheDate = getCurrentDate()
+                }
+                domainGoals
             }
         }
 
@@ -227,11 +262,7 @@ class GoalsViewModel
             setUiState(UIState.Idle)
 
             return handleResult(result) {
-                _state.value =
-                    _state.value.copy(
-                        isLoading = false,
-                        error = null,
-                    )
+                _state.value = _state.value.copy(isLoading = false, error = null)
             }.also {
                 if (it.isFailure) {
                     _state.value =
@@ -244,6 +275,12 @@ class GoalsViewModel
         }
 
         override suspend fun getGoalsInProgress(): Result<List<GoalDomain>> {
+            cacheMutex.withLock {
+                if (cachedGoalsInProgress != null && cacheDate == getCurrentDate()) {
+                    return Result.success(cachedGoalsInProgress!!)
+                }
+            }
+
             setIsLoading(true)
             setUiState(UIState.Loading)
 
@@ -253,7 +290,13 @@ class GoalsViewModel
             setUiState(UIState.Idle)
 
             return result.map { goalDTOs ->
-                goalDTOs.map { GoalDataMapper.toDomain(it) }
+                val domainGoals = goalDTOs.map { GoalDataMapper.toDomain(it) }
+                // Guardar en cache
+                cacheMutex.withLock {
+                    cachedGoalsInProgress = domainGoals
+                    cacheDate = getCurrentDate()
+                }
+                domainGoals
             }
         }
 
@@ -269,5 +312,13 @@ class GoalsViewModel
             return result.map { suggestedGoalDTOs ->
                 suggestedGoalDTOs.map { SuggestedGoalDataMapper.toDomain(it) }
             }
+        }
+
+        // Limpiar cache cuando se destruye el ViewModel
+        override fun onCleared() {
+            super.onCleared()
+            cachedGoalsByDate.clear()
+            cachedGoalsInProgress = null
+            cacheDate = null
         }
     }
