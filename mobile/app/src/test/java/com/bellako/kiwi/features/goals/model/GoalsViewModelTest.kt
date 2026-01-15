@@ -7,6 +7,7 @@ import com.bellako.kiwi.features.goals.data.GoalDTO
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDTO
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
+import com.bellako.kiwi.features.notifications.model.NotificationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -92,7 +93,7 @@ class GoalsViewModelTest {
                 },
             )
 
-        return GoalsViewModel(repo)
+        return GoalsViewModel(repo, NotificationManager())
     }
 
     @Test

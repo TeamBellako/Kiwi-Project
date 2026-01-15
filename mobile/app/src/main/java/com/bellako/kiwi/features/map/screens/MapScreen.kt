@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,8 +39,10 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.goals.data.GoalModalType
+import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
-import com.bellako.kiwi.features.goals.screens.GoalsNotificationsOverlay
+import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -47,6 +51,8 @@ import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
 import com.bellako.kiwi.features.nodes.screens.screenToMap
+import com.bellako.kiwi.features.notifications.model.NotificationManager
+import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
 import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -73,6 +79,7 @@ fun MapScreen(
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
+    notificationManager: NotificationManager,
     navController: NavHostController,
 ) {
     val kiwiColors = LocalKiwiColors.current
@@ -130,6 +137,19 @@ fun MapScreen(
             }
     }
 
+    val goalsModalRequest = remember { mutableStateOf<Pair<GoalModalType, List<IGoal>>?>(null) }
+
+    LaunchedEffect(Unit) {
+        goalsViewModel.checkAndNotifyGoals(
+            onYesterdayClick = { goals ->
+                goalsModalRequest.value = Pair(GoalModalType.YESTERDAY, goals)
+            },
+            onTodayClick = { goals ->
+                goalsModalRequest.value = Pair(GoalModalType.NEW, goals)
+            },
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier =
@@ -167,13 +187,33 @@ fun MapScreen(
         )
 
         @Suppress("MagicNumber")
-        GoalsNotificationsOverlay(
-            goalsViewModel,
+        NotificationOverlay(
+            notificationManager = notificationManager,
             modifier =
                 Modifier
                     .fillMaxSize()
                     .zIndex(11f),
         )
+
+        @Suppress("MagicNumber")
+        goalsModalRequest.value?.let { (type, goals) ->
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .zIndex(12f),
+            ) {
+                GoalsModal(
+                    type,
+                    goals,
+                    goalsViewModel,
+                    onDismiss = {
+                        goalsModalRequest.value = null
+                        notificationManager.dismissRequests
+                    },
+                )
+            }
+        }
     }
 }
 

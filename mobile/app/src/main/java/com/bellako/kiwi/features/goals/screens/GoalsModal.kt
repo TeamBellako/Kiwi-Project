@@ -166,7 +166,10 @@ fun GoalsModal(
                             .weight(buttonPercentage),
                     onClick = {
                         if (goalModalType == GoalModalType.NEW) {
-                            val suggestedGoals = goals.filterIsInstance<SuggestedGoalDomain>()
+                            val suggestedGoals =
+                                goals.map { goal ->
+                                    SuggestedGoalDomain(goal.id, goal.target, goal.action, goal.type, goal.category, goal.reward)
+                                }
                             coroutineScope.launch {
                                 goalsViewModel.createGoalsFromSuggestions(suggestedGoals)
                             }
