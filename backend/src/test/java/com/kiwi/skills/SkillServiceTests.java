@@ -88,16 +88,16 @@ public class SkillServiceTests {
 
         var skill1 = persistenceSkill(1L);
         var skill2 = persistenceSkill(2L);
-        skill1.setLevelupSkillId(skill2.getId());
-        skillRepo.saveAndFlush(skill2);
+        skill2.setLevelupSkillId(1L);
         skillRepo.saveAndFlush(skill1);
+        skillRepo.saveAndFlush(skill2);
 
         statusRepo.saveAndFlush(
-                unEquippedSkill(userId, skill1)
+                unEquippedSkill(userId, skill2)
         );
 
-        var result = service.levelUpSkill(userId, skill1.getId());
-        assertEquals(skill2.getId(), result.getSkillId());
+        var result = service.levelUpSkill(userId, skill2.getId());
+        assertEquals(skill1.getId(), result.getSkillId());
     }
 
     @Test(expected = SkillLevelUpNotFoundException.class)
