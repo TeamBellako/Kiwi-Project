@@ -22,26 +22,6 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-sealed class QuestNotificationEvent {
-    data class NewQuest(
-        val quest: QuestDomain,
-    ) : QuestNotificationEvent()
-
-    data class QuestCompleted(
-        val quest: QuestDomain,
-    ) : QuestNotificationEvent()
-
-    data class SubquestCompleted(
-        val quest: QuestDomain,
-        val subquestId: Int,
-    ) : QuestNotificationEvent()
-
-    data class SubquestFailed(
-        val quest: QuestDomain,
-        val subquestId: Int,
-    ) : QuestNotificationEvent()
-}
-
 @HiltViewModel
 class QuestsViewModel
     @Inject
@@ -87,26 +67,6 @@ class QuestsViewModel
                     setUiState(mapExceptionToUIState(e))
                 } catch (e: IOException) {
                     warn("IO error loading active quests: ${e.message}")
-                    setUiState(UIState.GeneralError)
-                } finally {
-                    setIsLoading(false)
-                }
-            }
-        }
-
-        override fun loadCompletedQuests() {
-            viewModelScope.launch {
-                setIsLoading(true)
-                setUiState(UIState.Loading)
-                try {
-                    val quests = repository.getCompletedQuests()
-                    _state.value = _state.value.copy(quests = quests)
-                    setUiState(UIState.Success(Unit))
-                } catch (e: HttpException) {
-                    warn("HTTP error loading completed quests: ${e.message}")
-                    setUiState(mapExceptionToUIState(e))
-                } catch (e: IOException) {
-                    warn("IO error loading completed quests: ${e.message}")
                     setUiState(UIState.GeneralError)
                 } finally {
                     setIsLoading(false)

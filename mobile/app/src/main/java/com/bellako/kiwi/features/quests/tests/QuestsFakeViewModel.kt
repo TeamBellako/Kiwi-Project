@@ -70,11 +70,6 @@ class QuestsFakeViewModel(
         }
     }
 
-    override fun loadCompletedQuests() {
-        handleSuccess()
-        setUiState(UIState.Success(Unit))
-    }
-
     // CHECK QUESTS AND SUBQUESTS STATUS
     override suspend fun isQuestCompleted(questId: Int): Boolean = fakeCompletedQuests.contains(questId)
 
