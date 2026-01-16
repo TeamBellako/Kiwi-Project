@@ -120,11 +120,13 @@ fun AppBarModalLayout(
                 selected = isSelected,
                 enabled = true,
                 onClick = {
-                    AudioManager.playSFX(
-                        context,
-                        R.raw.snd_ui_navigationtransition,
-                    )
-                    navController.navigate(item.route)
+                    if (item.route != currentRoute) {
+                        AudioManager.playSFX(
+                            context,
+                            R.raw.snd_ui_navigationtransition,
+                        )
+                        navController.navigate(item.route)
+                    }
                 },
                 icon = {
                     AppBarIcon(
