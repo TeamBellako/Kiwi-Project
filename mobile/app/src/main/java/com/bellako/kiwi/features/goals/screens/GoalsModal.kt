@@ -126,7 +126,7 @@ fun GoalsModal(
                     )
                     Kiwi_Spacer(Spacing.large)
                     for (goal in goals) {
-                        GoalComponent(goal, goalsViewModel)
+                        GoalComponent(goal, goalsViewModel, goalModalType != GoalModalType.NEW)
                         Kiwi_Spacer(Spacing.small)
                     }
                 }
@@ -165,24 +165,33 @@ fun GoalsModal(
                         Modifier
                             .weight(buttonPercentage),
                     onClick = {
-                        if (goalModalType == GoalModalType.NEW) {
-                            val suggestedGoals =
-                                goals.map { goal ->
-                                    SuggestedGoalDomain(goal.id, goal.target, goal.action, goal.type, goal.category, goal.reward)
-                                }
-                            coroutineScope.launch {
+                        coroutineScope.launch {
+                            if (goalModalType == GoalModalType.NEW) {
+                                val suggestedGoals =
+                                    goals.map { goal ->
+                                        SuggestedGoalDomain(
+                                            goal.id,
+                                            goal.target,
+                                            goal.action,
+                                            goal.type,
+                                            goal.category,
+                                            goal.reward,
+                                        )
+                                    }
+//                            coroutineScope.launch {
                                 goalsViewModel.createGoalsFromSuggestions(suggestedGoals)
-                            }
-                        } else {
-                            coroutineScope.launch {
+//                            }
+                            } else {
                                 for (goal in goals) {
                                     if (goal is GoalDomain && goal.status != GoalStatus.COMPLETED) {
+//                                    coroutineScope.launch {
                                         goalsViewModel.uncompleteGoal(goalId = goal.id)
+//                                    }
                                     }
                                 }
                             }
+                            onDismiss()
                         }
-                        onDismiss()
                     },
                 )
             }

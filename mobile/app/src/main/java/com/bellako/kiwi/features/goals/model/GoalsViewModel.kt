@@ -10,6 +10,7 @@ import com.bellako.kiwi.features.goals.data.GoalDataMapper
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.GoalState
+import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDataMapper
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
@@ -64,6 +65,7 @@ class GoalsViewModel
 
                 // Actualizar en cachedGoalsInProgress si existe
                 cachedGoalsInProgress = cachedGoalsInProgress?.map { goal -> if (goal.id == updatedGoal.id) updatedGoal else goal }
+                cachedGoalsInProgress = cachedGoalsInProgress?.filter { goal -> goal.status == GoalStatus.IN_PROGRESS }
 
                 // Mantener fecha de cache actualizada
                 cacheDate = getCurrentDate()
@@ -399,7 +401,6 @@ class GoalsViewModel
                 notifyYesterdayGoals(yesterdayGoals) {
                     onYesterdayClick(yesterdayGoals)
                 }
-                return // Salir para mostrar solo la de ayer primero
             }
 
             val todayResult = getGoalsByDate(today)
