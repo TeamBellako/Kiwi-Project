@@ -15,14 +15,14 @@ object SkillsTestFactory {
                     timeCooldownSkillEquipped(),
                     goalCooldownSkillEquipped(),
                     otherCooldownSkillUnequipped(),
-                    noCooldownSkillUnequipped(),
+                    skill1(),
                 ),
         )
 
     fun timeCooldownSkillEquipped(): SkillDomain =
         SkillDomain(
             id = 1,
-            name = "Time Cooldown Skill",
+            name = "Time Skill",
             description = "Skill with time-based cooldown",
             quote = "Patience is power",
             icon = 1,
@@ -39,7 +39,7 @@ object SkillsTestFactory {
     fun goalCooldownSkillEquipped(): SkillDomain =
         SkillDomain(
             id = 2,
-            name = "Goal Cooldown Skill",
+            name = "Goal Skill",
             description = "Cooldown ends when a goal is completed",
             quote = null,
             icon = 2,
@@ -56,7 +56,7 @@ object SkillsTestFactory {
     fun otherCooldownSkillUnequipped(): SkillDomain =
         SkillDomain(
             id = 3,
-            name = "Other Cooldown Skill",
+            name = "Other Skill",
             description = "Special cooldown condition",
             quote = null,
             icon = 3,
@@ -70,13 +70,13 @@ object SkillsTestFactory {
             deckSlot = 0,
         )
 
-    fun noCooldownSkillUnequipped(): SkillDomain =
+    fun skill1(): SkillDomain =
         SkillDomain(
             id = 4,
-            name = "Passive Skill",
+            name = "Frost",
             description = "No cooldown skill",
             quote = "Always on",
-            icon = 4,
+            icon = 3,
             cooldownType = CooldownType.TIME,
             cooldownGoalId = null,
             cooldownTimeMinutes = null,
@@ -84,24 +84,23 @@ object SkillsTestFactory {
             levelupSkillId = 5L,
             isCooldown = false,
             cooldownUntil = null,
-            deckSlot = 0,
+            deckSlot = 1,
         )
 
-    fun newSkill(): SkillDomain =
+    fun skill2(): SkillDomain =
         SkillDomain(
             id = 99,
-            name = "New Skill",
+            name = "Smite",
             description = "Just obtained skill",
             quote = null,
-            icon = 99,
-            cooldownType = CooldownType.TIME,
+            icon = 1,
+            cooldownType = CooldownType.OTHER,
             cooldownGoalId = null,
             cooldownTimeMinutes = null,
             cooldownOtherDescription = null,
             levelupSkillId = null,
-            isCooldown = false,
+            isCooldown = true,
             cooldownUntil = null,
-            deckSlot = 0,
+            deckSlot = 2,
         )
-
 }

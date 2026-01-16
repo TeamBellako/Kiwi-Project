@@ -151,6 +151,12 @@ class SkillsViewModel
             }
         }
 
+        fun onCooldownFinished(skillId: Long) {
+            viewModelScope.launch {
+                loadAllSkills()
+            }
+        }
+
         private fun updateState(skill: SkillDomain) {
             _state.value =
                 _state.value.copy(

@@ -68,7 +68,7 @@ class SkillsFakeViewModel(
             return
         }
 
-        val newSkill = SkillsTestFactory.newSkill().copy(id = skillId)
+        val newSkill = SkillsTestFactory.skill2().copy(id = skillId)
 
         _state.value =
             _state.value.copy(
@@ -88,7 +88,7 @@ class SkillsFakeViewModel(
         }
 
         val newSkill =
-            SkillsTestFactory.newSkill()
+            SkillsTestFactory.skill2()
 
         _state.value =
             _state.value.copy(
