@@ -52,12 +52,11 @@ public class GoalService {
             throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
         }
 
-        int progression = (int)(existingGoal.getTarget() / 10);
-        existingGoal.setValue(existingGoal.getValue() + progression);
-
-        if (existingGoal.getValue() >= existingGoal.getTarget()) {
-            return completeGoal(goalId, authentication);
+        Long newValue = (existingGoal.getValue() + (int)(existingGoal.getTarget() / 10));
+        if (newValue > existingGoal.getTarget()) {
+            newValue = existingGoal.getTarget();
         }
+        existingGoal.setValue(newValue);
 
         GoalPersistence updatedGoal = goalRepository.save(existingGoal);
 
@@ -76,16 +75,7 @@ public class GoalService {
             throw new GoalUnauthorizedException("You are not authorized to update this goal");
         }
 
-        // if (existingGoal.getStatus() != GoalStatus.IN_PROGRESS) {
-            // throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
-        // }
-
         existingGoal.setValue(goal.getValue());
-        if (existingGoal.getValue() < existingGoal.getTarget()) {
-            existingGoal.setStatus(GoalStatus.IN_PROGRESS);
-        } else {
-            existingGoal.setStatus(GoalStatus.COMPLETED);
-        }
 
         GoalPersistence updatedGoal = goalRepository.save(existingGoal);
 

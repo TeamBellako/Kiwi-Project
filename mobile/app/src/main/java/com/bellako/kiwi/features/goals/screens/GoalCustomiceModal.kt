@@ -41,6 +41,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.modals.WIPPopUpScreen
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
@@ -72,7 +73,9 @@ fun GoalCustomice(
     // Estado local para el progreso del slider (inicializado con el valor del goal)
     var sliderProgress: Float by remember { mutableStateOf(initialProgress.coerceIn(0f, 1f)) }
 
-    // Si el goal cambia (p. ej. se abre otro goal), sincronizamos el slider
+    var showWorkInProgressPopup by remember { mutableStateOf(false) }
+
+    // Si el goal cambia sincronizamos el slider
     LaunchedEffect(goal.id) {
         sliderProgress = (goal.value.toFloat() / goal.target.toFloat()).coerceIn(0f, 1f)
     }
@@ -129,7 +132,7 @@ fun GoalCustomice(
 
                 Kiwi_P2(
                     KiwiTextArguments(
-                        "${current}/${goal.target}",
+                        "$current/${goal.target}",
                         color = kiwiColor.color7A,
                     ),
                 )
@@ -174,7 +177,7 @@ fun GoalCustomice(
                             ),
                         color = kiwiColor.color8,
                         modifier = Modifier.width(buttonsWidth),
-                        onClick = {},
+                        onClick = { showWorkInProgressPopup = true },
                         iconRes = R.drawable.ic_swap,
                         iconSize = 15.dp,
                     )
@@ -196,20 +199,22 @@ fun GoalCustomice(
                 val updatedGoal =
                     goal.copy(
                         value = current,
-                        status = if (current >= goal.target) GoalStatus.COMPLETED else goal.status,
                     )
 
                 coroutineScope.launch {
                     val result = goalsViewModel.updateGoal(updatedGoal)
-                    result.onSuccess { updated ->
-                        onGoalUpdated(updated)
-                        onDismiss()
-                    }.onFailure {
-                        // En preview/fake no mostramos UI de error; en la app real podríamos mostrar un toast/modal
-                    }
+                    result
+                        .onSuccess { updated ->
+                            onGoalUpdated(updated)
+                            onDismiss()
+                        }
                 }
             },
         )
+    }
+    // Popup de "Work in progress"
+    if (showWorkInProgressPopup) {
+        WIPPopUpScreen(onDismiss = { showWorkInProgressPopup = false })
     }
 }
 

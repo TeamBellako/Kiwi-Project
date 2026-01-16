@@ -31,6 +31,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.modals.WIPPopUpScreen
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalModalType
@@ -126,7 +127,7 @@ fun GoalsModal(
                     )
                     Kiwi_Spacer(Spacing.large)
                     for (goal in goals) {
-                        GoalComponent(goal, goalsViewModel)
+                        GoalComponent(goal, goalsViewModel, goalModalType != GoalModalType.NEW)
                         Kiwi_Spacer(Spacing.small)
                     }
                 }
@@ -165,24 +166,33 @@ fun GoalsModal(
                         Modifier
                             .weight(buttonPercentage),
                     onClick = {
-                        if (goalModalType == GoalModalType.NEW) {
-                            val suggestedGoals =
-                                goals.map { goal ->
-                                    SuggestedGoalDomain(goal.id, goal.target, goal.action, goal.type, goal.category, goal.reward)
-                                }
-                            coroutineScope.launch {
+                        coroutineScope.launch {
+                            if (goalModalType == GoalModalType.NEW) {
+                                val suggestedGoals =
+                                    goals.map { goal ->
+                                        SuggestedGoalDomain(
+                                            goal.id,
+                                            goal.target,
+                                            goal.action,
+                                            goal.type,
+                                            goal.category,
+                                            goal.reward,
+                                        )
+                                    }
                                 goalsViewModel.createGoalsFromSuggestions(suggestedGoals)
-                            }
-                        } else {
-                            coroutineScope.launch {
+                            } else {
                                 for (goal in goals) {
-                                    if (goal is GoalDomain && goal.status != GoalStatus.COMPLETED) {
-                                        goalsViewModel.uncompleteGoal(goalId = goal.id)
+                                    if (goal is GoalDomain) {
+                                        if (goal.value == goal.target) {
+                                            goalsViewModel.completeGoal(goalId = goal.id)
+                                        } else {
+                                            goalsViewModel.uncompleteGoal(goalId = goal.id)
+                                        }
                                     }
                                 }
                             }
+                            onDismiss()
                         }
-                        onDismiss()
                     },
                 )
             }
@@ -191,46 +201,7 @@ fun GoalsModal(
 
     // Popup de "Work in progress"
     if (showWorkInProgressPopup) {
-        Dialog(
-            onDismissRequest = { showWorkInProgressPopup = false },
-        ) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = kiwiColor.color0,
-                            shape = RoundedCornerShape(16.dp),
-                        ).padding(getResponsiveSizeHeight(Spacing.large)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement =
-                        androidx.compose.foundation.layout.Arrangement
-                            .spacedBy(getResponsiveSizeHeight(Spacing.medium)),
-                ) {
-                    Kiwi_H1(
-                        KiwiTextArguments(
-                            "Work in progress",
-                            TextAlign.Center,
-                            bold = true,
-                        ),
-                    )
-                    Kiwi_FixedSizeButton(
-                        textArguments =
-                            KiwiTextArguments(
-                                "Close",
-                                color = kiwiColor.colorF,
-                                bold = false,
-                            ),
-                        color = kiwiColor.color8,
-                        modifier = Modifier.fillMaxWidth(0.6f),
-                        onClick = { showWorkInProgressPopup = false },
-                    )
-                }
-            }
-        }
+        WIPPopUpScreen(onDismiss = { showWorkInProgressPopup = false })
     }
 }
 
