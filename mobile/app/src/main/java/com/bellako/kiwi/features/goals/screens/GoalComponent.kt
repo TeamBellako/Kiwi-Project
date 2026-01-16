@@ -134,7 +134,7 @@ fun GoalComponent(
                     getIcon(currentGoal.type),
                     "Quest Indicator For: ${currentGoal.target}",
                     colorFilter =
-                        ColorFilter.tint(if (status != GoalStatus.COMPLETED) kiwiColors.colorF1 else kiwiColors.color8C),
+                        ColorFilter.tint(if (goalDomain?.value != goalDomain?.target) kiwiColors.colorF1 else kiwiColors.color8C),
                     contentScale = ContentScale.FillWidth,
                 )
             }
@@ -155,7 +155,7 @@ fun GoalComponent(
             Box(
                 modifier =
                     Modifier.weight(0.10f).padding(getResponsiveSizeHeight(Spacing.small)).clickable {
-                        if (status == GoalStatus.COMPLETED) {
+                        if (status != GoalStatus.IN_PROGRESS) {
                             return@clickable
                         } else {
                             coroutineScope.launch {
@@ -168,9 +168,9 @@ fun GoalComponent(
                     },
                 contentAlignment = Alignment.Center,
             ) {
-                if (plus && status != GoalStatus.NOT_COMPLETED) {
+                if (plus && status == GoalStatus.IN_PROGRESS) {
                     Kiwi_Image(
-                        if (status == GoalStatus.COMPLETED) {
+                        if (goalDomain?.value == goalDomain?.target) {
                             R.drawable.ic_daily_challenges_tick
                         } else {
                             R.drawable.ic_daily_challenges_plus
@@ -223,7 +223,7 @@ fun GoalComponent_Preview() {
                 GoalDomain(
                     "1",
                     1,
-                    "Programa el modal lo mejor que sepas",
+                    "1/1 - COMPLETED",
                     GoalType.PRODUCTIVITY,
                     GoalCategory.DAILY_CHALLENGES,
                     GoalStatus.COMPLETED,
@@ -236,7 +236,7 @@ fun GoalComponent_Preview() {
                 GoalDomain(
                     "1",
                     10,
-                    "Programa el modal lo mejor que sepas",
+                    "2/10 - NOT COMPLETED",
                     GoalType.EXERCISE,
                     GoalCategory.DAILY_CHALLENGES,
                     GoalStatus.NOT_COMPLETED,
@@ -248,8 +248,21 @@ fun GoalComponent_Preview() {
             GoalComponent(
                 GoalDomain(
                     "1",
+                    1,
+                    "1/1 - IN_PROGRESS",
+                    GoalType.PRODUCTIVITY,
+                    GoalCategory.DAILY_CHALLENGES,
+                    GoalStatus.IN_PROGRESS,
+                    1000,
+                    value = 1,
+                ),
+                goalFakeViewModel,
+            )
+            GoalComponent(
+                GoalDomain(
+                    "1",
                     20,
-                    "Programa el modal lo mejor que sepas",
+                    "0/20 - IN_PROGRESS",
                     GoalType.MEDITATION,
                     GoalCategory.DAILY_CHALLENGES,
                     GoalStatus.IN_PROGRESS,
