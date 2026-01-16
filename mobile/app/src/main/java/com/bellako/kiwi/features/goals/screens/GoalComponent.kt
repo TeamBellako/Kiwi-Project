@@ -56,6 +56,7 @@ import kotlinx.coroutines.launch
 fun GoalComponent(
     goal: IGoal,
     goalsViewModel: IGoalsViewModel,
+    plus: Boolean = true,
 ) {
     var currentGoal by remember { mutableStateOf(goal) }
     var showModal by remember { mutableStateOf(false) }
@@ -167,16 +168,16 @@ fun GoalComponent(
                     },
                 contentAlignment = Alignment.Center,
             ) {
-                Kiwi_Image(
-                    if (status !=
-                        GoalStatus.COMPLETED
-                    ) {
-                        R.drawable.ic_daily_challenges_plus
-                    } else {
-                        R.drawable.ic_daily_challenges_tick
-                    },
-                    "Quest Indicator For: ${currentGoal.target}",
-                )
+                if (plus && status != GoalStatus.NOT_COMPLETED) {
+                    Kiwi_Image(
+                        if (status == GoalStatus.COMPLETED) {
+                            R.drawable.ic_daily_challenges_tick
+                        } else {
+                            R.drawable.ic_daily_challenges_plus
+                        },
+                        "Quest Indicator For: ${currentGoal.target}",
+                    )
+                }
             }
         }
     }
