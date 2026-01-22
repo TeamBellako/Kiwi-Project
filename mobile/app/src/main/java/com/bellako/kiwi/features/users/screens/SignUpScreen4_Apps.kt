@@ -71,6 +71,7 @@ import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
+import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -80,7 +81,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-private const val APP_ITEM_DISABLED_ALPHA = 0.3f
 private val APP_ICON_SIZE_DP = 50.dp
 private val APP_ICON_PADDING_DP = 10.dp
 private const val DRAG_ALPHA = 1.0f
@@ -476,7 +476,7 @@ fun AppItem(
                 Modifier
                     .size(getResponsiveSizeHeight(APP_ICON_SIZE_DP))
                     .padding(horizontal = getResponsiveSizeHeight(APP_ICON_PADDING_DP))
-                    .graphicsLayer { alpha = if (enabled) 1f else APP_ITEM_DISABLED_ALPHA },
+                    .graphicsLayer { alpha = if (enabled) 1f else KIWI_DISABLED_ALPHA },
         )
         Kiwi_Label2(KiwiTextArguments(app.name))
     }

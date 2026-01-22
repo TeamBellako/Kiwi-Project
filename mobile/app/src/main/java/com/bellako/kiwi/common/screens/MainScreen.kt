@@ -53,6 +53,9 @@ import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
 import com.bellako.kiwi.features.settings.screens.SettingsScreen
+import com.bellako.kiwi.features.skills.model.ISkillsViewModel
+import com.bellako.kiwi.features.skills.model.SkillsViewModel
+import com.bellako.kiwi.features.skills.screen.SkillsScreen
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.screens.LogInScreen
 import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
@@ -70,6 +73,7 @@ fun MainScreen(
     nodesViewModel: NodesViewModel = hiltViewModel(),
     questsViewModel: QuestsViewModel = hiltViewModel(),
     goalsViewModel: GoalsViewModel = hiltViewModel(),
+    skillsViewModel: SkillsViewModel = hiltViewModel(),
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     notificationViewModel: NotificationViewModel = hiltViewModel(),
 ) {
@@ -97,6 +101,7 @@ fun MainScreen(
             nodesViewModel = nodesViewModel,
             questsViewModel = questsViewModel,
             goalsViewModel = goalsViewModel,
+            skillsViewModel = skillsViewModel,
             appBarViewModel = appBarViewModel,
             notificationManager = notificationManager,
         )
@@ -121,6 +126,7 @@ private fun AppScreen(
     nodesViewModel: NodesViewModel,
     questsViewModel: QuestsViewModel,
     goalsViewModel: GoalsViewModel,
+    skillsViewModel: SkillsViewModel,
     appBarViewModel: AppBarViewModel,
     notificationManager: NotificationManager,
 ) {
@@ -168,6 +174,7 @@ private fun AppScreen(
                     nodesViewModel = nodesViewModel,
                     questsViewModel = questsViewModel,
                     goalsViewModel = goalsViewModel,
+                    skillsViewModel = skillsViewModel,
                     notificationManager = notificationManager,
                 )
 
@@ -201,6 +208,7 @@ fun AppNavHost(
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
+    skillsViewModel: ISkillsViewModel,
     notificationManager: NotificationManager,
 ) {
     NavHost(
@@ -291,6 +299,12 @@ fun AppNavHost(
                 focusedQuestId = questId,
                 goalsViewModel = goalsViewModel,
             )
+        }
+
+        composable(ScreenRoutes.SKILLS) {
+            AppScreenWrapper {
+                SkillsScreen(skillsViewModel = skillsViewModel)
+            }
         }
 
         composable(ScreenRoutes.SETTINGS) {

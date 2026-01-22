@@ -67,6 +67,7 @@ private fun Kiwi_Text(
                 fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
                 fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal,
                 fontSize = (bodyStyle.fontSize.value * scale).sp,
+                lineHeight = (bodyStyle.fontSize.value * scale).sp,
             ),
     )
 }

@@ -100,8 +100,9 @@ class SkillsFakeViewModel(
     }
 
     // COOLDOWN
+    @Suppress("MagicNumber")
     override fun putOnCooldown(skillId: Long) {
-        updateSkill(skillId) {
+        updateSkill(skillId, {
             when (it.cooldownType) {
                 CooldownType.TIME ->
                     it.copy(
@@ -117,26 +118,43 @@ class SkillsFakeViewModel(
                         cooldownUntil = null,
                     )
             }
-        }
+        }, "Error putting skill in cooldown")
     }
 
     override fun removeCooldown(skillId: Long) {
-        updateSkill(skillId) {
+        updateSkill(skillId, {
             it.copy(
                 isCooldown = false,
                 cooldownUntil = null,
             )
-        }
+        }, "Error removing cooldown from skill")
+    }
+
+    override fun equipSkill(skillId: Long) {
+        updateSkill(skillId, {
+            it.copy(
+                deckSlot = 1,
+            )
+        }, "Error equipping skill")
+    }
+
+    override fun unequipSkill(skillId: Long) {
+        updateSkill(skillId, {
+            it.copy(
+                deckSlot = 0,
+            )
+        }, "Error unequipping skill")
     }
 
     // INTERNAL
     private fun updateSkill(
         skillId: Long,
         transform: (SkillDomain) -> SkillDomain,
+        errorMsg: String,
     ) {
         if (fakeError) {
             handleError(fakeException)
-            setUiState(UIState.Error(fakeException.message ?: "Error updating skill"))
+            setUiState(UIState.Error(fakeException.message ?: errorMsg))
             return
         }
 

@@ -28,4 +28,15 @@ interface ISkillsAPI {
     suspend fun removeCooldown(
         @Path("skillId") skillId: Long,
     ): SkillDTO
+
+    @POST("api/skills/{skillId}/equip")
+    suspend fun equipSkill(
+        @Path("skillId") skillId: Long,
+    ): SkillDTO
+
+    @POST("api/skills/{skillId}/unequip")
+    suspend fun unequipSkill(
+        @Path("skillId") skillId: Long,
+    ): SkillDTO
+
 }

@@ -24,7 +24,7 @@ class AppBarViewModel
                     items =
                         listOf(
                             AppBarItem(R.drawable.ic_map, ScreenRoutes.HOME),
-                            AppBarItem(R.drawable.ic_skills, ScreenRoutes.WIP),
+                            AppBarItem(R.drawable.ic_skills, ScreenRoutes.SKILLS),
                             AppBarItem(R.drawable.ic_objectives, ScreenRoutes.OBJECTIVES),
                             AppBarItem(R.drawable.ic_troops, ScreenRoutes.WIP),
                             AppBarItem(R.drawable.ic_settings, ScreenRoutes.SETTINGS),

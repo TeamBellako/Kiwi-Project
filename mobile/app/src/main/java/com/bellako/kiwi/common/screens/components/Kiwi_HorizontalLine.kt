@@ -28,36 +28,17 @@ fun Kiwi_HorizontalLine(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Rombo izquierdo
-        Kiwi_Diamond(getResponsiveSizeHeight(8.dp), color)
-//        Box(
-//            modifier =
-//                Modifier
-//                    .size(getResponsiveSizeHeight(8.dp))
-//                    .rotate(45f)
-//                    .background(color),
-//        )
+        Kiwi_Diamond(getResponsiveSizeHeight(10.dp), color)
 
-        // Línea central
         Box(
             modifier =
                 Modifier
                     .weight(1f)
                     .height(getResponsiveSizeHeight(3.dp))
-//                    .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
                     .background(color),
         )
 
-        // Rombo derecho
-        Kiwi_Diamond(getResponsiveSizeHeight(8.dp), color)
-//        Box(
-//            modifier =
-//                Modifier
-//                    .size(getResponsiveSizeHeight(8.dp))
-//                    .rotate(45f)
-////                    .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
-//                    .background(color),
-//        )
+        Kiwi_Diamond(getResponsiveSizeHeight(10.dp), color)
     }
 }
 
@@ -73,25 +54,16 @@ fun Kiwi_HorizontalLine_Text(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        Kiwi_Diamond(getResponsiveSizeHeight(8.dp), color)
-//        Box(
-//            modifier =
-//                Modifier
-//                    .size(getResponsiveSizeHeight(8.dp))
-//                    .rotate(45f)
-//                    .background(color),
-//        )
-        // Línea izquierda
+        Kiwi_Diamond(getResponsiveSizeHeight(10.dp), color)
+
         Box(
             modifier =
                 Modifier
                     .weight(1f)
                     .height(getResponsiveSizeHeight(3.dp))
-                    .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
                     .background(color),
         )
 
-        // Texto en el centro
         Kiwi_P1(
             KiwiTextArguments(
                 text = text,
@@ -103,22 +75,14 @@ fun Kiwi_HorizontalLine_Text(
             ),
         )
 
-        // Línea derecha
+
         Box(
             modifier =
                 Modifier
                     .weight(1f)
                     .height(getResponsiveSizeHeight(3.dp))
-                    .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
                     .background(color),
         )
-        Kiwi_Diamond(getResponsiveSizeHeight(8.dp), color)
-//        Box(
-//            modifier =
-//                Modifier
-//                    .size(getResponsiveSizeHeight(8.dp))
-//                    .rotate(45f)
-//                    .background(color),
-//        )
+        Kiwi_Diamond(getResponsiveSizeHeight(10.dp), color)
     }
 }

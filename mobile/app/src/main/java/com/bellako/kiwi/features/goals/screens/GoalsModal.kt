@@ -240,7 +240,9 @@ fun GoalsModal(
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Suppress("MagicNumber")
 @Composable
-fun GoalsModal_Preview() {
+fun GoalsModal_Preview(
+    goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
+) {
     Kiwi_Theme {
         Box(
             modifier =
@@ -273,7 +275,7 @@ fun GoalsModal_Preview() {
                             value = 5,
                         ),
                     ),
-                goalsViewModel = GoalsFakeViewModel(),
+                goalsViewModel = goalsViewModel,
             )
         }
     }

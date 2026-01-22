@@ -126,7 +126,7 @@ fun ObjectivesScreen(
 
         item {
             Kiwi_Spacer(Spacing.medium)
-            Kiwi_HorizontalLine(kiwiColors.color7D)
+            Kiwi_HorizontalLine(kiwiColors.color1A)
         }
 
         // TITLE GOALS
@@ -150,7 +150,12 @@ fun ObjectivesScreen(
 
         item {
             Kiwi_Spacer(Spacing.medium)
-            Kiwi_HorizontalLine_Text("Yesterday", kiwiColors.color7D, kiwiColors.colorF)
+            Kiwi_HorizontalLine_Text(
+                "Yesterday",
+                kiwiColors.color1A,
+                kiwiColors.colorF,
+                modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.large)),
+            )
             Kiwi_Spacer(Spacing.medium)
         }
 
@@ -163,6 +168,7 @@ fun ObjectivesScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)

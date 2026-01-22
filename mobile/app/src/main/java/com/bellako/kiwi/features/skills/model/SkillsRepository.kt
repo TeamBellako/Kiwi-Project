@@ -15,4 +15,9 @@ class SkillsRepository(
     suspend fun putOnCooldown(skillId: Long): SkillDomain = SkillDataMapper.toDomain(api.putOnCooldown(skillId))
 
     suspend fun removeCooldown(skillId: Long): SkillDomain = SkillDataMapper.toDomain(api.removeCooldown(skillId))
+
+    suspend fun equipSkill(skillId: Long): SkillDomain = SkillDataMapper.toDomain(api.equipSkill(skillId))
+
+    suspend fun unequipSkill(skillId: Long): SkillDomain = SkillDataMapper.toDomain(api.unequipSkill(skillId))
+
 }

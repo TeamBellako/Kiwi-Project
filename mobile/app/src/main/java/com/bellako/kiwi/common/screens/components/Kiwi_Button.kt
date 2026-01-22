@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -77,9 +78,9 @@ private fun Kiwi_Button(
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = color,
-                    disabledContainerColor = color.copy(alpha = 0.15f),
+                    disabledContainerColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
                     contentColor = color,
-                    disabledContentColor = color.copy(alpha = 0.3f),
+                    disabledContentColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
                 ),
             contentPadding =
                 PaddingValues(
@@ -115,7 +116,7 @@ private fun Kiwi_Button(
                     if (enabled) {
                         textArguments
                     } else {
-                        textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                        textArguments.copy(color = textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA))
                     }
                 Kiwi_Label1(actualTextArguments)
             }
@@ -289,7 +290,7 @@ private fun HoldButtonContent(
                 .height(IntrinsicSize.Min)
                 .width(IntrinsicSize.Max)
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
-                .background(if (isEnabled) color else color.copy(alpha = 0.3f))
+                .background(if (isEnabled) color else color.copy(alpha = KIWI_DISABLED_ALPHA))
                 .testTag(testTag)
                 .holdGestureHandler(isEnabled, onHoldStart, onHoldEnd),
     ) {
@@ -314,7 +315,7 @@ private fun HoldButtonContent(
                 if (isEnabled) {
                     textArguments
                 } else {
-                    textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                    textArguments.copy(color = textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA))
                 }
             Kiwi_Label1(actualTextArgs)
         }

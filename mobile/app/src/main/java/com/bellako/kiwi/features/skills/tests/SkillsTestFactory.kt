@@ -56,7 +56,7 @@ object SkillsTestFactory {
     fun otherCooldownSkillUnequipped(): SkillDomain =
         SkillDomain(
             id = 3,
-            name = "Other Skill",
+            name = "Fireball",
             description = "Special cooldown condition",
             quote = null,
             icon = 3,
@@ -74,8 +74,8 @@ object SkillsTestFactory {
         SkillDomain(
             id = 4,
             name = "Frost",
-            description = "No cooldown skill",
-            quote = "Always on",
+            description = "Frost skill with timed cooldown",
+            quote = "Cuando el grajo vuela bajo...",
             icon = 3,
             cooldownType = CooldownType.TIME,
             cooldownGoalId = null,

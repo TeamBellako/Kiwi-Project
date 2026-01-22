@@ -66,12 +66,17 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
 
         // DECK SKILLS
         item {
-            skillsState?.let { SkillsGrid(it.deckSkills, false) }
+            skillsState?.let {
+                SkillsGrid(
+                    it.deckSkills,
+                    false,
+                ) { id -> skillsViewModel.unequipSkill(id) }
+            }
         }
 
         item {
             Kiwi_Spacer(Spacing.medium)
-            Kiwi_HorizontalLine(kiwiColors.color7D)
+            Kiwi_HorizontalLine(kiwiColors.color1A)
         }
 
         // ALL
@@ -88,17 +93,24 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
 
         // UNEQUIPPED SKILLS
         item {
-            skillsState?.let { SkillsGrid(it.skills, true) }
+            skillsState?.let {
+                SkillsGrid(
+                    it.skills,
+                    true,
+                ) { id -> skillsViewModel.equipSkill(id) }
+            }
         }
     }
 }
+
+const val SKILL_WEIGHT = 0.5f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun SkillsGrid(
     skills: List<SkillDomain>,
-    disableEquipped: Boolean
-
+    disableEquipped: Boolean,
+    onClick: (Long) -> Unit,
 ) {
     val horizontalSpacing = getResponsiveSizeHeight(Spacing.small)
 
@@ -110,17 +122,21 @@ private fun SkillsGrid(
             rowSkills.forEach { skill ->
                 Skill(
                     skill = skill,
-                    if(disableEquipped){
-                        skill.deckSlot != 0
-                    }else{
-                        false;
+                    isDisabled =
+                        if (disableEquipped) {
+                            skill.deckSlot != 0
+                        } else {
+                            false
+                        },
+                    onClick = {
+                        onClick(skill.id)
                     },
-                    modifier = Modifier.weight(0.5f),
+                    modifier = Modifier.weight(SKILL_WEIGHT),
                 )
             }
 
             if (rowSkills.size == 1) {
-                Box(modifier = Modifier.weight(0.5f))
+                Box(modifier = Modifier.weight(SKILL_WEIGHT))
             }
         }
 

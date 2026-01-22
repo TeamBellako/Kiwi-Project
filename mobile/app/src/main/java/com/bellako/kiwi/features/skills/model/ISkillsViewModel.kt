@@ -37,4 +37,8 @@ interface ISkillsViewModel : IBaseViewModel<SkillsState> {
     fun putOnCooldown(skillId: Long)
 
     fun removeCooldown(skillId: Long)
+
+    fun equipSkill(skillId: Long)
+
+    fun unequipSkill(skillId: Long)
 }
