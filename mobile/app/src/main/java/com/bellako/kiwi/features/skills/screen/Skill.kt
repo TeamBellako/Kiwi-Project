@@ -9,10 +9,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Scaffold
@@ -27,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
@@ -35,9 +35,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label1
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Label3
+import com.bellako.kiwi.common.screens.components.Kiwi_P3
+import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.skills.data.CooldownType
@@ -52,7 +56,6 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
 import java.time.Instant
-import kotlin.time.Duration
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -87,7 +90,7 @@ fun Skill(
             var cooldownPercentage: Float = 0.0f
 
             if (skill.cooldownType == CooldownType.TIME) {
-                cooldownPercentage = rememberCooldownPercentage(skill)
+                cooldownPercentage = rememberTimeCooldownPercentage(skill)
             } else if (skill.cooldownType == CooldownType.GOAL) {
                 // todo
             }
@@ -182,6 +185,8 @@ fun Skill(
     }
 }
 
+private const val SKILL_MODAL_ASPECT_RATIO = 5f / 4f
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SkillDetailOverlay(
@@ -194,96 +199,130 @@ fun SkillDetailOverlay(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(getResponsiveSizeHeight(Spacing.medium)),
+                .aspectRatio(SKILL_MODAL_ASPECT_RATIO),
     ) {
         Kiwi_Image(
             R.drawable.combat_modal,
             "Skill info background",
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier.fillMaxSize(),
         )
 
+        // HEADER
         Column(
-            verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = getResponsiveSizeHeight(Spacing.xLarge)),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(10.dp)),
-                    verticalAlignment = Alignment.CenterVertically,
+                Kiwi_Image(
+                    skillIcon(skill.icon),
+                    "Skill Icon",
+                    modifier =
+                        Modifier
+                            .size(getResponsiveSizeHeight(48.dp)),
+                )
+
+                Column(
+                    modifier =
+                        Modifier
+                            .padding(start = getResponsiveSizeHeight(Spacing.medium)),
+                    horizontalAlignment = Alignment.Start,
                 ) {
-                    Kiwi_Image(
-                        skillIcon(skill.icon),
-                        "Skill Icon",
-                        modifier =
-                            Modifier
-                                .size(getResponsiveSizeHeight(40.dp)),
+                    Kiwi_H2(
+                        KiwiTextArguments(
+                            text = skill.name,
+                        ),
                     )
 
-                    Column(
-                        horizontalAlignment = Alignment.Start,
-                    ) {
-                        Kiwi_Label1(
-                            KiwiTextArguments(
-                                text = skill.name,
-                            ),
-                        )
+                    Kiwi_Label2(
+                        KiwiTextArguments(
+                            color =
+                                skillStatusColor(
+                                    kiwiColors,
+                                    skill.isCooldown,
+                                    skill.cooldownType,
+                                ),
+                            text =
+                                skillStatusText(
+                                    skill.isCooldown,
+                                    skill.cooldownType,
+                                ),
+                            italic = true,
+                        ),
+                    )
+                }
+            }
 
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = getResponsiveSizeHeight(38.dp))
+                        .padding(top = getResponsiveSizeHeight(Spacing.large)),
+                verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(0.20f)
+                            .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    skill.quote?.let {
                         Kiwi_Label3(
                             KiwiTextArguments(
-                                color =
-                                    skillStatusColor(
-                                        kiwiColors,
-                                        skill.isCooldown,
-                                        skill.cooldownType,
-                                    ),
-                                text =
-                                    skillStatusText(
-                                        skill.isCooldown,
-                                        skill.cooldownType,
-                                    ),
+                                color = kiwiColors.color7A,
+                                text = "\"" + it + "\"",
+                                fontWeight = FontWeight.Light,
                                 italic = true,
+                                textAlign = TextAlign.Center,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(),
                             ),
                         )
                     }
                 }
-            }
 
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(getResponsiveSizeHeight(3.dp))
-                        .padding(horizontal = getResponsiveSizeHeight(Spacing.medium))
-                        .background(kiwiColors.color5),
-            )
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(0.3f)
+                            .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Kiwi_Label2(
+                        KiwiTextArguments(
+                            text = skill.description,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        ),
+                    )
+                }
 
-            skill.quote?.let {
-                Kiwi_Label3(
-                    KiwiTextArguments(
-                        text = "\"" + it + "\"",
-                        italic = true,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    ),
-                )
-            }
-            Kiwi_Label3(
-                KiwiTextArguments(
-                    text = skill.description,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                ),
-            )
-
-            // Cooldown progress
-            when (skill.cooldownType) {
-                CooldownType.TIME -> SkillCooldownTime(skill)
-                CooldownType.OTHER -> SkillCooldownOther(skill)
-                CooldownType.GOAL -> {
-                    // TODO
+                // Cooldown progress
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(0.5f)
+                            .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (skill.isCooldown) {
+                        when (skill.cooldownType) {
+                            CooldownType.TIME -> SkillCooldownTime(skill)
+                            CooldownType.OTHER -> SkillCooldownOther(skill)
+                            CooldownType.GOAL -> {
+                                // TODO
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -293,21 +332,41 @@ fun SkillDetailOverlay(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun SkillCooldownTime(skill: SkillDomain) {
-    val percentage = rememberCooldownPercentage(skill)
+    val kiwiColors = LocalKiwiColors.current
 
-    Box(
+    val percentage = rememberTimeCooldownPercentage(skill)
+    val totalMinutes = skill.cooldownTimeMinutes
+    val currentMinutes = skill.cooldownTimeMinutes?.times(percentage)
+
+    Column(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .height(getResponsiveSizeHeight(8.dp))
-                .background(Color.Black.copy(alpha = 0.2f)),
+                .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(percentage)
-                    .background(LocalKiwiColors.current.color7A),
+        Kiwi_Label3(
+            KiwiTextArguments(
+                "Cooldown time",
+                TextAlign.Center,
+                color = kiwiColors.color6,
+            ),
+        )
+
+        Kiwi_Slider(
+            value = percentage,
+            onValueChange = { },
+            steps = 100,
+            testTag = "",
+            valueRange = 0f..1f,
+            enabled = false,
+        )
+
+        Kiwi_P3(
+            KiwiTextArguments(
+                "$currentMinutes/$totalMinutes",
+                color = kiwiColors.color7A,
+            ),
         )
     }
 }
@@ -319,6 +378,9 @@ private fun SkillCooldownOther(skill: SkillDomain) {
             KiwiTextArguments(
                 text = it,
                 italic = true,
+                color = LocalKiwiColors.current.color8,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             ),
         )
     }
@@ -330,7 +392,7 @@ const val ONEMINUTE_SECONDS = 60f
 const val ONESEC_MILLISECONDS = 1_000L
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun cooldownPercentage(
+fun timeCooldownPercentage(
     cooldownUntil: Instant,
     cooldownTimeMinutes: Int,
     now: Instant,
@@ -344,7 +406,7 @@ fun cooldownPercentage(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun rememberCooldownPercentage(skill: SkillDomain): Float {
+fun rememberTimeCooldownPercentage(skill: SkillDomain): Float {
     return produceState(
         initialValue = 1f,
         key1 = skill.id,
@@ -363,7 +425,7 @@ fun rememberCooldownPercentage(skill: SkillDomain): Float {
             val now = Instant.now()
 
             val percentage =
-                cooldownPercentage(
+                timeCooldownPercentage(
                     cooldownUntil = skill.cooldownUntil,
                     cooldownTimeMinutes = skill.cooldownTimeMinutes,
                     now = now,
@@ -459,9 +521,8 @@ fun Skills_Preview() {
                                 horizontal = getResponsiveSizeHeight(Spacing.large),
                             ),
                 ) {
-                    Kiwi_Spacer(Spacing.small)
                     SkillDetailOverlay(SkillsTestFactory.skill1())
-                    Kiwi_Spacer(Spacing.small)
+                    Kiwi_Spacer(Spacing.medium)
                     Row(horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small))) {
                         Skill(SkillsTestFactory.timeCooldownSkillEquipped(), true, onClick = {}, Modifier.weight(0.5f))
                         Skill(SkillsTestFactory.skill2(), false, onClick = {}, Modifier.weight(0.5f))

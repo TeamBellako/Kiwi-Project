@@ -37,7 +37,7 @@ data class KiwiTextArguments(
     val text: String,
     val textAlign: TextAlign = TextAlign.Left,
     val color: Color = Color.White,
-    val bold: Boolean = false,
+    val fontWeight: FontWeight = FontWeight.Normal,
     val italic: Boolean = false,
     val modifier: Modifier = Modifier,
 )
@@ -50,6 +50,7 @@ data class KiwiAnnotatedStringArguments(
 
 // -------------------------------------------------------------------------------------------------
 
+private const val LINE_HEIGHT = 1.2f
 @Composable
 private fun Kiwi_Text(
     arguments: KiwiTextArguments,
@@ -64,10 +65,10 @@ private fun Kiwi_Text(
         modifier = arguments.modifier,
         style =
             bodyStyle.copy(
-                fontWeight = if (arguments.bold) FontWeight.Bold else FontWeight.Normal,
+                fontWeight = arguments.fontWeight,
                 fontStyle = if (arguments.italic) FontStyle.Italic else FontStyle.Normal,
                 fontSize = (bodyStyle.fontSize.value * scale).sp,
-                lineHeight = (bodyStyle.fontSize.value * scale).sp,
+                lineHeight = (bodyStyle.fontSize.value * scale * LINE_HEIGHT).sp,
             ),
     )
 }

@@ -48,7 +48,7 @@ fun Kiwi_Slider(
         thumb = {
             Kiwi_Diamond(
                 size = getResponsiveSizeHeight(15.dp),
-                color = kiwiColors.color7D,
+                color = kiwiColors.color7C,
             )
         },
         track = { sliderState ->

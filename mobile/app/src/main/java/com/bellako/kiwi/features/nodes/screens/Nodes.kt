@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -229,7 +230,7 @@ fun UnlockButton(
             KiwiTextArguments(
                 text,
                 color = kiwiColors.colorF,
-                bold = true,
+                fontWeight = FontWeight.Bold,
             ),
         contentPaddingHorizontal = Spacing.xLarge,
         color = kiwiColors.color8,
@@ -251,7 +252,7 @@ fun PlayButton(
             KiwiTextArguments(
                 text,
                 color = kiwiColors.colorF,
-                bold = true,
+                fontWeight = FontWeight.Bold,
             ),
         contentPaddingHorizontal = Spacing.xLarge,
         color = kiwiColors.color7D,

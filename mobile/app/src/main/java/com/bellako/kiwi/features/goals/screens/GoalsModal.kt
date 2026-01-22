@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -107,7 +108,7 @@ fun GoalsModal(
                         KiwiTextArguments(
                             header,
                             TextAlign.Center,
-                            bold = true,
+                            fontWeight = FontWeight.Bold,
                             modifier =
                                 Modifier.padding(
                                     top = getResponsiveSizeHeight(Spacing.medium),
@@ -145,7 +146,6 @@ fun GoalsModal(
                         KiwiTextArguments(
                             "Modify",
                             color = kiwiColor.colorF,
-                            bold = false,
                         ),
                     color = kiwiColor.color7D,
                     modifier =
@@ -158,7 +158,6 @@ fun GoalsModal(
                         KiwiTextArguments(
                             if (goalModalType == GoalModalType.NEW) "Let's go!" else "Done",
                             color = kiwiColor.colorF,
-                            bold = false,
                         ),
                     color = kiwiColor.color8,
                     modifier =
@@ -214,7 +213,7 @@ fun GoalsModal(
                         KiwiTextArguments(
                             "Work in progress",
                             TextAlign.Center,
-                            bold = true,
+                            fontWeight = FontWeight.Bold,
                         ),
                     )
                     Kiwi_FixedSizeButton(
@@ -222,7 +221,6 @@ fun GoalsModal(
                             KiwiTextArguments(
                                 "Close",
                                 color = kiwiColor.colorF,
-                                bold = false,
                             ),
                         color = kiwiColor.color8,
                         modifier = Modifier.fillMaxWidth(0.6f),

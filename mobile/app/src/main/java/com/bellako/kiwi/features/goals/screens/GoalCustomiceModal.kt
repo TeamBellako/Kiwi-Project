@@ -170,7 +170,6 @@ fun GoalCustomice(
                             KiwiTextArguments(
                                 "Swap",
                                 color = kiwiColor.colorF,
-                                bold = false,
                             ),
                         color = kiwiColor.color8,
                         modifier = Modifier.width(buttonsWidth),
@@ -187,7 +186,6 @@ fun GoalCustomice(
                 KiwiTextArguments(
                     "Apply",
                     color = kiwiColor.colorF,
-                    bold = false,
                 ),
             modifier = Modifier.width(buttonsWidth),
             color = kiwiColor.color7C,
