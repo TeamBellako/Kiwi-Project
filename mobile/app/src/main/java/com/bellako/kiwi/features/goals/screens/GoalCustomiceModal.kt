@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.goals.screens
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -211,6 +212,7 @@ fun GoalCustomice(
     }
 }
 
+@SuppressLint("RememberInComposition")
 @Composable
 fun GoalCustomiceModal(
     goal: GoalDomain,

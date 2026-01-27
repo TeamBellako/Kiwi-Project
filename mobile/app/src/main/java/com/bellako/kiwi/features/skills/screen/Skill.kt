@@ -4,7 +4,7 @@ import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -25,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
@@ -51,24 +56,34 @@ import java.time.Instant
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Skill(
+fun SkillComponent(
     skill: SkillDomain,
     isDisabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onApplyGoalProgress: (skillId: Long, newProgress: Int) -> Unit = { _, _ -> },
 ) {
     val kiwiColors = LocalKiwiColors.current
-    val isHolding = false
+    var showModal by remember { mutableStateOf(false) }
 
     Box(
         modifier =
             modifier
                 .alpha(if (isDisabled) KIWI_DISABLED_ALPHA else 1.0f)
-                .clickable(enabled = !isDisabled) {
-                    onClick()
+                .pointerInput(isDisabled) {
+                    detectTapGestures(
+                        onTap = {
+                            if (!isDisabled) {
+                                onClick()
+                            }
+                        },
+                        onLongPress = {
+                            showModal = true
+                        },
+                    )
                 },
     ) {
-        SkillBackground(skill, isHolding)
+        SkillBackground(skill, showModal)
 
         Row(
             modifier =
@@ -128,6 +143,14 @@ fun Skill(
                 )
             }
         }
+    }
+
+    if (showModal) {
+        SkillDetailsModal(
+            skill = skill,
+            onDismiss = { showModal = false },
+            onApplyGoalProgress,
+        )
     }
 }
 
@@ -313,8 +336,8 @@ fun Skills_Preview() {
                             ),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small))) {
-                        Skill(SkillsTestFactory.timeCooldownSkillEquipped(), true, onClick = {}, Modifier.weight(0.5f))
-                        Skill(SkillsTestFactory.skill2(), false, onClick = {}, Modifier.weight(0.5f))
+                        SkillComponent(SkillsTestFactory.timeCooldownSkillEquipped(), true, onClick = {}, Modifier.weight(0.5f))
+                        SkillComponent(SkillsTestFactory.skill2(), false, onClick = {}, Modifier.weight(0.5f))
                     }
                 }
             }

@@ -31,22 +31,19 @@ fun DrawScope.kiwiDiamondShape(
     offsetY: Float,
     size: Float,
 ) {
+    val squareSide = size / kotlin.math.sqrt(2f)
+
     rotate(
         45f,
-        pivot =
-            androidx.compose.ui.geometry
-                .Offset(offsetX, offsetY),
+        pivot = androidx.compose.ui.geometry.Offset(offsetX, offsetY),
     ) {
         drawRect(
             color = color,
-            topLeft =
-                androidx.compose.ui.geometry.Offset(
-                    offsetX - size / 2,
-                    offsetY - size / 2,
-                ),
-            size =
-                androidx.compose.ui.geometry
-                    .Size(size, size),
+            topLeft = androidx.compose.ui.geometry.Offset(
+                offsetX - squareSide / 2,
+                offsetY - squareSide / 2,
+            ),
+            size = androidx.compose.ui.geometry.Size(squareSide, squareSide),
         )
     }
 }

@@ -47,7 +47,7 @@ fun Kiwi_Slider(
         enabled = enabled,
         thumb = {
             Kiwi_Diamond(
-                size = getResponsiveSizeHeight(15.dp),
+                size = getResponsiveSizeHeight(20.dp),
                 color = kiwiColors.color7C,
             )
         },
@@ -109,7 +109,7 @@ fun Kiwi_Slider_Preview() {
         ) {
             Kiwi_Slider(
                 KiwiTextArguments("Sound Volume"),
-                value = 2.0f,
+                value = 0.0f,
                 onValueChange = { },
                 valueRange = 0f..3f,
                 steps = 2,

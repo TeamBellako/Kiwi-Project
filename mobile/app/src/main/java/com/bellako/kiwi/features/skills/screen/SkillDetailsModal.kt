@@ -1,8 +1,11 @@
 package com.bellako.kiwi.features.skills.screen
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +24,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -46,20 +52,20 @@ import com.bellako.kiwi.ui.KiwiColorsData
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
-import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
 private const val SKILL_MODAL_ASPECT_RATIO = 0.96f
 
 private const val SKILL_MODAL_BODY_BIG_SPACE = 0.32f
-private const val SKILL_MODAL_BODY_SMALL_SPACE = 0.18f
+private const val SKILL_MODAL_BODY_SMALL_SPACE = 0.16f
 private const val SKILL_MODAL_BUTTON_SPACE = 0.5f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SkillDetailsModal(
+fun SkillDetails(
     skill: SkillDomain,
-    modifier: Modifier = Modifier,
-    onApplyGoalProgress: (skillId: Long, newProgress: Int) -> Unit = { _, _ -> },
+    onApplyGoalProgress: (skillId: Long, newProgress: Int) -> Unit,
+    onDismiss: () -> Unit,
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -77,96 +83,101 @@ fun SkillDetailsModal(
         skill is SkillDomain.Goal &&
             (goalProgress * skill.goalTarget).toInt() != skill.goalProgress
 
-    Box(
+    Column(
         modifier =
-            modifier
-                .fillMaxWidth()
-                .aspectRatio(SKILL_MODAL_ASPECT_RATIO),
+            Modifier
+                .padding(horizontal = getResponsiveSizeWidth(Spacing.large)),
     ) {
-        // BG
-        Kiwi_Image(
-            R.drawable.combat_modal,
-            "Skill info background",
-            modifier = Modifier.fillMaxSize(),
-        )
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(SKILL_MODAL_ASPECT_RATIO),
+        ) {
+            // BG
+            Kiwi_Image(
+                R.drawable.combat_modal,
+                "Skill info background",
+                modifier = Modifier.fillMaxWidth(),
+            )
 
-        Column {
-            // HEADER
-            SkillDetailsHeader(skill, kiwiColors)
+            Column {
+                // HEADER
+                SkillDetailsHeader(skill, kiwiColors)
 
-            // BODY
-            Column(
-                modifier =
-                    Modifier
-                        .padding(horizontal = getResponsiveSizeHeight(38.dp))
-                        .padding(top = getResponsiveSizeHeight(Spacing.large)),
-                verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
-            ) {
-                // QUOTE
-                Box(
+                // BODY
+                Column(
                     modifier =
                         Modifier
-                            .weight(SKILL_MODAL_BODY_SMALL_SPACE)
-                            .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
+                            .padding(horizontal = getResponsiveSizeWidth(38.dp))
+                            .padding(top = getResponsiveSizeWidth(Spacing.large)),
+                    verticalArrangement = Arrangement.spacedBy(getResponsiveSizeWidth(Spacing.small)),
                 ) {
-                    skill.quote?.let {
+                    // QUOTE
+                    Box(
+                        modifier =
+                            Modifier
+                                .weight(SKILL_MODAL_BODY_SMALL_SPACE)
+                                .fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        skill.quote?.let {
+                            Kiwi_Label2(
+                                KiwiTextArguments(
+                                    color = kiwiColors.color7A,
+                                    text = "\"" + it + "\"",
+                                    fontWeight = FontWeight.Light,
+                                    italic = true,
+                                    textAlign = TextAlign.Center,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth(),
+                                ),
+                            )
+                        }
+                    }
+
+                    // DESCRIPTION
+                    Box(
+                        modifier =
+                            Modifier
+                                .weight(SKILL_MODAL_BODY_BIG_SPACE)
+                                .fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
                         Kiwi_Label2(
                             KiwiTextArguments(
-                                color = kiwiColors.color7A,
-                                text = "\"" + it + "\"",
-                                fontWeight = FontWeight.Light,
-                                italic = true,
+                                text = skill.description,
                                 textAlign = TextAlign.Center,
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                             ),
                         )
                     }
-                }
 
-                // DESCRIPTION
-                Box(
-                    modifier =
-                        Modifier
-                            .weight(SKILL_MODAL_BODY_BIG_SPACE)
-                            .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Kiwi_Label2(
-                        KiwiTextArguments(
-                            text = skill.description,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
-                        ),
-                    )
-                }
+                    // SPACER
+                    Box(
+                        modifier =
+                            Modifier
+                                .weight(SKILL_MODAL_BODY_SMALL_SPACE),
+                    ) {}
 
-                // SPACER
-                Box(
-                    modifier =
-                        Modifier
-                            .weight(SKILL_MODAL_BODY_SMALL_SPACE),
-                ) {}
-
-                // COOLDOWN SECTION
-                Box(
-                    modifier =
-                        Modifier
-                            .alpha(if (skill.isCooldown) 1.0f else KIWI_DISABLED_ALPHA)
-                            .weight(SKILL_MODAL_BODY_BIG_SPACE)
-                            .fillMaxWidth(),
-                    contentAlignment = Alignment.BottomCenter,
-                ) {
-                    if (skill.isCooldown) {
+                    // COOLDOWN SECTION
+                    Box(
+                        modifier =
+                            Modifier
+                                .alpha(if (skill.isCooldown) 1.0f else KIWI_DISABLED_ALPHA)
+                                .weight(SKILL_MODAL_BODY_BIG_SPACE)
+                                .fillMaxWidth(),
+                    ) {
                         when (skill) {
                             is SkillDomain.Other -> {
                                 SkillCooldownOther(skill, kiwiColors)
                             }
+
                             is SkillDomain.Time -> {
                                 SkillCooldownTime(skill, kiwiColors)
                             }
+
                             is SkillDomain.Goal -> {
                                 SkillCooldownGoal(
                                     skill.goalAction,
@@ -181,24 +192,29 @@ fun SkillDetailsModal(
                 }
             }
         }
-    }
 
-    // GOAL MODIFICATION BUTTONS
-    if (skill.isCooldown && skill is SkillDomain.Goal) {
-        Kiwi_Spacer(Spacing.medium)
-        Row {
-            ApplyProgressButton(
-                progressChanged,
-                kiwiColors,
-                Modifier.weight(SKILL_MODAL_BUTTON_SPACE),
-            ) {
-                val newValue =
-                    (goalProgress * skill.goalTarget).toInt()
+        // GOAL MODIFICATION BUTTONS
+        if (skill.isCooldown && skill is SkillDomain.Goal) {
+            Kiwi_Spacer(Spacing.medium)
+            Row {
+                ApplyProgressButton(
+                    progressChanged,
+                    kiwiColors,
+                    Modifier.weight(SKILL_MODAL_BUTTON_SPACE),
+                ) {
+                    val newValue =
+                        (goalProgress * skill.goalTarget).toInt()
 
-                onApplyGoalProgress(skill.id, newValue)
+                    onApplyGoalProgress(skill.id, newValue)
+                }
+                Kiwi_Spacer_Horizontal(Spacing.small)
+                CancelButton(
+                    progressChanged,
+                    kiwiColors,
+                    Modifier.weight(SKILL_MODAL_BUTTON_SPACE),
+                    onDismiss,
+                )
             }
-            Kiwi_Spacer_Horizontal(Spacing.small)
-            CancelButton(progressChanged, kiwiColors, Modifier.weight(SKILL_MODAL_BUTTON_SPACE))
         }
     }
 }
@@ -212,7 +228,7 @@ private fun SkillDetailsHeader(
     Column(
         modifier =
             Modifier
-                .padding(top = getResponsiveSizeHeight(26.dp)),
+                .padding(top = getResponsiveSizeWidth(26.dp)),
     ) {
         Row(
             modifier =
@@ -226,13 +242,13 @@ private fun SkillDetailsHeader(
                 "Skill Icon",
                 modifier =
                     Modifier
-                        .size(getResponsiveSizeHeight(48.dp)),
+                        .size(getResponsiveSizeWidth(48.dp)),
             )
 
             Column(
                 modifier =
                     Modifier
-                        .padding(start = getResponsiveSizeHeight(Spacing.medium)),
+                        .padding(start = getResponsiveSizeWidth(Spacing.medium)),
                 horizontalAlignment = Alignment.Start,
             ) {
                 // TITLE
@@ -396,6 +412,7 @@ private fun CancelButton(
     enabled: Boolean,
     currentColors: KiwiColorsData,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit,
 ) {
     Kiwi_FixedSizeButton(
         textArguments =
@@ -406,9 +423,49 @@ private fun CancelButton(
         enabled = enabled,
         modifier = modifier,
         color = currentColors.color8,
-        onClick = {
-        },
+        onClick = onClick,
     )
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@SuppressLint("RememberInComposition")
+@Composable
+fun SkillDetailsModal(
+    skill: SkillDomain,
+    onDismiss: () -> Unit = {},
+    onApplyGoalProgress: (skillId: Long, newProgress: Int) -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties =
+            DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+                usePlatformDefaultWidth = false,
+            ),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .background(Color.Black.copy(alpha = 0.6f))
+                    .clickable(
+                        onClick = onDismiss,
+                        indication = null,
+                        interactionSource = MutableInteractionSource(),
+                    ),
+        ) {
+            Box(
+                modifier =
+                    Modifier.clickable(
+                        onClick = {},
+                        indication = null,
+                        interactionSource = MutableInteractionSource(),
+                    ),
+            ) {
+                SkillDetails(skill, onApplyGoalProgress, onDismiss)
+            }
+        }
+    }
 }
 
 @Suppress("MagicNumber")
@@ -432,16 +489,7 @@ fun SkillModal_Preview() {
                         .padding(paddingValues)
                         .fillMaxSize(),
             ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .padding(
-                                vertical = getResponsiveSizeHeight(Spacing.large),
-                                horizontal = getResponsiveSizeHeight(Spacing.large),
-                            ),
-                ) {
-                    SkillDetailsModal(SkillsTestFactory.timeCooldownSkillEquipped())
-                }
+                SkillDetailsModal(SkillsTestFactory.skill1(), {}, { _, _ -> })
             }
         }
     }

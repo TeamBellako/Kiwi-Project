@@ -17,11 +17,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Display1
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -97,6 +100,20 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
                 AllSkillsGrid(it.skills) { id -> skillsViewModel.equipSkill(id) }
             }
         }
+
+        item {
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.large,
+                textArguments =
+                    KiwiTextArguments(
+                        "Cooldown skill",
+                        color = kiwiColors.color7,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { skillsViewModel.putOnCooldown(1L) },
+            )
+        }
     }
 }
 
@@ -113,22 +130,22 @@ fun DeckGrid(
     for (rowStart in 1..MAX_DECK_SLOTS step 2) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             for (slot in rowStart..rowStart + 1) {
                 val skill = slotMap[slot]
                 if (skill != null) {
-                    Skill(
+                    SkillComponent(
                         skill = skill,
                         isDisabled = false,
                         onClick = { onClick(skill.id) },
-                        modifier = Modifier.weight(SKILL_WEIGHT)
+                        modifier = Modifier.weight(SKILL_WEIGHT),
                     )
                 } else {
                     Kiwi_Image(
                         R.drawable.skill_empty,
                         "Empty skill slot",
-                        modifier = Modifier.weight(SKILL_WEIGHT)
+                        modifier = Modifier.weight(SKILL_WEIGHT),
                     )
                 }
             }
@@ -149,7 +166,7 @@ fun AllSkillsGrid(
             modifier = Modifier.fillMaxWidth(),
         ) {
             rowSkills.forEach { skill ->
-                Skill(
+                SkillComponent(
                     skill = skill,
                     isDisabled = skill.deckSlot != 0,
                     onClick = { onClick(skill.id) },

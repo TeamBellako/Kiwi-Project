@@ -31,7 +31,7 @@ object SkillsTestFactory {
             quote = "Patience is power",
             icon = 1,
             levelupSkillId = null,
-            isCooldown = true,
+            isCooldown = false,
             deckSlot = 1,
             cooldownTimeMinutes = 10,
             cooldownUntil = Instant.now().plus(10, ChronoUnit.MINUTES),
