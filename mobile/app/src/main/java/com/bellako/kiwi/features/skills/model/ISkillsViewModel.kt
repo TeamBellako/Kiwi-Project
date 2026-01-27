@@ -24,8 +24,6 @@ interface ISkillsViewModel : IBaseViewModel<SkillsState> {
 
     suspend fun notifySkillGiven(skill: SkillDomain)
 
-    suspend fun notifySkillLevelUp(skill: SkillDomain)
-
     suspend fun notifyCooldownFinished(skill: SkillDomain)
 
     fun loadAllSkills()
@@ -41,4 +39,10 @@ interface ISkillsViewModel : IBaseViewModel<SkillsState> {
     fun equipSkill(skillId: Long)
 
     fun unequipSkill(skillId: Long)
+
+    fun updateGoalProgress(
+        skillId: Long,
+        goalId: Long,
+        newProgress: Int,
+    )
 }

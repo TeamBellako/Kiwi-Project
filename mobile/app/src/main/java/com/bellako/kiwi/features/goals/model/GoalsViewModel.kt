@@ -126,7 +126,7 @@ class GoalsViewModel
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override suspend fun updateGoalProgress(goalId: String): Result<GoalDomain> {
+        override suspend fun updateGoalProgress(goalId: Long): Result<GoalDomain> {
             setIsLoading(true)
             setUiState(UIState.Loading)
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -191,7 +191,7 @@ class GoalsViewModel
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override suspend fun completeGoal(goalId: String): Result<Unit> {
+        override suspend fun completeGoal(goalId: Long): Result<Unit> {
             setIsLoading(true)
             setUiState(UIState.Loading)
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -215,7 +215,7 @@ class GoalsViewModel
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override suspend fun uncompleteGoal(goalId: String): Result<Unit> {
+        override suspend fun uncompleteGoal(goalId: Long): Result<Unit> {
             setIsLoading(true)
             setUiState(UIState.Loading)
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -418,7 +418,7 @@ class GoalsViewModel
                     val goalsForCallback =
                         suggestedGoals.map { suggested ->
                             GoalDomain(
-                                id = "", // Temporal hasta que se cree
+                                id = 0, // Temporal hasta que se cree
                                 target = suggested.target,
                                 action = suggested.action,
                                 type = suggested.type,

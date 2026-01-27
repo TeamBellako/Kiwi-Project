@@ -1,7 +1,7 @@
 package com.bellako.kiwi.features.goals.data
 
 data class GoalState(
-    val id: String = "",
+    val id: Long = 0,
     val target: Int = 0,
     val action: String = "",
     val type: String = "EXERCISE",

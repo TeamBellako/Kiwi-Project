@@ -17,3 +17,9 @@ data class SkillDTO(
     val cooldownUntil: Instant?,
     val deckSlot: Int,
 )
+
+enum class CooldownType {
+    TIME,
+    OTHER,
+    GOAL,
+}

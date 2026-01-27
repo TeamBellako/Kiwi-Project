@@ -10,13 +10,13 @@ interface IGoalsViewModel {
 
     suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit>
 
-    suspend fun updateGoalProgress(goalId: String): Result<GoalDomain>
+    suspend fun updateGoalProgress(goalId: Long): Result<GoalDomain>
 
     suspend fun updateGoal(goal: GoalDomain): Result<GoalDomain>
 
-    suspend fun completeGoal(goalId: String): Result<Unit>
+    suspend fun completeGoal(goalId: Long): Result<Unit>
 
-    suspend fun uncompleteGoal(goalId: String): Result<Unit>
+    suspend fun uncompleteGoal(goalId: Long): Result<Unit>
 
     suspend fun getGoalsByDate(date: String): Result<List<GoalDomain>>
 

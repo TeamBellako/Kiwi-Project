@@ -2,24 +2,53 @@ package com.bellako.kiwi.features.skills.data
 
 import java.time.Instant
 
-data class SkillDomain(
-    val id: Long,
-    val name: String,
-    val description: String,
-    val quote: String?,
-    val icon: Int,
-    val cooldownType: CooldownType,
-    val cooldownGoalId: Long?,
-    val cooldownTimeMinutes: Int?,
-    val cooldownOtherDescription: String?,
-    val levelupSkillId: Long?,
-    val isCooldown: Boolean,
-    val cooldownUntil: Instant?,
-    val deckSlot: Int,
-)
+sealed class SkillDomain {
+    abstract val id: Long
+    abstract val name: String
+    abstract val description: String
+    abstract val quote: String?
+    abstract val icon: Int
+    abstract val levelupSkillId: Long?
+    abstract val isCooldown: Boolean
+    abstract val deckSlot: Int
 
-enum class CooldownType {
-    TIME,
-    GOAL,
-    OTHER,
+    data class Other(
+        override val id: Long,
+        override val name: String,
+        override val description: String,
+        override val quote: String?,
+        override val icon: Int,
+        override val levelupSkillId: Long?,
+        override val isCooldown: Boolean,
+        override val deckSlot: Int,
+        val cooldownOtherDescription: String,
+    ) : SkillDomain()
+
+    data class Time(
+        override val id: Long,
+        override val name: String,
+        override val description: String,
+        override val quote: String?,
+        override val icon: Int,
+        override val levelupSkillId: Long?,
+        override val isCooldown: Boolean,
+        override val deckSlot: Int,
+        val cooldownTimeMinutes: Int,
+        val cooldownUntil: Instant?,
+    ) : SkillDomain()
+
+    data class Goal(
+        override val id: Long,
+        override val name: String,
+        override val description: String,
+        override val quote: String?,
+        override val icon: Int,
+        override val levelupSkillId: Long?,
+        override val isCooldown: Boolean,
+        override val deckSlot: Int,
+        val cooldownGoalId: Long,
+        val goalAction: String,
+        val goalProgress: Int,
+        val goalTarget: Int,
+    ) : SkillDomain()
 }

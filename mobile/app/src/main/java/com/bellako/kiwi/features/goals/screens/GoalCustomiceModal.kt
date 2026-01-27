@@ -270,7 +270,7 @@ fun GoalCustomiceModal_Preview() {
             GoalCustomiceModal(
                 goal =
                     GoalDomain(
-                        "1",
+                        1,
                         9000,
                         "Walk 9000 Steps",
                         GoalType.EXERCISE,

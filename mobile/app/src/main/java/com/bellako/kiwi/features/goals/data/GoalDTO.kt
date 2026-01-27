@@ -1,7 +1,7 @@
 package com.bellako.kiwi.features.goals.data
 
 data class GoalDTO(
-    val id: String,
+    val id: Long,
     val target: Int,
     val action: String,
     val type: GoalType,

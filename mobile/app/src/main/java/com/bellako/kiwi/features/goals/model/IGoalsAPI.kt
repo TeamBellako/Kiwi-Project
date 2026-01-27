@@ -17,24 +17,29 @@ interface IGoalsAPI {
 
     @PATCH("api/user/goals/{goalId}/update_progress")
     suspend fun updateGoalProgress(
-        @Path("goalId") goalId: String,
+        @Path("goalId") goalId: Long,
     ): GoalDTO
 
     @PATCH("api/user/goals/{goalId}/update")
     suspend fun updateGoal(
-        @Path("goalId") goalId: String,
+        @Path("goalId") goalId: Long,
         @Body goal: GoalDTO,
     ): GoalDTO
 
     @PATCH("api/user/goals/{goalId}/complete")
     suspend fun completeGoal(
-        @Path("goalId") goalId: String,
+        @Path("goalId") goalId: Long,
     ): GoalDTO
 
     @PATCH("api/user/goals/{goalId}/uncompleted")
     suspend fun uncompleteGoal(
-        @Path("goalId") goalId: String,
+        @Path("goalId") goalId: Long,
     ): GoalDTO
+
+    @GET("api/user/goals/{goalId}")
+    suspend fun getGoalById(
+        @Query("date") date: Long,
+    ): GoalDTO?
 
     @GET("api/user/goals")
     suspend fun getGoalsByDate(
@@ -49,4 +54,7 @@ interface IGoalsAPI {
 
     @GET("api/user/goals/suggestions")
     suspend fun getSuggestedGoals(): List<SuggestedGoalDTO>
+
+    @GET("api/user/goals/skill")
+    suspend fun getSkillGoals(): List<GoalDTO>
 }

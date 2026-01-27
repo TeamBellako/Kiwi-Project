@@ -41,10 +41,6 @@ class SkillsFakeViewModel(
         notify(SkillNotificationEvent.SkillGiven(skill))
     }
 
-    override suspend fun notifySkillLevelUp(skill: SkillDomain) {
-        notify(SkillNotificationEvent.SkillLevelUp(skill))
-    }
-
     override suspend fun notifyCooldownFinished(skill: SkillDomain) {
         notify(SkillNotificationEvent.SkillCooldownFinished(skill))
     }
@@ -68,7 +64,7 @@ class SkillsFakeViewModel(
             return
         }
 
-        val newSkill = SkillsTestFactory.skill2().copy(id = skillId)
+        val newSkill = SkillsTestFactory.skill2()
 
         _state.value =
             _state.value.copy(
@@ -103,47 +99,94 @@ class SkillsFakeViewModel(
     @Suppress("MagicNumber")
     override fun putOnCooldown(skillId: Long) {
         updateSkill(skillId, {
-            when (it.cooldownType) {
-                CooldownType.TIME ->
+            when (it) {
+                is SkillDomain.Goal ->
+                    it.copy(
+                        isCooldown = true,
+                    )
+                is SkillDomain.Other ->
+                    it.copy(
+                        isCooldown = true,
+                    )
+                is SkillDomain.Time ->
                     it.copy(
                         isCooldown = true,
                         cooldownUntil = Instant.now().plusSeconds(60),
-                    )
-
-                CooldownType.GOAL,
-                CooldownType.OTHER,
-                ->
-                    it.copy(
-                        isCooldown = true,
-                        cooldownUntil = null,
                     )
             }
         }, "Error putting skill in cooldown")
     }
 
     override fun removeCooldown(skillId: Long) {
-        updateSkill(skillId, {
-            it.copy(
-                isCooldown = false,
-                cooldownUntil = null,
-            )
-        }, "Error removing cooldown from skill")
+        updateSkill(
+            skillId,
+            { skill ->
+                when (skill) {
+                    is SkillDomain.Other ->
+                        skill.copy(
+                            isCooldown = false,
+                        )
+
+                    is SkillDomain.Time,
+                    is SkillDomain.Goal,
+                    ->
+                        skill
+                }
+            },
+            "Error removing cooldown from skill",
+        )
     }
 
     override fun equipSkill(skillId: Long) {
-        updateSkill(skillId, {
-            it.copy(
-                deckSlot = 1,
-            )
-        }, "Error equipping skill")
+        updateSkill(
+            skillId,
+            { skill ->
+                when (skill) {
+                    is SkillDomain.Other -> skill.copy(deckSlot = 1)
+                    is SkillDomain.Time -> skill.copy(deckSlot = 1)
+                    is SkillDomain.Goal -> skill.copy(deckSlot = 1)
+                }
+            },
+            "Error equipping skill",
+        )
     }
 
     override fun unequipSkill(skillId: Long) {
-        updateSkill(skillId, {
-            it.copy(
-                deckSlot = 0,
-            )
-        }, "Error unequipping skill")
+        updateSkill(
+            skillId,
+            { skill ->
+                when (skill) {
+                    is SkillDomain.Other -> skill.copy(deckSlot = 0)
+                    is SkillDomain.Time -> skill.copy(deckSlot = 0)
+                    is SkillDomain.Goal -> skill.copy(deckSlot = 0)
+                }
+            },
+            "Error unequipping skill",
+        )
+    }
+
+    override fun updateGoalProgress(
+        skillId: Long,
+        goalId: Long,
+        newProgress: Int
+    ) {
+        updateSkill(
+            skillId,
+            { skill ->
+                when (skill) {
+                    is SkillDomain.Other -> skill
+                    is SkillDomain.Time -> skill
+                    is SkillDomain.Goal -> {
+                        if(newProgress >= skill.goalTarget){
+                            skill.copy(goalProgress = newProgress, isCooldown = false)
+                        }else{
+                            skill.copy(goalProgress = newProgress)
+                        }
+                    }
+                }
+            },
+            "Error update goal progress for skill",
+        )
     }
 
     // INTERNAL

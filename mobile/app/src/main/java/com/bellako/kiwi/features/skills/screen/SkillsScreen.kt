@@ -19,13 +19,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Display1
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
+import com.bellako.kiwi.features.skills.model.MAX_DECK_SLOTS
 import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -67,10 +70,7 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
         // DECK SKILLS
         item {
             skillsState?.let {
-                SkillsGrid(
-                    it.deckSkills,
-                    false,
-                ) { id -> skillsViewModel.unequipSkill(id) }
+                DeckGrid(it.deckSkills) { id -> skillsViewModel.unequipSkill(id) }
             }
         }
 
@@ -94,10 +94,7 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
         // UNEQUIPPED SKILLS
         item {
             skillsState?.let {
-                SkillsGrid(
-                    it.skills,
-                    true,
-                ) { id -> skillsViewModel.equipSkill(id) }
+                AllSkillsGrid(it.skills) { id -> skillsViewModel.equipSkill(id) }
             }
         }
     }
@@ -107,36 +104,64 @@ const val SKILL_WEIGHT = 0.5f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun SkillsGrid(
+fun DeckGrid(
     skills: List<SkillDomain>,
-    disableEquipped: Boolean,
     onClick: (Long) -> Unit,
 ) {
-    val horizontalSpacing = getResponsiveSizeHeight(Spacing.small)
+    val slotMap = skills.associateBy { it.deckSlot }
 
+    for (rowStart in 1..MAX_DECK_SLOTS step 2) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            for (slot in rowStart..rowStart + 1) {
+                val skill = slotMap[slot]
+                if (skill != null) {
+                    Skill(
+                        skill = skill,
+                        isDisabled = false,
+                        onClick = { onClick(skill.id) },
+                        modifier = Modifier.weight(SKILL_WEIGHT)
+                    )
+                } else {
+                    Kiwi_Image(
+                        R.drawable.skill_empty,
+                        "Empty skill slot",
+                        modifier = Modifier.weight(SKILL_WEIGHT)
+                    )
+                }
+            }
+        }
+        Kiwi_Spacer(Spacing.small)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun AllSkillsGrid(
+    skills: List<SkillDomain>,
+    onClick: (Long) -> Unit,
+) {
     skills.chunked(2).forEach { rowSkills ->
         Row(
-            horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
+            horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
             modifier = Modifier.fillMaxWidth(),
         ) {
             rowSkills.forEach { skill ->
                 Skill(
                     skill = skill,
-                    isDisabled =
-                        if (disableEquipped) {
-                            skill.deckSlot != 0
-                        } else {
-                            false
-                        },
-                    onClick = {
-                        onClick(skill.id)
-                    },
+                    isDisabled = skill.deckSlot != 0,
+                    onClick = { onClick(skill.id) },
                     modifier = Modifier.weight(SKILL_WEIGHT),
                 )
             }
 
             if (rowSkills.size == 1) {
-                Box(modifier = Modifier.weight(SKILL_WEIGHT))
+                Box(
+                    modifier = Modifier.weight(SKILL_WEIGHT),
+                ) {
+                }
             }
         }
 

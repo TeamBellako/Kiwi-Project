@@ -220,7 +220,7 @@ fun GoalComponent_Preview() {
         ) {
             GoalComponent(
                 GoalDomain(
-                    "1",
+                    1,
                     1,
                     "Programa el modal lo mejor que sepas",
                     GoalType.PRODUCTIVITY,
@@ -233,7 +233,7 @@ fun GoalComponent_Preview() {
             )
             GoalComponent(
                 GoalDomain(
-                    "1",
+                    2,
                     10,
                     "Programa el modal lo mejor que sepas",
                     GoalType.EXERCISE,
@@ -246,7 +246,7 @@ fun GoalComponent_Preview() {
             )
             GoalComponent(
                 GoalDomain(
-                    "1",
+                    3,
                     20,
                     "Programa el modal lo mejor que sepas",
                     GoalType.MEDITATION,

@@ -253,7 +253,7 @@ fun GoalsModal_Preview(
                 goals =
                     listOf(
                         GoalDomain(
-                            "1",
+                            1,
                             2,
                             "Programa el modal lo mejor que sepas",
                             GoalType.PRODUCTIVITY,
@@ -263,7 +263,7 @@ fun GoalsModal_Preview(
                             value = 2,
                         ),
                         GoalDomain(
-                            "2",
+                            2,
                             10,
                             "Esto está fuera de tu alcance",
                             GoalType.PRODUCTIVITY,

@@ -15,7 +15,7 @@ class GoalsRepository(
             api.createGoals(goals)
         }
 
-    suspend fun updateGoalProgress(goalId: String): Result<GoalDTO> =
+    suspend fun updateGoalProgress(goalId: Long): Result<GoalDTO> =
         runCatching {
             api.updateGoalProgress(goalId)
         }
@@ -25,17 +25,23 @@ class GoalsRepository(
             api.updateGoal(goal.id, goal)
         }
 
-    suspend fun completeGoal(goalId: String): Result<GoalDTO> =
+    suspend fun completeGoal(goalId: Long): Result<GoalDTO> =
         runCatching {
             api.completeGoal(goalId)
         }
 
-    suspend fun uncompleteGoal(goalId: String): Result<GoalDTO> =
+    suspend fun uncompleteGoal(goalId: Long): Result<GoalDTO> =
         runCatching {
             api.uncompleteGoal(goalId)
         }
 
     // region GET
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun getGoalById(goalId: Long): Result<GoalDTO?> =
+        runCatching {
+            api.getGoalById(goalId)
+        }
+
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun getGoalsByDate(date: LocalDate): Result<List<GoalDTO>?> =
         runCatching {
@@ -56,5 +62,11 @@ class GoalsRepository(
         runCatching {
             api.getSuggestedGoals()
         }
+
+    suspend fun getSkillGoals(): Result<List<GoalDTO>> =
+        runCatching {
+            api.getSkillGoals()
+        }
+
     // endregion
 }

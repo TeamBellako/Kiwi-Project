@@ -200,7 +200,7 @@ private fun SettingsEditFields(
                 "SFX Volume",
                 modifier =
                     Modifier
-                        .padding(getResponsiveSizeWidth(Spacing.medium), 0.dp)
+                        .padding(getResponsiveSizeHeight(Spacing.medium), 0.dp)
                         .fillMaxWidth(),
                 color = kiwiColors.color6,
             ),
