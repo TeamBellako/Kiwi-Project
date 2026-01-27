@@ -240,7 +240,9 @@ CREATE TABLE IF NOT EXISTS conversations (
     type ENUM('FULL', 'SMALL') NOT NULL,
     sprite INT NOT NULL,
     expresion INT NOT NULL,
-    dialog TEXT NOT NULL,
+    dialog VARCHAR(1000) NOT NULL,
+    dialog_m VARCHAR(1000) NOT NULL,
+    dialog_w VARCHAR(1000) NOT NULL,
     background INT NOT NULL,
     fx INT,
     delay_start_ms INT,
@@ -258,6 +260,8 @@ CREATE TABLE IF NOT EXISTS conversation_options (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conversation_id BIGINT NOT NULL,
     text VARCHAR(500) NOT NULL,
+    text_m VARCHAR(500) NOT NULL,
+    text_w VARCHAR(500) NOT NULL,
     next_event_id BIGINT NOT NULL,
     cost INT 
 );
