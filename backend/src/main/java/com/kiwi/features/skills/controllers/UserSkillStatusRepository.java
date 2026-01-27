@@ -12,7 +12,7 @@ public interface UserSkillStatusRepository
 
     List<UserSkillStatusPersistence> findByIdUserId(Long userId);
 
-    List<UserSkillStatusPersistence> findByIdUserIdAndDeckSlotNot(
+    Optional<UserSkillStatusPersistence> findByIdUserIdAndDeckSlot(
             Long userId,
             int deckSlot
     );

@@ -41,7 +41,7 @@ public class GoalService {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
         GoalPersistence existingGoal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId.toString()));
+                .orElseThrow(() -> new GoalNotFoundException(goalId));
 
         // Verificar que el goal pertenece al usuario autenticado
         if (!existingGoal.getUser().getId().equals(user.getId())) {
@@ -69,7 +69,7 @@ public class GoalService {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
         GoalPersistence existingGoal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId.toString()));
+                .orElseThrow(() -> new GoalNotFoundException(goalId));
 
         // Verificar que el goal pertenece al usuario autenticado
         if (!existingGoal.getUser().getId().equals(user.getId())) {
@@ -134,7 +134,7 @@ public class GoalService {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
         GoalPersistence goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId.toString()));
+                .orElseThrow(() -> new GoalNotFoundException(goalId));
 
         // Verificar que el goal pertenece al usuario autenticado
         if (!goal.getUser().getId().equals(user.getId())) {
@@ -167,7 +167,7 @@ public class GoalService {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
         GoalPersistence goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId.toString()));
+                .orElseThrow(() -> new GoalNotFoundException(goalId));
 
 
         // Verificar que el goal pertenece al usuario autenticado
@@ -188,39 +188,50 @@ public class GoalService {
     }
 
     // region GETTERS
-    @Transactional(readOnly = true)
+    public GoalDTO getGoalById(Long goalId, Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        GoalPersistence goal = goalRepository.findByIdAndUser(goalId, user)
+                .orElseThrow(() -> new GoalNotFoundException(goalId));
+
+        return GoalDataMapper.toDTO(goal);
+    }
+
     public List<GoalDTO> getGoalsByDate(String dateString, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
         LocalDate date = LocalDate.parse(dateString, DATE_FORMATTER);
 
-        List<GoalPersistence> goals = goalRepository.findByUserAndDate(user, date);
-
-        return goals.stream()
+        return goalRepository
+                .findByUserAndDateAndCategoryNot(user, date, GoalCategory.APP_USAGE)
+                .stream()
                 .map(GoalDataMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<GoalDTO> getAllGoals(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        List<GoalPersistence> allGoals = goalRepository.findByUserOrderByDateDesc(user);
-
-        return allGoals.stream()
+        return goalRepository.findByUserAndCategoryNotOrderByDateDesc(user, GoalCategory.APP_USAGE)
+                .stream()
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     public List<GoalDTO> getGoalsInProgress(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
         LocalDate today = LocalDate.now();
 
-        List<GoalPersistence> allGoals = goalRepository.findByUserOrderByDateDesc(user);
-        
-        // Filtrar solo los goals con estado IN_PROGRESS y fecha anterior a hoy (excluye hoy)
-        return allGoals.stream()
-                .filter(goal -> goal.getStatus() == GoalStatus.IN_PROGRESS && goal.getDate().isBefore(today))
+        return goalRepository.findByUserAndStatusAndDateBeforeAndCategoryNotOrderByDateDesc(user,GoalStatus.IN_PROGRESS, today, GoalCategory.APP_USAGE)
+                .stream()
+                .map(GoalDataMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<GoalDTO> getAppGoals(Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        return goalRepository.findByUserAndCategory(user, GoalCategory.APP_USAGE)
+                .stream()
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
     }

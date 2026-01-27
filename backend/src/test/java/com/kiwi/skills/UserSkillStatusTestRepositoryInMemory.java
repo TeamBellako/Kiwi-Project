@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.FluentQuery;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class UserSkillStatusTestRepositoryInMemory implements UserSkillStatusRepository {
 
@@ -26,16 +25,15 @@ public class UserSkillStatusTestRepositoryInMemory implements UserSkillStatusRep
     }
 
     @Override
-    public List<UserSkillStatusPersistence> findByIdUserIdAndDeckSlotNot(
+    public Optional<UserSkillStatusPersistence> findByIdUserIdAndDeckSlot(
             Long userId,
             int deckSlot
     ) {
         return store.values().stream()
                 .filter(us ->
                         us.getId().getUserId().equals(userId) &&
-                                us.getDeckSlot() != deckSlot
-                )
-                .toList();
+                                us.getDeckSlot() == deckSlot
+                ).findFirst();
     }
 
     @Override

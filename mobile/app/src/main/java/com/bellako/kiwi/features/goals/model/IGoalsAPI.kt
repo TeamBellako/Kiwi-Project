@@ -55,6 +55,6 @@ interface IGoalsAPI {
     @GET("api/user/goals/suggestions")
     suspend fun getSuggestedGoals(): List<SuggestedGoalDTO>
 
-    @GET("api/user/goals/skill")
-    suspend fun getSkillGoals(): List<GoalDTO>
+    @GET("api/user/goals/app_usage")
+    suspend fun getAppGoals(): List<GoalDTO>
 }

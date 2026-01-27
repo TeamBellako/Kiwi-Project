@@ -91,6 +91,25 @@ public class GoalServiceTests {
     // ============================================================================================
 
     @Test
+    public void getGoalById_valid_returnsGoal() {
+        LocalDate date = LocalDate.now();
+        GoalPersistence goal = inProgressGoalPersistence(1L, date, testUser);
+        goalRepository.save(goal);
+
+        GoalDTO result = goalService.getGoalById(1L, authentication);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("IN_PROGRESS", result.getStatus());
+    }
+
+    @Test(expected = GoalNotFoundException.class)
+    public void getGoalById_notFound_throwsException() {
+        goalService.getGoalById(999L, authentication);
+    }
+
+
+    @Test
     public void getGoalsByDate_valid_returnsGoalsForDate() {
         LocalDate date = LocalDate.now();
         LocalDate otherDate = LocalDate.now().minusDays(1);
@@ -146,6 +165,45 @@ public class GoalServiceTests {
         // Verify they are IN_PROGRESS and from before today
         assertTrue(result.stream().allMatch(g -> g.getStatus().equals("IN_PROGRESS")));
     }
+
+    @Test
+    public void getAppGoals_valid_returnsOnlyAppUsageGoals() {
+        LocalDate date = LocalDate.now();
+
+        // App usage goals
+        goalRepository.save(appGoalPersistence(1L, date, testUser));
+        goalRepository.save(appGoalPersistence(2L, date.minusDays(1), testUser));
+
+        // Otros goals (NO deben salir)
+        goalRepository.save(inProgressGoalPersistence(3L, date, testUser));
+
+        List<GoalDTO> result = goalService.getAppGoals(authentication);
+
+        assertEquals(2, result.size());
+        assertTrue(result.stream()
+                .allMatch(g -> g.getCategory().equals("APP_USAGE")));
+    }
+
+    @Test
+    public void getAppGoals_doesNotReturnOtherUsersGoals() {
+        LocalDate date = LocalDate.now();
+
+        UsersPersistence otherUser = new UsersPersistence();
+        otherUser.setId(2L);
+        otherUser.setEmail("other@test.com");
+        usersRepository.save(otherUser);
+
+        goalRepository.save(appGoalPersistence(1L, date, testUser));
+
+        goalRepository.save(appGoalPersistence(2L, date, otherUser));
+
+        List<GoalDTO> result = goalService.getAppGoals(authentication);
+
+        assertEquals(1, result.size());
+        assertEquals(1L, result.get(0).getId());
+    }
+
+
 
     // ============================================================================================
     // COMPLETE GOAL

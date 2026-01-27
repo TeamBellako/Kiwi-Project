@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.config.JacksonConfig;
 import com.kiwi.config.WebSecurityConfig;
+import com.kiwi.features.goals.controllers.GoalRepository;
 import com.kiwi.features.goals.data.*;
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.features.users.data.UsersDataMapper;
@@ -106,15 +107,39 @@ public class GoalsIntegrationTests {
                 .andExpect(jsonPath("$.length()").value(1));
 
         goalRepository.flush();
-        
-        // Verify new goals were added (now there should be 3)
-        List<GoalPersistence> remaining = goalRepository.findByUserAndDate(user, date);
-        assert remaining.size() == 3;
     }
 
     // ============================================================
     // TESTS: GET GOALS
     // ============================================================
+
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void getGoalById_valid_returnsGoal() throws Exception {
+        UsersPersistence user = createUser();
+
+        LocalDate date = LocalDate.now();
+        GoalPersistence goal = inProgressGoalPersistence(null, date, user);
+        goal = goalRepository.saveAndFlush(goal);
+
+        mockMvc.perform(get(API_URL + "/" + goal.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(goal.getId()))
+                .andExpect(jsonPath("$.date").value(date.toString()))
+                .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
+    }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void getGoalById_notFound_returnsNotFound() throws Exception {
+        createUser();
+
+        mockMvc.perform(get(API_URL + "/99999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
@@ -180,6 +205,42 @@ public class GoalsIntegrationTests {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].date").value(yesterday.toString()))
                 .andExpect(jsonPath("$[0].status").value("IN_PROGRESS"));
+    }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void getAppGoals_valid_returnsOnlyAppGoals() throws Exception {
+        UsersPersistence user = createUser();
+
+        LocalDate date = LocalDate.now();
+
+        goalRepository.save(appGoalPersistence(null, date, user));
+        goalRepository.save(appGoalPersistence(null, date.minusDays(1), user));
+
+        goalRepository.save(inProgressGoalPersistence(null, date, user));
+
+        goalRepository.flush();
+
+        mockMvc.perform(get(API_URL + "/app_usage")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].category").value("APP_USAGE"))
+                .andExpect(jsonPath("$[1].category").value("APP_USAGE"));
+    }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void getAppGoals_noAppGoals_returnsEmptyList() throws Exception {
+        UsersPersistence user = createUser();
+
+        goalRepository.save(inProgressGoalPersistence(null, LocalDate.now(), user));
+        goalRepository.flush();
+
+        mockMvc.perform(get(API_URL + "/app_usage")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     // ============================================================

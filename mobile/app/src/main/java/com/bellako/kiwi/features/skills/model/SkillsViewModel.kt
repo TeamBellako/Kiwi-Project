@@ -336,7 +336,7 @@ class SkillsViewModel
 
         private suspend fun loadSkillGoals(): Map<Long, GoalDTO> =
             goalsRepository
-                .getSkillGoals()
+                .getAppGoals()
                 .getOrNull()
                 ?.associateBy { it.id }
                 ?: emptyMap()

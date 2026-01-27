@@ -63,9 +63,9 @@ class GoalsRepository(
             api.getSuggestedGoals()
         }
 
-    suspend fun getSkillGoals(): Result<List<GoalDTO>> =
+    suspend fun getAppGoals(): Result<List<GoalDTO>> =
         runCatching {
-            api.getSkillGoals()
+            api.getAppGoals()
         }
 
     // endregion

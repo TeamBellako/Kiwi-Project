@@ -2,6 +2,7 @@ package com.kiwi.skills;
 
 import com.kiwi.features.skills.controllers.SkillService;
 import com.kiwi.features.skills.controllers.SkillProgressService;
+import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
 import com.kiwi.features.skills.exceptions.SkillLevelUpNotFoundException;
 import com.kiwi.features.skills.exceptions.SkillNotFoundException;
 import com.kiwi.features.skills.exceptions.UserSkillStatusNotFoundException;
@@ -42,21 +43,6 @@ public class SkillServiceTests {
         var result = service.getAllSkillsForUser(userId);
 
         assertEquals(2, result.size());
-    }
-
-    @Test
-    public void getEquippedSkillsForUser() {
-
-        var skill1 = skillRepo.saveAndFlush(persistenceSkill(1L));
-        var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
-
-        statusRepo.saveAndFlush(equippedSkill(userId, skill1));
-        statusRepo.saveAndFlush(unEquippedSkill(userId, skill2));
-
-        var result = service.getEquippedSkillsForUser(userId);
-
-        assertEquals(1, result.size());
-        assertEquals(skill1.getId(), result.get(0).getSkillId());
     }
 
     // ============================================================================================
@@ -151,5 +137,74 @@ public class SkillServiceTests {
 
         assertFalse(result.isCooldown());
         assertNull(result.getCooldownUntil());
+    }
+
+    // ============================================================================================
+    // EQUIP
+    // ============================================================================================
+
+    @Test
+    public void equipSkill_success() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        statusRepo.saveAndFlush(
+                unEquippedSkill(userId, skill)
+        );
+
+        var result = service.equipSkill(userId, skill.getId(), 1);
+
+        assertEquals(1, result.getDeckSlot());
+    }
+
+    @Test(expected = UserSkillStatusNotFoundException.class)
+    public void equipSkill_noStatusFails() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        service.equipSkill(userId, skill.getId(), 1);
+    }
+
+    @Test(expected = DeckSlotAlreadyOccupiedException.class)
+    public void equipSkill_deckSlotAlreadyOccupiedFails() {
+
+        var skill1 = skillRepo.saveAndFlush(persistenceSkill(1L));
+        var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
+
+        statusRepo.saveAndFlush(
+                equippedSkill(userId, skill1)
+        );
+
+        statusRepo.saveAndFlush(
+                unEquippedSkill(userId, skill2)
+        );
+
+        service.equipSkill(userId, skill2.getId(), 1);
+    }
+
+    // ============================================================================================
+    // UNEQUIP
+    // ============================================================================================
+
+    @Test
+    public void unequipSkill_success() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        statusRepo.saveAndFlush(
+                equippedSkill(userId, skill)
+        );
+
+        var result = service.unequipSkill(userId, skill.getId());
+
+        assertEquals(0, result.getDeckSlot());
+    }
+
+    @Test(expected = UserSkillStatusNotFoundException.class)
+    public void unequipSkill_noStatusFails() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        service.unequipSkill(userId, skill.getId());
     }
 }

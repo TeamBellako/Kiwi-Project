@@ -1,7 +1,10 @@
 package com.kiwi.goals;
 
+import com.kiwi.features.goals.data.GoalCategory;
 import com.kiwi.features.goals.data.GoalPersistence;
-import com.kiwi.features.goals.data.GoalRepository;
+import com.kiwi.features.goals.controllers.GoalRepository;
+import com.kiwi.features.goals.data.GoalStatus;
+import com.kiwi.features.goals.data.GoalType;
 import com.kiwi.features.users.data.UsersPersistence;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -12,7 +15,6 @@ import org.springframework.data.repository.query.FluentQuery;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class GoalTestRepositoryInMemory implements GoalRepository {
 
@@ -38,20 +40,42 @@ public class GoalTestRepositoryInMemory implements GoalRepository {
         return Optional.ofNullable(store.get(id));
     }
 
+
     @Override
-    public List<GoalPersistence> findByUserAndDate(UsersPersistence user, LocalDate date) {
+    public List<GoalPersistence> findByUserAndCategoryNotOrderByDateDesc(UsersPersistence user, GoalCategory category) {
         return store.values().stream()
                 .filter(g -> g.getUser().getId().equals(user.getId()))
-                .filter(g -> g.getDate().equals(date))
-                .collect(Collectors.toList());
+                .filter(g -> g.getCategory() != category)
+                .sorted(Comparator.comparing(GoalPersistence::getDate).reversed())
+                .toList();
     }
 
     @Override
-    public List<GoalPersistence> findByUserOrderByDateDesc(UsersPersistence user) {
+    public List<GoalPersistence> findByUserAndDateAndCategoryNot(UsersPersistence user, LocalDate date, GoalCategory category) {
         return store.values().stream()
                 .filter(g -> g.getUser().getId().equals(user.getId()))
-                .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
-                .collect(Collectors.toList());
+                .filter(g -> g.getDate().equals(date))
+                .filter(g -> g.getCategory() != category)
+                .toList();
+    }
+
+    @Override
+    public List<GoalPersistence> findByUserAndStatusAndDateBeforeAndCategoryNotOrderByDateDesc(UsersPersistence user, GoalStatus status, LocalDate date, GoalCategory category) {
+        return store.values().stream()
+                .filter(g -> g.getUser().getId().equals(user.getId()))
+                .filter(g -> g.getStatus() == status)
+                .filter(g -> g.getDate().isBefore(date))
+                .filter(g -> g.getCategory() != category)
+                .sorted(Comparator.comparing(GoalPersistence::getDate).reversed())
+                .toList();
+    }
+
+    @Override
+    public List<GoalPersistence> findByUserAndCategory(UsersPersistence user, GoalCategory category) {
+        return store.values().stream()
+                .filter(g -> g.getUser().getId().equals(user.getId()))
+                .filter(g -> g.getCategory() == category)
+                .toList();
     }
 
     @Override

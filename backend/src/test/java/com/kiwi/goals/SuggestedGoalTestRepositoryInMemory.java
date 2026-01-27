@@ -1,7 +1,7 @@
 package com.kiwi.goals;
 
 import com.kiwi.features.goals.data.SuggestedGoalPersistence;
-import com.kiwi.features.goals.data.SuggestedGoalRepository;
+import com.kiwi.features.goals.controllers.SuggestedGoalRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

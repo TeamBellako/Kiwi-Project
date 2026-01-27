@@ -1,6 +1,7 @@
 package com.kiwi.features.skills.controllers;
 
 import com.kiwi.features.skills.data.*;
+import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
 import com.kiwi.features.skills.exceptions.SkillLevelUpNotFoundException;
 import com.kiwi.features.skills.exceptions.SkillNotFoundException;
 import com.kiwi.features.skills.exceptions.UserSkillStatusNotFoundException;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SkillService {
@@ -32,14 +34,6 @@ public class SkillService {
 
     public List<SkillDTO> getAllSkillsForUser(Long userId) {
         return userSkillStatusRepository.findByIdUserId(userId).stream()
-                .map(this::buildSkillDomain)
-                .map(SkillMapper::toDTO)
-                .toList();
-    }
-
-    public List<SkillDTO> getEquippedSkillsForUser(Long userId) {
-        return userSkillStatusRepository
-                .findByIdUserIdAndDeckSlotNot(userId, 0).stream()
                 .map(this::buildSkillDomain)
                 .map(SkillMapper::toDTO)
                 .toList();
@@ -130,11 +124,60 @@ public class SkillService {
     }
 
     // ============================================================================================
+    // EQUIP
+    // ============================================================================================
+
+    public SkillDTO equipSkill(Long userId, long skillId, int deckSlot) {
+
+        SkillPersistence skill = skillRepository.findById(skillId).orElseThrow();
+
+        UserSkillStatusPersistence status =
+                userSkillStatusRepository
+                        .findByIdUserIdAndIdSkillId(userId, skillId)
+                        .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
+
+        Optional<UserSkillStatusPersistence> skillInDeckSlot =
+                userSkillStatusRepository
+                        .findByIdUserIdAndDeckSlot(userId, deckSlot);
+
+        if(skillInDeckSlot.isPresent()){
+            throw new DeckSlotAlreadyOccupiedException(skillId, deckSlot);
+        }
+
+        SkillDomain updated =
+                progress.equipSkill(SkillMapper.toDomain(skill, status), deckSlot);
+
+        userSkillStatusRepository.saveAndFlush(
+                SkillMapper.toPersistence(userId, updated, skill)
+        );
+
+        return SkillMapper.toDTO(updated);
+    }
+
+    public SkillDTO unequipSkill(Long userId, long skillId) {
+
+        SkillPersistence skill = skillRepository.findById(skillId).orElseThrow();
+
+        UserSkillStatusPersistence status =
+                userSkillStatusRepository
+                        .findByIdUserIdAndIdSkillId(userId, skillId)
+                        .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
+
+        SkillDomain updated =
+                progress.unequipSkill(SkillMapper.toDomain(skill, status));
+
+        userSkillStatusRepository.saveAndFlush(
+                SkillMapper.toPersistence(userId, updated, skill)
+        );
+
+        return SkillMapper.toDTO(updated);
+    }
+
+    // ============================================================================================
     // HELPERS
     // ============================================================================================
 
     private SkillDomain buildSkillDomain(UserSkillStatusPersistence status) {
         return SkillMapper.toDomain(status.getSkill(), status);
     }
-
 }

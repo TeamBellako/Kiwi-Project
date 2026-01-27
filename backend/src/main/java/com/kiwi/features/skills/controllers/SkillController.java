@@ -1,6 +1,7 @@
 package com.kiwi.features.skills.controllers;
 
 import com.kiwi.common.types.Email;
+import com.kiwi.features.goals.data.GoalDTO;
 import com.kiwi.features.skills.data.SkillDTO;
 import com.kiwi.features.users.controllers.UsersService;
 import org.jetbrains.annotations.NotNull;
@@ -36,17 +37,6 @@ public class SkillController {
                 .getId();
 
         return ResponseEntity.ok(skillService.getAllSkillsForUser(userId));
-    }
-
-    @GetMapping("/equipped")
-    public ResponseEntity<List<SkillDTO>> getEquippedSkills(
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
-        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
-                .orElseThrow()
-                .getId();
-
-        return ResponseEntity.ok(skillService.getEquippedSkillsForUser(userId));
     }
 
     // ============================================================================================
@@ -104,4 +94,35 @@ public class SkillController {
 
         return ResponseEntity.ok(skillService.removeCooldown(userId, skillId));
     }
+
+    // ============================================================================================
+    // EQUIP
+    // ============================================================================================
+
+    @PostMapping("/{skillId}/equip")
+    public ResponseEntity<SkillDTO> equipSkill(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable long skillId,
+            @RequestBody int deckSlot
+    ) {
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+                .orElseThrow()
+                .getId();
+
+        return ResponseEntity.ok(skillService.equipSkill(userId, skillId, deckSlot));
+    }
+
+    @PostMapping("/{skillId}/unequip")
+    public ResponseEntity<SkillDTO> unequipSkill(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable long skillId
+    ) {
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+                .orElseThrow()
+                .getId();
+
+        return ResponseEntity.ok(skillService.unequipSkill(userId, skillId));
+    }
+
+
 }

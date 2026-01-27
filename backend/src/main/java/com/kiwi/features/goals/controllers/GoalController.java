@@ -59,6 +59,21 @@ public class GoalController {
         return ResponseEntity.ok(uncompletedGoal);
     }
 
+    @GetMapping("/{goalId}")
+    public ResponseEntity<GoalDTO> getGoalById(
+            @PathVariable Long goalId,
+            Authentication authentication) {
+        GoalDTO goals = goalService.getGoalById(goalId, authentication);
+        return ResponseEntity.ok(goals);
+    }
+
+    @GetMapping("/app_usage")
+    public ResponseEntity<List<GoalDTO>> getAppGoals(
+            Authentication authentication) {
+        List<GoalDTO> goals = goalService.getAppGoals(authentication);
+        return ResponseEntity.ok(goals);
+    }
+
     @GetMapping
     public ResponseEntity<List<GoalDTO>> getGoalsByDate(
             @RequestParam("date") String date,

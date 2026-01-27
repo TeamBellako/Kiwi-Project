@@ -21,13 +21,6 @@ public class SkillProgressService {
         return SkillMapper.toDomain(skill, status);
     }
 
-    public long resolveLevelUpSkillId(SkillDomain skill) {
-        if (skill.getLevelupSkillId() == null) {
-            throw new IllegalStateException("Skill cannot be leveled up");
-        }
-        return skill.getLevelupSkillId();
-    }
-
     // ============================================================================================
     // COOLDOWN
     // ============================================================================================
@@ -55,4 +48,30 @@ public class SkillProgressService {
         skill.setCooldownUntil(null);
         return skill;
     }
+
+    // ============================================================================================
+    // EQUIP
+    // ============================================================================================
+
+    public SkillDomain equipSkill(SkillDomain skill, int deckSlot) {
+        if (skill.getDeckSlot() != 0) {
+            throw new IllegalStateException("Skill already on equipped");
+        }
+
+        skill.setDeckSlot(deckSlot);
+
+        return skill;
+    }
+
+    public SkillDomain unequipSkill(SkillDomain skill) {
+
+        if (skill.getDeckSlot() == 0) {
+            throw new IllegalStateException("Skill already on unequipped");
+        }
+
+        skill.setDeckSlot(0);
+
+        return skill;
+    }
+
 }
