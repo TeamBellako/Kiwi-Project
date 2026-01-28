@@ -64,7 +64,7 @@ private const val SKILL_MODAL_BUTTON_SPACE = 0.5f
 @Composable
 fun SkillDetails(
     skill: SkillDomain,
-    onApplyGoalProgress: (skillId: Long, newProgress: Int) -> Unit,
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val kiwiColors = LocalKiwiColors.current
@@ -181,7 +181,7 @@ fun SkillDetails(
                             is SkillDomain.Goal -> {
                                 SkillCooldownGoal(
                                     skill.goalAction,
-                                    skill.goalProgress,
+                                    goalProgress,
                                     skill.goalTarget,
                                     onProgressChange = { goalProgress = it },
                                     kiwiColors,
@@ -205,7 +205,7 @@ fun SkillDetails(
                     val newValue =
                         (goalProgress * skill.goalTarget).toInt()
 
-                    onApplyGoalProgress(skill.id, newValue)
+                    onApplyGoalProgress(skill.id, skill.cooldownGoalId, newValue)
                 }
                 Kiwi_Spacer_Horizontal(Spacing.small)
                 CancelButton(
@@ -325,46 +325,39 @@ private fun SkillCooldownTime(
 @Composable
 private fun SkillCooldownGoal(
     action: String,
-    current: Int,
-    target: Int,
+    goalProgress: Float,
+    goalTarget: Int,
     onProgressChange: (Float) -> Unit,
     currentColors: KiwiColorsData,
 ) {
-    var sliderProgress: Float by
-        remember {
-            mutableFloatStateOf(
-                (current.toFloat() / target.toFloat()).coerceIn(0f, 1f),
-            )
-        }
-
-    val current = (sliderProgress * target).toInt()
+    val currentValue = (goalProgress * goalTarget).toInt()
 
     Column(
-        modifier =
-            Modifier
-                .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(0.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Kiwi_Label3(
             KiwiTextArguments(
-                action,
-                TextAlign.Center,
+                text = action,
+                textAlign = TextAlign.Center,
                 color = currentColors.color6,
             ),
         )
 
         Kiwi_Slider(
-            value = sliderProgress,
-            onValueChange = { onProgressChange(it.coerceIn(0f, 1f)) },
+            value = goalProgress,
+            onValueChange = { newProgress ->
+                onProgressChange(newProgress.coerceIn(0f, 1f))
+            },
             steps = 100,
-            testTag = "",
             valueRange = 0f..1f,
+            testTag = "",
         )
 
         Kiwi_P3(
             KiwiTextArguments(
-                "$current/$target",
+                text = "$currentValue/$goalTarget",
                 color = currentColors.color7A,
             ),
         )
@@ -433,7 +426,7 @@ private fun CancelButton(
 fun SkillDetailsModal(
     skill: SkillDomain,
     onDismiss: () -> Unit = {},
-    onApplyGoalProgress: (skillId: Long, newProgress: Int) -> Unit,
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -489,7 +482,7 @@ fun SkillModal_Preview() {
                         .padding(paddingValues)
                         .fillMaxSize(),
             ) {
-                SkillDetailsModal(SkillsTestFactory.skill1(), {}, { _, _ -> })
+                SkillDetailsModal(SkillsTestFactory.skill1(), {}, { _, _, _ -> })
             }
         }
     }

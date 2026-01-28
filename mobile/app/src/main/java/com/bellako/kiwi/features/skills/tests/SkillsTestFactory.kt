@@ -70,7 +70,8 @@ object SkillsTestFactory {
         SkillDomain.Time(
             id = 4,
             name = "Frost",
-            description = "Frost skill with timed cooldown, skill with timed cooldown , skill " +
+            description =
+                "Frost skill with timed cooldown, skill with timed cooldown , skill " +
                     "with timed cooldown ,skill with timed cooldown skill.",
             quote = "Cuando el grajo vuela bajo hace un frio del carajo.",
             icon = 3,

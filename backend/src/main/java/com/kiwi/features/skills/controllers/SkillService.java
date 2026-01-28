@@ -127,7 +127,7 @@ public class SkillService {
     // EQUIP
     // ============================================================================================
 
-    public SkillDTO equipSkill(Long userId, long skillId, int deckSlot) {
+    public SkillDTO equipSkill(Long userId, long skillId, EquipSkillDTO equipSkillDTO) {
 
         SkillPersistence skill = skillRepository.findById(skillId).orElseThrow();
 
@@ -138,14 +138,14 @@ public class SkillService {
 
         Optional<UserSkillStatusPersistence> skillInDeckSlot =
                 userSkillStatusRepository
-                        .findByIdUserIdAndDeckSlot(userId, deckSlot);
+                        .findByIdUserIdAndDeckSlot(userId, equipSkillDTO.getDeckSlot());
 
         if(skillInDeckSlot.isPresent()){
-            throw new DeckSlotAlreadyOccupiedException(skillId, deckSlot);
+            throw new DeckSlotAlreadyOccupiedException(skillId, equipSkillDTO.getDeckSlot());
         }
 
         SkillDomain updated =
-                progress.equipSkill(SkillMapper.toDomain(skill, status), deckSlot);
+                progress.equipSkill(SkillMapper.toDomain(skill, status), equipSkillDTO.getDeckSlot());
 
         userSkillStatusRepository.saveAndFlush(
                 SkillMapper.toPersistence(userId, updated, skill)

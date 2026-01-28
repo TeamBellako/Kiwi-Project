@@ -13,7 +13,7 @@ data class SkillDTO(
     val cooldownTimeMinutes: Int?,
     val cooldownOtherDescription: String?,
     val levelupSkillId: Long?,
-    val isCooldown: Boolean,
+    val cooldown: Boolean,
     val cooldownUntil: Instant?,
     val deckSlot: Int,
 )

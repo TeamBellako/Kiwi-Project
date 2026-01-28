@@ -63,14 +63,21 @@ public class GoalController {
     public ResponseEntity<GoalDTO> getGoalById(
             @PathVariable Long goalId,
             Authentication authentication) {
-        GoalDTO goals = goalService.getGoalById(goalId, authentication);
-        return ResponseEntity.ok(goals);
+        GoalDTO goal = goalService.getGoalById(goalId, authentication);
+        return ResponseEntity.ok(goal);
     }
 
     @GetMapping("/app_usage")
     public ResponseEntity<List<GoalDTO>> getAppGoals(
             Authentication authentication) {
         List<GoalDTO> goals = goalService.getAppGoals(authentication);
+        return ResponseEntity.ok(goals);
+    }
+
+    @GetMapping("/skill")
+    public ResponseEntity<List<GoalDTO>> getSkillGoals(
+            Authentication authentication) {
+        List<GoalDTO> goals = goalService.getSkillGoals(authentication);
         return ResponseEntity.ok(goals);
     }
 

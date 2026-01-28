@@ -14,18 +14,18 @@ import java.util.Optional;
 @Repository
 public interface GoalRepository extends JpaRepository<GoalPersistence, Long> {
 
-    List<GoalPersistence> findByUserAndCategoryNotOrderByDateDesc(
+    List<GoalPersistence> findByUserAndCategoryOrderByDateDesc(
             UsersPersistence user,
             GoalCategory category
     );
 
-    List<GoalPersistence> findByUserAndDateAndCategoryNot(
+    List<GoalPersistence> findByUserAndDateAndCategory(
             UsersPersistence user,
             LocalDate date,
             GoalCategory category
     );
 
-    List<GoalPersistence> findByUserAndStatusAndDateBeforeAndCategoryNotOrderByDateDesc(
+    List<GoalPersistence> findByUserAndStatusAndDateBeforeAndCategoryOrderByDateDesc(
             UsersPersistence user,
             GoalStatus status,
             LocalDate date,

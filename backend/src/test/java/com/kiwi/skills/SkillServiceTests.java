@@ -152,7 +152,7 @@ public class SkillServiceTests {
                 unEquippedSkill(userId, skill)
         );
 
-        var result = service.equipSkill(userId, skill.getId(), 1);
+        var result = service.equipSkill(userId, skill.getId(), SkillTestFactory.equipSkillDTO(1));
 
         assertEquals(1, result.getDeckSlot());
     }
@@ -162,7 +162,7 @@ public class SkillServiceTests {
 
         var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
 
-        service.equipSkill(userId, skill.getId(), 1);
+        service.equipSkill(userId, skill.getId(), SkillTestFactory.equipSkillDTO(1));
     }
 
     @Test(expected = DeckSlotAlreadyOccupiedException.class)
@@ -179,7 +179,7 @@ public class SkillServiceTests {
                 unEquippedSkill(userId, skill2)
         );
 
-        service.equipSkill(userId, skill2.getId(), 1);
+        service.equipSkill(userId, skill2.getId(), SkillTestFactory.equipSkillDTO(1));
     }
 
     // ============================================================================================

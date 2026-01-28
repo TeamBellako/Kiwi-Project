@@ -38,8 +38,8 @@ interface IGoalsAPI {
 
     @GET("api/user/goals/{goalId}")
     suspend fun getGoalById(
-        @Query("date") date: Long,
-    ): GoalDTO?
+        @Path("goalId") goalId: Long,
+    ): GoalDTO
 
     @GET("api/user/goals")
     suspend fun getGoalsByDate(
@@ -57,4 +57,7 @@ interface IGoalsAPI {
 
     @GET("api/user/goals/app_usage")
     suspend fun getAppGoals(): List<GoalDTO>
+
+    @GET("api/user/goals/skill")
+    suspend fun getSkillGoals(): List<GoalDTO>
 }

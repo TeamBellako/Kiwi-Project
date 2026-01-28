@@ -1,6 +1,8 @@
 package com.bellako.kiwi.features.skills.model
 
+import com.bellako.kiwi.features.skills.data.EquipSkillDTO
 import com.bellako.kiwi.features.skills.data.SkillDTO
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -32,11 +34,11 @@ interface ISkillsAPI {
     @POST("api/skills/{skillId}/equip")
     suspend fun equipSkill(
         @Path("skillId") skillId: Long,
+        @Body equipSkillDTO: EquipSkillDTO,
     ): SkillDTO
 
     @POST("api/skills/{skillId}/unequip")
     suspend fun unequipSkill(
         @Path("skillId") skillId: Long,
     ): SkillDTO
-
 }

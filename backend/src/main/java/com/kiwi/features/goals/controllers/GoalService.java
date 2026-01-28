@@ -202,7 +202,7 @@ public class GoalService {
         LocalDate date = LocalDate.parse(dateString, DATE_FORMATTER);
 
         return goalRepository
-                .findByUserAndDateAndCategoryNot(user, date, GoalCategory.APP_USAGE)
+                .findByUserAndDateAndCategory(user, date, GoalCategory.DAILY_CHALLENGES)
                 .stream()
                 .map(GoalDataMapper::toDTO)
                 .toList();
@@ -211,7 +211,7 @@ public class GoalService {
     public List<GoalDTO> getAllGoals(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        return goalRepository.findByUserAndCategoryNotOrderByDateDesc(user, GoalCategory.APP_USAGE)
+        return goalRepository.findByUserAndCategoryOrderByDateDesc(user, GoalCategory.DAILY_CHALLENGES)
                 .stream()
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
@@ -221,7 +221,7 @@ public class GoalService {
         UsersPersistence user = getUserFromAuthentication(authentication);
         LocalDate today = LocalDate.now();
 
-        return goalRepository.findByUserAndStatusAndDateBeforeAndCategoryNotOrderByDateDesc(user,GoalStatus.IN_PROGRESS, today, GoalCategory.APP_USAGE)
+        return goalRepository.findByUserAndStatusAndDateBeforeAndCategoryOrderByDateDesc(user,GoalStatus.IN_PROGRESS, today, GoalCategory.DAILY_CHALLENGES)
                 .stream()
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
@@ -231,6 +231,15 @@ public class GoalService {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
         return goalRepository.findByUserAndCategory(user, GoalCategory.APP_USAGE)
+                .stream()
+                .map(GoalDataMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<GoalDTO> getSkillGoals(Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        return goalRepository.findByUserAndCategory(user, GoalCategory.SKILL)
                 .stream()
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());

@@ -42,30 +42,30 @@ public class GoalTestRepositoryInMemory implements GoalRepository {
 
 
     @Override
-    public List<GoalPersistence> findByUserAndCategoryNotOrderByDateDesc(UsersPersistence user, GoalCategory category) {
+    public List<GoalPersistence> findByUserAndCategoryOrderByDateDesc(UsersPersistence user, GoalCategory category) {
         return store.values().stream()
                 .filter(g -> g.getUser().getId().equals(user.getId()))
-                .filter(g -> g.getCategory() != category)
+                .filter(g -> g.getCategory() == category)
                 .sorted(Comparator.comparing(GoalPersistence::getDate).reversed())
                 .toList();
     }
 
     @Override
-    public List<GoalPersistence> findByUserAndDateAndCategoryNot(UsersPersistence user, LocalDate date, GoalCategory category) {
+    public List<GoalPersistence> findByUserAndDateAndCategory(UsersPersistence user, LocalDate date, GoalCategory category) {
         return store.values().stream()
                 .filter(g -> g.getUser().getId().equals(user.getId()))
                 .filter(g -> g.getDate().equals(date))
-                .filter(g -> g.getCategory() != category)
+                .filter(g -> g.getCategory() == category)
                 .toList();
     }
 
     @Override
-    public List<GoalPersistence> findByUserAndStatusAndDateBeforeAndCategoryNotOrderByDateDesc(UsersPersistence user, GoalStatus status, LocalDate date, GoalCategory category) {
+    public List<GoalPersistence> findByUserAndStatusAndDateBeforeAndCategoryOrderByDateDesc(UsersPersistence user, GoalStatus status, LocalDate date, GoalCategory category) {
         return store.values().stream()
                 .filter(g -> g.getUser().getId().equals(user.getId()))
                 .filter(g -> g.getStatus() == status)
                 .filter(g -> g.getDate().isBefore(date))
-                .filter(g -> g.getCategory() != category)
+                .filter(g -> g.getCategory() == category)
                 .sorted(Comparator.comparing(GoalPersistence::getDate).reversed())
                 .toList();
     }

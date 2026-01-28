@@ -243,6 +243,28 @@ public class GoalsIntegrationTests {
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void getSkillGoals_valid_returnsOnlySkillGoals() throws Exception {
+        UsersPersistence user = createUser();
+
+        LocalDate date = LocalDate.now();
+
+        goalRepository.save(skillGoalPersistence(null, date, user));
+        goalRepository.save(skillGoalPersistence(null, date.minusDays(1), user));
+
+        goalRepository.save(inProgressGoalPersistence(null, date, user));
+
+        goalRepository.flush();
+
+        mockMvc.perform(get(API_URL + "/skill")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].category").value("SKILL"))
+                .andExpect(jsonPath("$[1].category").value("SKILL"));
+    }
+
     // ============================================================
     // TESTS: COMPLETE GOAL
     // ============================================================

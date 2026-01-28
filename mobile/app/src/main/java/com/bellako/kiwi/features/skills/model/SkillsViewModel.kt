@@ -7,8 +7,8 @@ import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.goals.data.GoalDTO
-import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.model.GoalsRepository
+import com.bellako.kiwi.features.skills.data.EquipSkillDTO
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillsState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -69,8 +69,8 @@ class SkillsViewModel
                     )
                     startCooldownTimers(baseSkills)
 
-                    val goals = loadSkillGoals()
-                    val enrichedSkills = enrichSkillsWithGoals(baseSkills, goals)
+                    val skillGoals = loadSkillGoals()
+                    val enrichedSkills = enrichSkillsWithGoals(baseSkills, skillGoals)
 
                     _state.value = _state.value.copy(skills = enrichedSkills)
 
@@ -140,8 +140,9 @@ class SkillsViewModel
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val skill = skillsRepository.putOnCooldown(skillId)
-                    updateSkillState(skill)
+                    skillsRepository.putOnCooldown(skillId)
+                    updateSkillById(skillId) { it.withCooldown(true) }
+
                     setUiState(UIState.Success(Unit))
                 } catch (e: HttpException) {
                     warn("HTTP error putting skill on cooldown: ${e.message}")
@@ -160,9 +161,13 @@ class SkillsViewModel
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val skill = skillsRepository.removeCooldown(skillId)
-                    updateSkillState(skill)
-                    notifyCooldownFinished(skill)
+                    skillsRepository.removeCooldown(skillId)
+                    val updatedSkill = updateSkillById(skillId) { it.withCooldown(false) }
+
+                    if (updatedSkill != null) {
+                        notifyCooldownFinished(updatedSkill)
+                    }
+
                     setUiState(UIState.Success(Unit))
                 } catch (e: HttpException) {
                     warn("HTTP error removing cooldown: ${e.message}")
@@ -177,15 +182,18 @@ class SkillsViewModel
         }
 
         override fun equipSkill(skillId: Long) {
-            if (!hasEmptySlots()) {
+            val deckSlot = emptySlot()
+            if (deckSlot == null) {
                 return
             }
+            val equipSkillDTO = EquipSkillDTO(deckSlot)
             viewModelScope.launch {
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val skill = skillsRepository.equipSkill(skillId)
-                    updateSkillState(skill)
+                    skillsRepository.equipSkill(skillId, equipSkillDTO)
+                    updateSkillById(skillId) { it.withDeckSlot(deckSlot) }
+
                     setUiState(UIState.Success(Unit))
                 } catch (e: HttpException) {
                     warn("HTTP error removing cooldown: ${e.message}")
@@ -204,8 +212,9 @@ class SkillsViewModel
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val skill = skillsRepository.unequipSkill(skillId)
-                    updateSkillState(skill)
+                    skillsRepository.unequipSkill(skillId)
+                    updateSkillById(skillId) { it.withDeckSlot(0) }
+
                     setUiState(UIState.Success(Unit))
                 } catch (e: HttpException) {
                     warn("HTTP error removing cooldown: ${e.message}")
@@ -230,24 +239,27 @@ class SkillsViewModel
                 setUiState(UIState.Loading)
                 try {
                     val goal = goalsRepository.getGoalById(goalId).getOrNull() ?: return@launch
+                    var progress = newProgress
 
-                    val updatedGoal =
-                        goalsRepository.updateGoal(
+                    if (newProgress >= goal.target) {
+                        progress = 0
+                    }
+
+                    goalsRepository
+                        .updateGoal(
                             goal.copy(
-                                value = newProgress,
-                                status =
-                                    if (newProgress >= goal.target)
-                                        GoalStatus.COMPLETED.name
-                                    else
-                                        goal.status
-                            )
+                                value = progress,
+                            ),
                         ).getOrNull() ?: return@launch
 
-                    val skill = _state.value.skillById(skillId) as? SkillDomain.Goal ?: return@launch
+                    updateSkillById(skillId) { skill ->
+                        when (skill) {
+                            is SkillDomain.Goal -> skill.copy(goalProgress = progress)
+                            else -> skill
+                        }
+                    }
 
-                    updateSkillState (skill.copy(goalProgress = newProgress))
-
-                    if (updatedGoal.status == GoalStatus.COMPLETED.name) {
+                    if (progress == 0) {
                         removeCooldown(skillId)
                     }
                 } catch (e: HttpException) {
@@ -263,23 +275,43 @@ class SkillsViewModel
         }
 
         // HELPERS
-        private fun updateSkillState(skill: SkillDomain) {
+        private fun updateSkillById(
+            skillId: Long,
+            update: (SkillDomain) -> SkillDomain,
+        ): SkillDomain? {
+            val skill = _state.value.skillById(skillId) ?: return null
+            val updatedSkill = update(skill)
+
             _state.value =
                 _state.value.copy(
                     skills =
                         _state.value.skills.map {
-                            if (it.id == skill.id) skill else it
+                            if (it.id == skill.id) updatedSkill else it
                         },
                 )
+
+            return updatedSkill
         }
 
-        private fun hasEmptySlots(): Boolean {
-            val maxSlot =
-                _state.value.skills
-                    .filter { it.deckSlot == MAX_DECK_SLOTS }
+        fun SkillDomain.withCooldown(isCooldown: Boolean): SkillDomain =
+            when (this) {
+                is SkillDomain.Goal -> copy(isCooldown = isCooldown)
+                is SkillDomain.Time -> copy(isCooldown = isCooldown)
+                is SkillDomain.Other -> copy(isCooldown = isCooldown)
+            }
 
-            return maxSlot.isEmpty()
-        }
+        fun SkillDomain.withDeckSlot(deckSlot: Int): SkillDomain =
+            when (this) {
+                is SkillDomain.Goal -> copy(deckSlot = deckSlot)
+                is SkillDomain.Time -> copy(deckSlot = deckSlot)
+                is SkillDomain.Other -> copy(deckSlot = deckSlot)
+            }
+
+        private fun emptySlot(): Int? =
+            (1..MAX_DECK_SLOTS)
+                .firstOrNull { slot ->
+                    _state.value.skills.none { it.deckSlot == slot }
+                }
 
         @RequiresApi(Build.VERSION_CODES.O)
         private fun startCooldownTimers(skills: List<SkillDomain>) {
@@ -336,7 +368,7 @@ class SkillsViewModel
 
         private suspend fun loadSkillGoals(): Map<Long, GoalDTO> =
             goalsRepository
-                .getAppGoals()
+                .getSkillGoals()
                 .getOrNull()
                 ?.associateBy { it.id }
                 ?: emptyMap()

@@ -174,7 +174,7 @@ public class GoalServiceTests {
         goalRepository.save(appGoalPersistence(1L, date, testUser));
         goalRepository.save(appGoalPersistence(2L, date.minusDays(1), testUser));
 
-        // Otros goals (NO deben salir)
+        // other
         goalRepository.save(inProgressGoalPersistence(3L, date, testUser));
 
         List<GoalDTO> result = goalService.getAppGoals(authentication);
@@ -182,6 +182,24 @@ public class GoalServiceTests {
         assertEquals(2, result.size());
         assertTrue(result.stream()
                 .allMatch(g -> g.getCategory().equals("APP_USAGE")));
+    }
+
+    @Test
+    public void getSkillGoals_valid_returnsOnlySkillGoals() {
+        LocalDate date = LocalDate.now();
+
+        // Skill goals
+        goalRepository.save(skillGoalPersistence(1L, date, testUser));
+        goalRepository.save(skillGoalPersistence(2L, date.minusDays(1), testUser));
+
+        // other
+        goalRepository.save(inProgressGoalPersistence(3L, date, testUser));
+
+        List<GoalDTO> result = goalService.getSkillGoals(authentication);
+
+        assertEquals(2, result.size());
+        assertTrue(result.stream()
+                .allMatch(g -> g.getCategory().equals("SKILL")));
     }
 
     @Test
@@ -202,8 +220,6 @@ public class GoalServiceTests {
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getId());
     }
-
-
 
     // ============================================================================================
     // COMPLETE GOAL

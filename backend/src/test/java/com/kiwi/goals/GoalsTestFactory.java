@@ -113,7 +113,20 @@ public class GoalsTestFactory {
         );
     }
 
-    public static GoalPersistence inProgressGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
+    public static GoalDTO skillGoalDTO(Long id) {
+        return goalDTO(
+                id,
+                100L,
+                "Improve Java skills",
+                GoalType.PRODUCTIVITY,
+                GoalCategory.SKILL,
+                GoalStatus.IN_PROGRESS,
+                50
+        );
+    }
+
+
+        public static GoalPersistence inProgressGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
         return goalPersistence(
                 id,
                 30L,
@@ -166,6 +179,24 @@ public class GoalsTestFactory {
                 "Improve Java skills",
                 GoalType.PRODUCTIVITY,
                 GoalCategory.APP_USAGE,
+                GoalStatus.IN_PROGRESS,
+                50,
+                date,
+                user
+        );
+    }
+
+    public static GoalPersistence skillGoalPersistence(
+            Long id,
+            LocalDate date,
+            UsersPersistence user
+    ) {
+        return goalPersistence(
+                id,
+                100L,
+                "Improve Java skills",
+                GoalType.PRODUCTIVITY,
+                GoalCategory.SKILL,
                 GoalStatus.IN_PROGRESS,
                 50,
                 date,

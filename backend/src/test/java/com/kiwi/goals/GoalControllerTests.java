@@ -153,6 +153,18 @@ public class GoalControllerTests {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    public void getSkillGoals_valid_returnsOk() throws Exception {
+        List<GoalDTO> response = List.of(skillGoalDTO(1L));
+
+        when(goalService.getSkillGoals(any())).thenReturn(response);
+
+        mockMvc.perform(get(baseAPIUrl + "/skill")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
     public void completeGoal_valid_returnsOk() throws Exception {
         Long goalId = 1L;
         GoalDTO response = completedGoalDTO(goalId);

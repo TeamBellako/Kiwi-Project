@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -73,7 +72,15 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
         // DECK SKILLS
         item {
             skillsState?.let {
-                DeckGrid(it.deckSkills) { id -> skillsViewModel.unequipSkill(id) }
+                DeckGrid(
+                    it.deckSkills,
+                    onClick =
+                        { id -> skillsViewModel.unequipSkill(id) },
+                    onApplyGoalProgress =
+                        { skillId, goalId, newProgress ->
+                            skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
+                        },
+                )
             }
         }
 
@@ -97,7 +104,15 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
         // UNEQUIPPED SKILLS
         item {
             skillsState?.let {
-                AllSkillsGrid(it.skills) { id -> skillsViewModel.equipSkill(id) }
+                AllSkillsGrid(
+                    it.skills,
+                    onClick =
+                        { id -> skillsViewModel.equipSkill(id) },
+                    onApplyGoalProgress =
+                        { skillId, goalId, newProgress ->
+                            skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
+                        },
+                )
             }
         }
 
@@ -124,6 +139,7 @@ const val SKILL_WEIGHT = 0.5f
 fun DeckGrid(
     skills: List<SkillDomain>,
     onClick: (Long) -> Unit,
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
 ) {
     val slotMap = skills.associateBy { it.deckSlot }
 
@@ -140,6 +156,7 @@ fun DeckGrid(
                         isDisabled = false,
                         onClick = { onClick(skill.id) },
                         modifier = Modifier.weight(SKILL_WEIGHT),
+                        onApplyGoalProgress,
                     )
                 } else {
                     Kiwi_Image(
@@ -159,6 +176,7 @@ fun DeckGrid(
 fun AllSkillsGrid(
     skills: List<SkillDomain>,
     onClick: (Long) -> Unit,
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
 ) {
     skills.chunked(2).forEach { rowSkills ->
         Row(
@@ -171,6 +189,7 @@ fun AllSkillsGrid(
                     isDisabled = skill.deckSlot != 0,
                     onClick = { onClick(skill.id) },
                     modifier = Modifier.weight(SKILL_WEIGHT),
+                    onApplyGoalProgress,
                 )
             }
 

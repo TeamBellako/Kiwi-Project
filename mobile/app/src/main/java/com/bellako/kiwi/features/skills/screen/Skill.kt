@@ -61,7 +61,7 @@ fun SkillComponent(
     isDisabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onApplyGoalProgress: (skillId: Long, newProgress: Int) -> Unit = { _, _ -> },
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
 ) {
     val kiwiColors = LocalKiwiColors.current
     var showModal by remember { mutableStateOf(false) }
@@ -336,8 +336,20 @@ fun Skills_Preview() {
                             ),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small))) {
-                        SkillComponent(SkillsTestFactory.timeCooldownSkillEquipped(), true, onClick = {}, Modifier.weight(0.5f))
-                        SkillComponent(SkillsTestFactory.skill2(), false, onClick = {}, Modifier.weight(0.5f))
+                        SkillComponent(
+                            SkillsTestFactory.timeCooldownSkillEquipped(),
+                            true,
+                            onClick = {},
+                            Modifier.weight(0.5f),
+                            { _, _, _ -> },
+                        )
+                        SkillComponent(
+                            SkillsTestFactory.skill2(),
+                            false,
+                            onClick = {},
+                            Modifier.weight(0.5f),
+                            { _, _, _ -> },
+                        )
                     }
                 }
             }

@@ -11,7 +11,7 @@ object SkillDataMapper {
                     quote = dto.quote,
                     icon = dto.icon,
                     levelupSkillId = dto.levelupSkillId,
-                    isCooldown = dto.isCooldown,
+                    isCooldown = dto.cooldown,
                     deckSlot = dto.deckSlot,
                     cooldownOtherDescription =
                         requireNotNull(dto.cooldownOtherDescription) {
@@ -27,7 +27,7 @@ object SkillDataMapper {
                     quote = dto.quote,
                     icon = dto.icon,
                     levelupSkillId = dto.levelupSkillId,
-                    isCooldown = dto.isCooldown,
+                    isCooldown = dto.cooldown,
                     deckSlot = dto.deckSlot,
                     cooldownTimeMinutes =
                         requireNotNull(dto.cooldownTimeMinutes) {
@@ -44,7 +44,7 @@ object SkillDataMapper {
                     quote = dto.quote,
                     icon = dto.icon,
                     levelupSkillId = dto.levelupSkillId,
-                    isCooldown = dto.isCooldown,
+                    isCooldown = dto.cooldown,
                     deckSlot = dto.deckSlot,
                     cooldownGoalId =
                         requireNotNull(dto.cooldownGoalId) {
@@ -71,7 +71,7 @@ object SkillDataMapper {
                     cooldownTimeMinutes = null,
                     cooldownOtherDescription = domain.cooldownOtherDescription,
                     levelupSkillId = domain.levelupSkillId,
-                    isCooldown = domain.isCooldown,
+                    cooldown = domain.isCooldown,
                     cooldownUntil = null,
                     deckSlot = domain.deckSlot,
                 )
@@ -88,7 +88,7 @@ object SkillDataMapper {
                     cooldownTimeMinutes = domain.cooldownTimeMinutes,
                     cooldownOtherDescription = null,
                     levelupSkillId = domain.levelupSkillId,
-                    isCooldown = domain.isCooldown,
+                    cooldown = domain.isCooldown,
                     cooldownUntil = domain.cooldownUntil,
                     deckSlot = domain.deckSlot,
                 )
@@ -105,7 +105,7 @@ object SkillDataMapper {
                     cooldownTimeMinutes = null,
                     cooldownOtherDescription = null,
                     levelupSkillId = domain.levelupSkillId,
-                    isCooldown = domain.isCooldown,
+                    cooldown = domain.isCooldown,
                     cooldownUntil = null,
                     deckSlot = domain.deckSlot,
                 )

@@ -37,7 +37,7 @@ class GoalsRepository(
 
     // region GET
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun getGoalById(goalId: Long): Result<GoalDTO?> =
+    suspend fun getGoalById(goalId: Long): Result<GoalDTO> =
         runCatching {
             api.getGoalById(goalId)
         }
@@ -66,6 +66,11 @@ class GoalsRepository(
     suspend fun getAppGoals(): Result<List<GoalDTO>> =
         runCatching {
             api.getAppGoals()
+        }
+
+    suspend fun getSkillGoals(): Result<List<GoalDTO>> =
+        runCatching {
+            api.getSkillGoals()
         }
 
     // endregion

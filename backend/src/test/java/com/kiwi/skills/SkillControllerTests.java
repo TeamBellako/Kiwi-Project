@@ -158,7 +158,7 @@ public class SkillControllerTests {
                     setId(1L);
                 }}));
 
-        when(skillService.equipSkill(1L, 1L, 2))
+        when(skillService.equipSkill(1L, 1L, SkillTestFactory.equipSkillDTO(2)))
                 .thenReturn(SkillTestFactory.skillDto(1L, false, 0));
 
         mockMvc.perform(

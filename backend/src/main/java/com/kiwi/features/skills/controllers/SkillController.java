@@ -2,6 +2,7 @@ package com.kiwi.features.skills.controllers;
 
 import com.kiwi.common.types.Email;
 import com.kiwi.features.goals.data.GoalDTO;
+import com.kiwi.features.skills.data.EquipSkillDTO;
 import com.kiwi.features.skills.data.SkillDTO;
 import com.kiwi.features.users.controllers.UsersService;
 import org.jetbrains.annotations.NotNull;
@@ -103,13 +104,13 @@ public class SkillController {
     public ResponseEntity<SkillDTO> equipSkill(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable long skillId,
-            @RequestBody int deckSlot
+            @RequestBody EquipSkillDTO equipSkillDTO
     ) {
         Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
-        return ResponseEntity.ok(skillService.equipSkill(userId, skillId, deckSlot));
+        return ResponseEntity.ok(skillService.equipSkill(userId, skillId, equipSkillDTO));
     }
 
     @PostMapping("/{skillId}/unequip")

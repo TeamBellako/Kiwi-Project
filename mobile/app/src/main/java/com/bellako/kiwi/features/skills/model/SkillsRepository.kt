@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.skills.model
 
+import com.bellako.kiwi.features.skills.data.EquipSkillDTO
 import com.bellako.kiwi.features.skills.data.SkillDataMapper
 import com.bellako.kiwi.features.skills.data.SkillDomain
 
@@ -16,8 +17,10 @@ class SkillsRepository(
 
     suspend fun removeCooldown(skillId: Long): SkillDomain = SkillDataMapper.toDomain(api.removeCooldown(skillId))
 
-    suspend fun equipSkill(skillId: Long): SkillDomain = SkillDataMapper.toDomain(api.equipSkill(skillId))
+    suspend fun equipSkill(
+        skillId: Long,
+        equipSkillDTO: EquipSkillDTO,
+    ): SkillDomain = SkillDataMapper.toDomain(api.equipSkill(skillId, equipSkillDTO))
 
     suspend fun unequipSkill(skillId: Long): SkillDomain = SkillDataMapper.toDomain(api.unequipSkill(skillId))
-
 }
