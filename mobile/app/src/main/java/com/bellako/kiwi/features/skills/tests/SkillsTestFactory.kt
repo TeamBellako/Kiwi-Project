@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.skills.tests
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.bellako.kiwi.features.skills.data.GoalData
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillsState
 import java.time.Instant
@@ -19,7 +20,7 @@ object SkillsTestFactory {
                     otherCooldownSkillUnequipped(),
                     skill1(),
                     skill2(),
-                ),
+                ).associateBy { it.id },
         )
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -48,9 +49,7 @@ object SkillsTestFactory {
             isCooldown = true,
             deckSlot = 2,
             cooldownGoalId = 1001L,
-            goalAction = "Do 10 push ups",
-            goalProgress = 1,
-            goalTarget = 10,
+            goalData = GoalData("Do 10 push ups", 1, 10),
         )
 
     fun otherCooldownSkillUnequipped(): SkillDomain =

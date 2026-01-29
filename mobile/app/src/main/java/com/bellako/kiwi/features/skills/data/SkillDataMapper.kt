@@ -1,6 +1,11 @@
 package com.bellako.kiwi.features.skills.data
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import java.time.Instant
+
 object SkillDataMapper {
+    @RequiresApi(Build.VERSION_CODES.O)
     fun toDomain(dto: SkillDTO): SkillDomain =
         when (CooldownType.valueOf(dto.cooldownType)) {
             CooldownType.OTHER ->
@@ -33,7 +38,7 @@ object SkillDataMapper {
                         requireNotNull(dto.cooldownTimeMinutes) {
                             "cooldownTimeMinutes is required for TIME cooldown"
                         },
-                    cooldownUntil = dto.cooldownUntil,
+                    cooldownUntil = dto.cooldownUntil?.let { Instant.ofEpochMilli(it) },
                 )
 
             CooldownType.GOAL ->
@@ -50,64 +55,7 @@ object SkillDataMapper {
                         requireNotNull(dto.cooldownGoalId) {
                             "cooldownGoalId is required for GOAL cooldown"
                         },
-                    // Filled in viewmodel
-                    goalAction = "",
-                    goalProgress = 0,
-                    goalTarget = 0,
-                )
-        }
-
-    fun toDto(domain: SkillDomain): SkillDTO =
-        when (domain) {
-            is SkillDomain.Other ->
-                SkillDTO(
-                    skillId = domain.id,
-                    name = domain.name,
-                    description = domain.description,
-                    quote = domain.quote,
-                    icon = domain.icon,
-                    cooldownType = CooldownType.OTHER.name,
-                    cooldownGoalId = null,
-                    cooldownTimeMinutes = null,
-                    cooldownOtherDescription = domain.cooldownOtherDescription,
-                    levelupSkillId = domain.levelupSkillId,
-                    cooldown = domain.isCooldown,
-                    cooldownUntil = null,
-                    deckSlot = domain.deckSlot,
-                )
-
-            is SkillDomain.Time ->
-                SkillDTO(
-                    skillId = domain.id,
-                    name = domain.name,
-                    description = domain.description,
-                    quote = domain.quote,
-                    icon = domain.icon,
-                    cooldownType = CooldownType.TIME.name,
-                    cooldownGoalId = null,
-                    cooldownTimeMinutes = domain.cooldownTimeMinutes,
-                    cooldownOtherDescription = null,
-                    levelupSkillId = domain.levelupSkillId,
-                    cooldown = domain.isCooldown,
-                    cooldownUntil = domain.cooldownUntil,
-                    deckSlot = domain.deckSlot,
-                )
-
-            is SkillDomain.Goal ->
-                SkillDTO(
-                    skillId = domain.id,
-                    name = domain.name,
-                    description = domain.description,
-                    quote = domain.quote,
-                    icon = domain.icon,
-                    cooldownType = CooldownType.GOAL.name,
-                    cooldownGoalId = domain.cooldownGoalId,
-                    cooldownTimeMinutes = null,
-                    cooldownOtherDescription = null,
-                    levelupSkillId = domain.levelupSkillId,
-                    cooldown = domain.isCooldown,
-                    cooldownUntil = null,
-                    deckSlot = domain.deckSlot,
+                    goalData = null,
                 )
         }
 }

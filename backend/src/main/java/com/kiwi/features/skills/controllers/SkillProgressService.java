@@ -15,10 +15,11 @@ public class SkillProgressService {
     // ============================================================================================
 
     public SkillDomain giveSkill(SkillPersistence skill, UserSkillStatusPersistence status) {
+
         if (status != null) {
             throw new IllegalStateException("Skill already owned by user");
         }
-        return SkillMapper.toDomain(skill, status);
+        return SkillMapper.toDomain(skill, null);
     }
 
     // ============================================================================================
@@ -26,6 +27,7 @@ public class SkillProgressService {
     // ============================================================================================
 
     public SkillDomain putOnCooldown(SkillDomain skill) {
+
         if (skill.isCooldown()) {
             throw new IllegalStateException("Skill already on cooldown");
         }
@@ -43,7 +45,24 @@ public class SkillProgressService {
         return skill;
     }
 
+    public SkillDomain updateCooldown(SkillDomain skill) {
+
+        if (skill.getCooldownUntil() == null) {
+            return skill;
+        }
+
+        Instant now = Instant.now();
+
+        if(skill.getCooldownUntil().isBefore(now)) {
+            skill.setCooldown(false);
+            skill.setCooldownUntil(null);
+        }
+
+        return skill;
+    }
+
     public SkillDomain removeCooldown(SkillDomain skill) {
+
         skill.setCooldown(false);
         skill.setCooldownUntil(null);
         return skill;
@@ -54,6 +73,7 @@ public class SkillProgressService {
     // ============================================================================================
 
     public SkillDomain equipSkill(SkillDomain skill, int deckSlot) {
+
         if (skill.getDeckSlot() != 0) {
             throw new IllegalStateException("Skill already on equipped");
         }

@@ -32,9 +32,41 @@ public class SkillService {
     // GET SKILLS
     // ============================================================================================
 
+    @Transactional
     public List<SkillDTO> getAllSkillsForUser(Long userId) {
-        return userSkillStatusRepository.findByIdUserId(userId).stream()
+
+        List<UserSkillStatusPersistence> statuses =
+                userSkillStatusRepository.findByIdUserId(userId);
+
+        List<SkillDomain> domains = statuses.stream()
                 .map(this::buildSkillDomain)
+                .toList();
+
+        for (int i = 0; i < domains.size(); i++) {
+
+            SkillDomain skill = domains.get(i);
+
+            if (skill.getCooldownType() == CooldownType.TIME && skill.isCooldown()) {
+
+                SkillDomain updated = progress.updateCooldown(skill);
+
+                if (!updated.isCooldown()) {
+
+                    UserSkillStatusPersistence status = statuses.get(i);
+
+                    UserSkillStatusPersistence updatedStatus =
+                            SkillMapper.toPersistence(
+                                    userId,
+                                    updated,
+                                    status.getSkill()
+                            );
+
+                    userSkillStatusRepository.save(updatedStatus);
+                }
+            }
+        }
+
+        return domains.stream()
                 .map(SkillMapper::toDTO)
                 .toList();
     }
@@ -86,18 +118,16 @@ public class SkillService {
     @Transactional
     public SkillDTO putSkillOnCooldown(Long userId, Long skillId) {
 
-        SkillPersistence skill = skillRepository.findById(skillId).orElseThrow();
-
         UserSkillStatusPersistence status =
                 userSkillStatusRepository
                         .findByIdUserIdAndIdSkillId(userId, skillId)
                         .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
 
-        SkillDomain updated =
-                progress.putOnCooldown(SkillMapper.toDomain(skill, status));
+        SkillDomain current = buildSkillDomain(status);
+        SkillDomain updated = progress.putOnCooldown(current);
 
         userSkillStatusRepository.saveAndFlush(
-                SkillMapper.toPersistence(userId, updated, skill)
+                SkillMapper.toPersistence(userId, updated, status.getSkill())
         );
 
         return SkillMapper.toDTO(updated);
@@ -106,18 +136,16 @@ public class SkillService {
     @Transactional
     public SkillDTO removeCooldown(Long userId, Long skillId) {
 
-        SkillPersistence skill = skillRepository.findById(skillId).orElseThrow();
-
         UserSkillStatusPersistence status =
                 userSkillStatusRepository
                         .findByIdUserIdAndIdSkillId(userId, skillId)
                         .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
 
-        SkillDomain updated =
-                progress.removeCooldown(SkillMapper.toDomain(skill, status));
+        SkillDomain current = buildSkillDomain(status);
+        SkillDomain updated = progress.removeCooldown(current);
 
         userSkillStatusRepository.saveAndFlush(
-                SkillMapper.toPersistence(userId, updated, skill)
+                SkillMapper.toPersistence(userId, updated, status.getSkill())
         );
 
         return SkillMapper.toDTO(updated);
@@ -128,8 +156,6 @@ public class SkillService {
     // ============================================================================================
 
     public SkillDTO equipSkill(Long userId, long skillId, EquipSkillDTO equipSkillDTO) {
-
-        SkillPersistence skill = skillRepository.findById(skillId).orElseThrow();
 
         UserSkillStatusPersistence status =
                 userSkillStatusRepository
@@ -144,11 +170,11 @@ public class SkillService {
             throw new DeckSlotAlreadyOccupiedException(skillId, equipSkillDTO.getDeckSlot());
         }
 
-        SkillDomain updated =
-                progress.equipSkill(SkillMapper.toDomain(skill, status), equipSkillDTO.getDeckSlot());
+        SkillDomain current = buildSkillDomain(status);
+        SkillDomain updated = progress.equipSkill(current, equipSkillDTO.getDeckSlot());
 
         userSkillStatusRepository.saveAndFlush(
-                SkillMapper.toPersistence(userId, updated, skill)
+                SkillMapper.toPersistence(userId, updated, status.getSkill())
         );
 
         return SkillMapper.toDTO(updated);
@@ -156,18 +182,16 @@ public class SkillService {
 
     public SkillDTO unequipSkill(Long userId, long skillId) {
 
-        SkillPersistence skill = skillRepository.findById(skillId).orElseThrow();
-
         UserSkillStatusPersistence status =
                 userSkillStatusRepository
                         .findByIdUserIdAndIdSkillId(userId, skillId)
                         .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
 
-        SkillDomain updated =
-                progress.unequipSkill(SkillMapper.toDomain(skill, status));
+        SkillDomain current = buildSkillDomain(status);
+        SkillDomain updated = progress.unequipSkill(current);
 
         userSkillStatusRepository.saveAndFlush(
-                SkillMapper.toPersistence(userId, updated, skill)
+                SkillMapper.toPersistence(userId, updated, status.getSkill())
         );
 
         return SkillMapper.toDTO(updated);

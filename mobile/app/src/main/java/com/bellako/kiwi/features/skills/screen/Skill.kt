@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -177,7 +178,9 @@ fun SkillBackground(
                 cooldownPercentage = rememberTimeCooldownPercentage(skill)
             }
             is SkillDomain.Goal -> {
-                cooldownPercentage = skill.goalProgress.toFloat() / skill.goalTarget.toFloat()
+                val progress = skill.goalData?.progress ?: 0
+                val target = skill.goalData?.target ?: 1
+                cooldownPercentage = progress.toFloat() / target.toFloat()
             }
 
             is SkillDomain.Other -> {}

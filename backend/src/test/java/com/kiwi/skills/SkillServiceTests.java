@@ -2,11 +2,15 @@ package com.kiwi.skills;
 
 import com.kiwi.features.skills.controllers.SkillService;
 import com.kiwi.features.skills.controllers.SkillProgressService;
+import com.kiwi.features.skills.data.SkillDTO;
+import com.kiwi.features.skills.data.UserSkillStatusPersistence;
 import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
 import com.kiwi.features.skills.exceptions.SkillLevelUpNotFoundException;
 import com.kiwi.features.skills.exceptions.SkillNotFoundException;
 import com.kiwi.features.skills.exceptions.UserSkillStatusNotFoundException;
 import org.junit.Test;
+
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static com.kiwi.skills.SkillTestFactory.*;
@@ -43,6 +47,36 @@ public class SkillServiceTests {
         var result = service.getAllSkillsForUser(userId);
 
         assertEquals(2, result.size());
+    }
+
+    @Test
+    public void getAllSkillsForUser_expiredCooldown_isRemoved() {
+
+        // GIVEN
+        var skill = persistenceSkill(1L);
+        skillRepo.saveAndFlush(skill);
+
+        UserSkillStatusPersistence status = cooldownSkill(userId, skill);
+        // forced expired cooldown
+        status.setCooldownUntil(Instant.now().minusSeconds(60));
+
+        statusRepo.saveAndFlush(status);
+
+        var result = service.getAllSkillsForUser(userId);
+
+        assertEquals(1, result.size());
+
+        SkillDTO dto = result.get(0);
+        assertFalse(dto.isCooldown());
+        assertNull(dto.getCooldownUntil());
+
+        UserSkillStatusPersistence updated =
+                statusRepo
+                        .findByIdUserIdAndIdSkillId(userId, skill.getId())
+                        .orElseThrow();
+
+        assertFalse(updated.isCooldown());
+        assertNull(updated.getCooldownUntil());
     }
 
     // ============================================================================================

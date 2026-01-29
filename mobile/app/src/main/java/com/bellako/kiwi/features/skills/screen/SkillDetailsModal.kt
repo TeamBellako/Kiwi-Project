@@ -43,6 +43,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P3
 import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer_Horizontal
+import com.bellako.kiwi.common.utils.DateUtils
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
@@ -73,15 +74,18 @@ fun SkillDetails(
     var goalProgress by remember {
         mutableFloatStateOf(
             if (skill is SkillDomain.Goal) {
-                skill.goalProgress.toFloat() / skill.goalTarget.toFloat()
+                val progress = skill.goalData?.progress ?: 0
+                val target = skill.goalData?.target ?: 1
+                progress.toFloat() / target.toFloat()
             } else {
                 0f
             },
         )
     }
+
     val progressChanged =
         skill is SkillDomain.Goal &&
-            (goalProgress * skill.goalTarget).toInt() != skill.goalProgress
+                ((goalProgress * (skill.goalData?.target ?: 1)).toInt() != (skill.goalData?.progress ?: 0))
 
     Column(
         modifier =
@@ -122,7 +126,7 @@ fun SkillDetails(
                         contentAlignment = Alignment.Center,
                     ) {
                         skill.quote?.let {
-                            Kiwi_Label2(
+                            Kiwi_Label3(
                                 KiwiTextArguments(
                                     color = kiwiColors.color7A,
                                     text = "\"" + it + "\"",
@@ -180,9 +184,9 @@ fun SkillDetails(
 
                             is SkillDomain.Goal -> {
                                 SkillCooldownGoal(
-                                    skill.goalAction,
+                                    skill.goalData?.action ?: "",
                                     goalProgress,
-                                    skill.goalTarget,
+                                    skill.goalData?.target ?: 1,
                                     onProgressChange = { goalProgress = it },
                                     kiwiColors,
                                 )
@@ -197,23 +201,24 @@ fun SkillDetails(
         if (skill.isCooldown && skill is SkillDomain.Goal) {
             Kiwi_Spacer(Spacing.medium)
             Row {
-                ApplyProgressButton(
-                    progressChanged,
-                    kiwiColors,
-                    Modifier.weight(SKILL_MODAL_BUTTON_SPACE),
-                ) {
-                    val newValue =
-                        (goalProgress * skill.goalTarget).toInt()
-
-                    onApplyGoalProgress(skill.id, skill.cooldownGoalId, newValue)
-                }
-                Kiwi_Spacer_Horizontal(Spacing.small)
                 CancelButton(
                     progressChanged,
                     kiwiColors,
                     Modifier.weight(SKILL_MODAL_BUTTON_SPACE),
                     onDismiss,
                 )
+                Kiwi_Spacer_Horizontal(Spacing.small)
+                ApplyProgressButton(
+                    progressChanged,
+                    kiwiColors,
+                    Modifier.weight(SKILL_MODAL_BUTTON_SPACE),
+                ) {
+                    val target = skill.goalData?.target ?: 1
+                    val newValue =
+                        (goalProgress * target).toInt()
+
+                    onApplyGoalProgress(skill.id, skill.cooldownGoalId, newValue)
+                }
             }
         }
     }
@@ -285,8 +290,14 @@ private fun SkillCooldownTime(
     currentColors: KiwiColorsData,
 ) {
     val percentage = rememberTimeCooldownPercentage(skill)
-    val totalMinutes = skill.cooldownTimeMinutes
-    val currentMinutes = skill.cooldownTimeMinutes.times(percentage)
+    val totalTime =
+        DateUtils.parseTimeSeconds(
+            (skill.cooldownTimeMinutes * ONE_MINUTE_SECONDS).toInt(),
+        )
+    val currentTime =
+        DateUtils.parseTimeSeconds(
+            (skill.cooldownTimeMinutes.times(percentage) * ONE_MINUTE_SECONDS).toInt(),
+        )
 
     Column(
         modifier =
@@ -314,7 +325,7 @@ private fun SkillCooldownTime(
 
         Kiwi_P3(
             KiwiTextArguments(
-                "$currentMinutes/$totalMinutes",
+                "$currentTime/$totalTime",
                 color = currentColors.color7A,
             ),
         )
@@ -375,7 +386,7 @@ private fun SkillCooldownOther(
             italic = true,
             color = currentColors.color8,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
         ),
     )
 }
@@ -482,7 +493,7 @@ fun SkillModal_Preview() {
                         .padding(paddingValues)
                         .fillMaxSize(),
             ) {
-                SkillDetailsModal(SkillsTestFactory.skill1(), {}, { _, _, _ -> })
+                SkillDetailsModal(SkillsTestFactory.otherCooldownSkillUnequipped(), {}, { _, _, _ -> })
             }
         }
     }

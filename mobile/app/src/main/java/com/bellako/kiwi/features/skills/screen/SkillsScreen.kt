@@ -105,7 +105,7 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
         item {
             skillsState?.let {
                 AllSkillsGrid(
-                    it.skills,
+                    it.allSkills,
                     onClick =
                         { id -> skillsViewModel.equipSkill(id) },
                     onApplyGoalProgress =
@@ -127,6 +127,20 @@ fun SkillsScreen(skillsViewModel: ISkillsViewModel) {
                     ),
                 color = kiwiColors.color5A,
                 onClick = { skillsViewModel.putOnCooldown(1L) },
+            )
+        }
+
+        item {
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.large,
+                textArguments =
+                    KiwiTextArguments(
+                        "Remove cooldown skill",
+                        color = kiwiColors.color7,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { skillsViewModel.removeCooldown(1L) },
             )
         }
     }

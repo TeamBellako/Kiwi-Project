@@ -47,8 +47,12 @@ sealed class SkillDomain {
         override val isCooldown: Boolean,
         override val deckSlot: Int,
         val cooldownGoalId: Long,
-        val goalAction: String,
-        val goalProgress: Int,
-        val goalTarget: Int,
+        val goalData: GoalData?,
     ) : SkillDomain()
 }
+
+data class GoalData(
+    val action: String,
+    val progress: Int,
+    val target: Int,
+)

@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.skills.model
 import com.bellako.kiwi.common.model.IBaseViewModel
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillsState
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 
 sealed class SkillNotificationEvent {

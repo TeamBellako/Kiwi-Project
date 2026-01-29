@@ -1,7 +1,5 @@
 package com.bellako.kiwi.features.skills.data
 
-import java.time.Instant
-
 data class SkillDTO(
     val skillId: Long,
     val name: String,
@@ -14,7 +12,7 @@ data class SkillDTO(
     val cooldownOtherDescription: String?,
     val levelupSkillId: Long?,
     val cooldown: Boolean,
-    val cooldownUntil: Instant?,
+    val cooldownUntil: Long?,
     val deckSlot: Int,
 )
 

@@ -46,7 +46,9 @@ public class SkillMapper {
         dto.setLevelupSkillId(domain.getLevelupSkillId());
 
         dto.setCooldown(domain.isCooldown());
-        dto.setCooldownUntil(domain.getCooldownUntil());
+        dto.setCooldownUntil(domain.getCooldownUntil() != null
+                ? domain.getCooldownUntil().toEpochMilli()
+                : null);
         dto.setDeckSlot(domain.getDeckSlot());
 
         return dto;
