@@ -8,14 +8,15 @@ import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.goals.data.GoalDTO
 import com.bellako.kiwi.features.goals.model.GoalsRepository
+import com.bellako.kiwi.features.skills.data.CooldownType
 import com.bellako.kiwi.features.skills.data.EquipSkillDTO
 import com.bellako.kiwi.features.skills.data.GoalData
 import com.bellako.kiwi.features.skills.data.SkillDTO
 import com.bellako.kiwi.features.skills.data.SkillDataMapper
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillsState
+import com.bellako.kiwi.features.skills.screen.ONE_MINUTE_SECONDS
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,7 @@ import javax.inject.Inject
 
 const val MAX_DECK_SLOTS = 4
 
+@RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class SkillsViewModel
     @Inject
@@ -41,8 +43,6 @@ class SkillsViewModel
         ISkillsViewModel {
         private val _state = MutableStateFlow(SkillsState())
         override val state: StateFlow<SkillsState> = _state.asStateFlow()
-
-        private val cooldownJobs = mutableMapOf<Long, Job>()
 
         private val _notifications = MutableSharedFlow<SkillNotificationEvent>()
 
@@ -63,21 +63,17 @@ class SkillsViewModel
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val previousSkills = _state.value.allSkills
-                    val baseSkillDTOs = skillsRepository.getAllSkills()
+                    val skillDTOs = skillsRepository.getAllSkills()
 
-                    val goals = loadSkillGoals()
+                    val goalsData = loadSkillGoals()
                     val updatedSkills =
-                        baseSkillDTOs.map { dto ->
-                            val skill = SkillDataMapper.toDomain(dto)
-                            if (skill is SkillDomain.Goal) fillSkillGoal(skill, goals[skill.cooldownGoalId]) else skill
+                        skillDTOs.map { dto ->
+                            if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL) {
+                                SkillDataMapper.toGoalDomain(dto, goalsData[dto.cooldownGoalId]!!)
+                            } else {
+                                SkillDataMapper.toDomainWithoutGoal(dto)
+                            }
                         }
-
-                    detectFinishedCooldowns(
-                        previous = previousSkills,
-                        current = updatedSkills,
-                    )
-                    startCooldownTimers(updatedSkills)
 
                     _state.value =
                         _state.value.copy(
@@ -105,17 +101,21 @@ class SkillsViewModel
                 setUiState(UIState.Loading)
                 try {
                     val dto = skillsRepository.giveSkill(skillId)
-                    val skill = SkillDataMapper.toDomain(dto)
-                    val updatedSkill =
-                        if (skill is SkillDomain.Goal) {
-                            val goal = goalsRepository.getGoalById(skill.cooldownGoalId).getOrNull()
-                            fillSkillGoal(skill, goal)
+                    val skill =
+                        if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL) {
+                            val goalData =
+                                goalsRepository
+                                    .getGoalById(dto.cooldownGoalId!!)
+                                    .getOrThrow()
+                                    .toGoalData()
+
+                            SkillDataMapper.toGoalDomain(dto, goalData)
                         } else {
-                            skill
+                            SkillDataMapper.toDomainWithoutGoal(dto)
                         }
 
-                    updateSkill(updatedSkill)
-                    notifySkillGiven(updatedSkill)
+                    updateSkill(skill)
+                    notifySkillGiven(skill)
 
                     setUiState(UIState.Success(Unit))
                 } catch (e: HttpException) {
@@ -138,17 +138,21 @@ class SkillsViewModel
                 setUiState(UIState.Loading)
                 try {
                     val dto = skillsRepository.levelUpSkill(skillId)
-                    val skill = SkillDataMapper.toDomain(dto)
-                    val updatedSkill =
-                        if (skill is SkillDomain.Goal) {
-                            val goal = goalsRepository.getGoalById(skill.cooldownGoalId).getOrNull()
-                            fillSkillGoal(skill, goal)
+                    val skill =
+                        if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL) {
+                            val goalData =
+                                goalsRepository
+                                    .getGoalById(dto.cooldownGoalId!!)
+                                    .getOrThrow()
+                                    .toGoalData()
+
+                            SkillDataMapper.toGoalDomain(dto, goalData)
                         } else {
-                            skill
+                            SkillDataMapper.toDomainWithoutGoal(dto)
                         }
 
-                    updateSkill(updatedSkill)
-                    notifySkillGiven(updatedSkill)
+                    updateSkill(skill)
+                    notifySkillGiven(skill)
 
                     setUiState(UIState.Success(Unit))
                 } catch (e: HttpException) {
@@ -172,20 +176,27 @@ class SkillsViewModel
             setIsLoading(true)
             setUiState(UIState.Loading)
             try {
-                val skill = _state.value.skills[skillId] ?: return
-                val dto = cooldownAction(skillId)
-                val response = SkillDataMapper.toDomain(dto)
+                val skillState = _state.value.skills[skillId] ?: return
+                val skillDto = cooldownAction(skillId)
 
-                updateSkill(updateCooldown(skill, response.isCooldown, (response as? SkillDomain.Time)?.cooldownUntil))
+                updateSkill(
+                    updateCooldown(
+                        skillState,
+                        skillDto.cooldown,
+                        skillDto.cooldownUntil?.let { Instant.ofEpochMilli(it) },
+                    ),
+                )
 
-                if (!response.isCooldown) notifyCooldownFinished(skill)
+                if (!skillDto.cooldown) {
+                    notifyCooldownFinished(skillState)
+                }
 
                 setUiState(UIState.Success(Unit))
             } catch (e: HttpException) {
-                warn("HTTP error on cooldown: ${e.message}")
+                warn("HTTP error on handle cooldown: ${e.message}")
                 setUiState(mapExceptionToUIState(e))
             } catch (e: IOException) {
-                warn("IO error on cooldown: ${e.message}")
+                warn("IO error on handle cooldown: ${e.message}")
                 setUiState(UIState.GeneralError)
             } finally {
                 setIsLoading(false)
@@ -256,6 +267,7 @@ class SkillsViewModel
             }
         }
 
+        // GOAL
         @RequiresApi(Build.VERSION_CODES.O)
         override fun updateGoalProgress(
             skillId: Long,
@@ -277,21 +289,14 @@ class SkillsViewModel
                     val updatedProgress =
                         if (newProgress >= goal.target) 0 else newProgress
 
+                    // MAYBE WE SHOULD CREATE A FUNCTION TO UPDATE GOAL VALUE WITHOUT SENDING THE WHOLE GOAL
                     val response =
                         goalsRepository
                             .updateGoal(goal.copy(value = updatedProgress))
                             .getOrNull()
                             ?: return@launch
 
-                    val updatedSkill =
-                        skill.copy(
-                            goalData =
-                                skill.goalData?.copy(
-                                    progress = response.value,
-                                ),
-                        )
-
-                    updateSkill(updatedSkill)
+                    updateSkill(skill.copy(goalData = skill.goalData.copy(progress = response.value)))
 
                     if (response.value == 0) {
                         removeCooldown(skillId)
@@ -310,7 +315,10 @@ class SkillsViewModel
             }
         }
 
+        // ------------------------------------------------------------------------------------------
         // HELPERS
+        // ------------------------------------------------------------------------------------------
+
         private fun updateSkill(skill: SkillDomain) {
             _state.value =
                 _state.value.copy(
@@ -354,65 +362,80 @@ class SkillsViewModel
             return null
         }
 
+        private suspend fun loadSkillGoals(): Map<Long, GoalData> =
+            goalsRepository
+                .getSkillGoals()
+                .getOrNull()
+                ?.associate { it.id to it.toGoalData() }
+                ?: emptyMap()
+
+        fun GoalDTO.toGoalData(): GoalData =
+            GoalData(
+                action = action,
+                progress = value,
+                target = target,
+            )
+
+        init {
+            viewModelScope.launch {
+                while (true) {
+                    delay(1_000) // MAYBE WE CAN CHANGE IT TO ONLY UPDATE EVERY MINUTE
+                    tickCooldowns()
+                }
+            }
+        }
+
         @RequiresApi(Build.VERSION_CODES.O)
-        private fun startCooldownTimers(skills: List<SkillDomain>) {
-            skills
-                .filterIsInstance<SkillDomain.Time>()
-                .filter { it.isCooldown && it.cooldownUntil != null }
-                .forEach { skill ->
-                    if (cooldownJobs.containsKey(skill.id)) return@forEach
+        private suspend fun tickCooldowns() {
+            val now = Instant.now()
+            var changed = false
 
-                    val job =
-                        viewModelScope.launch {
-                            val remainingMillis =
-                                skill.cooldownUntil!!.toEpochMilli() - Instant.now().toEpochMilli()
-                            if (remainingMillis > 0) delay(remainingMillis)
-                            loadAllSkills()
+            val updated =
+                _state.value.skills.mapValues { (_, skill) ->
+                    if (skill is SkillDomain.Time && skill.isCooldown && skill.cooldownUntil != null) {
+                        val percentage =
+                            timeCooldownPercentage(
+                                skill.cooldownUntil,
+                                skill.cooldownTimeMinutes,
+                                now,
+                            )
+
+                        when {
+                            percentage >= 1f -> {
+                                changed = true
+                                notifyCooldownFinished(skill)
+                                skill.copy(isCooldown = false, cooldownUntil = null, cooldownProgress = 0f)
+                            }
+
+                            percentage != skill.cooldownProgress -> {
+                                changed = true
+                                skill.copy(cooldownProgress = percentage)
+                            }
+
+                            else -> skill
                         }
-
-                    cooldownJobs[skill.id] = job
+                    } else {
+                        skill
+                    }
                 }
-        }
 
-        private fun detectFinishedCooldowns(
-            previous: List<SkillDomain>,
-            current: List<SkillDomain>,
-        ) {
-            val previousById = previous.associateBy { it.id }
-            val currentById = current.associateBy { it.id }
-
-            previousById.forEach { (id, oldSkill) ->
-                val newSkill = currentById[id] ?: return@forEach
-                val wasTimedCooldown = oldSkill is SkillDomain.Time && oldSkill.isCooldown
-                val isNowNotCooldown = !newSkill.isCooldown
-                if (wasTimedCooldown && isNowNotCooldown) {
-                    clearCooldownJob(id)
-                    viewModelScope.launch { notifyCooldownFinished(newSkill) }
-                }
+            if (changed) {
+                _state.value = _state.value.copy(skills = updated)
             }
         }
 
-        private fun clearCooldownJob(skillId: Long) {
-            cooldownJobs.remove(skillId)?.cancel()
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun timeCooldownPercentage(
+            cooldownUntil: Instant,
+            cooldownTimeMinutes: Int,
+            now: Instant,
+        ): Float {
+            val totalSeconds = cooldownTimeMinutes * ONE_MINUTE_SECONDS
+            val remainingSeconds =
+                (cooldownUntil.epochSecond - now.epochSecond).coerceAtLeast(0)
+
+            val remainingRatio = remainingSeconds.toFloat() / totalSeconds
+
+            return (1f - remainingRatio).coerceIn(0f, 1f)
         }
-
-        private suspend fun loadSkillGoals(): Map<Long, GoalDTO> =
-            goalsRepository.getSkillGoals().getOrNull()?.associateBy { it.id } ?: emptyMap()
-
-        private fun fillSkillGoal(
-            skill: SkillDomain.Goal,
-            goal: GoalDTO?,
-        ): SkillDomain.Goal =
-            if (goal != null) {
-                skill.copy(
-                    goalData =
-                        GoalData(
-                            action = goal.action,
-                            progress = goal.value,
-                            target = goal.target,
-                        ),
-                )
-            } else {
-                skill
-            }
     }

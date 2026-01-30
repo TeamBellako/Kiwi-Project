@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,7 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,8 +50,6 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import kotlinx.coroutines.delay
-import java.time.Instant
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -175,11 +171,11 @@ fun SkillBackground(
 
         when (skill) {
             is SkillDomain.Time -> {
-                cooldownPercentage = rememberTimeCooldownPercentage(skill)
+                cooldownPercentage = skill.cooldownProgress
             }
             is SkillDomain.Goal -> {
-                val progress = skill.goalData?.progress ?: 0
-                val target = skill.goalData?.target ?: 1
+                val progress = skill.goalData.progress
+                val target = skill.goalData.target
                 cooldownPercentage = progress.toFloat() / target.toFloat()
             }
 
@@ -215,59 +211,6 @@ fun SkillBackground(
 }
 
 // HELPERS
-
-const val ONE_MINUTE_SECONDS = 60f
-const val ONE_SEC_MILLISECONDS = 1_000L
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun timeCooldownPercentage(
-    cooldownUntil: Instant,
-    cooldownTimeMinutes: Int,
-    now: Instant,
-): Float {
-    val totalSeconds = cooldownTimeMinutes * ONE_MINUTE_SECONDS
-    val remainingSeconds =
-        (cooldownUntil.epochSecond - now.epochSecond).coerceAtLeast(0)
-
-    val remainingRatio = remainingSeconds.toFloat() / totalSeconds
-
-    return (1f - remainingRatio).coerceIn(0f, 1f)
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun rememberTimeCooldownPercentage(skill: SkillDomain.Time): Float {
-    return produceState(
-        initialValue = 0f,
-        key1 = skill.id,
-        key2 = skill.cooldownUntil,
-    ) {
-        if (
-            !skill.isCooldown ||
-            skill.cooldownUntil == null
-        ) {
-            value = 0f
-            return@produceState
-        }
-
-        while (true) {
-            val now = Instant.now()
-
-            val percentage =
-                timeCooldownPercentage(
-                    cooldownUntil = skill.cooldownUntil,
-                    cooldownTimeMinutes = skill.cooldownTimeMinutes,
-                    now = now,
-                )
-
-            value = percentage
-
-            if (percentage <= 1f) break
-
-            delay(ONE_SEC_MILLISECONDS)
-        }
-    }.value
-}
 
 @DrawableRes
 fun skillDecoration(

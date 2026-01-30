@@ -36,6 +36,7 @@ object SkillsTestFactory {
             deckSlot = 1,
             cooldownTimeMinutes = 10,
             cooldownUntil = Instant.now().plus(10, ChronoUnit.MINUTES),
+            0f,
         )
 
     fun goalCooldownSkillEquipped(): SkillDomain =
@@ -79,6 +80,7 @@ object SkillsTestFactory {
             deckSlot = 4,
             cooldownTimeMinutes = 60,
             cooldownUntil = null,
+            0f,
         )
 
     fun skill2(): SkillDomain =

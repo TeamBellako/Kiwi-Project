@@ -6,7 +6,7 @@ import java.time.Instant
 
 object SkillDataMapper {
     @RequiresApi(Build.VERSION_CODES.O)
-    fun toDomain(dto: SkillDTO): SkillDomain =
+    fun toDomainWithoutGoal(dto: SkillDTO): SkillDomain =
         when (CooldownType.valueOf(dto.cooldownType)) {
             CooldownType.OTHER ->
                 SkillDomain.Other(
@@ -39,23 +39,34 @@ object SkillDataMapper {
                             "cooldownTimeMinutes is required for TIME cooldown"
                         },
                     cooldownUntil = dto.cooldownUntil?.let { Instant.ofEpochMilli(it) },
+                    cooldownProgress = 0f,
                 )
 
             CooldownType.GOAL ->
-                SkillDomain.Goal(
-                    id = dto.skillId,
-                    name = dto.name,
-                    description = dto.description,
-                    quote = dto.quote,
-                    icon = dto.icon,
-                    levelupSkillId = dto.levelupSkillId,
-                    isCooldown = dto.cooldown,
-                    deckSlot = dto.deckSlot,
-                    cooldownGoalId =
-                        requireNotNull(dto.cooldownGoalId) {
-                            "cooldownGoalId is required for GOAL cooldown"
-                        },
-                    goalData = null,
-                )
+                error("GOAL skills must be mapped with goal data")
         }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun toGoalDomain(
+        dto: SkillDTO,
+        goalData: GoalData,
+    ): SkillDomain.Goal {
+        require(CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL)
+
+        return SkillDomain.Goal(
+            id = dto.skillId,
+            name = dto.name,
+            description = dto.description,
+            quote = dto.quote,
+            icon = dto.icon,
+            levelupSkillId = dto.levelupSkillId,
+            isCooldown = dto.cooldown,
+            deckSlot = dto.deckSlot,
+            cooldownGoalId =
+                requireNotNull(dto.cooldownGoalId) {
+                    "cooldownGoalId is required for GOAL cooldown"
+                },
+            goalData = goalData,
+        )
+    }
 }

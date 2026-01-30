@@ -192,16 +192,12 @@ class SkillsFakeViewModel
                         is SkillDomain.Time -> skill
                         is SkillDomain.Goal -> {
                             val currentGoal = skill.goalData
-                            if (currentGoal != null) {
-                                val target = currentGoal.target
-                                val updatedGoal = currentGoal.copy(progress = newProgress)
-                                if (newProgress >= target) {
-                                    skill.copy(goalData = updatedGoal, isCooldown = false)
-                                } else {
-                                    skill.copy(goalData = updatedGoal)
-                                }
+                            val target = currentGoal.target
+                            val updatedGoal = currentGoal.copy(progress = newProgress)
+                            if (newProgress >= target) {
+                                skill.copy(goalData = updatedGoal, isCooldown = false)
                             } else {
-                                skill
+                                skill.copy(goalData = updatedGoal)
                             }
                         }
                     }
