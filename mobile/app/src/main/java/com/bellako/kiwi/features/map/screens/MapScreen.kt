@@ -64,9 +64,13 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -227,6 +231,7 @@ fun MapScreen(
     }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 private fun InteractiveMap(
     mapResourceId: Int,
@@ -345,10 +350,12 @@ private fun InteractiveMap(
                                 nodesViewModel.completeNode(id)
                                 AudioManager.playSFX(context, R.raw.snd_node_completed)
 
-                                EventBus.emitEvent(
-                                    EventType.SWITCH_MAP,
-                                    EventPayload.SwitchMapPayload(R.drawable.map_switch_test),
-                                )
+                                GlobalScope.launch(Dispatchers.Main) {
+                                    EventBus.emitEvent(
+                                        EventType.SWITCH_MAP,
+                                        EventPayload.SwitchMapPayload(R.drawable.map_switch_test),
+                                    )
+                                }
                             },
                         )
                     }
