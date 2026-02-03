@@ -87,6 +87,10 @@ class MapViewModel
             _state.value = _state.value.copy(offset = newOffset)
         }
 
+        private fun setMapResourceId(mapResourceId: Int) {
+            _state.value = _state.value.copy(mapResourceId = mapResourceId)
+        }
+
         // ---------------------------------------------------------------------------------------------
 
         override fun updateScale(
@@ -122,6 +126,10 @@ class MapViewModel
 
             setOffset(Offset(x, y))
             updateFling(delta)
+        }
+
+        override fun switchMap(mapResourceId: Int) {
+            setMapResourceId(mapResourceId)
         }
 
         /**

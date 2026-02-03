@@ -166,8 +166,7 @@ fun GoalCustomice(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly,
-                )
-                {
+                ) {
                     Kiwi_FixedSizeButton(
                         textArguments =
                             KiwiTextArguments(

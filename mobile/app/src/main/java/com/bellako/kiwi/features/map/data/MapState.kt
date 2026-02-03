@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.map.data
 
 import androidx.compose.ui.geometry.Offset
+import com.bellako.kiwi.R
 
 data class MapState(
     val scale: Float = 1f,
@@ -12,4 +13,5 @@ data class MapState(
     val selectedNodeId: Long? = null,
     val playerNode: Long = 0,
     val isFocusingNode: Boolean = false,
+    val mapResourceId: Int = R.drawable.mindveil_4k,
 )

@@ -55,7 +55,7 @@ fun Kiwi_HorizontalLine(
 //                Modifier
 //                    .size(getResponsiveSizeHeight(8.dp))
 //                    .rotate(45f)
-////                    .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
+// //                    .clip(RoundedCornerShape(getResponsiveSizeHeight(2.dp)))
 //                    .background(color),
 //        )
     }

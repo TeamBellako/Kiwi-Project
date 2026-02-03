@@ -63,7 +63,6 @@ import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlin.collections.forEach
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -73,7 +72,6 @@ fun MapScreen(
     maxZoom: Float = 8f,
     mapMarginFactor: Float = 0.08f,
     elasticityFactor: Float = 1.4f,
-    mapResourceId: Int = R.drawable.mindveil_4k,
     title: String = "MINDVEIL",
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
@@ -90,7 +88,8 @@ fun MapScreen(
         with(density) { getScreenHeight().dp.toPx() } * 0.84f // approximate usable space
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
 
-    val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
+    val mapState by mapViewModel.state.collectAsState()
+    val imageBitmap = ImageBitmap.imageResource(id = mapState.mapResourceId)
     val imageW = imageBitmap.width.toFloat()
     val imageH = imageBitmap.height.toFloat()
 
@@ -169,7 +168,7 @@ fun MapScreen(
             )
 
             InteractiveMap(
-                mapResourceId = mapResourceId,
+                mapResourceId = mapState.mapResourceId,
                 mapViewModel = mapViewModel,
                 nodesViewModel = nodesViewModel,
                 modifier = Modifier.fillMaxSize(),

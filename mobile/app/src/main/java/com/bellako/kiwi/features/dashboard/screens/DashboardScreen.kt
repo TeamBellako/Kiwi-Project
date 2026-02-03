@@ -407,7 +407,7 @@ fun DashboardModal_Preview(
                         navController = nav,
                         goalsViewModel = goalsFakeViewModel,
                         mapViewModel = mapViewModel,
-                        notificationManager = notificationManager
+                        notificationManager = notificationManager,
                     )
                     DashboardScreen(
                         usersViewModel =
