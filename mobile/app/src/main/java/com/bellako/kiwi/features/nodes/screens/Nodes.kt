@@ -39,6 +39,9 @@ import com.bellako.kiwi.features.nodes.data.NodesDomain
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Suppress("MagicNumber")
@@ -196,7 +199,7 @@ fun NodeAction(
     isPlayerNode: Boolean,
     node: NodesDomain,
     onUnlockNode: (Long) -> Unit,
-    onCompleteNode: (Long) -> Unit,
+    onCompleteNode: suspend (Long) -> Unit,
 ) {
     val offset = if (isPlayerNode) 64.dp else 48.dp
     Box(
@@ -206,7 +209,12 @@ fun NodeAction(
     ) {
         when (node.status) {
             NodeStatus.LOCKED -> UnlockButton("Unlock (" + node.price + ")") { onUnlockNode(node.id) }
-            NodeStatus.OPEN -> PlayButton("Play") { onCompleteNode(node.id) }
+            NodeStatus.COMPLETED ->
+                PlayButton("Play") {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onCompleteNode(node.id)
+                    }
+                }
             NodeStatus.COMPLETED -> PlayButton("Replay") { replayFirebaseEvent(node.id) }
             else -> {}
         }

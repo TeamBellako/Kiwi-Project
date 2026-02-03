@@ -37,6 +37,10 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.data.GoalModalType
@@ -147,6 +151,13 @@ fun MapScreen(
                 goalsModalRequest.value = Pair(GoalModalType.NEW, goals)
             },
         )
+    }
+
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.SWITCH_MAP) { eventPayload ->
+            val payload = eventPayload as EventPayload.SwitchMapPayload
+            mapViewModel.switchMap(payload.mapResourceId)
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -333,6 +344,11 @@ private fun InteractiveMap(
                             onCompleteNode = { id ->
                                 nodesViewModel.completeNode(id)
                                 AudioManager.playSFX(context, R.raw.snd_node_completed)
+
+                                EventBus.emitEvent(
+                                    EventType.SWITCH_MAP,
+                                    EventPayload.SwitchMapPayload(R.drawable.map_switch_test),
+                                )
                             },
                         )
                     }
