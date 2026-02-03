@@ -1,4 +1,4 @@
-package com.bellako.kiwi.features.goals.screens
+package com.bellako.kiwi.features.skills.screen
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -26,11 +26,8 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.features.goals.data.GoalCategory
-import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalStatus
-import com.bellako.kiwi.features.goals.data.GoalType
-import com.bellako.kiwi.features.goals.data.IGoal
+import com.bellako.kiwi.features.skills.data.SkillDomain
+import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -40,23 +37,18 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 const val ICON_GOAL_WEIGHT = 0.25f
 
 @Composable
-fun GoalsNotification(
-    type: GoalNotificationType,
-    goals: List<IGoal>,
+fun SkillNotification(
+    type: SkillNotificationType,
+    skill: SkillDomain,
     onClick: () -> Unit = {},
 ) {
     val header =
-        if (type == GoalNotificationType.NEW) {
-            "New Daily Goals!"
+        if (type == SkillNotificationType.NEW) {
+            "New Skill"
         } else {
-            "Yesterday's Challenge"
+            "Skill Ready"
         }
-    val body =
-        if (type == GoalNotificationType.NEW) {
-            "What can you accomplish today?"
-        } else {
-            "Let's check what you accomplished"
-        }
+    val body = skill.name
 
     val kiwiColor = LocalKiwiColors.current
 
@@ -68,7 +60,7 @@ fun GoalsNotification(
                     .clickable { onClick() },
         ) {
             Image(
-                painter = painterResource(id = R.drawable.goals_notification),
+                painter = painterResource(id = R.drawable.generic_notification),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -80,32 +72,17 @@ fun GoalsNotification(
                         .padding(vertical = getResponsiveSizeHeight(Spacing.large)),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier =
-                        Modifier.weight(ICON_GOAL_WEIGHT),
-                ) {
+
                     Kiwi_Image(
-                        painter = painterResource(id = goalIcon(goals[0].type)),
+                        painter = painterResource(id = skillIcon(skill.icon)),
                         alt = "Goal icon",
                         colorFilter = ColorFilter.tint(kiwiColor.colorF),
                         modifier =
                             Modifier
-                                .size(getResponsiveSizeWidth(30.dp))
-                                .offset(x = getResponsiveSizeWidth(-12.5.dp), y = getResponsiveSizeHeight(-2.5.dp)),
+                                .size(getResponsiveSizeWidth(30.dp)),
                         alignment = Alignment.Center,
                     )
-                    Kiwi_Image(
-                        painter = painterResource(id = goalIcon(goals[1].type)),
-                        alt = "Goal icon",
-                        colorFilter = ColorFilter.tint(kiwiColor.colorF),
-                        modifier =
-                            Modifier
-                                .size(getResponsiveSizeWidth(30.dp))
-                                .offset(x = getResponsiveSizeWidth(6.5.dp), y = getResponsiveSizeHeight(2.5.dp)),
-                        alignment = Alignment.Center,
-                    )
-                }
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier =
@@ -132,9 +109,9 @@ fun GoalsNotification(
     }
 }
 
-enum class GoalNotificationType {
+enum class SkillNotificationType {
     NEW,
-    YESTERDAY,
+    READY,
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -151,36 +128,18 @@ fun GoalsNotification_Card_Preview() {
                     .fillMaxSize()
                     .background(LocalKiwiColors.current.color0),
         ) {
-            Box(
+            Column(
                 modifier =
                     Modifier
                         .padding(horizontal = getResponsiveSizeHeight(Spacing.large)),
             ) {
-                GoalsNotification(
-                    type = GoalNotificationType.NEW,
-                    goals =
-                        listOf(
-                            GoalDomain(
-                                1,
-                                2,
-                                "Programa el modal lo mejor que sepas",
-                                GoalType.PRODUCTIVITY,
-                                GoalCategory.DAILY_CHALLENGES,
-                                GoalStatus.COMPLETED,
-                                1000,
-                                value = 2,
-                            ),
-                            GoalDomain(
-                                2,
-                                10,
-                                "Esto está fuera de tu alcance",
-                                GoalType.PRODUCTIVITY,
-                                GoalCategory.DAILY_CHALLENGES,
-                                GoalStatus.NOT_COMPLETED,
-                                1000,
-                                value = 5,
-                            ),
-                        ),
+                SkillNotification(
+                    type = SkillNotificationType.NEW,
+                    skill = SkillsTestFactory.skill1(),
+                )
+                SkillNotification(
+                    type = SkillNotificationType.READY,
+                    skill = SkillsTestFactory.skill2(),
                 )
             }
         }

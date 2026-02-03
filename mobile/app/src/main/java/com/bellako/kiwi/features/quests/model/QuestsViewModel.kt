@@ -4,12 +4,15 @@ import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
+import com.bellako.kiwi.features.notifications.controller.NotificationEvent
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.quests.data.QuestDTO
 import com.bellako.kiwi.features.quests.data.QuestDataMapper
 import com.bellako.kiwi.features.quests.data.QuestDomain
 import com.bellako.kiwi.features.quests.data.QuestStatus
 import com.bellako.kiwi.features.quests.data.QuestsState
 import com.bellako.kiwi.features.quests.data.SubquestStatus
+import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,32 +30,61 @@ class QuestsViewModel
     @Inject
     constructor(
         private val repository: QuestsRepository,
+        private val notificationManager: NotificationManager,
     ) : BaseViewModel(),
         IQuestsViewModel {
         private val _state = MutableStateFlow(QuestsState())
         override val state: StateFlow<QuestsState> = _state.asStateFlow()
 
-        private val _notifications = MutableSharedFlow<QuestNotificationEvent>()
-
-        override fun getNotifications(): SharedFlow<QuestNotificationEvent> = _notifications.asSharedFlow()
-
-        private suspend fun notify(event: QuestNotificationEvent) {
-            _notifications.emit(event)
+        private fun notify(
+            type: QuestNotificationType,
+            quest: QuestDomain,
+            subquestId: Int? = null,
+        ) {
+            notificationManager.notify(
+                NotificationEvent.Quest(
+                    type = type,
+                    quest = quest,
+                    subquestId = subquestId,
+                ),
+            )
         }
 
-        override suspend fun notifyNewQuest(quest: QuestDomain) = notify(QuestNotificationEvent.NewQuest(quest))
+        override fun notifyNewQuest(quest: QuestDomain) {
+            notify(
+                QuestNotificationType.NEW,
+                quest,
+            )
+        }
 
-        override suspend fun notifyQuestCompleted(quest: QuestDomain) = notify(QuestNotificationEvent.QuestCompleted(quest))
+        override fun notifyQuestCompleted(quest: QuestDomain) {
+            notify(
+                QuestNotificationType.QUEST_COMPLETED,
+                quest,
+            )
+        }
 
-        override suspend fun notifySubquestCompleted(
+        override fun notifySubquestCompleted(
             quest: QuestDomain,
             subquestId: Int,
-        ) = notify(QuestNotificationEvent.SubquestCompleted(quest, subquestId))
+        ) {
+            notify(
+                QuestNotificationType.SUBQUEST_COMPLETED,
+                quest,
+                subquestId,
+            )
+        }
 
-        override suspend fun notifySubquestFailed(
+        override fun notifySubquestFailed(
             quest: QuestDomain,
             subquestId: Int,
-        ) = notify(QuestNotificationEvent.SubquestFailed(quest, subquestId))
+        ) {
+            notify(
+                QuestNotificationType.SUBQUEST_FAILED,
+                quest,
+                subquestId,
+            )
+        }
 
         override fun loadActiveQuests() {
             viewModelScope.launch {

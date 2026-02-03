@@ -14,11 +14,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.screens.GoalNotificationType
 import com.bellako.kiwi.features.goals.screens.GoalsNotification
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
+import com.bellako.kiwi.features.quests.data.QuestDomain
+import com.bellako.kiwi.features.quests.screens.QuestNotification
+import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
@@ -32,11 +38,41 @@ private const val GAP_TIME_MS = 250L
 fun NotificationOverlay(
     notificationManager: NotificationManager,
     onGoalClick: (GoalNotificationType, List<IGoal>) -> Unit,
-    onQuestClick: () -> Unit,
+    onQuestClick: (QuestNotificationType, QuestDomain, Int?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var currentEvent by remember { mutableStateOf<NotificationEvent?>(null) }
     var visible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    LaunchedEffect(currentEvent) {
+        val event = currentEvent ?: return@LaunchedEffect
+
+        when (event) {
+            is NotificationEvent.Goal -> {
+                // TODO
+            }
+
+            is NotificationEvent.Quest -> {
+                when (event.type) {
+                    QuestNotificationType.NEW ->
+                        AudioManager.playSFX(context, R.raw.snd_ui_newquest)
+
+                    QuestNotificationType.QUEST_COMPLETED,
+                    QuestNotificationType.SUBQUEST_COMPLETED,
+                    ->
+                        AudioManager.playSFX(context, R.raw.snd_ui_questcompleted)
+
+                    QuestNotificationType.SUBQUEST_FAILED ->
+                        AudioManager.playSFX(context, R.raw.snd_ui_questfailed)
+                }
+            }
+
+            is NotificationEvent.Generic -> {
+                // TODO
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         notificationManager.notifications.collectLatest { event ->
@@ -81,11 +117,25 @@ fun NotificationOverlay(
                     ),
             ) {
                 currentEvent?.let { event ->
-                    NotificationContent(
-                        event,
-                        onGoalClick,
-                        onQuestClick,
-                    )
+                    when (event) {
+                        is NotificationEvent.Goal -> {
+                            GoalNotificationContent(
+                                event,
+                                onGoalClick,
+                            )
+                        }
+
+                        is NotificationEvent.Quest -> {
+                            QuestNotificationContent(
+                                event = event,
+                                onQuestClick = onQuestClick,
+                            )
+                        }
+
+                        is NotificationEvent.Generic -> {
+                            // TODO
+                        }
+                    }
                 }
             }
         }
@@ -93,28 +143,41 @@ fun NotificationOverlay(
 }
 
 @Composable
-fun NotificationContent(
-    event: NotificationEvent,
+fun GoalNotificationContent(
+    event: NotificationEvent.Goal,
     onGoalClick: (GoalNotificationType, List<IGoal>) -> Unit,
-    onQuestClick: () -> Unit,
 ) {
-    when (event) {
-        is NotificationEvent.Goal -> {
-            GoalsNotification(
-                type = event.type,
-                goals = event.goals,
-                onClick = {
-                    onGoalClick(event.type, event.goals)
-                },
-            )
-        }
+    GoalsNotification(
+        type = event.type,
+        goals = event.goals,
+        onClick = {
+            onGoalClick(event.type, event.goals)
+        },
+    )
+}
 
-        is NotificationEvent.Quest -> {
-            // TODO Quest notification UI
-        }
-
-        is NotificationEvent.Generic -> {
-            // TODO Generic notification UI
-        }
-    }
+@Composable
+fun QuestNotificationContent(
+    event: NotificationEvent.Quest,
+    onQuestClick: (QuestNotificationType, QuestDomain, Int?) -> Unit,
+) {
+    QuestNotification(
+        name =
+            when (event.type) {
+                QuestNotificationType.NEW -> event.quest.name
+                QuestNotificationType.QUEST_COMPLETED -> event.quest.name
+                QuestNotificationType.SUBQUEST_COMPLETED,
+                QuestNotificationType.SUBQUEST_FAILED,
+                -> {
+                    event.quest.subquests
+                        .firstOrNull { it.id == event.subquestId }
+                        ?.name ?: event.quest.name
+                }
+            },
+        questIcon = event.quest.icon,
+        type = event.type,
+        onClick = {
+            onQuestClick(event.type, event.quest, event.subquestId)
+        },
+    )
 }

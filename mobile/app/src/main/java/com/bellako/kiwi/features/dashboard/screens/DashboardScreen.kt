@@ -35,6 +35,7 @@ import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Display2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
+import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -61,8 +62,6 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
-import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
@@ -278,7 +277,7 @@ fun SelectedMetricsTime(
         }
 
     if (expanded) {
-        Kiwi_Display2(
+        Kiwi_H1(
             KiwiTextArguments(
                 text = currentString,
                 TextAlign.Center,
@@ -375,7 +374,6 @@ fun DashboardModal_Preview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
     nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState()),
-    questsViewModel: QuestsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState()),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
 ) {
     val nav = rememberNavController()
@@ -388,7 +386,6 @@ fun DashboardModal_Preview(
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen(
                         nodesViewModel = nodesViewModel,
-                        questsViewModel = questsViewModel,
                         navController = nav,
                         goalsViewModel = goalsViewModel,
                         mapViewModel = MapViewModel(),

@@ -125,8 +125,9 @@ fun ObjectivesScreen(
         }
 
         item {
-            Kiwi_Spacer(Spacing.medium)
+            Kiwi_Spacer(Spacing.large)
             Kiwi_HorizontalLine(kiwiColors.color1A)
+            Kiwi_Spacer(Spacing.medium)
         }
 
         // TITLE GOALS
@@ -144,7 +145,11 @@ fun ObjectivesScreen(
         // GOALS LIST
         todayGoals?.let { goals ->
             items(goals) { goal ->
-                GoalComponent(goal, goalsViewModel)
+                GoalComponent(
+                    goal,
+                    goalsViewModel,
+                    modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.xSmall)),
+                )
             }
         }
 
@@ -162,7 +167,11 @@ fun ObjectivesScreen(
         // YESTERDAY GOALS LIST
         yesterdayGoals?.let { goals ->
             items(goals) { goal ->
-                GoalComponent(goal, goalsViewModel)
+                GoalComponent(
+                    goal,
+                    goalsViewModel,
+                    modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.xSmall)),
+                )
             }
         }
     }

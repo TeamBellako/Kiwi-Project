@@ -47,6 +47,7 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -85,8 +86,8 @@ private fun Kiwi_Button(
                 ),
             contentPadding =
                 PaddingValues(
-                    getResponsiveSizeHeight(contentPaddingHorizontal),
-                    getResponsiveSizeHeight(contentPaddingVertical),
+                    getResponsiveSizeWidth(contentPaddingHorizontal),
+                    getResponsiveSizeWidth(contentPaddingVertical),
                 ),
             modifier =
                 Modifier
@@ -95,10 +96,10 @@ private fun Kiwi_Button(
                         horizontalMargin?.let {
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = getResponsiveSizeHeight(it))
+                                .padding(horizontal = getResponsiveSizeWidth(it))
                         } ?: Modifier,
                     ),
-            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
+            shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp)),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

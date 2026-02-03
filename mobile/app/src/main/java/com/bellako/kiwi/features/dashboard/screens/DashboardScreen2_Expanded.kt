@@ -42,6 +42,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.CoroutineScope
 
 val LocalGoalsViewModel = compositionLocalOf<IGoalsViewModel?> { null }
@@ -193,7 +194,10 @@ private fun ExpandedSummaryCard(
         }
     }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(horizontal = getResponsiveSizeWidth(Spacing.medium))
+    ) {
         Kiwi_P2(
             KiwiTextArguments(
                 "Challenges",

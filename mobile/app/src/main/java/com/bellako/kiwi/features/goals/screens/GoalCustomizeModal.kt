@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,7 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -36,7 +37,6 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
-import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
@@ -58,7 +58,7 @@ import kotlin.math.roundToInt
 
 @Composable
 @Suppress("LongMethod")
-fun GoalCustomice(
+fun GoalCustomize(
     goal: GoalDomain,
     goalsViewModel: IGoalsViewModel,
     onDismiss: () -> Unit = {},
@@ -71,7 +71,7 @@ fun GoalCustomice(
     val initialProgress = goal.value.toFloat() / goal.target.toFloat()
 
     // Estado local para el progreso del slider (inicializado con el valor del goal)
-    var sliderProgress: Float by remember { mutableStateOf(initialProgress.coerceIn(0f, 1f)) }
+    var sliderProgress: Float by remember { mutableFloatStateOf(initialProgress.coerceIn(0f, 1f)) }
 
     // Si el goal cambia (p. ej. se abre otro goal), sincronizamos el slider
     LaunchedEffect(goal.id) {
@@ -82,39 +82,42 @@ fun GoalCustomice(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = getResponsiveSizeWidth(Spacing.large)),
     ) {
         Box {
             Kiwi_Image(
-                painter = painterResource(id = R.drawable.goal_customice_modal),
+                painter = painterResource(id = R.drawable.goal_customize_modal),
                 alt = "Goal customize modal",
                 modifier = Modifier.fillMaxWidth(),
             )
+            Kiwi_Image(
+                painter = painterResource(id = goalIcon(goal.type)),
+                alt = "Goal icon",
+                modifier =
+                    Modifier
+                        .padding(top = getResponsiveSizeWidth(18.dp))
+                        .size(getResponsiveSizeWidth(38.dp))
+                        .align(Alignment.TopCenter),
+            )
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly,
                 modifier =
-                    Modifier.fillMaxWidth().padding(
-                        horizontal =
-                            getResponsiveSizeWidth(Spacing.medium),
-                    ),
+                    Modifier
+                        .matchParentSize()
+                        .padding(top = getResponsiveSizeWidth(60.dp))
+                        .padding(
+                            horizontal =
+                                getResponsiveSizeWidth(Spacing.medium),
+                            vertical =
+                                getResponsiveSizeWidth(Spacing.medium),
+                        ),
             ) {
-                Kiwi_Image(
-                    painter = painterResource(id = getIcon(goal.type)),
-                    alt = "Goal icon",
-                    modifier =
-                        Modifier
-                            .padding(vertical = getResponsiveSizeHeight(20.dp))
-                            .size(getResponsiveSizeHeight(40.dp)),
-                )
                 Kiwi_H2(
                     KiwiTextArguments(
                         goal.action,
                         TextAlign.Center,
-                        modifier =
-                            Modifier.padding(
-                                top = getResponsiveSizeHeight(Spacing.medium),
-                                bottom = getResponsiveSizeHeight(Spacing.small),
-                            ),
                         color = kiwiColor.color6,
                     ),
                 )
@@ -126,19 +129,25 @@ fun GoalCustomice(
                     testTag = "",
                     valueRange = 0f..1f,
                 )
-                Kiwi_Spacer(Spacing.small)
 
                 Kiwi_P2(
                     KiwiTextArguments(
-                        "${current}/${goal.target}",
+                        "$current/${goal.target}",
                         color = kiwiColor.color7A,
                     ),
                 )
-                Kiwi_Spacer(Spacing.medium)
-                Kiwi_HorizontalLine(color = kiwiColor.color2)
-                Kiwi_Spacer(Spacing.small)
-                Kiwi_H2(KiwiTextArguments("Dificulty"))
-                Kiwi_Spacer(Spacing.small)
+
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(getResponsiveSizeWidth(4.dp))
+                            .padding(horizontal = getResponsiveSizeWidth(Spacing.small))
+                            .background(kiwiColor.color2),
+                )
+
+                Kiwi_Label1(KiwiTextArguments("Difficulty"))
+
                 Box(
                     modifier =
                         Modifier
@@ -146,7 +155,7 @@ fun GoalCustomice(
                             .padding(horizontal = Spacing.medium)
                             .background(
                                 color = kiwiColor.color2,
-                                shape = RoundedCornerShape(getResponsiveSizeHeight(25.dp)),
+                                shape = RoundedCornerShape(getResponsiveSizeWidth(25.dp)),
                             ).padding(
                                 horizontal = getResponsiveSizeWidth(12.dp),
                             ),
@@ -159,26 +168,19 @@ fun GoalCustomice(
                         Kiwi_Label1(KiwiTextArguments("Easy", modifier = Modifier.padding(vertical = Spacing.small)))
                     }
                 }
-                Kiwi_Spacer(Spacing.medium)
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.medium),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+
+                Kiwi_FixedSizeButton(
+                    textArguments =
+                        KiwiTextArguments(
+                            "Swap",
+                            color = kiwiColor.colorF,
+                        ),
+                    color = kiwiColor.color8,
+                    modifier = Modifier.width(buttonsWidth).padding(top = getResponsiveSizeHeight(5.dp)),
+                    onClick = {},
+                    iconRes = R.drawable.ic_swap,
+                    iconSize = 15.dp,
                 )
-                {
-                    Kiwi_FixedSizeButton(
-                        textArguments =
-                            KiwiTextArguments(
-                                "Swap",
-                                color = kiwiColor.colorF,
-                            ),
-                        color = kiwiColor.color8,
-                        modifier = Modifier.width(buttonsWidth),
-                        onClick = {},
-                        iconRes = R.drawable.ic_swap,
-                        iconSize = 15.dp,
-                    )
-                }
             }
         }
         Kiwi_Spacer(Spacing.medium)
@@ -200,12 +202,13 @@ fun GoalCustomice(
 
                 coroutineScope.launch {
                     val result = goalsViewModel.updateGoal(updatedGoal)
-                    result.onSuccess { updated ->
-                        onGoalUpdated(updated)
-                        onDismiss()
-                    }.onFailure {
-                        // En preview/fake no mostramos UI de error; en la app real podríamos mostrar un toast/modal
-                    }
+                    result
+                        .onSuccess { updated ->
+                            onGoalUpdated(updated)
+                            onDismiss()
+                        }.onFailure {
+                            // En preview/fake no mostramos UI de error; en la app real podríamos mostrar un toast/modal
+                        }
                 }
             },
         )
@@ -214,7 +217,7 @@ fun GoalCustomice(
 
 @SuppressLint("RememberInComposition")
 @Composable
-fun GoalCustomiceModal(
+fun GoalCustomizeModal(
     goal: GoalDomain,
     goalsViewModel: IGoalsViewModel,
     onDismiss: () -> Unit = {},
@@ -249,12 +252,13 @@ fun GoalCustomiceModal(
                         interactionSource = MutableInteractionSource(),
                     ),
             ) {
-                GoalCustomice(goal, goalsViewModel, onDismiss, onGoalUpdated)
+                GoalCustomize(goal, goalsViewModel, onDismiss, onGoalUpdated)
             }
         }
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
@@ -269,7 +273,7 @@ fun GoalCustomiceModal_Preview() {
                     .fillMaxSize()
                     .background(LocalKiwiColors.current.color6),
         ) {
-            GoalCustomiceModal(
+            GoalCustomizeModal(
                 goal =
                     GoalDomain(
                         1,

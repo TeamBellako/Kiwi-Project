@@ -89,7 +89,6 @@ class LoginScreenTest {
                     MapScreen(
                         nodesViewModel = nodesFakeViewModel,
                         mapViewModel = mapviewModel,
-                        questsViewModel = questsFakeViewModel,
                         goalsViewModel = goalsFakeViewModel,
                         navController = navController,
                         notificationManager = NotificationManager(),

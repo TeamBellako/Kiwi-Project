@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -43,13 +42,14 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
-import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
 import com.bellako.kiwi.features.quests.model.QuestsViewModel
+import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
 import com.bellako.kiwi.features.settings.screens.SettingsScreen
@@ -62,7 +62,6 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
-import dagger.hilt.android.EntryPointAccessors
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -143,13 +142,15 @@ private fun AppScreen(
 
     val showDashboard = route == ScreenRoutes.HOME
 
-    LaunchedEffect(Unit) {
-        questsViewModel.getNotifications().collect { event ->
+    LaunchedEffect(notificationManager) {
+        notificationManager.notifications.collect { event ->
             when (event) {
-                is QuestNotificationEvent.QuestCompleted -> {}
-
+                is NotificationEvent.Quest -> {
+                    if (event.type == QuestNotificationType.QUEST_COMPLETED) {
+                        appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
+                    }
+                }
                 else -> {
-                    appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
                 }
             }
         }
@@ -273,7 +274,6 @@ fun AppNavHost(
                 Kiwi_Music_Home()
                 MapScreen(
                     nodesViewModel = nodesViewModel,
-                    questsViewModel = questsViewModel,
                     goalsViewModel = goalsViewModel,
                     notificationManager = notificationManager,
                     navController = navController,

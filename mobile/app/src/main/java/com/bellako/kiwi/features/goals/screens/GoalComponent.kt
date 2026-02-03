@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_Label1
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
@@ -49,6 +54,7 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.launch
 
 @Suppress("MagicNumber")
@@ -56,6 +62,7 @@ import kotlinx.coroutines.launch
 fun GoalComponent(
     goal: IGoal,
     goalsViewModel: IGoalsViewModel,
+    modifier: Modifier = Modifier,
 ) {
     var currentGoal by remember { mutableStateOf(goal) }
     var showModal by remember { mutableStateOf(false) }
@@ -74,19 +81,15 @@ fun GoalComponent(
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            Modifier
-                .width(IntrinsicSize.Max)
+            modifier
                 .height(IntrinsicSize.Min)
-                .padding(
-                    horizontal =
-                        getResponsiveSizeHeight(Spacing.medium),
-                ).clickable { showModal = true },
+                .clickable { showModal = true },
     ) {
         Kiwi_Image(
             R.drawable.daily_challenges_bg,
             "Bar bg",
             modifier =
-                Modifier.fillMaxSize(),
+                Modifier.fillMaxWidth(),
         )
 
         Kiwi_Image(
@@ -100,7 +103,7 @@ fun GoalComponent(
             "Bar fill",
             modifier =
                 Modifier
-                    .fillMaxSize()
+                    .matchParentSize()
                     .graphicsLayer {
                         clip = true
                         shape =
@@ -121,28 +124,29 @@ fun GoalComponent(
         Row(
             modifier =
                 Modifier
-                    .fillMaxSize()
-                    .offset(getResponsiveSizeHeight(-3.dp)),
+                    .matchParentSize()
+                    .padding(end = getResponsiveSizeHeight(4.dp)),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier.weight(0.20f).padding(getResponsiveSizeHeight(Spacing.medium)),
+                modifier = Modifier.fillMaxHeight().aspectRatio(1f),
                 contentAlignment = Alignment.Center,
             ) {
                 Kiwi_Image(
-                    getIcon(currentGoal.type),
+                    goalIcon(currentGoal.type),
                     "Quest Indicator For: ${currentGoal.target}",
+                    Modifier
+                        .padding(vertical = getResponsiveSizeWidth(13.dp)),
                     colorFilter =
                         ColorFilter.tint(if (status != GoalStatus.COMPLETED) kiwiColors.colorF1 else kiwiColors.color8C),
-                    contentScale = ContentScale.FillWidth,
                 )
             }
 
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.weight(0.70f),
+                modifier = Modifier.weight(0.6f),
             ) {
-                Kiwi_Label1(
+                Kiwi_Label2(
                     KiwiTextArguments(
                         currentGoal.action,
                         TextAlign.Center,
@@ -153,18 +157,21 @@ fun GoalComponent(
 
             Box(
                 modifier =
-                    Modifier.weight(0.10f).padding(getResponsiveSizeHeight(Spacing.small)).clickable {
-                        if (status == GoalStatus.COMPLETED) {
-                            return@clickable
-                        } else {
-                            coroutineScope.launch {
-                                val result = goalsViewModel.updateGoalProgress(currentGoal.id)
-                                result.onSuccess { update ->
-                                    currentGoal = update
+                    Modifier
+                        .weight(0.10f)
+                        .padding(getResponsiveSizeHeight(8.dp))
+                        .clickable {
+                            if (status == GoalStatus.COMPLETED) {
+                                return@clickable
+                            } else {
+                                coroutineScope.launch {
+                                    val result = goalsViewModel.updateGoalProgress(currentGoal.id)
+                                    result.onSuccess { update ->
+                                        currentGoal = update
+                                    }
                                 }
                             }
-                        }
-                    },
+                        },
                 contentAlignment = Alignment.Center,
             ) {
                 Kiwi_Image(
@@ -182,7 +189,7 @@ fun GoalComponent(
     }
     // Abrir modal de personalización solo si el goal es GoalDomain (evitar ClassCastException)
     if (showModal && currentGoal is GoalDomain) {
-        GoalCustomiceModal(
+        GoalCustomizeModal(
             goal = currentGoal as GoalDomain,
             goalsViewModel = goalsViewModel,
             onDismiss = { showModal = false },
@@ -193,7 +200,7 @@ fun GoalComponent(
     }
 }
 
-fun getIcon(goalType: GoalType): Int =
+fun goalIcon(goalType: GoalType): Int =
     when (goalType) {
         GoalType.EXERCISE -> R.drawable.ic_daily_challenge_physical
         GoalType.PRODUCTIVITY -> R.drawable.ic_daily_challenge_mental
@@ -218,45 +225,51 @@ fun GoalComponent_Preview() {
                     .fillMaxSize()
                     .background(LocalKiwiColors.current.color0),
         ) {
-            GoalComponent(
-                GoalDomain(
-                    1,
-                    1,
-                    "Programa el modal lo mejor que sepas",
-                    GoalType.PRODUCTIVITY,
-                    GoalCategory.DAILY_CHALLENGES,
-                    GoalStatus.COMPLETED,
-                    1000,
-                    value = 1,
-                ),
-                goalFakeViewModel,
-            )
-            GoalComponent(
-                GoalDomain(
-                    2,
-                    10,
-                    "Programa el modal lo mejor que sepas",
-                    GoalType.EXERCISE,
-                    GoalCategory.DAILY_CHALLENGES,
-                    GoalStatus.NOT_COMPLETED,
-                    1000,
-                    value = 2,
-                ),
-                goalFakeViewModel,
-            )
-            GoalComponent(
-                GoalDomain(
-                    3,
-                    20,
-                    "Programa el modal lo mejor que sepas",
-                    GoalType.MEDITATION,
-                    GoalCategory.DAILY_CHALLENGES,
-                    GoalStatus.IN_PROGRESS,
-                    1000,
-                    value = 0,
-                ),
-                goalFakeViewModel,
-            )
+            Column(
+                modifier =
+                    Modifier
+                        .padding(horizontal = getResponsiveSizeHeight(Spacing.xLarge))
+            ) {
+                GoalComponent(
+                    GoalDomain(
+                        1,
+                        1,
+                        "Programa el modal lo mejor que sepas",
+                        GoalType.PRODUCTIVITY,
+                        GoalCategory.DAILY_CHALLENGES,
+                        GoalStatus.COMPLETED,
+                        1000,
+                        value = 1,
+                    ),
+                    goalFakeViewModel,
+                )
+                GoalComponent(
+                    GoalDomain(
+                        2,
+                        10,
+                        "Programa el modal lo mejor que sepas",
+                        GoalType.EXERCISE,
+                        GoalCategory.DAILY_CHALLENGES,
+                        GoalStatus.NOT_COMPLETED,
+                        1000,
+                        value = 2,
+                    ),
+                    goalFakeViewModel,
+                )
+                GoalComponent(
+                    GoalDomain(
+                        3,
+                        20,
+                        "Programa el modal lo mejor que sepas",
+                        GoalType.MEDITATION,
+                        GoalCategory.DAILY_CHALLENGES,
+                        GoalStatus.IN_PROGRESS,
+                        1000,
+                        value = 0,
+                    ),
+                    goalFakeViewModel,
+                )
+            }
         }
     }
 }

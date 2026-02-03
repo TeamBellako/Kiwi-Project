@@ -2,9 +2,6 @@ package com.bellako.kiwi.features.quests.screens
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,23 +18,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
-import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -49,14 +41,11 @@ import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.quests.data.QuestDomain
 import com.bellako.kiwi.features.quests.data.SubquestDomain
 import com.bellako.kiwi.features.quests.data.SubquestStatus
-import com.bellako.kiwi.features.quests.model.IQuestsViewModel
-import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
 import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import kotlinx.coroutines.delay
 
 // ACTIVE QUESTS
 @Composable
@@ -237,7 +226,7 @@ fun Subquest(
 
 // NOTIFICATIONS
 
-enum class NotificationType {
+enum class QuestNotificationType {
     NEW,
     QUEST_COMPLETED,
     SUBQUEST_COMPLETED,
@@ -245,10 +234,10 @@ enum class NotificationType {
 }
 
 @Composable
-private fun QuestNotification(
+fun QuestNotification(
     name: String,
     questIcon: Int,
-    type: NotificationType,
+    type: QuestNotificationType,
     onClick: () -> Unit,
 ) {
     val kiwiColors = LocalKiwiColors.current
@@ -263,10 +252,10 @@ private fun QuestNotification(
         // Background image
         Kiwi_Image(
             when (type) {
-                NotificationType.NEW -> R.drawable.notification_quest_new
-                NotificationType.QUEST_COMPLETED -> R.drawable.notification_quest_completed
-                NotificationType.SUBQUEST_COMPLETED -> R.drawable.notification_quest_completed
-                NotificationType.SUBQUEST_FAILED -> R.drawable.notification_quest_failed
+                QuestNotificationType.NEW -> R.drawable.notification_quest_new
+                QuestNotificationType.QUEST_COMPLETED -> R.drawable.notification_quest_completed
+                QuestNotificationType.SUBQUEST_COMPLETED -> R.drawable.notification_quest_completed
+                QuestNotificationType.SUBQUEST_FAILED -> R.drawable.notification_quest_failed
             },
             "Quest notification background",
         )
@@ -309,10 +298,10 @@ private fun QuestNotification(
                         color = kiwiColors.colorF,
                         text =
                             when (type) {
-                                NotificationType.NEW -> "Your have a New Quest!"
-                                NotificationType.QUEST_COMPLETED -> "Quest Completed!"
-                                NotificationType.SUBQUEST_COMPLETED -> "Objective Completed!"
-                                NotificationType.SUBQUEST_FAILED -> "Objective Failed"
+                                QuestNotificationType.NEW -> "Your have a New Quest!"
+                                QuestNotificationType.QUEST_COMPLETED -> "Quest Completed!"
+                                QuestNotificationType.SUBQUEST_COMPLETED -> "Objective Completed!"
+                                QuestNotificationType.SUBQUEST_FAILED -> "Objective Failed"
                             },
                         italic = true,
                         modifier =
@@ -322,169 +311,6 @@ private fun QuestNotification(
                                 ),
                     ),
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun QuestCompletedNotification(quest: QuestDomain) {
-    QuestNotification(
-        name = quest.name,
-        questIcon = quest.icon,
-        type = NotificationType.QUEST_COMPLETED,
-        onClick = {},
-    )
-}
-
-@Composable
-fun SubquestCompletedNotification(
-    quest: QuestDomain,
-    subquestId: Int,
-    navController: NavController,
-) {
-    val subquest: SubquestDomain? = quest.subquests.find { it.id == subquestId }
-
-    subquest?.let {
-        QuestNotification(
-            name = subquest.name,
-            questIcon = quest.icon,
-            type = NotificationType.SUBQUEST_COMPLETED,
-            onClick = {
-                navController.navigate("objectives/${quest.id}")
-            },
-        )
-    }
-}
-
-@Composable
-fun SubquestFailedNotification(
-    quest: QuestDomain,
-    subquestId: Int,
-    navController: NavController,
-) {
-    val subquest: SubquestDomain? = quest.subquests.find { it.id == subquestId }
-
-    subquest?.let {
-        QuestNotification(
-            name = subquest.name,
-            questIcon = quest.icon,
-            type = NotificationType.SUBQUEST_FAILED,
-            onClick = {
-                navController.navigate("objectives/${quest.id}")
-            },
-        )
-    }
-}
-
-@Composable
-fun NewQuestNotification(
-    quest: QuestDomain,
-    navController: NavController,
-) {
-    QuestNotification(
-        name = quest.name,
-        questIcon = quest.icon,
-        type = NotificationType.NEW,
-        onClick = {
-            navController.navigate("objectives/${quest.id}")
-        },
-    )
-}
-
-@Suppress("MagicNumber")
-@Composable
-fun QuestNotificationsOverlay(
-    questsViewModel: IQuestsViewModel,
-    navController: NavController,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-
-    val queue = remember { mutableStateListOf<QuestNotificationEvent>() }
-    var current by remember { mutableStateOf<QuestNotificationEvent?>(null) }
-    var visible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        questsViewModel.getNotifications().collect { event ->
-            queue += event
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            if (current == null && queue.isNotEmpty()) {
-                current = queue.removeAt(0)
-                visible = true
-
-                when (current) {
-                    is QuestNotificationEvent.NewQuest ->
-                        AudioManager.playSFX(context, R.raw.snd_ui_newquest)
-
-                    is QuestNotificationEvent.QuestCompleted,
-                    is QuestNotificationEvent.SubquestCompleted,
-                    ->
-                        AudioManager.playSFX(context, R.raw.snd_ui_questcompleted)
-
-                    is QuestNotificationEvent.SubquestFailed ->
-                        AudioManager.playSFX(context, R.raw.snd_ui_questfailed)
-
-                    else -> {}
-                }
-
-                delay(4000)
-
-                visible = false
-                delay(300)
-
-                current = null
-                delay(250)
-            }
-
-            delay(16) // busy-loop
-        }
-    }
-
-    Box(modifier = modifier) {
-        Column(
-            modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.large)),
-        ) {
-            AnimatedVisibility(
-                visible = visible,
-                enter =
-                    slideInVertically(
-                        initialOffsetY = { -it },
-                        animationSpec = tween(300),
-                    ),
-                exit =
-                    slideOutVertically(
-                        targetOffsetY = { -it },
-                        animationSpec = tween(300),
-                    ),
-            ) {
-                current?.let { event ->
-                    when (event) {
-                        is QuestNotificationEvent.NewQuest ->
-                            NewQuestNotification(event.quest, navController)
-
-                        is QuestNotificationEvent.QuestCompleted ->
-                            QuestCompletedNotification(event.quest)
-
-                        is QuestNotificationEvent.SubquestCompleted ->
-                            SubquestCompletedNotification(
-                                event.quest,
-                                event.subquestId,
-                                navController,
-                            )
-
-                        is QuestNotificationEvent.SubquestFailed ->
-                            SubquestFailedNotification(
-                                event.quest,
-                                event.subquestId,
-                                navController,
-                            )
-                    }
-                }
             }
         }
     }
@@ -542,8 +368,10 @@ fun NewQuestNotification_Preview() {
                                 horizontal = getResponsiveSizeHeight(Spacing.xLarge),
                             ),
                 ) {
-                    NewQuestNotification(QuestsTestFactory.questWithFourSubquests(), nav)
-                    QuestCompletedNotification(QuestsTestFactory.questWithThreeSubquests())
+                    val quest1 = QuestsTestFactory.questWithFourSubquests()
+                    val quest2 = QuestsTestFactory.questWithThreeSubquests()
+                    QuestNotification(quest1.name, quest1.icon, QuestNotificationType.QUEST_COMPLETED) {}
+                    QuestNotification(quest2.name, quest2.icon, QuestNotificationType.NEW) {}
                 }
             }
         }
