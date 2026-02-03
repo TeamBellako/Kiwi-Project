@@ -13,12 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.bellako.kiwi.common.screens.MainScreen
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var notificationManager: NotificationManager
+
     @SuppressLint("SourceLockedOrientationActivity")
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = LocalKiwiColors.current.color2,
                 ) {
-                    MainScreen()
+                    MainScreen(notificationManager = notificationManager)
                 }
             }
         }

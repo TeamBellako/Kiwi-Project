@@ -32,6 +32,8 @@ import javax.inject.Inject
 
 const val MAX_DECK_SLOTS = 4
 
+const val ONE_SECOND_MILLISECONDS = 1_000L
+
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class SkillsViewModel
@@ -342,13 +344,13 @@ class SkillsViewModel
             cooldownUntil: Instant?,
         ): SkillDomain =
             when (skill) {
-                is SkillDomain.Other -> skill.copy(isCooldown = cooldown)
+                is SkillDomain.Goal -> skill.copy(isCooldown = cooldown)
                 is SkillDomain.Time ->
                     skill.copy(
                         isCooldown = cooldown,
                         cooldownUntil = cooldownUntil,
                     )
-                is SkillDomain.Goal -> skill.copy(isCooldown = cooldown)
+                is SkillDomain.Other -> skill.copy(isCooldown = cooldown)
             }
 
         private fun emptySlot(): Int? {
@@ -379,7 +381,7 @@ class SkillsViewModel
         init {
             viewModelScope.launch {
                 while (true) {
-                    delay(1_000) // MAYBE WE CAN CHANGE IT TO ONLY UPDATE EVERY MINUTE
+                    delay(ONE_SECOND_MILLISECONDS) // MAYBE WE CAN CHANGE IT TO ONLY UPDATE EVERY MINUTE
                     tickCooldowns()
                 }
             }

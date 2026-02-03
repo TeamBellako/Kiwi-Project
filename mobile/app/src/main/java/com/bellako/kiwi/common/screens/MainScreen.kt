@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -42,8 +43,7 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
-import com.bellako.kiwi.features.notifications.model.NotificationManager
-import com.bellako.kiwi.features.notifications.model.NotificationViewModel
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
@@ -62,6 +62,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
+import dagger.hilt.android.EntryPointAccessors
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -75,10 +76,9 @@ fun MainScreen(
     goalsViewModel: GoalsViewModel = hiltViewModel(),
     skillsViewModel: SkillsViewModel = hiltViewModel(),
     appBarViewModel: AppBarViewModel = hiltViewModel(),
-    notificationViewModel: NotificationViewModel = hiltViewModel(),
+    notificationManager: NotificationManager,
 ) {
     val navController = rememberNavController()
-    val notificationManager = notificationViewModel.notificationManager
 
     Kiwi_AudioHandler()
 

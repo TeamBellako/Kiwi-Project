@@ -2,10 +2,6 @@ package com.bellako.kiwi.features.goals.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,53 +14,45 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_P3
+import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.IGoal
-import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import java.time.LocalDate
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
+
+const val ICON_GOAL_WEIGHT = 0.25f
 
 @Composable
-@Suppress("MagicNumber")
-fun GoalsNotificationCard(
-    type: GoalModalType,
+fun GoalsNotification(
+    type: GoalNotificationType,
     goals: List<IGoal>,
     onClick: () -> Unit = {},
 ) {
     val header =
-        if (type == GoalModalType.NEW) {
+        if (type == GoalNotificationType.NEW) {
             "New Daily Goals!"
         } else {
             "Yesterday's Challenge"
         }
     val body =
-        if (type == GoalModalType.NEW) {
+        if (type == GoalNotificationType.NEW) {
             "What can you accomplish today?"
         } else {
             "Let's check what you accomplished"
@@ -72,20 +60,12 @@ fun GoalsNotificationCard(
 
     val kiwiColor = LocalKiwiColors.current
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+    Column {
         Box(
             contentAlignment = Alignment.Center,
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = getResponsiveSizeHeight(Spacing.large),
-                    ).padding(horizontal = getResponsiveSizeHeight(Spacing.large))
-                    .clickable { onClick() }
-                    .zIndex(1f),
+                    .clickable { onClick() },
         ) {
             Image(
                 painter = painterResource(id = R.drawable.goals_notification),
@@ -103,11 +83,7 @@ fun GoalsNotificationCard(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier =
-                        Modifier.weight(0.25f).padding(
-//                            top = getResponsiveSizeHeight(Spacing.xSmall),
-                            end = getResponsiveSizeHeight(Spacing.medium),
-//                            bottom = getResponsiveSizeHeight(Spacing.xSmall),
-                        ),
+                        Modifier.weight(ICON_GOAL_WEIGHT),
                 ) {
                     Kiwi_Image(
                         painter = painterResource(id = getIcon(goals[0].type)),
@@ -115,19 +91,18 @@ fun GoalsNotificationCard(
                         colorFilter = ColorFilter.tint(kiwiColor.colorF),
                         modifier =
                             Modifier
-                                .size(getResponsiveSizeHeight(30.dp))
-                                .offset(x = getResponsiveSizeHeight((-4).dp)),
+                                .size(getResponsiveSizeWidth(30.dp))
+                                .offset(x = getResponsiveSizeWidth(-12.5.dp), y = getResponsiveSizeHeight(-2.5.dp)),
                         alignment = Alignment.Center,
                     )
-                    Kiwi_Spacer(getResponsiveSizeHeight(Spacing.small))
                     Kiwi_Image(
                         painter = painterResource(id = getIcon(goals[1].type)),
                         alt = "Goal icon",
                         colorFilter = ColorFilter.tint(kiwiColor.colorF),
                         modifier =
                             Modifier
-                                .size(getResponsiveSizeHeight(30.dp))
-                                .offset(x = getResponsiveSizeHeight(14.dp)),
+                                .size(getResponsiveSizeWidth(30.dp))
+                                .offset(x = getResponsiveSizeWidth(6.5.dp), y = getResponsiveSizeHeight(2.5.dp)),
                         alignment = Alignment.Center,
                     )
                 }
@@ -135,7 +110,7 @@ fun GoalsNotificationCard(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier =
                         Modifier
-                            .weight(0.75f)
+                            .weight(1f - ICON_GOAL_WEIGHT)
                             .padding(start = getResponsiveSizeHeight(Spacing.medium)),
                 ) {
                     Kiwi_H2(
@@ -145,7 +120,7 @@ fun GoalsNotificationCard(
                         ),
                     )
                     Kiwi_Spacer(getResponsiveSizeHeight(Spacing.xSmall))
-                    Kiwi_P3(
+                    Kiwi_Label3(
                         KiwiTextArguments(
                             body,
                             color = kiwiColor.color6,
@@ -155,6 +130,11 @@ fun GoalsNotificationCard(
             }
         }
     }
+}
+
+enum class GoalNotificationType {
+    NEW,
+    YESTERDAY,
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -171,32 +151,38 @@ fun GoalsNotification_Card_Preview() {
                     .fillMaxSize()
                     .background(LocalKiwiColors.current.color0),
         ) {
-            GoalsNotificationCard(
-                type = GoalModalType.NEW,
-                goals =
-                    listOf(
-                        GoalDomain(
-                            1,
-                            2,
-                            "Programa el modal lo mejor que sepas",
-                            GoalType.PRODUCTIVITY,
-                            GoalCategory.DAILY_CHALLENGES,
-                            GoalStatus.COMPLETED,
-                            1000,
-                            value = 2,
+            Box(
+                modifier =
+                    Modifier
+                        .padding(horizontal = getResponsiveSizeHeight(Spacing.large)),
+            ) {
+                GoalsNotification(
+                    type = GoalNotificationType.NEW,
+                    goals =
+                        listOf(
+                            GoalDomain(
+                                1,
+                                2,
+                                "Programa el modal lo mejor que sepas",
+                                GoalType.PRODUCTIVITY,
+                                GoalCategory.DAILY_CHALLENGES,
+                                GoalStatus.COMPLETED,
+                                1000,
+                                value = 2,
+                            ),
+                            GoalDomain(
+                                2,
+                                10,
+                                "Esto está fuera de tu alcance",
+                                GoalType.PRODUCTIVITY,
+                                GoalCategory.DAILY_CHALLENGES,
+                                GoalStatus.NOT_COMPLETED,
+                                1000,
+                                value = 5,
+                            ),
                         ),
-                        GoalDomain(
-                            2,
-                            10,
-                            "Esto está fuera de tu alcance",
-                            GoalType.PRODUCTIVITY,
-                            GoalCategory.DAILY_CHALLENGES,
-                            GoalStatus.NOT_COMPLETED,
-                            1000,
-                            value = 5,
-                        ),
-                    ),
-            )
+                )
+            }
         }
     }
 }

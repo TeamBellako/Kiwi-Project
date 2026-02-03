@@ -39,9 +39,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
-import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.screens.GoalNotificationType
 import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
@@ -51,7 +51,7 @@ import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
 import com.bellako.kiwi.features.nodes.screens.screenToMap
-import com.bellako.kiwi.features.notifications.model.NotificationManager
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
 import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
@@ -137,17 +137,10 @@ fun MapScreen(
             }
     }
 
-    val goalsModalRequest = remember { mutableStateOf<Pair<GoalModalType, List<IGoal>>?>(null) }
+    val goalsModalRequest = remember { mutableStateOf<Pair<GoalNotificationType, List<IGoal>>?>(null) }
 
     LaunchedEffect(Unit) {
-        goalsViewModel.checkAndNotifyGoals(
-            onYesterdayClick = { goals ->
-                goalsModalRequest.value = Pair(GoalModalType.YESTERDAY, goals)
-            },
-            onTodayClick = { goals ->
-                goalsModalRequest.value = Pair(GoalModalType.NEW, goals)
-            },
-        )
+        goalsViewModel.checkAndNotifyGoals()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -189,6 +182,11 @@ fun MapScreen(
         @Suppress("MagicNumber")
         NotificationOverlay(
             notificationManager = notificationManager,
+            onGoalClick =
+                { type, goals ->
+                    goalsModalRequest.value = type to goals
+                },
+            onQuestClick = {},
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -209,7 +207,7 @@ fun MapScreen(
                     goalsViewModel,
                     onDismiss = {
                         goalsModalRequest.value = null
-                        notificationManager.dismissRequests
+                        notificationManager.dismissCurrent()
                     },
                 )
             }

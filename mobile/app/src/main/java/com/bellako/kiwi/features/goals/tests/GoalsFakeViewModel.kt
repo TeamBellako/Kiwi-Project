@@ -157,10 +157,7 @@ class GoalsFakeViewModel(
             Result.success(emptyList())
         }
 
-    override suspend fun checkAndNotifyGoals(
-        onYesterdayClick: (List<GoalDomain>) -> Unit,
-        onTodayClick: (List<GoalDomain>) -> Unit,
-    ) {
+    override suspend fun checkAndNotifyGoals() {
         // Implementación fake - no hace nada
     }
 }

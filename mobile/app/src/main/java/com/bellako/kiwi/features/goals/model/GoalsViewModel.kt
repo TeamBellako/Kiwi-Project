@@ -8,14 +8,14 @@ import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.features.goals.data.GoalDataMapper
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDataMapper
 import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
-import com.bellako.kiwi.features.goals.screens.GoalsNotificationCard
-import com.bellako.kiwi.features.notifications.model.NotificationEvent
-import com.bellako.kiwi.features.notifications.model.NotificationManager
+import com.bellako.kiwi.features.goals.screens.GoalNotificationType
+import com.bellako.kiwi.features.notifications.controller.NotificationEvent
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,12 +46,14 @@ class GoalsViewModel
         // Mutex para proteger el acceso concurrente a la cache
         private val cacheMutex = Mutex()
 
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun getCurrentDate(): String = dateToString(LocalDate.now())
 
         /**
          * Actualiza un goal en todas las entradas del cache donde aparezca
          * @param updatedGoal El goal actualizado
          */
+        @RequiresApi(Build.VERSION_CODES.O)
         private suspend fun updateGoalInCache(updatedGoal: GoalDomain) {
             cacheMutex.withLock {
                 // Actualizar en cachedGoalsByDate
@@ -178,7 +180,7 @@ class GoalsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> {
-            if (suggestedGoals.size == 0) {
+            if (suggestedGoals.isEmpty()) {
                 return Result.failure(IllegalArgumentException("La lista de sugerencias está vacía"))
             }
             val today = dateToString(LocalDate.now())
@@ -288,6 +290,7 @@ class GoalsViewModel
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun getGoalsInProgress(): Result<List<GoalDomain>> {
             cacheMutex.withLock {
                 if (cachedGoalsInProgress != null && cacheDate == getCurrentDate()) {
@@ -314,6 +317,7 @@ class GoalsViewModel
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun getSuggestedGoals(): Result<List<SuggestedGoalDomain>> {
             cacheMutex.withLock {
                 if (cachedSuggestedGoals != null && cacheDate == getCurrentDate()) {
@@ -347,33 +351,21 @@ class GoalsViewModel
             cacheDate = null
         }
 
-        suspend fun notifyNewGoals(
-            goals: List<com.bellako.kiwi.features.goals.data.IGoal>,
-            onClick: () -> Unit = {},
-        ) {
+        fun notifyNewGoals(goals: List<IGoal>) {
             notificationManager.notify(
-                NotificationEvent.Goal {
-                    GoalsNotificationCard(
-                        type = GoalModalType.NEW,
-                        goals = goals,
-                        onClick = onClick,
-                    )
-                },
+                NotificationEvent.Goal(
+                    type = GoalNotificationType.NEW,
+                    goals = goals,
+                ),
             )
         }
 
-        suspend fun notifyYesterdayGoals(
-            goals: List<com.bellako.kiwi.features.goals.data.IGoal>,
-            onClick: () -> Unit = {},
-        ) {
+        fun notifyYesterdayGoals(goals: List<IGoal>) {
             notificationManager.notify(
-                NotificationEvent.Goal {
-                    GoalsNotificationCard(
-                        type = GoalModalType.YESTERDAY,
-                        goals = goals,
-                        onClick = onClick,
-                    )
-                },
+                NotificationEvent.Goal(
+                    type = GoalNotificationType.YESTERDAY,
+                    goals = goals,
+                ),
             )
         }
 
@@ -381,24 +373,16 @@ class GoalsViewModel
          * Evalúa si hay notificaciones de goals que mostrar y las envía automáticamente.
          * 1. Verifica si hay goals de ayer en progreso (muestra primero)
          * 2. Verifica si hay goals de hoy o sugerencias (muestra después)
-         *
-         * @param onYesterdayClick Callback cuando se hace click en notificación de ayer
-         * @param onTodayClick Callback cuando se hace click en notificación de hoy
          */
         @RequiresApi(Build.VERSION_CODES.O)
-        override suspend fun checkAndNotifyGoals(
-            onYesterdayClick: (List<GoalDomain>) -> Unit,
-            onTodayClick: (List<GoalDomain>) -> Unit,
-        ) {
+        override suspend fun checkAndNotifyGoals() {
             val today = dateToString(LocalDate.now())
 
             val inProgressResult = getGoalsInProgress()
             val yesterdayGoals = inProgressResult.getOrNull()
 
             if (!yesterdayGoals.isNullOrEmpty()) {
-                notifyYesterdayGoals(yesterdayGoals) {
-                    onYesterdayClick(yesterdayGoals)
-                }
+                notifyYesterdayGoals(yesterdayGoals)
                 return // Salir para mostrar solo la de ayer primero
             }
 
@@ -409,28 +393,11 @@ class GoalsViewModel
                 return
             }
 
-            // 3. No hay goals de hoy - obtener sugerencias
             val suggestedResult = getSuggestedGoals()
             val suggestedGoals = suggestedResult.getOrNull()
 
             if (!suggestedGoals.isNullOrEmpty()) {
-                notifyNewGoals(suggestedGoals) {
-                    val goalsForCallback =
-                        suggestedGoals.map { suggested ->
-                            GoalDomain(
-                                id = 0, // Temporal hasta que se cree
-                                target = suggested.target,
-                                action = suggested.action,
-                                type = suggested.type,
-                                category = suggested.category,
-                                status = com.bellako.kiwi.features.goals.data.GoalStatus.NOT_COMPLETED,
-                                date = today,
-                                value = 0,
-                                reward = suggested.reward,
-                            )
-                        }
-                    onTodayClick(goalsForCallback)
-                }
+                notifyNewGoals(suggestedGoals)
             }
         }
     }

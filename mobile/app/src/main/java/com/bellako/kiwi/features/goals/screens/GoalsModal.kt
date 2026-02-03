@@ -34,7 +34,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.IGoal
@@ -50,7 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 @Suppress("MagicNumber", "LongMethod")
 fun GoalsModal(
-    goalModalType: GoalModalType,
+    goalModalType: GoalNotificationType,
     goals: List<IGoal>,
     goalsViewModel: IGoalsViewModel,
     onDismiss: () -> Unit = {},
@@ -59,14 +58,14 @@ fun GoalsModal(
     val coroutineScope = rememberCoroutineScope()
 
     val header =
-        if (goalModalType == GoalModalType.NEW) {
+        if (goalModalType == GoalNotificationType.NEW) {
             "New Daily Challenges!"
         } else {
             "Yesterday's Challenge"
         }
 
     val body =
-        if (goalModalType == GoalModalType.NEW) {
+        if (goalModalType == GoalNotificationType.NEW) {
             "These are the new challenges that await for you today"
         } else {
             "You didn't checked these goals yesterday.\n Did you completed them?"
@@ -156,7 +155,7 @@ fun GoalsModal(
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            if (goalModalType == GoalModalType.NEW) "Let's go!" else "Done",
+                            if (goalModalType == GoalNotificationType.NEW) "Let's go!" else "Done",
                             color = kiwiColor.colorF,
                         ),
                     color = kiwiColor.color8,
@@ -164,7 +163,7 @@ fun GoalsModal(
                         Modifier
                             .weight(buttonPercentage),
                     onClick = {
-                        if (goalModalType == GoalModalType.NEW) {
+                        if (goalModalType == GoalNotificationType.NEW) {
                             val suggestedGoals =
                                 goals.map { goal ->
                                     SuggestedGoalDomain(goal.id, goal.target, goal.action, goal.type, goal.category, goal.reward)
@@ -238,9 +237,7 @@ fun GoalsModal(
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Suppress("MagicNumber")
 @Composable
-fun GoalsModal_Preview(
-    goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
-) {
+fun GoalsModal_Preview(goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel()) {
     Kiwi_Theme {
         Box(
             modifier =
@@ -249,7 +246,7 @@ fun GoalsModal_Preview(
                     .background(LocalKiwiColors.current.color0),
         ) {
             GoalsModal(
-                goalModalType = GoalModalType.NEW,
+                goalModalType = GoalNotificationType.NEW,
                 goals =
                     listOf(
                         GoalDomain(

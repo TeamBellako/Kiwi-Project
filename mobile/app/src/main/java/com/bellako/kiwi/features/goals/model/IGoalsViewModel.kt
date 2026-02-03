@@ -26,8 +26,5 @@ interface IGoalsViewModel {
 
     suspend fun getSuggestedGoals(): Result<List<SuggestedGoalDomain>>
 
-    suspend fun checkAndNotifyGoals(
-        onYesterdayClick: (List<GoalDomain>) -> Unit = {},
-        onTodayClick: (List<GoalDomain>) -> Unit = {},
-    )
+    suspend fun checkAndNotifyGoals()
 }

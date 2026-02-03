@@ -56,8 +56,53 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
 private const val SKILL_MODAL_ASPECT_RATIO = 0.96f
-
 private const val SKILL_MODAL_BUTTON_SPACE = 0.5f
+
+@RequiresApi(Build.VERSION_CODES.O)
+@SuppressLint("RememberInComposition")
+@Composable
+fun SkillDetailsModal(
+    skill: SkillDomain,
+    onDismiss: () -> Unit = {},
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties =
+            DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true,
+                usePlatformDefaultWidth = false,
+            ),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .background(Color.Black.copy(alpha = 0.6f))
+                    .clickable(
+                        onClick = onDismiss,
+                        indication = null,
+                        interactionSource = MutableInteractionSource(),
+                    ),
+        ) {
+            Box(
+                modifier =
+                    Modifier.clickable(
+                        onClick = {},
+                        indication = null,
+                        interactionSource = MutableInteractionSource(),
+                    ),
+            ) {
+                SkillDetails(skill, onApplyGoalProgress, onDismiss)
+            }
+        }
+    }
+}
+
+const val SKILL_QUOTE_WEIGHT = 0.16f
+const val SKILL_DESCRIPTION_WEIGHT = 0.32f
+const val SKILL_SPACER_WEIGHT = 0.10f
+const val SKILL_COOLDOWN_WEIGHT = 0.36f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -119,7 +164,7 @@ fun SkillDetails(
                     Box(
                         modifier =
                             Modifier
-                                .weight(0.16f)
+                                .weight(SKILL_QUOTE_WEIGHT)
                                 .fillMaxWidth(),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -143,7 +188,7 @@ fun SkillDetails(
                     Box(
                         modifier =
                             Modifier
-                                .weight(0.32f)
+                                .weight(SKILL_DESCRIPTION_WEIGHT)
                                 .fillMaxWidth(),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -160,7 +205,7 @@ fun SkillDetails(
                     Box(
                         modifier =
                             Modifier
-                                .weight(0.10f),
+                                .weight(SKILL_SPACER_WEIGHT),
                     ) {}
 
                     // COOLDOWN SECTION
@@ -168,7 +213,7 @@ fun SkillDetails(
                         modifier =
                             Modifier
                                 .alpha(if (skill.isCooldown) 1.0f else KIWI_DISABLED_ALPHA)
-                                .weight(0.36f)
+                                .weight(SKILL_COOLDOWN_WEIGHT)
                                 .fillMaxWidth(),
                     ) {
                         when (skill) {
@@ -444,47 +489,6 @@ private fun CancelButton(
         color = currentColors.color8,
         onClick = onClick,
     )
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@SuppressLint("RememberInComposition")
-@Composable
-fun SkillDetailsModal(
-    skill: SkillDomain,
-    onDismiss: () -> Unit = {},
-    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties =
-            DialogProperties(
-                dismissOnBackPress = true,
-                dismissOnClickOutside = true,
-                usePlatformDefaultWidth = false,
-            ),
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .background(Color.Black.copy(alpha = 0.6f))
-                    .clickable(
-                        onClick = onDismiss,
-                        indication = null,
-                        interactionSource = MutableInteractionSource(),
-                    ),
-        ) {
-            Box(
-                modifier =
-                    Modifier.clickable(
-                        onClick = {},
-                        indication = null,
-                        interactionSource = MutableInteractionSource(),
-                    ),
-            ) {
-                SkillDetails(skill, onApplyGoalProgress, onDismiss)
-            }
-        }
-    }
 }
 
 @Suppress("MagicNumber")

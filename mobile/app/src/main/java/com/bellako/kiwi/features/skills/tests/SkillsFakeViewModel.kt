@@ -121,7 +121,7 @@ class SkillsFakeViewModel
                             cooldownUntil = Instant.now().plusSeconds(60),
                         )
                 }
-            }, "Error putting skill in cooldown")
+            })
         }
 
         override fun removeCooldown(skillId: Long) {
@@ -142,7 +142,6 @@ class SkillsFakeViewModel
                             skill
                     }
                 },
-                "Error removing cooldown from skill",
             )
         }
 
@@ -158,7 +157,6 @@ class SkillsFakeViewModel
                         is SkillDomain.Goal -> skill.copy(deckSlot = 1)
                     }
                 },
-                "Error equipping skill",
             )
         }
 
@@ -173,7 +171,6 @@ class SkillsFakeViewModel
                         is SkillDomain.Goal -> skill.copy(deckSlot = 0)
                     }
                 },
-                "Error unequipping skill",
             )
         }
 
@@ -202,7 +199,6 @@ class SkillsFakeViewModel
                         }
                     }
                 },
-                "Error update goal progress for skill",
             )
         }
 
@@ -210,14 +206,8 @@ class SkillsFakeViewModel
         private fun updateSkill(
             skill: SkillDomain,
             transform: (SkillDomain) -> SkillDomain,
-            errorMessage: String,
         ) {
-            val updated =
-                try {
-                    transform(skill)
-                } catch (e: Exception) {
-                    return
-                }
+            val updated = transform(skill)
 
             _state.value =
                 _state.value.copy(
