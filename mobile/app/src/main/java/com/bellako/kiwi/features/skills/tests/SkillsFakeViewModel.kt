@@ -4,11 +4,13 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
+import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.skills.data.CooldownType
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillsState
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
 import com.bellako.kiwi.features.skills.model.SkillNotificationEvent
+import com.bellako.kiwi.features.skills.screen.SkillNotificationType
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -29,24 +31,24 @@ class SkillsFakeViewModel
         var fakeError: Boolean = false
         var fakeException: Exception = Exception("Simulated error")
 
-        private val _notifications =
-            MutableSharedFlow<SkillNotificationEvent>(
-                extraBufferCapacity = 10,
-                onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+        override fun notify(
+            type: SkillNotificationType,
+            skill: SkillDomain,
+        ) {
+        }
+
+        override fun notifySkillGiven(skill: SkillDomain) {
+            notify(
+                SkillNotificationType.NEW,
+                skill,
             )
-
-        override fun getNotifications(): SharedFlow<SkillNotificationEvent> = _notifications.asSharedFlow()
-
-        private suspend fun notify(event: SkillNotificationEvent) {
-            _notifications.emit(event)
         }
 
-        override suspend fun notifySkillGiven(skill: SkillDomain) {
-            notify(SkillNotificationEvent.SkillGiven(skill))
-        }
-
-        override suspend fun notifyCooldownFinished(skill: SkillDomain) {
-            notify(SkillNotificationEvent.SkillCooldownFinished(skill))
+        override fun notifyCooldownFinished(skill: SkillDomain) {
+            notify(
+                SkillNotificationType.READY,
+                skill,
+            )
         }
 
         // LOAD

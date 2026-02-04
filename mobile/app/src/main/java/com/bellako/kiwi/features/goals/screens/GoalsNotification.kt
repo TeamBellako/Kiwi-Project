@@ -7,12 +7,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,9 +25,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label3
+import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
@@ -36,8 +39,6 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
-
-const val ICON_GOAL_WEIGHT = 0.25f
 
 @Composable
 fun GoalsNotification(
@@ -60,73 +61,72 @@ fun GoalsNotification(
 
     val kiwiColor = LocalKiwiColors.current
 
-    Column {
-        Box(
-            contentAlignment = Alignment.Center,
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .height(IntrinsicSize.Min)
+                .clickable { onClick() },
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.goals_notification),
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(
             modifier =
                 Modifier
-                    .clickable { onClick() },
+                    .matchParentSize(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.goals_notification),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Row(
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier =
+                    Modifier
+                        .padding(start = getResponsiveSizeWidth(18.dp))
+                        .width(getResponsiveSizeWidth(68.dp)),
+            ) {
+                Kiwi_Image(
+                    painter = painterResource(id = goalIcon(goals[0].type)),
+                    alt = "Goal icon",
+                    colorFilter = ColorFilter.tint(kiwiColor.colorF),
+                    modifier =
+                        Modifier
+                            .size(getResponsiveSizeWidth(30.dp))
+                            .offset(x = getResponsiveSizeWidth(-9.5.dp), y = getResponsiveSizeWidth(-2.5.dp)),
+                    alignment = Alignment.Center,
+                )
+                Kiwi_Image(
+                    painter = painterResource(id = goalIcon(goals[1].type)),
+                    alt = "Goal icon",
+                    colorFilter = ColorFilter.tint(kiwiColor.colorF),
+                    modifier =
+                        Modifier
+                            .size(getResponsiveSizeWidth(30.dp))
+                            .offset(x = getResponsiveSizeWidth(9.5.dp), y = getResponsiveSizeWidth(2.5.dp)),
+                    alignment = Alignment.Center,
+                )
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = getResponsiveSizeHeight(Spacing.medium))
-                        .padding(vertical = getResponsiveSizeHeight(Spacing.large)),
-                verticalAlignment = Alignment.CenterVertically,
+                        .padding(horizontal = getResponsiveSizeWidth(Spacing.small)),
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier =
-                        Modifier.weight(ICON_GOAL_WEIGHT),
-                ) {
-                    Kiwi_Image(
-                        painter = painterResource(id = goalIcon(goals[0].type)),
-                        alt = "Goal icon",
-                        colorFilter = ColorFilter.tint(kiwiColor.colorF),
-                        modifier =
-                            Modifier
-                                .size(getResponsiveSizeWidth(30.dp))
-                                .offset(x = getResponsiveSizeWidth(-12.5.dp), y = getResponsiveSizeHeight(-2.5.dp)),
-                        alignment = Alignment.Center,
-                    )
-                    Kiwi_Image(
-                        painter = painterResource(id = goalIcon(goals[1].type)),
-                        alt = "Goal icon",
-                        colorFilter = ColorFilter.tint(kiwiColor.colorF),
-                        modifier =
-                            Modifier
-                                .size(getResponsiveSizeWidth(30.dp))
-                                .offset(x = getResponsiveSizeWidth(6.5.dp), y = getResponsiveSizeHeight(2.5.dp)),
-                        alignment = Alignment.Center,
-                    )
-                }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier =
-                        Modifier
-                            .weight(1f - ICON_GOAL_WEIGHT)
-                            .padding(start = getResponsiveSizeHeight(Spacing.medium)),
-                ) {
-                    Kiwi_H2(
-                        KiwiTextArguments(
-                            header,
-                            color = kiwiColor.colorF,
-                        ),
-                    )
-                    Kiwi_Spacer(getResponsiveSizeHeight(Spacing.xSmall))
-                    Kiwi_Label3(
-                        KiwiTextArguments(
-                            body,
-                            color = kiwiColor.color6,
-                        ),
-                    )
-                }
+                Kiwi_P1(
+                    KiwiTextArguments(
+                        header,
+                        color = kiwiColor.colorF,
+                    ),
+                )
+                Kiwi_Spacer(getResponsiveSizeWidth(Spacing.xSmall))
+                Kiwi_Label3(
+                    KiwiTextArguments(
+                        body,
+                        color = kiwiColor.color6,
+                    ),
+                )
             }
         }
     }

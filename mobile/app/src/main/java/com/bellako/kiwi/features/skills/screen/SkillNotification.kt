@@ -7,10 +7,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -22,19 +23,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_Label3
-import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import com.bellako.kiwi.ui.getResponsiveSizeWidth
-
-const val ICON_GOAL_WEIGHT = 0.25f
 
 @Composable
 fun SkillNotification(
@@ -42,68 +39,63 @@ fun SkillNotification(
     skill: SkillDomain,
     onClick: () -> Unit = {},
 ) {
-    val header =
+    val notificationInfo =
         if (type == SkillNotificationType.NEW) {
-            "New Skill"
+            "New Skill acquired!"
         } else {
-            "Skill Ready"
+            "Skill ready to use!"
         }
-    val body = skill.name
+    val skillName = skill.name
 
     val kiwiColor = LocalKiwiColors.current
 
-    Column {
-        Box(
-            contentAlignment = Alignment.Center,
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .height(IntrinsicSize.Min)
+                .clickable { onClick() },
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.generic_notification),
+            contentDescription = "Skill notification background",
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(
             modifier =
                 Modifier
-                    .clickable { onClick() },
+                    .fillMaxWidth()
+                    .padding(getResponsiveSizeHeight(Spacing.large)),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.generic_notification),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Row(
+            Kiwi_Image(
+                painter = painterResource(id = skillIcon(skill.icon)),
+                alt = "Skill icon",
+                colorFilter = ColorFilter.tint(kiwiColor.colorF),
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = getResponsiveSizeHeight(Spacing.medium))
-                        .padding(vertical = getResponsiveSizeHeight(Spacing.large)),
-                verticalAlignment = Alignment.CenterVertically,
+                        .size(getResponsiveSizeHeight(70.dp)),
+                alignment = Alignment.Center,
+            )
+
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
-                    Kiwi_Image(
-                        painter = painterResource(id = skillIcon(skill.icon)),
-                        alt = "Goal icon",
-                        colorFilter = ColorFilter.tint(kiwiColor.colorF),
-                        modifier =
-                            Modifier
-                                .size(getResponsiveSizeWidth(30.dp)),
-                        alignment = Alignment.Center,
-                    )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier =
-                        Modifier
-                            .weight(1f - ICON_GOAL_WEIGHT)
-                            .padding(start = getResponsiveSizeHeight(Spacing.medium)),
-                ) {
-                    Kiwi_H2(
-                        KiwiTextArguments(
-                            header,
-                            color = kiwiColor.colorF,
-                        ),
-                    )
-                    Kiwi_Spacer(getResponsiveSizeHeight(Spacing.xSmall))
-                    Kiwi_Label3(
-                        KiwiTextArguments(
-                            body,
-                            color = kiwiColor.color6,
-                        ),
-                    )
-                }
+                Kiwi_H1(
+                    KiwiTextArguments(
+                        skillName,
+                        color = kiwiColor.colorF,
+                    ),
+                )
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        notificationInfo,
+                        color = kiwiColor.color6,
+                    ),
+                )
             }
         }
     }

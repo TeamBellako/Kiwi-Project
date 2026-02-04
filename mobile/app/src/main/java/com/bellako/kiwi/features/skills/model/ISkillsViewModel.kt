@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.skills.model
 import com.bellako.kiwi.common.model.IBaseViewModel
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillsState
+import com.bellako.kiwi.features.skills.screen.SkillNotificationType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -21,11 +22,14 @@ sealed class SkillNotificationEvent {
 }
 
 interface ISkillsViewModel : IBaseViewModel<SkillsState> {
-    fun getNotifications(): SharedFlow<SkillNotificationEvent>
+    fun notify(
+        type: SkillNotificationType,
+        skill: SkillDomain,
+    )
 
-    suspend fun notifySkillGiven(skill: SkillDomain)
+    fun notifySkillGiven(skill: SkillDomain)
 
-    suspend fun notifyCooldownFinished(skill: SkillDomain)
+    fun notifyCooldownFinished(skill: SkillDomain)
 
     fun loadAllSkills()
 

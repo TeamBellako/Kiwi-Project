@@ -71,9 +71,10 @@ fun ObjectivesScreen(
                 ?: -1
 
         if (index >= 0) {
-            listState.animateScrollToItem(index)
+            listState.animateScrollToItem(index + 1)
         }
     }
+
     LaunchedEffect(goalsState) {
         val today = dateToString(LocalDate.now())
         val yesterday = dateToString(LocalDate.now().minusDays(1))

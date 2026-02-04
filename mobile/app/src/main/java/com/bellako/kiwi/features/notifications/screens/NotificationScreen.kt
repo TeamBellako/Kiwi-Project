@@ -25,6 +25,9 @@ import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.quests.data.QuestDomain
 import com.bellako.kiwi.features.quests.screens.QuestNotification
 import com.bellako.kiwi.features.quests.screens.QuestNotificationType
+import com.bellako.kiwi.features.skills.data.SkillDomain
+import com.bellako.kiwi.features.skills.screen.SkillNotification
+import com.bellako.kiwi.features.skills.screen.SkillNotificationType
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
@@ -39,6 +42,7 @@ fun NotificationOverlay(
     notificationManager: NotificationManager,
     onGoalClick: (GoalNotificationType, List<IGoal>) -> Unit,
     onQuestClick: (QuestNotificationType, QuestDomain, Int?) -> Unit,
+    onSkillClick: (SkillNotificationType, SkillDomain) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var currentEvent by remember { mutableStateOf<NotificationEvent?>(null) }
@@ -66,6 +70,9 @@ fun NotificationOverlay(
                     QuestNotificationType.SUBQUEST_FAILED ->
                         AudioManager.playSFX(context, R.raw.snd_ui_questfailed)
                 }
+            }
+            is NotificationEvent.Skill -> {
+                // TODO
             }
 
             is NotificationEvent.Generic -> {
@@ -127,8 +134,14 @@ fun NotificationOverlay(
 
                         is NotificationEvent.Quest -> {
                             QuestNotificationContent(
-                                event = event,
-                                onQuestClick = onQuestClick,
+                                event,
+                                onQuestClick,
+                            )
+                        }
+                        is NotificationEvent.Skill -> {
+                            SkillNotificationContent(
+                                event,
+                                onSkillClick,
                             )
                         }
 
@@ -178,6 +191,20 @@ fun QuestNotificationContent(
         type = event.type,
         onClick = {
             onQuestClick(event.type, event.quest, event.subquestId)
+        },
+    )
+}
+
+@Composable
+fun SkillNotificationContent(
+    event: NotificationEvent.Skill,
+    onSkillClick: (SkillNotificationType, SkillDomain) -> Unit,
+) {
+    SkillNotification(
+        type = event.type,
+        skill = event.skill,
+        onClick = {
+            onSkillClick(event.type, event.skill)
         },
     )
 }

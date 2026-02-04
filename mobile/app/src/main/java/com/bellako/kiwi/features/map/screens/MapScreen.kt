@@ -29,18 +29,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
-import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalNotificationType
@@ -56,6 +56,7 @@ import com.bellako.kiwi.features.nodes.screens.screenToMap
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
 import com.bellako.kiwi.features.quests.screens.QuestNotificationType
+import com.bellako.kiwi.features.skills.model.ISkillsViewModel
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -81,6 +82,7 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
     goalsViewModel: IGoalsViewModel,
+    skillsViewModel: ISkillsViewModel,
     notificationManager: NotificationManager,
     navController: NavHostController,
 ) {
@@ -163,6 +165,42 @@ fun MapScreen(
                 ),
             )
 
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.large,
+                textArguments =
+                    KiwiTextArguments(
+                        "Cooldown skill",
+                        color = kiwiColors.color7,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { skillsViewModel.putOnCooldown(2L) },
+            )
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.large,
+                textArguments =
+                    KiwiTextArguments(
+                        "Remove cooldown skill",
+                        color = kiwiColors.color7,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { skillsViewModel.removeCooldown(1L) },
+            )
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.large,
+                textArguments =
+                    KiwiTextArguments(
+                        "Give new skill",
+                        color = kiwiColors.color7,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { skillsViewModel.removeCooldown(1L) },
+            )
+
             InteractiveMap(
                 mapResourceId = mapResourceId,
                 mapViewModel = mapViewModel,
@@ -179,8 +217,12 @@ fun MapScreen(
             },
             onQuestClick = { type, quest, subquestId ->
                 if (type != QuestNotificationType.QUEST_COMPLETED) {
-                    navController.navigate("objectives/${quest.id}")
+                    navController.navigate("OBJECTIVES/${quest.id}")
                 }
+                notificationManager.dismissCurrent()
+            },
+            onSkillClick = { type, skill ->
+                navController.navigate("SKILLS/${skill.id}")
                 notificationManager.dismissCurrent()
             },
             modifier =

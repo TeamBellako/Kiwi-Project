@@ -4,7 +4,6 @@ import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.quests.data.QuestDataMapper
 import com.bellako.kiwi.features.quests.data.SubquestStatus
 import com.bellako.kiwi.features.quests.model.IQuestsAPI
-import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
 import com.bellako.kiwi.features.quests.model.QuestsRepository
 import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.quests.tests.QuestsTestFactory

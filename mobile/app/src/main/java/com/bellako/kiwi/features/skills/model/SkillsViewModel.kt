@@ -8,6 +8,10 @@ import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.goals.data.GoalDTO
 import com.bellako.kiwi.features.goals.model.GoalsRepository
+import com.bellako.kiwi.features.notifications.controller.NotificationEvent
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
+import com.bellako.kiwi.features.quests.data.QuestDomain
+import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.features.skills.data.CooldownType
 import com.bellako.kiwi.features.skills.data.EquipSkillDTO
 import com.bellako.kiwi.features.skills.data.GoalData
@@ -16,6 +20,7 @@ import com.bellako.kiwi.features.skills.data.SkillDataMapper
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillsState
 import com.bellako.kiwi.features.skills.screen.ONE_MINUTE_SECONDS
+import com.bellako.kiwi.features.skills.screen.SkillNotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -41,22 +46,37 @@ class SkillsViewModel
     constructor(
         private val skillsRepository: SkillsRepository,
         private val goalsRepository: GoalsRepository,
+        private val notificationManager: NotificationManager,
     ) : BaseViewModel(),
         ISkillsViewModel {
         private val _state = MutableStateFlow(SkillsState())
         override val state: StateFlow<SkillsState> = _state.asStateFlow()
 
-        private val _notifications = MutableSharedFlow<SkillNotificationEvent>()
-
-        override fun getNotifications(): SharedFlow<SkillNotificationEvent> = _notifications.asSharedFlow()
-
-        private suspend fun notify(event: SkillNotificationEvent) {
-            _notifications.emit(event)
+        override fun notify(
+            type: SkillNotificationType,
+            skill: SkillDomain,
+        ) {
+            notificationManager.notify(
+                NotificationEvent.Skill(
+                    type = type,
+                    skill = skill,
+                ),
+            )
         }
 
-        override suspend fun notifySkillGiven(skill: SkillDomain) = notify(SkillNotificationEvent.SkillGiven(skill))
+        override fun notifySkillGiven(skill: SkillDomain) {
+            notify(
+                SkillNotificationType.NEW,
+                skill,
+            )
+        }
 
-        override suspend fun notifyCooldownFinished(skill: SkillDomain) = notify(SkillNotificationEvent.SkillCooldownFinished(skill))
+        override fun notifyCooldownFinished(skill: SkillDomain) {
+            notify(
+                SkillNotificationType.READY,
+                skill,
+            )
+        }
 
         // LOAD
         @RequiresApi(Build.VERSION_CODES.O)

@@ -150,6 +150,9 @@ private fun AppScreen(
                         appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
                     }
                 }
+                is NotificationEvent.Skill -> {
+                    appBarViewModel.onNewContent(ScreenRoutes.SKILLS)
+                }
                 else -> {
                 }
             }
@@ -275,6 +278,7 @@ fun AppNavHost(
                 MapScreen(
                     nodesViewModel = nodesViewModel,
                     goalsViewModel = goalsViewModel,
+                    skillsViewModel = skillsViewModel,
                     notificationManager = notificationManager,
                     navController = navController,
                     mapViewModel = hiltViewModel(),
@@ -305,6 +309,18 @@ fun AppNavHost(
             AppScreenWrapper {
                 SkillsScreen(skillsViewModel = skillsViewModel)
             }
+        }
+
+        composable(
+            route = ScreenRoutes.SKILLS_FOCUS,
+            arguments = listOf(navArgument("skillId") { type = NavType.LongType }),
+        ) { backStackEntry ->
+            val questId = backStackEntry.arguments?.getLong("skillId")
+
+            SkillsScreen(
+                skillsViewModel = skillsViewModel,
+                focusedSkillId = questId,
+            )
         }
 
         composable(ScreenRoutes.SETTINGS) {

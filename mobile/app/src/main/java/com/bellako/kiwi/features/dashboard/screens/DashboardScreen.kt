@@ -62,6 +62,8 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.skills.model.SkillsViewModel
+import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
@@ -373,8 +375,9 @@ fun DashboardModal_Preview_Expanded_Calendar() {
 fun DashboardModal_Preview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
-    nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState()),
+    nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
+    skillsViewModel: SkillsFakeViewModel = SkillsFakeViewModel(),
 ) {
     val nav = rememberNavController()
     Kiwi_Theme {
@@ -389,6 +392,7 @@ fun DashboardModal_Preview(
                         navController = nav,
                         goalsViewModel = goalsViewModel,
                         mapViewModel = MapViewModel(),
+                        skillsViewModel = skillsViewModel,
                         notificationManager = NotificationManager(),
                     )
                     DashboardScreen(
