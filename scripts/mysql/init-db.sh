@@ -182,8 +182,8 @@ VALUES
 (3,0,180,0.66,0.228,0,'node_3',NULL,0),
 (4,2,100,0.598,0.228,0,'node_4','CAVE OF THE DEEP BREATH',0), 
 (5,0,180,0.66,0.275,0,'node_5',NULL,0),
-(6,3,140,0.615,0.295,0,'node_6','CITY',0);
-(1,1,120,0.585,0.12,0,'node_7','MAP_SWITCH',1), 
+(6,3,140,0.615,0.295,0,'node_6','CITY',0),
+(7,1,120,0.585,0.12,0,'node_7','MAP_SWITCH',1);
 
 INSERT INTO node_edges ( from_node_id, to_node_id ) 
 VALUES
