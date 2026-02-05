@@ -64,6 +64,45 @@ public class GoalControllerTests {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    public void getGoalById_valid_returnsOk() throws Exception {
+        Long goalId = 1L;
+        GoalDTO response = inProgressGoalDTO(goalId);
+
+        when(goalService.getGoalById(eq(goalId), any())).thenReturn(response);
+
+        mockMvc.perform(get(baseAPIUrl + "/" + goalId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
+    public void getGoalById_notFound_returnsNotFound() throws Exception {
+        Long goalId = 999L;
+
+        when(goalService.getGoalById(eq(goalId), any()))
+                .thenThrow(new GoalNotFoundException(goalId));
+
+        mockMvc.perform(get(baseAPIUrl + "/" + goalId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
+    public void getGoalById_unauthorized_returnsForbidden() throws Exception {
+        Long goalId = 1L;
+
+        when(goalService.getGoalById(eq(goalId), any()))
+                .thenThrow(new GoalUnauthorizedException("You are not authorized"));
+
+        mockMvc.perform(get(baseAPIUrl + "/" + goalId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
     public void getGoalsByDate_valid_returnsOk() throws Exception {
         String date = LocalDate.now().toString();
         List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
@@ -102,6 +141,30 @@ public class GoalControllerTests {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    public void getAppGoals_valid_returnsOk() throws Exception {
+        List<GoalDTO> response = List.of(appGoalDTO(1L));
+
+        when(goalService.getAppGoals(any())).thenReturn(response);
+
+        mockMvc.perform(get(baseAPIUrl + "/app_usage")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
+    public void getSkillGoals_valid_returnsOk() throws Exception {
+        List<GoalDTO> response = List.of(skillGoalDTO(1L));
+
+        when(goalService.getSkillGoals(any())).thenReturn(response);
+
+        mockMvc.perform(get(baseAPIUrl + "/skill")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
     public void completeGoal_valid_returnsOk() throws Exception {
         Long goalId = 1L;
         GoalDTO response = completedGoalDTO(goalId);
@@ -119,7 +182,7 @@ public class GoalControllerTests {
         Long goalId = 999L;
 
         when(goalService.completeGoal(eq(goalId), any()))
-                .thenThrow(new GoalNotFoundException(goalId.toString()));
+                .thenThrow(new GoalNotFoundException(goalId));
 
         mockMvc.perform(patch(baseAPIUrl + "/" + goalId + "/complete")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -158,7 +221,7 @@ public class GoalControllerTests {
         Long goalId = 999L;
 
         when(goalService.uncompleteGoal(eq(goalId), any()))
-                .thenThrow(new GoalNotFoundException(goalId.toString()));
+                .thenThrow(new GoalNotFoundException(goalId));
 
         mockMvc.perform(patch(baseAPIUrl + "/" + goalId + "/uncompleted")
                         .contentType(MediaType.APPLICATION_JSON))

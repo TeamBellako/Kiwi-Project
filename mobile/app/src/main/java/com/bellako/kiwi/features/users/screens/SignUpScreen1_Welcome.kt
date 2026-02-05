@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
@@ -87,7 +88,7 @@ private fun Welcome(
                 "Your Legend is About\nTo Be Forged...",
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
-                bold = true,
+                fontWeight = FontWeight.Bold,
             ),
         )
 
@@ -99,7 +100,7 @@ private fun Welcome(
                 KiwiTextArguments(
                     "LET'S DO IT",
                     color = kiwiColors.colorF,
-                    bold = true,
+                    fontWeight = FontWeight.Bold,
                 ),
             color = kiwiColors.color3A,
             onClick = {

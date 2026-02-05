@@ -39,9 +39,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
-import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.screens.GoalNotificationType
 import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
@@ -51,10 +51,9 @@ import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
 import com.bellako.kiwi.features.nodes.screens.screenToMap
-import com.bellako.kiwi.features.notifications.model.NotificationManager
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
-import com.bellako.kiwi.features.quests.model.IQuestsViewModel
-import com.bellako.kiwi.features.quests.screens.QuestNotificationsOverlay
+import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -65,6 +64,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlin.collections.forEach
 import kotlin.math.min
+
+const val NOTIFICATION_OVERLAY_Z_ORDER = 10f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -77,7 +78,6 @@ fun MapScreen(
     title: String = "MINDVEIL",
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
-    questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
     notificationManager: NotificationManager,
     navController: NavHostController,
@@ -137,17 +137,10 @@ fun MapScreen(
             }
     }
 
-    val goalsModalRequest = remember { mutableStateOf<Pair<GoalModalType, List<IGoal>>?>(null) }
+    val goalsModalRequest = remember { mutableStateOf<Pair<GoalNotificationType, List<IGoal>>?>(null) }
 
     LaunchedEffect(Unit) {
-        goalsViewModel.checkAndNotifyGoals(
-            onYesterdayClick = { goals ->
-                goalsModalRequest.value = Pair(GoalModalType.YESTERDAY, goals)
-            },
-            onTodayClick = { goals ->
-                goalsModalRequest.value = Pair(GoalModalType.NEW, goals)
-            },
-        )
+        goalsViewModel.checkAndNotifyGoals()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -176,32 +169,34 @@ fun MapScreen(
             )
         }
 
-        @Suppress("MagicNumber")
-        QuestNotificationsOverlay(
-            questsViewModel,
-            navController,
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .zIndex(10f),
-        )
-
-        @Suppress("MagicNumber")
         NotificationOverlay(
             notificationManager = notificationManager,
+            onGoalClick = { type, goals ->
+                goalsModalRequest.value = type to goals
+                notificationManager.dismissCurrent()
+            },
+            onQuestClick = { type, quest, subquestId ->
+                if (type != QuestNotificationType.QUEST_COMPLETED) {
+                    navController.navigate("OBJECTIVES/${quest.id}")
+                }
+                notificationManager.dismissCurrent()
+            },
+            onSkillClick = { type, skill ->
+                navController.navigate("SKILLS/${skill.id}")
+                notificationManager.dismissCurrent()
+            },
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .zIndex(11f),
+                    .zIndex(NOTIFICATION_OVERLAY_Z_ORDER),
         )
 
-        @Suppress("MagicNumber")
         goalsModalRequest.value?.let { (type, goals) ->
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .zIndex(12f),
+                        .zIndex(NOTIFICATION_OVERLAY_Z_ORDER),
             ) {
                 GoalsModal(
                     type,
@@ -209,7 +204,6 @@ fun MapScreen(
                     goalsViewModel,
                     onDismiss = {
                         goalsModalRequest.value = null
-                        notificationManager.dismissRequests
                     },
                 )
             }

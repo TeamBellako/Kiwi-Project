@@ -47,8 +47,8 @@ fun Kiwi_Slider(
         enabled = enabled,
         thumb = {
             Kiwi_Diamond(
-                size = getResponsiveSizeHeight(15.dp),
-                color = kiwiColors.color7D,
+                size = getResponsiveSizeHeight(28.dp),
+                color = kiwiColors.color7C,
             )
         },
         track = { sliderState ->
@@ -56,7 +56,7 @@ fun Kiwi_Slider(
             val startDiamondColor = if (currentValue > valueRange.start) kiwiColors.color7D else kiwiColors.color2
             val endDiamondColor = if (currentValue >= valueRange.endInclusive) kiwiColors.color7D else kiwiColors.color2
             val density = androidx.compose.ui.platform.LocalDensity.current
-            val diamondSizePx = with(density) { getResponsiveSizeHeight(10.dp).toPx() }
+            val diamondSizePx = with(density) { getResponsiveSizeHeight(20.dp).toPx() }
 
             SliderDefaults.Track(
                 modifier =
@@ -109,7 +109,7 @@ fun Kiwi_Slider_Preview() {
         ) {
             Kiwi_Slider(
                 KiwiTextArguments("Sound Volume"),
-                value = 2.0f,
+                value = 0.0f,
                 onValueChange = { },
                 valueRange = 0f..3f,
                 steps = 2,

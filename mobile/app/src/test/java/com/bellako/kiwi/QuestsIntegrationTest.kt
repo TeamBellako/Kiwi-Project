@@ -1,12 +1,14 @@
 package com.bellako.kiwi
 
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.notifications.controller.NotificationEvent
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.quests.data.QuestDataMapper
 import com.bellako.kiwi.features.quests.data.SubquestStatus
 import com.bellako.kiwi.features.quests.model.IQuestsAPI
-import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
 import com.bellako.kiwi.features.quests.model.QuestsRepository
 import com.bellako.kiwi.features.quests.model.QuestsViewModel
+import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -35,12 +37,14 @@ class QuestsIntegrationTest {
     private lateinit var api: IQuestsAPI
     private lateinit var repository: QuestsRepository
     private lateinit var viewModel: QuestsViewModel
+    private lateinit var notificationManager: NotificationManager
 
     @Before
     fun setUp() {
+        notificationManager = NotificationManager()
         api = mock(IQuestsAPI::class.java)
         repository = QuestsRepository(api)
-        viewModel = QuestsViewModel(repository)
+        viewModel = QuestsViewModel(repository, notificationManager)
     }
 
     // -------------------------------------------------------------------------
@@ -90,14 +94,20 @@ class QuestsIntegrationTest {
 
             val notificationDeferred =
                 async {
-                    viewModel.getNotifications().first()
+                    notificationManager.notifications.first()
                 }
 
             viewModel.giveQuest(quest.id)
             advanceUntilIdle()
 
             val notification = notificationDeferred.await()
-            assertTrue(notification is QuestNotificationEvent.NewQuest)
+            assertTrue(notification is NotificationEvent.Quest)
+            val questNotification = notification
+            assertEquals(QuestNotificationType.NEW, questNotification.type)
+            assertEquals(quest.id, questNotification.quest.id)
+
+            val state = viewModel.state.value
+            assertTrue(state.quests.any { it.id == quest.id })
         }
 
     // -------------------------------------------------------------------------
@@ -118,14 +128,18 @@ class QuestsIntegrationTest {
 
             val notificationDeferred =
                 async {
-                    viewModel.getNotifications().first()
+                    notificationManager.notifications.first()
                 }
 
             viewModel.completeSubquest(3)
             advanceUntilIdle()
 
             val notification = notificationDeferred.await()
-            assertTrue(notification is QuestNotificationEvent.SubquestCompleted)
+            assertTrue(notification is NotificationEvent.Quest)
+            val questNotification = notification
+            assertEquals(QuestNotificationType.SUBQUEST_COMPLETED, questNotification.type)
+            assertEquals(quest.id, questNotification.quest.id)
+            assertEquals(3, questNotification.subquestId)
         }
 
     // -------------------------------------------------------------------------
@@ -156,22 +170,20 @@ class QuestsIntegrationTest {
             viewModel.loadActiveQuests()
             advanceUntilIdle()
 
-            val notificationDeferred =
-                async { viewModel.getNotifications().first() }
+            val notificationDeferred = async { notificationManager.notifications.first() }
 
             viewModel.failSubquest(3)
             advanceUntilIdle()
 
             val state = viewModel.state.value
             val updatedQuest = state.quests.first()
-
-            assertTrue(
-                updatedQuest.subquests.any {
-                    it.id == 3 && it.status == SubquestStatus.FAILED
-                },
-            )
+            assertTrue(updatedQuest.subquests.any { it.id == 3 && it.status == SubquestStatus.FAILED })
 
             val notification = notificationDeferred.await()
-            assertTrue(notification is QuestNotificationEvent.SubquestFailed)
+            assertTrue(notification is NotificationEvent.Quest)
+            val questNotification = notification
+            assertEquals(QuestNotificationType.SUBQUEST_FAILED, questNotification.type)
+            assertEquals(quest.id, questNotification.quest.id)
+            assertEquals(3, questNotification.subquestId)
         }
 }

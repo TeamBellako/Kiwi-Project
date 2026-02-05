@@ -28,7 +28,7 @@ class GoalsFakeViewModel(
     private val initialGoals =
         listOf(
             GoalDomain(
-                "1",
+                1,
                 10,
                 "Meditate for at least 10 minutes",
                 GoalType.MEDITATION,
@@ -38,7 +38,7 @@ class GoalsFakeViewModel(
                 value = 0,
             ),
             GoalDomain(
-                "2",
+                2,
                 30,
                 "Exercise for 30 minutes",
                 GoalType.EXERCISE,
@@ -49,7 +49,7 @@ class GoalsFakeViewModel(
             ),
         )
 
-    private val fakeGoalsMap: MutableMap<String, GoalDomain> =
+    private val fakeGoalsMap: MutableMap<Long, GoalDomain> =
         initialGoals.associateBy { it.id }.toMutableMap()
 
     // ---------------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ class GoalsFakeViewModel(
             Result.success(Unit)
         }
 
-    override suspend fun updateGoalProgress(goalId: String): Result<GoalDomain> =
+    override suspend fun updateGoalProgress(goalId: Long): Result<GoalDomain> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -91,7 +91,7 @@ class GoalsFakeViewModel(
             Result.success(goal)
         }
 
-    override suspend fun completeGoal(goalId: String): Result<Unit> =
+    override suspend fun completeGoal(goalId: Long): Result<Unit> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -105,7 +105,7 @@ class GoalsFakeViewModel(
             Result.success(Unit)
         }
 
-    override suspend fun uncompleteGoal(goalId: String): Result<Unit> =
+    override suspend fun uncompleteGoal(goalId: Long): Result<Unit> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -157,10 +157,7 @@ class GoalsFakeViewModel(
             Result.success(emptyList())
         }
 
-    override suspend fun checkAndNotifyGoals(
-        onYesterdayClick: (List<GoalDomain>) -> Unit,
-        onTodayClick: (List<GoalDomain>) -> Unit,
-    ) {
+    override suspend fun checkAndNotifyGoals() {
         // Implementación fake - no hace nada
     }
 }

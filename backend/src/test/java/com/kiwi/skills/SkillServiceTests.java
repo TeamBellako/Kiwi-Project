@@ -2,10 +2,15 @@ package com.kiwi.skills;
 
 import com.kiwi.features.skills.controllers.SkillService;
 import com.kiwi.features.skills.controllers.SkillProgressService;
+import com.kiwi.features.skills.data.SkillDTO;
+import com.kiwi.features.skills.data.UserSkillStatusPersistence;
+import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
 import com.kiwi.features.skills.exceptions.SkillLevelUpNotFoundException;
 import com.kiwi.features.skills.exceptions.SkillNotFoundException;
 import com.kiwi.features.skills.exceptions.UserSkillStatusNotFoundException;
 import org.junit.Test;
+
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static com.kiwi.skills.SkillTestFactory.*;
@@ -45,18 +50,33 @@ public class SkillServiceTests {
     }
 
     @Test
-    public void getEquippedSkillsForUser() {
+    public void getAllSkillsForUser_expiredCooldown_isRemoved() {
 
-        var skill1 = skillRepo.saveAndFlush(persistenceSkill(1L));
-        var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
+        // GIVEN
+        var skill = persistenceSkill(1L);
+        skillRepo.saveAndFlush(skill);
 
-        statusRepo.saveAndFlush(equippedSkill(userId, skill1));
-        statusRepo.saveAndFlush(unEquippedSkill(userId, skill2));
+        UserSkillStatusPersistence status = cooldownSkill(userId, skill);
+        // forced expired cooldown
+        status.setCooldownUntil(Instant.now().minusSeconds(60));
 
-        var result = service.getEquippedSkillsForUser(userId);
+        statusRepo.saveAndFlush(status);
+
+        var result = service.getAllSkillsForUser(userId);
 
         assertEquals(1, result.size());
-        assertEquals(skill1.getId(), result.get(0).getSkillId());
+
+        SkillDTO dto = result.get(0);
+        assertFalse(dto.isCooldown());
+        assertNull(dto.getCooldownUntil());
+
+        UserSkillStatusPersistence updated =
+                statusRepo
+                        .findByIdUserIdAndIdSkillId(userId, skill.getId())
+                        .orElseThrow();
+
+        assertFalse(updated.isCooldown());
+        assertNull(updated.getCooldownUntil());
     }
 
     // ============================================================================================
@@ -151,5 +171,74 @@ public class SkillServiceTests {
 
         assertFalse(result.isCooldown());
         assertNull(result.getCooldownUntil());
+    }
+
+    // ============================================================================================
+    // EQUIP
+    // ============================================================================================
+
+    @Test
+    public void equipSkill_success() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        statusRepo.saveAndFlush(
+                unEquippedSkill(userId, skill)
+        );
+
+        var result = service.equipSkill(userId, skill.getId(), SkillTestFactory.equipSkillDTO(1));
+
+        assertEquals(1, result.getDeckSlot());
+    }
+
+    @Test(expected = UserSkillStatusNotFoundException.class)
+    public void equipSkill_noStatusFails() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        service.equipSkill(userId, skill.getId(), SkillTestFactory.equipSkillDTO(1));
+    }
+
+    @Test(expected = DeckSlotAlreadyOccupiedException.class)
+    public void equipSkill_deckSlotAlreadyOccupiedFails() {
+
+        var skill1 = skillRepo.saveAndFlush(persistenceSkill(1L));
+        var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
+
+        statusRepo.saveAndFlush(
+                equippedSkill(userId, skill1)
+        );
+
+        statusRepo.saveAndFlush(
+                unEquippedSkill(userId, skill2)
+        );
+
+        service.equipSkill(userId, skill2.getId(), SkillTestFactory.equipSkillDTO(1));
+    }
+
+    // ============================================================================================
+    // UNEQUIP
+    // ============================================================================================
+
+    @Test
+    public void unequipSkill_success() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        statusRepo.saveAndFlush(
+                equippedSkill(userId, skill)
+        );
+
+        var result = service.unequipSkill(userId, skill.getId());
+
+        assertEquals(0, result.getDeckSlot());
+    }
+
+    @Test(expected = UserSkillStatusNotFoundException.class)
+    public void unequipSkill_noStatusFails() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        service.unequipSkill(userId, skill.getId());
     }
 }

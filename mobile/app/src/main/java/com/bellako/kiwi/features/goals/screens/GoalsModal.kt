@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,10 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
@@ -34,7 +33,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.modals.WIPPopUpScreen
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.IGoal
@@ -45,12 +43,13 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.launch
 
 @Composable
 @Suppress("MagicNumber", "LongMethod")
 fun GoalsModal(
-    goalModalType: GoalModalType,
+    goalModalType: GoalNotificationType,
     goals: List<IGoal>,
     goalsViewModel: IGoalsViewModel,
     onDismiss: () -> Unit = {},
@@ -59,14 +58,14 @@ fun GoalsModal(
     val coroutineScope = rememberCoroutineScope()
 
     val header =
-        if (goalModalType == GoalModalType.NEW) {
+        if (goalModalType == GoalNotificationType.NEW) {
             "New Daily Challenges!"
         } else {
             "Yesterday's Challenge"
         }
 
     val body =
-        if (goalModalType == GoalModalType.NEW) {
+        if (goalModalType == GoalNotificationType.NEW) {
             "These are the new challenges that await for you today"
         } else {
             "You didn't checked these goals yesterday.\n Did you completed them?"
@@ -108,7 +107,7 @@ fun GoalsModal(
                         KiwiTextArguments(
                             header,
                             TextAlign.Center,
-                            bold = true,
+                            fontWeight = FontWeight.Bold,
                             modifier =
                                 Modifier.padding(
                                     top = getResponsiveSizeHeight(Spacing.medium),
@@ -127,7 +126,11 @@ fun GoalsModal(
                     )
                     Kiwi_Spacer(Spacing.large)
                     for (goal in goals) {
-                        GoalComponent(goal, goalsViewModel, goalModalType != GoalModalType.NEW)
+                        GoalComponent(
+                            goal,
+                            goalsViewModel,
+                            Modifier.padding(horizontal = getResponsiveSizeWidth(10.dp)),
+                        )
                         Kiwi_Spacer(Spacing.small)
                     }
                 }
@@ -146,7 +149,6 @@ fun GoalsModal(
                         KiwiTextArguments(
                             "Modify",
                             color = kiwiColor.colorF,
-                            bold = false,
                         ),
                     color = kiwiColor.color7D,
                     modifier =
@@ -157,42 +159,32 @@ fun GoalsModal(
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            if (goalModalType == GoalModalType.NEW) "Let's go!" else "Done",
+                            if (goalModalType == GoalNotificationType.NEW) "Let's go!" else "Done",
                             color = kiwiColor.colorF,
-                            bold = false,
                         ),
                     color = kiwiColor.color8,
                     modifier =
                         Modifier
                             .weight(buttonPercentage),
                     onClick = {
-                        coroutineScope.launch {
-                            if (goalModalType == GoalModalType.NEW) {
-                                val suggestedGoals =
-                                    goals.map { goal ->
-                                        SuggestedGoalDomain(
-                                            goal.id,
-                                            goal.target,
-                                            goal.action,
-                                            goal.type,
-                                            goal.category,
-                                            goal.reward,
-                                        )
-                                    }
+                        if (goalModalType == GoalNotificationType.NEW) {
+                            val suggestedGoals =
+                                goals.map { goal ->
+                                    SuggestedGoalDomain(goal.id, goal.target, goal.action, goal.type, goal.category, goal.reward)
+                                }
+                            coroutineScope.launch {
                                 goalsViewModel.createGoalsFromSuggestions(suggestedGoals)
-                            } else {
+                            }
+                        } else {
+                            coroutineScope.launch {
                                 for (goal in goals) {
-                                    if (goal is GoalDomain) {
-                                        if (goal.value == goal.target) {
-                                            goalsViewModel.completeGoal(goalId = goal.id)
-                                        } else {
-                                            goalsViewModel.uncompleteGoal(goalId = goal.id)
-                                        }
+                                    if (goal is GoalDomain && goal.status != GoalStatus.COMPLETED) {
+                                        goalsViewModel.uncompleteGoal(goalId = goal.id)
                                     }
                                 }
                             }
-                            onDismiss()
                         }
+                        onDismiss()
                     },
                 )
             }
@@ -211,7 +203,7 @@ fun GoalsModal(
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Suppress("MagicNumber")
 @Composable
-fun GoalsModal_Preview() {
+fun GoalsModal_Preview(goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel()) {
     Kiwi_Theme {
         Box(
             modifier =
@@ -220,11 +212,11 @@ fun GoalsModal_Preview() {
                     .background(LocalKiwiColors.current.color0),
         ) {
             GoalsModal(
-                goalModalType = GoalModalType.NEW,
+                goalModalType = GoalNotificationType.NEW,
                 goals =
                     listOf(
                         GoalDomain(
-                            "1",
+                            1,
                             2,
                             "Programa el modal lo mejor que sepas",
                             GoalType.PRODUCTIVITY,
@@ -234,7 +226,7 @@ fun GoalsModal_Preview() {
                             value = 2,
                         ),
                         GoalDomain(
-                            "2",
+                            2,
                             10,
                             "Esto está fuera de tu alcance",
                             GoalType.PRODUCTIVITY,
@@ -244,7 +236,7 @@ fun GoalsModal_Preview() {
                             value = 5,
                         ),
                     ),
-                goalsViewModel = GoalsFakeViewModel(),
+                goalsViewModel = goalsViewModel,
             )
         }
     }

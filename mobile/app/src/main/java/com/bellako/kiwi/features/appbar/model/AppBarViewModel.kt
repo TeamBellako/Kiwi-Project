@@ -18,13 +18,16 @@ class AppBarViewModel
     constructor() :
     BaseViewModel(),
         IAppBarViewModel {
+        private val _currentRoute = MutableStateFlow<String?>(null)
+        val currentRoute: StateFlow<String?> = _currentRoute.asStateFlow()
+
         private val _state =
             MutableStateFlow(
                 AppBarState(
                     items =
                         listOf(
                             AppBarItem(R.drawable.ic_map, ScreenRoutes.HOME),
-                            AppBarItem(R.drawable.ic_skills, ScreenRoutes.WIP),
+                            AppBarItem(R.drawable.ic_skills, ScreenRoutes.SKILLS),
                             AppBarItem(R.drawable.ic_objectives, ScreenRoutes.OBJECTIVES),
                             AppBarItem(R.drawable.ic_troops, ScreenRoutes.WIP),
                             AppBarItem(R.drawable.ic_settings, ScreenRoutes.SETTINGS),
@@ -36,7 +39,15 @@ class AppBarViewModel
 
         // ---------------------------------------------------------------------------------------------
 
+        override fun onRouteChanged(route: String?) {
+            _currentRoute.value = route
+        }
+
+        // ---------------------------------------------------------------------------------------------
+
         override fun onNewContent(route: String) {
+            if (_currentRoute.value?.startsWith(route) == true) return
+
             updateItem(route) {
                 copy(hasNewContent = true)
             }

@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -34,8 +33,8 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Display2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
+import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -47,9 +46,6 @@ import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.common.utils.SECONDS_IN_HOUR
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
-import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalsListState
-import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
@@ -59,19 +55,16 @@ import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
-import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
-import com.bellako.kiwi.features.notifications.model.NotificationManager
-import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
-import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
+import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -79,7 +72,6 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import java.time.LocalDate
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
-const val DAY_DISABLED_ALPHA = 0.3f
 
 const val STATE_HEIGHT_0 = 140
 const val STATE_HEIGHT_1 = 270
@@ -174,7 +166,7 @@ fun DashboardScreen(
                 Box(
                     modifier =
                         Modifier
-                            .background(kiwiColors.color2.copy(alpha = 0.3f))
+                            .background(kiwiColors.color2.copy(alpha = KIWI_DISABLED_ALPHA))
                             .fillMaxWidth()
                             .height(
                                 getResponsiveSizeHeight(STATES[currentStateIndex]).dp -
@@ -283,7 +275,7 @@ fun SelectedMetricsTime(
         }
 
     if (expanded) {
-        Kiwi_Display2(
+        Kiwi_H1(
             KiwiTextArguments(
                 text = currentString,
                 TextAlign.Center,
@@ -340,8 +332,7 @@ fun SelectedMetricsTime(
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Hidden() {
-    val fakeGoalsViewModel = GoalsFakeViewModel()
-    DashboardModal_Preview(false, 0, goalsViewModel = fakeGoalsViewModel)
+    DashboardModal_Preview(false, 0)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -351,8 +342,7 @@ fun DashboardModal_Preview_Hidden() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Collapsed() {
-    val fakeGoalsViewModel = GoalsFakeViewModel()
-    DashboardModal_Preview(false, 1, goalsViewModel = fakeGoalsViewModel)
+    DashboardModal_Preview(false, 1)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -362,8 +352,7 @@ fun DashboardModal_Preview_Collapsed() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Expanded() {
-    val fakeGoalsViewModel = GoalsFakeViewModel()
-    DashboardModal_Preview(false, 2, goalsViewModel = fakeGoalsViewModel)
+    DashboardModal_Preview(false, 2)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -373,8 +362,7 @@ fun DashboardModal_Preview_Expanded() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Expanded_Calendar() {
-    val fakeGoalsViewModel = GoalsFakeViewModel()
-    DashboardModal_Preview(true, 2, goalsViewModel = fakeGoalsViewModel)
+    DashboardModal_Preview(true, 2)
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -383,16 +371,9 @@ fun DashboardModal_Preview_Expanded_Calendar() {
 fun DashboardModal_Preview(
     showCalendarView: Boolean,
     initialStateIndex: Int = 0,
-    nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState()),
-    questsViewModel: QuestsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState()),
+    nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
 ) {
-    val nodesFakeViewModel = nodesViewModel
-    val questsFakeViewModel = questsViewModel
-    val goalsFakeViewModel = goalsViewModel
-    val mapViewModel = MapViewModel()
-    val notificationManager = NotificationManager()
-
     val nav = rememberNavController()
     Kiwi_Theme {
         Scaffold(
@@ -402,12 +383,11 @@ fun DashboardModal_Preview(
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen(
-                        nodesViewModel = nodesFakeViewModel,
-                        questsViewModel = questsFakeViewModel,
+                        nodesViewModel = nodesViewModel,
                         navController = nav,
-                        goalsViewModel = goalsFakeViewModel,
-                        mapViewModel = mapViewModel,
-                        notificationManager = notificationManager
+                        goalsViewModel = goalsViewModel,
+                        mapViewModel = MapViewModel(),
+                        notificationManager = NotificationManager(),
                     )
                     DashboardScreen(
                         usersViewModel =

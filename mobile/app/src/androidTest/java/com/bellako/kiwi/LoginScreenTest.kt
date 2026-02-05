@@ -18,7 +18,7 @@ import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
-import com.bellako.kiwi.features.notifications.model.NotificationManager
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
@@ -89,7 +89,6 @@ class LoginScreenTest {
                     MapScreen(
                         nodesViewModel = nodesFakeViewModel,
                         mapViewModel = mapviewModel,
-                        questsViewModel = questsFakeViewModel,
                         goalsViewModel = goalsFakeViewModel,
                         navController = navController,
                         notificationManager = NotificationManager(),

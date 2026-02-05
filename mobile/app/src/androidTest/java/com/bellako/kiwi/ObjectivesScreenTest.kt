@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onNodeWithText
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
-import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.ui.Kiwi_Theme
 import org.junit.Rule
 import org.junit.Test
@@ -17,53 +16,57 @@ class ObjectivesScreenTest {
 
     @Test
     fun displaysAllQuests() {
-        val fakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
+        val questFakeViewModel = QuestsFakeViewModel()
+        val goalsFakeViewModel = GoalsFakeViewModel()
 
         rule.setContent {
             Kiwi_Theme {
-                ObjectivesScreen(questsViewModel = fakeViewModel, GoalsFakeViewModel())
+                ObjectivesScreen(questsViewModel = questFakeViewModel, goalsFakeViewModel)
             }
         }
 
-        fakeViewModel.state.value.quests.forEach { quest ->
+        questFakeViewModel.state.value.quests.forEach { quest ->
             rule.onNodeWithText(quest.name).assertIsDisplayed()
         }
     }
 
     @Test
     fun focusedQuestIsExpandedAndScrolledTo() {
-        val fakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
+        val questFakeViewModel = QuestsFakeViewModel()
+        val goalsFakeViewModel = GoalsFakeViewModel()
+
         val focusedQuestId =
-            fakeViewModel.state.value.quests
+            questFakeViewModel.state.value.quests
                 .last()
                 .id
 
         rule.setContent {
             Kiwi_Theme {
-                ObjectivesScreen(questsViewModel = fakeViewModel, GoalsFakeViewModel(), focusedQuestId = focusedQuestId)
+                ObjectivesScreen(questsViewModel = questFakeViewModel, goalsFakeViewModel, focusedQuestId = focusedQuestId)
             }
         }
 
         val focusedQuest =
-            fakeViewModel.state.value.quests
+            questFakeViewModel.state.value.quests
                 .first { it.id == focusedQuestId }
         rule.onNodeWithText(focusedQuest.description).assertIsDisplayed()
     }
 
     @Test
     fun questsAreDisplayedOnScreenLaunch() {
-        val fakeViewModel = QuestsFakeViewModel()
+        val questFakeViewModel = QuestsFakeViewModel()
+        val goalsFakeViewModel = GoalsFakeViewModel()
 
         rule.setContent {
             Kiwi_Theme {
-                ObjectivesScreen(questsViewModel = fakeViewModel, GoalsFakeViewModel())
+                ObjectivesScreen(questsViewModel = questFakeViewModel, goalsFakeViewModel)
             }
         }
 
         rule.waitForIdle()
 
         val firstQuest =
-            fakeViewModel.state.value.quests
+            questFakeViewModel.state.value.quests
                 .first()
         rule.onNodeWithText(firstQuest.name).assertIsDisplayed()
     }

@@ -19,6 +19,6 @@ public class SkillDTO {
     private Long levelupSkillId;
 
     private boolean isCooldown;
-    private Instant cooldownUntil;
+    private Long cooldownUntil;
     private int deckSlot;
 }

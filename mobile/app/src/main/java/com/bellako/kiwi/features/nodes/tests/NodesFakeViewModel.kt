@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class NodesFakeViewModel(
-    initialState: NodesState = NodesState(),
+    initialState: NodesState = NodesTestFactory.validNodesState(),
 ) : BaseFakeViewModel(),
     INodesViewModel {
     private val _state = MutableStateFlow(initialState)
