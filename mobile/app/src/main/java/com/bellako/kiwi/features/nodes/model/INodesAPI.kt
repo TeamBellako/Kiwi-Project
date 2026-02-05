@@ -6,8 +6,10 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface INodesAPI {
-    @GET("api/nodes")
-    suspend fun getNodesForUser(): List<NodesDTO>
+    @GET("api/nodes/{mapId}")
+    suspend fun getNodesForMapId(
+        @Path("mapId") mapId: Int,
+    ): List<NodesDTO>
 
     @POST("api/nodes/{nodeId}/unlock")
     suspend fun unlockNode(

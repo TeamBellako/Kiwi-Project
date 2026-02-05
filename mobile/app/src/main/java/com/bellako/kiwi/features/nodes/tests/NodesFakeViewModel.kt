@@ -22,7 +22,7 @@ class NodesFakeViewModel(
 
     // ---------------------------------------------------------------------------------------------
 
-    override fun loadNodes() {
+    override fun loadNodes(mapId: Int) {
         if (fakeError) {
             handleError(fakeException)
             setUiState(UIState.Error(fakeException.message ?: "Error loading nodes"))
@@ -88,6 +88,7 @@ class NodesFakeViewModel(
                         name = "Node $connectedId",
                         displayName = "Node $connectedId",
                         connectedNodeIds = emptyList(),
+                        mapId = 0,
                     )
                 currentNodes[connectedId] = newNode
             }

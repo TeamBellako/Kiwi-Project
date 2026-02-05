@@ -27,12 +27,12 @@ class NodesViewModel
 
         // -----------------------------------------------------------------------------------------
 
-        override fun loadNodes() {
+        override fun loadNodes(mapId: Int) {
             viewModelScope.launch {
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val nodes = repository.getNodes()
+                    val nodes = repository.getNodesByMapId(mapId)
                     _state.value =
                         _state.value.copy(
                             nodes = nodes.associateBy { it.id },

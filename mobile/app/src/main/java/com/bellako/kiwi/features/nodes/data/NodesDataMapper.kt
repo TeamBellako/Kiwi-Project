@@ -13,6 +13,7 @@ object NodesDataMapper {
             name = dto.name,
             displayName = dto.displayName,
             connectedNodeIds = dto.connectedNodeIds,
+            mapId = dto.mapId,
         )
 
     fun toDTO(domain: NodesDomain): NodesDTO =
@@ -27,5 +28,6 @@ object NodesDataMapper {
             name = domain.name,
             displayName = domain.displayName,
             connectedNodeIds = domain.connectedNodeIds,
+            mapId = domain.mapId,
         )
 }

@@ -135,6 +135,7 @@ public class NodesService {
     }
 
     public List<NodesDTO> getNodesForMapId(@NotNull int mapId, @NotNull Long userId) {
-        return getNodesForUser(userId).stream().filter(node -> Objects.equals(node.getMapId(), mapId)).toList();
+        List<NodesDTO> allNodes = getNodesForUser(userId);
+        return allNodes.stream().filter(node -> Objects.equals(node.getMapId(), mapId)).toList();
     }
 }

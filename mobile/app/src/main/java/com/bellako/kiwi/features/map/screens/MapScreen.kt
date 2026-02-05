@@ -121,7 +121,7 @@ fun MapScreen(
     val nodesState by nodesViewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        nodesViewModel.loadNodes()
+        nodesViewModel.loadNodes(0)
 
         snapshotFlow { nodesState?.nodes }
             .filterNotNull()
@@ -352,21 +352,24 @@ private fun InteractiveMap(
                                 mapViewModel.setPlayerNode(id)
                             },
                             onCompleteNode = { id ->
-                                // TODO: Hack
-                                // nodesViewModel.completeNode(id)
+                                nodesViewModel.completeNode(id)
                                 AudioManager.playSFX(context, R.raw.snd_node_completed)
 
-                                GlobalScope.launch(Dispatchers.Main) {
-                                    EventBus.emitEvent(
-                                        EventType.SWITCH_MAP,
-                                        EventPayload.SwitchMapPayload(
-                                            MapInfo(
-                                                mapResourceId = R.drawable.map_switch_test,
-                                                maxZoom = 16f,
-                                                backgroundColor = kiwiColors.colorF,
+                                // TODO: Testing for map switching
+                                if (id.toInt() == 7) {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        EventBus.emitEvent(
+                                            EventType.SWITCH_MAP,
+                                            EventPayload.SwitchMapPayload(
+                                                MapInfo(
+                                                    mapResourceId = R.drawable.map_switch_test,
+                                                    maxZoom = 16f,
+                                                    backgroundColor = kiwiColors.colorF,
+                                                    mapId = 1,
+                                                ),
                                             ),
-                                        ),
-                                    )
+                                        )
+                                    }
                                 }
                             },
                         )

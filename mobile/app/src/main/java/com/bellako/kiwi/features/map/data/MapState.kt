@@ -8,6 +8,7 @@ data class MapInfo(
     val mapResourceId: Int = R.drawable.mindveil_4k,
     val maxZoom: Float = 8f,
     val backgroundColor: Color = Color.White,
+    val mapId: Int = 0,
 )
 
 data class MapState(
