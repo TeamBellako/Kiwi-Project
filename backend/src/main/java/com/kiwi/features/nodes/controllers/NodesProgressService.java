@@ -18,7 +18,9 @@ public class NodesProgressService {
                     node.getEventOnExecution(),
                     node.getName(),
                     node.getDisplayName(),
-                    node.getConnectedNodeIds());
+                    node.getConnectedNodeIds(),
+                    node.getMapId());
+            
         }
         return node;
     }
@@ -36,7 +38,8 @@ public class NodesProgressService {
                 node.getEventOnExecution(),
                 node.getName(),
                 node.getDisplayName(),
-                node.getConnectedNodeIds());
+                node.getConnectedNodeIds(),
+                node.getMapId());
     }
 
     public NodesDomain complete(NodesDomain node) {
@@ -52,6 +55,7 @@ public class NodesProgressService {
                 node.getEventOnExecution(),
                 node.getName(),
                 node.getDisplayName(),
-                node.getConnectedNodeIds());
+                node.getConnectedNodeIds(),
+                node.getMapId());
     }
 }

@@ -36,6 +36,9 @@ public class NodesPersistence {
     @Column(name = "display_name")
     private String displayName;
 
+    @Column(name = "map_id")
+    private int mapId;
+
     @OneToMany(mappedBy = "fromNode", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NodeEdgePersistence> outgoingEdges = new ArrayList<>();
 

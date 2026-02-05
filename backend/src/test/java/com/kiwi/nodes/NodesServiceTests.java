@@ -28,9 +28,9 @@ public class NodesServiceTests {
     @Test
     public void getNodesForUser() {
 
-        var node1 =  persistenceNode( 1L);
-        var node2 = persistenceNode( 2L);
-        var node3 = persistenceNode( 3L);
+        var node1 =  persistenceNode( 1L , 0);
+        var node2 = persistenceNode( 2L, 0);
+        var node3 = persistenceNode( 3L, 0);
 
         nodeRepo.saveAndFlush(node1);
         nodeRepo.saveAndFlush(node2);
@@ -45,7 +45,7 @@ public class NodesServiceTests {
 
     @Test
     public void lockNode_success() {
-        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L));
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L, 0));
         var result = service.lockNode(userId, node.getId());
 
         assertEquals(NodeStatus.LOCKED.name(), result.getStatus());
@@ -53,7 +53,7 @@ public class NodesServiceTests {
 
     @Test
     public void unlockNode_success() {
-        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L));
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L, 0));
         statusRepo.saveUserStatus(lockedStatus(userId, node.getId()));
 
         var result = service.unlockNode(userId, node.getId());
@@ -62,7 +62,7 @@ public class NodesServiceTests {
 
     @Test(expected = NodeInaccessibleException.class)
     public void unlockNode_failsIfNoStatus() {
-        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L));
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 1L, 0));
         service.unlockNode(userId, node.getId());
     }
 
@@ -73,7 +73,7 @@ public class NodesServiceTests {
 
     @Test
     public void completeNode_success() {
-        var node =  nodeRepo.saveAndFlush(persistenceNode( 2L));
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 2L, 0));
         statusRepo.saveUserStatus(openStatus(userId, node.getId()));
 
         var result = service.completeNode(userId, node.getId());
@@ -84,7 +84,7 @@ public class NodesServiceTests {
 
     @Test(expected = IllegalStateException.class)
     public void completeNode_lockedFails() {
-        var node =  nodeRepo.saveAndFlush(persistenceNode( 2L));
+        var node =  nodeRepo.saveAndFlush(persistenceNode( 2L, 0));
         statusRepo.saveUserStatus(lockedStatus(userId, node.getId()));
 
         service.completeNode(userId, node.getId());

@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS nodes (
   event_on_execution BIGINT NOT NULL,
   name VARCHAR(255) NOT NULL,
   display_name VARCHAR(255),
+  map_id INT NOT NULL,
   CONSTRAINT uq_nodes_name UNIQUE (name),
   CHECK (
     cord_x >= 0.0 AND cord_x <= 1.0
@@ -174,14 +175,15 @@ CREATE TABLE IF NOT EXISTS node_edges (
 );
 
 -- Insert placeholder values for nodes
-INSERT INTO nodes ( id, icon, price, cord_x, cord_y, event_on_execution, name, display_name ) 
+INSERT INTO nodes ( id, icon, price, cord_x, cord_y, event_on_execution, name, display_name, map_id ) 
 VALUES 
-(1,1,120,0.585,0.12,0,'node_1','START'), 
-(2,0,140,0.623,0.175,0,'node_2',NULL), 
-(3,0,180,0.66,0.228,0,'node_3',NULL),
-(4,2,100,0.598,0.228,0,'node_4','CAVE OF THE DEEP BREATH'), 
-(5,0,180,0.66,0.275,0,'node_5',NULL),
-(6,3,140,0.615,0.295,0,'node_6','CITY');
+(1,1,120,0.585,0.12,0,'node_1','START',0), 
+(2,0,140,0.623,0.175,0,'node_2',NULL,0), 
+(3,0,180,0.66,0.228,0,'node_3',NULL,0),
+(4,2,100,0.598,0.228,0,'node_4','CAVE OF THE DEEP BREATH',0), 
+(5,0,180,0.66,0.275,0,'node_5',NULL,0),
+(6,3,140,0.615,0.295,0,'node_6','CITY',0);
+(1,1,120,0.585,0.12,0,'node_7','MAP_SWITCH',1), 
 
 INSERT INTO node_edges ( from_node_id, to_node_id ) 
 VALUES

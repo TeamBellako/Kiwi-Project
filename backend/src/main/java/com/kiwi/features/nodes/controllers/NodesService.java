@@ -133,4 +133,8 @@ public class NodesService {
         UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
         userNodeStatusRepository.saveAndFlush(persistence);
     }
+
+    public List<NodesDTO> getNodesForMapId(@NotNull int mapId, @NotNull Long userId) {
+        return getNodesForUser(userId).stream().filter(node -> Objects.equals(node.getMapId(), mapId)).toList();
+    }
 }

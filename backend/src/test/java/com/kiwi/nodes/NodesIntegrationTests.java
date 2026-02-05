@@ -16,6 +16,7 @@ import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.JwtUtils;
+import jakarta.persistence.MapsId;
 import jakarta.transaction.Transactional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,8 +69,8 @@ public class NodesIntegrationTests {
         return usersRepository.saveAndFlush(user);
     }
 
-    private NodesPersistence createNode(Long nodeId) {
-        return nodesRepository.saveAndFlush(persistenceNode(nodeId));
+    private NodesPersistence createNode(Long nodeId, int mapId) {
+        return nodesRepository.saveAndFlush(persistenceNode(nodeId, mapId));
     }
 
     private void setNodeStatuses(UsersPersistence user, NodesPersistence... nodes) {
@@ -93,10 +94,10 @@ public class NodesIntegrationTests {
     @WithMockUser(username = "finn@thehuman.com")
     public void getAllNodes() throws Exception {
         var user = createUser();
-        var n1 = createNode(1L);
-        var n2 = createNode(2L);
-        var n3 = createNode(3L);
-        var n4 = createNode(4L);
+        var n1 = createNode(1L, 0);
+        var n2 = createNode(2L, 0);
+        var n3 = createNode(3L, 0);
+        var n4 = createNode(4L, 0);
 
         setNodeStatuses(user, n1, n2, n3, n4);
 
@@ -107,9 +108,25 @@ public class NodesIntegrationTests {
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
+    public void getNodesForMapId() throws Exception {
+        var user = createUser();
+        var n1 = createNode(1L, 0);
+        var n2 = createNode(2L, 0);
+        var n3 = createNode(3L, 1);
+        var n4 = createNode(4L, 1);
+
+        setNodeStatuses(user, n1, n2, n3, n4);
+
+        mockMvc.perform(get(API_URL + '/' + 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
     public void unlockNodeSuccess() throws Exception {
         var user = createUser();
-        var node = createNode(1L);
+        var node = createNode(1L, 0);
         statusRepository.saveAndFlush(lockedStatus(user.getId(), node.getId()));
 
         mockMvc.perform(post(API_URL + "/" + node.getId() + "/unlock"))
@@ -121,9 +138,9 @@ public class NodesIntegrationTests {
     @WithMockUser(username = "finn@thehuman.com")
     public void completeNodeSuccess() throws Exception {
         var user = createUser();
-        var node1 = createNode(1L);
-        var node2 = createNode(2L);
-        var node3 = createNode(3L);
+        var node1 = createNode(1L, 0);
+        var node2 = createNode(2L, 0);
+        var node3 = createNode(3L, 0);
 
         connectNodes(node1, node2, node3);
         nodesRepository.saveAndFlush(node1);
