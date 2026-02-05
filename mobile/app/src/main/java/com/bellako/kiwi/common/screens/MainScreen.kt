@@ -197,6 +197,12 @@ private fun AppScreen(
                         personalityViewModel = personalityViewModel,
                     )
                 }
+
+                LaunchedEffect(isLoginCompleted) {
+                    if (isLoginCompleted) {
+                        skillsViewModel.onUserLoggedIn()
+                    }
+                }
             }
         },
     )

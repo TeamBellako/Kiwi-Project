@@ -31,8 +31,6 @@ interface ISkillsViewModel : IBaseViewModel<SkillsState> {
 
     fun notifyCooldownFinished(skill: SkillDomain)
 
-    fun loadAllSkills()
-
     fun giveSkill(skillId: Long)
 
     fun levelUpSkill(skillId: Long)

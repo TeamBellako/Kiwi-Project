@@ -10,8 +10,6 @@ import com.bellako.kiwi.features.goals.data.GoalDTO
 import com.bellako.kiwi.features.goals.model.GoalsRepository
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
-import com.bellako.kiwi.features.quests.data.QuestDomain
-import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.features.skills.data.CooldownType
 import com.bellako.kiwi.features.skills.data.EquipSkillDTO
 import com.bellako.kiwi.features.skills.data.GoalData
@@ -23,11 +21,8 @@ import com.bellako.kiwi.features.skills.screen.ONE_MINUTE_SECONDS
 import com.bellako.kiwi.features.skills.screen.SkillNotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -80,39 +75,23 @@ class SkillsViewModel
 
         // LOAD
         @RequiresApi(Build.VERSION_CODES.O)
-        override fun loadAllSkills() {
-            viewModelScope.launch {
-                setIsLoading(true)
-                setUiState(UIState.Loading)
-                try {
-                    val skillDTOs = skillsRepository.getAllSkills()
+        private suspend fun loadAllSkills() {
+            val skillDTOs = skillsRepository.getAllSkills()
 
-                    val goalsData = loadSkillGoals()
-                    val updatedSkills =
-                        skillDTOs.map { dto ->
-                            if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL) {
-                                SkillDataMapper.toGoalDomain(dto, goalsData[dto.cooldownGoalId]!!)
-                            } else {
-                                SkillDataMapper.toDomainWithoutGoal(dto)
-                            }
-                        }
-
-                    _state.value =
-                        _state.value.copy(
-                            skills = updatedSkills.associateBy { it.id },
-                        )
-
-                    setUiState(UIState.Success(Unit))
-                } catch (e: HttpException) {
-                    warn("HTTP error loading skills: ${e.message}")
-                    setUiState(mapExceptionToUIState(e))
-                } catch (e: IOException) {
-                    warn("IO error loading skills: ${e.message}")
-                    setUiState(UIState.GeneralError)
-                } finally {
-                    setIsLoading(false)
+            val goalsData = loadSkillGoals()
+            val updatedSkills =
+                skillDTOs.map { dto ->
+                    if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL) {
+                        SkillDataMapper.toGoalDomain(dto, goalsData[dto.cooldownGoalId]!!)
+                    } else {
+                        SkillDataMapper.toDomainWithoutGoal(dto)
+                    }
                 }
-            }
+
+            _state.value =
+                _state.value.copy(
+                    skills = updatedSkills.associateBy { it.id },
+                )
         }
 
         // GIVE
@@ -321,7 +300,9 @@ class SkillsViewModel
                     updateSkill(skill.copy(goalData = skill.goalData.copy(progress = response.value)))
 
                     if (response.value == 0) {
-                        removeCooldown(skillId)
+                        handleCooldown(skillId) {
+                            skillsRepository.removeCooldown(it)
+                        }
                     }
 
                     setUiState(UIState.Success(Unit))
@@ -340,6 +321,17 @@ class SkillsViewModel
         // ------------------------------------------------------------------------------------------
         // HELPERS
         // ------------------------------------------------------------------------------------------
+
+        fun onUserLoggedIn() {
+            viewModelScope.launch {
+                loadAllSkills()
+
+                while (true) {
+                    delay(ONE_SECOND_MILLISECONDS) // MAYBE WE CAN CHANGE IT TO ONLY UPDATE EVERY MINUTE
+                    tickCooldowns()
+                }
+            }
+        }
 
         private fun updateSkill(skill: SkillDomain) {
             _state.value =
@@ -398,19 +390,11 @@ class SkillsViewModel
                 target = target,
             )
 
-        init {
-            viewModelScope.launch {
-                while (true) {
-                    delay(ONE_SECOND_MILLISECONDS) // MAYBE WE CAN CHANGE IT TO ONLY UPDATE EVERY MINUTE
-                    tickCooldowns()
-                }
-            }
-        }
-
         @RequiresApi(Build.VERSION_CODES.O)
-        private suspend fun tickCooldowns() {
+        private fun tickCooldowns() {
             val now = Instant.now()
             var changed = false
+            val finishedCooldowns = mutableListOf<Long>()
 
             val updated =
                 _state.value.skills.mapValues { (_, skill) ->
@@ -425,7 +409,7 @@ class SkillsViewModel
                         when {
                             percentage >= 1f -> {
                                 changed = true
-                                notifyCooldownFinished(skill)
+                                finishedCooldowns += skill.id
                                 skill.copy(isCooldown = false, cooldownUntil = null, cooldownProgress = 0f)
                             }
 
@@ -443,6 +427,12 @@ class SkillsViewModel
 
             if (changed) {
                 _state.value = _state.value.copy(skills = updated)
+            }
+
+            viewModelScope.launch {
+                finishedCooldowns.forEach { skillId ->
+                    handleCooldown(skillId) { skillsRepository.removeCooldown(it) }
+                }
             }
         }
 

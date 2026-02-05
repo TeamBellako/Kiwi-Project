@@ -198,7 +198,7 @@ fun MapScreen(
                         fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5A,
-                onClick = { skillsViewModel.removeCooldown(1L) },
+                onClick = { skillsViewModel.giveSkill(2L) },
             )
 
             InteractiveMap(

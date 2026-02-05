@@ -46,10 +46,6 @@ fun SkillsScreen(
     val kiwiColors = LocalKiwiColors.current
     val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) {
-        skillsViewModel.loadAllSkills()
-    }
-
     LaunchedEffect(skillsState, focusedSkillId) {
         if (focusedSkillId == null) return@LaunchedEffect
 

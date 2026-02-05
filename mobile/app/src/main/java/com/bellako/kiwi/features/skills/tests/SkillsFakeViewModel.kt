@@ -4,18 +4,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseFakeViewModel
-import com.bellako.kiwi.features.notifications.controller.NotificationEvent
-import com.bellako.kiwi.features.skills.data.CooldownType
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillsState
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
-import com.bellako.kiwi.features.skills.model.SkillNotificationEvent
 import com.bellako.kiwi.features.skills.screen.SkillNotificationType
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 
@@ -49,17 +43,6 @@ class SkillsFakeViewModel
                 SkillNotificationType.READY,
                 skill,
             )
-        }
-
-        // LOAD
-        override fun loadAllSkills() {
-            if (fakeError) {
-                handleError(fakeException)
-                setUiState(UIState.Error(fakeException.message ?: "Error loading skills"))
-            } else {
-                handleSuccess()
-                setUiState(UIState.Success(Unit))
-            }
         }
 
         // GIVE
