@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -42,6 +43,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.modals.WIPPopUpScreen
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
@@ -72,6 +74,8 @@ fun GoalCustomize(
 
     // Estado local para el progreso del slider (inicializado con el valor del goal)
     var sliderProgress: Float by remember { mutableFloatStateOf(initialProgress.coerceIn(0f, 1f)) }
+
+    var showWorkInProgressPopup by remember { mutableStateOf(false) }
 
     // Si el goal cambia (p. ej. se abre otro goal), sincronizamos el slider
     LaunchedEffect(goal.id) {
@@ -177,7 +181,7 @@ fun GoalCustomize(
                         ),
                     color = kiwiColor.color8,
                     modifier = Modifier.width(buttonsWidth).padding(top = getResponsiveSizeHeight(5.dp)),
-                    onClick = {},
+                    onClick = { showWorkInProgressPopup = true },
                     iconRes = R.drawable.ic_swap,
                     iconSize = 15.dp,
                 )
@@ -212,6 +216,11 @@ fun GoalCustomize(
                 }
             },
         )
+    }
+
+    // Popup de "Work in progress"
+    if (showWorkInProgressPopup) {
+        WIPPopUpScreen(onDismiss = { showWorkInProgressPopup = false })
     }
 }
 

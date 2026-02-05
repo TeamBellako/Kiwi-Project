@@ -59,6 +59,7 @@ fun GoalComponent(
     goal: IGoal,
     goalsViewModel: IGoalsViewModel,
     modifier: Modifier = Modifier,
+    plus: Boolean = true,
 ) {
     var currentGoal by remember { mutableStateOf(goal) }
     var showModal by remember { mutableStateOf(false) }
@@ -134,7 +135,7 @@ fun GoalComponent(
                     Modifier
                         .padding(vertical = getResponsiveSizeWidth(13.dp)),
                     colorFilter =
-                        ColorFilter.tint(if (status != GoalStatus.COMPLETED) kiwiColors.colorF1 else kiwiColors.color8C),
+                        ColorFilter.tint(if (goalDomain?.value != goalDomain?.target) kiwiColors.colorF1 else kiwiColors.color8C),
                 )
             }
 
@@ -157,7 +158,7 @@ fun GoalComponent(
                         .weight(0.10f)
                         .padding(getResponsiveSizeHeight(8.dp))
                         .clickable {
-                            if (status == GoalStatus.COMPLETED) {
+                            if (status != GoalStatus.IN_PROGRESS) {
                                 return@clickable
                             } else {
                                 coroutineScope.launch {
@@ -170,16 +171,16 @@ fun GoalComponent(
                         },
                 contentAlignment = Alignment.Center,
             ) {
-                Kiwi_Image(
-                    if (status !=
-                        GoalStatus.COMPLETED
-                    ) {
-                        R.drawable.ic_daily_challenges_plus
-                    } else {
-                        R.drawable.ic_daily_challenges_tick
-                    },
-                    "Quest Indicator For: ${currentGoal.target}",
-                )
+                if (plus && status == GoalStatus.IN_PROGRESS) {
+                    Kiwi_Image(
+                        if (goalDomain?.value == goalDomain?.target) {
+                            R.drawable.ic_daily_challenges_tick
+                        } else {
+                            R.drawable.ic_daily_challenges_plus
+                        },
+                        "Quest Indicator For: ${currentGoal.target}",
+                    )
+                }
             }
         }
     }
