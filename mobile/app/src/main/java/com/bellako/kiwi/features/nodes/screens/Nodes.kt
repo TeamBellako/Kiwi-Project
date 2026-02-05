@@ -206,7 +206,8 @@ fun NodeAction(
     ) {
         when (node.status) {
             NodeStatus.LOCKED -> UnlockButton("Unlock (" + node.price + ")") { onUnlockNode(node.id) }
-            NodeStatus.OPEN ->
+            // TODO: Hack
+            NodeStatus.COMPLETED ->
                 PlayButton("Play") {
                     onCompleteNode(node.id)
                 }

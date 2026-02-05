@@ -47,6 +47,7 @@ import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalsModal
+import com.bellako.kiwi.features.map.data.MapInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -97,7 +98,7 @@ fun MapScreen(
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
 
     val mapState by mapViewModel.state.collectAsState()
-    val imageBitmap = ImageBitmap.imageResource(id = mapState.mapResourceId)
+    val imageBitmap = ImageBitmap.imageResource(id = mapState.mapInfo.mapResourceId)
     val imageW = imageBitmap.width.toFloat()
     val imageH = imageBitmap.height.toFloat()
 
@@ -158,9 +159,11 @@ fun MapScreen(
     }
 
     LaunchedEffect(Unit) {
+        mapViewModel.setBackgroundColor(kiwiColors.colorOcean)
+
         listenToEvent(EventType.SWITCH_MAP) { eventPayload ->
             val payload = eventPayload as EventPayload.SwitchMapPayload
-            mapViewModel.switchMap(payload.mapResourceId)
+            mapViewModel.switchMap(payload.mapInfo)
         }
     }
 
@@ -183,7 +186,7 @@ fun MapScreen(
             )
 
             InteractiveMap(
-                mapResourceId = mapState.mapResourceId,
+                mapResourceId = mapState.mapInfo.mapResourceId,
                 mapViewModel = mapViewModel,
                 nodesViewModel = nodesViewModel,
                 modifier = Modifier.fillMaxSize(),
@@ -243,6 +246,8 @@ private fun InteractiveMap(
     val mapState by mapViewModel.state.collectAsState()
     val nodesState by nodesViewModel.state.collectAsState()
 
+    val kiwiColors = LocalKiwiColors.current
+
     Box(
         modifier =
             modifier
@@ -259,7 +264,7 @@ private fun InteractiveMap(
                 },
         contentAlignment = Alignment.Center,
     ) {
-        Background()
+        Background(mapViewModel)
 
         val imageWidthDp = with(LocalDensity.current) { mapState.mapWidthPx.toDp() }
         val imageHeightDp = with(LocalDensity.current) { mapState.mapHeightPx.toDp() }
@@ -347,13 +352,20 @@ private fun InteractiveMap(
                                 mapViewModel.setPlayerNode(id)
                             },
                             onCompleteNode = { id ->
-                                nodesViewModel.completeNode(id)
+                                // TODO: Hack
+                                // nodesViewModel.completeNode(id)
                                 AudioManager.playSFX(context, R.raw.snd_node_completed)
 
                                 GlobalScope.launch(Dispatchers.Main) {
                                     EventBus.emitEvent(
                                         EventType.SWITCH_MAP,
-                                        EventPayload.SwitchMapPayload(R.drawable.map_switch_test),
+                                        EventPayload.SwitchMapPayload(
+                                            MapInfo(
+                                                mapResourceId = R.drawable.map_switch_test,
+                                                maxZoom = 16f,
+                                                backgroundColor = kiwiColors.colorF,
+                                            ),
+                                        ),
                                     )
                                 }
                             },
@@ -365,11 +377,13 @@ private fun InteractiveMap(
 }
 
 @Composable
-fun Background() {
+fun Background(mapViewModel: MapViewModel) {
+    val mapState = mapViewModel.state.collectAsState()
+
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(LocalKiwiColors.current.colorOcean),
+                .background(mapState.value.mapInfo.backgroundColor),
     )
 }

@@ -1,11 +1,13 @@
 package com.bellako.kiwi.common.services.eventbus
 
+import com.bellako.kiwi.features.map.data.MapInfo
+
 enum class EventType {
     SWITCH_MAP,
 }
 
 sealed class EventPayload {
     data class SwitchMapPayload(
-        val mapResourceId: Int,
+        val mapInfo: MapInfo,
     ) : EventPayload()
 }

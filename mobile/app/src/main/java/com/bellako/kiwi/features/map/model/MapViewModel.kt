@@ -5,9 +5,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.features.map.data.MapInfo
 import com.bellako.kiwi.features.map.data.MapState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -87,8 +89,12 @@ class MapViewModel
             _state.value = _state.value.copy(offset = newOffset)
         }
 
-        private fun setMapResourceId(mapResourceId: Int) {
-            _state.value = _state.value.copy(mapResourceId = mapResourceId)
+        private fun setMapInfo(mapInfo: MapInfo) {
+            _state.value = _state.value.copy(mapInfo = mapInfo)
+        }
+
+        override fun setBackgroundColor(color: Color) {
+            _state.value = _state.value.copy(mapInfo = _state.value.mapInfo.copy(backgroundColor = color))
         }
 
         // ---------------------------------------------------------------------------------------------
@@ -128,8 +134,8 @@ class MapViewModel
             updateFling(delta)
         }
 
-        override fun switchMap(mapResourceId: Int) {
-            setMapResourceId(mapResourceId)
+        override fun switchMap(mapInfo: MapInfo) {
+            setMapInfo(mapInfo)
         }
 
         /**
