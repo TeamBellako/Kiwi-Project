@@ -29,6 +29,7 @@ class SkillsFakeViewModel
             type: SkillNotificationType,
             skill: SkillDomain,
         ) {
+            // No needed to test
         }
 
         override fun notifySkillGiven(skill: SkillDomain) {

@@ -383,7 +383,7 @@ class SkillsViewModel
                 ?.associate { it.id to it.toGoalData() }
                 ?: emptyMap()
 
-        fun GoalDTO.toGoalData(): GoalData =
+        private fun GoalDTO.toGoalData(): GoalData =
             GoalData(
                 action = action,
                 progress = value,

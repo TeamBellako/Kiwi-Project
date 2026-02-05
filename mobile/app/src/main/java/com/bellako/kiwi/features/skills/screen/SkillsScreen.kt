@@ -36,6 +36,9 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
+const val DECK_SKILLS_SECTION_INDEX = 1
+const val ALL_SKILLS_SECTION_INDEX = 4
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SkillsScreen(
@@ -56,7 +59,7 @@ fun SkillsScreen(
                 ?: -1
 
         if (deckIndex >= 0) {
-            listState.animateScrollToItem(1)
+            listState.animateScrollToItem(DECK_SKILLS_SECTION_INDEX)
         } else {
             val allIndex =
                 skillsState
@@ -64,7 +67,7 @@ fun SkillsScreen(
                     ?.indexOfFirst { it.id == focusedSkillId }
                     ?: -1
             if (allIndex >= 0) {
-                listState.animateScrollToItem(4)
+                listState.animateScrollToItem(ALL_SKILLS_SECTION_INDEX)
             }
         }
     }

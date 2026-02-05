@@ -33,7 +33,6 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_Display2
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
@@ -56,14 +55,11 @@ import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
-import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.skills.model.SkillsViewModel
-import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
@@ -377,7 +373,6 @@ fun DashboardModal_Preview(
     initialStateIndex: Int = 0,
     nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
-    skillsViewModel: SkillsFakeViewModel = SkillsFakeViewModel(),
 ) {
     val nav = rememberNavController()
     Kiwi_Theme {
@@ -392,7 +387,6 @@ fun DashboardModal_Preview(
                         navController = nav,
                         goalsViewModel = goalsViewModel,
                         mapViewModel = MapViewModel(),
-                        skillsViewModel = skillsViewModel,
                         notificationManager = NotificationManager(),
                     )
                     DashboardScreen(

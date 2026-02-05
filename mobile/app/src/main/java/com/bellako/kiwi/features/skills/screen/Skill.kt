@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
@@ -66,6 +67,7 @@ fun SkillComponent(
     Box(
         modifier =
             modifier
+                .testTag("skill-${skill.id}")
                 .alpha(if (isDisabled) KIWI_DISABLED_ALPHA else 1.0f)
                 .pointerInput(isDisabled) {
                     detectTapGestures(

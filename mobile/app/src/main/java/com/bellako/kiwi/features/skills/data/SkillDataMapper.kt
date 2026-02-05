@@ -69,4 +69,59 @@ object SkillDataMapper {
             goalData = goalData,
         )
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun toDTO(domain: SkillDomain): SkillDTO =
+        when (domain) {
+            is SkillDomain.Other ->
+                SkillDTO(
+                    skillId = domain.id,
+                    name = domain.name,
+                    description = domain.description,
+                    quote = domain.quote,
+                    icon = domain.icon,
+                    levelupSkillId = domain.levelupSkillId,
+                    cooldown = domain.isCooldown,
+                    deckSlot = domain.deckSlot,
+                    cooldownType = CooldownType.OTHER.name,
+                    cooldownTimeMinutes = null,
+                    cooldownUntil = null,
+                    cooldownGoalId = null,
+                    cooldownOtherDescription = domain.cooldownOtherDescription,
+                )
+
+            is SkillDomain.Time ->
+                SkillDTO(
+                    skillId = domain.id,
+                    name = domain.name,
+                    description = domain.description,
+                    quote = domain.quote,
+                    icon = domain.icon,
+                    levelupSkillId = domain.levelupSkillId,
+                    cooldown = domain.isCooldown,
+                    deckSlot = domain.deckSlot,
+                    cooldownType = CooldownType.TIME.name,
+                    cooldownTimeMinutes = domain.cooldownTimeMinutes,
+                    cooldownUntil = domain.cooldownUntil?.toEpochMilli(),
+                    cooldownGoalId = null,
+                    cooldownOtherDescription = null,
+                )
+
+            is SkillDomain.Goal ->
+                SkillDTO(
+                    skillId = domain.id,
+                    name = domain.name,
+                    description = domain.description,
+                    quote = domain.quote,
+                    icon = domain.icon,
+                    levelupSkillId = domain.levelupSkillId,
+                    cooldown = domain.isCooldown,
+                    deckSlot = domain.deckSlot,
+                    cooldownType = CooldownType.GOAL.name,
+                    cooldownTimeMinutes = null,
+                    cooldownUntil = null,
+                    cooldownGoalId = domain.cooldownGoalId,
+                    cooldownOtherDescription = null,
+                )
+        }
 }

@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.notifications.screens
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -50,35 +51,7 @@ fun NotificationOverlay(
     val context = LocalContext.current
 
     LaunchedEffect(currentEvent) {
-        val event = currentEvent ?: return@LaunchedEffect
-
-        when (event) {
-            is NotificationEvent.Goal -> {
-                // TODO
-            }
-
-            is NotificationEvent.Quest -> {
-                when (event.type) {
-                    QuestNotificationType.NEW ->
-                        AudioManager.playSFX(context, R.raw.snd_ui_newquest)
-
-                    QuestNotificationType.QUEST_COMPLETED,
-                    QuestNotificationType.SUBQUEST_COMPLETED,
-                    ->
-                        AudioManager.playSFX(context, R.raw.snd_ui_questcompleted)
-
-                    QuestNotificationType.SUBQUEST_FAILED ->
-                        AudioManager.playSFX(context, R.raw.snd_ui_questfailed)
-                }
-            }
-            is NotificationEvent.Skill -> {
-                // TODO
-            }
-
-            is NotificationEvent.Generic -> {
-                // TODO
-            }
-        }
+        currentEvent?.let { handleAudioForEvent(it, context) }
     }
 
     LaunchedEffect(Unit) {
@@ -123,35 +96,47 @@ fun NotificationOverlay(
                         animationSpec = tween(ANIM_TIME_MS.toInt()),
                     ),
             ) {
-                currentEvent?.let { event ->
-                    when (event) {
-                        is NotificationEvent.Goal -> {
-                            GoalNotificationContent(
-                                event,
-                                onGoalClick,
-                            )
-                        }
-
-                        is NotificationEvent.Quest -> {
-                            QuestNotificationContent(
-                                event,
-                                onQuestClick,
-                            )
-                        }
-                        is NotificationEvent.Skill -> {
-                            SkillNotificationContent(
-                                event,
-                                onSkillClick,
-                            )
-                        }
-
-                        is NotificationEvent.Generic -> {
-                            // TODO
-                        }
-                    }
-                }
+                currentEvent?.let { NotificationContent(it, onGoalClick, onQuestClick, onSkillClick) }
             }
         }
+    }
+}
+
+private fun handleAudioForEvent(
+    event: NotificationEvent,
+    context: Context,
+) {
+    when (event) {
+        is NotificationEvent.Quest -> {
+            when (event.type) {
+                QuestNotificationType.NEW -> AudioManager.playSFX(context, R.raw.snd_ui_newquest)
+                QuestNotificationType.QUEST_COMPLETED,
+                QuestNotificationType.SUBQUEST_COMPLETED,
+                -> AudioManager.playSFX(context, R.raw.snd_ui_questcompleted)
+                QuestNotificationType.SUBQUEST_FAILED -> AudioManager.playSFX(context, R.raw.snd_ui_questfailed)
+            }
+        }
+        is NotificationEvent.Goal,
+        is NotificationEvent.Skill,
+        is NotificationEvent.Generic,
+        -> {
+            // TODO
+        }
+    }
+}
+
+@Composable
+private fun NotificationContent(
+    currentEvent: NotificationEvent,
+    onGoalClick: (GoalNotificationType, List<IGoal>) -> Unit,
+    onQuestClick: (QuestNotificationType, QuestDomain, Int?) -> Unit,
+    onSkillClick: (SkillNotificationType, SkillDomain) -> Unit,
+) {
+    when (currentEvent) {
+        is NotificationEvent.Goal -> GoalNotificationContent(currentEvent, onGoalClick)
+        is NotificationEvent.Quest -> QuestNotificationContent(currentEvent, onQuestClick)
+        is NotificationEvent.Skill -> SkillNotificationContent(currentEvent, onSkillClick)
+        is NotificationEvent.Generic -> { /* TODO */ }
     }
 }
 

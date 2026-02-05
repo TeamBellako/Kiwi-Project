@@ -132,13 +132,7 @@ private fun AppScreen(
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val route = currentBackStackEntry?.destination?.route
-    val isLoginScreen =
-        route == null ||
-            route == ScreenRoutes.LOGIN ||
-            route == ScreenRoutes.SIGNUP1_WELCOME ||
-            route == ScreenRoutes.SIGNUP2_FORM ||
-            route == ScreenRoutes.SIGNUP3_TEST ||
-            route == ScreenRoutes.SIGNUP4_APPS
+    val isLoginScreen = isLoginScreen(route)
 
     val showDashboard = route == ScreenRoutes.HOME
 
@@ -207,6 +201,14 @@ private fun AppScreen(
         },
     )
 }
+
+private fun isLoginScreen(route: String?): Boolean =
+    route == null ||
+        route == ScreenRoutes.LOGIN ||
+        route == ScreenRoutes.SIGNUP1_WELCOME ||
+        route == ScreenRoutes.SIGNUP2_FORM ||
+        route == ScreenRoutes.SIGNUP3_TEST ||
+        route == ScreenRoutes.SIGNUP4_APPS
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -284,7 +286,6 @@ fun AppNavHost(
                 MapScreen(
                     nodesViewModel = nodesViewModel,
                     goalsViewModel = goalsViewModel,
-                    skillsViewModel = skillsViewModel,
                     notificationManager = notificationManager,
                     navController = navController,
                     mapViewModel = hiltViewModel(),
