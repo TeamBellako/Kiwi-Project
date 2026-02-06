@@ -40,9 +40,9 @@ class NodesIntegrationTest {
             val nodesState = NodesTestFactory.validNodesState()
             val nodes = nodesState.nodes.values.toList()
 
-            whenever(repository.getNodes()).thenReturn(nodes)
+            whenever(repository.getNodesByMapId(0)).thenReturn(nodes)
 
-            viewModel.loadNodes()
+            viewModel.loadNodes(0)
             advanceUntilIdle()
 
             val state = viewModel.state.value
@@ -63,7 +63,7 @@ class NodesIntegrationTest {
         runTest(mainDispatcherRule.dispatcher) {
             val initialState = NodesTestFactory.validNodesState()
 
-            whenever(repository.getNodes())
+            whenever(repository.getNodesByMapId(0))
                 .thenReturn(initialState.nodes.values.toList())
 
             val lockedNode = initialState.nodes[4L]!!
@@ -73,7 +73,7 @@ class NodesIntegrationTest {
                     lockedNode.copy(status = NodeStatus.OPEN),
                 )
 
-            viewModel.loadNodes()
+            viewModel.loadNodes(0)
             advanceUntilIdle()
 
             viewModel.unlockNode(4L)
@@ -93,7 +93,7 @@ class NodesIntegrationTest {
         runTest(mainDispatcherRule.dispatcher) {
             val initialState = NodesTestFactory.validNodesState()
 
-            whenever(repository.getNodes())
+            whenever(repository.getNodesByMapId(0))
                 .thenReturn(initialState.nodes.values.toList())
 
             val openNode = initialState.nodes[3L]!!
@@ -106,7 +106,7 @@ class NodesIntegrationTest {
                     ),
                 )
 
-            viewModel.loadNodes()
+            viewModel.loadNodes(0)
             advanceUntilIdle()
 
             viewModel.completeNode(3L)
