@@ -39,6 +39,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DateUtils
@@ -109,6 +112,13 @@ fun DashboardScreen(
     val shouldShowCalendarView = remember { mutableStateOf(showCalendarView) }
 
     val draggableStateIndex = remember { mutableIntStateOf(initialLayout.value) }
+
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.CHANGE_DASHBOARD_LAYOUT) { eventPayload ->
+            val payload = eventPayload as EventPayload.ChangeDashboardLayoutPayload
+            draggableStateIndex.intValue = payload.newLayout.value
+        }
+    }
 
     LaunchedEffect(draggableStateIndex.intValue) {
         if (draggableStateIndex.intValue == 0) {
