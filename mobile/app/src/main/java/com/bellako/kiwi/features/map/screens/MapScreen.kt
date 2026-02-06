@@ -42,6 +42,7 @@ import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.dashboard.screens.DashboardLayout
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalNotificationType
@@ -311,8 +312,15 @@ private fun InteractiveMap(
                                                 distance(Offset(it.cordX, it.cordY), normalizedTap) < clickRadius
                                             }
 
-                                    clickedNode?.let {
-                                        mapViewModel.selectNode(it.id, it.cordX, it.cordY)
+                                    clickedNode?.let { node ->
+                                        mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+
+                                        CoroutineScope(Dispatchers.Main).launch {
+                                            EventBus.emitEvent(
+                                                EventType.CHANGE_DASHBOARD_LAYOUT,
+                                                EventPayload.ChangeDashboardLayoutPayload(DashboardLayout.HIDDEN),
+                                            )
+                                        }
                                     }
                                 }
                             }

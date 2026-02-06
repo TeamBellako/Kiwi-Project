@@ -20,6 +20,7 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.features.dashboard.screens.DashboardLayout
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.dashboard.screens.LocalGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
@@ -92,7 +93,7 @@ class DashboardModalTest {
 
     @Test
     fun loadPastMetrics() {
-        setContent(false, 2)
+        setContent(false, DashboardLayout.EXPANDED)
 
         val dateYesterday = dateNow.minusDays(1)
         val yesterdayWeekNumber = DateUtils.getDayOfWeekNumber(dateYesterday)
@@ -127,7 +128,7 @@ class DashboardModalTest {
 
     @Test
     fun tryLoadFutureMetrics() {
-        setContent(false, 2)
+        setContent(false, DashboardLayout.EXPANDED)
 
         val dateTomorrow = dateNow.plusDays(1)
         val tomorrowWeekNumber = DateUtils.getDayOfWeekNumber(dateTomorrow)
@@ -162,7 +163,7 @@ class DashboardModalTest {
 
     @Test
     fun dragFromHiddenToCollapsed() {
-        setContent(false, 0)
+        setContent(false, DashboardLayout.HIDDEN)
 
         isInHiddenState()
 
@@ -176,7 +177,7 @@ class DashboardModalTest {
 
     @Test
     fun dragFromHiddenToExpanded() {
-        setContent(false, 0)
+        setContent(false, DashboardLayout.HIDDEN)
 
         isInHiddenState()
 
@@ -190,7 +191,7 @@ class DashboardModalTest {
 
     @Test
     fun dragFromCollapsedToExpanded() {
-        setContent(false, 1)
+        setContent(false, DashboardLayout.COLLAPSED)
 
         isInCollapsedState()
 
@@ -204,7 +205,7 @@ class DashboardModalTest {
 
     @Test
     fun showCalendarViewFromCollapsedAndThenHideIt() {
-        setContent(true, 1)
+        setContent(true, DashboardLayout.COLLAPSED)
 
         rule
             .onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
@@ -229,7 +230,7 @@ class DashboardModalTest {
 
     @Test
     fun showCalendarViewFromExpandedAndThenHideIt() {
-        setContent(false, 2)
+        setContent(false, DashboardLayout.EXPANDED)
 
         rule
             .onNodeWithTag(DashboardModalTestTags.CALENDAR_VIEW_BUTTON)
@@ -251,7 +252,7 @@ class DashboardModalTest {
 
     @Test
     fun navigateToPastMonthInCalendarView() {
-        setContent(true, 2)
+        setContent(true, DashboardLayout.EXPANDED)
 
         val originalMonthYearText =
             rule
@@ -340,7 +341,7 @@ class DashboardModalTest {
 
     private fun setContent(
         showCalendarView: Boolean,
-        initialStateIndex: Int,
+        initialLayout: DashboardLayout,
     ) {
         rule.setContent {
             screenHeightDp = getScreenHeight(withoutInsetTop = true).dp
@@ -353,7 +354,7 @@ class DashboardModalTest {
                     fakePersonalityViewModel,
                     GoalsFakeViewModel(),
                     showCalendarView,
-                    initialStateIndex,
+                    initialLayout,
                 )
             }
         }
