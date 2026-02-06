@@ -74,14 +74,6 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import java.time.LocalDate
 
-enum class DashboardLayout(
-    val value: Int,
-) {
-    HIDDEN(0),
-    COLLAPSED(1),
-    EXPANDED(2),
-}
-
 const val MONTH_SLIDE_ANIM_DURATION = 300
 
 const val STATE_HEIGHT_0 = 140
@@ -445,4 +437,12 @@ fun DashboardModal_Preview(
             },
         )
     }
+}
+
+enum class DashboardLayout(
+    val value: Int,
+) {
+    HIDDEN(0),
+    COLLAPSED(1),
+    EXPANDED(2),
 }
