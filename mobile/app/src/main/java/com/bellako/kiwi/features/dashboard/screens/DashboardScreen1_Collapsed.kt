@@ -113,5 +113,5 @@ private fun CollapsedSummaryCard(
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 fun DashboardModal1_Collapsed_Preview() {
-    DashboardModal_Preview(false, 1)
+    DashboardModal_Preview(false, DashboardLayout.COLLAPSED)
 }

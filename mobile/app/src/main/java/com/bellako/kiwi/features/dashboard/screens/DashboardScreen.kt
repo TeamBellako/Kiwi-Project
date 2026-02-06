@@ -71,6 +71,14 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import java.time.LocalDate
 
+enum class DashboardLayout(
+    val value: Int,
+) {
+    HIDDEN(0),
+    COLLAPSED(1),
+    EXPANDED(2),
+}
+
 const val MONTH_SLIDE_ANIM_DURATION = 300
 
 const val STATE_HEIGHT_0 = 140
@@ -86,7 +94,7 @@ fun DashboardScreen(
     personalityViewModel: IPersonalityViewModel,
     goalsViewModel: IGoalsViewModel,
     showCalendarView: Boolean = false,
-    initialStateIndex: Int = 0,
+    initialLayout: DashboardLayout = DashboardLayout.HIDDEN,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -100,7 +108,7 @@ fun DashboardScreen(
     val kiwiColors = LocalKiwiColors.current
     val shouldShowCalendarView = remember { mutableStateOf(showCalendarView) }
 
-    val draggableStateIndex = remember { mutableIntStateOf(initialStateIndex) }
+    val draggableStateIndex = remember { mutableIntStateOf(initialLayout.value) }
 
     LaunchedEffect(draggableStateIndex.intValue) {
         if (draggableStateIndex.intValue == 0) {
@@ -332,7 +340,7 @@ fun SelectedMetricsTime(
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Hidden() {
-    DashboardModal_Preview(false, 0)
+    DashboardModal_Preview(false, DashboardLayout.HIDDEN)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -342,7 +350,7 @@ fun DashboardModal_Preview_Hidden() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Collapsed() {
-    DashboardModal_Preview(false, 1)
+    DashboardModal_Preview(false, DashboardLayout.COLLAPSED)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -352,7 +360,7 @@ fun DashboardModal_Preview_Collapsed() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Expanded() {
-    DashboardModal_Preview(false, 2)
+    DashboardModal_Preview(false, DashboardLayout.EXPANDED)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -362,7 +370,7 @@ fun DashboardModal_Preview_Expanded() {
 @Suppress("EmptyFunctionBlock")
 @Composable
 fun DashboardModal_Preview_Expanded_Calendar() {
-    DashboardModal_Preview(true, 2)
+    DashboardModal_Preview(true, DashboardLayout.EXPANDED)
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -370,7 +378,7 @@ fun DashboardModal_Preview_Expanded_Calendar() {
 @Composable
 fun DashboardModal_Preview(
     showCalendarView: Boolean,
-    initialStateIndex: Int = 0,
+    initialLayout: DashboardLayout = DashboardLayout.HIDDEN,
     nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
 ) {
@@ -421,7 +429,7 @@ fun DashboardModal_Preview(
                             ),
                         goalsViewModel = goalsViewModel,
                         showCalendarView,
-                        initialStateIndex,
+                        initialLayout = initialLayout,
                     )
                 }
             },

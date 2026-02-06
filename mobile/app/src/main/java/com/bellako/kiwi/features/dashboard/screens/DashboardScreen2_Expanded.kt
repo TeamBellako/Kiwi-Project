@@ -230,7 +230,7 @@ private fun ExpandedSummaryCard(
 @Composable
 fun DashboardModal2_Preview_Expanded() {
     val fakeGoalsViewModel = remember { GoalsFakeViewModel() }
-    DashboardModal_Preview(false, 2, goalsViewModel = fakeGoalsViewModel)
+    DashboardModal_Preview(false, DashboardLayout.EXPANDED, goalsViewModel = fakeGoalsViewModel)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -241,5 +241,5 @@ fun DashboardModal2_Preview_Expanded() {
 @Composable
 fun DashboardModal2_Expanded_Calendar_Preview() {
     val fakeGoalsViewModel = remember { GoalsFakeViewModel() }
-    DashboardModal_Preview(true, 2, goalsViewModel = fakeGoalsViewModel)
+    DashboardModal_Preview(true, DashboardLayout.EXPANDED, goalsViewModel = fakeGoalsViewModel)
 }

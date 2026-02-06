@@ -18,5 +18,5 @@ fun DashboardScreen0_Hidden() {
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 fun DashboardModal0_Hidden_Preview() {
-    DashboardModal_Preview(false, 0)
+    DashboardModal_Preview(false, DashboardLayout.HIDDEN)
 }
