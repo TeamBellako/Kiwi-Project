@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS nodes (
   name VARCHAR(255) NOT NULL,
   display_name VARCHAR(255),
   map_id INT NOT NULL,
+  is_first_node_of_map BOOLEAN DEFAULT FALSE,
   CONSTRAINT uq_nodes_name UNIQUE (name),
   CHECK (
     cord_x >= 0.0 AND cord_x <= 1.0

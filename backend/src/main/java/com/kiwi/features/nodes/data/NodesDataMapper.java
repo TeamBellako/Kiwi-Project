@@ -21,7 +21,8 @@ public class NodesDataMapper {
                 node.getName(),
                 node.getDisplayName(),
                 node.getConnectedNodeIds(),
-                node.getMapId()
+                node.getMapId(),
+                node.isFirstNodeOfMap()
         );
     }
 
@@ -42,7 +43,8 @@ public class NodesDataMapper {
                 node.getName(),
                 node.getDisplayName(),
                 connectedNodeIds,
-                node.getMapId()
+                node.getMapId(),
+                node.isFirstNodeOfMap()
         );
     }
 

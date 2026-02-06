@@ -33,10 +33,7 @@ class NodesViewModel
                 setUiState(UIState.Loading)
                 try {
                     val nodes = repository.getNodesByMapId(mapId)
-                    _state.value =
-                        _state.value.copy(
-                            nodes = nodes.associateBy { it.id },
-                        )
+                    _state.value = NodesState(nodes = nodes.associateBy { it.id })
                     setUiState(UIState.Idle)
                 } catch (e: GeneralSecurityException) {
                     warn("Encryption error: ${e.message}")

@@ -70,7 +70,8 @@ public class NodesTestFactory {
                 "node" + id,
                 "Node " + id,
                 List.of(),
-                0
+                0,
+                true
         );
     }
 }

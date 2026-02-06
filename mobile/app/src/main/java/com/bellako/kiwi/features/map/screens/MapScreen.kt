@@ -18,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -65,12 +64,12 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
@@ -118,31 +117,9 @@ fun MapScreen(
             elasticityFactor = elasticityFactor,
         )
     }
-    val nodesState by nodesViewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        nodesViewModel.loadNodes(0)
-
-        snapshotFlow { nodesState?.nodes }
-            .filterNotNull()
-            .filter { it.isNotEmpty() }
-            .first()
-            .let { nodesMap ->
-                val nodesList = nodesMap.values.toList()
-
-                val lastOpen = nodesList.lastOrNull { it.status == NodeStatus.OPEN }
-
-                val lastCompleted = nodesList.lastOrNull { it.status == NodeStatus.COMPLETED }
-
-                val defaultNode = nodesList.firstOrNull()
-
-                val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
-
-                selectedNode?.let { node ->
-                    mapViewModel.selectNode(node.id, node.cordX, node.cordY)
-                    mapViewModel.setPlayerNode(node.id)
-                }
-            }
+        loadNodes(mapViewModel, nodesViewModel, 0)
     }
 
     val goalsModalRequest = remember { mutableStateOf<Pair<GoalModalType, List<IGoal>>?>(null) }
@@ -164,6 +141,8 @@ fun MapScreen(
         listenToEvent(EventType.SWITCH_MAP) { eventPayload ->
             val payload = eventPayload as EventPayload.SwitchMapPayload
             mapViewModel.switchMap(payload.mapInfo)
+
+            loadNodes(mapViewModel, nodesViewModel, payload.mapInfo.mapId)
         }
     }
 
@@ -232,6 +211,33 @@ fun MapScreen(
             }
         }
     }
+}
+
+private fun loadNodes(
+    mapViewModel: MapViewModel,
+    nodesViewModel: INodesViewModel,
+    mapId: Int,
+) {
+    nodesViewModel.loadNodes(mapId)
+
+    nodesViewModel.state
+        .onEach { nodesState ->
+            val nodesMap = nodesState?.nodes ?: return@onEach
+            if (nodesMap.isNotEmpty()) {
+                val nodesList = nodesMap.values.toList()
+
+                val lastOpen = nodesList.lastOrNull { it.status == NodeStatus.OPEN }
+                val lastCompleted = nodesList.lastOrNull { it.status == NodeStatus.COMPLETED }
+                val defaultNode = nodesList.firstOrNull()
+
+                val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
+
+                selectedNode?.let { node ->
+                    mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+                    mapViewModel.setPlayerNode(node.id)
+                }
+            }
+        }.launchIn(CoroutineScope(Dispatchers.Main))
 }
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -352,24 +358,21 @@ private fun InteractiveMap(
                                 mapViewModel.setPlayerNode(id)
                             },
                             onCompleteNode = { id ->
-                                nodesViewModel.completeNode(id)
+                                // nodesViewModel.completeNode(id)
                                 AudioManager.playSFX(context, R.raw.snd_node_completed)
 
-                                // TODO: Testing for map switching
-                                if (id.toInt() == 7) {
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        EventBus.emitEvent(
-                                            EventType.SWITCH_MAP,
-                                            EventPayload.SwitchMapPayload(
-                                                MapInfo(
-                                                    mapResourceId = R.drawable.map_switch_test,
-                                                    maxZoom = 16f,
-                                                    backgroundColor = kiwiColors.colorF,
-                                                    mapId = 1,
-                                                ),
+                                GlobalScope.launch(Dispatchers.Main) {
+                                    EventBus.emitEvent(
+                                        EventType.SWITCH_MAP,
+                                        EventPayload.SwitchMapPayload(
+                                            MapInfo(
+                                                mapResourceId = R.drawable.map_switch_test,
+                                                maxZoom = 16f,
+                                                backgroundColor = kiwiColors.colorF,
+                                                mapId = 1,
                                             ),
-                                        )
-                                    }
+                                        ),
+                                    )
                                 }
                             },
                         )

@@ -30,6 +30,11 @@ public class NodesService {
         this.progressService = progressService;
     }
 
+    public List<NodesDTO> getNodesForMapId(@NotNull int mapId, @NotNull Long userId) {
+        List<NodesDTO> allNodes = getNodesForUser(userId);
+        return allNodes.stream().filter(node -> Objects.equals(node.getMapId(), mapId)).toList();
+    }
+
     public List<NodesDTO> getNodesForUser(@NotNull Long userId) {
         List<UserNodeStatusPersistence> statuses =
                 userNodeStatusRepository.findByIdUserId(userId);
@@ -124,18 +129,19 @@ public class NodesService {
     }
 
     public void initializeUserProgress(Long userId) {
-        NodesPersistence firstNode = nodesRepository.findById(1L)
-                .orElseThrow(() -> new NodeNotFoundException(1L));
+        List<NodesPersistence> firstNodes = nodesRepository.findByIsFirstNodeOfMapTrue();
 
-        NodesDomain domain = NodesDataMapper.toDomain(firstNode, null);
-        NodesDomain locked = progressService.lock(domain);
+        if (firstNodes.isEmpty()) {
+            throw new NodeNotFoundException(userId);
+        }
 
-        UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
-        userNodeStatusRepository.saveAndFlush(persistence);
-    }
+        for (NodesPersistence firstNode : firstNodes) {
+            NodesDomain domain = NodesDataMapper.toDomain(firstNode, null);
 
-    public List<NodesDTO> getNodesForMapId(@NotNull int mapId, @NotNull Long userId) {
-        List<NodesDTO> allNodes = getNodesForUser(userId);
-        return allNodes.stream().filter(node -> Objects.equals(node.getMapId(), mapId)).toList();
+            NodesDomain locked = progressService.lock(domain);
+
+            UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
+            userNodeStatusRepository.saveAndFlush(persistence);
+        }
     }
 }

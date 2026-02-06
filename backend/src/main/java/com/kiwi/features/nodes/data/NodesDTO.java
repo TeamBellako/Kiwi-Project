@@ -17,4 +17,5 @@ public class NodesDTO {
     private String displayName;
     private List<Long> connectedNodeIds;
     private int mapId;
+    private boolean isFirstNodeOfMap;
 }

@@ -39,6 +39,9 @@ public class NodesPersistence {
     @Column(name = "map_id")
     private int mapId;
 
+    @Column(name = "is_first_node_of_map")
+    private boolean isFirstNodeOfMap;
+
     @OneToMany(mappedBy = "fromNode", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NodeEdgePersistence> outgoingEdges = new ArrayList<>();
 
