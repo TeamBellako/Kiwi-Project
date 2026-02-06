@@ -46,7 +46,7 @@ import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalsModal
-import com.bellako.kiwi.features.map.data.MapInfo
+import com.bellako.kiwi.features.map.data.MapsInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -358,21 +358,29 @@ private fun InteractiveMap(
                                 mapViewModel.setPlayerNode(id)
                             },
                             onCompleteNode = { id ->
-                                // nodesViewModel.completeNode(id)
+                                nodesViewModel.completeNode(id)
                                 AudioManager.playSFX(context, R.raw.snd_node_completed)
-
-                                GlobalScope.launch(Dispatchers.Main) {
-                                    EventBus.emitEvent(
-                                        EventType.SWITCH_MAP,
-                                        EventPayload.SwitchMapPayload(
-                                            MapInfo(
-                                                mapResourceId = R.drawable.map_switch_test,
-                                                maxZoom = 16f,
-                                                backgroundColor = kiwiColors.colorF,
-                                                mapId = 1,
+                            },
+                            onRetryNode = { id ->
+                                // HACK: Remove once scripting is done, this is just for showcase
+                                if (selectedNode.displayName == "CITY") {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        EventBus.emitEvent(
+                                            EventType.SWITCH_MAP,
+                                            EventPayload.SwitchMapPayload(
+                                                MapsInfo.Testing,
                                             ),
-                                        ),
-                                    )
+                                        )
+                                    }
+                                } else if (selectedNode.displayName == "MAP_SWITCH") {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        EventBus.emitEvent(
+                                            EventType.SWITCH_MAP,
+                                            EventPayload.SwitchMapPayload(
+                                                MapsInfo.MindVeil,
+                                            ),
+                                        )
+                                    }
                                 }
                             },
                         )

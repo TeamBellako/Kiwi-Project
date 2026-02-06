@@ -197,6 +197,7 @@ fun NodeAction(
     node: NodesDomain,
     onUnlockNode: (Long) -> Unit,
     onCompleteNode: (Long) -> Unit,
+    onRetryNode: (Long) -> Unit,
 ) {
     val offset = if (isPlayerNode) 64.dp else 48.dp
     Box(
@@ -210,7 +211,11 @@ fun NodeAction(
                 PlayButton("Play") {
                     onCompleteNode(node.id)
                 }
-            NodeStatus.COMPLETED -> PlayButton("Replay") { replayFirebaseEvent(node.id) }
+            NodeStatus.COMPLETED ->
+                PlayButton("Replay") {
+                    onRetryNode(node.id)
+                    replayFirebaseEvent(node.id)
+                }
             else -> {}
         }
     }
