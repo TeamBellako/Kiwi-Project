@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -146,7 +147,7 @@ private fun PermissionRequestLayout(context: Context) {
                     "Permissions Required",
                     color = kiwiColors.colorF,
                     textAlign = TextAlign.Center,
-                    bold = true,
+                    fontWeight = FontWeight.Bold,
                 ),
             )
 
@@ -179,7 +180,7 @@ private fun PermissionRequestLayout(context: Context) {
                         "ENABLE APP USAGE ACCESS",
                         color = kiwiColors.color7,
                         textAlign = TextAlign.Center,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5A,
                 onClick = {

@@ -31,6 +31,8 @@ fun DrawScope.kiwiDiamondShape(
     offsetY: Float,
     size: Float,
 ) {
+    val squareSide = size / kotlin.math.sqrt(2f)
+
     rotate(
         45f,
         pivot =
@@ -41,12 +43,12 @@ fun DrawScope.kiwiDiamondShape(
             color = color,
             topLeft =
                 androidx.compose.ui.geometry.Offset(
-                    offsetX - size / 2,
-                    offsetY - size / 2,
+                    offsetX - squareSide / 2,
+                    offsetY - squareSide / 2,
                 ),
             size =
                 androidx.compose.ui.geometry
-                    .Size(size, size),
+                    .Size(squareSide, squareSide),
         )
     }
 }

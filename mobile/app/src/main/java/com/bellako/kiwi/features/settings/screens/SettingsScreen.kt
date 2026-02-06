@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -146,7 +147,7 @@ private fun SettingsInfoFields(usersState: UsersState?) {
         Kiwi_H2(
             KiwiTextArguments(
                 "SETTINGS",
-                bold = true,
+                fontWeight = FontWeight.Bold,
             ),
         )
 
@@ -199,7 +200,7 @@ private fun SettingsEditFields(
                 "SFX Volume",
                 modifier =
                     Modifier
-                        .padding(getResponsiveSizeWidth(Spacing.medium), 0.dp)
+                        .padding(getResponsiveSizeHeight(Spacing.medium), 0.dp)
                         .fillMaxWidth(),
                 color = kiwiColors.color6,
             ),
@@ -270,7 +271,7 @@ private fun SettingsButtons(
                     KiwiTextArguments(
                         "CHANGE GOOD/BAD APPS",
                         color = kiwiColors.color6,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5A,
                 onClick = { navController.navigate(ScreenRoutes.SIGNUP4_APPS) },
@@ -284,7 +285,7 @@ private fun SettingsButtons(
                     KiwiTextArguments(
                         "CONTACT US",
                         color = kiwiColors.color6,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5A,
                 onClick = { openLinkInBrowser(context, BuildConfig.CONCIERGE_FORM_LINK) },
@@ -296,7 +297,7 @@ private fun SettingsButtons(
                     KiwiTextArguments(
                         "REPORT A BUG",
                         color = kiwiColors.color6,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5A,
                 onClick = { openLinkInBrowser(context, BuildConfig.BUG_FORM_LINK) },
@@ -310,7 +311,7 @@ private fun SettingsButtons(
                     KiwiTextArguments(
                         "LOG OUT",
                         color = kiwiColors.color6,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5A,
                 onClick = {
@@ -331,7 +332,7 @@ private fun SettingsButtons(
                     KiwiTextArguments(
                         "RESET PROGRESS",
                         color = kiwiColors.color6,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.colorR1,
                 onClick = {

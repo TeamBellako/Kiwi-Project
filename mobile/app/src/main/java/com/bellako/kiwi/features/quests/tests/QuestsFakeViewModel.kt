@@ -6,12 +6,8 @@ import com.bellako.kiwi.features.quests.data.QuestDomain
 import com.bellako.kiwi.features.quests.data.QuestsState
 import com.bellako.kiwi.features.quests.data.SubquestStatus
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
-import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class QuestsFakeViewModel(
@@ -28,35 +24,26 @@ class QuestsFakeViewModel(
     var fakeError: Boolean = false
     var fakeException: Exception = Exception("Simulated error")
 
-    // NOTIFICATIONS
-    private val _notifications =
-        MutableSharedFlow<QuestNotificationEvent>(
-            extraBufferCapacity = 10,
-            onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
-        )
-
-    override fun getNotifications(): SharedFlow<QuestNotificationEvent> = _notifications.asSharedFlow()
-
-    override suspend fun notifyNewQuest(quest: QuestDomain) {
-        _notifications.emit(QuestNotificationEvent.NewQuest(quest))
+    override fun notifyNewQuest(quest: QuestDomain) {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun notifyQuestCompleted(quest: QuestDomain) {
-        _notifications.emit(QuestNotificationEvent.QuestCompleted(quest))
+    override fun notifyQuestCompleted(quest: QuestDomain) {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun notifySubquestCompleted(
+    override fun notifySubquestCompleted(
         quest: QuestDomain,
         subquestId: Int,
     ) {
-        _notifications.emit(QuestNotificationEvent.SubquestCompleted(quest, subquestId))
+        TODO("Not yet implemented")
     }
 
-    override suspend fun notifySubquestFailed(
+    override fun notifySubquestFailed(
         quest: QuestDomain,
         subquestId: Int,
     ) {
-        _notifications.emit(QuestNotificationEvent.SubquestFailed(quest, subquestId))
+        TODO("Not yet implemented")
     }
 
     // LOAD
@@ -68,11 +55,6 @@ class QuestsFakeViewModel(
             handleSuccess()
             setUiState(UIState.Success(Unit))
         }
-    }
-
-    override fun loadCompletedQuests() {
-        handleSuccess()
-        setUiState(UIState.Success(Unit))
     }
 
     // CHECK QUESTS AND SUBQUESTS STATUS

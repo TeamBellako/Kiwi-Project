@@ -71,9 +71,10 @@ fun ObjectivesScreen(
                 ?: -1
 
         if (index >= 0) {
-            listState.animateScrollToItem(index)
+            listState.animateScrollToItem(index + 1)
         }
     }
+
     LaunchedEffect(goalsState) {
         val today = dateToString(LocalDate.now())
         val yesterday = dateToString(LocalDate.now().minusDays(1))
@@ -125,8 +126,9 @@ fun ObjectivesScreen(
         }
 
         item {
+            Kiwi_Spacer(Spacing.large)
+            Kiwi_HorizontalLine(kiwiColors.color1A)
             Kiwi_Spacer(Spacing.medium)
-            Kiwi_HorizontalLine(kiwiColors.color7D)
         }
 
         // TITLE GOALS
@@ -144,25 +146,39 @@ fun ObjectivesScreen(
         // GOALS LIST
         todayGoals?.let { goals ->
             items(goals) { goal ->
-                GoalComponent(goal, goalsViewModel)
+                GoalComponent(
+                    goal,
+                    goalsViewModel,
+                    modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.xSmall)),
+                )
             }
         }
 
         item {
             Kiwi_Spacer(Spacing.medium)
-            Kiwi_HorizontalLine_Text("Yesterday", kiwiColors.color7D, kiwiColors.colorF)
+            Kiwi_HorizontalLine_Text(
+                "Yesterday",
+                kiwiColors.color1A,
+                kiwiColors.colorF,
+                modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.large)),
+            )
             Kiwi_Spacer(Spacing.medium)
         }
 
         // YESTERDAY GOALS LIST
         yesterdayGoals?.let { goals ->
             items(goals) { goal ->
-                GoalComponent(goal, goalsViewModel)
+                GoalComponent(
+                    goal,
+                    goalsViewModel,
+                    modifier = Modifier.padding(bottom = getResponsiveSizeHeight(Spacing.xSmall)),
+                )
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)

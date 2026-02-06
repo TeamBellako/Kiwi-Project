@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -160,7 +161,7 @@ private fun SignUpFormLayout(
                 "Let's Start With\nThe Basics",
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
-                bold = true,
+                fontWeight = FontWeight.Bold,
             ),
         )
 
@@ -224,7 +225,7 @@ private fun SignUpForm(
             KiwiTextArguments(
                 "START JOURNEY",
                 color = kiwiColors.colorF,
-                bold = true,
+                fontWeight = FontWeight.Bold,
             ),
         color = kiwiColors.color8,
         onClick = {

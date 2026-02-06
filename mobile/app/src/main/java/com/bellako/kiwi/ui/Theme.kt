@@ -7,6 +7,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
+const val KIWI_DISABLED_ALPHA = 0.3f
+
 @Composable
 fun Kiwi_Theme(content: @Composable () -> Unit) {
     CompositionLocalProvider(

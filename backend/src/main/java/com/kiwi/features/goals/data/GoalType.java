@@ -5,5 +5,5 @@ public enum GoalType {
     SLEEP,
     MEDITATION,
     NUTRITION,
-    PRODUCTIVITY
+    PRODUCTIVITY,
 }

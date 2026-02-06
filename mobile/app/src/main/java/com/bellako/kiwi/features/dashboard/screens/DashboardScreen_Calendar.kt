@@ -67,6 +67,7 @@ import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -477,7 +478,7 @@ fun CalendarDayView(
                 ).testTag(testTag),
         contentAlignment = Alignment.Center,
     ) {
-        val contentAlpha = if (isDayEnabled) 1f else DAY_DISABLED_ALPHA
+        val contentAlpha = if (isDayEnabled) 1f else KIWI_DISABLED_ALPHA
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

@@ -72,26 +72,6 @@ public class SkillControllerTests {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @WithMockUser(username = "test@test.com")
-    public void getEquippedSkills_valid_returnsOk() throws Exception {
-
-        when(usersService.getUserByEmail(any()))
-                .thenReturn(Optional.of(new UsersPersistence() {{
-                    setId(1L);
-                    setEmail("test@test.com");
-                }}));
-
-        when(skillService.getEquippedSkillsForUser(1L))
-                .thenReturn(List.of(
-                        SkillTestFactory.skillDto(1L, false, 1)
-                ));
-
-        mockMvc.perform(get(baseAPIUrl + "/equipped")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
     // ============================================================
     // GIVE / LEVEL UP
     // ============================================================
@@ -161,6 +141,50 @@ public class SkillControllerTests {
                 .thenReturn(SkillTestFactory.skillDto(1L, false, 1));
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/1/ready", null))
+                .andExpect(status().isOk());
+    }
+
+    // ============================================================
+    // EQUIP
+    // ============================================================
+
+
+    @Test
+    @WithMockUser(username = "test@test.com")
+    public void equipSkill_valid_returnsOk() throws Exception {
+
+        when(usersService.getUserByEmail(any()))
+                .thenReturn(Optional.of(new UsersPersistence() {{
+                    setId(1L);
+                }}));
+
+        when(skillService.equipSkill(1L, 1L, SkillTestFactory.equipSkillDTO(2)))
+                .thenReturn(SkillTestFactory.skillDto(1L, false, 0));
+
+        mockMvc.perform(
+                        getPostRequestBuilder(
+                                baseAPIUrl + "/1/equip",
+                                "2"
+                        ).contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
+    public void unequipSkill_valid_returnsOk() throws Exception {
+
+        when(usersService.getUserByEmail(any()))
+                .thenReturn(Optional.of(new UsersPersistence() {{
+                    setId(1L);
+                }}));
+
+        when(skillService.unequipSkill(1L, 1L))
+                .thenReturn(SkillTestFactory.skillDto(1L, false, 0));
+
+        mockMvc.perform(
+                        getPostRequestBuilder(baseAPIUrl + "/1/unequip", null)
+                )
                 .andExpect(status().isOk());
     }
 }

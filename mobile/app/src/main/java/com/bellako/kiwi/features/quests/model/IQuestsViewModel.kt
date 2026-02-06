@@ -6,25 +6,21 @@ import com.bellako.kiwi.features.quests.data.QuestsState
 import kotlinx.coroutines.flow.SharedFlow
 
 interface IQuestsViewModel : IBaseViewModel<QuestsState> {
-    fun getNotifications(): SharedFlow<QuestNotificationEvent>
+    fun notifyNewQuest(quest: QuestDomain)
 
-    suspend fun notifyNewQuest(quest: QuestDomain)
+    fun notifyQuestCompleted(quest: QuestDomain)
 
-    suspend fun notifyQuestCompleted(quest: QuestDomain)
-
-    suspend fun notifySubquestCompleted(
+    fun notifySubquestCompleted(
         quest: QuestDomain,
         subquestId: Int,
     )
 
-    suspend fun notifySubquestFailed(
+    fun notifySubquestFailed(
         quest: QuestDomain,
         subquestId: Int,
     )
 
     fun loadActiveQuests()
-
-    fun loadCompletedQuests()
 
     suspend fun isQuestCompleted(questId: Int): Boolean
 

@@ -119,4 +119,73 @@ public class SkillsIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.cooldown").value(true));
     }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void removeSkillCooldown_success() throws Exception {
+
+        var user = createUser();
+        var skill = createSkill(1L);
+
+        statusRepository.saveAndFlush(cooldownSkill(user.getId(), skill));
+
+        mockMvc.perform(post(API_URL + "/" + skill.getId() + "/ready"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cooldown").value(false));
+    }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void equipSkill_success() throws Exception {
+
+        var user = createUser();
+        var skill = createSkill(1L);
+
+        statusRepository.saveAndFlush(
+                unEquippedSkill(user.getId(), skill)
+        );
+
+        mockMvc.perform(
+                        post(API_URL + "/" + skill.getId() + "/equip")
+                                .contentType("application/json")
+                                .content("1")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deckSlot").value(1));
+
+        var status =
+                statusRepository
+                        .findByIdUserIdAndIdSkillId(user.getId(), skill.getId())
+                        .orElseThrow();
+
+        assertEquals(1, status.getDeckSlot());
+    }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void unequipSkill_success() throws Exception {
+
+        var user = createUser();
+        var skill = createSkill(1L);
+
+        statusRepository.saveAndFlush(
+                equippedSkill(user.getId(), skill)
+        );
+
+        mockMvc.perform(
+                        post(API_URL + "/" + skill.getId() + "/unequip")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deckSlot").value(0));
+
+        var status =
+                statusRepository
+                        .findByIdUserIdAndIdSkillId(user.getId(), skill.getId())
+                        .orElseThrow();
+
+        assertEquals(0, status.getDeckSlot());
+    }
+
+
+
 }

@@ -10,6 +10,7 @@ interface IQuestsAPI {
     @GET("api/quests/active")
     suspend fun getActiveQuests(): List<QuestDTO>
 
+    // IF WE EVER NEED THIS, CHANGE BACKEND TO LOAD ALL QUESTS AND THEN FILTER LIKE IN THE SKILLS STATE
     @GET("api/quests/completed")
     suspend fun getCompletedQuests(): List<QuestDTO>
 
