@@ -27,16 +27,13 @@ class NodesViewModel
 
         // -----------------------------------------------------------------------------------------
 
-        override fun loadNodes() {
+        override fun loadNodes(mapId: Int) {
             viewModelScope.launch {
                 setIsLoading(true)
                 setUiState(UIState.Loading)
                 try {
-                    val nodes = repository.getNodes()
-                    _state.value =
-                        _state.value.copy(
-                            nodes = nodes.associateBy { it.id },
-                        )
+                    val nodes = repository.getNodesByMapId(mapId)
+                    _state.value = NodesState(nodes = nodes.associateBy { it.id })
                     setUiState(UIState.Idle)
                 } catch (e: GeneralSecurityException) {
                     warn("Encryption error: ${e.message}")

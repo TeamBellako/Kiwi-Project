@@ -18,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -37,12 +36,17 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalNotificationType
 import com.bellako.kiwi.features.goals.screens.GoalsModal
+import com.bellako.kiwi.features.map.data.MapsInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
@@ -59,10 +63,13 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlin.collections.forEach
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 const val NOTIFICATION_OVERLAY_Z_ORDER = 10f
@@ -74,7 +81,6 @@ fun MapScreen(
     maxZoom: Float = 8f,
     mapMarginFactor: Float = 0.08f,
     elasticityFactor: Float = 1.4f,
-    mapResourceId: Int = R.drawable.mindveil_4k,
     title: String = "MINDVEIL",
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
@@ -90,7 +96,8 @@ fun MapScreen(
         with(density) { getScreenHeight().dp.toPx() } * 0.84f // approximate usable space
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
 
-    val imageBitmap = ImageBitmap.imageResource(id = mapResourceId)
+    val mapState by mapViewModel.state.collectAsState()
+    val imageBitmap = ImageBitmap.imageResource(id = mapState.mapInfo.mapResourceId)
     val imageW = imageBitmap.width.toFloat()
     val imageH = imageBitmap.height.toFloat()
 
@@ -110,37 +117,26 @@ fun MapScreen(
             elasticityFactor = elasticityFactor,
         )
     }
-    val nodesState by nodesViewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
-        nodesViewModel.loadNodes()
-
-        snapshotFlow { nodesState?.nodes }
-            .filterNotNull()
-            .filter { it.isNotEmpty() }
-            .first()
-            .let { nodesMap ->
-                val nodesList = nodesMap.values.toList()
-
-                val lastOpen = nodesList.lastOrNull { it.status == NodeStatus.OPEN }
-
-                val lastCompleted = nodesList.lastOrNull { it.status == NodeStatus.COMPLETED }
-
-                val defaultNode = nodesList.firstOrNull()
-
-                val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
-
-                selectedNode?.let { node ->
-                    mapViewModel.selectNode(node.id, node.cordX, node.cordY)
-                    mapViewModel.setPlayerNode(node.id)
-                }
-            }
+        loadNodes(mapViewModel, nodesViewModel, 0)
     }
 
     val goalsModalRequest = remember { mutableStateOf<Pair<GoalNotificationType, List<IGoal>>?>(null) }
 
     LaunchedEffect(Unit) {
         goalsViewModel.checkAndNotifyGoals()
+    }
+
+    LaunchedEffect(Unit) {
+        mapViewModel.setBackgroundColor(kiwiColors.colorOcean)
+
+        listenToEvent(EventType.SWITCH_MAP) { eventPayload ->
+            val payload = eventPayload as EventPayload.SwitchMapPayload
+            mapViewModel.switchMap(payload.mapInfo)
+
+            loadNodes(mapViewModel, nodesViewModel, payload.mapInfo.mapId)
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -162,7 +158,7 @@ fun MapScreen(
             )
 
             InteractiveMap(
-                mapResourceId = mapResourceId,
+                mapResourceId = mapState.mapInfo.mapResourceId,
                 mapViewModel = mapViewModel,
                 nodesViewModel = nodesViewModel,
                 modifier = Modifier.fillMaxSize(),
@@ -211,6 +207,34 @@ fun MapScreen(
     }
 }
 
+private fun loadNodes(
+    mapViewModel: MapViewModel,
+    nodesViewModel: INodesViewModel,
+    mapId: Int,
+) {
+    nodesViewModel.loadNodes(mapId)
+
+    nodesViewModel.state
+        .onEach { nodesState ->
+            val nodesMap = nodesState?.nodes ?: return@onEach
+            if (nodesMap.isNotEmpty()) {
+                val nodesList = nodesMap.values.toList()
+
+                val lastOpen = nodesList.lastOrNull { it.status == NodeStatus.OPEN }
+                val lastCompleted = nodesList.lastOrNull { it.status == NodeStatus.COMPLETED }
+                val defaultNode = nodesList.firstOrNull()
+
+                val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
+
+                selectedNode?.let { node ->
+                    mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+                    mapViewModel.setPlayerNode(node.id)
+                }
+            }
+        }.launchIn(CoroutineScope(Dispatchers.Main))
+}
+
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 private fun InteractiveMap(
     mapResourceId: Int,
@@ -221,6 +245,8 @@ private fun InteractiveMap(
     val context = LocalContext.current
     val mapState by mapViewModel.state.collectAsState()
     val nodesState by nodesViewModel.state.collectAsState()
+
+    val kiwiColors = LocalKiwiColors.current
 
     Box(
         modifier =
@@ -238,7 +264,7 @@ private fun InteractiveMap(
                 },
         contentAlignment = Alignment.Center,
     ) {
-        Background()
+        Background(mapViewModel)
 
         val imageWidthDp = with(LocalDensity.current) { mapState.mapWidthPx.toDp() }
         val imageHeightDp = with(LocalDensity.current) { mapState.mapHeightPx.toDp() }
@@ -329,6 +355,28 @@ private fun InteractiveMap(
                                 nodesViewModel.completeNode(id)
                                 AudioManager.playSFX(context, R.raw.snd_node_completed)
                             },
+                            onRetryNode = { id ->
+                                // HACK: Remove once scripting is done, this is just for showcase
+                                if (selectedNode.displayName == "CITY") {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        EventBus.emitEvent(
+                                            EventType.SWITCH_MAP,
+                                            EventPayload.SwitchMapPayload(
+                                                MapsInfo.Testing,
+                                            ),
+                                        )
+                                    }
+                                } else if (selectedNode.displayName == "MAP_SWITCH") {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        EventBus.emitEvent(
+                                            EventType.SWITCH_MAP,
+                                            EventPayload.SwitchMapPayload(
+                                                MapsInfo.MindVeil,
+                                            ),
+                                        )
+                                    }
+                                }
+                            },
                         )
                     }
             }
@@ -337,11 +385,13 @@ private fun InteractiveMap(
 }
 
 @Composable
-fun Background() {
+fun Background(mapViewModel: MapViewModel) {
+    val mapState = mapViewModel.state.collectAsState()
+
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(LocalKiwiColors.current.colorOcean),
+                .background(mapState.value.mapInfo.backgroundColor),
     )
 }

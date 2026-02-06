@@ -47,6 +47,11 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
+    public List<NodesPersistence> findByIsFirstNodeOfMapTrue() {
+        return List.of();
+    }
+
+    @Override
     public boolean existsById(Long id) {
         return nodeStore.containsKey(id);
     }

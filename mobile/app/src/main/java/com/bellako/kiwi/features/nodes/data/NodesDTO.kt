@@ -11,4 +11,5 @@ data class NodesDTO(
     val name: String,
     val displayName: String,
     val connectedNodeIds: List<Long>,
+    val mapId: Int,
 )

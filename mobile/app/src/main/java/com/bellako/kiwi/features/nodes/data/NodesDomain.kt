@@ -11,6 +11,7 @@ data class NodesDomain(
     val name: String,
     val displayName: String,
     val connectedNodeIds: List<Long>,
+    val mapId: Int,
 )
 
 enum class NodeStatus {

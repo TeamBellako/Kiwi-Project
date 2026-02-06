@@ -40,5 +40,6 @@ object NodesTestFactory {
             name = name,
             displayName = displayName,
             connectedNodeIds = connectedNodeIds,
+            mapId = 0,
         )
 }

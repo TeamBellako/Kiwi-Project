@@ -51,6 +51,7 @@ data class KiwiAnnotatedStringArguments(
 // -------------------------------------------------------------------------------------------------
 
 private const val LINE_HEIGHT = 1.2f
+
 @Composable
 private fun Kiwi_Text(
     arguments: KiwiTextArguments,

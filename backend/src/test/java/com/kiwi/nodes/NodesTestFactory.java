@@ -6,13 +6,14 @@ import java.util.List;
 
 public class NodesTestFactory {
 
-    public static NodesPersistence persistenceNode(Long nodeId) {
+    public static NodesPersistence persistenceNode(Long nodeId, int mapId) {
         NodesPersistence n = new NodesPersistence();
         n.setPrice(0);
         n.setCordX(0);
         n.setCordY(0);
         n.setEventOnExecution(0L);
         n.setName("Node"+nodeId);
+        n.setMapId(mapId);
         return n;
     }
 
@@ -68,7 +69,9 @@ public class NodesTestFactory {
                 null,
                 "node" + id,
                 "Node " + id,
-                List.of()
+                List.of(),
+                0,
+                true
         );
     }
 }
