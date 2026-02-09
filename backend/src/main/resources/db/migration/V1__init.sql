@@ -1,23 +1,6 @@
-USE kiwi_db_dev;
+-- V1__init.sql (Flyway)
 
--- Drop tables if they exist
-DROP TABLE IF EXISTS user_skill_status;
-DROP TABLE IF EXISTS skills;
-DROP TABLE IF EXISTS suggested_goals;
-DROP TABLE IF EXISTS goals;
-DROP TABLE IF EXISTS metrics;
-DROP TABLE IF EXISTS personality;
-DROP TABLE IF EXISTS settings;
-DROP TABLE IF EXISTS node_edges;
-DROP TABLE IF EXISTS user_node_status;
-DROP TABLE IF EXISTS nodes;
-DROP TABLE IF EXISTS user_quest_status;
-DROP TABLE IF EXISTS user_subquest_status;
-DROP TABLE IF EXISTS subquests;
-DROP TABLE IF EXISTS quests;
-DROP TABLE IF EXISTS users;
-
--- Create users table with a foreign key to settings
+-- users
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -27,18 +10,16 @@ CREATE TABLE IF NOT EXISTS users (
     total_points INT NOT NULL DEFAULT 0
 );
 
--- Create settings table
+-- settings
 CREATE TABLE IF NOT EXISTS settings (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     sound_volume FLOAT NOT NULL CHECK (sound_volume >= 0 AND sound_volume <= 1),
     music_volume FLOAT NOT NULL CHECK (music_volume >= 0 AND music_volume <= 1),
-
-    -- Foreign key to users table
     user_id BIGINT NOT NULL,
     CONSTRAINT fk_settings_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create metrics table with a foreign key to users
+-- metrics
 CREATE TABLE IF NOT EXISTS metrics (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     date DATE NOT NULL,
@@ -46,16 +27,12 @@ CREATE TABLE IF NOT EXISTS metrics (
     current_good_time_seconds INT NOT NULL CHECK (current_good_time_seconds >= 0),
     max_bad_time_seconds INT NOT NULL CHECK (max_bad_time_seconds >= 0),
     current_bad_time_seconds INT NOT NULL CHECK (current_bad_time_seconds >= 0),
-
-    -- Foreign key to users table
     user_id BIGINT NOT NULL,
     CONSTRAINT fk_metrics_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-
-    -- Add a unique constraint for each date for each user to avoid multiple entries per day
     CONSTRAINT unique_user_date UNIQUE (user_id, date)
 );
 
--- Create personality table
+-- personality
 CREATE TABLE IF NOT EXISTS personality (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     real_name VARCHAR(255),
@@ -64,13 +41,11 @@ CREATE TABLE IF NOT EXISTS personality (
     good_apps TEXT,
     bad_apps TEXT,
     neutral_apps TEXT,
-
-    -- Foreign key to users table
     user_id BIGINT NOT NULL,
     CONSTRAINT fk_personality_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create goals table with a foreign key to users
+-- goals
 CREATE TABLE IF NOT EXISTS goals (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     target BIGINT NOT NULL,
@@ -81,18 +56,14 @@ CREATE TABLE IF NOT EXISTS goals (
     reward INT NOT NULL,
     date DATE NOT NULL,
     value BIGINT NOT NULL,
-
-    -- Foreign key to users table
     user_id BIGINT NOT NULL,
     CONSTRAINT fk_goals_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-
-    -- Add index for efficient queries by user and date
     INDEX idx_user_date (user_id, date)
 );
 
--- Create suggested_goals table with a foreign key to users
+-- suggested_goals
 CREATE TABLE IF NOT EXISTS suggested_goals (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     target BIGINT NOT NULL,
     action TEXT,
@@ -101,16 +72,15 @@ CREATE TABLE IF NOT EXISTS suggested_goals (
     reward INT NOT NULL
 );
 
--- Insert placeholder values for suggested_goals
-INSERT INTO suggested_goals ( id, name, target, action, type, category, reward ) 
-VALUES 
-(1, "", 10000, "Da 10000 pasos", "EXERCISE", "DAILY_CHALLENGES", 100), 
-(2, "", 10, "Medita 10 minutos", "MEDITATION", "DAILY_CHALLENGES", 200),
-(3, "", 7500, "Da 7500 pasos", "EXERCISE", "DAILY_CHALLENGES", 100),
-(4, "", 10, "Usa Duolingo 10 minutos", "MEDITATION", "DAILY_CHALLENGES", 200),
-(5, "", 5, "Haz 5 flexiones", "EXERCISE", "DAILY_CHALLENGES", 100);
+INSERT IGNORE INTO suggested_goals (id, name, target, action, type, category, reward)
+VALUES
+('1', "", 10000, "Da 10000 pasos", "EXERCISE", "DAILY_CHALLENGES", 100),
+('2', "", 10, "Medita 10 minutos", "MEDITATION", "DAILY_CHALLENGES", 200),
+('3', "", 7500, "Da 7500 pasos", "EXERCISE", "DAILY_CHALLENGES", 100),
+('4', "", 10, "Usa Duolingo 10 minutos", "MEDITATION", "DAILY_CHALLENGES", 200),
+('5', "", 5, "Haz 5 flexiones", "EXERCISE", "DAILY_CHALLENGES", 100);
 
--- Create nodes table
+-- nodes
 CREATE TABLE IF NOT EXISTS nodes (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   icon INT DEFAULT 0,
@@ -129,7 +99,6 @@ CREATE TABLE IF NOT EXISTS nodes (
   )
 );
 
--- Create user_nodes_status table
 CREATE TABLE IF NOT EXISTS user_node_status (
   user_id BIGINT NOT NULL,
   node_id BIGINT NOT NULL,
@@ -143,72 +112,51 @@ CREATE TABLE IF NOT EXISTS node_edges (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     from_node_id BIGINT NOT NULL,
     to_node_id BIGINT NOT NULL,
-
-    CONSTRAINT fk_node_edges_from
-        FOREIGN KEY (from_node_id)
-        REFERENCES nodes(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_node_edges_to
-        FOREIGN KEY (to_node_id)
-        REFERENCES nodes(id)
-        ON DELETE CASCADE,
-
+    CONSTRAINT fk_node_edges_from FOREIGN KEY (from_node_id) REFERENCES nodes(id) ON DELETE CASCADE,
+    CONSTRAINT fk_node_edges_to   FOREIGN KEY (to_node_id)   REFERENCES nodes(id) ON DELETE CASCADE,
     UNIQUE KEY uq_node_edge (from_node_id, to_node_id)
 );
 
--- Insert placeholder values for nodes
-INSERT INTO nodes ( id, icon, price, cord_x, cord_y, event_on_execution, name, display_name, map_id, is_first_node_of_map ) 
-VALUES 
-(1, 1, 120, 0.585, 0.12, 0, 'node_1', 'START', 0, TRUE), 
-(2, 0, 140, 0.623, 0.175, 0, 'node_2', NULL, 0, FALSE), 
+INSERT IGNORE INTO nodes (id, icon, price, cord_x, cord_y, event_on_execution, name, display_name, map_id, is_first_node_of_map)
+VALUES
+(1, 1, 120, 0.585, 0.12, 0, 'node_1', 'START', 0, TRUE),
+(2, 0, 140, 0.623, 0.175, 0, 'node_2', NULL, 0, FALSE),
 (3, 0, 180, 0.66, 0.228, 0, 'node_3', NULL, 0, FALSE),
-(4, 2, 100, 0.598, 0.228, 0, 'node_4', 'CAVE OF THE DEEP BREATH', 0, FALSE), 
+(4, 2, 100, 0.598, 0.228, 0, 'node_4', 'CAVE OF THE DEEP BREATH', 0, FALSE),
 (5, 0, 180, 0.66, 0.275, 0, 'node_5', NULL, 0, FALSE),
 (6, 3, 140, 0.615, 0.295, 0, 'node_6', 'CITY', 0, FALSE),
 (7, 1, 120, 0.585, 0.12, 0, 'node_7', 'MAP_SWITCH', 1, TRUE);
 
-INSERT INTO node_edges ( from_node_id, to_node_id ) 
-VALUES
-(1,2),
-(2,3),
-(3,4),
-(3,5),
-(5,6);
+INSERT IGNORE INTO node_edges (from_node_id, to_node_id)
+VALUES (1,2),(2,3),(3,4),(3,5),(5,6);
 
--- Create quest table
+-- quests
 CREATE TABLE IF NOT EXISTS quests (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     experience INT NOT NULL,
-	icon INT NOT NULL
+    icon INT NOT NULL
 );
 
--- Create subquests table
 CREATE TABLE IF NOT EXISTS subquests (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     quest_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     experience INT NOT NULL,
     order_index INT NOT NULL,
-
-    FOREIGN KEY (quest_id) REFERENCES quests(id)
+    FOREIGN KEY (quest_id) REFERENCES quests(id) ON DELETE CASCADE
 );
 
--- Create user_quest_status table
 CREATE TABLE IF NOT EXISTS user_quest_status (
     user_id BIGINT NOT NULL,
     quest_id BIGINT NOT NULL,
-
     status ENUM('ACTIVE', 'COMPLETED') NOT NULL,
-
     PRIMARY KEY (user_id, quest_id),
     FOREIGN KEY (quest_id) REFERENCES quests(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Create user_subquest_status table
 CREATE TABLE IF NOT EXISTS user_subquest_status (
     user_id BIGINT NOT NULL,
     subquest_id BIGINT NOT NULL,
@@ -218,7 +166,6 @@ CREATE TABLE IF NOT EXISTS user_subquest_status (
     FOREIGN KEY (subquest_id) REFERENCES subquests(id)
 );
 
--- Trigger to DELETE ON CASCADE user_quest_status table
 DELIMITER $$
 
 CREATE TRIGGER user_quest_status_after_delete
@@ -229,70 +176,57 @@ BEGIN
     WHERE user_id = OLD.user_id
       AND subquest_id IN (
           SELECT id FROM subquests WHERE quest_id = OLD.quest_id
-      );    
+      );
 END$$
 
 DELIMITER ;
---
 
--- Insert placeholder values for quests
-INSERT INTO quests VALUES (1,"First Quest", "Complete your first challenge", 100,1),(2,"Second Quest", "A longer mission with multiple steps", 100,2);
-INSERT INTO subquests VALUES (1,1,"Objective 1",20,1),(2,1,"Objective 2",20,2),(3,1,"Objective 3",20,3),(4,2,"Objective 1",20,1),(5,2,"Objective 2",20,2),(6,2,"Objective 3",20,3),(7,2,"Objective 4",20,4);
---
+INSERT IGNORE INTO quests (id, name, description, experience, icon)
+VALUES
+(1, 'First Quest', 'Complete your first challenge', 100, 1),
+(2, 'Second Quest', 'A longer mission with multiple steps', 100, 2);
 
--- Create skills table
+INSERT IGNORE INTO subquests (id, quest_id, name, experience, order_index)
+VALUES
+(1,1,'Objective 1',20,1),
+(2,1,'Objective 2',20,2),
+(3,1,'Objective 3',20,3),
+(4,2,'Objective 1',20,1),
+(5,2,'Objective 2',20,2),
+(6,2,'Objective 3',20,3),
+(7,2,'Objective 4',20,4);
+
+-- skills
 CREATE TABLE IF NOT EXISTS skills (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-
     name VARCHAR(255) NOT NULL UNIQUE,
     description VARCHAR(500) NOT NULL,
     quote VARCHAR(255),
-
     icon INT NOT NULL,
-
     cooldown_type ENUM('GOAL', 'TIME', 'OTHER') NOT NULL,
-
     cooldown_goal_id BIGINT,
     cooldown_time_minutes INT,
     cooldown_other_description VARCHAR(500),
-
     levelup_skill_id BIGINT,
-
     CONSTRAINT fk_skills_goal
-        FOREIGN KEY (cooldown_goal_id)
-        REFERENCES goals(id)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
+        FOREIGN KEY (cooldown_goal_id) REFERENCES goals(id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT fk_skills_levelup
-        FOREIGN KEY (levelup_skill_id)
-        REFERENCES skills(id)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE
+        FOREIGN KEY (levelup_skill_id) REFERENCES skills(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- Create user_skill_status table
 CREATE TABLE IF NOT EXISTS user_skill_status (
     user_id BIGINT NOT NULL,
     skill_id BIGINT NOT NULL,
-
     is_cooldown BOOLEAN NOT NULL,
-
     cooldown_until TIMESTAMP NULL,
-
     deck_slot INT NOT NULL,
-
     PRIMARY KEY (user_id, skill_id),
-
     CONSTRAINT fk_user_skill_status_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_user_skill_status_skill
-        FOREIGN KEY (skill_id)
-        REFERENCES skills(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+        FOREIGN KEY (skill_id) REFERENCES skills(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );

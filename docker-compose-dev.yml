@@ -2,6 +2,7 @@ name: kiwi-dev
 services:
   db:
     image: mysql:8.0
+    command: --log-bin-trust-function-creators=1
     container_name: kiwi-mysql-dev
     restart: always
     env_file:
