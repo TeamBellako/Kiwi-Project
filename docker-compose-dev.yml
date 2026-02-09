@@ -1,7 +1,7 @@
 name: kiwi-dev
 services:
   db:
-    image: mysql:8
+    image: mysql:8.0
     container_name: kiwi-mysql-dev
     restart: always
     env_file:
