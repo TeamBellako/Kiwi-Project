@@ -10,9 +10,13 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./scripts/mysql/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   backend:
     build:
@@ -20,11 +24,8 @@ services:
       dockerfile: Dockerfile.dev
     container_name: kiwi-backend-dev
     depends_on:
-      - db
-    environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - BACKEND_DB_USERNAME=${BACKEND_DB_USERNAME}
-      - BACKEND_DB_PASSWORD=${BACKEND_DB_PASSWORD}
+      db:
+        condition: service_healthy
     env_file:
       - ./backend/.env.dev
     ports:
