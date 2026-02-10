@@ -166,6 +166,9 @@ CREATE TABLE IF NOT EXISTS user_subquest_status (
     FOREIGN KEY (subquest_id) REFERENCES subquests(id)
 );
 
+-- Drop the trigger if it already exists
+DROP TRIGGER IF EXISTS user_quest_status_after_delete;
+
 DELIMITER $$
 
 CREATE TRIGGER user_quest_status_after_delete
