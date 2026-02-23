@@ -20,7 +20,9 @@ public class NodesDataMapper {
                 node.getEventOnExecution(),
                 node.getName(),
                 node.getDisplayName(),
-                node.getConnectedNodeIds()
+                node.getConnectedNodeIds(),
+                node.getMapId(),
+                node.isFirstNodeOfMap()
         );
     }
 
@@ -40,7 +42,9 @@ public class NodesDataMapper {
                 node.getEventOnExecution(),
                 node.getName(),
                 node.getDisplayName(),
-                connectedNodeIds
+                connectedNodeIds,
+                node.getMapId(),
+                node.isFirstNodeOfMap()
         );
     }
 

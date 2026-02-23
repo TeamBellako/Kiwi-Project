@@ -10,4 +10,6 @@ interface IAppBarViewModel : IBaseViewModel<AppBarState> {
     fun onNewContent(route: String)
 
     fun onNewContentVisited(route: String)
+
+    fun onRouteChanged(route: String?)
 }

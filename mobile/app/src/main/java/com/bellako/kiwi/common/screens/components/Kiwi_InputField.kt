@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestTags
+import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -74,15 +75,15 @@ fun Kiwi_InputField(
                 TextFieldDefaults.colors().copy(
                     unfocusedContainerColor = color,
                     focusedContainerColor = color,
-                    disabledContainerColor = color.copy(alpha = 0.3f),
+                    disabledContainerColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent,
                     cursorColor = textColor,
                     focusedTextColor = textColor,
                     unfocusedTextColor = textColor,
-                    disabledTextColor = textColor.copy(alpha = 0.3f),
-                    disabledLabelColor = textColor.copy(alpha = 0.3f),
+                    disabledTextColor = textColor.copy(alpha = KIWI_DISABLED_ALPHA),
+                    disabledLabelColor = textColor.copy(alpha = KIWI_DISABLED_ALPHA),
                 ),
             modifier =
                 Modifier

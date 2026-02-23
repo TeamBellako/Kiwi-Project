@@ -36,15 +36,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -77,14 +80,14 @@ private fun Kiwi_Button(
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = color,
-                    disabledContainerColor = color.copy(alpha = 0.15f),
+                    disabledContainerColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
                     contentColor = color,
-                    disabledContentColor = color.copy(alpha = 0.3f),
+                    disabledContentColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
                 ),
             contentPadding =
                 PaddingValues(
-                    getResponsiveSizeHeight(contentPaddingHorizontal),
-                    getResponsiveSizeHeight(contentPaddingVertical),
+                    getResponsiveSizeWidth(contentPaddingHorizontal),
+                    getResponsiveSizeWidth(contentPaddingVertical),
                 ),
             modifier =
                 Modifier
@@ -93,10 +96,10 @@ private fun Kiwi_Button(
                         horizontalMargin?.let {
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = getResponsiveSizeHeight(it))
+                                .padding(horizontal = getResponsiveSizeWidth(it))
                         } ?: Modifier,
                     ),
-            shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
+            shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp)),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -115,7 +118,7 @@ private fun Kiwi_Button(
                     if (enabled) {
                         textArguments
                     } else {
-                        textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                        textArguments.copy(color = textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA))
                     }
                 Kiwi_Label1(actualTextArguments)
             }
@@ -289,7 +292,7 @@ private fun HoldButtonContent(
                 .height(IntrinsicSize.Min)
                 .width(IntrinsicSize.Max)
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
-                .background(if (isEnabled) color else color.copy(alpha = 0.3f))
+                .background(if (isEnabled) color else color.copy(alpha = KIWI_DISABLED_ALPHA))
                 .testTag(testTag)
                 .holdGestureHandler(isEnabled, onHoldStart, onHoldEnd),
     ) {
@@ -314,7 +317,7 @@ private fun HoldButtonContent(
                 if (isEnabled) {
                     textArguments
                 } else {
-                    textArguments.copy(color = textArguments.color.copy(alpha = 0.3f))
+                    textArguments.copy(color = textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA))
                 }
             Kiwi_Label1(actualTextArgs)
         }
@@ -362,7 +365,7 @@ fun Kiwi_Button_Preview() {
                     KiwiTextArguments(
                         "BUTTON",
                         color = kiwiColors.colorF,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5,
                 onClick = {},
@@ -375,7 +378,7 @@ fun Kiwi_Button_Preview() {
                     KiwiTextArguments(
                         "BUTTON",
                         color = kiwiColors.colorF,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5,
                 onClick = {},
@@ -388,7 +391,7 @@ fun Kiwi_Button_Preview() {
                         KiwiTextArguments(
                             "BUTTON",
                             color = kiwiColors.colorF,
-                            bold = true,
+                            fontWeight = FontWeight.Bold,
                         ),
                     color = kiwiColors.color5,
                     onClick = {},
@@ -402,7 +405,7 @@ fun Kiwi_Button_Preview() {
                         KiwiTextArguments(
                             "BUTTON",
                             color = kiwiColors.colorF,
-                            bold = true,
+                            fontWeight = FontWeight.Bold,
                         ),
                     color = kiwiColors.color5,
                     onClick = {},

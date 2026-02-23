@@ -77,16 +77,13 @@ fun AppBarModalLayout(
     val state by appBarViewModel.state.collectAsState()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val objectivesRoute = ScreenRoutes.OBJECTIVES
+    val currentRoute = normalize(navBackStackEntry?.destination?.route)
 
     LaunchedEffect(currentRoute) {
+        appBarViewModel.onRouteChanged(currentRoute)
+
         currentRoute?.let {
-            if (it.startsWith(objectivesRoute)) {
-                appBarViewModel.onNewContentVisited(ScreenRoutes.OBJECTIVES)
-            } else {
-                appBarViewModel.onNewContentVisited(currentRoute)
-            }
+            appBarViewModel.onNewContentVisited(currentRoute)
         }
     }
 
@@ -109,12 +106,7 @@ fun AppBarModalLayout(
         Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
 
         state.items.forEach { item ->
-            val isSelected =
-                if (item.route == objectivesRoute) {
-                    currentRoute?.startsWith(objectivesRoute) == true
-                } else {
-                    currentRoute == item.route
-                }
+            val isSelected = currentRoute == item.route
 
             NavigationBarItem(
                 selected = isSelected,
@@ -145,6 +137,13 @@ fun AppBarModalLayout(
         Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
     }
 }
+
+fun normalize(route: String?): String? =
+    when {
+        route?.startsWith(ScreenRoutes.SKILLS) == true -> ScreenRoutes.SKILLS
+        route?.startsWith(ScreenRoutes.OBJECTIVES) == true -> ScreenRoutes.OBJECTIVES
+        else -> route
+    }
 
 // -------------------------------------------------------------------------------------------------
 

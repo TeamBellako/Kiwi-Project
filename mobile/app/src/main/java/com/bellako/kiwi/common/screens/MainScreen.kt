@@ -50,17 +50,20 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
-import com.bellako.kiwi.features.notifications.model.NotificationManager
-import com.bellako.kiwi.features.notifications.model.NotificationViewModel
+import com.bellako.kiwi.features.notifications.controller.NotificationEvent
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
-import com.bellako.kiwi.features.quests.model.QuestNotificationEvent
 import com.bellako.kiwi.features.quests.model.QuestsViewModel
+import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
 import com.bellako.kiwi.features.settings.screens.SettingsScreen
+import com.bellako.kiwi.features.skills.model.ISkillsViewModel
+import com.bellako.kiwi.features.skills.model.SkillsViewModel
+import com.bellako.kiwi.features.skills.screen.SkillsScreen
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.screens.LogInScreen
 import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
@@ -79,12 +82,12 @@ fun MainScreen(
     nodesViewModel: NodesViewModel = hiltViewModel(),
     questsViewModel: QuestsViewModel = hiltViewModel(),
     goalsViewModel: GoalsViewModel = hiltViewModel(),
+    skillsViewModel: SkillsViewModel = hiltViewModel(),
     appBarViewModel: AppBarViewModel = hiltViewModel(),
-    notificationViewModel: NotificationViewModel = hiltViewModel(),
+    notificationManager: NotificationManager,
     conversationViewModel: ConversationViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
-    val notificationManager = notificationViewModel.notificationManager
 
     Kiwi_AudioHandler()
 
@@ -107,6 +110,7 @@ fun MainScreen(
             nodesViewModel = nodesViewModel,
             questsViewModel = questsViewModel,
             goalsViewModel = goalsViewModel,
+            skillsViewModel = skillsViewModel,
             appBarViewModel = appBarViewModel,
             notificationManager = notificationManager,
             conversationViewModel = conversationViewModel,
@@ -132,6 +136,7 @@ private fun AppScreen(
     nodesViewModel: NodesViewModel,
     questsViewModel: QuestsViewModel,
     goalsViewModel: GoalsViewModel,
+    skillsViewModel: SkillsViewModel,
     appBarViewModel: AppBarViewModel,
     notificationManager: NotificationManager,
     conversationViewModel: ConversationViewModel,
@@ -139,26 +144,28 @@ private fun AppScreen(
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val route = currentBackStackEntry?.destination?.route
-    val isLoginScreen =
-        route == null ||
-            route == ScreenRoutes.LOGIN ||
-            route == ScreenRoutes.SIGNUP1_WELCOME ||
-            route == ScreenRoutes.SIGNUP2_FORM ||
-            route == ScreenRoutes.SIGNUP3_TEST ||
-            route == ScreenRoutes.SIGNUP4_APPS
+    val isLoginScreen = isLoginScreen(route)
 
     val showDashboard = route == ScreenRoutes.HOME
 
     val activeConversation by conversationViewModel.active.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        questsViewModel.getNotifications().collect { event ->
-            when (event) {
-                is QuestNotificationEvent.QuestCompleted -> {}
+    val activeConversation by conversationViewModel.active.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(notificationManager) {
+        notificationManager.notifications.collect { event ->
+            when (event) {
+                is NotificationEvent.Quest -> {
+                    if (event.type == QuestNotificationType.QUEST_COMPLETED) {
+                        appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
+                    }
+                }
+                is NotificationEvent.Skill -> {
+                    appBarViewModel.onNewContent(ScreenRoutes.SKILLS)
+                }
                 else -> {
-                    appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
                 }
             }
         }
@@ -184,6 +191,7 @@ private fun AppScreen(
                         nodesViewModel = nodesViewModel,
                         questsViewModel = questsViewModel,
                         goalsViewModel = goalsViewModel,
+                    skillsViewModel = skillsViewModel,
                         notificationManager = notificationManager,
                         onConversationRequest = { conversation ->
                             conversationViewModel.start(conversation)
@@ -206,7 +214,12 @@ private fun AppScreen(
                         )
                     }
 
-                    // Capa 2: Conversación — encima del mapa
+                LaunchedEffect(isLoginCompleted) {
+                    if (isLoginCompleted) {
+                        skillsViewModel.onUserLoggedIn()
+                    }
+                }
+
                     activeConversation?.let { conversation ->
                         Box(modifier = Modifier.matchParentSize()) {
                             if (conversation.type == ConversationType.SMALL) {
@@ -228,6 +241,14 @@ private fun AppScreen(
     }
 }
 
+private fun isLoginScreen(route: String?): Boolean =
+    route == null ||
+        route == ScreenRoutes.LOGIN ||
+        route == ScreenRoutes.SIGNUP1_WELCOME ||
+        route == ScreenRoutes.SIGNUP2_FORM ||
+        route == ScreenRoutes.SIGNUP3_TEST ||
+        route == ScreenRoutes.SIGNUP4_APPS
+
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun AppNavHost(
@@ -238,6 +259,7 @@ fun AppNavHost(
     nodesViewModel: INodesViewModel,
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
+    skillsViewModel: ISkillsViewModel,
     notificationManager: NotificationManager,
     onConversationRequest: (ConversationDomain) -> Unit = {},
 ) {
@@ -303,7 +325,6 @@ fun AppNavHost(
                 Kiwi_Music_Home()
                 MapScreen(
                     nodesViewModel = nodesViewModel,
-                    questsViewModel = questsViewModel,
                     goalsViewModel = goalsViewModel,
                     notificationManager = notificationManager,
                     navController = navController,
@@ -329,6 +350,24 @@ fun AppNavHost(
                 questsViewModel = questsViewModel,
                 focusedQuestId = questId,
                 goalsViewModel = goalsViewModel,
+            )
+        }
+
+        composable(ScreenRoutes.SKILLS) {
+            AppScreenWrapper {
+                SkillsScreen(skillsViewModel = skillsViewModel)
+            }
+        }
+
+        composable(
+            route = ScreenRoutes.SKILLS_FOCUS,
+            arguments = listOf(navArgument("skillId") { type = NavType.LongType }),
+        ) { backStackEntry ->
+            val questId = backStackEntry.arguments?.getLong("skillId")
+
+            SkillsScreen(
+                skillsViewModel = skillsViewModel,
+                focusedSkillId = questId,
             )
         }
 

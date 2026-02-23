@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -45,7 +46,7 @@ fun WIPPopUpScreen(onDismiss: () -> Unit = {}) {
                     KiwiTextArguments(
                         "Work in progress",
                         TextAlign.Center,
-                        bold = true,
+                        fontWeight = FontWeight.Bold,
                     ),
                 )
                 @Suppress("MagicNumber")
@@ -54,7 +55,6 @@ fun WIPPopUpScreen(onDismiss: () -> Unit = {}) {
                         KiwiTextArguments(
                             "Close",
                             color = kiwiColor.colorF,
-                            bold = false,
                         ),
                     color = kiwiColor.color8,
                     modifier = Modifier.fillMaxWidth(0.6f),

@@ -42,6 +42,7 @@ import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.CoroutineScope
 
 val LocalGoalsViewModel = compositionLocalOf<IGoalsViewModel?> { null }
@@ -193,7 +194,10 @@ private fun ExpandedSummaryCard(
         }
     }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(horizontal = getResponsiveSizeWidth(Spacing.medium)),
+    ) {
         Kiwi_P2(
             KiwiTextArguments(
                 "Challenges",
@@ -226,7 +230,7 @@ private fun ExpandedSummaryCard(
 @Composable
 fun DashboardModal2_Preview_Expanded() {
     val fakeGoalsViewModel = remember { GoalsFakeViewModel() }
-    DashboardModal_Preview(false, 2, goalsViewModel = fakeGoalsViewModel)
+    DashboardModal_Preview(false, DashboardLayout.EXPANDED, goalsViewModel = fakeGoalsViewModel)
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -237,5 +241,5 @@ fun DashboardModal2_Preview_Expanded() {
 @Composable
 fun DashboardModal2_Expanded_Calendar_Preview() {
     val fakeGoalsViewModel = remember { GoalsFakeViewModel() }
-    DashboardModal_Preview(true, 2, goalsViewModel = fakeGoalsViewModel)
+    DashboardModal_Preview(true, DashboardLayout.EXPANDED, goalsViewModel = fakeGoalsViewModel)
 }

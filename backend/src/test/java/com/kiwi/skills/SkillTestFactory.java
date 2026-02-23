@@ -81,4 +81,11 @@ public class SkillTestFactory {
                 .deckSlot(deckSlot)
                 .build();
     }
+
+    public static EquipSkillDTO equipSkillDTO(
+            int deckSlot
+    ){
+        return EquipSkillDTO.builder()
+                .deckSlot(deckSlot).build();
+    }
 }

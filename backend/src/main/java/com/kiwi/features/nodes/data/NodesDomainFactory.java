@@ -24,7 +24,9 @@ public class NodesDomainFactory {
                 node.getEventOnExecution(),
                 node.getName(),
                 node.getDisplayName(),
-                connectedNodeIds
+                connectedNodeIds,
+                node.getMapId(),
+                node.isFirstNodeOfMap()
         );
     }
 }

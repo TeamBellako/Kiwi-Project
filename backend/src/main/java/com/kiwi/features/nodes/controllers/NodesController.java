@@ -3,6 +3,7 @@ package com.kiwi.features.nodes.controllers;
 import com.kiwi.common.types.Email;
 import com.kiwi.features.nodes.data.NodesDTO;
 import com.kiwi.features.users.controllers.UsersService;
+import jakarta.persistence.MapsId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,11 +27,19 @@ public class NodesController {
     public ResponseEntity<List<NodesDTO>> getNodesForUser(
             @AuthenticationPrincipal UserDetails userDetails
     ) {
+        return getNodesForMapId(userDetails, 0);
+    }
+
+    @GetMapping("/{mapId}")
+    public ResponseEntity<List<NodesDTO>> getNodesForMapId(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable int mapId
+    ) {
         Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
 
-        List<NodesDTO> nodes = nodesService.getNodesForUser(userId);
+        List<NodesDTO> nodes = nodesService.getNodesForMapId(mapId, userId);
         return ResponseEntity.ok(nodes);
     }
 

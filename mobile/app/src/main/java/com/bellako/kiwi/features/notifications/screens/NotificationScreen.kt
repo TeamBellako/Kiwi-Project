@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.notifications.screens
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -10,76 +11,70 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.bellako.kiwi.features.notifications.model.NotificationEvent
-import com.bellako.kiwi.features.notifications.model.NotificationManager
+import androidx.compose.ui.platform.LocalContext
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.features.goals.data.IGoal
+import com.bellako.kiwi.features.goals.screens.GoalNotificationType
+import com.bellako.kiwi.features.goals.screens.GoalsNotification
+import com.bellako.kiwi.features.notifications.controller.NotificationEvent
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
+import com.bellako.kiwi.features.quests.data.QuestDomain
+import com.bellako.kiwi.features.quests.screens.QuestNotification
+import com.bellako.kiwi.features.quests.screens.QuestNotificationType
+import com.bellako.kiwi.features.skills.data.SkillDomain
+import com.bellako.kiwi.features.skills.screen.SkillNotification
+import com.bellako.kiwi.features.skills.screen.SkillNotificationType
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 
-/**
- * Overlay de notificaciones que muestra notificaciones de diferentes módulos
- * en la parte superior de la pantalla.
- *
- * Este componente gestiona una cola de notificaciones y las muestra una a una
- * con animaciones de entrada y salida.
- *
- * @param notificationManager El gestor de notificaciones compartido
- * @param modifier Modificador opcional para personalizar el layout
- */
-@Suppress("MagicNumber")
+private const val SHOW_TIME_MS = 4_000L
+private const val ANIM_TIME_MS = 300L
+private const val GAP_TIME_MS = 250L
+
 @Composable
 fun NotificationOverlay(
     notificationManager: NotificationManager,
+    onGoalClick: (GoalNotificationType, List<IGoal>) -> Unit,
+    onQuestClick: (QuestNotificationType, QuestDomain, Int?) -> Unit,
+    onSkillClick: (SkillNotificationType, SkillDomain) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val queue = remember { mutableStateListOf<NotificationEvent>() }
-    var current by remember { mutableStateOf<NotificationEvent?>(null) }
+    var currentEvent by remember { mutableStateOf<NotificationEvent?>(null) }
     var visible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-    // Escuchar notificaciones entrantes
+    LaunchedEffect(currentEvent) {
+        currentEvent?.let { handleAudioForEvent(it, context) }
+    }
+
     LaunchedEffect(Unit) {
-        notificationManager.notifications.collect { event ->
-            queue += event
+        notificationManager.notifications.collectLatest { event ->
+            currentEvent = event
+            visible = true
+
+            delay(SHOW_TIME_MS)
+
+            visible = false
+            delay(ANIM_TIME_MS)
+
+            currentEvent = null
+            delay(GAP_TIME_MS)
         }
     }
 
-    // Procesar cola con busy-loop
     LaunchedEffect(Unit) {
-        while (true) {
-            if (current == null && queue.isNotEmpty()) {
-                current = queue.removeAt(0)
-
-                visible = true
-
-                delay(4000)
-
-                visible = false
-                delay(300)
-
-                current = null
-                delay(250)
-            }
-
-            delay(16) // busy-loop
-        }
-    }
-
-    // Escuchar solicitudes externas de dismiss para animar la salida
-    LaunchedEffect(notificationManager) {
         notificationManager.dismissRequests.collect {
-            if (current != null && visible) {
-                // Ejecutar animación de salida como si se cumpliera el timeout
+            if (visible) {
                 visible = false
-                // esperar a la animación de salida
-                delay(300)
-                current = null
-                // mantener el mismo ritmo que el flujo original
-                delay(250)
+                delay(ANIM_TIME_MS)
+                currentEvent = null
             }
         }
     }
@@ -93,17 +88,108 @@ fun NotificationOverlay(
                 enter =
                     slideInVertically(
                         initialOffsetY = { -it },
-                        animationSpec = tween(300),
+                        animationSpec = tween(ANIM_TIME_MS.toInt()),
                     ),
                 exit =
                     slideOutVertically(
                         targetOffsetY = { -it },
-                        animationSpec = tween(300),
+                        animationSpec = tween(ANIM_TIME_MS.toInt()),
                     ),
             ) {
-                // Renderizar el contenido composable de la notificación
-                current?.content?.invoke()
+                currentEvent?.let { NotificationContent(it, onGoalClick, onQuestClick, onSkillClick) }
             }
         }
     }
+}
+
+private fun handleAudioForEvent(
+    event: NotificationEvent,
+    context: Context,
+) {
+    when (event) {
+        is NotificationEvent.Quest -> {
+            when (event.type) {
+                QuestNotificationType.NEW -> AudioManager.playSFX(context, R.raw.snd_ui_newquest)
+                QuestNotificationType.QUEST_COMPLETED,
+                QuestNotificationType.SUBQUEST_COMPLETED,
+                -> AudioManager.playSFX(context, R.raw.snd_ui_questcompleted)
+                QuestNotificationType.SUBQUEST_FAILED -> AudioManager.playSFX(context, R.raw.snd_ui_questfailed)
+            }
+        }
+        is NotificationEvent.Goal,
+        is NotificationEvent.Skill,
+        is NotificationEvent.Generic,
+        -> {
+            // TODO
+        }
+    }
+}
+
+@Composable
+private fun NotificationContent(
+    currentEvent: NotificationEvent,
+    onGoalClick: (GoalNotificationType, List<IGoal>) -> Unit,
+    onQuestClick: (QuestNotificationType, QuestDomain, Int?) -> Unit,
+    onSkillClick: (SkillNotificationType, SkillDomain) -> Unit,
+) {
+    when (currentEvent) {
+        is NotificationEvent.Goal -> GoalNotificationContent(currentEvent, onGoalClick)
+        is NotificationEvent.Quest -> QuestNotificationContent(currentEvent, onQuestClick)
+        is NotificationEvent.Skill -> SkillNotificationContent(currentEvent, onSkillClick)
+        is NotificationEvent.Generic -> { /* TODO */ }
+    }
+}
+
+@Composable
+fun GoalNotificationContent(
+    event: NotificationEvent.Goal,
+    onGoalClick: (GoalNotificationType, List<IGoal>) -> Unit,
+) {
+    GoalsNotification(
+        type = event.type,
+        goals = event.goals,
+        onClick = {
+            onGoalClick(event.type, event.goals)
+        },
+    )
+}
+
+@Composable
+fun QuestNotificationContent(
+    event: NotificationEvent.Quest,
+    onQuestClick: (QuestNotificationType, QuestDomain, Int?) -> Unit,
+) {
+    QuestNotification(
+        name =
+            when (event.type) {
+                QuestNotificationType.NEW -> event.quest.name
+                QuestNotificationType.QUEST_COMPLETED -> event.quest.name
+                QuestNotificationType.SUBQUEST_COMPLETED,
+                QuestNotificationType.SUBQUEST_FAILED,
+                -> {
+                    event.quest.subquests
+                        .firstOrNull { it.id == event.subquestId }
+                        ?.name ?: event.quest.name
+                }
+            },
+        questIcon = event.quest.icon,
+        type = event.type,
+        onClick = {
+            onQuestClick(event.type, event.quest, event.subquestId)
+        },
+    )
+}
+
+@Composable
+fun SkillNotificationContent(
+    event: NotificationEvent.Skill,
+    onSkillClick: (SkillNotificationType, SkillDomain) -> Unit,
+) {
+    SkillNotification(
+        type = event.type,
+        skill = event.skill,
+        onClick = {
+            onSkillClick(event.type, event.skill)
+        },
+    )
 }

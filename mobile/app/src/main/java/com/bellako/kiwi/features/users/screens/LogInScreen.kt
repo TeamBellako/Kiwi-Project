@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -280,7 +281,7 @@ private fun LogInForm(
                 KiwiTextArguments(
                     "LOG IN",
                     color = kiwiColors.colorF,
-                    bold = true,
+                    fontWeight = FontWeight.Bold,
                 ),
             color = kiwiColors.color5,
             onClick = {
@@ -313,7 +314,7 @@ private fun WelcomeText() {
             "Welcome Back,\nKnight",
             TextAlign.Center,
             color = kiwiColors.colorF,
-            bold = true,
+            fontWeight = FontWeight.Bold,
             modifier =
                 Modifier
                     .fillMaxWidth(),

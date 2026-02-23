@@ -5,7 +5,7 @@ import com.bellako.kiwi.features.goals.data.GoalsListState
 
 object GoalsTestFactory {
     fun validGoalState(
-        id: String = "goal1",
+        id: Long = 1,
         objective: Int = 30,
         description: String = "Complete 30 minutes of physical exercise",
         type: String = "EXERCISE",
@@ -25,9 +25,9 @@ object GoalsTestFactory {
     fun validGoalsListState(
         goals: List<GoalState> =
             listOf(
-                validGoalState(id = "1", description = "Exercise for 30 minutes"),
-                validGoalState(id = "2", description = "Read for 20 minutes"),
-                validGoalState(id = "3", description = "Meditate for 10 minutes"),
+                validGoalState(id = 1, description = "Exercise for 30 minutes"),
+                validGoalState(id = 2, description = "Read for 20 minutes"),
+                validGoalState(id = 3, description = "Meditate for 10 minutes"),
             ),
         isLoading: Boolean = false,
         error: String? = null,

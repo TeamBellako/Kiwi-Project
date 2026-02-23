@@ -23,11 +23,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
+import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AdaptableSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
@@ -197,6 +200,7 @@ fun NodeAction(
     node: NodesDomain,
     onUnlockNode: (Long) -> Unit,
     onCompleteNode: (Long) -> Unit,
+    onRetryNode: (Long) -> Unit,
 ) {
     val offset = if (isPlayerNode) 64.dp else 48.dp
     Box(
@@ -206,8 +210,15 @@ fun NodeAction(
     ) {
         when (node.status) {
             NodeStatus.LOCKED -> UnlockButton("Unlock (" + node.price + ")") { onUnlockNode(node.id) }
-            NodeStatus.OPEN -> PlayButton("Play") { onCompleteNode(node.id) }
-            NodeStatus.COMPLETED -> PlayButton("Replay") { replayFirebaseEvent(node.id) }
+            NodeStatus.OPEN ->
+                PlayButton("Play") {
+                    onCompleteNode(node.id)
+                }
+            NodeStatus.COMPLETED ->
+                PlayButton("Replay") {
+                    onRetryNode(node.id)
+                    replayFirebaseEvent(node.id)
+                }
             else -> {}
         }
     }
@@ -227,7 +238,7 @@ fun UnlockButton(
             KiwiTextArguments(
                 text,
                 color = kiwiColors.colorF,
-                bold = true,
+                fontWeight = FontWeight.Bold,
             ),
         contentPaddingHorizontal = Spacing.xLarge,
         color = kiwiColors.color8,
@@ -249,7 +260,7 @@ fun PlayButton(
             KiwiTextArguments(
                 text,
                 color = kiwiColors.colorF,
-                bold = true,
+                fontWeight = FontWeight.Bold,
             ),
         contentPaddingHorizontal = Spacing.xLarge,
         color = kiwiColors.color7D,
@@ -258,14 +269,13 @@ fun PlayButton(
     )
 }
 
-@Suppress("UnusedParameter")
-private fun replayFirebaseEvent(id: Long) {
- /*   firebaseLogEvent(
+private fun replayFirebaseEvent(nodeId: Long) {
+    firebaseLogEvent(
         FirebaseEventNames.NODES_REPLAY_COMPLETED_NODE,
         mapOf(
-            "node_id" to Long,
+            "node_id" to nodeId.toString(),
         ),
-    ) // Uncomment when added event on firebase server */
+    )
 }
 
 @Composable

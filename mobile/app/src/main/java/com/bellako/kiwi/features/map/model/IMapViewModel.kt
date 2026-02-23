@@ -1,9 +1,10 @@
 package com.bellako.kiwi.features.map.model
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import com.bellako.kiwi.common.model.IBaseViewModel
+import com.bellako.kiwi.features.map.data.MapInfo
 import com.bellako.kiwi.features.map.data.MapState
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface IMapViewModel : IBaseViewModel<MapState> {
@@ -15,4 +16,8 @@ interface IMapViewModel : IBaseViewModel<MapState> {
     )
 
     fun updateOffset(delta: Offset)
+
+    fun switchMap(mapInfo: MapInfo)
+
+    fun setBackgroundColor(color: Color)
 }

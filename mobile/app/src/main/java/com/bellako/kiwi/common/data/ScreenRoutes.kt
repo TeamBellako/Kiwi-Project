@@ -11,4 +11,6 @@ object ScreenRoutes {
     const val WIP = "WIP"
     const val OBJECTIVES = "OBJECTIVES"
     const val OBJECTIVES_FOCUS = "OBJECTIVES/{questId}"
+    const val SKILLS = "SKILLS"
+    const val SKILLS_FOCUS = "SKILLS/{skillId}"
 }
