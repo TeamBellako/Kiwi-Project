@@ -233,6 +233,30 @@ CREATE TABLE IF NOT EXISTS user_subquest_status (
     FOREIGN KEY (subquest_id) REFERENCES subquests(id)
 );
 
+-- Create sprites DB
+CREATE TABLE IF NOT EXISTS sprites (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+-- Create expressions DB
+CREATE TABLE IF NOT EXISTS expressions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+-- Create backgrounds DB
+CREATE TABLE IF NOT EXISTS backgrounds (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+-- Create fx DB
+CREATE TABLE IF NOT EXISTS fx (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
 -- Create conversation table
 CREATE TABLE IF NOT EXISTS conversations (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -240,11 +264,12 @@ CREATE TABLE IF NOT EXISTS conversations (
     type ENUM('FULL', 'SMALL') NOT NULL,
     sprite INT NOT NULL,
     expresion INT NOT NULL,
+    background INT NOT NULL,
+    fx INT,
+    dark TINYINT(1) NOT NULL DEFAULT 0,
     dialog VARCHAR(1000) NOT NULL,
     dialog_m VARCHAR(1000) NOT NULL,
     dialog_w VARCHAR(1000) NOT NULL,
-    background INT NOT NULL,
-    fx INT,
     delay_start_ms INT,
     delay_end_ms INT,
     next_event ENUM('CONVERSATION', 'BATTLE', 'END') NOT NULL,
@@ -252,7 +277,8 @@ CREATE TABLE IF NOT EXISTS conversations (
 
     FOREIGN KEY (sprite) REFERENCES sprites(id),
     FOREIGN KEY (expresion) REFERENCES expressions(id),
-    FOREIGN KEY (background) REFERENCES backgrounds(id)
+    FOREIGN KEY (background) REFERENCES backgrounds(id),
+    FOREIGN KEY (fx) REFERENCES fx(id)
 );
 
 -- Create conversation_options table
@@ -274,31 +300,7 @@ CREATE TABLE IF NOT EXISTS user_conversation_selection (
     PRIMARY KEY (user_id, conversation_id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (conversation_id) REFERENCES conversations(id),
-    FOREIGN KEY (option_id) REFERENCES conversation_options(id
-);
-
--- Create sprites DB
-CREATE TABLE IF NOT EXISTS sprites (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-);
-
--- Create expressions DB
-CREATE TABLE IF NOT EXISTS expressions (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-);
-
--- Create backgrounds DB
-CREATE TABLE IF NOT EXISTS backgrounds (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-);
-
--- Create fx DB
-CREATE TABLE IF NOT EXISTS fx (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    FOREIGN KEY (option_id) REFERENCES conversation_options(id)
 );
 
 -- Trigger to DELETE ON CASCADE user_quest_status table
