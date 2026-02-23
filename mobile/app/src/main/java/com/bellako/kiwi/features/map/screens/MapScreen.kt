@@ -35,10 +35,16 @@ import androidx.navigation.NavHostController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
+import com.bellako.kiwi.features.conversations.data.ConversationDomain
+import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
+import com.bellako.kiwi.features.conversations.data.ConversationType
+import com.bellako.kiwi.features.conversations.data.NextEventType
+import com.bellako.kiwi.features.conversations.screens.ConversationScreen
 import com.bellako.kiwi.features.goals.data.GoalModalType
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
@@ -81,6 +87,7 @@ fun MapScreen(
     goalsViewModel: IGoalsViewModel,
     notificationManager: NotificationManager,
     navController: NavHostController,
+    onConversationRequest: (ConversationDomain) -> Unit = {},
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
@@ -166,6 +173,93 @@ fun MapScreen(
                     color = kiwiColors.colorF,
                     modifier = Modifier.padding(0.dp, getResponsiveSizeHeight(Spacing.small)),
                 ),
+            )
+            Kiwi_FixedSizeButton(
+                textArguments = KiwiTextArguments("Conversation"),
+                color = kiwiColors.color6,
+                onClick = {
+                    onConversationRequest(
+                        ConversationDomain(
+                            id = 1L,
+                            name = "Test Conversation",
+                            type = ConversationType.FULL,
+                            spriteId = 1L,
+                            expresionId = 1L,
+                            backgroundId = 1L,
+                            dark = 0,
+                            dialog = "Wellcome to GrowTale and wellcome to Minveil. I'm Liria 😊",
+                            dialogM = "Texto masculino de prueba",
+                            dialogW = "Texto femenino de prueba",
+                            nextEvent = NextEventType.END,
+                            eventId = 2L,
+                            options = emptyList(),
+                        ),
+                    )
+                },
+            )
+            Kiwi_FixedSizeButton(
+                textArguments = KiwiTextArguments("Dialogue"),
+                color = kiwiColors.color6,
+                onClick = {
+                    onConversationRequest(
+                        ConversationDomain(
+                            id = 1L,
+                            name = "Test Conversation",
+                            type = ConversationType.SMALL,
+                            spriteId = 1L,
+                            expresionId = 1L,
+                            backgroundId = 1L,
+                            dark = 0,
+                            dialog = "Wellcome to GrowTale and wellcome to Minveil. I'm Liria 😊",
+                            dialogM = "Texto masculino de prueba",
+                            dialogW = "Texto femenino de prueba",
+                            nextEvent = NextEventType.END,
+                            eventId = 2L,
+                            options = emptyList(),
+                        ),
+                    )
+                },
+            )
+            Kiwi_FixedSizeButton(
+                textArguments = KiwiTextArguments("Conversation with options"),
+                color = kiwiColors.color6,
+                onClick = {
+                    onConversationRequest(
+                        ConversationDomain(
+                            id = 1L,
+                            name = "Test Conversation",
+                            type = ConversationType.FULL,
+                            spriteId = 1L,
+                            expresionId = 1L,
+                            backgroundId = 1L,
+                            dark = 0,
+                            dialog = "Wellcome to GrowTale and wellcome to Minveil. I'm Liria 😊",
+                            dialogM = "Texto masculino de prueba",
+                            dialogW = "Texto femenino de prueba",
+                            nextEvent = NextEventType.END,
+                            eventId = 2L,
+                            options =
+                                listOf(
+                                    ConversationOptionDomain(
+                                        1L,
+                                        "Option 1",
+                                        "Option 1",
+                                        "Option 1",
+                                        2,
+                                        null,
+                                    ),
+                                    ConversationOptionDomain(
+                                        1L,
+                                        "Option 2",
+                                        "Option 2",
+                                        "Option 2",
+                                        2,
+                                        null,
+                                    ),
+                                ),
+                        ),
+                    )
+                },
             )
 
             InteractiveMap(

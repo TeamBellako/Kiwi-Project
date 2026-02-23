@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -12,7 +13,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -35,6 +38,11 @@ import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.conversations.data.ConversationDomain
+import com.bellako.kiwi.features.conversations.data.ConversationType
+import com.bellako.kiwi.features.conversations.model.ConversationViewModel
+import com.bellako.kiwi.features.conversations.screens.ConversationScreen
+import com.bellako.kiwi.features.conversations.screens.DialogueScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
@@ -59,6 +67,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -72,6 +81,7 @@ fun MainScreen(
     goalsViewModel: GoalsViewModel = hiltViewModel(),
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     notificationViewModel: NotificationViewModel = hiltViewModel(),
+    conversationViewModel: ConversationViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
     val notificationManager = notificationViewModel.notificationManager
@@ -99,6 +109,7 @@ fun MainScreen(
             goalsViewModel = goalsViewModel,
             appBarViewModel = appBarViewModel,
             notificationManager = notificationManager,
+            conversationViewModel = conversationViewModel,
         )
     }
 }
@@ -123,6 +134,7 @@ private fun AppScreen(
     goalsViewModel: GoalsViewModel,
     appBarViewModel: AppBarViewModel,
     notificationManager: NotificationManager,
+    conversationViewModel: ConversationViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -137,6 +149,9 @@ private fun AppScreen(
 
     val showDashboard = route == ScreenRoutes.HOME
 
+    val activeConversation by conversationViewModel.active.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         questsViewModel.getNotifications().collect { event ->
             when (event) {
@@ -149,46 +164,68 @@ private fun AppScreen(
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            if (!isLoginScreen && isLoginCompleted) {
-                AppBarScreen(
-                    navController = navController,
-                    appBarViewModel = appBarViewModel,
-                )
-            }
-        },
-        content = { paddingValues ->
-            Box(Modifier.padding(paddingValues)) {
-                AppNavHost(
-                    navController = navController,
-                    usersViewModel = usersViewModel,
-                    settingsViewModel = settingsViewModel,
-                    personalityViewModel = personalityViewModel,
-                    nodesViewModel = nodesViewModel,
-                    questsViewModel = questsViewModel,
-                    goalsViewModel = goalsViewModel,
-                    notificationManager = notificationManager,
-                )
-
-                if (showDashboard) {
-                    DashboardScreen(
-                        usersViewModel = usersViewModel,
-                        metricsViewModel = metricsViewModel,
-                        personalityViewModel = personalityViewModel,
-                        goalsViewModel = goalsViewModel,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            bottomBar = {
+                if (!isLoginScreen && isLoginCompleted) {
+                    AppBarScreen(
+                        navController = navController,
+                        appBarViewModel = appBarViewModel,
                     )
                 }
-
-                if (!isLoginScreen && isLoginCompleted) {
-                    Kiwi_LoggedInScreen(
+            },
+            content = { paddingValues ->
+                Box(Modifier.padding(paddingValues)) {
+                    AppNavHost(
+                        navController = navController,
+                        usersViewModel = usersViewModel,
                         settingsViewModel = settingsViewModel,
                         personalityViewModel = personalityViewModel,
+                        nodesViewModel = nodesViewModel,
+                        questsViewModel = questsViewModel,
+                        goalsViewModel = goalsViewModel,
+                        notificationManager = notificationManager,
+                        onConversationRequest = { conversation ->
+                            conversationViewModel.start(conversation)
+                        },
                     )
+
+                    if (showDashboard && activeConversation == null) {
+                        DashboardScreen(
+                            usersViewModel = usersViewModel,
+                            metricsViewModel = metricsViewModel,
+                            personalityViewModel = personalityViewModel,
+                            goalsViewModel = goalsViewModel,
+                        )
+                    }
+
+                    if (!isLoginScreen && isLoginCompleted) {
+                        Kiwi_LoggedInScreen(
+                            settingsViewModel = settingsViewModel,
+                            personalityViewModel = personalityViewModel,
+                        )
+                    }
+
+                    // Capa 2: Conversación — encima del mapa
+                    activeConversation?.let { conversation ->
+                        Box(modifier = Modifier.matchParentSize()) {
+                            if (conversation.type == ConversationType.SMALL) {
+                                DialogueScreen(
+                                    conversation = conversation,
+                                    viewModel = conversationViewModel,
+                                )
+                            } else {
+                                ConversationScreen(
+                                    conversation = conversation,
+                                    viewModel = conversationViewModel,
+                                )
+                            }
+                        }
+                    }
                 }
-            }
-        },
-    )
+            },
+        )
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -202,6 +239,7 @@ fun AppNavHost(
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
     notificationManager: NotificationManager,
+    onConversationRequest: (ConversationDomain) -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -270,6 +308,7 @@ fun AppNavHost(
                     notificationManager = notificationManager,
                     navController = navController,
                     mapViewModel = hiltViewModel(),
+                    onConversationRequest = onConversationRequest,
                 )
             }
         }
