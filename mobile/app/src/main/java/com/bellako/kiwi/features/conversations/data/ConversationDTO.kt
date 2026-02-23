@@ -1,0 +1,34 @@
+package com.bellako.kiwi.features.conversations.data
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ConversationOptionDTO(
+    val id: Long? = null,
+    val conversationId: Long? = null,
+    val text: String,
+    val textM: String,
+    val textW: String,
+    val nextEventId: Long,
+    val cost: Int? = null,
+)
+
+@Serializable
+data class ConversationDTO(
+    val id: Long? = null,
+    val name: String,
+    val type: ConversationType,
+    val spriteId: Long,
+    val expresionId: Long,
+    val backgroundId: Long,
+    val fxId: Long? = null,
+    val dark: Int,
+    val delayStartMs: Int? = null,
+    val delayEndMs: Int? = null,
+    val dialog: String,
+    val dialogM: String,
+    val dialogW: String,
+    val nextEvent: NextEventType,
+    val eventId: Long,
+    val options: List<ConversationOptionDTO> = emptyList(),
+)
