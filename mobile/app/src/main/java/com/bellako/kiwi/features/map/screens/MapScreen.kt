@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -77,7 +78,6 @@ const val NOTIFICATION_OVERLAY_Z_ORDER = 10f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-@Suppress("ComplexMethod", "LongMethod")
 fun MapScreen(
     maxZoom: Float = 8f,
     mapMarginFactor: Float = 0.08f,
@@ -235,6 +235,7 @@ private fun loadNodes(
         }.launchIn(CoroutineScope(Dispatchers.Main))
 }
 
+@Suppress("LongMethod")
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
 private fun InteractiveMap(
@@ -246,8 +247,6 @@ private fun InteractiveMap(
     val context = LocalContext.current
     val mapState by mapViewModel.state.collectAsState()
     val nodesState by nodesViewModel.state.collectAsState()
-
-    val kiwiColors = LocalKiwiColors.current
 
     Box(
         modifier =
@@ -352,40 +351,54 @@ private fun InteractiveMap(
                     ?.nodes[selectedNodeId]
                     ?.let { selectedNode ->
                         AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
-                        NodeAction(
-                            selectedNodeId == mapState.playerNode,
-                            node = selectedNode,
-                            onUnlockNode = { id ->
-                                nodesViewModel.unlockNode(id)
-                                mapViewModel.setPlayerNode(id)
-                            },
-                            onCompleteNode = { id ->
-                                nodesViewModel.completeNode(id)
-                                AudioManager.playSFX(context, R.raw.snd_node_completed)
-                            },
-                            onRetryNode = { id ->
-                                // HACK: Remove once scripting is done, this is just for showcase
-                                if (selectedNode.displayName == "CITY") {
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        EventBus.emitEvent(
-                                            EventType.SWITCH_MAP,
-                                            EventPayload.SwitchMapPayload(
-                                                MapsInfo.Testing,
-                                            ),
-                                        )
-                                    }
-                                } else if (selectedNode.displayName == "MAP_SWITCH") {
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        EventBus.emitEvent(
-                                            EventType.SWITCH_MAP,
-                                            EventPayload.SwitchMapPayload(
-                                                MapsInfo.MindVeil,
-                                            ),
-                                        )
-                                    }
+
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.TopCenter,
+                        ) {
+                            val centerOffset =
+                                with(LocalDensity.current) {
+                                    (mapState.viewportHeightPx / 2f).toDp()
                                 }
-                            },
-                        )
+
+                            NodeAction(
+                                node = selectedNode,
+                                onUnlockNode = { id ->
+                                    nodesViewModel.unlockNode(id)
+                                    mapViewModel.setPlayerNode(id)
+                                },
+                                onCompleteNode = { id ->
+                                    nodesViewModel.completeNode(id)
+                                    AudioManager.playSFX(context, R.raw.snd_node_completed)
+                                },
+                                onRetryNode = { id ->
+                                    // HACK: Remove once scripting is done, this is just for showcase
+                                    if (selectedNode.displayName == "CITY") {
+                                        GlobalScope.launch(Dispatchers.Main) {
+                                            EventBus.emitEvent(
+                                                EventType.SWITCH_MAP,
+                                                EventPayload.SwitchMapPayload(
+                                                    MapsInfo.Testing,
+                                                ),
+                                            )
+                                        }
+                                    } else if (selectedNode.displayName == "MAP_SWITCH") {
+                                        GlobalScope.launch(Dispatchers.Main) {
+                                            EventBus.emitEvent(
+                                                EventType.SWITCH_MAP,
+                                                EventPayload.SwitchMapPayload(
+                                                    MapsInfo.MindVeil,
+                                                ),
+                                            )
+                                        }
+                                    }
+                                },
+                                modifier =
+                                    Modifier.offset(
+                                        y = centerOffset + getResponsiveSizeHeight(26.dp),
+                                    ),
+                            )
+                        }
                     }
             }
         }

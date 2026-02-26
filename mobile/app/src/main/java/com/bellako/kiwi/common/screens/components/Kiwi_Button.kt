@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -189,7 +188,7 @@ fun Kiwi_AdaptableSizeButton(
 fun Kiwi_HoldButton(
     modifier: Modifier = Modifier,
     holdDurationMillis: Long = 2000,
-    contentPaddingHorizontal: Dp = 8.dp,
+    horizontalMargin: Dp = 8.dp,
     contentPaddingVertical: Dp = 8.dp,
     textArguments: KiwiTextArguments,
     onHoldComplete: () -> Unit,
@@ -239,7 +238,7 @@ fun Kiwi_HoldButton(
         fillColor = fillColor,
         animatedProgress = animatedProgress,
         textArguments = textArguments,
-        contentPaddingHorizontal = contentPaddingHorizontal,
+        horizontalMargin = horizontalMargin,
         contentPaddingVertical = contentPaddingVertical,
         testTag = testTag,
     )
@@ -282,7 +281,7 @@ private fun HoldButtonContent(
     fillColor: Color,
     animatedProgress: Float,
     textArguments: KiwiTextArguments,
-    contentPaddingHorizontal: Dp,
+    horizontalMargin: Dp,
     contentPaddingVertical: Dp,
     testTag: String,
 ) {
@@ -290,7 +289,8 @@ private fun HoldButtonContent(
         modifier =
             modifier
                 .height(IntrinsicSize.Min)
-                .width(IntrinsicSize.Max)
+                .fillMaxWidth()
+                .padding(horizontal = getResponsiveSizeWidth(horizontalMargin))
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
                 .background(if (isEnabled) color else color.copy(alpha = KIWI_DISABLED_ALPHA))
                 .testTag(testTag)
@@ -307,8 +307,8 @@ private fun HoldButtonContent(
         Box(
             modifier =
                 Modifier
+                    .fillMaxWidth()
                     .padding(
-                        horizontal = getResponsiveSizeHeight(contentPaddingHorizontal),
                         vertical = getResponsiveSizeHeight(contentPaddingVertical),
                     ),
             contentAlignment = Alignment.Center,
