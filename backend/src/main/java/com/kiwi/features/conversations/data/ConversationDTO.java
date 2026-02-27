@@ -20,7 +20,7 @@ public class ConversationDTO {
     private Long expresionId;
     private Long backgroundId;
     private Long fxId;
-    private Integer dark;
+    private Boolean dark;
     private Integer delayStartMs;
     private Integer delayEndMs;
     private String dialog;

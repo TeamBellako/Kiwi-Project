@@ -32,16 +32,16 @@ public class ConversationPersistence {
     @JoinColumn(name = "expresion", nullable = false)
     private ExpressionPersistence expresion;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "background", nullable = false)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "background", nullable = true)
     private BackgroundPersistence background;
 
-    @ManyToOne
-    @JoinColumn(name = "fx")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "fx", nullable = true)
     private FxPersistence fx;
 
     @Column(name = "dark", nullable = false)
-    private Integer dark;
+    private Boolean dark;
 
     @Column(name = "delay_start_ms")
     private Integer delayStartMs;
