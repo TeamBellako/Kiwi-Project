@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.conversations.components
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +60,7 @@ fun ConversationOption(
                 modifier = Modifier.size(Spacing.medium),
             )
         }
-        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.weight(1f).clickable { onClick() }, contentAlignment = Alignment.Center) {
             Kiwi_P2(KiwiTextArguments(option.text))
         }
     }
@@ -94,7 +95,7 @@ fun CharacterName(
                 if (dark) "???" else name,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(Spacing.medium, Spacing.small),
-                color = if (dark or small) LocalKiwiColors.current.color6 else LocalKiwiColors.current.color3,
+                color = if (dark || small) LocalKiwiColors.current.color6 else LocalKiwiColors.current.color3,
             ),
         )
     }

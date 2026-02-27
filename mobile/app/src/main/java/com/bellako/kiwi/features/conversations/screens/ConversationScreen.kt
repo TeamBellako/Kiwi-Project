@@ -2,7 +2,6 @@ package com.bellako.kiwi.features.conversations.screens
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.RepeatMode
@@ -25,7 +24,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -43,7 +41,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.conversations.components.CharacterName
 import com.bellako.kiwi.features.conversations.components.ConversationOption
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
-import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.data.NextEventType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
@@ -59,7 +56,6 @@ fun ConversationScreen(
     viewModel: ConversationViewModel? = null,
 ) {
     val kiwiColor = LocalKiwiColors.current
-    val coroutineScope = rememberCoroutineScope()
     val infiniteTransition = rememberInfiniteTransition(label = "arrow_bounce")
     val offsetY by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -76,7 +72,8 @@ fun ConversationScreen(
         verticalArrangement = Arrangement.Bottom,
         modifier =
             Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .clickable {},
     ) {
         // Sprite
         Kiwi_Image(
@@ -113,7 +110,7 @@ fun ConversationScreen(
                     KiwiTextArguments(
                         conversation.dialog,
                         textAlign = TextAlign.Center,
-                        color = if (conversation.dark != 0) kiwiColor.color6 else kiwiColor.color3,
+                        color = if (conversation.dark) kiwiColor.color6 else kiwiColor.color3,
                         modifier =
                             Modifier.padding(Spacing.medium, Spacing.medium),
                     ),
@@ -124,7 +121,7 @@ fun ConversationScreen(
                             .matchParentSize()
                             .offset(x = getResponsiveSizeWidth(25.dp)),
                 ) {
-                    CharacterName("Liria", conversation.dark != 0, false)
+                    CharacterName("Liria", conversation.dark, false)
                 }
             }
         }
@@ -195,7 +192,7 @@ private fun getAsset(
             lineCount <= 2 -> "medium"
             else -> "big"
         }
-    val color = if (conversation.dark != 0) "dark" else "light"
+    val color = if (conversation.dark) "dark" else "light"
     resourceName = "dialogue_${color}_$size"
     return context.resources.getIdentifier(resourceName, "drawable", context.packageName)
 }
@@ -224,7 +221,7 @@ fun ConversationScreen_Preview() {
                         1,
                         1,
                         1,
-                        0,
+                        false,
                         0,
                         0,
                         "Esto es un texto de prueba, que tiene que ser largo de narices sin nada",

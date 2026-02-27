@@ -13,9 +13,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -38,7 +36,6 @@ import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
-import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
 import com.bellako.kiwi.features.conversations.screens.ConversationScreen
@@ -70,7 +67,6 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
-import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
@@ -149,10 +145,6 @@ private fun AppScreen(
     val showDashboard = route == ScreenRoutes.HOME
 
     val activeConversation by conversationViewModel.active.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-
-    val activeConversation by conversationViewModel.active.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(notificationManager) {
         notificationManager.notifications.collect { event ->
@@ -162,9 +154,11 @@ private fun AppScreen(
                         appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
                     }
                 }
+
                 is NotificationEvent.Skill -> {
                     appBarViewModel.onNewContent(ScreenRoutes.SKILLS)
                 }
+
                 else -> {
                 }
             }
@@ -191,10 +185,10 @@ private fun AppScreen(
                         nodesViewModel = nodesViewModel,
                         questsViewModel = questsViewModel,
                         goalsViewModel = goalsViewModel,
-                    skillsViewModel = skillsViewModel,
+                        skillsViewModel = skillsViewModel,
                         notificationManager = notificationManager,
-                        onConversationRequest = { conversation ->
-                            conversationViewModel.start(conversation)
+                        onConversationRequest = { conversationId ->
+                            conversationViewModel.start(conversationId)
                         },
                     )
 
@@ -214,11 +208,11 @@ private fun AppScreen(
                         )
                     }
 
-                LaunchedEffect(isLoginCompleted) {
-                    if (isLoginCompleted) {
-                        skillsViewModel.onUserLoggedIn()
+                    LaunchedEffect(isLoginCompleted) {
+                        if (isLoginCompleted) {
+                            skillsViewModel.onUserLoggedIn()
+                        }
                     }
-                }
 
                     activeConversation?.let { conversation ->
                         Box(modifier = Modifier.matchParentSize()) {
@@ -261,7 +255,7 @@ fun AppNavHost(
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
     notificationManager: NotificationManager,
-    onConversationRequest: (ConversationDomain) -> Unit = {},
+    onConversationRequest: (Long) -> Unit = {},
 ) {
     NavHost(
         navController = navController,

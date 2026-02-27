@@ -1,13 +1,12 @@
 package com.bellako.kiwi.features.conversations.screens
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.*
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -112,7 +110,7 @@ fun DialogueScreen(
                     contentAlignment = Alignment.BottomCenter,
                     modifier = Modifier.matchParentSize().offset(x = 0.dp, y = getResponsiveSizeHeight(25.dp)),
                 ) {
-                    CharacterName("Liria", conversation.dark == 1, conversation.type == ConversationType.SMALL)
+                    CharacterName("Liria", conversation.dark, conversation.type == ConversationType.SMALL)
                 }
             }
             Kiwi_Spacer_Horizontal()
@@ -176,7 +174,7 @@ fun DialogueScreen_Preview() {
                         1,
                         1,
                         1,
-                        0,
+                        false,
                         0,
                         0,
                         "Esto es un texto de prueba, que tiene que ser largo de narices sin nada",

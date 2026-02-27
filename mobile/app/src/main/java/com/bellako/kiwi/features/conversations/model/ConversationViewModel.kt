@@ -32,17 +32,10 @@ class ConversationViewModel
                             _active.value = domain
                         }
                     },
-                    onFailure = { /* TODO: manejar error */ },
+                    onFailure = {
+                        _active.value = null
+                    },
                 )
-            }
-        }
-
-        /**
-         * SOLO PARA DESARROLLO
-         */
-        fun start(conversation: ConversationDomain) {
-            viewModelScope.launch {
-                _active.value = conversation
             }
         }
 
@@ -72,12 +65,24 @@ class ConversationViewModel
 
         private fun handleNextEvent(
             conversation: ConversationDomain,
-            nextEventId: Long,
+            nextEventId: Long?,
         ) {
             when (conversation.nextEvent) {
-                NextEventType.CONVERSATION -> start(nextEventId)
-                NextEventType.END -> end()
-                NextEventType.BATTLE -> end() // TODO: lanzar batalla
+                NextEventType.CONVERSATION -> {
+                    if (nextEventId == null) {
+                        end()
+                    } else {
+                        start(nextEventId)
+                    }
+                }
+
+                NextEventType.END -> {
+                    end()
+                }
+
+                NextEventType.BATTLE -> {
+                    end()
+                } // TODO: lanzar batalla
             }
         }
     }

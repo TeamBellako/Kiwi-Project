@@ -10,8 +10,6 @@ object ConversationDataMapper {
             require(dto.name.isNotBlank()) { "Name cannot be blank" }
             require(dto.spriteId > 0) { "SpriteId must be positive" }
             require(dto.expresionId > 0) { "ExpresionId must be positive" }
-            require(dto.backgroundId > 0) { "BackgroundId must be positive" }
-            require(dto.eventId > 0) { "EventId must be positive" }
             require(dto.dialog.isNotBlank()) { "Dialog cannot be blank" }
             require(dto.dialogM.isNotBlank()) { "DialogM cannot be blank" }
             require(dto.dialogW.isNotBlank()) { "DialogW cannot be blank" }
