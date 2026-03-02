@@ -346,7 +346,7 @@ fun AppNavHost(
                     notificationManager = notificationManager,
                     navController = navController,
                     mapViewModel = hiltViewModel(),
-                    onConversationRequest = onConversationRequest,
+//                    onConversationRequest = onConversationRequest,
                 )
             }
         }

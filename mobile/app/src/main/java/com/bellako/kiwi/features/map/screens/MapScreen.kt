@@ -89,7 +89,6 @@ fun MapScreen(
     goalsViewModel: IGoalsViewModel,
     notificationManager: NotificationManager,
     navController: NavHostController,
-    onConversationRequest: (Long) -> Unit = {},
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
