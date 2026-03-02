@@ -150,7 +150,12 @@ class AudioManagerBase {
         layerPlayer: AudioLayerPlayer,
         fadeDuration: Long,
     ) {
-        val targetVolume = if (layerPlayer.layer.isActive) globalVolume * layerPlayer.layer.baseVolume else 0f
+        val targetVolume =
+            if (layerPlayer.layer.isActive) {
+                globalVolume * layerPlayer.layer.baseVolume
+            } else {
+                0f
+            }
         val fadeDuration = if (layerPlayer.layer.isActive) fadeDuration else 0
         fade(layerPlayer, 0f, targetVolume, fadeDuration, null)
         layerPlayer.player.play()
@@ -221,7 +226,8 @@ class AudioManagerBase {
     private fun updateCurrentLayersVolume() {
         for ((_, player) in currentLayers) {
             if (player.layer.isActive) {
-                fade(player, player.player.volume, globalVolume * player.layer.baseVolume, DEFAULT_FADE_DURATION_FAST)
+                val targetVolume = globalVolume * player.layer.baseVolume
+                fade(player, player.player.volume, targetVolume, DEFAULT_FADE_DURATION_FAST)
             }
         }
     }
