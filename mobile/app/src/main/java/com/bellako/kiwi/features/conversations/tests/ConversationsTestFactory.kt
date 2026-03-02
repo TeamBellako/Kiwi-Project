@@ -5,7 +5,7 @@ import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.data.NextEventType
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongParameterList")
 object ConversationsTestFactory {
     fun validConversationDomain(
         id: Long = 1L,
