@@ -4,6 +4,13 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -123,6 +130,7 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
+@Suppress("LongParameterList")
 private fun AppScreen(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
@@ -145,6 +153,7 @@ private fun AppScreen(
     val showDashboard = route == ScreenRoutes.HOME
 
     val activeConversation by conversationViewModel.active.collectAsState()
+    val isConversationVisible by conversationViewModel.isVisible.collectAsState()
 
     LaunchedEffect(notificationManager) {
         notificationManager.notifications.collect { event ->
@@ -192,7 +201,7 @@ private fun AppScreen(
                         },
                     )
 
-                    if (showDashboard && activeConversation == null) {
+                    if (showDashboard && !isConversationVisible) {
                         DashboardScreen(
                             usersViewModel = usersViewModel,
                             metricsViewModel = metricsViewModel,
@@ -214,18 +223,32 @@ private fun AppScreen(
                         }
                     }
 
-                    activeConversation?.let { conversation ->
-                        Box(modifier = Modifier.matchParentSize()) {
-                            if (conversation.type == ConversationType.SMALL) {
-                                DialogueScreen(
-                                    conversation = conversation,
-                                    viewModel = conversationViewModel,
-                                )
-                            } else {
-                                ConversationScreen(
-                                    conversation = conversation,
-                                    viewModel = conversationViewModel,
-                                )
+                    AnimatedVisibility(
+                        visible = isConversationVisible,
+                        enter =
+                            slideInVertically(
+                                initialOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        exit =
+                            slideOutVertically(
+                                targetOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                    ) {
+                        activeConversation?.let { conversation ->
+                            Box(modifier = Modifier.matchParentSize()) {
+                                if (conversation.type == ConversationType.SMALL) {
+                                    DialogueScreen(
+                                        conversation = conversation,
+                                        viewModel = conversationViewModel,
+                                    )
+                                } else {
+                                    ConversationScreen(
+                                        conversation = conversation,
+                                        viewModel = conversationViewModel,
+                                    )
+                                }
                             }
                         }
                     }

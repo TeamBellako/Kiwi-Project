@@ -49,6 +49,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
 @Composable
+@Suppress("MagicNumber")
 fun DialogueScreen(
     conversation: ConversationDomain,
     viewModel: ConversationViewModel? = null,

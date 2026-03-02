@@ -67,6 +67,7 @@ fun ConversationOption(
 }
 
 @Composable
+@Suppress("MagicNumber")
 fun CharacterName(
     name: String,
     dark: Boolean,

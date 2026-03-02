@@ -43,9 +43,6 @@ import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
-import com.bellako.kiwi.features.conversations.data.ConversationDomain
-import com.bellako.kiwi.features.conversations.data.ConversationType
-import com.bellako.kiwi.features.conversations.data.NextEventType
 import com.bellako.kiwi.features.dashboard.screens.DashboardLayout
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
