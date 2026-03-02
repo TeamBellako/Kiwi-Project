@@ -159,20 +159,6 @@ fun MapScreen(
                     modifier = Modifier.padding(0.dp, getResponsiveSizeHeight(Spacing.small)),
                 ),
             )
-            Kiwi_FixedSizeButton(
-                textArguments = KiwiTextArguments("Conversation"),
-                color = kiwiColors.color6,
-                onClick = {
-                    onConversationRequest(2)
-                },
-            )
-            Kiwi_FixedSizeButton(
-                textArguments = KiwiTextArguments("Dialogue"),
-                color = kiwiColors.color6,
-                onClick = {
-                    onConversationRequest(1)
-                },
-            )
 
             InteractiveMap(
                 mapResourceId = mapState.mapInfo.mapResourceId,
