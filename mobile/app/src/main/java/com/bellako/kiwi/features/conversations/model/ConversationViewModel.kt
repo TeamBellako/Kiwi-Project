@@ -70,6 +70,16 @@ class ConversationViewModel
         /** Termina la conversación activa y limpia las selecciones acumuladas */
         fun end() {
             viewModelScope.launch {
+                val options = _selectedOptions.value
+                if (options.isNotEmpty()) {
+                    try {
+                        repository.saveOptions(options)
+                    } catch (e: GeneralSecurityException) {
+                        warn("Encryption error saving options: ${e.message}")
+                    } catch (e: IOException) {
+                        warn("IO error saving options: ${e.message}")
+                    }
+                }
                 _isVisible.value = false
                 delay(ANIMATION_DURATION_MS)
                 _active.value = null

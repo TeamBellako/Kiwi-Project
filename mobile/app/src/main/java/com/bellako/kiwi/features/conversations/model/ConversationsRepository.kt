@@ -7,4 +7,6 @@ class ConversationsRepository(
     private val api: IConversationsAPI,
 ) {
     suspend fun getById(id: Long): ConversationDomain = ConversationDataMapper.toDomain(api.getConversationById(id))
+
+    suspend fun saveOptions(optionIds: List<Long>) = api.saveConversationOptions(optionIds)
 }
