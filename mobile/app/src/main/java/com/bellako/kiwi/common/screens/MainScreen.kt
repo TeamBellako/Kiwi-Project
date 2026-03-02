@@ -196,9 +196,9 @@ private fun AppScreen(
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
                         notificationManager = notificationManager,
-                        onConversationRequest = { conversationId ->
-                            conversationViewModel.start(conversationId)
-                        },
+//                        onConversationRequest = { conversationId ->
+//                            conversationViewModel.start(conversationId)
+//                        },
                     )
 
                     if (showDashboard && !isConversationVisible) {
@@ -278,7 +278,7 @@ fun AppNavHost(
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
     notificationManager: NotificationManager,
-    onConversationRequest: (Long) -> Unit = {},
+//    onConversationRequest: (Long) -> Unit = {},
 ) {
     NavHost(
         navController = navController,
