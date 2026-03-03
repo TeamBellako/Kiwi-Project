@@ -4,7 +4,15 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -35,6 +43,10 @@ import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.conversations.data.ConversationType
+import com.bellako.kiwi.features.conversations.model.ConversationViewModel
+import com.bellako.kiwi.features.conversations.screens.ConversationScreen
+import com.bellako.kiwi.features.conversations.screens.DialogueScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
@@ -76,6 +88,7 @@ fun MainScreen(
     skillsViewModel: SkillsViewModel = hiltViewModel(),
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     notificationManager: NotificationManager,
+    conversationViewModel: ConversationViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -103,6 +116,7 @@ fun MainScreen(
             skillsViewModel = skillsViewModel,
             appBarViewModel = appBarViewModel,
             notificationManager = notificationManager,
+            conversationViewModel = conversationViewModel,
         )
     }
 }
@@ -116,6 +130,7 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
+@Suppress("LongParameterList")
 private fun AppScreen(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
@@ -128,6 +143,7 @@ private fun AppScreen(
     skillsViewModel: SkillsViewModel,
     appBarViewModel: AppBarViewModel,
     notificationManager: NotificationManager,
+    conversationViewModel: ConversationViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -135,6 +151,9 @@ private fun AppScreen(
     val isLoginScreen = isLoginScreen(route)
 
     val showDashboard = route == ScreenRoutes.HOME
+
+    val activeConversation by conversationViewModel.active.collectAsState()
+    val isConversationVisible by conversationViewModel.isVisible.collectAsState()
 
     LaunchedEffect(notificationManager) {
         notificationManager.notifications.collect { event ->
@@ -144,62 +163,99 @@ private fun AppScreen(
                         appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
                     }
                 }
+
                 is NotificationEvent.Skill -> {
                     appBarViewModel.onNewContent(ScreenRoutes.SKILLS)
                 }
+
                 else -> {
                 }
             }
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            if (!isLoginScreen && isLoginCompleted) {
-                AppBarScreen(
-                    navController = navController,
-                    appBarViewModel = appBarViewModel,
-                )
-            }
-        },
-        content = { paddingValues ->
-            Box(Modifier.padding(paddingValues)) {
-                AppNavHost(
-                    navController = navController,
-                    usersViewModel = usersViewModel,
-                    settingsViewModel = settingsViewModel,
-                    personalityViewModel = personalityViewModel,
-                    nodesViewModel = nodesViewModel,
-                    questsViewModel = questsViewModel,
-                    goalsViewModel = goalsViewModel,
-                    skillsViewModel = skillsViewModel,
-                    notificationManager = notificationManager,
-                )
-
-                if (showDashboard) {
-                    DashboardScreen(
-                        usersViewModel = usersViewModel,
-                        metricsViewModel = metricsViewModel,
-                        personalityViewModel = personalityViewModel,
-                        goalsViewModel = goalsViewModel,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            bottomBar = {
+                if (!isLoginScreen && isLoginCompleted) {
+                    AppBarScreen(
+                        navController = navController,
+                        appBarViewModel = appBarViewModel,
                     )
                 }
-
-                if (!isLoginScreen && isLoginCompleted) {
-                    Kiwi_LoggedInScreen(
+            },
+            content = { paddingValues ->
+                Box(Modifier.padding(paddingValues)) {
+                    AppNavHost(
+                        navController = navController,
+                        usersViewModel = usersViewModel,
                         settingsViewModel = settingsViewModel,
                         personalityViewModel = personalityViewModel,
+                        nodesViewModel = nodesViewModel,
+                        questsViewModel = questsViewModel,
+                        goalsViewModel = goalsViewModel,
+                        skillsViewModel = skillsViewModel,
+                        notificationManager = notificationManager,
+//                        onConversationRequest = { conversationId ->
+//                            conversationViewModel.start(conversationId)
+//                        },
                     )
-                }
 
-                LaunchedEffect(isLoginCompleted) {
-                    if (isLoginCompleted) {
-                        skillsViewModel.onUserLoggedIn()
+                    if (showDashboard && !isConversationVisible) {
+                        DashboardScreen(
+                            usersViewModel = usersViewModel,
+                            metricsViewModel = metricsViewModel,
+                            personalityViewModel = personalityViewModel,
+                            goalsViewModel = goalsViewModel,
+                        )
+                    }
+
+                    if (!isLoginScreen && isLoginCompleted) {
+                        Kiwi_LoggedInScreen(
+                            settingsViewModel = settingsViewModel,
+                            personalityViewModel = personalityViewModel,
+                        )
+                    }
+
+                    LaunchedEffect(isLoginCompleted) {
+                        if (isLoginCompleted) {
+                            skillsViewModel.onUserLoggedIn()
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isConversationVisible,
+                        enter =
+                            slideInVertically(
+                                initialOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        exit =
+                            slideOutVertically(
+                                targetOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                    ) {
+                        activeConversation?.let { conversation ->
+                            Box(modifier = Modifier.matchParentSize()) {
+                                if (conversation.type == ConversationType.SMALL) {
+                                    DialogueScreen(
+                                        conversation = conversation,
+                                        viewModel = conversationViewModel,
+                                    )
+                                } else {
+                                    ConversationScreen(
+                                        conversation = conversation,
+                                        viewModel = conversationViewModel,
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        },
-    )
+            },
+        )
+    }
 }
 
 private fun isLoginScreen(route: String?): Boolean =
@@ -222,6 +278,7 @@ fun AppNavHost(
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
     notificationManager: NotificationManager,
+//    onConversationRequest: (Long) -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -289,6 +346,7 @@ fun AppNavHost(
                     notificationManager = notificationManager,
                     navController = navController,
                     mapViewModel = hiltViewModel(),
+//                    onConversationRequest = onConversationRequest,
                 )
             }
         }

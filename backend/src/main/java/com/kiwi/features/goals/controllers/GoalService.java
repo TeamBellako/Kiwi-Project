@@ -52,10 +52,8 @@ public class GoalService {
             throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
         }
 
-        Long newValue = (existingGoal.getValue() + (int)(existingGoal.getTarget() / 10));
-        if (newValue > existingGoal.getTarget()) {
-            newValue = existingGoal.getTarget();
-        }
+        Long increment = Math.max(1L, existingGoal.getTarget() / 10);
+        Long newValue = Math.min(existingGoal.getValue() + increment, existingGoal.getTarget());
         existingGoal.setValue(newValue);
 
         GoalPersistence updatedGoal = goalRepository.save(existingGoal);
