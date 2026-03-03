@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -80,20 +81,22 @@ fun ConversationScreen(
     ) {
         Box(
             modifier =
-                Modifier.offset(
-                    x = getResponsiveSizeWidth(-50.dp),
-                    y = getResponsiveSizeHeight(100.dp),
-                ),
+                Modifier
+                    .height(getResponsiveSizeHeight(400.dp))
+                    .fillMaxWidth()
+                    .offset(
+                        x = getResponsiveSizeWidth(-50.dp),
+                        y = getResponsiveSizeHeight(100.dp),
+                    ),
         ) {
             // Sprite
             Kiwi_Image(
-                painterResourceId = R.drawable.liria_provisional,
-                alt = "Liria test",
-//                modifier =
-//                    Modifier.offset(
-//                        x = getResponsiveSizeWidth(-50.dp),
-//                        y = getResponsiveSizeHeight(100.dp),
-//                    ),
+                painterResourceId = R.drawable.liria_neutral,
+                alt = "Character Pose",
+            )
+            Kiwi_Image(
+                painterResourceId = R.drawable.liria_defiant,
+                alt = "Character Expression",
             )
         }
         // Dialogue

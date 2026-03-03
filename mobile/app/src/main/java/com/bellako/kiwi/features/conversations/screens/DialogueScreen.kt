@@ -96,7 +96,7 @@ fun DialogueScreen(
                             .clip(CircleShape),
                 ) {
                     Kiwi_Image(
-                        R.drawable.liria_provisional,
+                        R.drawable.liria_neutral,
                         "Character image",
                         contentScale = ContentScale.Crop,
                         modifier =
@@ -104,6 +104,16 @@ fun DialogueScreen(
                                 .matchParentSize()
                                 .scale(1.6f)
                                 .background(kiwiColor.color0),
+                    )
+                    Kiwi_Image(
+                        painterResourceId = R.drawable.liria_defiant,
+                        alt = "Character Expression",
+                        contentScale = ContentScale.Crop,
+                        modifier =
+                                Modifier
+                                .matchParentSize()
+                            .scale(1.6f)
+                            .background(kiwiColor.color0),
                     )
                 }
                 Kiwi_Image(
