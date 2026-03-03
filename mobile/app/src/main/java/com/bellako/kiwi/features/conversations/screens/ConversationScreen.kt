@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
@@ -68,6 +70,7 @@ fun ConversationScreen(
             ),
         label = "arrow_offset",
     )
+    val context = LocalContext.current
     // Background image
     Column(
         verticalArrangement = Arrangement.Bottom,
@@ -76,16 +79,26 @@ fun ConversationScreen(
                 .fillMaxSize()
                 .clickable {},
     ) {
-        // Sprite
-        Kiwi_Image(
-            painterResourceId = R.drawable.liria_provisional,
-            alt = "Liria test",
+        Box(
             modifier =
-                Modifier.offset(
-                    x = getResponsiveSizeWidth(-50.dp),
-                    y = getResponsiveSizeHeight(100.dp),
-                ),
-        )
+                Modifier
+                    .height(getResponsiveSizeHeight(400.dp))
+                    .fillMaxWidth()
+                    .offset(
+                        x = getResponsiveSizeWidth(-50.dp),
+                        y = getResponsiveSizeHeight(100.dp),
+                    ),
+        ) {
+            // Sprite
+            Kiwi_Image(
+                painterResourceId = R.drawable.liria_neutral,
+                alt = "Character Pose",
+            )
+            Kiwi_Image(
+                painterResourceId = R.drawable.liria_defiant,
+                alt = "Character Expression",
+            )
+        }
         // Dialogue
         Box(
             modifier =
@@ -144,6 +157,7 @@ fun ConversationScreen(
             ) {
                 items(conversation.options) { option ->
                     ConversationOption(option, onClick = {
+                        AudioManager.playSFX(context, R.raw.snd_fx_03_page)
                         viewModel?.next(option)
                     })
                     Kiwi_Spacer(Spacing.small)
@@ -160,6 +174,7 @@ fun ConversationScreen(
                             .size(getResponsiveSizeWidth(8.dp), getResponsiveSizeHeight(8.dp))
                             .offset(y = getResponsiveSizeHeight(offsetY.dp))
                             .clickable {
+                                AudioManager.playSFX(context, R.raw.snd_fx_03_page)
                                 viewModel?.next()
                             },
                 )

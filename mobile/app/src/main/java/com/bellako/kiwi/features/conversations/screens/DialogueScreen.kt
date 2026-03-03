@@ -29,10 +29,12 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
@@ -66,6 +68,7 @@ fun DialogueScreen(
             ),
         label = "arrow_offset",
     )
+    val context = LocalContext.current
     Column(
         verticalArrangement = Arrangement.Bottom,
         modifier =
@@ -93,7 +96,7 @@ fun DialogueScreen(
                             .clip(CircleShape),
                 ) {
                     Kiwi_Image(
-                        R.drawable.liria_provisional,
+                        R.drawable.liria_neutral,
                         "Character image",
                         contentScale = ContentScale.Crop,
                         modifier =
@@ -101,6 +104,16 @@ fun DialogueScreen(
                                 .matchParentSize()
                                 .scale(1.6f)
                                 .background(kiwiColor.color0),
+                    )
+                    Kiwi_Image(
+                        painterResourceId = R.drawable.liria_defiant,
+                        alt = "Character Expression",
+                        contentScale = ContentScale.Crop,
+                        modifier =
+                                Modifier
+                                .matchParentSize()
+                            .scale(1.6f)
+                            .background(kiwiColor.color0),
                     )
                 }
                 Kiwi_Image(
@@ -142,6 +155,7 @@ fun DialogueScreen(
                             .size(getResponsiveSizeWidth(10.dp), getResponsiveSizeHeight(10.dp))
                             .offset(y = getResponsiveSizeHeight(offsetY.dp))
                             .clickable {
+                                AudioManager.playSFX(context, R.raw.snd_fx_03_page)
                                 viewModel?.next()
                             },
                 )
