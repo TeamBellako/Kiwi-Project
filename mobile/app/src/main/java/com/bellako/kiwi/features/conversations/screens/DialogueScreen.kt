@@ -110,10 +110,10 @@ fun DialogueScreen(
                         alt = "Character Expression",
                         contentScale = ContentScale.Crop,
                         modifier =
-                                Modifier
+                            Modifier
                                 .matchParentSize()
-                            .scale(1.6f)
-                            .background(kiwiColor.color0),
+                                .scale(1.6f)
+                                .background(kiwiColor.color0),
                     )
                 }
                 Kiwi_Image(
