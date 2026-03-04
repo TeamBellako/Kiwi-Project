@@ -1,7 +1,6 @@
 package com.kiwi.features.skills.controllers;
 
 import com.kiwi.common.types.Email;
-import com.kiwi.features.goals.data.GoalDTO;
 import com.kiwi.features.skills.data.EquipSkillDTO;
 import com.kiwi.features.skills.data.SkillDTO;
 import com.kiwi.features.users.controllers.UsersService;
