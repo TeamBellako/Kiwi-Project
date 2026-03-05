@@ -9,7 +9,7 @@ object MapsInfo {
             mapResourceId = R.drawable.mindveil_4k,
             maxZoom = 8f,
             backgroundColor = Color.White,
-            mapId = 1,
+            mapId = 0,
         )
 
     val Testing: MapInfo =
@@ -17,7 +17,7 @@ object MapsInfo {
             mapResourceId = R.drawable.map_switch_test,
             maxZoom = 4f,
             backgroundColor = Color.Red,
-            mapId = 2,
+            mapId = 1,
         )
 
     val mapsList = listOf(MindVeil, Testing)
