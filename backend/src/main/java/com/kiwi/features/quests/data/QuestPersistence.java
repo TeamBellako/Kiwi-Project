@@ -24,4 +24,13 @@ public class QuestPersistence {
     @Column(nullable = false)
     private int icon;
 
+    @Column(name = "on_completed_action")
+    private String onCompletedAction;
+
+    @Column(name = "on_completed_entity")
+    private String onCompletedEntity = "";
+
+    @Column(name = "on_completed_entity_id")
+    private int onCompletedEntityId = 0;
+
 }

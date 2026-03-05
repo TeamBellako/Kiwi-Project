@@ -21,7 +21,9 @@ public class QuestProgressService {
                 quest.getExperience(),
                 quest.getIcon(),
                 QuestStatus.ACTIVE,
-                quest.getSubquests()
+                quest.getSubquests(),
+                quest.getOnCompletedEvent(),
+                quest.getOnCompletedEntityId()
         );
     }
 
@@ -36,7 +38,9 @@ public class QuestProgressService {
                 quest.getExperience(),
                 quest.getIcon(),
                 QuestStatus.COMPLETED,
-                quest.getSubquests()
+                quest.getSubquests(),
+                quest.getOnCompletedEvent(),
+                quest.getOnCompletedEntityId()
         );
     }
 
