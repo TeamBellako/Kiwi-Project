@@ -43,4 +43,6 @@ data class ConversationDomain(
     val nextEvent: NextEventType,
     val eventId: Long? = null,
     val options: List<ConversationOptionDomain> = emptyList(),
+    val onCompletedEvent: String,
+    val onCompletedEntityId: Int,
 )

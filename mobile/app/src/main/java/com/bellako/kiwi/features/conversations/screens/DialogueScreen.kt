@@ -197,6 +197,8 @@ fun DialogueScreen_Preview() {
                         "Esto es un texto de prueba, que tiene que ser largo de narices pero con W",
                         NextEventType.END,
                         2,
+                        onCompletedEvent = "",
+                        onCompletedEntityId = 0,
                     ),
             )
         }

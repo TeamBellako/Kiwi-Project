@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.conversations.model
 
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.services.eventbus.listenToEvent
@@ -98,6 +99,14 @@ class ConversationViewModel
                 }
                 _isVisible.value = false
                 delay(ANIMATION_DURATION_MS)
+
+                if (_active.value != null && _active.value?.onCompletedEvent != "_") {
+                    EventBus.emitEvent(
+                        EventType.valueOf(_active.value!!.onCompletedEvent),
+                        EventPayload.EntityIdPayload(_active.value!!.onCompletedEntityId),
+                    )
+                }
+
                 _active.value = null
                 _selectedOptions.value = emptyList()
             }

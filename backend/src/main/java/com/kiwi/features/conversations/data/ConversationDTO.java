@@ -29,5 +29,9 @@ public class ConversationDTO {
     private NextEventType nextEvent;
     private Long eventId;
     private List<ConversationOptionDTO> options;
+    private String onCompletedEvent;
+    private String onCompletedAction;
+    private String onCompletedEntity;
+    private int onCompletedEntityId;
 }
 

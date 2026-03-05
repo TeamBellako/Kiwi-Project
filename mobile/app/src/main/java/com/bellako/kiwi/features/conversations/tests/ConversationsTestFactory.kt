@@ -42,6 +42,8 @@ object ConversationsTestFactory {
             nextEvent = nextEvent,
             eventId = eventId,
             options = options,
+            onCompletedEvent = "",
+            onCompletedEntityId = 0,
         )
 
     fun validConversationOption(
