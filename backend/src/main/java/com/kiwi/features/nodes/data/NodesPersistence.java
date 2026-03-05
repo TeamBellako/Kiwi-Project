@@ -27,9 +27,6 @@ public class NodesPersistence {
     @Column(name = "cord_y", nullable = false)
     private float cordY;
 
-    @Column(name = "event_on_execution", nullable = false)
-    private Long eventOnExecution;
-
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -41,6 +38,15 @@ public class NodesPersistence {
 
     @Column(name = "is_first_node_of_map")
     private boolean isFirstNodeOfMap;
+    
+    @Column(name = "on_execution_action")
+    private String onExecutionAction;
+
+    @Column(name = "on_execution_entity")
+    private String onExecutionEntity;
+
+    @Column(name = "on_execution_entity_id")
+    private int onExecutionEntityId;
 
     @OneToMany(mappedBy = "fromNode", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NodeEdgePersistence> outgoingEdges = new ArrayList<>();
