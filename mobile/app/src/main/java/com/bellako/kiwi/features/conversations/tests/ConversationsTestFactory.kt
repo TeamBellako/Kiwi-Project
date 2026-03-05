@@ -42,7 +42,7 @@ object ConversationsTestFactory {
             nextEvent = nextEvent,
             eventId = eventId,
             options = options,
-            onCompletedEvent = "",
+            onCompletedEvent = "_",
             onCompletedEntityId = 0,
         )
 
