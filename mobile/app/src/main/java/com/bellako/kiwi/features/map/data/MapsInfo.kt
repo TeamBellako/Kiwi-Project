@@ -9,7 +9,7 @@ object MapsInfo {
             mapResourceId = R.drawable.mindveil_4k,
             maxZoom = 8f,
             backgroundColor = Color.White,
-            mapId = 0,
+            mapId = 1,
         )
 
     val Testing: MapInfo =
@@ -17,6 +17,10 @@ object MapsInfo {
             mapResourceId = R.drawable.map_switch_test,
             maxZoom = 4f,
             backgroundColor = Color.Red,
-            mapId = 1,
+            mapId = 2,
         )
+
+    val mapsList = listOf(MindVeil, Testing)
+
+    fun findMapById(id: Int): MapInfo = mapsList.find { it.mapId == id } ?: MindVeil
 }

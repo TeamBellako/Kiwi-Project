@@ -17,3 +17,10 @@ SET
   on_execution_entity = 'MAP', 
   on_execution_entity_id = 2 
 WHERE id = 7;
+
+UPDATE nodes
+SET
+  on_execution_action = 'SWITCH',
+  on_execution_entity = 'MAP', 
+  on_execution_entity_id = 1 
+WHERE id = 6;
