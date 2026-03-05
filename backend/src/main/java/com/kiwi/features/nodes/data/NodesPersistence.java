@@ -43,10 +43,10 @@ public class NodesPersistence {
     private String onExecutionAction;
 
     @Column(name = "on_execution_entity")
-    private String onExecutionEntity;
+    private String onExecutionEntity = "";
 
     @Column(name = "on_execution_entity_id")
-    private int onExecutionEntityId;
+    private int onExecutionEntityId = 0;
 
     @OneToMany(mappedBy = "fromNode", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NodeEdgePersistence> outgoingEdges = new ArrayList<>();
