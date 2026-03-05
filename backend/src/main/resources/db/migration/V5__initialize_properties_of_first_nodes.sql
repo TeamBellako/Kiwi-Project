@@ -6,21 +6,14 @@ SET
 
 UPDATE nodes
 SET
-  on_execution_action = 'START',
-  on_execution_entity = 'CNV',
-  on_execution_entity_id = 1            
-WHERE id = 1;
-
-UPDATE nodes
-SET
   on_execution_action = 'SWITCH',
   on_execution_entity = 'MAP', 
   on_execution_entity_id = 2 
-WHERE id = 7;
+WHERE id = 6;
 
 UPDATE nodes
 SET
   on_execution_action = 'SWITCH',
   on_execution_entity = 'MAP', 
   on_execution_entity_id = 1 
-WHERE id = 6;
+WHERE id = 7;
