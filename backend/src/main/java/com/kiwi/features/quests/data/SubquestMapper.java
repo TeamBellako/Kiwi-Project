@@ -14,7 +14,9 @@ public class SubquestMapper {
                 sq.getName(),
                 sq.getExperience(),
                 sq.getOrderIndex(),
-                status
+                status,
+                sq.getOnCompletedAction() + "_" + sq.getOnCompletedEntity(),
+                sq.getOnCompletedEntityId()
         );
     }
 
@@ -24,7 +26,9 @@ public class SubquestMapper {
                 sq.getName(),
                 sq.getExperience(),
                 sq.getOrderIndex(),
-                null
+                null,
+                sq.getOnCompletedAction() + "_" + sq.getOnCompletedEntity(),
+                sq.getOnCompletedEntityId()
         );
     }
 
@@ -58,6 +62,8 @@ public class SubquestMapper {
         dto.setExperience(domain.getExperience());
         dto.setOrder(domain.getOrder());
         dto.setStatus(domain.getStatus() != null ? domain.getStatus().name() : null);
+        dto.setOnCompletedEvent(domain.getOnCompletedEvent());
+        dto.setOnCompletedEntityId(domain.getOnCompletedEntityId());
         return dto;
     }
 
