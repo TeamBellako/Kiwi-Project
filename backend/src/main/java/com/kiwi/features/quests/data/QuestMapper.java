@@ -25,7 +25,8 @@ public class QuestMapper {
                 quest.getIcon(),
                 status != null ? status.getStatus() : null,
                 orderedSubquests,
-                quest.getOnCompletedAction() + "_" + quest.getOnCompletedEntity(),
+                quest.getOnCompletedAction(),
+                quest.getOnCompletedEntity(), 
                 quest.getOnCompletedEntityId()
         );
     }
@@ -48,6 +49,8 @@ public class QuestMapper {
         dto.setSubquests(subquestDTOs);
         
         dto.setOnCompletedEvent(domain.getOnCompletedEvent());
+        dto.setOnCompletedAction(domain.getOnCompletedAction());
+        dto.setOnCompletedEntity(domain.getOnCompletedEntity());
         dto.setOnCompletedEntityId(domain.getOnCompletedEntityId());
         return dto;
     }

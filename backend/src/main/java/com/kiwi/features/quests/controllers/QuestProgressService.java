@@ -22,7 +22,8 @@ public class QuestProgressService {
                 quest.getIcon(),
                 QuestStatus.ACTIVE,
                 quest.getSubquests(),
-                quest.getOnCompletedEvent(),
+                quest.getOnCompletedAction(),
+                quest.getOnCompletedEntity(), 
                 quest.getOnCompletedEntityId()
         );
     }
@@ -39,7 +40,8 @@ public class QuestProgressService {
                 quest.getIcon(),
                 QuestStatus.COMPLETED,
                 quest.getSubquests(),
-                quest.getOnCompletedEvent(),
+                quest.getOnCompletedAction(),
+                quest.getOnCompletedEntity(),
                 quest.getOnCompletedEntityId()
         );
     }

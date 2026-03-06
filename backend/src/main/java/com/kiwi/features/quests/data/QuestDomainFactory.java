@@ -16,7 +16,8 @@ public class QuestDomainFactory {
                 subquests.stream()
                         .sorted((a, b) -> Integer.compare(a.getOrder(), b.getOrder()))
                         .collect(Collectors.toList()),
-                "_",
+                "",
+                "",
                 0
         );
     }
