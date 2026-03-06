@@ -59,22 +59,23 @@ CREATE TABLE user_goal_status (
 
 -- ============================================================
 -- Step 6: Migrate old goals -> user_goal_status
---         id is copied explicitly to preserve references from skills
+--         id is copied explicitly to preserve references from skills.
+--         MIN(g.id) avoids duplicate rows when multiple goal
+--         definitions share the same (target, type, category, reward).
 -- ============================================================
 INSERT INTO user_goal_status (id, user_id, goal_id, status, date, value)
 SELECT
     og.id,
     og.user_id,
-    g.id,
+    (SELECT MIN(g.id) FROM goals g
+     WHERE g.target   = og.target
+       AND g.type     = og.type
+       AND g.category = og.category
+       AND g.reward   = og.reward),
     og.status,
     og.date,
     og.value
-FROM _old_goals og
-JOIN goals g
-  ON g.target   = og.target
- AND g.type     = og.type
- AND g.category = og.category
- AND g.reward   = og.reward;
+FROM _old_goals og;
 
 -- ============================================================
 -- Step 7: Re-add FK on skills now pointing to user_goal_status
