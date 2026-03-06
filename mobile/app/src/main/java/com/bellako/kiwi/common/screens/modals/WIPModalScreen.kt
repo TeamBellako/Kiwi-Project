@@ -1,5 +1,10 @@
 package com.bellako.kiwi.common.screens.modals
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.AndroidRuntimeException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.BuildConfig
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -30,6 +38,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -37,6 +46,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun WIPModalScreen(
+    navController: NavController,
     modifier: Modifier = Modifier,
     message: String =
         "Coming soon!",
@@ -59,6 +69,7 @@ fun WIPModalScreen(
         contentAlignment = Alignment.Center,
     ) {
         WIPModalLayout(
+            navController,
             modifier,
             message,
             subMessage,
@@ -70,12 +81,14 @@ fun WIPModalScreen(
 
 @Composable
 private fun WIPModalLayout(
+    navController: NavController,
     modifier: Modifier = Modifier,
     message: String,
     subMessage: String,
     buttonMessage: String,
     onButtonClick: (() -> Unit)? = null,
 ) {
+    val context = LocalContext.current
     val kiwiColors = LocalKiwiColors.current
 
     Column(
@@ -122,19 +135,75 @@ private fun WIPModalLayout(
 
         Kiwi_Spacer(Spacing.xLarge)
 
-        if (onButtonClick != null) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .testTag(CommonTestTags.SETTINGS_SCREEN),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Kiwi_FixedSizeButton(
-                horizontalMargin = Spacing.large,
+                horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
-                        buttonMessage,
-                        color = kiwiColors.color7,
+                        "CONTACT US",
+                        color = kiwiColors.color6,
                         fontWeight = FontWeight.Bold,
                     ),
                 color = kiwiColors.color5A,
-                onClick = onButtonClick,
+                onClick = { openLinkInBrowser(context, BuildConfig.CONCIERGE_FORM_LINK) },
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
+                textArguments =
+                    KiwiTextArguments(
+                        "REPORT A BUG",
+                        color = kiwiColors.color6,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { openLinkInBrowser(context, BuildConfig.BUG_FORM_LINK) },
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
+                textArguments =
+                    KiwiTextArguments(
+                        buttonMessage,
+                        color = kiwiColors.color6,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = {
+                    if (onButtonClick != null) {
+                        onButtonClick
+                    } else {
+                        navController.navigateUp()
+                    }
+                },
             )
         }
+    }
+}
+
+private fun openLinkInBrowser(
+    context: Context,
+    url: String,
+) {
+    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+
+    try {
+        context.startActivity(browserIntent)
+    } catch (e: ActivityNotFoundException) {
+        warn("No browser app found: ${e.message}")
+    } catch (e: AndroidRuntimeException) {
+        warn("Runtime error: ${e.message}")
     }
 }
 
@@ -146,6 +215,6 @@ private fun WIPModalLayout(
 @Composable
 fun WIPModal_Preview() {
     Kiwi_Theme {
-        WIPModalScreen {}
+        WIPModalScreen(navController = rememberNavController()) {}
     }
 }
