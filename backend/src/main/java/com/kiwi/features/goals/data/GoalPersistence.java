@@ -26,7 +26,7 @@ public class GoalPersistence {
     private String action;
 
     @Column(name = "target", nullable = false)
-    private Long target;
+    private Integer target;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)

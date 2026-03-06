@@ -13,7 +13,7 @@ public class GoalsTestFactory {
 
     public static GoalPersistence goalDefinition(
             Long id,
-            Long target,
+            Integer target,
             String action,
             String name,
             GoalType type,
@@ -32,17 +32,17 @@ public class GoalsTestFactory {
     }
 
     public static GoalPersistence exerciseGoalDefinition(Long id) {
-        return goalDefinition(id, 30L, "Exercise for 30 minutes", "Exercise Goal",
+        return goalDefinition(id, 30, "Exercise for 30 minutes", "Exercise Goal",
                 GoalType.EXERCISE, GoalCategory.DAILY_CHALLENGES, 10);
     }
 
     public static GoalPersistence appGoalDefinition(Long id) {
-        return goalDefinition(id, 100L, "Improve Java skills", "App Usage Goal",
+        return goalDefinition(id, 100, "Improve Java skills", "App Usage Goal",
                 GoalType.PRODUCTIVITY, GoalCategory.APP_USAGE, 50);
     }
 
     public static GoalPersistence skillGoalDefinition(Long id) {
-        return goalDefinition(id, 100L, "Improve Java skills", "Skill Goal",
+        return goalDefinition(id, 100, "Improve Java skills", "Skill Goal",
                 GoalType.PRODUCTIVITY, GoalCategory.SKILL, 50);
     }
 
@@ -63,7 +63,7 @@ public class GoalsTestFactory {
                 .goal(goal)
                 .status(status)
                 .date(date)
-                .value(0L)
+                .value(0)
                 .build();
     }
 
@@ -104,12 +104,12 @@ public class GoalsTestFactory {
                 .goalId(goalId)
                 .name("Exercise Goal")
                 .action("Exercise for 30 minutes")
-                .target(30L)
+                .target(30)
                 .type(type.name())
                 .category(category.name())
                 .reward(reward)
                 .status(status)
-                .value(0L)
+                .value(0)
                 .build();
     }
 

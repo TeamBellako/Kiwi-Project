@@ -38,5 +38,5 @@ public class UserGoalStatusPersistence {
     private LocalDate date;
 
     @Column(name = "value", nullable = false)
-    private Long value;
+    private Integer value;
 }

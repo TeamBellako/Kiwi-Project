@@ -18,7 +18,7 @@ CREATE TABLE goals (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     action TEXT,
-    target BIGINT NOT NULL,
+    target INT NOT NULL,
     type ENUM('EXERCISE', 'SLEEP', 'MEDITATION', 'NUTRITION', 'PRODUCTIVITY') NOT NULL,
     category ENUM('DAILY_CHALLENGES', 'APP_USAGE', 'SKILL') NOT NULL,
     reward INT NOT NULL
@@ -49,7 +49,7 @@ CREATE TABLE user_goal_status (
     goal_id BIGINT NOT NULL,
     status ENUM('COMPLETED', 'NOT_COMPLETED', 'IN_PROGRESS') NOT NULL,
     date DATE NOT NULL,
-    value BIGINT NOT NULL,
+    value INT NOT NULL,
     CONSTRAINT fk_user_goal_status_user
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_user_goal_status_goal

@@ -57,9 +57,9 @@ public class GoalService {
             throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
         }
 
-        Long target = existing.getGoal().getTarget();
-        Long increment = Math.max(1L, target / 10);
-        Long newValue = Math.min(existing.getValue() + increment, target);
+        Integer target = existing.getGoal().getTarget();
+        Integer increment = Math.max(1, target / 10);
+        Integer newValue = Math.min(existing.getValue() + increment, target);
         existing.setValue(newValue);
 
         return UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.save(existing));

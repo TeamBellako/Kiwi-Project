@@ -13,7 +13,7 @@ public class GoalDTO {
     private Long id;
     private String name;
     private String action;
-    private Long target;
+    private Integer target;
     private String type;
     private String category;
     private Integer reward;

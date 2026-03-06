@@ -15,12 +15,12 @@ public class UserGoalStatusDTO {
     // Denormalized from GoalPersistence for display
     private String name;
     private String action;
-    private Long target;
+    private Integer target;
     private String type;
     private String category;
     private Integer reward;
     // Per-user status fields
     private String status;
     private String date;
-    private Long value;
+    private Integer value;
 }
