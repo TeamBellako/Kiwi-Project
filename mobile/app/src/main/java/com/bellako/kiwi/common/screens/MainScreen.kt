@@ -402,7 +402,9 @@ fun AppNavHost(
         composable(ScreenRoutes.WIP) {
             AppScreenWrapper {
                 Kiwi_Music_Home()
-                WIPModalScreen()
+                WIPModalScreen(
+                    navController = navController,
+                )
             }
         }
     }

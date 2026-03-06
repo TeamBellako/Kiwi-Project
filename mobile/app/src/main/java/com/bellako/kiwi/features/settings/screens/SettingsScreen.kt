@@ -109,9 +109,9 @@ private fun SettingsScreenContainer(
             )
         }
         is UIState.WIP -> {
-            WIPModalScreen(onButtonClick = {
+            WIPModalScreen(navController = navController) {
                 settingsViewModel.resetUiState()
-            })
+            }
         }
         else -> {
             Column(
