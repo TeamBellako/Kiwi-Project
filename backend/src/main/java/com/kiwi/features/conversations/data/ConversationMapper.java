@@ -23,24 +23,30 @@ public class ConversationMapper {
             ? options.stream().map(ConversationOptionMapper::toDto).collect(Collectors.toList())
             : new ArrayList<>();
         
+        String onCompletedEvent = entity.getOnCompletedAction() + '_' + entity.getOnCompletedEntity();
+        
         return ConversationDTO.builder()
             .id(entity.getId())
             .name(entity.getName())
             .type(entity.getType())
             .spriteId(entity.getSprite() != null ? entity.getSprite().getId() : null)
-                .expresionId(entity.getExpresion() != null ? entity.getExpresion().getId() : null)
-                .backgroundId(entity.getBackground() != null ? entity.getBackground().getId() : null)
-                .fxId(entity.getFx() != null ? entity.getFx().getId() : null)
-                .dark(entity.getDark())
-                .delayStartMs(entity.getDelayStartMs())
-                .delayEndMs(entity.getDelayEndMs())
-                .dialog(entity.getDialog())
-                .dialogM(entity.getDialogM())
-                .dialogW(entity.getDialogW())
-                .nextEvent(entity.getNextEvent())
-                .eventId(entity.getEventId())
-                .options(optionDtos)
-                .build();
+            .expresionId(entity.getExpresion() != null ? entity.getExpresion().getId() : null)
+            .backgroundId(entity.getBackground() != null ? entity.getBackground().getId() : null)
+            .fxId(entity.getFx() != null ? entity.getFx().getId() : null)
+            .dark(entity.getDark())
+            .delayStartMs(entity.getDelayStartMs())
+            .delayEndMs(entity.getDelayEndMs())
+            .dialog(entity.getDialog())
+            .dialogM(entity.getDialogM())
+            .dialogW(entity.getDialogW())
+            .nextEvent(entity.getNextEvent())
+            .eventId(entity.getEventId())
+            .options(optionDtos)
+            .onCompletedEvent(onCompletedEvent)
+            .onCompletedAction(entity.getOnCompletedAction())
+            .onCompletedEntity(entity.getOnCompletedEntity())
+            .onCompletedEntityId(entity.getOnCompletedEntityId())
+            .build();
     }
 
     /**
@@ -60,6 +66,10 @@ public class ConversationMapper {
         entity.setDialogW(dto.getDialogW());
         entity.setNextEvent(dto.getNextEvent());
         entity.setEventId(dto.getEventId());
+
+        entity.setOnCompletedAction(dto.getOnCompletedAction());
+        entity.setOnCompletedEntity(dto.getOnCompletedEntity());
+        entity.setOnCompletedEntityId(dto.getOnCompletedEntityId());
         
         if (dto.getSpriteId() != null) {
             SpritePersistence sprite = new SpritePersistence();

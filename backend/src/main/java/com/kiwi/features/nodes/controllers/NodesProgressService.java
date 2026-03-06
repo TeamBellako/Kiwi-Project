@@ -15,12 +15,13 @@ public class NodesProgressService {
                     node.getPrice(),
                     node.getCordX(),
                     node.getCordY(),
-                    node.getEventOnExecution(),
                     node.getName(),
                     node.getDisplayName(),
                     node.getConnectedNodeIds(),
                     node.getMapId(),
-                    node.isFirstNodeOfMap());
+                    node.isFirstNodeOfMap(),
+                    node.getOnExecutionEvent(),
+                    node.getOnExecutionEntityId());
             
         }
         return node;
@@ -36,12 +37,13 @@ public class NodesProgressService {
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
-                node.getEventOnExecution(),
                 node.getName(),
                 node.getDisplayName(),
                 node.getConnectedNodeIds(),
                 node.getMapId(),
-                node.isFirstNodeOfMap());
+                node.isFirstNodeOfMap(),
+                node.getOnExecutionEvent(),
+                node.getOnExecutionEntityId());
     }
 
     public NodesDomain complete(NodesDomain node) {
@@ -54,11 +56,12 @@ public class NodesProgressService {
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
-                node.getEventOnExecution(),
                 node.getName(),
                 node.getDisplayName(),
                 node.getConnectedNodeIds(),
                 node.getMapId(),
-                node.isFirstNodeOfMap());
+                node.isFirstNodeOfMap(),
+                node.getOnExecutionEvent(),
+                node.getOnExecutionEntityId());
     }
 }

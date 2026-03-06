@@ -19,4 +19,8 @@ object MapsInfo {
             backgroundColor = Color.Red,
             mapId = 1,
         )
+
+    val mapsList = listOf(MindVeil, Testing)
+
+    fun findMapById(id: Int): MapInfo = mapsList.find { it.mapId == id } ?: MindVeil
 }

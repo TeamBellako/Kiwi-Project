@@ -8,7 +8,9 @@ public class SubquestDomainFactory {
                 subquest.getName(),
                 subquest.getExperience(),
                 subquest.getOrderIndex(),
-                subquestStatus.getStatus()
+                subquestStatus.getStatus(),
+                subquest.getOnCompletedAction() + "_" + subquest.getOnCompletedEntity(),
+                subquest.getOnCompletedEntityId()
         );
     }
 }

@@ -133,10 +133,11 @@ fun MapScreen(
         mapViewModel.setBackgroundColor(kiwiColors.colorOcean)
 
         listenToEvent(EventType.SWITCH_MAP) { eventPayload ->
-            val payload = eventPayload as EventPayload.SwitchMapPayload
-            mapViewModel.switchMap(payload.mapInfo)
+            val payload = eventPayload as EventPayload.EntityIdPayload
+            val mapInfo = MapsInfo.findMapById(payload.targetEntityId)
 
-            loadNodes(mapViewModel, nodesViewModel, payload.mapInfo.mapId)
+            mapViewModel.switchMap(mapInfo)
+            loadNodes(mapViewModel, nodesViewModel, mapInfo.mapId)
         }
     }
 
@@ -370,25 +371,22 @@ private fun InteractiveMap(
                                 onCompleteNode = { id ->
                                     nodesViewModel.completeNode(id)
                                     AudioManager.playSFX(context, R.raw.snd_node_completed)
-                                },
-                                onRetryNode = { id ->
-                                    // HACK: Remove once scripting is done, this is just for showcase
-                                    if (selectedNode.displayName == "CITY") {
+
+                                    if (selectedNode.onExecutionEvent != "_") {
                                         GlobalScope.launch(Dispatchers.Main) {
                                             EventBus.emitEvent(
-                                                EventType.SWITCH_MAP,
-                                                EventPayload.SwitchMapPayload(
-                                                    MapsInfo.Testing,
-                                                ),
+                                                EventType.valueOf(selectedNode.onExecutionEvent),
+                                                EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
                                             )
                                         }
-                                    } else if (selectedNode.displayName == "MAP_SWITCH") {
+                                    }
+                                },
+                                onRetryNode = { id ->
+                                    if (selectedNode.onExecutionEvent != "_") {
                                         GlobalScope.launch(Dispatchers.Main) {
                                             EventBus.emitEvent(
-                                                EventType.SWITCH_MAP,
-                                                EventPayload.SwitchMapPayload(
-                                                    MapsInfo.MindVeil,
-                                                ),
+                                                EventType.valueOf(selectedNode.onExecutionEvent),
+                                                EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
                                             )
                                         }
                                     }

@@ -6,4 +6,6 @@ data class SubquestDTO(
     val experience: Int,
     val order: Int,
     val status: String,
+    val onCompletedEvent: String,
+    val onCompletedEntityId: Int,
 )

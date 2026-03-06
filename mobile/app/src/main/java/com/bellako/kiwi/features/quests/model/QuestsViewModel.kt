@@ -3,6 +3,10 @@ package com.bellako.kiwi.features.quests.model
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
@@ -14,17 +18,18 @@ import com.bellako.kiwi.features.quests.data.QuestsState
 import com.bellako.kiwi.features.quests.data.SubquestStatus
 import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
+@OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
 class QuestsViewModel
     @Inject
@@ -35,6 +40,22 @@ class QuestsViewModel
         IQuestsViewModel {
         private val _state = MutableStateFlow(QuestsState())
         override val state: StateFlow<QuestsState> = _state.asStateFlow()
+
+        init {
+            GlobalScope.launch(Dispatchers.Main) {
+                listenToEvent(EventType.START_QUEST) { eventPayload ->
+                    val payload = eventPayload as EventPayload.EntityIdPayload
+                    giveQuest(payload.targetEntityId)
+                }
+            }
+
+            GlobalScope.launch(Dispatchers.Main) {
+                listenToEvent(EventType.COMPLETE_QUEST) { eventPayload ->
+                    val payload = eventPayload as EventPayload.EntityIdPayload
+                    completeSubquest(payload.targetEntityId)
+                }
+            }
+        }
 
         private fun notify(
             type: QuestNotificationType,
@@ -179,6 +200,13 @@ class QuestsViewModel
                     }
 
                     setUiState(UIState.Success(Unit))
+
+                    if (domainQuest.onCompletedEvent != "_") {
+                        EventBus.emitEvent(
+                            EventType.valueOf(domainQuest.onCompletedEvent),
+                            EventPayload.EntityIdPayload(domainQuest.onCompletedEntityId),
+                        )
+                    }
                 } catch (e: HttpException) {
                     warn("HTTP error completing subquest: ${e.message}")
                     setUiState(mapExceptionToUIState(e))

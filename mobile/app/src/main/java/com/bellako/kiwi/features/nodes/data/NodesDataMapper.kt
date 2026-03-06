@@ -9,11 +9,12 @@ object NodesDataMapper {
             price = dto.price,
             cordX = dto.cordX,
             cordY = dto.cordY,
-            eventOnExecution = dto.eventOnExecution,
             name = dto.name,
             displayName = dto.displayName,
             connectedNodeIds = dto.connectedNodeIds,
             mapId = dto.mapId,
+            onExecutionEvent = dto.onExecutionEvent,
+            onExecutionEntityId = dto.onExecutionEntityId,
         )
 
     fun toDTO(domain: NodesDomain): NodesDTO =
@@ -24,10 +25,11 @@ object NodesDataMapper {
             price = domain.price,
             cordX = domain.cordX,
             cordY = domain.cordY,
-            eventOnExecution = domain.eventOnExecution,
             name = domain.name,
             displayName = domain.displayName,
             connectedNodeIds = domain.connectedNodeIds,
             mapId = domain.mapId,
+            onExecutionEvent = domain.onExecutionEvent,
+            onExecutionEntityId = domain.onExecutionEntityId,
         )
 }

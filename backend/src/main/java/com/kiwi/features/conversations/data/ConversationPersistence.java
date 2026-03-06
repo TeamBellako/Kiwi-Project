@@ -64,4 +64,13 @@ public class ConversationPersistence {
 
     @Column(name = "event_id")
     private Long eventId;
+
+    @Column(name = "on_completed_action")
+    private String onCompletedAction;
+
+    @Column(name = "on_completed_entity")
+    private String onCompletedEntity = "";
+
+    @Column(name = "on_completed_entity_id")
+    private int onCompletedEntityId = 0;
 }

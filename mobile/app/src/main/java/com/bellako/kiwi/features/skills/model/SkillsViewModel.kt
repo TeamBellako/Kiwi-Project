@@ -5,6 +5,9 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.goals.data.GoalDTO
 import com.bellako.kiwi.features.goals.model.GoalsRepository
@@ -20,6 +23,9 @@ import com.bellako.kiwi.features.skills.data.SkillsState
 import com.bellako.kiwi.features.skills.screen.ONE_MINUTE_SECONDS
 import com.bellako.kiwi.features.skills.screen.SkillNotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +40,7 @@ const val MAX_DECK_SLOTS = 4
 
 const val ONE_SECOND_MILLISECONDS = 1_000L
 
+@OptIn(DelicateCoroutinesApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class SkillsViewModel
@@ -46,6 +53,15 @@ class SkillsViewModel
         ISkillsViewModel {
         private val _state = MutableStateFlow(SkillsState())
         override val state: StateFlow<SkillsState> = _state.asStateFlow()
+
+        init {
+            GlobalScope.launch(Dispatchers.Main) {
+                listenToEvent(EventType.GAIN_SKILL) { eventPayload ->
+                    val payload = eventPayload as EventPayload.EntityIdPayload
+                    giveSkill(payload.targetEntityId.toLong())
+                }
+            }
+        }
 
         override fun notify(
             type: SkillNotificationType,

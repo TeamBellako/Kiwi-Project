@@ -24,4 +24,13 @@ public class SubquestPersistence {
 
     @Column(name = "order_index", nullable = false)
     private int orderIndex;
+
+    @Column(name = "on_completed_action")
+    private String onCompletedAction;
+
+    @Column(name = "on_completed_entity")
+    private String onCompletedEntity = "";
+
+    @Column(name = "on_completed_entity_id")
+    private int onCompletedEntityId = 0;
 }

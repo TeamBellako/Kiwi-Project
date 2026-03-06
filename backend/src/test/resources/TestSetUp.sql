@@ -59,11 +59,13 @@ CREATE TABLE IF NOT EXISTS nodes (
   icon INT NOT NULL,
   cord_x FLOAT NOT NULL,
   cord_y FLOAT NOT NULL,
-  event_on_execution BIGINT NOT NULL,
   name VARCHAR(255) NOT NULL,
   display_name VARCHAR(255),
   map_id INT NOT NULL,
   is_first_node_of_map BOOLEAN DEFAULT FALSE,
+  on_execution_action VARCHAR(255),
+  on_execution_entity VARCHAR(255),
+  on_execution_entity_id INT,
   CONSTRAINT uq_nodes_name UNIQUE (name),
   CHECK (
     cord_x >= 0.0 AND cord_x <= 1.0

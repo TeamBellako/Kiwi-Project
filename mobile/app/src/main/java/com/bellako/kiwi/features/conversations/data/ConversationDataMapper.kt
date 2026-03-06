@@ -19,6 +19,8 @@ object ConversationDataMapper {
             nextEvent = dto.nextEvent,
             eventId = dto.eventId,
             options = dto.options.map { toDomain(it) },
+            onCompletedEvent = dto.onCompletedEvent,
+            onCompletedEntityId = dto.onCompletedEntityId,
         )
 
     fun toDomain(dto: ConversationOptionDTO): ConversationOptionDomain =
@@ -49,6 +51,8 @@ object ConversationDataMapper {
             nextEvent = domain.nextEvent,
             eventId = domain.eventId,
             options = domain.options.map { toDTO(it) },
+            onCompletedEvent = domain.onCompletedEvent,
+            onCompletedEntityId = domain.onCompletedEntityId,
         )
 
     fun toDTO(domain: ConversationOptionDomain): ConversationOptionDTO =
