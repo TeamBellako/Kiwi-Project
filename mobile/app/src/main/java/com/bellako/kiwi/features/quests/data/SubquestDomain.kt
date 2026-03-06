@@ -6,6 +6,8 @@ data class SubquestDomain(
     val experience: Int,
     val order: Int,
     val status: SubquestStatus,
+    val onCompletedEvent: String,
+    val onCompletedEntityId: Int,
 )
 
 enum class SubquestStatus { LOCKED, ACTIVE, COMPLETED, FAILED }

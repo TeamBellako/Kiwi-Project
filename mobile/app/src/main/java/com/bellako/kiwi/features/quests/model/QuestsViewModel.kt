@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.quests.model
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.services.eventbus.listenToEvent
@@ -46,7 +47,9 @@ class QuestsViewModel
                     val payload = eventPayload as EventPayload.EntityIdPayload
                     giveQuest(payload.targetEntityId)
                 }
+            }
 
+            GlobalScope.launch(Dispatchers.Main) {
                 listenToEvent(EventType.COMPLETE_QUEST) { eventPayload ->
                     val payload = eventPayload as EventPayload.EntityIdPayload
                     completeSubquest(payload.targetEntityId)
@@ -197,6 +200,13 @@ class QuestsViewModel
                     }
 
                     setUiState(UIState.Success(Unit))
+
+                    if (domainQuest.onCompletedEvent != "_") {
+                        EventBus.emitEvent(
+                            EventType.valueOf(domainQuest.onCompletedEvent),
+                            EventPayload.EntityIdPayload(domainQuest.onCompletedEntityId),
+                        )
+                    }
                 } catch (e: HttpException) {
                     warn("HTTP error completing subquest: ${e.message}")
                     setUiState(mapExceptionToUIState(e))

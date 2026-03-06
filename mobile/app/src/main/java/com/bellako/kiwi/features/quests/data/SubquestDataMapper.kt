@@ -8,6 +8,8 @@ class SubquestDataMapper {
             experience = dto.experience,
             order = dto.order,
             status = SubquestStatus.valueOf(dto.status),
+            onCompletedEvent = dto.onCompletedEvent,
+            onCompletedEntityId = dto.onCompletedEntityId,
         )
 
     fun toDto(domain: SubquestDomain): SubquestDTO =
@@ -17,5 +19,7 @@ class SubquestDataMapper {
             experience = domain.experience,
             order = domain.order,
             status = domain.status.name,
+            onCompletedEvent = domain.onCompletedEvent,
+            onCompletedEntityId = domain.onCompletedEntityId,
         )
 }
