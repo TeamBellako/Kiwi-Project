@@ -82,7 +82,6 @@ fun MapScreen(
     maxZoom: Float = 8f,
     mapMarginFactor: Float = 0.08f,
     elasticityFactor: Float = 1.4f,
-    title: String = "MINDVEIL",
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
     goalsViewModel: IGoalsViewModel,
@@ -153,9 +152,12 @@ fun MapScreen(
         ) {
             Kiwi_H2(
                 KiwiTextArguments(
-                    title,
+                    mapState.mapInfo.mapTitle,
                     color = kiwiColors.colorF,
-                    modifier = Modifier.padding(0.dp, getResponsiveSizeHeight(Spacing.small)),
+                    modifier =
+                        Modifier
+                            .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
+                            .zIndex(1f),
                 ),
             )
 
