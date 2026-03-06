@@ -36,7 +36,7 @@ import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.IGoal
-import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
+import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -168,17 +168,14 @@ fun GoalsModal(
                             .weight(buttonPercentage),
                     onClick = {
                         if (goalModalType == GoalNotificationType.NEW) {
-                            val suggestedGoals =
-                                goals.map { goal ->
-                                    SuggestedGoalDomain(goal.id, goal.target, goal.action, goal.type, goal.category, goal.reward)
-                                }
+                            val goalDefinitions = goals.filterIsInstance<GoalDomain>()
                             coroutineScope.launch {
-                                goalsViewModel.createGoalsFromSuggestions(suggestedGoals)
+                                goalsViewModel.createGoalsFromDefinitions(goalDefinitions)
                             }
                         } else {
                             coroutineScope.launch {
                                 for (goal in goals) {
-                                    if (goal is GoalDomain && goal.status != GoalStatus.COMPLETED) {
+                                    if (goal is UserGoalStatusDomain && goal.status != GoalStatus.COMPLETED) {
                                         goalsViewModel.uncompleteGoal(goalId = goal.id)
                                     }
                                 }
@@ -215,19 +212,23 @@ fun GoalsModal_Preview(goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel()
                 goalModalType = GoalNotificationType.NEW,
                 goals =
                     listOf(
-                        GoalDomain(
+                        UserGoalStatusDomain(
                             1,
-                            2,
+                            1,
+                            "Programa el modal lo mejor que sepas",
+                            1000,
                             "Programa el modal lo mejor que sepas",
                             GoalType.PRODUCTIVITY,
                             GoalCategory.DAILY_CHALLENGES,
                             GoalStatus.COMPLETED,
                             1000,
-                            value = 2,
+                            value = 5,
                         ),
-                        GoalDomain(
+                        UserGoalStatusDomain(
                             2,
-                            10,
+                            2,
+                            "Esto está fuera de tu alcance",
+                            1000,
                             "Esto está fuera de tu alcance",
                             GoalType.PRODUCTIVITY,
                             GoalCategory.DAILY_CHALLENGES,

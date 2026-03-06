@@ -1,44 +1,69 @@
-package com.bellako.kiwi.features.goals.data
+﻿package com.bellako.kiwi.features.goals.data
 
-object GoalDataMapper {
-    fun toDomain(dto: GoalDTO): GoalDomain =
-        GoalDomain(
+object UserGoalStatusDataMapper {
+    fun toDomain(dto: UserGoalStatusDTO): UserGoalStatusDomain =
+        UserGoalStatusDomain(
             id = dto.id,
+            goalId = dto.goalId,
             name = dto.name,
             target = dto.target,
             action = dto.action,
             type = stringToType(dto.type),
             category = stringToCategory(dto.category),
+            status = stringToStatus(dto.status),
             reward = dto.reward,
+            date = dto.date,
+            value = dto.value,
         )
 
-    fun toDTO(domain: GoalDomain): GoalDTO =
-        GoalDTO(
-            id = domain.id,
-            name = domain.name,
-            target = domain.target,
-            action = domain.action,
-            type = typeToString(domain.type),
-            category = categoryToString(domain.category),
-            reward = domain.reward,
+    fun toDomain(state: GoalState): UserGoalStatusDomain =
+        UserGoalStatusDomain(
+            id = state.id,
+            goalId = state.goalId,
+            name = state.name,
+            target = state.target,
+            action = state.action,
+            type = stringToType(state.type),
+            category = stringToCategory(state.category),
+            status = stringToStatus(state.status),
+            reward = state.reward,
+            date = state.date,
+            value = state.value,
         )
 
-    fun toUserGoalStatusState(
-        domain: GoalDomain,
-        date: String,
-    ): GoalState =
+    fun toState(domain: UserGoalStatusDomain): GoalState =
         GoalState(
-            id = 0,
-            goalId = domain.id,
+            id = domain.id,
+            goalId = domain.goalId,
             name = domain.name,
             target = domain.target,
             action = domain.action,
             type = typeToString(domain.type),
             category = categoryToString(domain.category),
-            status = "IN_PROGRESS",
+            status = statusToString(domain.status),
             reward = domain.reward,
-            date = date,
+            value = domain.value,
+            date = domain.date,
         )
+
+    fun toState(dto: UserGoalStatusDTO): GoalState = toState(toDomain(dto))
+
+    fun toDTO(domain: UserGoalStatusDomain): UserGoalStatusDTO =
+        UserGoalStatusDTO(
+            id = domain.id,
+            goalId = domain.goalId,
+            name = domain.name,
+            target = domain.target,
+            action = domain.action,
+            type = typeToString(domain.type),
+            category = categoryToString(domain.category),
+            status = statusToString(domain.status),
+            reward = domain.reward,
+            date = domain.date,
+            value = domain.value,
+        )
+
+    fun toDTO(state: GoalState): UserGoalStatusDTO = toDTO(toDomain(state))
 
     private fun stringToType(type: String?): GoalType =
         when (type?.uppercase()) {
@@ -72,5 +97,20 @@ object GoalDataMapper {
             GoalCategory.DAILY_CHALLENGES -> "DAILY_CHALLENGES"
             GoalCategory.APP_USAGE -> "APP_USAGE"
             GoalCategory.SKILL -> "SKILL"
+        }
+
+    private fun stringToStatus(status: String?): GoalStatus =
+        when (status?.uppercase()) {
+            "COMPLETED" -> GoalStatus.COMPLETED
+            "NOT_COMPLETED" -> GoalStatus.NOT_COMPLETED
+            "IN_PROGRESS" -> GoalStatus.IN_PROGRESS
+            else -> GoalStatus.IN_PROGRESS
+        }
+
+    private fun statusToString(status: GoalStatus): String =
+        when (status) {
+            GoalStatus.COMPLETED -> "COMPLETED"
+            GoalStatus.NOT_COMPLETED -> "NOT_COMPLETED"
+            GoalStatus.IN_PROGRESS -> "IN_PROGRESS"
         }
 }

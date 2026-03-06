@@ -31,7 +31,7 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
-import com.bellako.kiwi.features.goals.data.GoalDomain
+import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalComponent
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
@@ -185,7 +185,7 @@ private fun ExpandedSummaryCard(
     metricsState: MetricsState,
     goalsViewModel: IGoalsViewModel,
 ) {
-    var goals by remember { mutableStateOf<List<GoalDomain>>(emptyList()) }
+    var goals by remember { mutableStateOf<List<UserGoalStatusDomain>>(emptyList()) }
 
     LaunchedEffect(metricsState.date) {
         val result = goalsViewModel.getGoalsByDate(metricsState.date)

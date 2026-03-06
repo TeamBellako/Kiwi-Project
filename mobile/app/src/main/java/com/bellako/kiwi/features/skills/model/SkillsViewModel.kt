@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.Logger.warn
-import com.bellako.kiwi.features.goals.data.GoalDTO
+import com.bellako.kiwi.features.goals.data.UserGoalStatusDTO
 import com.bellako.kiwi.features.goals.model.GoalsRepository
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
@@ -356,13 +356,20 @@ class SkillsViewModel
             cooldownUntil: Instant?,
         ): SkillDomain =
             when (skill) {
-                is SkillDomain.Goal -> skill.copy(isCooldown = cooldown)
-                is SkillDomain.Time ->
+                is SkillDomain.Goal -> {
+                    skill.copy(isCooldown = cooldown)
+                }
+
+                is SkillDomain.Time -> {
                     skill.copy(
                         isCooldown = cooldown,
                         cooldownUntil = cooldownUntil,
                     )
-                is SkillDomain.Other -> skill.copy(isCooldown = cooldown)
+                }
+
+                is SkillDomain.Other -> {
+                    skill.copy(isCooldown = cooldown)
+                }
             }
 
         private fun emptySlot(): Int? {
@@ -383,7 +390,7 @@ class SkillsViewModel
                 ?.associate { it.id to it.toGoalData() }
                 ?: emptyMap()
 
-        private fun GoalDTO.toGoalData(): GoalData =
+        private fun UserGoalStatusDTO.toGoalData(): GoalData =
             GoalData(
                 action = action,
                 progress = value,
@@ -418,7 +425,9 @@ class SkillsViewModel
                                 skill.copy(cooldownProgress = percentage)
                             }
 
-                            else -> skill
+                            else -> {
+                                skill
+                            }
                         }
                     } else {
                         skill
