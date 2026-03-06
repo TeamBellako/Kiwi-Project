@@ -134,10 +134,6 @@ class ConversationViewModel
                 NextEventType.END -> {
                     end()
                 }
-
-                NextEventType.BATTLE -> {
-                    end()
-                }
             }
         }
     }

@@ -11,7 +11,6 @@ enum class ConversationType {
 @Serializable
 enum class NextEventType {
     CONVERSATION,
-    BATTLE,
     END,
 }
 
