@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,12 +34,14 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
@@ -70,6 +73,7 @@ fun GoalComponent(
     val goalDomain = currentGoal as? UserGoalStatusDomain
     val status = goalDomain?.status ?: GoalStatus.IN_PROGRESS
     val kiwiColors = LocalKiwiColors.current
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val targetProgress: Float =
@@ -170,11 +174,12 @@ fun GoalComponent(
                 modifier =
                     Modifier
                         .weight(0.10f)
-                        .padding(getResponsiveSizeHeight(8.dp))
+                        .fillMaxHeight()
                         .clickable {
                             if (status != GoalStatus.IN_PROGRESS) {
                                 return@clickable
                             } else {
+                                AudioManager.playSFX(context, R.raw.snd_ui_check)
                                 coroutineScope.launch {
                                     val result = goalsViewModel.updateGoalProgress(currentGoal.id)
                                     result.onSuccess { update ->
@@ -193,6 +198,7 @@ fun GoalComponent(
                             R.drawable.ic_daily_challenges_plus
                         },
                         "Quest Indicator For: ${currentGoal.target}",
+                        Modifier.padding(getResponsiveSizeHeight(8.dp)),
                     )
                 }
             }
