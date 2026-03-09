@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -321,16 +322,6 @@ private fun InteractiveMap(
                                 onRetryNode = { _ ->
                                     // HACK: Remove once scripting is done, this is just for showcase
                                     if (selectedNode.displayName == "CITY") {
-                                        GlobalScope.launch(Dispatchers.Main) {
-                                            EventBus.emitEvent(
-                                                EventType.valueOf(selectedNode.onExecutionEvent),
-                                                EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
-                                            )
-                                        }
-                                    }
-                                },
-                                onRetryNode = { id ->
-                                    if (selectedNode.onExecutionEvent != "_") {
                                         GlobalScope.launch(Dispatchers.Main) {
                                             EventBus.emitEvent(
                                                 EventType.valueOf(selectedNode.onExecutionEvent),
