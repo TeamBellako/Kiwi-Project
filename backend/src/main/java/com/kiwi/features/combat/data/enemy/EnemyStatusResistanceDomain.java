@@ -1,0 +1,14 @@
+package com.kiwi.features.combat.data.enemy;
+
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class EnemyStatusResistanceDomain {
+
+    private Long enemyId;
+    private Long stateId;
+    private float resistance;
+}
