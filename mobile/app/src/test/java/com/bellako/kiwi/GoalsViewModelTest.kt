@@ -36,28 +36,28 @@ class GoalsViewModelTest {
                     id = 1L,
                     goalId = 1L,
                     name = "Action 1",
-                    target = 10L,
+                    target = 10,
                     action = "Action 1",
                     type = "EXERCISE",
                     category = "DAILY_CHALLENGES",
                     status = "IN_PROGRESS",
                     reward = 100,
                     date = today,
-                    value = 0L,
+                    value = 0,
                 )
             val g2 =
                 UserGoalStatusDTO(
                     id = 2L,
                     goalId = 2L,
                     name = "Action 2",
-                    target = 20L,
+                    target = 20,
                     action = "Action 2",
                     type = "EXERCISE",
                     category = "DAILY_CHALLENGES",
                     status = "IN_PROGRESS",
                     reward = 200,
                     date = today,
-                    value = 5L,
+                    value = 5,
                 )
             storage[g1.id] = g1
             storage[g2.id] = g2
@@ -104,9 +104,11 @@ class GoalsViewModelTest {
                         goal: UserGoalStatusDTO,
                     ): UserGoalStatusDTO = throw UnsupportedOperationException("Not needed in tests")
 
-                    override suspend fun completeGoal(goalId: Long): UserGoalStatusDTO = throw UnsupportedOperationException("Not needed in tests")
+                    override suspend fun completeGoal(goalId: Long): UserGoalStatusDTO =
+                        throw UnsupportedOperationException("Not needed in tests")
 
-                    override suspend fun uncompleteGoal(goalId: Long): UserGoalStatusDTO = throw UnsupportedOperationException("Not needed in tests")
+                    override suspend fun uncompleteGoal(goalId: Long): UserGoalStatusDTO =
+                        throw UnsupportedOperationException("Not needed in tests")
 
                     override suspend fun getGoalById(goalId: Long): UserGoalStatusDTO {
                         TODO("Not yet implemented")
@@ -188,7 +190,7 @@ class GoalsViewModelTest {
                 GoalDomain(
                     id = 3L,
                     name = "Action 3",
-                    target = 5L,
+                    target = 5,
                     action = "Action 3",
                     type = GoalType.EXERCISE,
                     category = GoalCategory.DAILY_CHALLENGES,

@@ -32,6 +32,7 @@ import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.screens.GoalComponent
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
+import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.quests.model.IQuestsViewModel
 import com.bellako.kiwi.features.quests.screens.Quest
 import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
@@ -51,7 +52,6 @@ fun ObjectivesScreen(
 ) {
     val questsState by questsViewModel.state.collectAsState()
     val goalsState by goalsViewModel.state.collectAsState()
-    val kiwiColors = LocalKiwiColors.current
     val listState = rememberLazyListState()
 
     var todayGoals by remember { mutableStateOf<List<IGoal>?>(null) }
@@ -61,18 +61,15 @@ fun ObjectivesScreen(
         questsViewModel.loadActiveQuests()
     }
 
+    // Al abrir la pantalla, re-verificar si hay notificaciones de goals pendientes
+    LaunchedEffect(Unit) {
+        goalsViewModel.checkAndNotifyGoals()
+    }
+
     LaunchedEffect(questsState, focusedQuestId) {
         if (focusedQuestId == null) return@LaunchedEffect
-
-        val index =
-            questsState
-                ?.quests
-                ?.indexOfFirst { it.id == focusedQuestId }
-                ?: -1
-
-        if (index >= 0) {
-            listState.animateScrollToItem(index + 1)
-        }
+        val index = questsState?.quests?.indexOfFirst { it.id == focusedQuestId } ?: -1
+        if (index >= 0) listState.animateScrollToItem(index + 1)
     }
 
     LaunchedEffect(goalsState) {
@@ -81,20 +78,41 @@ fun ObjectivesScreen(
         val todayResult = goalsViewModel.getGoalsByDate(today)
         if (todayResult.isSuccess) {
             val goals = todayResult.getOrNull() ?: emptyList()
-            if (goals.isNotEmpty()) {
-                todayGoals = goals
-            }
+            if (goals.isNotEmpty()) todayGoals = goals
         }
         val yesterdayResult = goalsViewModel.getGoalsByDate(yesterday)
         if (yesterdayResult.isSuccess) {
             val goals = yesterdayResult.getOrNull() ?: emptyList()
-            if (goals.isNotEmpty()) {
-                yesterdayGoals = goals
-            }
+            if (goals.isNotEmpty()) yesterdayGoals = goals
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
+        ObjectivesContent(
+            questsViewModel = questsViewModel,
+            goalsViewModel = goalsViewModel,
+            focusedQuestId = focusedQuestId,
+            todayGoals = todayGoals,
+            yesterdayGoals = yesterdayGoals,
+            listState = listState,
+        )
+    }
+}
+
+@Composable
+private fun ObjectivesContent(
+    questsViewModel: IQuestsViewModel,
+    goalsViewModel: IGoalsViewModel,
+    focusedQuestId: Int?,
+    todayGoals: List<IGoal>?,
+    yesterdayGoals: List<IGoal>?,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+) {
+    val questsState by questsViewModel.state.collectAsState()
+    val kiwiColors = LocalKiwiColors.current
+
     LazyColumn(
+        state = listState,
         modifier =
             Modifier
                 .fillMaxSize()

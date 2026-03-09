@@ -17,8 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -30,8 +28,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import androidx.navigation.NavHostController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -44,10 +40,7 @@ import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.dashboard.screens.DashboardLayout
-import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
-import com.bellako.kiwi.features.goals.screens.GoalNotificationType
-import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.data.MapsInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
@@ -57,9 +50,6 @@ import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
 import com.bellako.kiwi.features.nodes.screens.screenToMap
-import com.bellako.kiwi.features.notifications.controller.NotificationManager
-import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
-import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -74,8 +64,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
-const val NOTIFICATION_OVERLAY_Z_ORDER = 10f
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MapScreen(
@@ -86,8 +74,6 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
     goalsViewModel: IGoalsViewModel,
-    notificationManager: NotificationManager,
-    navController: NavHostController,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
@@ -122,8 +108,6 @@ fun MapScreen(
     LaunchedEffect(Unit) {
         loadNodes(mapViewModel, nodesViewModel, 0)
     }
-
-    val goalsModalRequest = remember { mutableStateOf<Pair<GoalNotificationType, List<IGoal>>?>(null) }
 
     LaunchedEffect(Unit) {
         goalsViewModel.checkAndNotifyGoals()
@@ -164,46 +148,6 @@ fun MapScreen(
                 nodesViewModel = nodesViewModel,
                 modifier = Modifier.fillMaxSize(),
             )
-        }
-
-        NotificationOverlay(
-            notificationManager = notificationManager,
-            onGoalClick = { type, goals ->
-                goalsModalRequest.value = type to goals
-                notificationManager.dismissCurrent()
-            },
-            onQuestClick = { type, quest, subquestId ->
-                if (type != QuestNotificationType.QUEST_COMPLETED) {
-                    navController.navigate("OBJECTIVES/${quest.id}")
-                }
-                notificationManager.dismissCurrent()
-            },
-            onSkillClick = { type, skill ->
-                navController.navigate("SKILLS/${skill.id}")
-                notificationManager.dismissCurrent()
-            },
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .zIndex(NOTIFICATION_OVERLAY_Z_ORDER),
-        )
-
-        goalsModalRequest.value?.let { (type, goals) ->
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .zIndex(NOTIFICATION_OVERLAY_Z_ORDER),
-            ) {
-                GoalsModal(
-                    type,
-                    goals,
-                    goalsViewModel,
-                    onDismiss = {
-                        goalsModalRequest.value = null
-                    },
-                )
-            }
         }
     }
 }
@@ -371,7 +315,7 @@ private fun InteractiveMap(
                                     nodesViewModel.completeNode(id)
                                     AudioManager.playSFX(context, R.raw.snd_node_completed)
                                 },
-                                onRetryNode = { id ->
+                                onRetryNode = { _ ->
                                     // HACK: Remove once scripting is done, this is just for showcase
                                     if (selectedNode.displayName == "CITY") {
                                         GlobalScope.launch(Dispatchers.Main) {

@@ -167,21 +167,19 @@ fun GoalsModal(
                         Modifier
                             .weight(buttonPercentage),
                     onClick = {
-                        if (goalModalType == GoalNotificationType.NEW) {
-                            val goalDefinitions = goals.filterIsInstance<GoalDomain>()
-                            coroutineScope.launch {
+                        coroutineScope.launch {
+                            if (goalModalType == GoalNotificationType.NEW) {
+                                val goalDefinitions = goals.filterIsInstance<GoalDomain>()
                                 goalsViewModel.createGoalsFromDefinitions(goalDefinitions)
-                            }
-                        } else {
-                            coroutineScope.launch {
+                            } else {
                                 for (goal in goals) {
                                     if (goal is UserGoalStatusDomain && goal.status != GoalStatus.COMPLETED) {
                                         goalsViewModel.uncompleteGoal(goalId = goal.id)
                                     }
                                 }
                             }
+                            onDismiss()
                         }
-                        onDismiss()
                     },
                 )
             }

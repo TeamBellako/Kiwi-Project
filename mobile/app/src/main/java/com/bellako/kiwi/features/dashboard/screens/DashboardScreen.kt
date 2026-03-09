@@ -394,10 +394,8 @@ fun DashboardModal_Preview(
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen(
                         nodesViewModel = nodesViewModel,
-                        navController = nav,
                         goalsViewModel = goalsViewModel,
                         mapViewModel = MapViewModel(),
-                        notificationManager = NotificationManager(),
                     )
                     DashboardScreen(
                         usersViewModel =
