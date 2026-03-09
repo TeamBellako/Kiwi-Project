@@ -175,7 +175,7 @@ class GoalsViewModelTest {
             assert(after.isSuccess)
             val goals = after.getOrNull()!!
             val g1 = goals.find { it.id == 1L }!!
-            Assert.assertEquals(1L, g1.value)
+            Assert.assertEquals(1, g1.value)
         }
 
     @Test
@@ -187,21 +187,24 @@ class GoalsViewModelTest {
 
             // Create new goal definition and call createGoalsFromDefinitions
             val suggested =
-                GoalDomain(
+                UserGoalStatusDTO(
                     id = 3L,
+                    goalId = 3L,
                     name = "Action 3",
                     target = 5,
                     action = "Action 3",
-                    type = GoalType.EXERCISE,
-                    category = GoalCategory.DAILY_CHALLENGES,
+                    type = "EXERCISE",
+                    category = "DAILY_CHALLENGES",
+                    status = "IN_PROGRESS",
                     reward = 50,
+                    date = today,
+                    value = 0,
                 )
-            val created = vm.createGoalsFromDefinitions(listOf(suggested))
-            assert(created.isSuccess)
-            // After creation, getGoalsByDate should include the new goal (may update cache)
+            fakeApi.createGoals(listOf(suggested))
+
             val after = vm.getGoalsByDate(today)
             assert(after.isSuccess)
             val list = after.getOrNull()!!
-            assert(list.any { it.id == 3L })
+            Assert.assertTrue(list.any { it.id == 3L })
         }
 }

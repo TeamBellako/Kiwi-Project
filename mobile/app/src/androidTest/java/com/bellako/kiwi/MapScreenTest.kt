@@ -39,14 +39,11 @@ class MapScreenTest {
         goalsFakeViewModel = GoalsFakeViewModel()
 
         composeTestRule.setContent {
-            val navController = rememberNavController()
             MapScreen(
                 maxZoom = maxZoom,
                 nodesViewModel = nodesModel,
                 mapViewModel = viewModel,
                 goalsViewModel = goalsFakeViewModel,
-                navController = navController,
-                notificationManager = NotificationManager(),
             )
         }
 
