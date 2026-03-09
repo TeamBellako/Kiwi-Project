@@ -44,6 +44,13 @@ public class GoalDefinitionRepositoryInMemory implements GoalRepository {
     }
 
     @Override
+    public List<GoalPersistence> findTwoRandom() {
+        List<GoalPersistence> all = new ArrayList<>(store.values());
+        Collections.shuffle(all);
+        return all.stream().limit(2).toList();
+    }
+
+    @Override
     public List<GoalPersistence> findAll() {
         return new ArrayList<>(store.values());
     }

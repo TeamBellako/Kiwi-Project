@@ -1,5 +1,6 @@
 package com.kiwi.features.goals.controllers;
 
+import com.kiwi.features.goals.data.GoalDTO;
 import com.kiwi.features.goals.data.UserGoalStatusDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +101,12 @@ public class GoalController {
     public ResponseEntity<List<UserGoalStatusDTO>> getAllGoals(Authentication authentication) {
         List<UserGoalStatusDTO> allGoals = goalService.getAllGoals(authentication);
         return ResponseEntity.ok(allGoals);
+    }
+
+    @GetMapping("/suggestions")
+    public ResponseEntity<List<GoalDTO>> getGoalDefinitions() {
+        List<GoalDTO> definitions = goalService.getGoalDefinitions();
+        return ResponseEntity.ok(definitions);
     }
 }
 

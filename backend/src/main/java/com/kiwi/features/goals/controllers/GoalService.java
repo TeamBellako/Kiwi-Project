@@ -222,5 +222,12 @@ public class GoalService {
                 .map(UserGoalStatusDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<GoalDTO> getGoalDefinitions() {
+        return goalRepository.findTwoRandom()
+                .stream()
+                .map(GoalDataMapper::toDTO)
+                .collect(Collectors.toList());
+    }
     // endregion
 }
