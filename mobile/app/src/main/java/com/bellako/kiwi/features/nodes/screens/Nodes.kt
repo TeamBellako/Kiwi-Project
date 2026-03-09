@@ -514,7 +514,6 @@ fun Node_Preview() {
                         0.65f,
                         3,
                         100,
-                        4,
                         "node3",
                         "VIGILARIS CITY",
                         listOf(4L),

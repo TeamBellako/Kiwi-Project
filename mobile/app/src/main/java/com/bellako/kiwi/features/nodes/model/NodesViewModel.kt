@@ -3,10 +3,16 @@ package com.bellako.kiwi.features.nodes.model
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.nodes.data.NodesDomain
 import com.bellako.kiwi.features.nodes.data.NodesState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +21,7 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import javax.inject.Inject
 
+@OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
 class NodesViewModel
     @Inject
@@ -24,6 +31,15 @@ class NodesViewModel
         INodesViewModel {
         private val _state = MutableStateFlow(NodesState())
         override val state: StateFlow<NodesState> = _state.asStateFlow()
+
+        init {
+            GlobalScope.launch(Dispatchers.Main) {
+                listenToEvent(EventType.UNLOCK_NODE) { eventPayload ->
+                    val payload = eventPayload as EventPayload.EntityIdPayload
+                    unlockNode(payload.targetEntityId.toLong())
+                }
+            }
+        }
 
         // -----------------------------------------------------------------------------------------
 

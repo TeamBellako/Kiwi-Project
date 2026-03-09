@@ -7,11 +7,12 @@ data class NodesDomain(
     val price: Int,
     val cordX: Float,
     val cordY: Float,
-    val eventOnExecution: Int,
     val name: String,
     val displayName: String,
     val connectedNodeIds: List<Long>,
     val mapId: Int,
+    val onExecutionEvent: String,
+    val onExecutionEntityId: Int,
 )
 
 enum class NodeStatus {

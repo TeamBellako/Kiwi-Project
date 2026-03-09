@@ -31,4 +31,6 @@ data class ConversationDTO(
     val nextEvent: NextEventType,
     val eventId: Long? = null,
     val options: List<ConversationOptionDTO> = emptyList(),
+    val onCompletedEvent: String,
+    val onCompletedEntityId: Int,
 )

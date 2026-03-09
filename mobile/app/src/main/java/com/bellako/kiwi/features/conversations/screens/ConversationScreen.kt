@@ -43,6 +43,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.conversations.components.CharacterName
 import com.bellako.kiwi.features.conversations.components.ConversationOption
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
+import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.data.NextEventType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
@@ -246,12 +247,21 @@ fun ConversationScreen_Preview() {
                         NextEventType.END,
                         2,
                         listOf(
-//                            ConversationOptionDomain(1L, "Option 1", "Option 1", "Option 1", 2, null),
-//                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
-//                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
-//                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
-//                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
+                            ConversationOptionDomain(
+                                1L,
+                                "Option 1",
+                                "Option 1",
+                                "Option 1",
+                                2,
+                                null,
+                            ),
+                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
+                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
+                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
+                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
                         ),
+                        onCompletedEvent = "",
+                        onCompletedEntityId = 0,
                     ),
             )
         }

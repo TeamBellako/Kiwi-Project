@@ -2,11 +2,18 @@ package com.bellako.kiwi.features.conversations.model
 
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.NextEventType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +23,7 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import javax.inject.Inject
 
+@OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
 class ConversationViewModel
     @Inject
@@ -33,6 +41,15 @@ class ConversationViewModel
         /** Lista de option ids seleccionados durante la sesión actual */
         private val _selectedOptions = MutableStateFlow<List<Long>>(emptyList())
         val selectedOptions: StateFlow<List<Long>> = _selectedOptions.asStateFlow()
+
+        init {
+            GlobalScope.launch(Dispatchers.Main) {
+                listenToEvent(EventType.START_CNV) { eventPayload ->
+                    val payload = eventPayload as EventPayload.EntityIdPayload
+                    start(payload.targetEntityId.toLong())
+                }
+            }
+        }
 
         fun start(conversationId: Long) {
             viewModelScope.launch {
@@ -82,6 +99,14 @@ class ConversationViewModel
                 }
                 _isVisible.value = false
                 delay(ANIMATION_DURATION_MS)
+
+                if (_active.value != null && _active.value?.onCompletedEvent != "_") {
+                    EventBus.emitEvent(
+                        EventType.valueOf(_active.value!!.onCompletedEvent),
+                        EventPayload.EntityIdPayload(_active.value!!.onCompletedEntityId),
+                    )
+                }
+
                 _active.value = null
                 _selectedOptions.value = emptyList()
             }
@@ -107,10 +132,6 @@ class ConversationViewModel
                 }
 
                 NextEventType.END -> {
-                    end()
-                }
-
-                NextEventType.BATTLE -> {
                     end()
                 }
             }

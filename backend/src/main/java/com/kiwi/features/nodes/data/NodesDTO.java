@@ -12,10 +12,11 @@ public class NodesDTO {
     public int price;
     public float cordX;
     public float cordY;
-    private Long eventOnExecution;
     private String name;
     private String displayName;
     private List<Long> connectedNodeIds;
     private int mapId;
     private boolean isFirstNodeOfMap;
+    private String onExecutionEvent;
+    private int onExecutionEntityId;
 }

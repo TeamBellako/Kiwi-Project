@@ -14,11 +14,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object ConversationsModule {
-
     @Provides
     @Singleton
     fun provideConversationsApi(jwtAuthInterceptor: JwtAuthInterceptor): IConversationsAPI =
-        Retrofit.Builder()
+        Retrofit
+            .Builder()
             .baseUrl(BuildConfig.MOBILE_API_URL)
             .client(OkHttpClient.Builder().addInterceptor(jwtAuthInterceptor).build())
             .addConverterFactory(GsonConverterFactory.create())
@@ -27,7 +27,5 @@ object ConversationsModule {
 
     @Provides
     @Singleton
-    fun provideConversationsRepository(api: IConversationsAPI): ConversationsRepository =
-        ConversationsRepository(api)
+    fun provideConversationsRepository(api: IConversationsAPI): ConversationsRepository = ConversationsRepository(api)
 }
-

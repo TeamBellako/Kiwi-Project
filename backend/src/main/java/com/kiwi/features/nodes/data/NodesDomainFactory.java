@@ -21,12 +21,13 @@ public class NodesDomainFactory {
                 node.getPrice(),
                 node.getCordX(),
                 node.getCordY(),
-                node.getEventOnExecution(),
                 node.getName(),
                 node.getDisplayName(),
                 connectedNodeIds,
                 node.getMapId(),
-                node.isFirstNodeOfMap()
+                node.isFirstNodeOfMap(),
+                node.getOnExecutionAction() + '_' + node.getOnExecutionEntity(),
+                node.getOnExecutionEntityId()
         );
     }
 }

@@ -8,4 +8,6 @@ data class QuestDTO(
     val icon: Int,
     val status: String,
     val subquests: List<SubquestDTO>,
+    val onCompletedEvent: String,
+    val onCompletedEntityId: Int,
 )

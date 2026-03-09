@@ -15,7 +15,10 @@ public class QuestDomainFactory {
                 questStatus.getStatus(),
                 subquests.stream()
                         .sorted((a, b) -> Integer.compare(a.getOrder(), b.getOrder()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()),
+                "",
+                "",
+                0
         );
     }
 }

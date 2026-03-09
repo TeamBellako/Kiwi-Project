@@ -8,6 +8,8 @@ data class QuestDomain(
     val icon: Int,
     val status: QuestStatus,
     val subquests: List<SubquestDomain>,
+    val onCompletedEvent: String,
+    val onCompletedEntityId: Int,
 )
 
 enum class QuestStatus { ACTIVE, COMPLETED }

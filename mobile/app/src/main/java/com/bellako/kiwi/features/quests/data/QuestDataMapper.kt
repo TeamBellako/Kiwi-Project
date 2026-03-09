@@ -10,6 +10,8 @@ object QuestDataMapper {
             icon = dto.icon,
             status = QuestStatus.valueOf(dto.status),
             subquests = dto.subquests.map { toDomain(it) },
+            onCompletedEvent = dto.onCompletedEvent,
+            onCompletedEntityId = dto.onCompletedEntityId,
         )
 
     fun toDomain(dto: SubquestDTO): SubquestDomain =
@@ -19,6 +21,8 @@ object QuestDataMapper {
             experience = dto.experience,
             order = dto.order,
             status = SubquestStatus.valueOf(dto.status),
+            onCompletedEvent = dto.onCompletedEvent,
+            onCompletedEntityId = dto.onCompletedEntityId,
         )
 
     fun toDto(domain: QuestDomain): QuestDTO =
@@ -30,6 +34,8 @@ object QuestDataMapper {
             icon = domain.icon,
             status = domain.status.toString(),
             subquests = domain.subquests.map { toDto(it) },
+            onCompletedEvent = domain.onCompletedEvent,
+            onCompletedEntityId = domain.onCompletedEntityId,
         )
 
     fun toDto(domain: SubquestDomain): SubquestDTO =
@@ -39,5 +45,7 @@ object QuestDataMapper {
             experience = domain.experience,
             order = domain.order,
             status = domain.status.toString(),
+            onCompletedEvent = domain.onCompletedEvent,
+            onCompletedEntityId = domain.onCompletedEntityId,
         )
 }

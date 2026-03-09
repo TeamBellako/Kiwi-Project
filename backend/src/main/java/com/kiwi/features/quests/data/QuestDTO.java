@@ -12,4 +12,8 @@ public class QuestDTO {
     private int icon;
     private String status;
     private List<SubquestDTO> subquests;
+    private String onCompletedEvent;
+    private String onCompletedAction;
+    private String onCompletedEntity;
+    private int onCompletedEntityId;
 }
