@@ -136,7 +136,7 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "ComplexMethod", "MagicNumber")
 private fun AppScreen(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
@@ -203,7 +203,6 @@ private fun AppScreen(
                         questsViewModel = questsViewModel,
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
-                        notificationManager = notificationManager,
 //                        onConversationRequest = { conversationId ->
 //                            conversationViewModel.start(conversationId)
 //                        },
@@ -326,7 +325,6 @@ fun AppNavHost(
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
-    notificationManager: NotificationManager,
 //    onConversationRequest: (Long) -> Unit = {},
 ) {
     NavHost(

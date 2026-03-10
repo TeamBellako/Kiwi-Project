@@ -68,23 +68,23 @@ public class GoalsTestFactory {
     }
 
     public static UserGoalStatusPersistence inProgressGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
-        return userGoalStatusPersistence(id, exerciseGoalDefinition(null), GoalStatus.IN_PROGRESS, date, user);
+        return userGoalStatusPersistence(id, exerciseGoalDefinition(1L), GoalStatus.IN_PROGRESS, date, user);
     }
 
     public static UserGoalStatusPersistence completedGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
-        return userGoalStatusPersistence(id, exerciseGoalDefinition(null), GoalStatus.COMPLETED, date, user);
+        return userGoalStatusPersistence(id, exerciseGoalDefinition(1L), GoalStatus.COMPLETED, date, user);
     }
 
     public static UserGoalStatusPersistence notCompletedGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
-        return userGoalStatusPersistence(id, exerciseGoalDefinition(null), GoalStatus.NOT_COMPLETED, date, user);
+        return userGoalStatusPersistence(id, exerciseGoalDefinition(1L), GoalStatus.NOT_COMPLETED, date, user);
     }
 
     public static UserGoalStatusPersistence appGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
-        return userGoalStatusPersistence(id, appGoalDefinition(null), GoalStatus.IN_PROGRESS, date, user);
+        return userGoalStatusPersistence(id, appGoalDefinition(2L), GoalStatus.IN_PROGRESS, date, user);
     }
 
     public static UserGoalStatusPersistence skillGoalPersistence(Long id, LocalDate date, UsersPersistence user) {
-        return userGoalStatusPersistence(id, skillGoalDefinition(null), GoalStatus.IN_PROGRESS, date, user);
+        return userGoalStatusPersistence(id, skillGoalDefinition(3L), GoalStatus.IN_PROGRESS, date, user);
     }
 
     // =========================================================================
