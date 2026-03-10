@@ -19,12 +19,18 @@ import java.util.stream.Collectors;
 @Service
 public class GoalService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
-    
+
+    private final UserGoalStatusRepository userGoalStatusRepository;
     private final GoalRepository goalRepository;
     private final UsersRepository usersRepository;
     private final UsersService usersService;
 
-    public GoalService(GoalRepository goalRepository, UsersRepository usersRepository, UsersService usersService) {
+    public GoalService(
+            UserGoalStatusRepository userGoalStatusRepository,
+            GoalRepository goalRepository,
+            UsersRepository usersRepository,
+            UsersService usersService) {
+        this.userGoalStatusRepository = userGoalStatusRepository;
         this.goalRepository = goalRepository;
         this.usersRepository = usersRepository;
         this.usersService = usersService;
@@ -37,201 +43,191 @@ public class GoalService {
     }
 
     @Transactional
-    public GoalDTO updateGoalProgress(Long goalId, Authentication authentication) {
+    public UserGoalStatusDTO updateGoalProgress(Long id, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        GoalPersistence existingGoal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId));
+        UserGoalStatusPersistence existing = userGoalStatusRepository.findById(id)
+                .orElseThrow(() -> new GoalNotFoundException(id));
 
-        // Verificar que el goal pertenece al usuario autenticado
-        if (!existingGoal.getUser().getId().equals(user.getId())) {
+        if (!existing.getUser().getId().equals(user.getId())) {
             throw new GoalUnauthorizedException("You are not authorized to update this goal");
         }
 
-        if (existingGoal.getStatus() != GoalStatus.IN_PROGRESS) {
+        if (existing.getStatus() != GoalStatus.IN_PROGRESS) {
             throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
         }
 
-        Long increment = Math.max(1L, existingGoal.getTarget() / 10);
-        Long newValue = Math.min(existingGoal.getValue() + increment, existingGoal.getTarget());
-        existingGoal.setValue(newValue);
+        Integer target = existing.getGoal().getTarget();
+        Integer increment = Math.max(1, target / 10);
+        Integer newValue = Math.min(existing.getValue() + increment, target);
+        existing.setValue(newValue);
 
-        GoalPersistence updatedGoal = goalRepository.save(existingGoal);
-
-        return GoalDataMapper.toDTO(updatedGoal);
+        return UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.save(existing));
     }
 
     @Transactional
-    public GoalDTO updateGoal(Long goalId, GoalDTO goal, Authentication authentication) {
+    public UserGoalStatusDTO updateGoal(Long id, UserGoalStatusDTO dto, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        GoalPersistence existingGoal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId));
+        UserGoalStatusPersistence existing = userGoalStatusRepository.findById(id)
+                .orElseThrow(() -> new GoalNotFoundException(id));
 
-        // Verificar que el goal pertenece al usuario autenticado
-        if (!existingGoal.getUser().getId().equals(user.getId())) {
+        if (!existing.getUser().getId().equals(user.getId())) {
             throw new GoalUnauthorizedException("You are not authorized to update this goal");
         }
 
-        existingGoal.setValue(goal.getValue());
+        existing.setValue(dto.getValue());
 
-        GoalPersistence updatedGoal = goalRepository.save(existingGoal);
-
-        return GoalDataMapper.toDTO(updatedGoal);
+        return UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.save(existing));
     }
 
     @Transactional
-    public List<GoalDTO> createGoals(List<GoalDTO> goals, Authentication authentication) {
+    public List<UserGoalStatusDTO> createGoals(List<UserGoalStatusDTO> dtos, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
-        // Si no se proporciona fecha en los goals, usar la fecha actual
+
         LocalDate defaultDate = LocalDate.now();
-        
-        // Si los goals tienen fecha, usar la primera (todas deberían tener la misma fecha)
         final LocalDate date;
-        if (!goals.isEmpty() && goals.get(0).getDate() != null && !goals.get(0).getDate().isEmpty()) {
-            date = LocalDate.parse(goals.get(0).getDate(), DATE_FORMATTER);
+        if (!dtos.isEmpty() && dtos.get(0).getDate() != null && !dtos.get(0).getDate().isEmpty()) {
+            date = LocalDate.parse(dtos.get(0).getDate(), DATE_FORMATTER);
         } else {
             date = defaultDate;
         }
 
-        // Eliminar goals existentes para esta fecha
-        // List<GoalPersistence> existingGoals = goalRepository.findByUserAndDate(user, date);
-        // goalRepository.deleteAll(existingGoals);
-
-        List<GoalPersistence> newGoals = goals.stream()
+        List<UserGoalStatusPersistence> newEntities = dtos.stream()
                 .map(dto -> {
-                    dto.setId(null); // Forzar id a null para nuevas entidades
-                    return GoalDataMapper.toEntity(dto, user, date);
+                    dto.setId(null);
+                    GoalPersistence goal = goalRepository.findById(dto.getGoalId())
+                            .orElseThrow(() -> new GoalNotFoundException(dto.getGoalId()));
+                    return UserGoalStatusDataMapper.toEntity(dto, user, goal, date);
                 })
                 .collect(Collectors.toList());
 
-        List<GoalPersistence> savedGoals = goalRepository.saveAll(newGoals);
-
-        return savedGoals.stream()
-                .map(GoalDataMapper::toDTO)
+        return userGoalStatusRepository.saveAll(newEntities).stream()
+                .map(UserGoalStatusDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     /**
      * Marca un goal como completado y añade puntos al usuario.
-     * SOLO se puede marccar como no completado un goal en estado IN_PROGRESS. 
+     * SOLO se puede marcar como completado un goal en estado IN_PROGRESS.
      * SOLO puede completar el propietario del goal.
      */
     @Transactional
-    public GoalDTO completeGoal(Long goalId, Authentication authentication) {
+    public UserGoalStatusDTO completeGoal(Long id, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        GoalPersistence goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId));
+        UserGoalStatusPersistence entry = userGoalStatusRepository.findById(id)
+                .orElseThrow(() -> new GoalNotFoundException(id));
 
-        // Verificar que el goal pertenece al usuario autenticado
-        if (!goal.getUser().getId().equals(user.getId())) {
+        if (!entry.getUser().getId().equals(user.getId())) {
             throw new GoalUnauthorizedException("You are not authorized to complete this goal");
         }
 
-        // Verificar que el goal está en IN_PROGRESS
-        if (goal.getStatus() != GoalStatus.IN_PROGRESS) {
-            return GoalDataMapper.toDTO(goal);
+        if (entry.getStatus() != GoalStatus.IN_PROGRESS) {
+            return UserGoalStatusDataMapper.toDTO(entry);
         }
 
-        // Añadir puntos al usuario ANTES de cambiar el estado
-        usersService.addPointsToUser(user.getId(), goal.getReward());
+        usersService.addPointsToUser(user.getId(), entry.getGoal().getReward());
 
-        // Cambiar estado y guardar
-        goal.setStatus(GoalStatus.COMPLETED);
-        goal.setValue(goal.getTarget());
-        GoalPersistence savedGoal = goalRepository.save(goal);
+        entry.setStatus(GoalStatus.COMPLETED);
+        entry.setValue(entry.getGoal().getTarget());
 
-        return GoalDataMapper.toDTO(savedGoal);
+        return UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.save(entry));
     }
 
     /**
      * Marca un goal como no completado.
-     * SOLO se puede marccar como no completado un goal en estado IN_PROGRESS.
-     * SOLO puedo marcarse como no completado el propietario del goal.
+     * SOLO se puede marcar como no completado un goal en estado IN_PROGRESS.
+     * SOLO puede marcarlo el propietario del goal.
      */
     @Transactional
-    public GoalDTO uncompleteGoal(Long goalId, Authentication authentication) {
+    public UserGoalStatusDTO uncompleteGoal(Long id, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        GoalPersistence goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new GoalNotFoundException(goalId));
+        UserGoalStatusPersistence entry = userGoalStatusRepository.findById(id)
+                .orElseThrow(() -> new GoalNotFoundException(id));
 
-
-        // Verificar que el goal pertenece al usuario autenticado
-        if (!goal.getUser().getId().equals(user.getId())) {
+        if (!entry.getUser().getId().equals(user.getId())) {
             throw new GoalUnauthorizedException("You are not authorized to uncomplete this goal");
         }
 
-        // Verificar que el goal está en IN_PROGRESS
-        if (goal.getStatus() != GoalStatus.IN_PROGRESS) {
-            return GoalDataMapper.toDTO(goal);
+        if (entry.getStatus() != GoalStatus.IN_PROGRESS) {
+            return UserGoalStatusDataMapper.toDTO(entry);
         }
 
-        // Cambiar estado y guardar
-        goal.setStatus(GoalStatus.NOT_COMPLETED);
-        GoalPersistence savedGoal = goalRepository.saveAndFlush(goal);
-        
-        return GoalDataMapper.toDTO(savedGoal);
+        entry.setStatus(GoalStatus.NOT_COMPLETED);
+
+        return UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.saveAndFlush(entry));
     }
 
     // region GETTERS
-    public GoalDTO getGoalById(Long goalId, Authentication authentication) {
+    public UserGoalStatusDTO getGoalById(Long id, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        GoalPersistence goal = goalRepository.findByIdAndUser(goalId, user)
-                .orElseThrow(() -> new GoalNotFoundException(goalId));
+        UserGoalStatusPersistence entry = userGoalStatusRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new GoalNotFoundException(id));
 
-        return GoalDataMapper.toDTO(goal);
+        return UserGoalStatusDataMapper.toDTO(entry);
     }
 
-    public List<GoalDTO> getGoalsByDate(String dateString, Authentication authentication) {
+    public List<UserGoalStatusDTO> getGoalsByDate(String dateString, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
         LocalDate date = LocalDate.parse(dateString, DATE_FORMATTER);
 
-        return goalRepository
-                .findByUserAndDateAndCategory(user, date, GoalCategory.DAILY_CHALLENGES)
+        return userGoalStatusRepository
+                .findByUserAndDateAndGoal_Category(user, date, GoalCategory.DAILY_CHALLENGES)
                 .stream()
-                .map(GoalDataMapper::toDTO)
+                .map(UserGoalStatusDataMapper::toDTO)
                 .toList();
     }
 
-    public List<GoalDTO> getAllGoals(Authentication authentication) {
+    public List<UserGoalStatusDTO> getAllGoals(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        return goalRepository.findByUserAndCategoryOrderByDateDesc(user, GoalCategory.DAILY_CHALLENGES)
+        return userGoalStatusRepository
+                .findByUserAndGoal_CategoryOrderByDateDesc(user, GoalCategory.DAILY_CHALLENGES)
                 .stream()
-                .map(GoalDataMapper::toDTO)
+                .map(UserGoalStatusDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<GoalDTO> getGoalsInProgress(Authentication authentication) {
+    public List<UserGoalStatusDTO> getGoalsInProgress(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
         LocalDate today = LocalDate.now();
 
-        return goalRepository.findByUserAndStatusAndDateBeforeAndCategoryOrderByDateDesc(user,GoalStatus.IN_PROGRESS, today, GoalCategory.DAILY_CHALLENGES)
+        return userGoalStatusRepository
+                .findByUserAndStatusAndDateBeforeAndGoal_CategoryOrderByDateDesc(
+                        user, GoalStatus.IN_PROGRESS, today, GoalCategory.DAILY_CHALLENGES)
                 .stream()
-                .map(GoalDataMapper::toDTO)
+                .map(UserGoalStatusDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<GoalDTO> getAppGoals(Authentication authentication) {
+    public List<UserGoalStatusDTO> getAppGoals(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        return goalRepository.findByUserAndCategory(user, GoalCategory.APP_USAGE)
+        return userGoalStatusRepository
+                .findByUserAndGoal_Category(user, GoalCategory.APP_USAGE)
                 .stream()
-                .map(GoalDataMapper::toDTO)
+                .map(UserGoalStatusDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<GoalDTO> getSkillGoals(Authentication authentication) {
+    public List<UserGoalStatusDTO> getSkillGoals(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        return goalRepository.findByUserAndCategory(user, GoalCategory.SKILL)
+        return userGoalStatusRepository
+                .findByUserAndGoal_Category(user, GoalCategory.SKILL)
+                .stream()
+                .map(UserGoalStatusDataMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<GoalDTO> getGoalDefinitions() {
+        return goalRepository.findTwoRandom()
                 .stream()
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
-    // endregions
+    // endregion
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.config.JacksonConfig;
 import com.kiwi.config.WebSecurityConfig;
-import com.kiwi.features.goals.controllers.GoalRepository;
+import com.kiwi.features.goals.controllers.UserGoalStatusRepository;
 import com.kiwi.features.goals.data.*;
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.features.users.data.UsersDataMapper;
@@ -51,7 +51,7 @@ public class GoalsIntegrationTests {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private UsersRepository usersRepository;
-    @Autowired private GoalRepository goalRepository;
+    @Autowired private UserGoalStatusRepository userGoalStatusRepository;
 
     // ============================================================
     // HELPERS
@@ -73,7 +73,7 @@ public class GoalsIntegrationTests {
     public void createGoals_valid_returnsCreated() throws Exception {
         createUser();
         
-        List<GoalDTO> request = List.of(
+        List<UserGoalStatusDTO> request = List.of(
                 inProgressGoalDTO(null),
                 inProgressGoalDTO(null)
         );
@@ -82,7 +82,7 @@ public class GoalsIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.length()").value(2));        
-        goalRepository.flush();    }
+        userGoalStatusRepository.flush();    }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
@@ -92,12 +92,12 @@ public class GoalsIntegrationTests {
         LocalDate date = LocalDate.now();
         
         // Create initial goals (sin IDs manuales)
-        goalRepository.save(inProgressGoalPersistence(null, date, user));
-        goalRepository.save(inProgressGoalPersistence(null, date, user));
-        goalRepository.flush();
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date, user));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date, user));
+        userGoalStatusRepository.flush();
 
         // Add new goals
-        List<GoalDTO> request = List.of(
+        List<UserGoalStatusDTO> request = List.of(
                 inProgressGoalDTO(null)
         );
 
@@ -106,7 +106,7 @@ public class GoalsIntegrationTests {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.length()").value(1));
 
-        goalRepository.flush();
+        userGoalStatusRepository.flush();
     }
 
     // ============================================================
@@ -120,8 +120,8 @@ public class GoalsIntegrationTests {
         UsersPersistence user = createUser();
 
         LocalDate date = LocalDate.now();
-        GoalPersistence goal = inProgressGoalPersistence(null, date, user);
-        goal = goalRepository.saveAndFlush(goal);
+        UserGoalStatusPersistence goal = inProgressGoalPersistence(null, date, user);
+        goal = userGoalStatusRepository.saveAndFlush(goal);
 
         mockMvc.perform(get(API_URL + "/" + goal.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -147,9 +147,9 @@ public class GoalsIntegrationTests {
         UsersPersistence user = createUser();
         
         LocalDate date = LocalDate.now();
-        goalRepository.save(inProgressGoalPersistence(null, date, user));
-        goalRepository.save(inProgressGoalPersistence(null, date, user));
-        goalRepository.flush();
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date, user));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date, user));
+        userGoalStatusRepository.flush();
 
         mockMvc.perform(get(API_URL)
                         .param("date", date.toString())
@@ -167,10 +167,10 @@ public class GoalsIntegrationTests {
         LocalDate date1 = LocalDate.now();
         LocalDate date2 = LocalDate.now().minusDays(1);
 
-        goalRepository.save(inProgressGoalPersistence(null, date1, user));
-        goalRepository.save(inProgressGoalPersistence(null, date1, user));
-        goalRepository.save(inProgressGoalPersistence(null, date2, user));
-        goalRepository.flush();
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date1, user));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date1, user));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date2, user));
+        userGoalStatusRepository.flush();
 
         mockMvc.perform(get(API_URL + "/all")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -190,14 +190,14 @@ public class GoalsIntegrationTests {
         LocalDate today = LocalDate.now();
 
         // IN_PROGRESS goals from yesterday (should be included)
-        goalRepository.save(inProgressGoalPersistence(null, yesterday, user));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, yesterday, user));
         
         // IN_PROGRESS goal from today (should NOT be included)
-        goalRepository.save(inProgressGoalPersistence(null, today, user));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, today, user));
         
         // COMPLETED goal from yesterday (should NOT be included)
-        goalRepository.save(completedGoalPersistence(null, yesterday, user));
-        goalRepository.flush();
+        userGoalStatusRepository.save(completedGoalPersistence(null, yesterday, user));
+        userGoalStatusRepository.flush();
 
         mockMvc.perform(get(API_URL + "/in_progress")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -214,12 +214,12 @@ public class GoalsIntegrationTests {
 
         LocalDate date = LocalDate.now();
 
-        goalRepository.save(appGoalPersistence(null, date, user));
-        goalRepository.save(appGoalPersistence(null, date.minusDays(1), user));
+        userGoalStatusRepository.save(appGoalPersistence(null, date, user));
+        userGoalStatusRepository.save(appGoalPersistence(null, date.minusDays(1), user));
 
-        goalRepository.save(inProgressGoalPersistence(null, date, user));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date, user));
 
-        goalRepository.flush();
+        userGoalStatusRepository.flush();
 
         mockMvc.perform(get(API_URL + "/app_usage")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -234,8 +234,8 @@ public class GoalsIntegrationTests {
     public void getAppGoals_noAppGoals_returnsEmptyList() throws Exception {
         UsersPersistence user = createUser();
 
-        goalRepository.save(inProgressGoalPersistence(null, LocalDate.now(), user));
-        goalRepository.flush();
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, LocalDate.now(), user));
+        userGoalStatusRepository.flush();
 
         mockMvc.perform(get(API_URL + "/app_usage")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -250,12 +250,12 @@ public class GoalsIntegrationTests {
 
         LocalDate date = LocalDate.now();
 
-        goalRepository.save(skillGoalPersistence(null, date, user));
-        goalRepository.save(skillGoalPersistence(null, date.minusDays(1), user));
+        userGoalStatusRepository.save(skillGoalPersistence(null, date, user));
+        userGoalStatusRepository.save(skillGoalPersistence(null, date.minusDays(1), user));
 
-        goalRepository.save(inProgressGoalPersistence(null, date, user));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date, user));
 
-        goalRepository.flush();
+        userGoalStatusRepository.flush();
 
         mockMvc.perform(get(API_URL + "/skill")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -276,8 +276,8 @@ public class GoalsIntegrationTests {
         int initialPoints = user.getCurrentPoints();
         
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = inProgressGoalPersistence(null, date, user);
-        goal = goalRepository.saveAndFlush(goal);
+        UserGoalStatusPersistence goal = inProgressGoalPersistence(null, date, user);
+        goal = userGoalStatusRepository.saveAndFlush(goal);
         Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/complete")
@@ -287,7 +287,7 @@ public class GoalsIntegrationTests {
 
         // Verify points were added
         UsersPersistence updatedUser = usersRepository.findById(user.getId()).orElseThrow();
-        assert updatedUser.getCurrentPoints() == initialPoints + goal.getReward();
+        assert updatedUser.getCurrentPoints() == initialPoints + goal.getGoal().getReward();
     }
 
     @Test
@@ -315,8 +315,8 @@ public class GoalsIntegrationTests {
         otherUser = usersRepository.saveAndFlush(otherUser);
         
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = inProgressGoalPersistence(null, date, otherUser);
-        goal = goalRepository.saveAndFlush(goal);
+        UserGoalStatusPersistence goal = inProgressGoalPersistence(null, date, otherUser);
+        goal = userGoalStatusRepository.saveAndFlush(goal);
         Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/complete")
@@ -334,8 +334,8 @@ public class GoalsIntegrationTests {
         UsersPersistence user = createUser();
         
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = inProgressGoalPersistence(null, date, user);
-        goal = goalRepository.saveAndFlush(goal);
+        UserGoalStatusPersistence goal = inProgressGoalPersistence(null, date, user);
+        goal = userGoalStatusRepository.saveAndFlush(goal);
         Long goalId = goal.getId();
 
         mockMvc.perform(patch(API_URL + "/" + goalId + "/uncompleted")

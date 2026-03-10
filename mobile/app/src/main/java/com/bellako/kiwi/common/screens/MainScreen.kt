@@ -20,8 +20,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -48,14 +50,18 @@ import com.bellako.kiwi.features.conversations.model.ConversationViewModel
 import com.bellako.kiwi.features.conversations.screens.ConversationScreen
 import com.bellako.kiwi.features.conversations.screens.DialogueScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
+import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.screens.GoalNotificationType
+import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
+import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
@@ -130,7 +136,7 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "ComplexMethod", "MagicNumber")
 private fun AppScreen(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
@@ -174,6 +180,8 @@ private fun AppScreen(
         }
     }
 
+    val goalsModalRequest = remember { mutableStateOf<Pair<GoalNotificationType, List<IGoal>>?>(null) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             bottomBar = {
@@ -195,7 +203,6 @@ private fun AppScreen(
                         questsViewModel = questsViewModel,
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
-                        notificationManager = notificationManager,
 //                        onConversationRequest = { conversationId ->
 //                            conversationViewModel.start(conversationId)
 //                        },
@@ -255,6 +262,47 @@ private fun AppScreen(
                 }
             },
         )
+
+        // Overlay global de notificaciones — único colector, siempre activo
+        if (!isLoginScreen && isLoginCompleted) {
+            NotificationOverlay(
+                notificationManager = notificationManager,
+                onGoalClick = { type, goals ->
+                    goalsModalRequest.value = type to goals
+                    notificationManager.dismissCurrent()
+                },
+                onQuestClick = { type, quest, subquestId ->
+                    if (type != QuestNotificationType.QUEST_COMPLETED) {
+                        navController.navigate("OBJECTIVES/${quest.id}")
+                    }
+                    notificationManager.dismissCurrent()
+                },
+                onSkillClick = { _, skill ->
+                    navController.navigate("SKILLS/${skill.id}")
+                    notificationManager.dismissCurrent()
+                },
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .zIndex(10f),
+            )
+
+            goalsModalRequest.value?.let { (type, goals) ->
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .zIndex(11f),
+                ) {
+                    GoalsModal(
+                        goalModalType = type,
+                        goals = goals,
+                        goalsViewModel = goalsViewModel,
+                        onDismiss = { goalsModalRequest.value = null },
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -277,7 +325,6 @@ fun AppNavHost(
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
-    notificationManager: NotificationManager,
 //    onConversationRequest: (Long) -> Unit = {},
 ) {
     NavHost(
@@ -343,8 +390,6 @@ fun AppNavHost(
                 MapScreen(
                     nodesViewModel = nodesViewModel,
                     goalsViewModel = goalsViewModel,
-                    notificationManager = notificationManager,
-                    navController = navController,
                     mapViewModel = hiltViewModel(),
 //                    onConversationRequest = onConversationRequest,
                 )
@@ -353,7 +398,10 @@ fun AppNavHost(
 
         composable(ScreenRoutes.OBJECTIVES) {
             AppScreenWrapper {
-                ObjectivesScreen(questsViewModel = questsViewModel, goalsViewModel = goalsViewModel)
+                ObjectivesScreen(
+                    questsViewModel = questsViewModel,
+                    goalsViewModel = goalsViewModel,
+                )
             }
         }
 

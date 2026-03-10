@@ -90,8 +90,6 @@ class LoginScreenTest {
                         nodesViewModel = nodesFakeViewModel,
                         mapViewModel = mapviewModel,
                         goalsViewModel = goalsFakeViewModel,
-                        navController = navController,
-                        notificationManager = NotificationManager(),
                     )
                 }
                 composable(ScreenRoutes.SIGNUP3_TEST) {

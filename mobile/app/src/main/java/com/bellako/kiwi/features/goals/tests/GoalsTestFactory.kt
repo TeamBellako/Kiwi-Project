@@ -10,7 +10,7 @@ object GoalsTestFactory {
         description: String = "Complete 30 minutes of physical exercise",
         type: String = "EXERCISE",
         category: String = "DAILY_CHALLENGES",
-        status: String = "REVIEW",
+        status: String = "IN_PROGRESS",
         points: Int = 10,
     ) = GoalState(
         id = id,
