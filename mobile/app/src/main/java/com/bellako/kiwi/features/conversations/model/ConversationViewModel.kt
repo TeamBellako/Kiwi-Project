@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.conversations.model
 
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.services.PersonalityScriptVariableResolver
 import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
@@ -10,6 +11,7 @@ import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.NextEventType
+import com.bellako.kiwi.features.personality.model.IPersonalityRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +31,7 @@ class ConversationViewModel
     @Inject
     constructor(
         private val repository: ConversationsRepository,
+        private val personalityRepository: IPersonalityRepository,
     ) : BaseViewModel() {
         // -------------------------------------------------------------------------
 
@@ -41,6 +44,10 @@ class ConversationViewModel
         /** Lista de option ids seleccionados durante la sesión actual */
         private val _selectedOptions = MutableStateFlow<List<Long>>(emptyList())
         val selectedOptions: StateFlow<List<Long>> = _selectedOptions.asStateFlow()
+
+        private val scriptVariableResolver: PersonalityScriptVariableResolver by lazy {
+            PersonalityScriptVariableResolver(personalityRepository)
+        }
 
         init {
             GlobalScope.launch(Dispatchers.Main) {
@@ -55,7 +62,7 @@ class ConversationViewModel
             viewModelScope.launch {
                 try {
                     val conversation = repository.getById(conversationId)
-                    _active.value = conversation
+                    _active.value = conversation.copy(dialog = conversation.readDialog(scriptVariableResolver))
                     _isVisible.value = true
                 } catch (e: GeneralSecurityException) {
                     warn("Encryption error: ${e.message}")
@@ -71,7 +78,18 @@ class ConversationViewModel
          */
         fun next() {
             val conversation = _active.value ?: return
-            handleNextEvent(conversation, conversation.eventId)
+
+            viewModelScope.launch {
+                handleNextEvent(
+                    conversation.copy(
+                        dialog =
+                            conversation.readDialog(
+                                scriptVariableResolver,
+                            ),
+                    ),
+                    conversation.eventId,
+                )
+            }
         }
 
         /**

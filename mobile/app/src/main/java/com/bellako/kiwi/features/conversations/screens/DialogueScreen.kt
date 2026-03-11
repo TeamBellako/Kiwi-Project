@@ -57,7 +57,9 @@ fun DialogueScreen(
     viewModel: ConversationViewModel? = null,
 ) {
     val kiwiColor = LocalKiwiColors.current
+
     val infiniteTransition = rememberInfiniteTransition(label = "arrow_bounce")
+
     val offsetY by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = -10f, // altura del salto
@@ -68,7 +70,9 @@ fun DialogueScreen(
             ),
         label = "arrow_offset",
     )
+
     val context = LocalContext.current
+
     Column(
         verticalArrangement = Arrangement.Bottom,
         modifier =
@@ -139,7 +143,7 @@ fun DialogueScreen(
                 )
                 Kiwi_P2(
                     KiwiTextArguments(
-                        conversation.readDialog(),
+                        conversation.dialog,
                         textAlign = TextAlign.Center,
                         color = kiwiColor.color6,
                         modifier = Modifier.padding(Spacing.medium, Spacing.medium),
