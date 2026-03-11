@@ -44,4 +44,15 @@ data class ConversationDomain(
     val options: List<ConversationOptionDomain> = emptyList(),
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
-)
+) {
+    fun readDialog(): String {
+        val regex = Regex("@\\w+")
+
+        return regex.replace(dialog) { match ->
+            val variable = match.value.removePrefix("@")
+            getScriptVariable(variable)
+        }
+    }
+
+    private fun getScriptVariable(variable: String): String = "kk"
+}

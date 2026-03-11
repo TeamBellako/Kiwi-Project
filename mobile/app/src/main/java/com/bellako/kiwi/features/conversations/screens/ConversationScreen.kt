@@ -123,7 +123,7 @@ fun ConversationScreen(
                 )
                 Kiwi_P2(
                     KiwiTextArguments(
-                        conversation.dialog,
+                        conversation.readDialog(),
                         textAlign = TextAlign.Center,
                         color = if (conversation.dark) kiwiColor.color6 else kiwiColor.color3,
                         modifier =

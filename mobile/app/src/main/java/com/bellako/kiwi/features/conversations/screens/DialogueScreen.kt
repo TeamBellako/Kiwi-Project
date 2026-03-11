@@ -139,7 +139,7 @@ fun DialogueScreen(
                 )
                 Kiwi_P2(
                     KiwiTextArguments(
-                        conversation.dialog,
+                        conversation.readDialog(),
                         textAlign = TextAlign.Center,
                         color = kiwiColor.color6,
                         modifier = Modifier.padding(Spacing.medium, Spacing.medium),
