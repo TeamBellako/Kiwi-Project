@@ -318,10 +318,18 @@ private fun InteractiveMap(
                                 onCompleteNode = { id ->
                                     nodesViewModel.completeNode(id)
                                     AudioManager.playSFX(context, R.raw.snd_node_completed)
+
+                                    if (selectedNode.onExecutionEvent != "_") {
+                                        GlobalScope.launch(Dispatchers.Main) {
+                                            EventBus.emitEvent(
+                                                EventType.valueOf(selectedNode.onExecutionEvent),
+                                                EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
+                                            )
+                                        }
+                                    }
                                 },
                                 onRetryNode = { _ ->
-                                    // HACK: Remove once scripting is done, this is just for showcase
-                                    if (selectedNode.displayName == "CITY") {
+                                    if (selectedNode.onExecutionEvent != "_") {
                                         GlobalScope.launch(Dispatchers.Main) {
                                             EventBus.emitEvent(
                                                 EventType.valueOf(selectedNode.onExecutionEvent),

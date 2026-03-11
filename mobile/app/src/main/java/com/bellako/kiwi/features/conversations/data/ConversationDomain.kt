@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.conversations.data
 
+import com.bellako.kiwi.common.services.ScriptVariableResolver
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -44,4 +45,17 @@ data class ConversationDomain(
     val options: List<ConversationOptionDomain> = emptyList(),
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
-)
+) {
+    suspend fun readDialog(resolver: ScriptVariableResolver): String {
+        val regex = Regex("@[a-zA-Z0-9_]+")
+        var result = dialog
+
+        regex.findAll(dialog).forEach { match ->
+            val variableName = match.value.removePrefix("@")
+            val value = resolver.getValue(variableName)
+            result = result.replace(match.value, value)
+        }
+
+        return result
+    }
+}

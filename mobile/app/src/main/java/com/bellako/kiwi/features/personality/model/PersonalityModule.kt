@@ -34,5 +34,5 @@ object PersonalityModule {
 
     @Provides
     @Singleton
-    fun providePersonalityRepository(api: IPersonalityAPI): PersonalityRepository = PersonalityRepository(api)
+    fun providePersonalityRepository(api: IPersonalityAPI): IPersonalityRepository = PersonalityRepository(api)
 }
