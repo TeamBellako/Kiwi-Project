@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.conversations.data
 
+import com.bellako.kiwi.common.data.ScriptVariables
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -50,9 +51,7 @@ data class ConversationDomain(
 
         return regex.replace(dialog) { match ->
             val variable = match.value.removePrefix("@")
-            getScriptVariable(variable)
+            ScriptVariables.getValue(variable)
         }
     }
-
-    private fun getScriptVariable(variable: String): String = "kk"
 }
