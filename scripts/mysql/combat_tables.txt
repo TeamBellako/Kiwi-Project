@@ -162,6 +162,8 @@ CREATE TABLE IF NOT EXISTS enemy_status_resistances (
 CREATE TABLE IF NOT EXISTS combats (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
 
+	combat_config_id BIGINT NOT NULL,
+	
     user_id BIGINT NOT NULL,
     enemy_id BIGINT NOT NULL,
 	
@@ -173,18 +175,24 @@ CREATE TABLE IF NOT EXISTS combats (
 
     turn_number INT NOT NULL DEFAULT 1,
 
-    turn_owner ENUM('USER','ENEMY') NOT NULL,
-
     combat_status ENUM('ONGOING','USER_WON','USER_LOST') NOT NULL,
 
     started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+	INDEX idx_combats_user_config (user_id, combat_config_id),
+	
     CONSTRAINT fk_combats_user
         FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
+	CONSTRAINT fk_combats_config
+		FOREIGN KEY (combat_config_id)
+		REFERENCES combat_config(id)
+		ON DELETE CASCADE
+		ON UPDATE CASCADE,
+	
     CONSTRAINT fk_combats_enemy
         FOREIGN KEY (enemy_id)
         REFERENCES enemies(id)
@@ -314,6 +322,18 @@ CREATE TABLE IF NOT EXISTS combat_log (
 	CONSTRAINT fk_combat_log_skills
 		FOREIGN KEY (skill_id)
 		REFERENCES skills(id)
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS combat_config (
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	enemy_id BIGINT NOT NULL,
+	time_limit INT,	
+	
+    CONSTRAINT fk_combat_config_enemy
+        FOREIGN KEY (enemy_id)
+        REFERENCES enemies(id)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE
 );
