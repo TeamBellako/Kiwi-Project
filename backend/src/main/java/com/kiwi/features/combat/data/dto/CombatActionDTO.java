@@ -14,5 +14,5 @@ public class CombatActionDTO {
     private String actor;     // USER / ENEMY
     private Long skillId;
 
-    private List<CombatEffectDTO> effects;
+    private List<SkillEffectDTO> effects;
 }

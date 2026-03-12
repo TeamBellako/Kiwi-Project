@@ -1,16 +1,16 @@
 package com.kiwi.features.combat.data.mappers;
 
 import com.kiwi.features.combat.data.dto.CombatDTO;
-import com.kiwi.features.combat.data.dto.EnemyCombatEntityDTO;
+import com.kiwi.features.combat.data.dto.EnemyActorDTO;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
-import com.kiwi.features.combat.data.dto.UserCombatEntityDTO;
+import com.kiwi.features.combat.data.dto.UserActorDTO;
 
 public class CombatMapper {
 
     public static CombatDTO toDTO(
             CombatPersistence combat,
-            UserCombatEntityDTO user,
-            EnemyCombatEntityDTO enemy
+            UserActorDTO user,
+            EnemyActorDTO enemy
     ) {
 
         return CombatDTO.builder()

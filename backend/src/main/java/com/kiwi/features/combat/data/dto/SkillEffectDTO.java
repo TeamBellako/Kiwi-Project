@@ -7,9 +7,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CombatEffectDTO {
+public class SkillEffectDTO {
 
-    private String type; // DAMAGE / HEAL / STATUS
+    private String type; // DAMAGE / HEAL / APPLY-STATUS
 
     private String target;
 

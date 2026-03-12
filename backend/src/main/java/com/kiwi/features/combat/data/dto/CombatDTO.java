@@ -25,6 +25,6 @@ public class CombatDTO {
 
     private Instant startedAt;
 
-    private UserCombatEntityDTO user;
-    private EnemyCombatEntityDTO enemy;
+    private UserActorDTO user;
+    private EnemyActorDTO enemy;
 }

@@ -1,11 +1,12 @@
 package com.kiwi.features.combat.controllers;
 
 import com.kiwi.features.combat.data.dto.*;
-import com.kiwi.features.combat.data.mappers.EnemyCombatEntityMapper;
+import com.kiwi.features.combat.data.mappers.EnemyActorMapper;
 import com.kiwi.features.combat.data.persistence.*;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.mappers.CombatMapper;
-import com.kiwi.features.combat.data.mappers.UserCombatEntityMapper;
+import com.kiwi.features.combat.data.mappers.UserActorMapper;
+import com.kiwi.features.combat.engine.CombatContext;
 import com.kiwi.features.combat.engine.CombatEngine;
 import com.kiwi.features.combat.repositories.*;
 import com.kiwi.features.skills.controllers.SkillService;
@@ -34,6 +35,8 @@ public class CombatService {
     private final EnemyStatusResistanceRepository enemyStatusResistanceRepository;
     private final CombatEngine combatEngine;
     private final SkillService skillService;
+
+    //------------------------------------------------------------------------------------------------------------------
 
     public CombatService(
             CombatRepository combatRepository, CombatConfigRepository combatConfigRepository,
@@ -110,7 +113,7 @@ public class CombatService {
         List<ElementMultiplierDTO> enemyElements = loadEnemyElements(enemy.getId(), elementMap);
         List<StatusResistanceDTO> enemyResistances = loadEnemyResistances(enemy.getId(), stateMap);
 
-        UserCombatEntityDTO userDTO = UserCombatEntityMapper.toDTO(
+        UserActorDTO userDTO = UserActorMapper.toDTO(
                 userId,
                 combat.getUserHp(),
                 userStats,
@@ -118,7 +121,7 @@ public class CombatService {
                 userResistances
         );
 
-        EnemyCombatEntityDTO enemyDTO = EnemyCombatEntityMapper.toDTO(
+        EnemyActorDTO enemyDTO = EnemyActorMapper.toDTO(
                 enemy,
                 combat.getEnemyHp(),
                 enemyElements,
@@ -144,11 +147,41 @@ public class CombatService {
         // cooldown
         skillService.putSkillOnCooldown(userId, skillId);
 
-        // ejecutar turno
-        CombatTurnResultDTO result =
-                combatEngine.executeTurn(userId, combat, skillId);
 
-        // guardar estado actualizado
+        UserStatsPersistence userStats =
+                userStatsRepository.findById(userId).orElseThrow();
+
+        Map<Long, CombatElementPersistence> elementMap = loadElementMap();
+        Map<Long, CombatStatePersistence> stateMap = loadStateMap();
+
+        EnemyPersistence enemy =
+                enemyRepository.findById(combat.getEnemyId()).orElseThrow();
+
+        List<ElementMultiplierDTO> userElements = loadUserElements(userId, elementMap);
+        List<StatusResistanceDTO> userResistances = loadUserResistances(userId, stateMap);
+
+        List<ElementMultiplierDTO> enemyElements = loadEnemyElements(enemy.getId(), elementMap);
+        List<StatusResistanceDTO> enemyResistances = loadEnemyResistances(enemy.getId(), stateMap);
+
+        CombatContext context =
+                combatContextBuilder.build(
+                        combat,
+                        userStats,
+                        enemy,
+                        userElements,
+                        enemyElements,
+                        userResistances,
+                        enemyResistances
+                );
+
+        CombatTurnResultDTO result =
+                combatEngine.executeTurn(context, skillId);
+
+        // persist HP
+        combat.setUserHp(context.getUser().getHp());
+        combat.setEnemyHp(context.getEnemy().getHp());
+
+        // save updated combat
         combatRepository.save(combat);
 
         return result;
@@ -158,9 +191,24 @@ public class CombatService {
 
     @Transactional
     public CombatTurnResultDTO timeOutCombat(Long userId, Long combatId) {
-        //TODO
-    }
 
+        CombatPersistence combat =
+                combatRepository.findById(combatId)
+                        .orElseThrow();
+
+        if(combat.getCombatStatus() != CombatGeneralStatus.ONGOING) {
+            throw new IllegalStateException("Combat already finished");
+        }
+
+        // TODO decidir que se necesita enviar
+        CombatTurnResultDTO result =
+                combatEngine.setTimeOut(userId, combat);
+
+        // save updated combat
+        combatRepository.save(combat);
+
+        return result;
+    }
 
     //------------------------------------------------------------------------------------------------------------------
     // AUXILIARY FUNCTIONS

@@ -4,7 +4,7 @@ import com.kiwi.features.combat.data.persistence.CombatPersistence;
 
 public class EnemyAI {
 
-    public Long chooseSkill(CombatPersistence context) {
+    public Long chooseSkill(CombatContext context) {
 
         // versión simple
         return context.getEnemySkills().get(0);

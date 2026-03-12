@@ -9,16 +9,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EnemyCombatEntityDTO {
+public class UserActorDTO {
 
-    private Long enemyId;
-
-    private String name;
+    private Long userId;
 
     private int currentHp;
     private int maxHp;
 
-    private EnemyStatsDTO stats;
+    private UserStatsDTO stats;
 
     private List<ElementMultiplierDTO> elementalMultipliers;
 

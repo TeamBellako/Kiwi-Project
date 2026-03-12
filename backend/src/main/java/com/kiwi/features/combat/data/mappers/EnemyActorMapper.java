@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.mappers;
 
-import com.kiwi.features.combat.data.dto.EnemyCombatEntityDTO;
+import com.kiwi.features.combat.data.dto.EnemyActorDTO;
 import com.kiwi.features.combat.data.dto.EnemyStatsDTO;
 import com.kiwi.features.combat.data.dto.ElementMultiplierDTO;
 import com.kiwi.features.combat.data.dto.StatusResistanceDTO;
@@ -8,9 +8,9 @@ import com.kiwi.features.combat.data.persistence.EnemyPersistence;
 
 import java.util.List;
 
-public class EnemyCombatEntityMapper {
+public class EnemyActorMapper {
 
-    public static EnemyCombatEntityDTO toDTO(
+    public static EnemyActorDTO toDTO(
             EnemyPersistence enemy,
             int currentHp,
             List<ElementMultiplierDTO> elements,
@@ -27,7 +27,7 @@ public class EnemyCombatEntityMapper {
                 .lck(enemy.getLck())
                 .build();
 
-        return EnemyCombatEntityDTO.builder()
+        return EnemyActorDTO.builder()
                 .enemyId(enemy.getId())
                 .name(enemy.getName())
                 .currentHp(currentHp)
