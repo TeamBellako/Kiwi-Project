@@ -13,6 +13,7 @@ enum class EventType {
     GAIN_SKILL,
     THROW_SKILL,
     UNLOCK_NODE,
+    START_TIP,
 }
 
 sealed class EventPayload {
