@@ -4,5 +4,5 @@ data class TipDTO(
     val id: Long,
     val title: String,
     val text: String,
-    val readMoreURL: String,
+    val readMoreURL: String?,
 )
