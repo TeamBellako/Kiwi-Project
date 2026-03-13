@@ -9,8 +9,11 @@ import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -74,6 +78,8 @@ import com.bellako.kiwi.features.settings.screens.SettingsScreen
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
 import com.bellako.kiwi.features.skills.model.SkillsViewModel
 import com.bellako.kiwi.features.skills.screen.SkillsScreen
+import com.bellako.kiwi.features.tips.model.TipsViewModel
+import com.bellako.kiwi.features.tips.screen.TipScreen
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.screens.LogInScreen
 import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
@@ -81,6 +87,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 
+@Suppress("LongParameterList")
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainScreen(
@@ -95,6 +102,7 @@ fun MainScreen(
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     notificationManager: NotificationManager,
     conversationViewModel: ConversationViewModel = hiltViewModel(),
+    tipsViewModel: TipsViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -123,6 +131,7 @@ fun MainScreen(
             appBarViewModel = appBarViewModel,
             notificationManager = notificationManager,
             conversationViewModel = conversationViewModel,
+            tipsViewModel = tipsViewModel,
         )
     }
 }
@@ -136,7 +145,7 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-@Suppress("LongParameterList", "ComplexMethod", "MagicNumber")
+@Suppress("LongParameterList", "ComplexMethod", "MagicNumber", "LongMethod")
 private fun AppScreen(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
@@ -150,6 +159,7 @@ private fun AppScreen(
     appBarViewModel: AppBarViewModel,
     notificationManager: NotificationManager,
     conversationViewModel: ConversationViewModel,
+    tipsViewModel: TipsViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -160,6 +170,8 @@ private fun AppScreen(
 
     val activeConversation by conversationViewModel.active.collectAsState()
     val isConversationVisible by conversationViewModel.isVisible.collectAsState()
+
+    val isTipVisible by tipsViewModel.isVisible.collectAsState()
 
     LaunchedEffect(notificationManager) {
         notificationManager.notifications.collect { event ->
@@ -203,9 +215,6 @@ private fun AppScreen(
                         questsViewModel = questsViewModel,
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
-//                        onConversationRequest = { conversationId ->
-//                            conversationViewModel.start(conversationId)
-//                        },
                     )
 
                     if (showDashboard && !isConversationVisible) {
@@ -259,6 +268,8 @@ private fun AppScreen(
                             }
                         }
                     }
+
+                    TipModal(isTipVisible, tipsViewModel)
                 }
             },
         )
@@ -302,6 +313,45 @@ private fun AppScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TipModal(
+    isTipVisible: Boolean,
+    tipsViewModel: TipsViewModel,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        AnimatedVisibility(
+            visible = isTipVisible,
+            enter = fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.7f)),
+            )
+        }
+
+        AnimatedVisibility(
+            visible = isTipVisible,
+            enter =
+                scaleIn(
+                    initialScale = 0.6f,
+                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+            exit =
+                scaleOut(
+                    targetScale = 0.3f,
+                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+        ) {
+            TipScreen(tipsViewModel)
         }
     }
 }
