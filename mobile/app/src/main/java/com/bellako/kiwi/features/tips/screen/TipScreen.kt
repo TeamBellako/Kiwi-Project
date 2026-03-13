@@ -23,15 +23,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.utils.Logger.warn
@@ -55,19 +58,23 @@ fun TipScreen(viewModel: ITipsViewModel) {
     Box(
         modifier =
             Modifier
+                .padding(horizontal = Spacing.large)
                 .fillMaxSize()
                 .clickable { viewModel.closeTip() },
         contentAlignment = Alignment.Center,
     ) {
+        Kiwi_Image(
+            R.drawable.dialogue_small_bg,
+            "Dialogue frame",
+            contentScale = ContentScale.FillWidth,
+        )
+
         Column(
             modifier =
                 Modifier
                     .padding(horizontal = Spacing.large)
                     .fillMaxWidth()
-                    .background(
-                        color = kiwiColor.color0,
-                        shape = RoundedCornerShape(16.dp),
-                    ).padding(getResponsiveSizeHeight(Spacing.large)),
+                    .padding(getResponsiveSizeHeight(Spacing.large)),
             verticalArrangement = Arrangement.Center,
         ) {
             Kiwi_H1(

@@ -216,7 +216,7 @@ private fun AppScreen(
                         skillsViewModel = skillsViewModel,
                     )
 
-                    if (showDashboard && !isConversationVisible && !isTipVisible) {
+                    if (showDashboard && !isConversationVisible) {
                         DashboardScreen(
                             usersViewModel = usersViewModel,
                             metricsViewModel = metricsViewModel,
