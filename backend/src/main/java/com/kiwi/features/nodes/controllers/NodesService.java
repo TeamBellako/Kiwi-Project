@@ -94,6 +94,7 @@ public class NodesService {
         UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, opened);
 
         userNodeStatusRepository.saveAndFlush(persistence);
+        
         return NodesDataMapper.toDTO(node, persistence);
     }
 
