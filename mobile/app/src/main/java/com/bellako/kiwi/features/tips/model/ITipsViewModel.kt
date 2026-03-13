@@ -6,4 +6,6 @@ import com.bellako.kiwi.features.tips.data.TipState
 
 interface ITipsViewModel : IBaseViewModel<TipState> {
     suspend fun getTip(id: Long): TipDomain
+
+    fun closeTip()
 }

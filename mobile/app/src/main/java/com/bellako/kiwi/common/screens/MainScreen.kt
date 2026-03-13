@@ -74,6 +74,8 @@ import com.bellako.kiwi.features.settings.screens.SettingsScreen
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
 import com.bellako.kiwi.features.skills.model.SkillsViewModel
 import com.bellako.kiwi.features.skills.screen.SkillsScreen
+import com.bellako.kiwi.features.tips.model.TipsViewModel
+import com.bellako.kiwi.features.tips.screen.TipScreen
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.screens.LogInScreen
 import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
@@ -95,6 +97,7 @@ fun MainScreen(
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     notificationManager: NotificationManager,
     conversationViewModel: ConversationViewModel = hiltViewModel(),
+    tipsViewModel: TipsViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -123,6 +126,7 @@ fun MainScreen(
             appBarViewModel = appBarViewModel,
             notificationManager = notificationManager,
             conversationViewModel = conversationViewModel,
+            tipsViewModel = tipsViewModel,
         )
     }
 }
@@ -150,6 +154,7 @@ private fun AppScreen(
     appBarViewModel: AppBarViewModel,
     notificationManager: NotificationManager,
     conversationViewModel: ConversationViewModel,
+    tipsViewModel: TipsViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -160,6 +165,8 @@ private fun AppScreen(
 
     val activeConversation by conversationViewModel.active.collectAsState()
     val isConversationVisible by conversationViewModel.isVisible.collectAsState()
+
+    val isTipVisible by tipsViewModel.isVisible.collectAsState()
 
     LaunchedEffect(notificationManager) {
         notificationManager.notifications.collect { event ->
@@ -203,12 +210,9 @@ private fun AppScreen(
                         questsViewModel = questsViewModel,
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
-//                        onConversationRequest = { conversationId ->
-//                            conversationViewModel.start(conversationId)
-//                        },
                     )
 
-                    if (showDashboard && !isConversationVisible) {
+                    if (showDashboard && !isConversationVisible && !isTipVisible) {
                         DashboardScreen(
                             usersViewModel = usersViewModel,
                             metricsViewModel = metricsViewModel,
@@ -258,6 +262,22 @@ private fun AppScreen(
                                 }
                             }
                         }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isTipVisible,
+                        enter =
+                            slideInVertically(
+                                initialOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        exit =
+                            slideOutVertically(
+                                targetOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                    ) {
+                        TipScreen(tipsViewModel)
                     }
                 }
             },

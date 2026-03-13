@@ -47,7 +47,10 @@ class TipsViewModel
             }
         }
 
-        override suspend fun getTip(id: Long): TipDomain = TipMapper.toDomain(tipsRepository.getTip(id))
+        override suspend fun getTip(id: Long): TipDomain {
+            val dto = tipsRepository.getTip(id)
+            return TipMapper.toDomain(dto)
+        }
 
         fun showTip(id: Long) {
             viewModelScope.launch {
@@ -63,7 +66,7 @@ class TipsViewModel
             }
         }
 
-        fun closeTip() {
+        override fun closeTip() {
             _isVisible.value = false
         }
     }

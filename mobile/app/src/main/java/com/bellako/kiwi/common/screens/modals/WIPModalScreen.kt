@@ -3,7 +3,6 @@ package com.bellako.kiwi.common.screens.modals
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.AndroidRuntimeException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.BuildConfig
@@ -196,7 +196,7 @@ private fun openLinkInBrowser(
     context: Context,
     url: String,
 ) {
-    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri())
 
     try {
         context.startActivity(browserIntent)
