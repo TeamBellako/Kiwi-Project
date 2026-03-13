@@ -5,4 +5,7 @@ object TipMapper {
 
     fun toDTO(domain: TipDomain): TipDTO =
         TipDTO(id = domain.id, title = domain.title, text = domain.text, readMoreURL = domain.readMoreURL)
+
+    fun toState(domain: TipDomain): TipState =
+        TipState(id = domain.id, title = domain.title, text = domain.text, readMoreURL = domain.readMoreURL)
 }
