@@ -32,7 +32,7 @@ class TipsViewModel
         private val tipsRepository: TipsRepository,
     ) : BaseViewModel(),
         ITipsViewModel {
-        private val _state = MutableStateFlow(TipState(0, "", "", ""))
+        private val _state = MutableStateFlow(TipState(0, "My Title", "My Text", "https://www.youtube.com/watch?v=EY9aLFSdYFg"))
         override val state: StateFlow<TipState> = _state.asStateFlow()
 
         private val _isVisible = MutableStateFlow(false)

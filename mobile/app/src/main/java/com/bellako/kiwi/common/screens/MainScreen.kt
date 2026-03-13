@@ -9,8 +9,11 @@ import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -264,21 +268,7 @@ private fun AppScreen(
                         }
                     }
 
-                    AnimatedVisibility(
-                        visible = isTipVisible,
-                        enter =
-                            slideInVertically(
-                                initialOffsetY = { fullHeight -> fullHeight },
-                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
-                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
-                        exit =
-                            slideOutVertically(
-                                targetOffsetY = { fullHeight -> fullHeight },
-                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
-                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
-                    ) {
-                        TipScreen(tipsViewModel)
-                    }
+                    TipModal(isTipVisible, tipsViewModel)
                 }
             },
         )
@@ -322,6 +312,45 @@ private fun AppScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TipModal(
+    isTipVisible: Boolean,
+    tipsViewModel: TipsViewModel,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        AnimatedVisibility(
+            visible = isTipVisible,
+            enter = fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.7f)),
+            )
+        }
+
+        AnimatedVisibility(
+            visible = isTipVisible,
+            enter =
+                scaleIn(
+                    initialScale = 0.6f,
+                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+            exit =
+                scaleOut(
+                    targetScale = 0.3f,
+                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+        ) {
+            TipScreen(tipsViewModel)
         }
     }
 }

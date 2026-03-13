@@ -8,10 +8,15 @@ import android.os.Build
 import android.util.AndroidRuntimeException
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,6 +35,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.utils.Logger.warn
+import com.bellako.kiwi.features.tips.data.TipState
 import com.bellako.kiwi.features.tips.model.FakeTipsAPI
 import com.bellako.kiwi.features.tips.model.ITipsViewModel
 import com.bellako.kiwi.features.tips.model.TipsRepository
@@ -50,42 +56,55 @@ fun TipScreen(viewModel: ITipsViewModel) {
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(
-                    color = kiwiColor.color0,
-                    shape = RoundedCornerShape(16.dp),
-                ).padding(getResponsiveSizeHeight(Spacing.large)),
+                .clickable { viewModel.closeTip() },
         contentAlignment = Alignment.Center,
     ) {
-        Kiwi_H1(
-            KiwiTextArguments(
-                tipState?.title ?: "",
-                TextAlign.Center,
-                color = kiwiColor.colorF,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.fillMaxWidth(),
-            ),
-        )
-
-        Kiwi_P1(
-            KiwiTextArguments(
-                tipState?.text ?: "",
-                color = kiwiColor.colorF,
-            ),
-        )
-
-        Kiwi_Spacer()
-
-        if (tipState?.readMoreURL != null && tipState?.readMoreURL?.isEmpty() == false) {
-            Kiwi_FixedSizeButton(
-                textArguments =
-                    KiwiTextArguments(
-                        "Read more",
-                        color = kiwiColor.colorF,
-                    ),
-                color = kiwiColor.color8,
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { openReadMoreURL(context, tipState?.readMoreURL ?: "") },
+        Column(
+            modifier =
+                Modifier
+                    .padding(horizontal = Spacing.large)
+                    .fillMaxWidth()
+                    .background(
+                        color = kiwiColor.color0,
+                        shape = RoundedCornerShape(16.dp),
+                    ).padding(getResponsiveSizeHeight(Spacing.large)),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Kiwi_H1(
+                KiwiTextArguments(
+                    tipState?.title ?: "",
+                    TextAlign.Left,
+                    color = kiwiColor.color6,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth(),
+                ),
             )
+
+            Kiwi_P1(
+                KiwiTextArguments(
+                    tipState?.text ?: "",
+                    color = kiwiColor.color6,
+                ),
+            )
+
+            Kiwi_Spacer()
+
+            if (
+                tipState?.readMoreURL != null &&
+                tipState?.readMoreURL?.isEmpty() == false &&
+                !tipState?.readMoreURL.equals("")
+            ) {
+                Kiwi_FixedSizeButton(
+                    textArguments =
+                        KiwiTextArguments(
+                            "Read more",
+                            color = kiwiColor.color6,
+                        ),
+                    color = kiwiColor.color5A,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { openReadMoreURL(context, tipState?.readMoreURL ?: "") },
+                )
+            }
         }
     }
 }
