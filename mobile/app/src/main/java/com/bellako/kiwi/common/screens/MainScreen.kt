@@ -87,6 +87,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 
+@Suppress("LongParameterList")
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainScreen(
@@ -144,7 +145,7 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
-@Suppress("LongParameterList", "ComplexMethod", "MagicNumber")
+@Suppress("LongParameterList", "ComplexMethod", "MagicNumber", "LongMethod")
 private fun AppScreen(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
