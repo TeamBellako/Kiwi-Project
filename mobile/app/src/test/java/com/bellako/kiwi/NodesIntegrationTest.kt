@@ -70,7 +70,7 @@ class NodesIntegrationTest {
 
             whenever(repository.unlockNode(4L))
                 .thenReturn(
-                    lockedNode.copy(status = NodeStatus.OPEN),
+                    arrayOf(Array) lockedNode.copy(status = NodeStatus.OPEN),
                 )
 
             viewModel.loadNodes(0)

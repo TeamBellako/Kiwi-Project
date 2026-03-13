@@ -131,7 +131,7 @@ public class NodesIntegrationTests {
 
         mockMvc.perform(post(API_URL + "/" + node.getId() + "/unlock"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(NodeStatus.OPEN.toString()));
+                .andExpect(jsonPath("$[0].status").value(NodeStatus.OPEN.toString()));
     }
 
     @Test

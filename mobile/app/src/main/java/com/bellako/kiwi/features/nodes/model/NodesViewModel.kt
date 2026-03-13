@@ -63,7 +63,7 @@ class NodesViewModel
 
         override fun unlockNode(nodeId: Long) =
             updateNodesSafe {
-                listOf(repository.unlockNode(nodeId))
+                repository.unlockNode(nodeId)
             }
 
         override fun completeNode(nodeId: Long) {
