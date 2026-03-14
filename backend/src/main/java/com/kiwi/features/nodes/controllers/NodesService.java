@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -80,7 +81,7 @@ public class NodesService {
 
 
     @Transactional
-    public NodesDTO unlockNode(Long userId, Long nodeId) {
+    public List<NodesDTO> unlockNode(Long userId, Long nodeId) {
         NodesPersistence node = nodesRepository.findById(nodeId)
                 .orElseThrow(() -> new NodeNotFoundException(nodeId));
 
@@ -94,7 +95,17 @@ public class NodesService {
         UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, opened);
 
         userNodeStatusRepository.saveAndFlush(persistence);
-        return NodesDataMapper.toDTO(node, persistence);
+        
+        // For blank nodes, we want to automatically complete them so that edges are unlocked
+        if (domain.getOnExecutionEvent().equals("_"))
+        {
+            return completeNode(userId, nodeId);
+        }
+        
+        List<NodesDTO> result = new ArrayList<>();
+        result.add(NodesDataMapper.toDTO(node, persistence));
+        
+        return result;
     }
 
     @Transactional
