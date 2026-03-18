@@ -2,8 +2,7 @@ package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.enums.AttackType;
-import com.kiwi.features.combat.data.enums.CombatActor;
-import com.kiwi.features.skills.data.enums.SkillEffectType;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +20,7 @@ public class CombatDamageCalculator {
 
     public CombatActionDTO executeSkill(
             CombatContext context,
-            CombatActor actor,
+            CombatActorType actor,
             Long skillId
     ) {
 
@@ -32,8 +31,7 @@ public class CombatDamageCalculator {
 
         List<SkillEffectDTO> effects = new ArrayList<>();
 
-        // Esto se tiene que pillar del log
-      //  attacker.setLastSkillUsed(skillId);
+        attacker.setLastSkillUsed(skillId);
 
         // ESTO HAY QUE TENER CUIDADO PORQUE EL ORDEN DEBE IMPORTAR (AÑADIR CAMPO PARA QUE SE ELIJA ORDEN DEFINIR ORDEN FIJO DAMAGE/HEAL/STATUS)
         for (SkillEffectRuntime effect : skill.getEffects()) {
@@ -85,10 +83,11 @@ public class CombatDamageCalculator {
         int roll = random.nextInt(100);
 
         if (roll > hitChance) {
-
+            //TODO: ME ACABO DE DAR CUENTA QUE EXISTE MIS Y CRITICO EN LA DB DE LOG OSEA QUE VALE LO ENFOCAMOS ASI, TENGO QUE REVISAR AUN
+            // PERO A LO MEJOR SE PUEDE AÑADIR OTRO MAS CONCRETO PARA CUANDO EL ACTOR NO PUEDE ATACAR POR CULPA DE UN ESTADO PORQUE MISS ES AMBIGUO
             return SkillEffectDTO.builder()
                     .type("MISS")
-                    .target(victim.getActor().name())
+                    .target(victim.getType().name())
                     .build();
         }
 
@@ -141,7 +140,7 @@ public class CombatDamageCalculator {
 
             return SkillEffectDTO.builder()
                     .type("HEAL")
-                    .target(attacker.getActor().name())
+                    .target(attacker.getType().name())
                     .value((float) damage)
                     .crit(false)
                     .build();
@@ -151,7 +150,7 @@ public class CombatDamageCalculator {
 
         return SkillEffectDTO.builder()
                 .type("DAMAGE")
-                .target(victim.getActor().name())
+                .target(victim.getType().name())
                 .value((float) damage)
                 .crit(crit)
                 .build();
@@ -171,7 +170,7 @@ public class CombatDamageCalculator {
 
         return SkillEffectDTO.builder()
                 .type("HEAL")
-                .target(target.getActor().name())
+                .target(target.getType().name())
                 .value((float) heal)
                 .crit(false)
                 .build();
@@ -209,7 +208,7 @@ public class CombatDamageCalculator {
 
         return SkillEffectDTO.builder()
                 .type("STATUS")
-                .target(victim.getActor().name())
+                .target(victim.getType().name())
                 .appliedState(dto)
                 .build();
     }

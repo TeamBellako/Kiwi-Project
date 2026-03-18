@@ -12,6 +12,7 @@ import java.util.List;
 public class CombatActionDTO {
 
     private String actor;     // USER / ENEMY
+
     private Long skillId;
 
     private List<SkillEffectDTO> effects;

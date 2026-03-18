@@ -147,9 +147,7 @@ public class CombatService {
         // cooldown
         skillService.putSkillOnCooldown(userId, skillId);
 
-
-        UserStatsPersistence userStats =
-                userStatsRepository.findById(userId).orElseThrow();
+        UserStatsPersistence userStats = userStatsRepository.findById(userId).orElseThrow();
 
         Map<Long, CombatElementPersistence> elementMap = loadElementMap();
         Map<Long, CombatStatePersistence> stateMap = loadStateMap();
@@ -180,6 +178,11 @@ public class CombatService {
         // persist HP
         combat.setUserHp(context.getUser().getHp());
         combat.setEnemyHp(context.getEnemy().getHp());
+
+        //Falta actualizar el remaining time si es que tiene tiempo incluso a lo mejor habria que intentar checkear el estado del tiempo antes de hacer nada por
+        // si el jugador es un listo y ataca en el último segundo y llega esta peticion antes que el time out
+        //Tambien se actualiza el turno y generalstatus dentro del combatengine pero me molesta que la vida de los
+        // personajes se haga aqui, me gustataria que todo se haga en un mismo sitio
 
         // save updated combat
         combatRepository.save(combat);

@@ -1,7 +1,7 @@
 package com.kiwi.features.combat.data.domain;
 
 
-import com.kiwi.features.combat.data.enums.CombatActor;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import lombok.*;
 
 @Getter
@@ -17,7 +17,7 @@ public class CombatStatusEffectDomain {
 
     private Long sourceSkillId;
 
-    private CombatActor target;
+    private CombatActorType target;
 
     private Long stateId;
 

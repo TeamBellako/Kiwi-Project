@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.persistence;
 
-import com.kiwi.features.combat.data.enums.CombatActor;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatLogEffectType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,13 +27,13 @@ public class CombatLogPersistence {
     private int turnNumber;
 
     @Enumerated(EnumType.STRING)
-    private CombatActor actor;
+    private CombatActorType actor;
 
     @Column(name="skill_id")
     private Long skillId;
 
     @Enumerated(EnumType.STRING)
-    private CombatActor target;
+    private CombatActorType target;
 
     @Enumerated(EnumType.STRING)
     @Column(name="effect_type")

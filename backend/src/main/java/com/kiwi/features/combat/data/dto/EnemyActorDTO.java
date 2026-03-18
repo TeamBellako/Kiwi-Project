@@ -14,6 +14,7 @@ public class EnemyActorDTO {
     private Long enemyId;
 
     private String name;
+    private String sprite;
 
     private int currentHp;
     private int maxHp;

@@ -1,8 +1,9 @@
 package com.kiwi.features.combat.engine;
 
-import com.kiwi.features.combat.data.enums.CombatActor;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.Map;
 @Builder
 public class ActorRuntime {
 
-    private CombatActor actor;
+    private CombatActorType type;
 
     private int hp;
     private int maxHp;
@@ -33,6 +34,7 @@ public class ActorRuntime {
 
     private Map<Long, SkillRuntime> skills;
 
+    @Setter
     private Long lastSkillUsed;
 
     public void damage(int amount) {
@@ -42,4 +44,5 @@ public class ActorRuntime {
     public void heal(int amount) {
         hp = Math.min(maxHp, hp + amount);
     }
+
 }

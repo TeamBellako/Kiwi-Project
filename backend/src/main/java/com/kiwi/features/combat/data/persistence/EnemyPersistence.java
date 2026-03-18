@@ -17,6 +17,7 @@ public class EnemyPersistence {
     private Long id;
 
     private String name;
+    private String sprite;
 
     private int maxHp;
     private int tim;

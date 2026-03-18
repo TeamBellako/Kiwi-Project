@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.enums;
 
-public enum CombatActor {
+public enum CombatActorType {
     USER,
     ENEMY
 }

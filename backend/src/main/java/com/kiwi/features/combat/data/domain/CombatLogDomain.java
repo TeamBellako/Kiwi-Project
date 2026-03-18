@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.domain;
 
-import com.kiwi.features.combat.data.enums.CombatActor;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatLogEffectType;
 import lombok.*;
 
@@ -19,11 +19,11 @@ public class CombatLogDomain {
 
     private int turnNumber;
 
-    private CombatActor actor;
+    private CombatActorType actor;
 
     private Long skillId;
 
-    private CombatActor target;
+    private CombatActorType target;
 
     private CombatLogEffectType effectType;
 

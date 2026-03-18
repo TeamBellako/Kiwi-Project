@@ -1,13 +1,98 @@
 package com.kiwi.features.combat.engine;
 
-import com.kiwi.features.combat.data.persistence.CombatPersistence;
+import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+//TODO CAMBIAR A LA IA PROPUESTA EN EL NOTION
+@Component
 public class EnemyAI {
+
+    private final Random random = new Random();
 
     public Long chooseSkill(CombatContext context) {
 
-        // versión simple
-        return context.getEnemySkills().get(0);
+        ActorRuntime enemy = context.getEnemy();
+        ActorRuntime user = context.getUser();
 
+        List<SkillRuntime> skills =
+                new ArrayList<>(enemy.getSkills().values());
+
+        SkillRuntime bestSkill = null;
+
+        float bestScore = -999;
+
+        for (SkillRuntime skill : skills) {
+
+            float score =
+                    evaluateSkill(skill, enemy, user);
+
+            if(score > bestScore) {
+                bestScore = score;
+                bestSkill = skill;
+            }
+        }
+
+        assert bestSkill != null;
+        return bestSkill.getId();
     }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    private float evaluateSkill(
+            SkillRuntime skill,
+            ActorRuntime enemy,
+            ActorRuntime user
+    ) {
+
+        float score = 0;
+
+        for (SkillEffectRuntime effect : skill.getEffects()) {
+
+            switch (effect.getEffectType()) {
+
+                case DAMAGE -> {
+
+                    float atk =
+                            effect.getAttackType().isPhysical()
+                                    ? enemy.getPatk()
+                                    : enemy.getMatk();
+
+                    float def =
+                            effect.getAttackType().isPhysical()
+                                    ? user.getPdef()
+                                    : user.getMdef();
+
+                    float damage =
+                            (atk / def) * effect.getPower();
+
+                    score += damage;
+                }
+
+                case HEAL -> {
+
+                    if(enemy.getHp() < enemy.getMaxHp() * 0.4f) {
+                        score += 50;
+                    }
+                }
+
+                case APPLY_STATUS -> {
+
+                    float resistance =
+                            user.getStatusResistances()
+                                    .getOrDefault(effect.getStateId(),0f);
+
+                    score += (1f - resistance) * 30;
+                }
+            }
+        }
+
+        score += random.nextFloat() * 5;
+
+        return score;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
 }

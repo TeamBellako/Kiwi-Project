@@ -1,7 +1,7 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
-import com.kiwi.features.combat.data.enums.CombatActor;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,12 +33,12 @@ public class CombatContext {
         this.enemy = enemy;
     }
 
-    public ActorRuntime getActor(CombatActor actor) {
-        return actor == CombatActor.USER ? user : enemy;
+    public ActorRuntime getActor(CombatActorType actor) {
+        return actor == CombatActorType.USER ? user : enemy;
     }
 
-    public ActorRuntime getTarget(CombatActor actor) {
-        return actor == CombatActor.USER ? enemy : user;
+    public ActorRuntime getTarget(CombatActorType actor) {
+        return actor == CombatActorType.USER ? enemy : user;
     }
 
     public void addAction(CombatActionDTO action) {

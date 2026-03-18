@@ -3,13 +3,12 @@ package com.kiwi.features.combat.engine;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.dto.CombatActorStateDTO;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
-import com.kiwi.features.combat.data.enums.CombatActor;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
+import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
+@Component
 public class CombatEngine {
 
     private final CombatDamageCalculator damageCalculator;
@@ -35,63 +34,64 @@ public class CombatEngine {
             Long userSkillId
     ) {
 
+        CombatPersistence combat = context.getCombat();
+
+        // START TURN STATES
+        stateService.onTurnStart(context);
+
         // USER ACTION
-        if(stateService.canAct(context.getUser())) {
+        if(stateService.canAct(context, CombatActorType.USER)) {
 
             CombatActionDTO action =
                     damageCalculator.executeSkill(
                             context,
-                            CombatActor.USER,
+                            CombatActorType.USER,
                             userSkillId
                     );
 
             context.addAction(action);
 
         } else {
-            context.addAction(stateService.buildSkipAction(CombatActor.USER));
+            //TODO REPRESENTAR POR ACCION O ALGO QUE NO SE HA EJECUTADO EL TURNO POR CULPA DEL ESTADO
+            // context.addAction(stateService.buildSkipAction(CombatActor.USER));
         }
 
         // ENEMY ACTION
-        if(context.getCombat().getEnemyHp() > 0) {
+        if(combat.getEnemyHp() > 0) {
 
             Long enemySkill =
                     enemyAI.chooseSkill(context);
 
-            if(stateService.canAct(context.getEnemy())) {
+            if(stateService.canAct(context, CombatActorType.ENEMY)) {
 
                 CombatActionDTO enemyAction =
                         damageCalculator.executeSkill(
                                 context,
-                                CombatActor.ENEMY,
+                                CombatActorType.ENEMY,
                                 enemySkill
                         );
 
                 context.addAction(enemyAction);
 
             } else {
-
-                context.addAction(
-                        stateService.buildSkipAction(CombatActor.ENEMY)
-                );
+                //TODO REPRESENTAR POR ACCION O ALGO QUE NO SE HA EJECUTADO EL TURNO POR CULPA DEL ESTADO
+                // context.addAction(stateService.buildSkipAction(CombatActor.ENEMY));
             }
         }
 
-        // APPLY STATES
-        stateService.applyCurrentStates(context);
-
-        // UPDATE STATES (CHECK IF LAST TURN AND REMOVE)
-        stateService.updateStates(context);
+        // END TURN STATES
+        stateService.onTurnEnd(context);
 
         // TURN UPDATE
-        context.getCombat().setTurnNumber( context.getCombat().getTurnNumber() + 1);
+        combat.setTurnNumber(combat.getTurnNumber() + 1);
 
         // CHECK WIN
         if(context.getEnemy().getHp() <= 0) {
-            context.getCombat().setCombatStatus(CombatGeneralStatus.USER_WON);
+            combat.setCombatStatus(CombatGeneralStatus.USER_WON);
         }
 
         if(context.getUser().getHp() <= 0) {
-            context.getCombat().setCombatStatus(CombatGeneralStatus.USER_LOST);
+            combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
         }
 
         // BUILD RESULT
@@ -99,14 +99,14 @@ public class CombatEngine {
                 CombatActorStateDTO.builder()
                         .actor("USER")
                         .hp(combat.getUserHp())
-                        .activeStates(stateService.getActiveStates(combat, CombatActor.USER))
+                        .activeStates(stateService.getActiveStates(context, CombatActorType.USER))
                         .build();
 
         CombatActorStateDTO enemyState =
                 CombatActorStateDTO.builder()
                         .actor("ENEMY")
                         .hp(combat.getEnemyHp())
-                        .activeStates(stateService.getActiveStates(combat, CombatActor.ENEMY))
+                        .activeStates(stateService.getActiveStates(context, CombatActorType.ENEMY))
                         .build();
 
         return CombatTurnResultDTO.builder()
@@ -114,7 +114,7 @@ public class CombatEngine {
                 .turnNumber(combat.getTurnNumber())
                 .user(userState)
                 .enemy(enemyState)
-                .actions(actions)
+                .actions(context.getActions())
                 .combatStatus(combat.getCombatStatus().name())
                 .build();
     }
@@ -127,14 +127,12 @@ public class CombatEngine {
                 CombatActorStateDTO.builder()
                         .actor("USER")
                         .hp(combat.getUserHp())
-                        .activeStates(stateService.getActiveStates(combat, CombatActor.USER))
                         .build();
 
         CombatActorStateDTO enemyState =
                 CombatActorStateDTO.builder()
                         .actor("ENEMY")
                         .hp(combat.getEnemyHp())
-                        .activeStates(stateService.getActiveStates(combat, CombatActor.ENEMY))
                         .build();
 
         return CombatTurnResultDTO.builder()
@@ -147,4 +145,7 @@ public class CombatEngine {
                 .build();
 
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+
 }

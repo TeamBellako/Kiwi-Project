@@ -30,6 +30,7 @@ public class EnemyActorMapper {
         return EnemyActorDTO.builder()
                 .enemyId(enemy.getId())
                 .name(enemy.getName())
+                .sprite(enemy.getSprite())
                 .currentHp(currentHp)
                 .maxHp(enemy.getMaxHp())
                 .stats(stats)

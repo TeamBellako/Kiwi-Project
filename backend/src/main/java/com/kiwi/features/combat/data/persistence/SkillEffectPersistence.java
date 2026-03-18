@@ -1,6 +1,7 @@
 package com.kiwi.features.combat.data.persistence;
 
 import com.kiwi.features.combat.data.enums.AttackType;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.SkillEffectType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,6 +21,10 @@ public class SkillEffectPersistence {
 
     @Column(name="skill_id", nullable = false)
     private Long skillId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="target", nullable = false)
+    private CombatActorType target;
 
     @Enumerated(EnumType.STRING)
     @Column(name="effect_type", nullable = false)

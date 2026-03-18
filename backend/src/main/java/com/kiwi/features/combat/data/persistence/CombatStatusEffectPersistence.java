@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.persistence;
 
-import com.kiwi.features.combat.data.enums.CombatActor;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +24,7 @@ public class CombatStatusEffectPersistence {
     private Long sourceSkillId;
 
     @Enumerated(EnumType.STRING)
-    private CombatActor target;
+    private CombatActorType target;
 
     @Column(name="state_id")
     private Long stateId;

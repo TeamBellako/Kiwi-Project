@@ -1,10 +1,10 @@
 package com.kiwi.features.combat.engine;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Builder
 @Getter
+@Setter
 public class ActiveState {
 
     private Long stateId;

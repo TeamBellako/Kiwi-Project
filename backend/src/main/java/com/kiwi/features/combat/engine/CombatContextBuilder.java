@@ -3,21 +3,19 @@ package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.data.dto.ElementMultiplierDTO;
 import com.kiwi.features.combat.data.dto.StatusResistanceDTO;
-import com.kiwi.features.combat.data.enums.CombatActor;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import com.kiwi.features.combat.data.persistence.EnemyPersistence;
 import com.kiwi.features.combat.data.persistence.UserStatsPersistence;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Component
 public class CombatContextBuilder {
-
-    public CombatContextBuilder() {
-
-    }
 
     public CombatContext build(
             CombatPersistence combat,
@@ -26,14 +24,18 @@ public class CombatContextBuilder {
             List<ElementMultiplierDTO> userElements,
             List<ElementMultiplierDTO> enemyElements,
             List<StatusResistanceDTO> userResistances,
-            List<StatusResistanceDTO> enemyResistances
-    ) {
+            List<StatusResistanceDTO> enemyResistances,
+            Map<Long, SkillRuntime> userSkills,
+            Map<Long, SkillRuntime> enemySkills,
+            Long userLastSkillUsed,
+            Long enemyLastSkillUsed
+            ) {
 
         ActorRuntime user =
-                buildUserRuntime(combat, userStats, userElements, userResistances);
+                buildUserRuntime(combat, userStats, userElements, userResistances, userSkills, userLastSkillUsed);
 
         ActorRuntime enemyRuntime =
-                buildEnemyRuntime(combat, enemy, enemyElements, enemyResistances);
+                buildEnemyRuntime(combat, enemy, enemyElements, enemyResistances, enemySkills, enemyLastSkillUsed);
 
         return new CombatContext(combat, user, enemyRuntime);
     }
@@ -42,7 +44,9 @@ public class CombatContextBuilder {
             CombatPersistence combat,
             UserStatsPersistence stats,
             List<ElementMultiplierDTO> elements,
-            List<StatusResistanceDTO> resistances
+            List<StatusResistanceDTO> resistances,
+            Map<Long, SkillRuntime> skills,
+            Long userLastSkillUsed
     ) {
 
         Map<Long, Float> elementMap =
@@ -58,13 +62,8 @@ public class CombatContextBuilder {
                                 StatusResistanceDTO::getStateId,
                                 StatusResistanceDTO::getResistance
                         ));
-
-        //TODO PEDIR AL COMBAT SERVICE
-        Map<Long, SkillRuntime> skills =
-                combatService.loadUserSkillsRuntime(stats.getUserId());
-
         return ActorRuntime.builder()
-                .actor(CombatActor.USER)
+                .type(CombatActorType.USER)
                 .hp(combat.getUserHp())
                 .maxHp(stats.getMaxHp())
                 .patk(stats.getPatk())
@@ -78,6 +77,7 @@ public class CombatContextBuilder {
                 .statusResistances(resistanceMap)
                 .states(new ArrayList<>())
                 .skills(skills)
+                .lastSkillUsed(userLastSkillUsed)
                 .build();
     }
 
@@ -85,7 +85,9 @@ public class CombatContextBuilder {
             CombatPersistence combat,
             EnemyPersistence enemy,
             List<ElementMultiplierDTO> elements,
-            List<StatusResistanceDTO> resistances
+            List<StatusResistanceDTO> resistances,
+            Map<Long, SkillRuntime> skills,
+            Long enemyLastSkillUsed
     ) {
 
         Map<Long, Float> elementMap =
@@ -102,11 +104,8 @@ public class CombatContextBuilder {
                                 StatusResistanceDTO::getResistance
                         ));
 
-        Map<Long, SkillRuntime> skills =
-                skillService.loadEnemySkillsRuntime(enemy.getId());
-
         return ActorRuntime.builder()
-                .actor(CombatActor.ENEMY)
+                .type(CombatActorType.ENEMY)
                 .hp(combat.getEnemyHp())
                 .maxHp(enemy.getMaxHp())
                 .patk(enemy.getPatk())
@@ -120,6 +119,7 @@ public class CombatContextBuilder {
                 .statusResistances(resistanceMap)
                 .states(new ArrayList<>())
                 .skills(skills)
+                .lastSkillUsed(enemyLastSkillUsed)
                 .build();
     }
 }
