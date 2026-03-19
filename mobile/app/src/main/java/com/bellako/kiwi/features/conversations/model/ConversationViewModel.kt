@@ -87,7 +87,7 @@ class ConversationViewModel
                                 scriptVariableResolver,
                             ),
                     ),
-                    conversation.eventId,
+                    if (conversation.shouldPlayNextEvent()) conversation.eventId else conversation.fallbackEventId,
                 )
             }
         }
