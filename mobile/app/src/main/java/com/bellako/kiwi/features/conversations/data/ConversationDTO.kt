@@ -29,7 +29,7 @@ data class ConversationDTO(
     val dialogM: String,
     val dialogW: String,
     val nextEvent: NextEventType,
-    val conditionalVariableForNextEvent: String? = null,
+    val incidenceForNextEvent: String? = null,
     val eventId: Long? = null,
     val fallbackEventId: Long? = null,
     val options: List<ConversationOptionDTO> = emptyList(),

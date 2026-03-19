@@ -65,8 +65,8 @@ public class ConversationPersistence {
     @Column(name = "event_id")
     private Long eventId;
 
-    @Column(name = "conditional_variable_for_next_event")
-    private String conditionalVariableForNextEvent;
+    @Column(name = "incidence_for_next_event")
+    private String incidenceForNextEvent;
 
     @Column(name = "fallback_event_id")
     private Long fallbackEventId;

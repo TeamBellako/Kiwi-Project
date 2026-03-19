@@ -1,6 +1,6 @@
 package com.bellako.kiwi.features.conversations.data
 
-import com.bellako.kiwi.common.services.ConditionalVariableResolver
+import com.bellako.kiwi.common.services.IncidenceResolver
 import com.bellako.kiwi.common.services.ScriptVariableResolver
 import kotlinx.serialization.Serializable
 
@@ -44,15 +44,15 @@ data class ConversationDomain(
     val nextEvent: NextEventType,
     val eventId: Long? = null,
     val fallbackEventId: Long? = null,
-    val conditionalVariableForNextEvent: String? = null,
+    val incidenceForNextEvent: String? = null,
     val options: List<ConversationOptionDomain> = emptyList(),
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
 ) {
     fun shouldPlayNextEvent(): Boolean {
         val isConditionalVariableEmpty =
-            conditionalVariableForNextEvent == null || conditionalVariableForNextEvent.isEmpty()
-        return isConditionalVariableEmpty || ConditionalVariableResolver.resolveVariable(conditionalVariableForNextEvent)
+            incidenceForNextEvent == null || incidenceForNextEvent.isEmpty()
+        return isConditionalVariableEmpty || IncidenceResolver.resolveIncidence(incidenceForNextEvent)
     }
 
     suspend fun readDialog(resolver: ScriptVariableResolver): String {

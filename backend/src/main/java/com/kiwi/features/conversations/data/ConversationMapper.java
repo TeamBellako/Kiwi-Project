@@ -41,7 +41,7 @@ public class ConversationMapper {
             .dialogW(entity.getDialogW())
             .nextEvent(entity.getNextEvent())
             .eventId(entity.getEventId())
-            .conditionalVariableForNextEvent(entity.getConditionalVariableForNextEvent())
+            .incidenceForNextEvent(entity.getIncidenceForNextEvent())
             .fallbackEventId(entity.getFallbackEventId())
             .options(optionDtos)
             .onCompletedEvent(onCompletedEvent)
@@ -69,7 +69,7 @@ public class ConversationMapper {
         entity.setNextEvent(dto.getNextEvent());
         entity.setEventId(dto.getEventId());
         
-        entity.setConditionalVariableForNextEvent(dto.getConditionalVariableForNextEvent());
+        entity.setIncidenceForNextEvent(dto.getIncidenceForNextEvent());
         entity.setFallbackEventId(dto.getFallbackEventId());
 
         entity.setOnCompletedAction(dto.getOnCompletedAction());

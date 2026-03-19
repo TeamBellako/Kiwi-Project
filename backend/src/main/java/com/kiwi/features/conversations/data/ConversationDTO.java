@@ -28,7 +28,7 @@ public class ConversationDTO {
     private String dialogW;
     private NextEventType nextEvent;
     private Long eventId;
-    private String conditionalVariableForNextEvent;
+    private String incidenceForNextEvent;
     private Long fallbackEventId;
     private List<ConversationOptionDTO> options;
     private String onCompletedEvent;
