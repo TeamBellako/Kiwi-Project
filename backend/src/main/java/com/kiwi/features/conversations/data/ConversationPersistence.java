@@ -65,6 +65,9 @@ public class ConversationPersistence {
     @Column(name = "event_id")
     private Long eventId;
 
+    @Column(name = "conditional_variable_to_play")
+    private String conditionalVariableToPlay;
+
     @Column(name = "on_completed_action")
     private String onCompletedAction;
 

@@ -41,6 +41,7 @@ public class ConversationMapper {
             .dialogW(entity.getDialogW())
             .nextEvent(entity.getNextEvent())
             .eventId(entity.getEventId())
+            .conditionalVariableToPlay(entity.getConditionalVariableToPlay())
             .options(optionDtos)
             .onCompletedEvent(onCompletedEvent)
             .onCompletedAction(entity.getOnCompletedAction())
@@ -66,6 +67,7 @@ public class ConversationMapper {
         entity.setDialogW(dto.getDialogW());
         entity.setNextEvent(dto.getNextEvent());
         entity.setEventId(dto.getEventId());
+        entity.setConditionalVariableToPlay(dto.getConditionalVariableToPlay());
 
         entity.setOnCompletedAction(dto.getOnCompletedAction());
         entity.setOnCompletedEntity(dto.getOnCompletedEntity());

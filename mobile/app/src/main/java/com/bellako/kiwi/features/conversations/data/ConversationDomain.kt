@@ -42,6 +42,7 @@ data class ConversationDomain(
     val dialogW: String,
     val nextEvent: NextEventType,
     val eventId: Long? = null,
+    val conditionalVariableToPlay: String? = null,
     val options: List<ConversationOptionDomain> = emptyList(),
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
