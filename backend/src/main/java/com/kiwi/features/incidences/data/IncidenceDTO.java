@@ -10,5 +10,4 @@ import lombok.*;
 @EqualsAndHashCode @ToString
 public class IncidenceDTO {
     private String name;
-    private boolean value;
 }

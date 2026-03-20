@@ -7,10 +7,8 @@ import lombok.Setter;
 @Setter
 public class IncidenceDomain {
     private String name;
-    private boolean value;
 
-    public IncidenceDomain(String name, boolean value) {
+    public IncidenceDomain(String name) {
         this.name = name;
-        this.value = value;
     }
 }

@@ -7,7 +7,7 @@ public class IncidenceMapper {
         if (incidenceDTO == null) {
             return null;
         }
-        return new IncidenceDomain(incidenceDTO.getName(), incidenceDTO.isValue());
+        return new IncidenceDomain(incidenceDTO.getName());
     }
 
     // From Domain to DTO
@@ -15,7 +15,7 @@ public class IncidenceMapper {
         if (incidenceDomain == null) {
             return null;
         }
-        return new IncidenceDTO(incidenceDomain.getName(), incidenceDomain.isValue());
+        return new IncidenceDTO(incidenceDomain.getName());
     }
 
     // From Persistence to Domain
@@ -23,7 +23,7 @@ public class IncidenceMapper {
         if (incidencePersistance == null) {
             return null;
         }
-        return new IncidenceDomain(incidencePersistance.getName(), incidencePersistance.isValue());
+        return new IncidenceDomain(incidencePersistance.getName());
     }
 
     // From Domain to Persistence
@@ -33,7 +33,6 @@ public class IncidenceMapper {
         }
         return IncidencePersistance.builder()
                 .name(incidenceDomain.getName())
-                .value(incidenceDomain.isValue())
                 .build();
     }
 }
