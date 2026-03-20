@@ -19,19 +19,19 @@ public class IncidenceMapper {
     }
 
     // From Persistence to Domain
-    public static IncidenceDomain fromPersistence(IncidencePersistance incidencePersistance) {
-        if (incidencePersistance == null) {
+    public static IncidenceDomain fromPersistence(IncidencePersistence incidencePersistence) {
+        if (incidencePersistence == null) {
             return null;
         }
-        return new IncidenceDomain(incidencePersistance.getName());
+        return new IncidenceDomain(incidencePersistence.getName());
     }
 
     // From Domain to Persistence
-    public static IncidencePersistance toPersistence(IncidenceDomain incidenceDomain) {
+    public static IncidencePersistence toPersistence(IncidenceDomain incidenceDomain) {
         if (incidenceDomain == null) {
             return null;
         }
-        return IncidencePersistance.builder()
+        return IncidencePersistence.builder()
                 .name(incidenceDomain.getName())
                 .build();
     }

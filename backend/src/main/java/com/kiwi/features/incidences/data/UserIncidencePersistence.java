@@ -15,7 +15,7 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name = "user_incidences")
-public class UserIncidencePersistance {
+public class UserIncidencePersistence {
     @EmbeddedId
     private UserIncidenceKey id;
 

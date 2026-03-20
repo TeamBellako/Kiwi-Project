@@ -12,7 +12,7 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name = "incidences")
-public class IncidencePersistance {
+public class IncidencePersistence {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
