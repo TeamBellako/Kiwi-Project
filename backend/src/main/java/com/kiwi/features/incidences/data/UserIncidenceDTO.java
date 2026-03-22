@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode @ToString
-public class IncidenceDTO {
+public class UserIncidenceDTO {
     private String name;
+    private boolean value;
 }
