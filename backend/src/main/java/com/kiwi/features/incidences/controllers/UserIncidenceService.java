@@ -30,7 +30,7 @@ public class UserIncidenceService {
                 });
 
         UserIncidencePersistence userIncidence = userIncidenceRepository
-                .findByIdUserIdAndIncidenceId(userId, incidence.getId())
+                .findByIdUserIdAndIdIncidenceId(userId, incidence.getId())
                 .orElseGet(() -> {
                     UserIncidencePersistence newUserIncidence = new UserIncidencePersistence();
                     newUserIncidence.setId(new UserIncidenceKey(userId, incidence.getId()));
@@ -45,7 +45,8 @@ public class UserIncidenceService {
         Optional<IncidencePersistence> incidencePersistence = incidenceRepository.findByName(incidenceName);
         if (incidencePersistence.isEmpty()) return false;
         
-        Optional<UserIncidencePersistence> userIncidencePersistence = userIncidenceRepository.findByIdUserIdAndIncidenceId(userId, incidencePersistence.get().getId());
+        Optional<UserIncidencePersistence> userIncidencePersistence = 
+                userIncidenceRepository.findByIdUserIdAndIdIncidenceId(userId, incidencePersistence.get().getId());
         return userIncidencePersistence.map(UserIncidencePersistence::isValue).orElse(false);
     }
 }

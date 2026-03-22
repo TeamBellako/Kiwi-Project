@@ -127,6 +127,17 @@ CREATE TABLE IF NOT EXISTS tips (
 
 INSERT INTO tips (title, text, read_more_url) 
     VALUES ('Pomodoro Timer', 'Just work, bro', 'https://www.todoist.com/es/productivity-methods/pomodoro-technique');
+    
+CREATE TABLE IF NOT EXISTS incidences (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS user_incidences (
+    user_id BIGINT NOT NULL,
+    incidence_id BIGINT NOT NULL,
+    value BOOLEAN NOT NULL DEFAULT FALSE
+);
 
 
 

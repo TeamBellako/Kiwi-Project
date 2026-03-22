@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface UserIncidenceRepository extends JpaRepository<UserIncidencePersistence, UserIncidenceKey> {
-    Optional<UserIncidencePersistence> findByIdUserIdAndIncidenceId(Long userId, Long incidenceId);
+    Optional<UserIncidencePersistence> findByIdUserIdAndIdIncidenceId(Long userId, Long incidenceId);
 }
