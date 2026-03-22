@@ -11,6 +11,7 @@ import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.NextEventType
+import com.bellako.kiwi.features.incidences.model.UserIncidenceManager
 import com.bellako.kiwi.features.personality.model.IPersonalityRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -32,6 +33,7 @@ class ConversationViewModel
     constructor(
         private val repository: ConversationsRepository,
         private val personalityRepository: IPersonalityRepository,
+        private val userIncidenceManager: UserIncidenceManager,
     ) : BaseViewModel() {
         // -------------------------------------------------------------------------
 
@@ -77,7 +79,7 @@ class ConversationViewModel
          * Usa el nextEvent y eventId de la conversación activa.
          */
         fun next() {
-            val conversation = _active.value ?: return
+            val conversation: ConversationDomain = _active.value ?: return
 
             viewModelScope.launch {
                 handleNextEvent(
@@ -87,7 +89,7 @@ class ConversationViewModel
                                 scriptVariableResolver,
                             ),
                     ),
-                    if (conversation.shouldPlayNextEvent()) conversation.eventId else conversation.fallbackEventId,
+                    if (shouldPlayNextEvent(conversation)) conversation.eventId else conversation.fallbackEventId,
                 )
             }
         }
@@ -153,5 +155,12 @@ class ConversationViewModel
                     end()
                 }
             }
+        }
+
+        private suspend fun shouldPlayNextEvent(conversationDomain: ConversationDomain): Boolean {
+            val isConditionalVariableEmpty =
+                conversationDomain.incidenceForNextEvent == null || conversationDomain.incidenceForNextEvent.isEmpty()
+            return isConditionalVariableEmpty ||
+                userIncidenceManager.getIncidence(conversationDomain.incidenceForNextEvent)
         }
     }

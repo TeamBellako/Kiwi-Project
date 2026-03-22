@@ -1,6 +1,5 @@
 package com.bellako.kiwi.features.conversations.data
 
-import com.bellako.kiwi.common.services.IncidenceResolver
 import com.bellako.kiwi.common.services.ScriptVariableResolver
 import kotlinx.serialization.Serializable
 
@@ -49,12 +48,6 @@ data class ConversationDomain(
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
 ) {
-    fun shouldPlayNextEvent(): Boolean {
-        val isConditionalVariableEmpty =
-            incidenceForNextEvent == null || incidenceForNextEvent.isEmpty()
-        return isConditionalVariableEmpty || IncidenceResolver.resolveIncidence(incidenceForNextEvent)
-    }
-
     suspend fun readDialog(resolver: ScriptVariableResolver): String {
         val regex = Regex("@[a-zA-Z0-9_]+")
         var result = dialog
