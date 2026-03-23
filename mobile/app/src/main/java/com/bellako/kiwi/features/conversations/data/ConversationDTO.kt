@@ -32,6 +32,8 @@ data class ConversationDTO(
     val incidenceForNextEvent: String? = null,
     val eventId: Long? = null,
     val fallbackEventId: Long? = null,
+    val incidenceNameToSet: String? = null,
+    val incidenceValueToSet: Boolean = true,
     val options: List<ConversationOptionDTO> = emptyList(),
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,

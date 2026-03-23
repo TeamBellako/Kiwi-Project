@@ -64,8 +64,17 @@ class ConversationViewModel
             viewModelScope.launch {
                 try {
                     val conversation = repository.getById(conversationId)
+
                     _active.value = conversation.copy(dialog = conversation.readDialog(scriptVariableResolver))
+
                     _isVisible.value = true
+
+                    if (conversation.incidenceNameToSet != null && !conversation.incidenceNameToSet.isEmpty()) {
+                        userIncidenceManager.setIncidence(
+                            conversation.incidenceNameToSet,
+                            conversation.incidenceValueToSet,
+                        )
+                    }
                 } catch (e: GeneralSecurityException) {
                     warn("Encryption error: ${e.message}")
                 } catch (e: IOException) {
