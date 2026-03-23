@@ -43,6 +43,8 @@ public class ConversationMapper {
             .eventId(entity.getEventId())
             .incidenceForNextEvent(entity.getIncidenceForNextEvent())
             .fallbackEventId(entity.getFallbackEventId())
+            .incidenceNameToSet(entity.getIncidenceNameToSet())
+            .incidenceValueToSet(entity.getIncidenceValueToSet())
             .options(optionDtos)
             .onCompletedEvent(onCompletedEvent)
             .onCompletedAction(entity.getOnCompletedAction())
@@ -71,6 +73,9 @@ public class ConversationMapper {
         
         entity.setIncidenceForNextEvent(dto.getIncidenceForNextEvent());
         entity.setFallbackEventId(dto.getFallbackEventId());
+        
+        entity.setIncidenceNameToSet(dto.getIncidenceNameToSet());
+        entity.setIncidenceValueToSet(dto.getIncidenceValueToSet());
 
         entity.setOnCompletedAction(dto.getOnCompletedAction());
         entity.setOnCompletedEntity(dto.getOnCompletedEntity());
