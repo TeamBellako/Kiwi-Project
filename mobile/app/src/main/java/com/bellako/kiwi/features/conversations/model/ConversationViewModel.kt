@@ -65,7 +65,17 @@ class ConversationViewModel
                 try {
                     val conversation = repository.getById(conversationId)
 
-                    _active.value = conversation.copy(dialog = conversation.readDialog(scriptVariableResolver))
+                    _active.value =
+                        conversation.copy(
+                            dialog = conversation.readDialog(scriptVariableResolver),
+                            // Filter options based on incidences
+                            options =
+                                conversation.options.filter { optionDomain ->
+                                    optionDomain.incidenceToShow == null ||
+                                        optionDomain.incidenceToShow.isEmpty() ||
+                                        userIncidenceManager.getIncidence(optionDomain.incidenceToShow)
+                                },
+                        )
 
                     _isVisible.value = true
 

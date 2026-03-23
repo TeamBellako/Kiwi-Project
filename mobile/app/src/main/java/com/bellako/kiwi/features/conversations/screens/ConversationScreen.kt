@@ -72,6 +72,7 @@ fun ConversationScreen(
         label = "arrow_offset",
     )
     val context = LocalContext.current
+
     // Background image
     Column(
         verticalArrangement = Arrangement.Bottom,

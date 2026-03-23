@@ -35,6 +35,7 @@ object ConversationDataMapper {
             textW = dto.textW,
             nextEventId = dto.nextEventId,
             cost = dto.cost,
+            incidenceToShow = dto.incidenceToShow,
         )
 
     fun toDTO(domain: ConversationDomain): ConversationDTO =
@@ -72,5 +73,6 @@ object ConversationDataMapper {
             textW = domain.textW,
             nextEventId = domain.nextEventId,
             cost = domain.cost,
+            incidenceToShow = domain.incidenceToShow,
         )
 }

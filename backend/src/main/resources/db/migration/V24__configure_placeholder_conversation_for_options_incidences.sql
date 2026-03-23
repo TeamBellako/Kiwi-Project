@@ -1,8 +1,8 @@
 INSERT INTO conversations (
-    id, name, type, sprite, expresion, background, fx, dark, dialog, dialog_m, dialog_w, delay_start_ms, delay_end_ms, next_event, event_id, incidence_name_to_set, incidence_value_to_set
+    id, name, type, sprite, expresion, background, fx, dark, dialog, dialog_m, dialog_w, delay_start_ms, delay_end_ms, next_event, event_id, incidence_name_to_set, incidence_value_to_set, on_completed_action, on_completed_entity, on_completed_entity_id
 ) VALUES
-(10, 'Conditional Options Testing', 'SMALL', 1, 1, NULL, NULL, 0, "I'm going to show you some options...", "", "", NULL, NULL, 'END', NULL, "showDialogOption", TRUE),
-(11, 'Conditional Options Testing End', 'SMALL', 1, 1, NULL, NULL, 0, "Bye bye!", "", "", NULL, NULL, 'END', NULL, "", TRUE);
+(10, 'Conditional Options Testing', 'FULL', 1, 1, NULL, NULL, 0, "I'm going to show you some options...", "", "", NULL, NULL, 'END', NULL, "showDialogOption", TRUE, "", "", 0),
+(11, 'Conditional Options Testing End', 'FULL', 1, 1, NULL, NULL, 0, "Bye bye!", "", "", NULL, NULL, 'END', NULL, "", TRUE, "", "", 0);
 
 INSERT INTO conversation_options (
     id, conversation_id, text, text_m, text_w, next_event_id, cost, incidence_to_show

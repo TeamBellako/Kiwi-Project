@@ -23,6 +23,7 @@ data class ConversationOptionDomain(
     val textW: String,
     val nextEventId: Long,
     val cost: Int? = null,
+    val incidenceToShow: String? = null,
 )
 
 @Serializable
