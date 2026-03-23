@@ -23,6 +23,7 @@ data class ConversationOptionDomain(
     val textW: String,
     val nextEventId: Long,
     val cost: Int? = null,
+    val incidenceToShow: String? = null,
 )
 
 @Serializable
@@ -42,6 +43,10 @@ data class ConversationDomain(
     val dialogW: String,
     val nextEvent: NextEventType,
     val eventId: Long? = null,
+    val fallbackEventId: Long? = null,
+    val incidenceForNextEvent: String? = null,
+    val incidenceNameToSet: String? = null,
+    val incidenceValueToSet: Boolean = true,
     val options: List<ConversationOptionDomain> = emptyList(),
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,

@@ -11,6 +11,7 @@ import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.NextEventType
+import com.bellako.kiwi.features.incidences.model.UserIncidenceManager
 import com.bellako.kiwi.features.personality.model.IPersonalityRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -32,6 +33,7 @@ class ConversationViewModel
     constructor(
         private val repository: ConversationsRepository,
         private val personalityRepository: IPersonalityRepository,
+        private val userIncidenceManager: UserIncidenceManager,
     ) : BaseViewModel() {
         // -------------------------------------------------------------------------
 
@@ -62,8 +64,27 @@ class ConversationViewModel
             viewModelScope.launch {
                 try {
                     val conversation = repository.getById(conversationId)
-                    _active.value = conversation.copy(dialog = conversation.readDialog(scriptVariableResolver))
+
+                    _active.value =
+                        conversation.copy(
+                            dialog = conversation.readDialog(scriptVariableResolver),
+                            // Filter options based on incidences
+                            options =
+                                conversation.options.filter { optionDomain ->
+                                    optionDomain.incidenceToShow == null ||
+                                        optionDomain.incidenceToShow.isEmpty() ||
+                                        userIncidenceManager.getIncidence(optionDomain.incidenceToShow)
+                                },
+                        )
+
                     _isVisible.value = true
+
+                    if (conversation.incidenceNameToSet != null && !conversation.incidenceNameToSet.isEmpty()) {
+                        userIncidenceManager.setIncidence(
+                            conversation.incidenceNameToSet,
+                            conversation.incidenceValueToSet,
+                        )
+                    }
                 } catch (e: GeneralSecurityException) {
                     warn("Encryption error: ${e.message}")
                 } catch (e: IOException) {
@@ -77,7 +98,7 @@ class ConversationViewModel
          * Usa el nextEvent y eventId de la conversación activa.
          */
         fun next() {
-            val conversation = _active.value ?: return
+            val conversation: ConversationDomain = _active.value ?: return
 
             viewModelScope.launch {
                 handleNextEvent(
@@ -87,7 +108,7 @@ class ConversationViewModel
                                 scriptVariableResolver,
                             ),
                     ),
-                    conversation.eventId,
+                    if (shouldPlayNextEvent(conversation)) conversation.eventId else conversation.fallbackEventId,
                 )
             }
         }
@@ -153,5 +174,12 @@ class ConversationViewModel
                     end()
                 }
             }
+        }
+
+        private suspend fun shouldPlayNextEvent(conversationDomain: ConversationDomain): Boolean {
+            val isConditionalVariableEmpty =
+                conversationDomain.incidenceForNextEvent == null || conversationDomain.incidenceForNextEvent.isEmpty()
+            return isConditionalVariableEmpty ||
+                userIncidenceManager.getIncidence(conversationDomain.incidenceForNextEvent)
         }
     }

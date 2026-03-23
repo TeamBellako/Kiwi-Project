@@ -18,6 +18,10 @@ object ConversationDataMapper {
             dialogW = dto.dialogW,
             nextEvent = dto.nextEvent,
             eventId = dto.eventId,
+            fallbackEventId = dto.fallbackEventId,
+            incidenceForNextEvent = dto.incidenceForNextEvent,
+            incidenceNameToSet = dto.incidenceNameToSet,
+            incidenceValueToSet = dto.incidenceValueToSet,
             options = dto.options.map { toDomain(it) },
             onCompletedEvent = dto.onCompletedEvent,
             onCompletedEntityId = dto.onCompletedEntityId,
@@ -31,6 +35,7 @@ object ConversationDataMapper {
             textW = dto.textW,
             nextEventId = dto.nextEventId,
             cost = dto.cost,
+            incidenceToShow = dto.incidenceToShow,
         )
 
     fun toDTO(domain: ConversationDomain): ConversationDTO =
@@ -50,6 +55,10 @@ object ConversationDataMapper {
             dialogW = domain.dialogW,
             nextEvent = domain.nextEvent,
             eventId = domain.eventId,
+            fallbackEventId = domain.fallbackEventId,
+            incidenceForNextEvent = domain.incidenceForNextEvent,
+            incidenceNameToSet = domain.incidenceNameToSet,
+            incidenceValueToSet = domain.incidenceValueToSet,
             options = domain.options.map { toDTO(it) },
             onCompletedEvent = domain.onCompletedEvent,
             onCompletedEntityId = domain.onCompletedEntityId,
@@ -64,5 +73,6 @@ object ConversationDataMapper {
             textW = domain.textW,
             nextEventId = domain.nextEventId,
             cost = domain.cost,
+            incidenceToShow = domain.incidenceToShow,
         )
 }

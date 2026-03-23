@@ -15,4 +15,5 @@ public class ConversationOptionDTO {
 	private String textW;
 	private Long nextEventId;
 	private Integer cost;
+	private String incidenceToShow;
 }

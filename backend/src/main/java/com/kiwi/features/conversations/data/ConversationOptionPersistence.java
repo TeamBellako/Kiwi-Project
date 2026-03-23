@@ -30,4 +30,7 @@ public class ConversationOptionPersistence {
 
     @Column(name = "cost", nullable = true)
     private Integer cost;
+
+    @Column(name = "incidence_to_show")
+    private String incidenceToShow;
 }
