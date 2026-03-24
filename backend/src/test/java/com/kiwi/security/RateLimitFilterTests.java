@@ -21,7 +21,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(PingController.class)
 @AutoConfigureMockMvc
 public class RateLimitFilterTests {
-
+    
+    public static final int TARGET_NUM_OF_REQUESTS = 201;
+    
     @Autowired
     private MockMvc mockMvc;
 
@@ -35,7 +37,7 @@ public class RateLimitFilterTests {
     @Test
     @WithMockUser(username = "finn@thehuman.com")
     public void shouldEnforceRateLimitAfterTooManyRequests() throws Exception {
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < TARGET_NUM_OF_REQUESTS; i++) {
             mockMvc.perform(get("/api/ping"))
                     .andExpect(status().isOk());
         }
