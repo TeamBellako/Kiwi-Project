@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class RateLimitFilterTests {
     
-    public static final int TARGET_NUM_OF_REQUESTS = 201;
+    public static final int TARGET_NUM_OF_REQUESTS = 200;
     
     @Autowired
     private MockMvc mockMvc;
