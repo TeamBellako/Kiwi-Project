@@ -391,7 +391,6 @@ fun AppClassificationColumns(
                             dragState = dragState,
                             columnRects = columnRects,
                             appLists = appLists,
-                            personalityViewModel = personalityViewModel,
                             onDragStarted = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             },
@@ -755,7 +754,6 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.handleAp
     dragState: DragState,
     columnRects: ColumnRects,
     appLists: AppLists,
-    personalityViewModel: IPersonalityViewModel,
     onDragStarted: () -> Unit,
 ) {
     detectDragGesturesAfterLongPress(
