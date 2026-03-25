@@ -14,9 +14,15 @@ enum class EventType {
     THROW_SKILL,
     UNLOCK_NODE,
     START_TIP,
+    DAILY_GOALS_UPDATED,
+    QUESTS_UPDATED,
 }
 
 sealed class EventPayload {
+    data class EmptyPayload(
+        val value: Int? = null,
+    ) : EventPayload()
+
     data class ChangeDashboardLayoutPayload(
         val newLayout: DashboardLayout,
     ) : EventPayload()
