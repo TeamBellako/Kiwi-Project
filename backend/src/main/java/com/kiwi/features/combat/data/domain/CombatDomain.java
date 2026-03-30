@@ -18,15 +18,12 @@ public class CombatDomain {
     private Long userId;
     private Long enemyId;
 
-    private int timeMax;
-    private int timeRemaining;
-
     private int userHp;
     private int enemyHp;
 
     private int turnNumber;
 
-    private CombatGeneralStatus combatStatus;
+    private Instant endsAt;
 
-    private Instant startedAt;
+    private CombatGeneralStatus combatStatus;
 }

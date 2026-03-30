@@ -20,7 +20,7 @@ public class EnemyAI {
         List<SkillRuntime> skills =
                 new ArrayList<>(enemy.getSkills().values());
 
-        SkillRuntime bestSkill = null;
+        Long bestSkillId = -1L;
 
         float bestScore = -999;
 
@@ -31,12 +31,11 @@ public class EnemyAI {
 
             if(score > bestScore) {
                 bestScore = score;
-                bestSkill = skill;
+                bestSkillId = skill.getId();
             }
         }
 
-        assert bestSkill != null;
-        return bestSkill.getId();
+        return bestSkillId;
     }
 
     // ----------------------------------------------------------------------------------------------------------------

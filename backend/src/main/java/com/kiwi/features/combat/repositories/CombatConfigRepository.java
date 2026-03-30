@@ -8,5 +8,4 @@ import java.util.Optional;
 
 public interface CombatConfigRepository extends JpaRepository<CombatConfigPersistence, Long> {
 
-    Optional<CombatConfigPersistence> findByUserIdAndCombatConfigId(Long userId, Long combatConfigId);
 }

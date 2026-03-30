@@ -9,7 +9,10 @@ import lombok.*;
 public class CombatStateDomain {
 
     private Long id;
+
     private String name;
+
     private int icon;
+
     private String description;
 }

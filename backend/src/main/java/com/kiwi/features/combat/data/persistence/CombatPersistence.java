@@ -28,12 +28,6 @@ public class CombatPersistence {
     @Column(name="enemy_id", nullable = false)
     private Long enemyId;
 
-    @Column(name="time_max")
-    private Integer timeMax;
-
-    @Column(name="time_remaining")
-    private Integer timeRemaining;
-
     @Column(name="user_hp")
     private Integer userHp;
 
@@ -43,10 +37,10 @@ public class CombatPersistence {
     @Column(name="turn_number")
     private int turnNumber;
 
+    @Column(name = "ends_at")
+    private Instant endsAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name="combat_status")
     private CombatGeneralStatus combatStatus;
-
-    @Column(name="started_at")
-    private Instant startedAt;
 }

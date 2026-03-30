@@ -9,6 +9,8 @@ import lombok.*;
 public class EnemyStatusResistanceDomain {
 
     private Long enemyId;
+
     private Long stateId;
+
     private float resistance;
 }

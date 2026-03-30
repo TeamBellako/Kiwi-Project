@@ -167,18 +167,15 @@ CREATE TABLE IF NOT EXISTS combats (
 	
     user_id BIGINT NOT NULL,
     enemy_id BIGINT NOT NULL,
-	
-	time_max INT,
-	time_remaining INT,
-	
+
 	user_hp INT NOT NULL,
 	enemy_hp INT NOT NULL,
 
     turn_number INT NOT NULL DEFAULT 1,
+	
+	ends_at TIMESTAMP,
 
     combat_status ENUM('ONGOING','USER_WON','USER_LOST') NOT NULL,
-
-    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
 	INDEX idx_combats_user_config (user_id, combat_config_id),
 	
@@ -206,7 +203,7 @@ CREATE TABLE IF NOT EXISTS skill_effects (
 
     skill_id BIGINT NOT NULL,
 	
-	target ENUM('USER','ENEMY') NOT NULL,
+	target ENUM('OPPONENT','SELF','ALLY') NOT NULL DEFAULT 'OPPONENT',
 
     effect_type ENUM('DAMAGE','HEAL','APPLY_STATUS') NOT NULL,
 
@@ -277,6 +274,7 @@ CREATE TABLE IF NOT EXISTS combat_status_effects (
 		ON UPDATE CASCADE
 );
 
+//TENGO QUE REHACER ESTA TABLA
 CREATE TABLE IF NOT EXISTS combat_log (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
 
@@ -314,7 +312,6 @@ CREATE TABLE IF NOT EXISTS combat_log (
         REFERENCES combats(id)
         ON DELETE CASCADE
 		ON UPDATE CASCADE,
-		
 		
     CONSTRAINT fk_combat_log_states
         FOREIGN KEY (state_id)

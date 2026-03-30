@@ -1,5 +1,6 @@
 package com.kiwi.features.combat.engine;
 
+import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +34,11 @@ public class ActorRuntime {
     private List<ActiveState> states;
 
     private Map<Long, SkillRuntime> skills;
+    @Setter
+    private List<Long> blockedSkills;
+
+    @Setter
+    private ActionType actionModifierType;
 
     @Setter
     private Long lastSkillUsed;

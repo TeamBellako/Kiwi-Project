@@ -1,68 +1,131 @@
 package com.kiwi.features.combat.engine;
 
+import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.dto.CombatStateAppliedDTO;
-import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.combat.data.enums.ActionType;
+import com.kiwi.features.combat.data.persistence.CombatPersistence;
+import com.kiwi.features.combat.data.persistence.CombatStatePersistence;
+import com.kiwi.features.combat.data.persistence.CombatStatusEffectPersistence;
+import com.kiwi.features.combat.repositories.CombatStateRepository;
+import com.kiwi.features.combat.repositories.CombatStatusEffectRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class CombatStateService {
 
+    private final CombatStateRepository stateRepository;
+    private final CombatStatusEffectRepository statusEffectRepository;
+
     private final Random random = new Random();
 
-    public void onTurnStart(CombatContext context)
-    {
-        applyActiveStates(context.getUser());
-        applyActiveStates(context.getEnemy());
+    public CombatStateService(CombatStateRepository stateRepository, CombatStatusEffectRepository statusEffectRepository) {
+        this.stateRepository = stateRepository;
+        this.statusEffectRepository = statusEffectRepository;
     }
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    private void applyActiveStates(ActorRuntime actor)
+    public void applyActiveStatesToActor(ActorRuntime actor, CombatContext context)
     {
+        // TODO en la BBDD tendrán que tener estos ids
         for (ActiveState state : actor.getStates()) {
 
             if (state.getStateId() == 1) { // BURN
-                applyDamage(actor);
+                int damage = applyDamage(actor, state.getValue());
+
+                CombatActionDTO action =
+                        CombatActionDTO.builder()
+                                .actor(actor.getType().name())
+                                .actionType(ActionType.ACTOR_DAMAGED_BY_STATE.name())
+                                .stateName(state.getName())
+                                .value(damage)
+                                .build();
+
+                context.addAction(action);
             }
 
             if (state.getStateId() == 2) { // POISON
-                applyDamage(actor);
+                int damage = applyDamage(actor, state.getValue());
+
+                CombatActionDTO action =
+                        CombatActionDTO.builder()
+                                .actor(actor.getType().name())
+                                .actionType(ActionType.ACTOR_DAMAGED_BY_STATE.name())
+                                .stateName(state.getName())
+                                .value(damage)
+                                .build();
+
+                context.addAction(action);
             }
-        }
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-
-    private void applyDamage(ActorRuntime actor)
-    {
-        int damage = (int) (actor.getMaxHp() * 0.05);
-        actor.damage(damage);
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-
-    public boolean canAct(CombatContext context, CombatActorType actor)
-    {
-        ActorRuntime runtime = context.getActor(actor);
-
-        for (ActiveState state : runtime.getStates()) {
 
             if (state.getStateId() == 3) { // FREEZE
+                if (random.nextInt(100) < 80) {
+                    actor.setActionModifierType(ActionType.ACTOR_BLOCKED_BY_STATE);
 
-                int chance = random.nextInt(100);
+                    CombatActionDTO action =
+                            CombatActionDTO.builder()
+                                    .actor(actor.getType().name())
+                                    .actionType(ActionType.ACTOR_BLOCKED_BY_STATE.name())
+                                    .stateName(state.getName())
+                                    .build();
 
-                if (chance < 80) {
-                    return false;
+                    context.addAction(action);
+                }
+            } else if (state.getStateId() == 4) {  // CONFUSION: no need to apply if FREEZE is applying
+                if (actor.getLastSkillUsed() != null && random.nextInt(100) < 40)
+                {
+                    actor.setActionModifierType(ActionType.SKILL_REPEAT_BY_STATE);
+
+                    CombatActionDTO action =
+                            CombatActionDTO.builder()
+                                    .actor(actor.getType().name())
+                                    .actionType(ActionType.SKILL_REPEAT_BY_STATE.name())
+                                    .stateName(state.getName())
+                                    .build();
+
+                    context.addAction(action);
                 }
             }
-        }
 
-        return true;
+            //TODO: lo he dejado asi por simplicidad pero en el futuro al user hay que aplicarlo inmediatamente
+            //para que sepa las que no puede usar
+            if (state.getStateId() == 7) { //MUTIS
+
+                List<Long> blockedSkillIds = new ArrayList<>();
+
+                List<Long> skillIds =
+                        new ArrayList<>(actor.getSkills().keySet());
+
+                Collections.shuffle(skillIds);
+
+                blockedSkillIds = skillIds.stream()
+                        .limit(2)
+                        .toList();
+
+                CombatActionDTO action =
+                        CombatActionDTO.builder()
+                                .actor(actor.getType().name())
+                                .actionType(ActionType.BLOCKED_SKILLS_BY_STATE.name())
+                                .stateName(state.getName())
+                                .blockedSkills(blockedSkillIds)
+                                .build();
+
+                context.addAction(action);
+                actor.setBlockedSkills(blockedSkillIds);
+
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    private int applyDamage(ActorRuntime actor, float value)
+    {
+        int damage = (int) (actor.getMaxHp() * value); // 0.05 TBC
+        actor.damage(damage);
+        return damage;
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -98,57 +161,70 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public void onTurnEnd(CombatContext context)
+    public void reduceStatesTurnsToActor(ActorRuntime actor, CombatContext context)
     {
-        reduceStates(context.getUser());
-        reduceStates(context.getEnemy());
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-
-    private void reduceStates(ActorRuntime actor)
-    {
-        Iterator<ActiveState> it =
+        Iterator<ActiveState> statesIt =
                 actor.getStates().iterator();
 
-        while (it.hasNext()) {
+        while (statesIt.hasNext()) {
+            ActiveState state = statesIt.next();
 
-            ActiveState state = it.next();
+            CombatActionDTO action =
+                    CombatActionDTO.builder()
+                            .actor(actor.getType().name())
+                            .actionType(ActionType.STATUS_TURN_REDUCED.name())
+                            .stateName(state.getName())
+                            .build();
 
             state.setRemainingTurns(
                     state.getRemainingTurns() - 1
             );
 
             if (state.getRemainingTurns() <= 0) {
-                it.remove();
+                statesIt.remove();
+
+                action.setActionType(ActionType.STATUS_FINISHED.name());
             }
+
+            context.addAction(action);
         }
     }
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public CombatStateAppliedDTO buildStateDTO(ActiveState state)
+    public CombatStateAppliedDTO applyNewState(ActiveState state, ActorRuntime target, Long skillId, Long combatId)
     {
-        return CombatStateAppliedDTO.builder()
-                .stateId(state.getStateId())
-                .remainingTurns(state.getRemainingTurns())
-                .value(state.getValue())
-                .build();
-    }
+        Optional<CombatStatePersistence> statePersistence = stateRepository.findById(state.getStateId());
 
-    // ----------------------------------------------------------------------------------------------------------------
+        if (statePersistence.isPresent()) {
 
-    public List<CombatStateAppliedDTO> getActiveStates(CombatContext context, CombatActorType combatActorType)
-    {
-        List<CombatStateAppliedDTO> activeStates = new ArrayList<>();
+            target.getStates().add(state);
 
-        ActorRuntime runtime = context.getActor(combatActorType);
+            CombatStatusEffectPersistence statusEffectPersistence =
+                    CombatStatusEffectPersistence.builder()
+                            .combatId(combatId)
+                            .sourceSkillId(skillId)
+                            .target(target.getType())
+                            .stateId(state.getStateId())
+                            .value(state.getValue())
+                            .remainingTurns(state.getRemainingTurns())
+                            .build();
 
-        for (ActiveState state : runtime.getStates()) {
-            activeStates.add(buildStateDTO(state));
+            statusEffectRepository.save(statusEffectPersistence);
+
+            return CombatStateAppliedDTO.builder()
+                    .stateId(state.getStateId())
+                    .name(state.getName())
+                    .icon(statePersistence.get().getIcon())
+                    .description(statePersistence.get().getDescription())
+                    .remainingTurns(state.getRemainingTurns())
+                    .value(state.getValue())
+                    .build();
+        }
+        else {
+            throw new IllegalStateException("Combat state does not exist");
         }
 
-        return activeStates;
     }
 
     // ----------------------------------------------------------------------------------------------------------------

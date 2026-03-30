@@ -7,13 +7,17 @@ import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.mappers.CombatMapper;
 import com.kiwi.features.combat.data.mappers.UserActorMapper;
 import com.kiwi.features.combat.engine.CombatContext;
+import com.kiwi.features.combat.engine.CombatContextBuilder;
 import com.kiwi.features.combat.engine.CombatEngine;
+import com.kiwi.features.combat.engine.SkillRuntime;
 import com.kiwi.features.combat.repositories.*;
+import com.kiwi.features.skills.controllers.SkillRepository;
 import com.kiwi.features.skills.controllers.SkillService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,8 +37,10 @@ public class CombatService {
     private final EnemyElementMultiplierRepository enemyElementMultiplierRepository;
     private final UserStatusResistanceRepository userStatusResistanceRepository;
     private final EnemyStatusResistanceRepository enemyStatusResistanceRepository;
+    private final CombatStatusEffectRepository combatStatusEffectRepository;
     private final CombatEngine combatEngine;
     private final SkillService skillService;
+    private final CombatContextBuilder contextBuilder;
 
     //------------------------------------------------------------------------------------------------------------------
 
@@ -45,8 +51,8 @@ public class CombatService {
             UserElementMultiplierRepository userElementMultiplierRepository,
             EnemyElementMultiplierRepository enemyElementMultiplierRepository,
             UserStatusResistanceRepository userStatusResistanceRepository,
-            EnemyStatusResistanceRepository enemyStatusResistanceRepository, CombatEngine combatEngine,
-            SkillService skillService
+            EnemyStatusResistanceRepository enemyStatusResistanceRepository, CombatStatusEffectRepository combatStatusEffectRepository, CombatEngine combatEngine,
+            SkillService skillService, CombatContextBuilder contextBuilder
     ) {
         this.combatRepository = combatRepository;
         this.combatConfigRepository = combatConfigRepository;
@@ -58,8 +64,10 @@ public class CombatService {
         this.enemyElementMultiplierRepository = enemyElementMultiplierRepository;
         this.userStatusResistanceRepository = userStatusResistanceRepository;
         this.enemyStatusResistanceRepository = enemyStatusResistanceRepository;
+        this.combatStatusEffectRepository = combatStatusEffectRepository;
         this.combatEngine = combatEngine;
         this.skillService = skillService;
+        this.contextBuilder = contextBuilder;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -70,14 +78,17 @@ public class CombatService {
         UserStatsPersistence userStats =
                 userStatsRepository.findById(userId).orElseThrow();
 
-        Optional<CombatPersistence> existing =
+        Optional<CombatPersistence> existingCombat =
                 combatRepository.findByUserIdAndCombatConfigId(userId, combatConfigId);
 
         CombatPersistence combat;
 
-        if(existing.isPresent()) {
-            combat = existing.get();
-        } else {
+        if(existingCombat.isPresent())
+        {
+            combat = existingCombat.get();
+        }
+        else
+        {
 
             CombatConfigPersistence config =
                     combatConfigRepository.findById(combatConfigId).orElseThrow();
@@ -93,9 +104,7 @@ public class CombatService {
                     .enemyHp(enemy.getMaxHp())
                     .turnNumber(1)
                     .combatStatus(CombatGeneralStatus.ONGOING)
-                    .timeMax(config.getTimeLimit())
-                    .timeRemaining(config.getTimeLimit())
-                    .startedAt(Instant.now())
+                    .endsAt(Instant.now().plus(config.getTimeLimit(), ChronoUnit.MINUTES))
                     .build();
 
             combatRepository.save(combat);
@@ -144,6 +153,23 @@ public class CombatService {
             throw new IllegalStateException("Combat already finished");
         }
 
+        //A lo mejor pensar que pueda llegar un skill id -1 que sea como pasar turno
+        //en el futuro si hay opcion como hablar u otras cosas a lo mejor se pasa la accion y no el id de skill
+
+        // check timeout
+        if (combat.getEndsAt() != null) {
+            Instant now = Instant.now();
+
+            if (combat.getEndsAt().isBefore(now)) {
+                CombatTurnResultDTO result = combatEngine.buildTimeoutCombatTurnResultDTO(userId, combat);
+
+                // save updated combat
+                combatRepository.save(combat);
+
+                return result;
+            }
+        }
+
         // cooldown
         skillService.putSkillOnCooldown(userId, skillId);
 
@@ -161,15 +187,22 @@ public class CombatService {
         List<ElementMultiplierDTO> enemyElements = loadEnemyElements(enemy.getId(), elementMap);
         List<StatusResistanceDTO> enemyResistances = loadEnemyResistances(enemy.getId(), stateMap);
 
+        // TODO obtener los status actuales de cada uno
+        //combatStatusEffectRepository
+
         CombatContext context =
-                combatContextBuilder.build(
-                        combat,
-                        userStats,
-                        enemy,
+                contextBuilder.build(
+                         combat,
+                         userStats,
+                         enemy,
                         userElements,
                         enemyElements,
                         userResistances,
-                        enemyResistances
+                        enemyResistances,
+                        userSkills,
+                        enemySkills,
+                        userLastSkillUsed,
+                        enemyLastSkillUsed
                 );
 
         CombatTurnResultDTO result =
@@ -178,11 +211,6 @@ public class CombatService {
         // persist HP
         combat.setUserHp(context.getUser().getHp());
         combat.setEnemyHp(context.getEnemy().getHp());
-
-        //Falta actualizar el remaining time si es que tiene tiempo incluso a lo mejor habria que intentar checkear el estado del tiempo antes de hacer nada por
-        // si el jugador es un listo y ataca en el último segundo y llega esta peticion antes que el time out
-        //Tambien se actualiza el turno y generalstatus dentro del combatengine pero me molesta que la vida de los
-        // personajes se haga aqui, me gustataria que todo se haga en un mismo sitio
 
         // save updated combat
         combatRepository.save(combat);
@@ -203,9 +231,8 @@ public class CombatService {
             throw new IllegalStateException("Combat already finished");
         }
 
-        // TODO decidir que se necesita enviar
         CombatTurnResultDTO result =
-                combatEngine.setTimeOut(userId, combat);
+                combatEngine.buildTimeoutCombatTurnResultDTO(userId, combat);
 
         // save updated combat
         combatRepository.save(combat);

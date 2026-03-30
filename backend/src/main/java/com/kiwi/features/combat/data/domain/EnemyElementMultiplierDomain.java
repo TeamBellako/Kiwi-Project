@@ -9,6 +9,8 @@ import lombok.*;
 public class EnemyElementMultiplierDomain {
 
     private Long enemyId;
+
     private Long elementId;
+
     private float multiplier;
 }

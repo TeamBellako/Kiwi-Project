@@ -1,7 +1,7 @@
 package com.kiwi.features.combat.data.enums;
 
-public enum CombatActorType {
-    USER,
-    ENEMY,
+public enum SkillEffectTargetType {
+    OPPONENT,
+    SELF,
     ALLY // future
 }

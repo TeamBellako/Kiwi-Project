@@ -1,7 +1,7 @@
 package com.kiwi.features.combat.data.domain;
 
 import com.kiwi.features.combat.data.enums.CombatActorType;
-import com.kiwi.features.combat.data.enums.CombatLogEffectType;
+import com.kiwi.features.combat.data.enums.SkillEffectResultType;
 import lombok.*;
 
 import java.time.Instant;
@@ -25,7 +25,7 @@ public class CombatLogDomain {
 
     private CombatActorType target;
 
-    private CombatLogEffectType effectType;
+    private SkillEffectResultType effectType;
 
     private Float value;
 

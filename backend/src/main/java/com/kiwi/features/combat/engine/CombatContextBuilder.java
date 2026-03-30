@@ -3,6 +3,7 @@ package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.data.dto.ElementMultiplierDTO;
 import com.kiwi.features.combat.data.dto.StatusResistanceDTO;
+import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import com.kiwi.features.combat.data.persistence.EnemyPersistence;
@@ -75,9 +76,10 @@ public class CombatContextBuilder {
                 .lck(stats.getLck())
                 .elementMultipliers(elementMap)
                 .statusResistances(resistanceMap)
-                .states(new ArrayList<>())
+                .states(new ArrayList<>()) //TODO COGER DEL REPOSITORY
                 .skills(skills)
                 .lastSkillUsed(userLastSkillUsed)
+                .actionModifierType(ActionType.SKILL_USED)
                 .build();
     }
 
@@ -117,9 +119,10 @@ public class CombatContextBuilder {
                 .lck(enemy.getLck())
                 .elementMultipliers(elementMap)
                 .statusResistances(resistanceMap)
-                .states(new ArrayList<>())
+                .states(new ArrayList<>()) //TODO COGER DEL REPOSITORY
                 .skills(skills)
                 .lastSkillUsed(enemyLastSkillUsed)
+                .actionModifierType(ActionType.SKILL_USED)
                 .build();
     }
 }

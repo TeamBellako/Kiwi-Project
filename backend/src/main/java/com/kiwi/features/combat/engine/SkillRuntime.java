@@ -10,8 +10,11 @@ import java.util.List;
 public class SkillRuntime {
 
     private Long id;
+
     private String name;
-    private CombatActorType target;
+
+    private CombatActorType target ;
+
     private List<SkillEffectRuntime> effects;
 
 }

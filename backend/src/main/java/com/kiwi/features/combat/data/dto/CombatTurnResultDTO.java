@@ -15,10 +15,8 @@ public class CombatTurnResultDTO {
 
     private int turnNumber;
 
-    private CombatActorStateDTO user;
-    private CombatActorStateDTO enemy;
-
     private List<CombatActionDTO> actions;
 
     private String combatStatus;
+
 }

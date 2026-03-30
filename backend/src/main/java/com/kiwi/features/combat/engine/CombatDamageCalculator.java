@@ -1,8 +1,11 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.data.dto.*;
+import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.AttackType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.combat.data.enums.SkillEffectResultType;
+import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,55 +23,64 @@ public class CombatDamageCalculator {
 
     public CombatActionDTO executeSkill(
             CombatContext context,
-            CombatActorType actor,
+            CombatActorType actorType,
             Long skillId
     ) {
+        // No skills availables
+        if(skillId == -1) {
 
-        ActorRuntime attacker = context.getActor(actor);
-        ActorRuntime target = context.getTarget(actor);
+            return CombatActionDTO.builder()
+                    .actionType(ActionType.SKIP.name())
+                    .actor(actorType.name())
+                    .build();
+        }
+
+        ActorRuntime attacker = context.getActor(actorType);
 
         SkillRuntime skill = attacker.getSkills().get(skillId);
 
-        List<SkillEffectDTO> effects = new ArrayList<>();
+        List<SkillEffectResultDTO> effectsResults = new ArrayList<>();
 
         attacker.setLastSkillUsed(skillId);
 
-        // ESTO HAY QUE TENER CUIDADO PORQUE EL ORDEN DEBE IMPORTAR (AÑADIR CAMPO PARA QUE SE ELIJA ORDEN DEFINIR ORDEN FIJO DAMAGE/HEAL/STATUS)
+        //todo: ESTO HAY QUE TENER CUIDADO PORQUE EL ORDEN DEBE IMPORTAR (AÑADIR CAMPO PARA QUE SE ELIJA ORDEN DEFINIR ORDEN FIJO DAMAGE/HEAL/STATUS)
         for (SkillEffectRuntime effect : skill.getEffects()) {
+
+            ActorRuntime target = context.getTarget(actorType, effect.getTarget());
 
             switch (effect.getEffectType()) {
 
-                case DAMAGE -> effects.add(
-                        applyDamage(context, attacker, target, effect)
+                case DAMAGE -> effectsResults.add(
+                        applyDamage(attacker, target, effect)
                 );
 
-                case HEAL -> effects.add(
-                        applyHeal(attacker, effect)
+                case HEAL -> effectsResults.add(
+                        applyHeal(target, effect)
                 );
 
                 case APPLY_STATUS -> {
 
-                    SkillEffectDTO statusEffect =
-                            applyStatus(attacker, target, effect);
+                    SkillEffectResultDTO statusEffect =
+                            applyStatus(attacker, target, effect, skillId, context.getCombat().getId());
 
                     if(statusEffect != null) {
-                        effects.add(statusEffect);
+                        effectsResults.add(statusEffect);
                     }
                 }
             }
         }
 
         return CombatActionDTO.builder()
-                .actor(actor.name())
-                .skillId(skillId)
-                .effects(effects)
+                .actionType(ActionType.SKILL_USED.name())
+                .actor(actorType.name())
+                .skillName(skill.getName())
+                .effects(effectsResults)
                 .build();
     }
 
     // ------------------------------------------------
 
-    private SkillEffectDTO applyDamage(
-            CombatContext context,
+    private SkillEffectResultDTO applyDamage(
             ActorRuntime attacker,
             ActorRuntime victim,
             SkillEffectRuntime effect
@@ -83,10 +95,8 @@ public class CombatDamageCalculator {
         int roll = random.nextInt(100);
 
         if (roll > hitChance) {
-            //TODO: ME ACABO DE DAR CUENTA QUE EXISTE MIS Y CRITICO EN LA DB DE LOG OSEA QUE VALE LO ENFOCAMOS ASI, TENGO QUE REVISAR AUN
-            // PERO A LO MEJOR SE PUEDE AÑADIR OTRO MAS CONCRETO PARA CUANDO EL ACTOR NO PUEDE ATACAR POR CULPA DE UN ESTADO PORQUE MISS ES AMBIGUO
-            return SkillEffectDTO.builder()
-                    .type("MISS")
+            return SkillEffectResultDTO.builder()
+                    .type(SkillEffectResultType.MISS.name())
                     .target(victim.getType().name())
                     .build();
         }
@@ -138,27 +148,27 @@ public class CombatDamageCalculator {
 
             attacker.heal(damage);
 
-            return SkillEffectDTO.builder()
-                    .type("HEAL")
+            return SkillEffectResultDTO.builder()
+                    .type(SkillEffectResultType.HEAL.name())
                     .target(attacker.getType().name())
                     .value((float) damage)
-                    .crit(false)
+                    .critic(false)
                     .build();
         }
 
         victim.damage(damage);
 
-        return SkillEffectDTO.builder()
-                .type("DAMAGE")
+        return SkillEffectResultDTO.builder()
+                .type(SkillEffectResultType.DAMAGE.name())
                 .target(victim.getType().name())
                 .value((float) damage)
-                .crit(crit)
+                .critic(crit)
                 .build();
     }
 
     // ------------------------------------------------
 
-    private SkillEffectDTO applyHeal(
+    private SkillEffectResultDTO applyHeal(
             ActorRuntime target,
             SkillEffectRuntime effect
     ) {
@@ -168,48 +178,49 @@ public class CombatDamageCalculator {
 
         target.heal(heal);
 
-        return SkillEffectDTO.builder()
-                .type("HEAL")
+        return SkillEffectResultDTO.builder()
+                .type(SkillEffectResultType.HEAL.name())
                 .target(target.getType().name())
                 .value((float) heal)
-                .crit(false)
+                .critic(false)
                 .build();
     }
 
     // ------------------------------------------------
 
-    private SkillEffectDTO applyStatus(
+    private SkillEffectResultDTO applyStatus(
             ActorRuntime attacker,
-            ActorRuntime victim,
-            SkillEffectRuntime effect
+            ActorRuntime target,
+            SkillEffectRuntime effect,
+            Long skillId,
+            Long combatId
     ) {
 
-        float resistance =
-                victim.getStatusResistances()
-                        .getOrDefault(effect.getStateId(), 0f);
+        if (attacker != target) {
+            float resistance =
+                    target.getStatusResistances()
+                            .getOrDefault(effect.getStateId(), 0f);
 
-        float chance =
-                1f - resistance;
+            float chance = 1f - resistance;
 
-        if(random.nextFloat() > chance) {
-            return null;
+            if (random.nextFloat() > chance) {
+                return null;
+            }
         }
 
         ActiveState state = new ActiveState(
                 effect.getStateId(),
+                effect.getStateName(),
                 effect.getStatusDuration(),
                 effect.getPower()
         );
 
-        victim.getStates().add(state);
+        CombatStateAppliedDTO stateDTO = stateService.applyNewState(state, target, skillId, combatId);
 
-        CombatStateAppliedDTO dto =
-                stateService.buildStateDTO(state);
-
-        return SkillEffectDTO.builder()
-                .type("STATUS")
-                .target(victim.getType().name())
-                .appliedState(dto)
+        return SkillEffectResultDTO.builder()
+                .type(SkillEffectResultType.STATUS_APPLIED.name())
+                .target(target.getType().name())
+                .stateApplied(stateDTO)
                 .build();
     }
 }

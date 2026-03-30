@@ -1,9 +1,6 @@
 package com.kiwi.features.combat.data.dto;
 
-import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import lombok.*;
-
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -16,15 +13,14 @@ public class CombatDTO {
 
     private Long combatConfigId;
 
-    private int timeMax;
-    private int timeRemaining;
-
     private int turnNumber;
 
-    private CombatGeneralStatus combatStatus;
+    private Long endsAt;
 
-    private Instant startedAt;
+    private String combatStatus;
 
     private UserActorDTO user;
     private EnemyActorDTO enemy;
+
+    //TODO faltan los combatstateapplied y el log (vacios si empieza el combate)
 }

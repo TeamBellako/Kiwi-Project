@@ -1,12 +1,13 @@
 package com.kiwi.features.combat.data.persistence;
 
 import com.kiwi.features.combat.data.enums.CombatActorType;
-import com.kiwi.features.combat.data.enums.CombatLogEffectType;
+import com.kiwi.features.combat.data.enums.SkillEffectResultType;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
 
+//TODO ESTA CLASE HAY QUE REVISARLA AL FINAL PARA VER COMO METEMOS TODA LA INFO EN LA BBDD
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,7 +38,7 @@ public class CombatLogPersistence {
 
     @Enumerated(EnumType.STRING)
     @Column(name="effect_type")
-    private CombatLogEffectType effectType;
+    private SkillEffectResultType effectType;
 
     private Float value;
 

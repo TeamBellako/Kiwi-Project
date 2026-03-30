@@ -9,6 +9,8 @@ import lombok.*;
 public class UserElementMultiplierDomain {
 
     private Long userId;
+
     private Long elementId;
+
     private float multiplier;
 }

@@ -2,6 +2,7 @@ package com.kiwi.features.combat.data.domain;
 
 import com.kiwi.features.combat.data.enums.AttackType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.combat.data.enums.SkillEffectTargetType;
 import com.kiwi.features.combat.data.enums.SkillEffectType;
 import lombok.*;
 
@@ -16,7 +17,7 @@ public class SkillEffectDomain {
 
     private Long skillId;
 
-    private CombatActorType target;
+    private SkillEffectTargetType target;
 
     private SkillEffectType effectType;
 

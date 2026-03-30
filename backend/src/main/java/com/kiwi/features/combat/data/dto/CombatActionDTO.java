@@ -13,7 +13,12 @@ public class CombatActionDTO {
 
     private String actor;     // USER / ENEMY
 
-    private Long skillId;
+    private String actionType;
 
-    private List<SkillEffectDTO> effects;
+    private String stateName;
+    private int value;
+    private List<Long> blockedSkills;
+
+    private String skillName;
+    private List<SkillEffectResultDTO> effects;
 }

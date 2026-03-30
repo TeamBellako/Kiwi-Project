@@ -9,6 +9,8 @@ import lombok.*;
 public class UserStatusResistanceDomain {
 
     private Long userId;
+
     private Long stateId;
+
     private float resistance;
 }
