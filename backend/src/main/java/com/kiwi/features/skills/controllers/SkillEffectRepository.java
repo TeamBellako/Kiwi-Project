@@ -1,6 +1,6 @@
-package com.kiwi.features.combat.repositories;
+package com.kiwi.features.skills.controllers;
 
-import com.kiwi.features.combat.data.persistence.SkillEffectPersistence;
+import com.kiwi.features.skills.data.SkillEffectPersistence;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

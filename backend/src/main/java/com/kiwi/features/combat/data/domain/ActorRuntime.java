@@ -1,7 +1,8 @@
-package com.kiwi.features.combat.engine;
+package com.kiwi.features.combat.data.domain;
 
 import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.skills.data.SkillCombatDomain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,9 +32,9 @@ public class ActorRuntime {
     private Map<Long, Float> elementMultipliers;
     private Map<Long, Float> statusResistances;
 
-    private List<ActiveState> states;
+    private List<CombatStatusAppliedDomain> states;
 
-    private Map<Long, SkillRuntime> skills;
+    private Map<Long, SkillCombatDomain> skills;
     @Setter
     private List<Long> blockedSkills;
 

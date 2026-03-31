@@ -2,6 +2,8 @@ package com.kiwi.features.combat.data.dto;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,8 +21,12 @@ public class CombatDTO {
 
     private String combatStatus;
 
-    private UserActorDTO user;
-    private EnemyActorDTO enemy;
+    private String enemyName;
+    private String enemySprite;
 
-    //TODO faltan los combatstateapplied y el log (vacios si empieza el combate)
+    private CombatActorDTO user;
+    private CombatActorDTO enemy;
+
+    private List<CombatActionDTO> log;
+
 }

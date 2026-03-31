@@ -11,9 +11,11 @@ public class ElementMultiplierDTO {
 
     private Long elementId;
 
-    private String elementName;
+    private String name;
 
-    private int elementIcon;
+    private int icon;
+
+    private String description;
 
     private float multiplier;
 }

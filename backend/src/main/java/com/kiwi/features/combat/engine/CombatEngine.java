@@ -1,5 +1,7 @@
 package com.kiwi.features.combat.engine;
 
+import com.kiwi.features.combat.controllers.CombatStateService;
+import com.kiwi.features.combat.data.domain.ActorRuntime;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
 import com.kiwi.features.combat.data.enums.ActionType;

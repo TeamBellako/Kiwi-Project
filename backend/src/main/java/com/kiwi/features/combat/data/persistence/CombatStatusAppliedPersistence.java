@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "combat_status_effects")
-public class CombatStatusEffectPersistence {
+public class CombatStatusAppliedPersistence {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

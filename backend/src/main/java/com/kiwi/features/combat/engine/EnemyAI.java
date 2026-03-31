@@ -1,5 +1,8 @@
 package com.kiwi.features.combat.engine;
 
+import com.kiwi.features.combat.data.domain.ActorRuntime;
+import com.kiwi.features.skills.data.SkillEffectDomain;
+import com.kiwi.features.skills.data.SkillCombatDomain;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,14 +20,14 @@ public class EnemyAI {
         ActorRuntime enemy = context.getEnemy();
         ActorRuntime user = context.getUser();
 
-        List<SkillRuntime> skills =
+        List<SkillCombatDomain> skills =
                 new ArrayList<>(enemy.getSkills().values());
 
         Long bestSkillId = -1L;
 
         float bestScore = -999;
 
-        for (SkillRuntime skill : skills) {
+        for (SkillCombatDomain skill : skills) {
 
             float score =
                     evaluateSkill(skill, enemy, user);
@@ -41,14 +44,14 @@ public class EnemyAI {
     // ----------------------------------------------------------------------------------------------------------------
 
     private float evaluateSkill(
-            SkillRuntime skill,
+            SkillCombatDomain skill,
             ActorRuntime enemy,
             ActorRuntime user
     ) {
 
         float score = 0;
 
-        for (SkillEffectRuntime effect : skill.getEffects()) {
+        for (SkillEffectDomain effect : skill.getEffects()) {
 
             switch (effect.getEffectType()) {
 

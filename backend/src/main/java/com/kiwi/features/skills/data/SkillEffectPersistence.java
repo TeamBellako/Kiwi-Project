@@ -1,7 +1,6 @@
-package com.kiwi.features.combat.data.persistence;
+package com.kiwi.features.skills.data;
 
 import com.kiwi.features.combat.data.enums.AttackType;
-import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.SkillEffectTargetType;
 import com.kiwi.features.combat.data.enums.SkillEffectType;
 import jakarta.persistence.*;

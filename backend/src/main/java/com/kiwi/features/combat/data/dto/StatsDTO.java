@@ -1,4 +1,4 @@
-package com.kiwi.features.combat.data.domain;
+package com.kiwi.features.combat.data.dto;
 
 import lombok.*;
 
@@ -6,14 +6,10 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EnemyDomain {
-
-    private Long id;
-    private String name;
-    private String sprite;
+@Builder
+public class StatsDTO {
 
     private int maxHp;
-    private int tim;
 
     private int patk;
     private int matk;

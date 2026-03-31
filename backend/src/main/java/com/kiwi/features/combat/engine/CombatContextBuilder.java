@@ -1,13 +1,13 @@
 package com.kiwi.features.combat.engine;
 
 
-import com.kiwi.features.combat.data.dto.ElementMultiplierDTO;
-import com.kiwi.features.combat.data.dto.StatusResistanceDTO;
+import com.kiwi.features.combat.data.domain.CombatStatusAppliedDomain;
+import com.kiwi.features.combat.data.domain.ActorRuntime;
+import com.kiwi.features.skills.data.SkillCombatDomain;
+import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
-import com.kiwi.features.combat.data.persistence.EnemyPersistence;
-import com.kiwi.features.combat.data.persistence.UserStatsPersistence;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,51 +20,48 @@ public class CombatContextBuilder {
 
     public CombatContext build(
             CombatPersistence combat,
-            UserStatsPersistence userStats,
-            EnemyPersistence enemy,
-            List<ElementMultiplierDTO> userElements,
-            List<ElementMultiplierDTO> enemyElements,
-            List<StatusResistanceDTO> userResistances,
-            List<StatusResistanceDTO> enemyResistances,
-            Map<Long, SkillRuntime> userSkills,
-            Map<Long, SkillRuntime> enemySkills,
+            CombatActorDTO userDTO,
+            CombatActorDTO enemyDTO,
+            Map<Long, SkillCombatDomain> userSkills,
+            Map<Long, SkillCombatDomain> enemySkills,
             Long userLastSkillUsed,
             Long enemyLastSkillUsed
             ) {
 
         ActorRuntime user =
-                buildUserRuntime(combat, userStats, userElements, userResistances, userSkills, userLastSkillUsed);
+                buildActorRuntime(CombatActorType.USER, combat, userDTO, userSkills, userLastSkillUsed);
 
         ActorRuntime enemyRuntime =
-                buildEnemyRuntime(combat, enemy, enemyElements, enemyResistances, enemySkills, enemyLastSkillUsed);
+                buildActorRuntime(CombatActorType.ENEMY, combat, enemyDTO, enemySkills, enemyLastSkillUsed);
 
         return new CombatContext(combat, user, enemyRuntime);
     }
 
-    private ActorRuntime buildUserRuntime(
+    private ActorRuntime buildActorRuntime(
+            CombatActorType actorType,
             CombatPersistence combat,
-            UserStatsPersistence stats,
-            List<ElementMultiplierDTO> elements,
-            List<StatusResistanceDTO> resistances,
-            Map<Long, SkillRuntime> skills,
-            Long userLastSkillUsed
+            CombatActorDTO combatActorDTO,
+            Map<Long, SkillCombatDomain> skills,
+            Long lastSkillUsed
     ) {
+        StatsDTO stats = combatActorDTO.getStats();
 
-        Map<Long, Float> elementMap =
-                elements.stream()
+        Map<Long, Float> elementsMap =
+                combatActorDTO.getElementalMultipliers().stream()
                         .collect(Collectors.toMap(
                                 ElementMultiplierDTO::getElementId,
                                 ElementMultiplierDTO::getMultiplier
                         ));
 
         Map<Long, Float> resistanceMap =
-                resistances.stream()
+                combatActorDTO.getStatusResistances().stream()
                         .collect(Collectors.toMap(
                                 StatusResistanceDTO::getStateId,
                                 StatusResistanceDTO::getResistance
                         ));
+
         return ActorRuntime.builder()
-                .type(CombatActorType.USER)
+                .type(actorType)
                 .hp(combat.getUserHp())
                 .maxHp(stats.getMaxHp())
                 .patk(stats.getPatk())
@@ -74,55 +71,34 @@ public class CombatContextBuilder {
                 .acc(stats.getAcc())
                 .eva(stats.getEva())
                 .lck(stats.getLck())
-                .elementMultipliers(elementMap)
+                .elementMultipliers(elementsMap)
                 .statusResistances(resistanceMap)
-                .states(new ArrayList<>()) //TODO COGER DEL REPOSITORY
+                .states(buildActiveStates(combatActorDTO.getStatusApplied()))
                 .skills(skills)
-                .lastSkillUsed(userLastSkillUsed)
+                .lastSkillUsed(lastSkillUsed)
                 .actionModifierType(ActionType.SKILL_USED)
                 .build();
     }
 
-    private ActorRuntime buildEnemyRuntime(
-            CombatPersistence combat,
-            EnemyPersistence enemy,
-            List<ElementMultiplierDTO> elements,
-            List<StatusResistanceDTO> resistances,
-            Map<Long, SkillRuntime> skills,
-            Long enemyLastSkillUsed
-    ) {
+    //-----------------------------------------------------------------------------------------------------------------
 
-        Map<Long, Float> elementMap =
-                elements.stream()
-                        .collect(Collectors.toMap(
-                                ElementMultiplierDTO::getElementId,
-                                ElementMultiplierDTO::getMultiplier
-                        ));
+    List<CombatStatusAppliedDomain> buildActiveStates(List<CombatStatusAppliedDTO> statusAppliedList){
 
-        Map<Long, Float> resistanceMap =
-                resistances.stream()
-                        .collect(Collectors.toMap(
-                                StatusResistanceDTO::getStateId,
-                                StatusResistanceDTO::getResistance
-                        ));
+        List<CombatStatusAppliedDomain> activeStates = new ArrayList<>();
 
-        return ActorRuntime.builder()
-                .type(CombatActorType.ENEMY)
-                .hp(combat.getEnemyHp())
-                .maxHp(enemy.getMaxHp())
-                .patk(enemy.getPatk())
-                .matk(enemy.getMatk())
-                .pdef(enemy.getPdef())
-                .mdef(enemy.getMdef())
-                .acc(enemy.getAcc())
-                .eva(enemy.getEva())
-                .lck(enemy.getLck())
-                .elementMultipliers(elementMap)
-                .statusResistances(resistanceMap)
-                .states(new ArrayList<>()) //TODO COGER DEL REPOSITORY
-                .skills(skills)
-                .lastSkillUsed(enemyLastSkillUsed)
-                .actionModifierType(ActionType.SKILL_USED)
-                .build();
+        for (CombatStatusAppliedDTO statusApplied : statusAppliedList){
+
+            CombatStatusAppliedDomain activeState = CombatStatusAppliedDomain.builder()
+                    .stateId(statusApplied.getStateId())
+                    .name(statusApplied.getName())
+                    .remainingTurns(statusApplied.getRemainingTurns())
+                    .value(statusApplied.getValue())
+                    .build();
+
+            activeStates.add(activeState);
+        }
+
+        return activeStates;
     }
+
 }

@@ -1,25 +1,17 @@
-package com.kiwi.features.combat.data.domain;
+package com.kiwi.features.skills.data;
 
 import com.kiwi.features.combat.data.enums.AttackType;
-import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.SkillEffectTargetType;
 import com.kiwi.features.combat.data.enums.SkillEffectType;
 import lombok.*;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class SkillEffectDomain {
 
-    private Long id;
-
-    private Long skillId;
+    private SkillEffectType effectType;
 
     private SkillEffectTargetType target;
-
-    private SkillEffectType effectType;
 
     private Float power;
 
@@ -31,5 +23,8 @@ public class SkillEffectDomain {
 
     private Long stateId;
 
+    private String stateName;
+
     private Integer statusDuration;
+
 }

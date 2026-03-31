@@ -1,11 +1,16 @@
 package com.kiwi.features.combat.engine;
 
+import com.kiwi.features.combat.controllers.CombatStateService;
+import com.kiwi.features.combat.data.domain.CombatStatusAppliedDomain;
+import com.kiwi.features.combat.data.domain.ActorRuntime;
+import com.kiwi.features.skills.data.SkillEffectDomain;
+import com.kiwi.features.skills.data.SkillCombatDomain;
 import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.AttackType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.SkillEffectResultType;
-import com.kiwi.features.combat.data.persistence.CombatPersistence;
+import com.kiwi.features.skills.data.SkillEffectResultDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -37,14 +42,14 @@ public class CombatDamageCalculator {
 
         ActorRuntime attacker = context.getActor(actorType);
 
-        SkillRuntime skill = attacker.getSkills().get(skillId);
+        SkillCombatDomain skill = attacker.getSkills().get(skillId);
 
         List<SkillEffectResultDTO> effectsResults = new ArrayList<>();
 
         attacker.setLastSkillUsed(skillId);
 
         //todo: ESTO HAY QUE TENER CUIDADO PORQUE EL ORDEN DEBE IMPORTAR (AÑADIR CAMPO PARA QUE SE ELIJA ORDEN DEFINIR ORDEN FIJO DAMAGE/HEAL/STATUS)
-        for (SkillEffectRuntime effect : skill.getEffects()) {
+        for (SkillEffectDomain effect : skill.getEffects()) {
 
             ActorRuntime target = context.getTarget(actorType, effect.getTarget());
 
@@ -83,7 +88,7 @@ public class CombatDamageCalculator {
     private SkillEffectResultDTO applyDamage(
             ActorRuntime attacker,
             ActorRuntime victim,
-            SkillEffectRuntime effect
+            SkillEffectDomain effect
     ) {
 
         // ACCURACY CHECK
@@ -170,7 +175,7 @@ public class CombatDamageCalculator {
 
     private SkillEffectResultDTO applyHeal(
             ActorRuntime target,
-            SkillEffectRuntime effect
+            SkillEffectDomain effect
     ) {
 
         int heal =
@@ -191,7 +196,7 @@ public class CombatDamageCalculator {
     private SkillEffectResultDTO applyStatus(
             ActorRuntime attacker,
             ActorRuntime target,
-            SkillEffectRuntime effect,
+            SkillEffectDomain effect,
             Long skillId,
             Long combatId
     ) {
@@ -208,19 +213,19 @@ public class CombatDamageCalculator {
             }
         }
 
-        ActiveState state = new ActiveState(
+        CombatStatusAppliedDomain state = new CombatStatusAppliedDomain(
                 effect.getStateId(),
                 effect.getStateName(),
                 effect.getStatusDuration(),
                 effect.getPower()
         );
 
-        CombatStateAppliedDTO stateDTO = stateService.applyNewState(state, target, skillId, combatId);
+        CombatStatusAppliedDTO stateDTO = stateService.applyNewState(state, target, skillId, combatId);
 
         return SkillEffectResultDTO.builder()
                 .type(SkillEffectResultType.STATUS_APPLIED.name())
                 .target(target.getType().name())
-                .stateApplied(stateDTO)
+                .statusApplied(stateDTO)
                 .build();
     }
 }

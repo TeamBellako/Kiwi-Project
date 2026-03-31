@@ -1,5 +1,6 @@
 package com.kiwi.features.combat.engine;
 
+import com.kiwi.features.combat.data.domain.ActorRuntime;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.SkillEffectTargetType;
@@ -17,7 +18,7 @@ public class CombatContext {
 
     private Random random = new Random();
 
-    private CombatPersistence combat;
+    private CombatPersistence combat; // TODO esto se tiene que cambiar
 
     private ActorRuntime user;
     private ActorRuntime enemy;

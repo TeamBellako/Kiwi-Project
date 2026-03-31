@@ -1,5 +1,6 @@
 package com.kiwi.features.combat.data.dto;
 
+import com.kiwi.features.skills.data.SkillEffectResultDTO;
 import lombok.*;
 
 import java.util.List;
