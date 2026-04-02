@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.skills.tests
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.bellako.kiwi.R
 import com.bellako.kiwi.features.skills.data.GoalData
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.data.SkillType
@@ -32,8 +33,8 @@ object SkillsTestFactory {
             type = SkillType.ADAPTABILITY,
             description = "Skill with time-based cooldown",
             quote = "Patience is power",
-            icon = 1,
-            onThrowSFX = 1,
+            icon = R.drawable.ic_skills_resilience,
+            onThrowSFX = R.raw.snd_fx_skill_resilience,
             levelupSkillId = null,
             isCooldown = false,
             deckSlot = 1,
@@ -49,8 +50,8 @@ object SkillsTestFactory {
             type = SkillType.ADAPTABILITY,
             description = "Cooldown ends when a goal is completed and mucho mas texto sobre lo que hace",
             quote = "Goal skill quote",
-            icon = 2,
-            onThrowSFX = 1,
+            icon = R.drawable.ic_skills_resilience,
+            onThrowSFX = R.raw.snd_fx_skill_resilience,
             levelupSkillId = null,
             isCooldown = true,
             deckSlot = 2,
@@ -65,8 +66,8 @@ object SkillsTestFactory {
             type = SkillType.ADAPTABILITY,
             description = "Special cooldown condition",
             quote = null,
-            icon = 3,
-            onThrowSFX = 1,
+            icon = R.drawable.ic_skills_resilience,
+            onThrowSFX = R.raw.snd_fx_skill_resilience,
             levelupSkillId = null,
             isCooldown = false,
             deckSlot = 0,
@@ -82,8 +83,8 @@ object SkillsTestFactory {
                 "Frost skill with timed cooldown, skill with timed cooldown , skill " +
                     "with timed cooldown ,skill with timed cooldown skill.",
             quote = "Cuando el grajo vuela bajo hace un frio del carajo.",
-            icon = 3,
-            onThrowSFX = 1,
+            icon = R.drawable.ic_skills_resilience,
+            onThrowSFX = R.raw.snd_fx_skill_resilience,
             levelupSkillId = 5L,
             isCooldown = true,
             deckSlot = 4,
@@ -99,8 +100,8 @@ object SkillsTestFactory {
             type = SkillType.ADAPTABILITY,
             description = "Just obtained skill",
             quote = null,
-            icon = 1,
-            onThrowSFX = 1,
+            icon = R.drawable.ic_skills_resilience,
+            onThrowSFX = R.raw.snd_fx_skill_resilience,
             levelupSkillId = null,
             isCooldown = false,
             deckSlot = 0,
