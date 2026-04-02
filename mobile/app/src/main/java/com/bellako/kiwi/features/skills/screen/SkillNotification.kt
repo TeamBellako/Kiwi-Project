@@ -80,7 +80,7 @@ fun SkillNotification(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Kiwi_Image(
-                painter = painterResource(id = skillIcon(skill.icon)),
+                painter = painterResource(id = skill.icon),
                 alt = "Skill icon",
                 colorFilter = ColorFilter.tint(kiwiColor.colorF),
                 modifier =

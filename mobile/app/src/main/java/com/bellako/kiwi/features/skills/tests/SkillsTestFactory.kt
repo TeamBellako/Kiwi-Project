@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.features.skills.data.GoalData
 import com.bellako.kiwi.features.skills.data.SkillDomain
+import com.bellako.kiwi.features.skills.data.SkillType
 import com.bellako.kiwi.features.skills.data.SkillsState
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -28,9 +29,11 @@ object SkillsTestFactory {
         SkillDomain.Time(
             id = 1,
             name = "Time Skill",
+            type = SkillType.ADAPTABILITY,
             description = "Skill with time-based cooldown",
             quote = "Patience is power",
             icon = 1,
+            onThrowSFX = 1,
             levelupSkillId = null,
             isCooldown = false,
             deckSlot = 1,
@@ -43,9 +46,11 @@ object SkillsTestFactory {
         SkillDomain.Goal(
             id = 2,
             name = "Goal Skill",
+            type = SkillType.ADAPTABILITY,
             description = "Cooldown ends when a goal is completed and mucho mas texto sobre lo que hace",
             quote = "Goal skill quote",
             icon = 2,
+            onThrowSFX = 1,
             levelupSkillId = null,
             isCooldown = true,
             deckSlot = 2,
@@ -57,9 +62,11 @@ object SkillsTestFactory {
         SkillDomain.Other(
             id = 3,
             name = "Fireball",
+            type = SkillType.ADAPTABILITY,
             description = "Special cooldown condition",
             quote = null,
             icon = 3,
+            onThrowSFX = 1,
             levelupSkillId = null,
             isCooldown = false,
             deckSlot = 0,
@@ -70,11 +77,13 @@ object SkillsTestFactory {
         SkillDomain.Time(
             id = 4,
             name = "Frost",
+            type = SkillType.ADAPTABILITY,
             description =
                 "Frost skill with timed cooldown, skill with timed cooldown , skill " +
                     "with timed cooldown ,skill with timed cooldown skill.",
             quote = "Cuando el grajo vuela bajo hace un frio del carajo.",
             icon = 3,
+            onThrowSFX = 1,
             levelupSkillId = 5L,
             isCooldown = true,
             deckSlot = 4,
@@ -87,9 +96,11 @@ object SkillsTestFactory {
         SkillDomain.Other(
             id = 99,
             name = "Smite",
+            type = SkillType.ADAPTABILITY,
             description = "Just obtained skill",
             quote = null,
             icon = 1,
+            onThrowSFX = 1,
             levelupSkillId = null,
             isCooldown = false,
             deckSlot = 0,

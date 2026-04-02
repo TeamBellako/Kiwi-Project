@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,7 +63,6 @@ fun SkillComponent(
 ) {
     val kiwiColors = LocalKiwiColors.current
     var showModal by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
     Box(
         modifier =
@@ -100,7 +98,7 @@ fun SkillComponent(
                         .padding(start = getResponsiveSizeHeight(20.dp)),
             ) {
                 Kiwi_Image(
-                    skillIcon(skill.icon),
+                    skill.icon,
                     "Skill Icon",
                     modifier =
                         Modifier
@@ -229,18 +227,6 @@ fun skillDecoration(
         }
     } else {
         R.drawable.skill_deco
-    }
-
-@DrawableRes
-fun skillIcon(skillIcon: Int): Int =
-    @Suppress("MagicNumber")
-    when (skillIcon) {
-        1 -> R.drawable.ic_skills_adaptability
-        2 -> R.drawable.ic_skills_control
-        3 -> R.drawable.ic_skills_empathy
-        4 -> R.drawable.ic_skills_focus
-        5 -> R.drawable.ic_skills_motivation
-        else -> R.drawable.ic_skills_resilience
     }
 
 fun skillStatusText(isCooldown: Boolean): String =
