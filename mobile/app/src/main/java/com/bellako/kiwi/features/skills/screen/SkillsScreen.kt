@@ -18,9 +18,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Display1
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
@@ -48,6 +50,8 @@ fun SkillsScreen(
     val skillsState by skillsViewModel.state.collectAsState()
     val kiwiColors = LocalKiwiColors.current
     val listState = rememberLazyListState()
+
+    val context = LocalContext.current
 
     LaunchedEffect(skillsState, focusedSkillId) {
         if (focusedSkillId == null) return@LaunchedEffect
@@ -100,7 +104,12 @@ fun SkillsScreen(
                 DeckGrid(
                     it.deckSkills,
                     onClick =
-                        { id -> skillsViewModel.unequipSkill(id) },
+                        { id ->
+
+                            skillsViewModel.unequipSkill(id)
+
+                            AudioManager.playSFX(context, R.raw.snd_fx_skill_unequip)
+                        },
                     onApplyGoalProgress =
                         { skillId, goalId, newProgress ->
                             skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
@@ -132,7 +141,12 @@ fun SkillsScreen(
                 AllSkillsGrid(
                     it.allSkills,
                     onClick =
-                        { id -> skillsViewModel.equipSkill(id) },
+                        { id ->
+
+                            skillsViewModel.equipSkill(id)
+
+                            AudioManager.playSFX(context, R.raw.snd_fx_skill_equip)
+                        },
                     onApplyGoalProgress =
                         { skillId, goalId, newProgress ->
                             skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)

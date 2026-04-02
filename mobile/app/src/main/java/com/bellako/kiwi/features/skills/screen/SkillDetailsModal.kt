@@ -286,7 +286,7 @@ private fun SkillDetailsHeader(
         ) {
             // ICON
             Kiwi_Image(
-                skillIcon(skill.icon),
+                skill.icon,
                 "Skill Icon",
                 modifier =
                     Modifier

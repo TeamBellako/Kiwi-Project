@@ -18,6 +18,10 @@ public class SkillPersistence {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private SkillType skillType;
+    
     @Column(nullable = false, unique = true)
     private String name;
 
@@ -25,9 +29,6 @@ public class SkillPersistence {
     private String description;
 
     private String quote;
-
-    @Column(nullable = false)
-    private int icon;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "cooldown_type", nullable = false)

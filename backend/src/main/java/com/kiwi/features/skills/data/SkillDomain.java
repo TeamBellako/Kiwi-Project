@@ -11,7 +11,7 @@ public class SkillDomain {
     private String name;
     private String description;
     private String quote;
-    private int icon;
+    private SkillType type;
 
     private CooldownType cooldownType;
     private Long cooldownGoalId;
@@ -28,7 +28,7 @@ public class SkillDomain {
             String name,
             String description,
             String quote,
-            int icon,
+            SkillType type,
             CooldownType cooldownType,
             Long cooldownGoalId,
             Integer cooldownTimeMinutes,
@@ -42,7 +42,7 @@ public class SkillDomain {
         this.name = name;
         this.description = description;
         this.quote = quote;
-        this.icon = icon;
+        this.type = type;
         this.cooldownType = cooldownType;
         this.cooldownGoalId = cooldownGoalId;
         this.cooldownTimeMinutes = cooldownTimeMinutes;

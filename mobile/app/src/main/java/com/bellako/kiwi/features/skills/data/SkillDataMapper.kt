@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.skills.data
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.bellako.kiwi.R
 import java.time.Instant
 
 object SkillDataMapper {
@@ -12,9 +13,11 @@ object SkillDataMapper {
                 SkillDomain.Other(
                     id = dto.skillId,
                     name = dto.name,
+                    type = SkillType.valueOf(dto.type),
                     description = dto.description,
                     quote = dto.quote,
-                    icon = dto.icon,
+                    icon = resolveIcon(SkillType.valueOf(dto.type)),
+                    onThrowSFX = resolveOnThrowSFX(SkillType.valueOf(dto.type)),
                     levelupSkillId = dto.levelupSkillId,
                     isCooldown = dto.cooldown,
                     deckSlot = dto.deckSlot,
@@ -28,9 +31,11 @@ object SkillDataMapper {
                 SkillDomain.Time(
                     id = dto.skillId,
                     name = dto.name,
+                    type = SkillType.valueOf(dto.type),
                     description = dto.description,
                     quote = dto.quote,
-                    icon = dto.icon,
+                    icon = resolveIcon(SkillType.valueOf(dto.type)),
+                    onThrowSFX = resolveOnThrowSFX(SkillType.valueOf(dto.type)),
                     levelupSkillId = dto.levelupSkillId,
                     isCooldown = dto.cooldown,
                     deckSlot = dto.deckSlot,
@@ -56,9 +61,11 @@ object SkillDataMapper {
         return SkillDomain.Goal(
             id = dto.skillId,
             name = dto.name,
+            type = SkillType.valueOf(dto.type),
             description = dto.description,
             quote = dto.quote,
-            icon = dto.icon,
+            icon = resolveIcon(SkillType.valueOf(dto.type)),
+            onThrowSFX = resolveOnThrowSFX(SkillType.valueOf(dto.type)),
             levelupSkillId = dto.levelupSkillId,
             isCooldown = dto.cooldown,
             deckSlot = dto.deckSlot,
@@ -77,9 +84,9 @@ object SkillDataMapper {
                 SkillDTO(
                     skillId = domain.id,
                     name = domain.name,
+                    type = domain.type.name,
                     description = domain.description,
                     quote = domain.quote,
-                    icon = domain.icon,
                     levelupSkillId = domain.levelupSkillId,
                     cooldown = domain.isCooldown,
                     deckSlot = domain.deckSlot,
@@ -94,9 +101,9 @@ object SkillDataMapper {
                 SkillDTO(
                     skillId = domain.id,
                     name = domain.name,
+                    type = domain.type.name,
                     description = domain.description,
                     quote = domain.quote,
-                    icon = domain.icon,
                     levelupSkillId = domain.levelupSkillId,
                     cooldown = domain.isCooldown,
                     deckSlot = domain.deckSlot,
@@ -111,9 +118,9 @@ object SkillDataMapper {
                 SkillDTO(
                     skillId = domain.id,
                     name = domain.name,
+                    type = domain.type.name,
                     description = domain.description,
                     quote = domain.quote,
-                    icon = domain.icon,
                     levelupSkillId = domain.levelupSkillId,
                     cooldown = domain.isCooldown,
                     deckSlot = domain.deckSlot,
@@ -123,5 +130,25 @@ object SkillDataMapper {
                     cooldownGoalId = domain.cooldownGoalId,
                     cooldownOtherDescription = null,
                 )
+        }
+
+    private fun resolveIcon(type: SkillType): Int =
+        when (type) {
+            SkillType.ADAPTABILITY -> R.drawable.ic_skills_adaptability
+            SkillType.CONTROL -> R.drawable.ic_skills_control
+            SkillType.EMPATHY -> R.drawable.ic_skills_empathy
+            SkillType.FOCUS -> R.drawable.ic_skills_focus
+            SkillType.MOTIVATION -> R.drawable.ic_skills_motivation
+            else -> R.drawable.ic_skills_resilience
+        }
+
+    private fun resolveOnThrowSFX(type: SkillType): Int =
+        when (type) {
+            SkillType.ADAPTABILITY -> R.raw.snd_fx_skill_adaptability
+            SkillType.CONTROL -> R.raw.snd_fx_skill_control
+            SkillType.EMPATHY -> R.raw.snd_fx_skill_empathy
+            SkillType.FOCUS -> R.raw.snd_fx_skill_focus
+            SkillType.MOTIVATION -> R.raw.snd_fx_skill_motivation
+            else -> R.raw.snd_fx_skill_resilience
         }
 }
