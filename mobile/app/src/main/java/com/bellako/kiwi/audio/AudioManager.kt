@@ -299,6 +299,24 @@ object AudioManager {
         sfxManager.updateOrCreateLayer(context, AudioLayer(resId, baseVolume, true), 0, false)
     }
 
+    /** Stops a currently playing SFX */
+    fun stopSFX(
+        resId: Int,
+        fadeDuration: Long = 0,
+    ) {
+        val layerPlayer = sfxManager.getLayers()[resId]
+        if (layerPlayer != null) {
+            sfxManager.removeLayer(
+                AudioLayer(
+                    resId = resId,
+                    baseVolume = layerPlayer.layer.baseVolume,
+                    isActive = false,
+                ),
+                fadeDuration,
+            )
+        }
+    }
+
     /**
      * Should be called when the app goes to background or screen turns off.
      * Pause the music and SFXs if any.

@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -63,6 +64,7 @@ fun SkillComponent(
 ) {
     val kiwiColors = LocalKiwiColors.current
     var showModal by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Box(
         modifier =
