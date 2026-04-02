@@ -231,10 +231,14 @@ fun skillDecoration(
 
 @DrawableRes
 fun skillIcon(skillIcon: Int): Int =
+    @Suppress("MagicNumber")
     when (skillIcon) {
-        1 -> R.drawable.ic_skill_1
-        2 -> R.drawable.ic_skill_2
-        else -> R.drawable.ic_skill_3
+        1 -> R.drawable.ic_skills_adaptability
+        2 -> R.drawable.ic_skills_control
+        3 -> R.drawable.ic_skills_empathy
+        4 -> R.drawable.ic_skills_focus
+        5 -> R.drawable.ic_skills_motivation
+        else -> R.drawable.ic_skills_resilience
     }
 
 fun skillStatusText(isCooldown: Boolean): String =
