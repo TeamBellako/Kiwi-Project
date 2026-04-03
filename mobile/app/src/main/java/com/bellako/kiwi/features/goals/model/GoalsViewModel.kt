@@ -4,6 +4,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
 import com.bellako.kiwi.features.goals.data.GoalDataMapper
@@ -118,6 +121,8 @@ class GoalsViewModel
                 val newGoalsDomain = resultDTOs.map { UserGoalStatusDataMapper.toDomain(it) }
                 val today = dateToString(LocalDate.now())
                 addGoalsToCache(newGoalsDomain, today)
+
+                EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
             }.also {
                 if (it.isFailure) {
                     _state.value =
@@ -170,9 +175,15 @@ class GoalsViewModel
                 val updatedDTO = result.getOrNull()!!
                 val updatedState = UserGoalStatusDataMapper.toState(updatedDTO)
                 val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
+
                 _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
+
                 val updatedDomain = UserGoalStatusDataMapper.toDomain(updatedDTO)
+
                 updateGoalInCache(updatedDomain)
+
+                EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
+
                 Result.success(updatedDomain)
             } else {
                 _state.value = _state.value.copy(isLoading = false, error = result.exceptionOrNull()?.message)
@@ -209,7 +220,11 @@ class GoalsViewModel
                 val updatedGoal = UserGoalStatusDataMapper.toState(result.getOrNull()!!)
                 val updatedGoals = _state.value.goals.map { if (it.id == updatedGoal.id) updatedGoal else it }
                 _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
+
                 val updatedDomain = UserGoalStatusDataMapper.toDomain(result.getOrNull()!!)
+
+                EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
+
                 updateGoalInCache(updatedDomain)
                 usersRepository.getMyUserPoints() // Refrescar puntos al completar goal
             }.also {

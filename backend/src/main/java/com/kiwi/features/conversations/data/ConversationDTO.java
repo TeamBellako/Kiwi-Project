@@ -28,6 +28,10 @@ public class ConversationDTO {
     private String dialogW;
     private NextEventType nextEvent;
     private Long eventId;
+    private String incidenceForNextEvent;
+    private Long fallbackEventId;
+    private String incidenceNameToSet;
+    private Boolean incidenceValueToSet = true;
     private List<ConversationOptionDTO> options;
     private String onCompletedEvent;
     private String onCompletedAction;

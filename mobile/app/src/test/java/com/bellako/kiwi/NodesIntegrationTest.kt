@@ -2,6 +2,7 @@ package com.bellako.kiwi
 
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.features.nodes.data.NodeStatus
+import com.bellako.kiwi.features.nodes.data.NodesDomain
 import com.bellako.kiwi.features.nodes.model.NodesRepository
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
@@ -66,11 +67,11 @@ class NodesIntegrationTest {
             whenever(repository.getNodesByMapId(0))
                 .thenReturn(initialState.nodes.values.toList())
 
-            val lockedNode = initialState.nodes[4L]!!
-
+            val lockedNode: NodesDomain = initialState.nodes[4L]!!
+            val mockList: List<NodesDomain> = listOf(lockedNode.copy(status = NodeStatus.OPEN))
             whenever(repository.unlockNode(4L))
                 .thenReturn(
-                    lockedNode.copy(status = NodeStatus.OPEN),
+                    mockList,
                 )
 
             viewModel.loadNodes(0)

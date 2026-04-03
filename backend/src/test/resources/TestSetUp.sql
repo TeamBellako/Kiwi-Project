@@ -118,6 +118,26 @@ CREATE TABLE IF NOT EXISTS user_goal_status (
     CONSTRAINT fk_ugs_goals FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS tips (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    text VARCHAR(255) NOT NULL,
+    read_more_url VARCHAR(255)
+);
+
+INSERT INTO tips (title, text, read_more_url) 
+    VALUES ('Pomodoro Timer', 'Just work, bro', 'https://www.todoist.com/es/productivity-methods/pomodoro-technique');
+    
+CREATE TABLE IF NOT EXISTS incidences (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS user_incidences (
+    user_id BIGINT NOT NULL,
+    incidence_id BIGINT NOT NULL,
+    value BOOLEAN NOT NULL DEFAULT FALSE
+);
 
 
 

@@ -14,6 +14,7 @@ public class ConversationOptionMapper {
                 .textM(entity.getTextM())
                 .textW(entity.getTextW())
                 .nextEventId(entity.getNextEventId())
+                .incidenceToShow(entity.getIncidenceToShow())
             .cost(entity.getCost())
                 .build();
     }
@@ -33,6 +34,7 @@ public class ConversationOptionMapper {
         entity.setTextW(dto.getTextW());
         entity.setNextEventId(dto.getNextEventId());
         entity.setCost(dto.getCost());
+        entity.setIncidenceToShow(dto.getIncidenceToShow());
         return entity;
     }
 }

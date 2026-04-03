@@ -164,6 +164,7 @@ class QuestsViewModel
             viewModelScope.launch {
                 setIsLoading(true)
                 setUiState(UIState.Loading)
+
                 try {
                     val quest = repository.giveQuest(questId)
                     _state.value =
@@ -172,6 +173,8 @@ class QuestsViewModel
                         )
                     notifyNewQuest(quest)
                     setUiState(UIState.Success(Unit))
+
+                    EventBus.emitEvent(EventType.QUESTS_UPDATED, EventPayload.EmptyPayload())
                 } catch (e: HttpException) {
                     warn("HTTP error giving quest: ${e.message}")
                     setUiState(mapExceptionToUIState(e))
@@ -200,6 +203,8 @@ class QuestsViewModel
                     }
 
                     setUiState(UIState.Success(Unit))
+
+                    EventBus.emitEvent(EventType.QUESTS_UPDATED, EventPayload.EmptyPayload())
 
                     if (domainQuest.onCompletedEvent != "_") {
                         EventBus.emitEvent(
@@ -235,6 +240,8 @@ class QuestsViewModel
                     }
 
                     setUiState(UIState.Success(Unit))
+
+                    EventBus.emitEvent(EventType.QUESTS_UPDATED, EventPayload.EmptyPayload())
                 } catch (e: HttpException) {
                     warn("HTTP error failing subquest: ${e.message}")
                     setUiState(mapExceptionToUIState(e))

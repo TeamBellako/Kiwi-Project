@@ -58,7 +58,7 @@ public class NodesServiceTests {
         statusRepo.saveUserStatus(lockedStatus(userId, node.getId()));
 
         var result = service.unlockNode(userId, node.getId());
-        assertEquals(NodeStatus.OPEN.name(), result.getStatus());
+        assertEquals(NodeStatus.OPEN.name(), result.get(0).getStatus());
     }
 
     @Test(expected = NodeInaccessibleException.class)

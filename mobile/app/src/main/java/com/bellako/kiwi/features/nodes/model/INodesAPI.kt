@@ -14,7 +14,7 @@ interface INodesAPI {
     @POST("api/nodes/{nodeId}/unlock")
     suspend fun unlockNode(
         @Path("nodeId") nodeId: Long,
-    ): NodesDTO
+    ): List<NodesDTO>
 
     @POST("api/nodes/{nodeId}/complete")
     suspend fun completeNode(

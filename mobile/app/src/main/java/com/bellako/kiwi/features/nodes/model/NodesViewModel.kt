@@ -1,6 +1,8 @@
 package com.bellako.kiwi.features.nodes.model
 
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.analytics.FirebaseEventNames
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.services.eventbus.EventPayload
@@ -67,7 +69,18 @@ class NodesViewModel
             }
         }
 
+        @Suppress("MagicNumber")
         override fun completeNode(nodeId: Long) {
+            // Business logic: We understand that a user is activated once she completes, at least, 3 nodes
+            if (nodeId == 1013L) {
+                firebaseLogEvent(FirebaseEventNames.USER_ACTIVATED)
+            }
+
+            // Business logic: We understand that a user is retained once she completes act 1
+            if (nodeId == 1031L) {
+                firebaseLogEvent(FirebaseEventNames.USER_RETAINED)
+            }
+
             updateNodesSafe {
                 repository.completeNode(nodeId)
             }

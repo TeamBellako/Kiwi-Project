@@ -72,6 +72,7 @@ fun ConversationScreen(
         label = "arrow_offset",
     )
     val context = LocalContext.current
+
     // Background image
     Column(
         verticalArrangement = Arrangement.Bottom,
@@ -242,20 +243,21 @@ fun ConversationScreen_Preview() {
                         "Esto es un texto de prueba, que tiene que ser largo de narices pero con W",
                         NextEventType.END,
                         2,
-                        listOf(
-                            ConversationOptionDomain(
-                                1L,
-                                "Option 1",
-                                "Option 1",
-                                "Option 1",
-                                2,
-                                null,
+                        options =
+                            listOf(
+                                ConversationOptionDomain(
+                                    1L,
+                                    "Option 1",
+                                    "Option 1",
+                                    "Option 1",
+                                    2,
+                                    null,
+                                ),
+                                ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
+                                ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
+                                ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
+                                ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
                             ),
-                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
-                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
-                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
-                            ConversationOptionDomain(2L, "Option 2", "Option 2", "Option 2", 2, null),
-                        ),
                         onCompletedEvent = "",
                         onCompletedEntityId = 0,
                     ),

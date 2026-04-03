@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class PersonalityViewModel
     @Inject
     constructor(
-        private val repository: PersonalityRepository,
+        private val repository: IPersonalityRepository,
     ) : BaseViewModel(),
         IPersonalityViewModel {
         private val _state = MutableStateFlow(PersonalityState("", "", "", listOf(), listOf(), neutralApps = listOf()))

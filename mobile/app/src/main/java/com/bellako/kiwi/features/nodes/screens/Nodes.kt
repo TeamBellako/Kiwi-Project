@@ -264,16 +264,8 @@ fun NodeAction(
     val kiwiColors = LocalKiwiColors.current
     val hasName = node.displayName.isNotEmpty()
 
- /*   var heightPx by remember { mutableIntStateOf(0) }
-    val density = LocalDensity.current
-
-    val offsetModifier =
-        if (heightPx > 0) {
-            val halfHeightDp = with(density) { (heightPx / 2).toDp() }
-            Modifier.offset(y = verticalOffset + halfHeightDp)
-        } else {
-            Modifier
-        }*/
+    val isBlankNode = node.onExecutionEvent == "_"
+    if (isBlankNode && node.status != NodeStatus.LOCKED) return
 
     Column(
         modifier = modifier,

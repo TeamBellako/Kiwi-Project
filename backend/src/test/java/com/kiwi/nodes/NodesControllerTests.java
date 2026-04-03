@@ -23,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,9 +78,11 @@ public class NodesControllerTests {
                     setId(1L);
                     setEmail("test@test.com");
                 }}));
-
+        
+        List<NodesDTO> mockResult = new ArrayList<>();
+        mockResult.add(new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, "node1", "Node 1", List.of(2L), 0, true, "", 0));
         when(nodesService.unlockNode(1L, 1L))
-                .thenReturn(new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, "node1", "Node 1", List.of(2L), 0, true, "", 0));
+                .thenReturn(mockResult);
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/1/unlock", null)
                         .contentType(MediaType.APPLICATION_JSON))

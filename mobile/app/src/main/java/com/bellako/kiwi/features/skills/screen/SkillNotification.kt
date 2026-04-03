@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -48,6 +51,14 @@ fun SkillNotification(
     val skillName = skill.name
 
     val kiwiColor = LocalKiwiColors.current
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        AudioManager.playSFX(
+            context,
+            if (type == SkillNotificationType.NEW) R.raw.snd_fx_skill_new else R.raw.snd_fx_skill_finish_cooldown,
+        )
+    }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -69,7 +80,7 @@ fun SkillNotification(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Kiwi_Image(
-                painter = painterResource(id = skillIcon(skill.icon)),
+                painter = painterResource(id = skill.icon),
                 alt = "Skill icon",
                 colorFilter = ColorFilter.tint(kiwiColor.colorF),
                 modifier =

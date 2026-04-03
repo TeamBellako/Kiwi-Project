@@ -14,7 +14,7 @@ public class SkillMapper {
                 skill.getName(),
                 skill.getDescription(),
                 skill.getQuote(),
-                skill.getIcon(),
+                skill.getSkillType(),
 
                 skill.getCooldownType(),
                 skill.getCooldownGoalId(),
@@ -37,7 +37,7 @@ public class SkillMapper {
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());
         dto.setQuote(domain.getQuote());
-        dto.setIcon(domain.getIcon());
+        dto.setType(domain.getType().name());
 
         dto.setCooldownType(domain.getCooldownType().name());
         dto.setCooldownGoalId(domain.getCooldownGoalId());

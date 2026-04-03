@@ -3,6 +3,8 @@ package com.bellako.kiwi
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
 import com.bellako.kiwi.features.conversations.model.ConversationsRepository
 import com.bellako.kiwi.features.conversations.tests.ConversationsTestFactory
+import com.bellako.kiwi.features.incidences.model.UserIncidenceManager
+import com.bellako.kiwi.features.personality.model.PersonalityRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -34,7 +36,12 @@ class ConversationViewModelTest {
     @Before
     fun setUp() {
         repository = mock(ConversationsRepository::class.java)
-        viewModel = ConversationViewModel(repository)
+        viewModel =
+            ConversationViewModel(
+                repository,
+                mock(PersonalityRepository::class.java),
+                mock(UserIncidenceManager::class.java),
+            )
     }
 
     // -------------------------------------------------------------------------

@@ -65,6 +65,18 @@ public class ConversationPersistence {
     @Column(name = "event_id")
     private Long eventId;
 
+    @Column(name = "incidence_for_next_event")
+    private String incidenceForNextEvent;
+
+    @Column(name = "fallback_event_id")
+    private Long fallbackEventId;
+
+    @Column(name = "incidence_name_to_set")
+    private String incidenceNameToSet;
+
+    @Column(name = "incidence_value_to_set")
+    private Boolean incidenceValueToSet = true;
+
     @Column(name = "on_completed_action")
     private String onCompletedAction;
 

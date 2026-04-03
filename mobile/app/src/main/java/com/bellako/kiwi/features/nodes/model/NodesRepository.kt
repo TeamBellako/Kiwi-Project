@@ -8,7 +8,7 @@ class NodesRepository(
 ) {
     suspend fun getNodesByMapId(mapId: Int): List<NodesDomain> = api.getNodesForMapId(mapId).map { NodesDataMapper.toDomain(it) }
 
-    suspend fun unlockNode(nodeId: Long): NodesDomain = NodesDataMapper.toDomain(api.unlockNode(nodeId))
+    suspend fun unlockNode(nodeId: Long): List<NodesDomain> = api.unlockNode(nodeId).map { NodesDataMapper.toDomain(it) }
 
     suspend fun completeNode(nodeId: Long): List<NodesDomain> = api.completeNode(nodeId).map { NodesDataMapper.toDomain(it) }
 }

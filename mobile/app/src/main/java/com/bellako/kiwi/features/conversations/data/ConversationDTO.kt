@@ -11,6 +11,7 @@ data class ConversationOptionDTO(
     val textW: String,
     val nextEventId: Long,
     val cost: Int? = null,
+    val incidenceToShow: String? = null,
 )
 
 @Serializable
@@ -29,7 +30,11 @@ data class ConversationDTO(
     val dialogM: String,
     val dialogW: String,
     val nextEvent: NextEventType,
+    val incidenceForNextEvent: String? = null,
     val eventId: Long? = null,
+    val fallbackEventId: Long? = null,
+    val incidenceNameToSet: String? = null,
+    val incidenceValueToSet: Boolean = true,
     val options: List<ConversationOptionDTO> = emptyList(),
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
