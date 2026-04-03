@@ -28,7 +28,7 @@ class NodesIntegrationTest {
     @Before
     fun setUp() {
         repository = mock(NodesRepository::class.java)
-        viewModel = NodesViewModel(repository)
+        viewModel = NodesViewModel(repository, UsersFakeRepository())
     }
 
     // -------------------------------------------------------------------------

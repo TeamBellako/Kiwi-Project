@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.analytics.firebaseSetUserId
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
@@ -27,6 +28,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.security.GeneralSecurityException
 import java.time.LocalDate
@@ -44,6 +48,13 @@ class UsersViewModel
 
         private val _isLoginCompleted = MutableStateFlow(false)
         val isLoginCompleted: StateFlow<Boolean> = _isLoginCompleted.asStateFlow()
+
+        init {
+            repository.currentPoints
+                .onEach { points ->
+                    _state.value = _state.value.copy(currentPoints = points)
+                }.launchIn(viewModelScope)
+        }
 
         // -----------------------------------------------------------------------------------------
 
@@ -102,6 +113,7 @@ class UsersViewModel
                 _state.value = _state.value.copy(registerDate = result.getOrThrow().registerDate)
                 saveLocalCredentials(context)
                 firebaseSetUserId(_state.value.email)
+                repository.getMyUserPoints()
                 _isLoginCompleted.value = true
             }
         }
@@ -219,5 +231,21 @@ class UsersViewModel
                 setIsLoading(false)
                 setUiState(UIState.Idle)
             }
+        }
+
+        suspend fun getMyUserPoints() {
+            setIsLoading(true)
+            val result = repository.getMyUserPoints()
+            setIsLoading(false)
+            result
+                .onSuccess { points ->
+                    _state.value =
+                        _state.value.copy(
+                            currentPoints = points.currentPoints,
+                            totalPoints = points.totalPoints,
+                        )
+                }.onFailure { err ->
+                    setUiState(UIState.Error(err.message.orEmpty()))
+                }
         }
     }

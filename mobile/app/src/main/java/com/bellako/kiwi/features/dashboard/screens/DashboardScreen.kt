@@ -383,6 +383,14 @@ fun DashboardModal_Preview(
     initialLayout: DashboardLayout = DashboardLayout.HIDDEN,
     nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
+    usersViewModel: UsersFakeViewModel =
+        UsersFakeViewModel(
+            UsersState(
+                validUsersDTO().email,
+                validUsersDTO().password,
+                validUsersDTO().registerDate,
+            ),
+        ),
 ) {
     val nav = rememberNavController()
     Kiwi_Theme {
@@ -396,6 +404,7 @@ fun DashboardModal_Preview(
                         nodesViewModel = nodesViewModel,
                         goalsViewModel = goalsViewModel,
                         mapViewModel = MapViewModel(),
+                        usersViewModel = usersViewModel,
                     )
                     DashboardScreen(
                         usersViewModel =

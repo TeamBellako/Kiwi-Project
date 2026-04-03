@@ -1,12 +1,17 @@
 package com.kiwi.features.nodes.controllers;
 
+import com.kiwi.features.nodes.events.NodeUnlockedEvent;
+import com.kiwi.features.users.events.UserCreatedEvent;
 import com.kiwi.features.nodes.data.*;
 import com.kiwi.features.nodes.exceptions.NodeInaccessibleException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -19,16 +24,19 @@ public class NodesService {
     private final NodesRepository nodesRepository;
     private final UserNodeStatusRepository userNodeStatusRepository;
     private final NodesProgressService progressService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public NodesService(
             NodesRepository nodesRepository,
             UserNodeStatusRepository userNodeStatusRepository,
-            NodesProgressService progressService
+            NodesProgressService progressService,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.nodesRepository = nodesRepository;
         this.userNodeStatusRepository = userNodeStatusRepository;
         this.progressService = progressService;
+        this.eventPublisher = eventPublisher;
     }
 
     public List<NodesDTO> getNodesForMapId(@NotNull int mapId, @NotNull Long userId) {
@@ -137,6 +145,12 @@ public class NodesService {
                 .forEach(result::add);
 
         return result;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener
+    public void onUserCreated(UserCreatedEvent event) {
+        initializeUserProgress(event.userId());
     }
 
     public void initializeUserProgress(Long userId) {

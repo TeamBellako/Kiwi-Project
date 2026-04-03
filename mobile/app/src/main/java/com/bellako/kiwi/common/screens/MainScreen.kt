@@ -375,7 +375,6 @@ fun AppNavHost(
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
-//    onConversationRequest: (Long) -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -441,7 +440,7 @@ fun AppNavHost(
                     nodesViewModel = nodesViewModel,
                     goalsViewModel = goalsViewModel,
                     mapViewModel = hiltViewModel(),
-//                    onConversationRequest = onConversationRequest,
+                    usersViewModel = usersViewModel,
                 )
             }
         }

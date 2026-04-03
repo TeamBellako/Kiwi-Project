@@ -19,6 +19,7 @@ import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import com.bellako.kiwi.features.goals.screens.GoalNotificationType
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
+import com.bellako.kiwi.features.users.model.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +35,7 @@ class GoalsViewModel
     constructor(
         private val repository: GoalsRepository,
         private val notificationManager: NotificationManager,
+        private val usersRepository: UsersRepository,
     ) : BaseViewModel(),
         IGoalsViewModel {
         private val _state = MutableStateFlow(GoalsListState())
@@ -224,6 +226,7 @@ class GoalsViewModel
                 EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
 
                 updateGoalInCache(updatedDomain)
+                usersRepository.getMyUserPoints() // Refrescar puntos al completar goal
             }.also {
                 if (it.isFailure) {
                     _state.value = _state.value.copy(isLoading = false, error = it.exceptionOrNull()?.message)

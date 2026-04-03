@@ -2,9 +2,7 @@ package com.kiwi.features.users.controllers;
 
 import com.kiwi.features.users.data.LoggedDTO;
 import com.kiwi.features.users.data.LoginDTO;
-import com.kiwi.features.users.exceptions.CreateUserInvalidException;
 import com.kiwi.features.users.exceptions.LoginUserInvalidException;
-import com.kiwi.features.users.exceptions.UsersNotFoundException;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.common.types.Email;
@@ -36,7 +34,7 @@ public class UsersController {
         this.jwtUtils = jwtUtils;
         this.passwordEncoder = passwordEncoder;
     }
-    
+
     @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> signup(@RequestBody LoginDTO loginDTO) {
         usersService.createUser(loginDTO);

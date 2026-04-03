@@ -136,7 +136,7 @@ public class UsersIntegrationTest {
     static class TestConfig {
         @Bean
         public NodesService nodesService() {
-            return new NodesService(null,null,null) {
+            return new NodesService(null, null, null, event -> {}) {
                 @Override
                 public void initializeUserProgress(Long userId) {
                 }
