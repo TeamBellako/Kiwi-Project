@@ -203,9 +203,6 @@ private fun AppScreen(
                         questsViewModel = questsViewModel,
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
-//                        onConversationRequest = { conversationId ->
-//                            conversationViewModel.start(conversationId)
-//                        },
                     )
 
                     if (showDashboard && !isConversationVisible) {
@@ -325,7 +322,6 @@ fun AppNavHost(
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
-//    onConversationRequest: (Long) -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -391,7 +387,7 @@ fun AppNavHost(
                     nodesViewModel = nodesViewModel,
                     goalsViewModel = goalsViewModel,
                     mapViewModel = hiltViewModel(),
-//                    onConversationRequest = onConversationRequest,
+                    usersViewModel = usersViewModel,
                 )
             }
         }

@@ -9,10 +9,8 @@ import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.nodes.data.NodesDomain
 import com.bellako.kiwi.features.nodes.data.NodesState
+import com.bellako.kiwi.features.users.model.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,19 +19,19 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import javax.inject.Inject
 
-@OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
 class NodesViewModel
     @Inject
     constructor(
         private val repository: NodesRepository,
+        private val usersRepository: UsersRepository,
     ) : BaseViewModel(),
         INodesViewModel {
         private val _state = MutableStateFlow(NodesState())
         override val state: StateFlow<NodesState> = _state.asStateFlow()
 
         init {
-            GlobalScope.launch(Dispatchers.Main) {
+            viewModelScope.launch {
                 listenToEvent(EventType.UNLOCK_NODE) { eventPayload ->
                     val payload = eventPayload as EventPayload.EntityIdPayload
                     unlockNode(payload.targetEntityId.toLong())
@@ -61,10 +59,13 @@ class NodesViewModel
             }
         }
 
-        override fun unlockNode(nodeId: Long) =
+        override fun unlockNode(nodeId: Long) {
             updateNodesSafe {
-                listOf(repository.unlockNode(nodeId))
+                val unlockedNode = repository.unlockNode(nodeId)
+                usersRepository.getMyUserPoints() // Sincronizar puntos tras el gasto exitoso
+                listOf(unlockedNode)
             }
+        }
 
         override fun completeNode(nodeId: Long) {
             updateNodesSafe {

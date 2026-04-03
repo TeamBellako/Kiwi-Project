@@ -95,10 +95,6 @@ fun ConversationScreen(
                 painterResourceId = R.drawable.liria_neutral,
                 alt = "Character Pose",
             )
-            Kiwi_Image(
-                painterResourceId = R.drawable.liria_defiant,
-                alt = "Character Expression",
-            )
         }
         // Dialogue
         Box(

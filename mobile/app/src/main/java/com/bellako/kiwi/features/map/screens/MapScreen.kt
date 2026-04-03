@@ -51,6 +51,7 @@ import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
 import com.bellako.kiwi.features.nodes.screens.screenToMap
+import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -74,9 +75,13 @@ fun MapScreen(
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
     goalsViewModel: IGoalsViewModel,
+    usersViewModel: IUsersViewModel,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
+
+    val userState by usersViewModel.state.collectAsState()
+    val currentPoints = userState?.currentPoints ?: 0
 
     @Suppress("MagicNumber")
     val viewportHeightPx =
@@ -150,6 +155,7 @@ fun MapScreen(
                 mapResourceId = mapState.mapInfo.mapResourceId,
                 mapViewModel = mapViewModel,
                 nodesViewModel = nodesViewModel,
+                currentPoints = currentPoints,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -190,6 +196,7 @@ private fun InteractiveMap(
     mapResourceId: Int,
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
+    currentPoints: Int,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -334,6 +341,7 @@ private fun InteractiveMap(
                                     Modifier.offset(
                                         y = centerOffset + getResponsiveSizeHeight(26.dp),
                                     ),
+                                currentPoints = currentPoints,
                             )
                         }
                     }

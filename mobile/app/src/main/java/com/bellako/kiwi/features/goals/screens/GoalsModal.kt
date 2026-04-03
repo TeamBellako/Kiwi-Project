@@ -173,8 +173,12 @@ fun GoalsModal(
                                 goalsViewModel.createGoalsFromDefinitions(goalDefinitions)
                             } else {
                                 for (goal in goals) {
-                                    if (goal is UserGoalStatusDomain && goal.status != GoalStatus.COMPLETED) {
-                                        goalsViewModel.uncompleteGoal(goalId = goal.id)
+                                    if (goal is UserGoalStatusDomain) {
+                                        if (goal.value == goal.target) {
+                                            goalsViewModel.completeGoal(goalId = goal.id)
+                                        } else {
+                                            goalsViewModel.uncompleteGoal(goalId = goal.id)
+                                        }
                                     }
                                 }
                             }

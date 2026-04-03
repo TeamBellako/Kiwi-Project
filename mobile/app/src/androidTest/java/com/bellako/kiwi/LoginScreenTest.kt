@@ -90,6 +90,7 @@ class LoginScreenTest {
                         nodesViewModel = nodesFakeViewModel,
                         mapViewModel = mapviewModel,
                         goalsViewModel = goalsFakeViewModel,
+                        usersViewModel = usersFakeViewModel,
                     )
                 }
                 composable(ScreenRoutes.SIGNUP3_TEST) {

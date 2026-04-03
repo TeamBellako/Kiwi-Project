@@ -1,9 +1,6 @@
 package com.bellako.kiwi
 
 import com.bellako.kiwi.common.utils.DateUtils
-import com.bellako.kiwi.features.goals.data.GoalCategory
-import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDTO
 import com.bellako.kiwi.features.goals.model.GoalsRepository
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
@@ -133,7 +130,7 @@ class GoalsViewModelTest {
                 },
             )
 
-        return GoalsViewModel(repo, NotificationManager())
+        return GoalsViewModel(repo, NotificationManager(), usersRepository = UsersFakeRepository())
     }
 
     @Test

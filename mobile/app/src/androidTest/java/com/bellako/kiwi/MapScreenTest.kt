@@ -14,6 +14,9 @@ import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,6 +30,7 @@ class MapScreenTest {
     private lateinit var viewModel: MapViewModel
     private lateinit var nodesModel: NodesFakeViewModel
     private lateinit var goalsFakeViewModel: GoalsFakeViewModel
+    private lateinit var userViewModel: UsersFakeViewModel
 
     private val maxZoom = 8f
 
@@ -37,6 +41,14 @@ class MapScreenTest {
         viewModel = MapViewModel()
         nodesModel = NodesFakeViewModel()
         goalsFakeViewModel = GoalsFakeViewModel()
+        userViewModel =
+            UsersFakeViewModel(
+                UsersState(
+                    validUsersDTO().email,
+                    validUsersDTO().password,
+                    validUsersDTO().registerDate,
+                ),
+            )
 
         composeTestRule.setContent {
             MapScreen(
@@ -44,6 +56,7 @@ class MapScreenTest {
                 nodesViewModel = nodesModel,
                 mapViewModel = viewModel,
                 goalsViewModel = goalsFakeViewModel,
+                usersViewModel = userViewModel,
             )
         }
 

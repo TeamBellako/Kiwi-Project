@@ -8,6 +8,7 @@ import com.bellako.kiwi.features.users.model.IUsersAPI
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.model.UsersRepository
 import com.bellako.kiwi.features.users.model.UsersViewModel
+import com.bellako.kiwi.features.users.data.UserPointsDTO
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.invalidUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validLoggedDTO
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
@@ -45,6 +46,7 @@ class UsersIntegrationTest {
         runTest {
             whenever(api.signup(any())).thenReturn(mapOf("message" to "Created successfully"))
             whenever(api.login(any())).thenReturn(validLoggedDTO())
+            whenever(api.getMyUserPoints()).thenReturn(UserPointsDTO(0, 0))
 
             viewModel.onEmailChanged(validUsersDTO().email)
             viewModel.onPasswordChanged(validUsersDTO().password)
@@ -69,6 +71,7 @@ class UsersIntegrationTest {
     fun `login with a valid user`() =
         runTest {
             whenever(api.login(any())).thenReturn(validLoggedDTO())
+            whenever(api.getMyUserPoints()).thenReturn(UserPointsDTO(0, 0))
 
             viewModel.onEmailChanged(validUsersDTO().email)
             viewModel.onPasswordChanged(validUsersDTO().password)
