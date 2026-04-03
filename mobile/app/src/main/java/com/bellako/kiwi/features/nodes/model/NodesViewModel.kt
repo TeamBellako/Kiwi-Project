@@ -65,7 +65,7 @@ class NodesViewModel
             updateNodesSafe {
                 val unlockedNode = repository.unlockNode(nodeId)
                 usersRepository.getMyUserPoints() // Sincronizar puntos tras el gasto exitoso
-                listOf(unlockedNode)
+                unlockedNode
             }
         }
 
