@@ -1,8 +1,9 @@
 package com.kiwi.features.users.controllers;
 
+import com.kiwi.features.nodes.events.NodeUnlockedEvent;
+import com.kiwi.features.users.events.UserCreatedEvent;
 import com.kiwi.common.types.Password;
 import com.kiwi.common.types.PositiveOrZeroInteger;
-import com.kiwi.features.nodes.controllers.NodesService;
 import com.kiwi.features.users.data.*;
 import com.kiwi.features.users.exceptions.CreateUserConflictException;
 import com.kiwi.common.types.Email;
@@ -10,9 +11,12 @@ import com.kiwi.features.users.exceptions.CreateUserInvalidException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -23,13 +27,13 @@ import static com.kiwi.common.utils.FormatUtils.formatDate;
 public class UsersService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
-    private final NodesService nodesService;
-    
+    private final ApplicationEventPublisher eventPublisher;
+
     @Autowired
-    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, NodesService nodesService) {
+    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, ApplicationEventPublisher eventPublisher) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
-        this.nodesService = nodesService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -52,9 +56,7 @@ public class UsersService {
         UsersPersistence usersPersistence = UsersDataMapper.toPersistenceWithoutPoints(userDto, hashedPassword);
         usersRepository.saveAndFlush(usersPersistence);
 
-        if (nodesService != null) {
-            nodesService.initializeUserProgress(usersPersistence.getId());
-        }
+        eventPublisher.publishEvent(new UserCreatedEvent(usersPersistence.getId()));
     }
 
     public Optional<UsersPersistence> getUserByEmail(@NotNull Email email) {
@@ -87,6 +89,14 @@ public class UsersService {
         user.setCurrentPoints(domain.getCurrentPoints().value());
         user.setTotalPoints(domain.getTotalPoints().value());
         usersRepository.saveAndFlush(user);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener
+    public void onNodeUnlocked(NodeUnlockedEvent event) {
+        if (event.price() > 0) {
+            subtractPointsToUser(event.userId(), event.price());
+        }
     }
 
     @Transactional

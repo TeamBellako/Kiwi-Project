@@ -6,6 +6,7 @@ import com.kiwi.features.nodes.data.NodeStatus;
 import com.kiwi.features.nodes.exceptions.NodeInaccessibleException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
 import org.junit.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.kiwi.nodes.NodesTestFactory.*;
 
@@ -21,7 +22,7 @@ public class NodesServiceTests {
             new NodesProgressService();
 
     private final NodesService service =
-            new NodesService(nodeRepo, statusRepo, progress);
+            new NodesService(nodeRepo, statusRepo, progress, event -> {});
 
     private final Long userId = 1L;
 
