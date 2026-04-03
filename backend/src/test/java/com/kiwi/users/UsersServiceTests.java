@@ -27,7 +27,7 @@ public class UsersServiceTests {
         public boolean matches(CharSequence rawPassword, String encodedPassword) {
             return true;
         }
-    },null);
+    }, event -> {});
     
     private final String validEmailString = validUserDTO().getEmail(); 
     
