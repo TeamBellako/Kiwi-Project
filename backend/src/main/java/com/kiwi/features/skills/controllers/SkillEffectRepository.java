@@ -1,6 +1,6 @@
 package com.kiwi.features.skills.controllers;
 
-import com.kiwi.features.skills.data.SkillEffectPersistence;
+import com.kiwi.features.skills.data.persistence.SkillEffectPersistence;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,5 +10,7 @@ import java.util.List;
 public interface SkillEffectRepository extends JpaRepository<SkillEffectPersistence, Long> {
 
     List<SkillEffectPersistence> findBySkillId(Long skillId);
+
+    List<SkillEffectPersistence> findBySkillIdIn(List<Long> skillIds);
 
 }

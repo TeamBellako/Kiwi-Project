@@ -1,7 +1,7 @@
 package com.kiwi.skills;
 
 import com.kiwi.features.skills.controllers.SkillRepository;
-import com.kiwi.features.skills.data.SkillPersistence;
+import com.kiwi.features.skills.data.persistence.SkillPersistence;
 import org.springframework.data.domain.*;
 import org.springframework.data.repository.query.FluentQuery;
 
@@ -121,5 +121,10 @@ public class SkillTestRepositoryInMemory implements SkillRepository {
             Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction
     ) {
         return null;
+    }
+
+    @Override
+    public List<SkillPersistence> findByIdIn(List<Long> ids) {
+        return List.of();
     }
 }

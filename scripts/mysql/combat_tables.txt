@@ -274,56 +274,67 @@ CREATE TABLE IF NOT EXISTS combat_status_effects (
 		ON UPDATE CASCADE
 );
 
-//TENGO QUE REHACER ESTA TABLA
 CREATE TABLE IF NOT EXISTS combat_log (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
 
     combat_id BIGINT NOT NULL,
-
     turn_number INT NOT NULL,
-
     actor ENUM('USER','ENEMY') NOT NULL,
 
-    skill_id BIGINT,
+    action_type ENUM(
+        'SKILL_USED',
+        'ACTOR_BLOCKED_BY_STATE',
+        'SKILL_REPEAT_BY_STATE',
+        'ACTOR_DAMAGED_BY_STATE',
+        'BLOCKED_SKILLS_BY_STATE',
+        'SKIP',
+        'STATUS_TURN_REDUCED',
+        'STATUS_FINISHED',
+        'TIMEOUT'
+    ) NOT NULL,
 
-    target ENUM('USER','ENEMY'),
+    skill_id BIGINT NULL,
+    skill_name VARCHAR(100) NULL,
+
+    target ENUM('OPPONENT','SELF','ALLY') NULL,
 
     effect_type ENUM(
         'DAMAGE',
         'HEAL',
         'STATUS_APPLIED',
         'STATUS_REMOVED',
-        'MISS',
-        'CRIT'
-    ),
+        'MISS'
+    ) NULL,
 
-    value FLOAT,
+    value FLOAT NULL,
+    critic BOOLEAN DEFAULT FALSE,
 
-    state_id BIGINT,
-	
-	status_duration INT,
+    state_id BIGINT NULL,
+    status_duration INT NULL, -- remainingTurns
+
+    blocked_skills VARCHAR(255) NULL, -- ids separados por comas
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	
-	INDEX idx_combat_log_combat (combat_id),
+
+    INDEX idx_combat_log_combat (combat_id),
 
     CONSTRAINT fk_combat_log_combats
         FOREIGN KEY (combat_id)
         REFERENCES combats(id)
         ON DELETE CASCADE
-		ON UPDATE CASCADE,
-		
+        ON UPDATE CASCADE,
+
     CONSTRAINT fk_combat_log_states
         FOREIGN KEY (state_id)
         REFERENCES combat_states(id)
         ON DELETE CASCADE
-		ON UPDATE CASCADE,
-		
-	CONSTRAINT fk_combat_log_skills
-		FOREIGN KEY (skill_id)
-		REFERENCES skills(id)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_combat_log_skills
+        FOREIGN KEY (skill_id)
+        REFERENCES skills(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS combat_config (
@@ -337,3 +348,23 @@ CREATE TABLE IF NOT EXISTS combat_config (
 		ON DELETE CASCADE
 		ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS enemy_skill (
+    enemy_id BIGINT NOT NULL,
+    skill_id BIGINT NOT NULL,
+
+    PRIMARY KEY (enemy_id, skill_id),
+
+    CONSTRAINT fk_enemy
+        FOREIGN KEY (enemy_id)
+        REFERENCES enemies(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_skill
+        FOREIGN KEY (skill_id)
+        REFERENCES skills(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+

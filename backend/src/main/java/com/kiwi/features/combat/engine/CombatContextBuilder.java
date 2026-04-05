@@ -2,8 +2,8 @@ package com.kiwi.features.combat.engine;
 
 
 import com.kiwi.features.combat.data.domain.CombatStatusAppliedDomain;
-import com.kiwi.features.combat.data.domain.ActorRuntime;
-import com.kiwi.features.skills.data.SkillCombatDomain;
+import com.kiwi.features.combat.data.domain.ActorDomain;
+import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
@@ -22,26 +22,26 @@ public class CombatContextBuilder {
             CombatPersistence combat,
             CombatActorDTO userDTO,
             CombatActorDTO enemyDTO,
-            Map<Long, SkillCombatDomain> userSkills,
-            Map<Long, SkillCombatDomain> enemySkills,
+            List<SkillCombatDomain> userSkills,
+            List<SkillCombatDomain> enemySkills,
             Long userLastSkillUsed,
             Long enemyLastSkillUsed
             ) {
 
-        ActorRuntime user =
+        ActorDomain user =
                 buildActorRuntime(CombatActorType.USER, combat, userDTO, userSkills, userLastSkillUsed);
 
-        ActorRuntime enemyRuntime =
+        ActorDomain enemyRuntime =
                 buildActorRuntime(CombatActorType.ENEMY, combat, enemyDTO, enemySkills, enemyLastSkillUsed);
 
         return new CombatContext(combat, user, enemyRuntime);
     }
 
-    private ActorRuntime buildActorRuntime(
+    private ActorDomain buildActorRuntime(
             CombatActorType actorType,
             CombatPersistence combat,
             CombatActorDTO combatActorDTO,
-            Map<Long, SkillCombatDomain> skills,
+            List<SkillCombatDomain> skills,
             Long lastSkillUsed
     ) {
         StatsDTO stats = combatActorDTO.getStats();
@@ -60,7 +60,7 @@ public class CombatContextBuilder {
                                 StatusResistanceDTO::getResistance
                         ));
 
-        return ActorRuntime.builder()
+        return ActorDomain.builder()
                 .type(actorType)
                 .hp(combat.getUserHp())
                 .maxHp(stats.getMaxHp())

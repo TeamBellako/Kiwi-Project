@@ -1,7 +1,8 @@
 package com.kiwi.skills;
 
+import com.kiwi.features.skills.data.persistence.UserSkillStatusKey;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 import com.kiwi.features.skills.controllers.UserSkillStatusRepository;
-import com.kiwi.features.skills.data.*;
 import org.springframework.data.domain.*;
 import org.springframework.data.repository.query.FluentQuery;
 

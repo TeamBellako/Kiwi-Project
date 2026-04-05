@@ -7,7 +7,7 @@ import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.persistence.CombatStatePersistence;
 import com.kiwi.features.combat.data.persistence.CombatStatusAppliedPersistence;
 import com.kiwi.features.combat.data.domain.CombatStatusAppliedDomain;
-import com.kiwi.features.combat.data.domain.ActorRuntime;
+import com.kiwi.features.combat.data.domain.ActorDomain;
 import com.kiwi.features.combat.engine.CombatContext;
 import com.kiwi.features.combat.repositories.CombatStateRepository;
 import com.kiwi.features.combat.repositories.CombatStatusEffectRepository;
@@ -30,7 +30,7 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public void applyActiveStatesToActor(ActorRuntime actor, CombatContext context)
+    public void applyActiveStatesToActor(ActorDomain actor, CombatContext context)
     {
         // TODO en la BBDD tendrán que tener estos ids
         for (CombatStatusAppliedDomain state : actor.getStates()) {
@@ -96,7 +96,7 @@ public class CombatStateService {
             //para que sepa las que no puede usar
             if (state.getStateId() == 7) { //MUTIS
 
-                List<Long> blockedSkillIds = new ArrayList<>();
+                List<Long> blockedSkillIds;
 
                 List<Long> skillIds =
                         new ArrayList<>(actor.getSkills().keySet());
@@ -124,7 +124,7 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    private int applyDamage(ActorRuntime actor, float value)
+    private int applyDamage(ActorDomain actor, float value)
     {
         int damage = (int) (actor.getMaxHp() * value); // 0.05 TBC
         actor.damage(damage);
@@ -133,7 +133,7 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public float calculateStateMultiplier(ActorRuntime attacker, ActorRuntime victim)
+    public float calculateStateMultiplier(ActorDomain attacker, ActorDomain victim)
     {
         float multiplier = 1f;
 
@@ -164,7 +164,7 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public void reduceStatesTurnsToActor(ActorRuntime actor, CombatContext context)
+    public void reduceStatesTurnsToActor(ActorDomain actor, CombatContext context)
     {
         Iterator<CombatStatusAppliedDomain> statesIt =
                 actor.getStates().iterator();
@@ -195,7 +195,7 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public CombatStatusAppliedDTO applyNewState(CombatStatusAppliedDomain stateRuntime, ActorRuntime target, Long skillId, Long combatId)
+    public CombatStatusAppliedDTO applyNewState(CombatStatusAppliedDomain stateRuntime, ActorDomain target, Long skillId, Long combatId)
     {
         Optional<CombatStatePersistence> statePersistence = stateRepository.findById(stateRuntime.getStateId());
 

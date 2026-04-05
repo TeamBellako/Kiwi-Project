@@ -1,6 +1,15 @@
 package com.kiwi.features.skills.controllers;
 
-import com.kiwi.features.skills.data.*;
+import com.kiwi.features.skills.data.domain.SkillCombatDomain;
+import com.kiwi.features.skills.data.domain.SkillDomain;
+import com.kiwi.features.skills.data.mappers.SkillCombatMapper;
+import com.kiwi.features.skills.data.mappers.SkillMapper;
+import com.kiwi.features.skills.data.persistence.SkillEffectPersistence;
+import com.kiwi.features.skills.data.persistence.SkillPersistence;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
+import com.kiwi.features.skills.data.DTO.EquipSkillDTO;
+import com.kiwi.features.skills.data.DTO.SkillDTO;
+import com.kiwi.features.skills.data.enums.CooldownType;
 import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
 import com.kiwi.features.skills.exceptions.SkillLevelUpNotFoundException;
 import com.kiwi.features.skills.exceptions.SkillNotFoundException;
@@ -9,23 +18,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SkillService {
 
     private final SkillRepository skillRepository;
     private final UserSkillStatusRepository userSkillStatusRepository;
-    private final SkillProgressService progress;
+    private final SkillProgressService skillProgressService;
+    private final SkillEffectRepository skillEffectRepository;
+    private final EnemySkillRepository enemySkillRepository;
 
     public SkillService(
             SkillRepository skillRepository,
             UserSkillStatusRepository userSkillStatusRepository,
-            SkillProgressService progress
+            SkillProgressService skillProgressService, SkillEffectRepository skillEffectRepository, EnemySkillRepository enemySkillRepository
     ) {
         this.skillRepository = skillRepository;
         this.userSkillStatusRepository = userSkillStatusRepository;
-        this.progress = progress;
+        this.skillProgressService = skillProgressService;
+        this.skillEffectRepository = skillEffectRepository;
+        this.enemySkillRepository = enemySkillRepository;
     }
 
     // ============================================================================================
@@ -48,7 +63,7 @@ public class SkillService {
 
             if (skill.getCooldownType() == CooldownType.TIME && skill.isCooldown()) {
 
-                SkillDomain updated = progress.updateCooldown(skill);
+                SkillDomain updated = skillProgressService.updateCooldown(skill);
 
                 if (!updated.isCooldown()) {
 
@@ -71,6 +86,63 @@ public class SkillService {
                 .toList();
     }
 
+    //------------------------------------------------------------------------------------
+
+    @Transactional
+    public List<SkillCombatDomain> getCombatSkillsForUser(Long userId) {
+
+        List<UserSkillStatusPersistence> equippedSkills =
+                userSkillStatusRepository
+                        .findByIdUserIdAndDeckSlotGreaterThan(userId, 0);
+
+        List<Long> skillIds = equippedSkills.stream()
+                .map(s -> s.getId().getSkillId())
+                .toList();
+
+        Map<Long, List<SkillEffectPersistence>> effectsBySkill =
+                skillEffectRepository.findBySkillIdIn(skillIds)
+                        .stream()
+                        .collect(Collectors.groupingBy(SkillEffectPersistence::getSkillId));
+
+        return equippedSkills.stream()
+                .map(status -> {
+
+                    SkillPersistence skill = status.getSkill();
+
+                    List<SkillEffectPersistence> effects =
+                            effectsBySkill.getOrDefault(skill.getId(), List.of());
+
+                    return SkillCombatMapper.toDomain(skill, effects);
+                })
+                .toList();
+    }
+
+    @Transactional
+    public List<SkillCombatDomain> getCombatSkillsForEnemy(Long enemyId) {
+
+        List<SkillPersistence> skills =
+                enemySkillRepository.findSkillsByEnemyId(enemyId);
+
+        List<Long> skillIds = skills.stream()
+                .map(SkillPersistence::getId)
+                .toList();
+
+        Map<Long, List<SkillEffectPersistence>> effectsBySkill =
+                skillEffectRepository.findBySkillIdIn(skillIds)
+                        .stream()
+                        .collect(Collectors.groupingBy(SkillEffectPersistence::getSkillId));
+
+        return skills.stream()
+                .map(skill -> {
+
+                    List<SkillEffectPersistence> effects =
+                            effectsBySkill.getOrDefault(skill.getId(), List.of());
+
+                    return SkillCombatMapper.toDomain(skill, effects);
+                })
+                .toList();
+    }
+
     // ============================================================================================
     // GIVE / LEVEL UP
     // ============================================================================================
@@ -86,7 +158,7 @@ public class SkillService {
                         .findByIdUserIdAndIdSkillId(userId, skillId)
                         .orElse(null);
 
-        SkillDomain given = progress.giveSkill(skill, status);
+        SkillDomain given = skillProgressService.giveSkill(skill, status);
 
         UserSkillStatusPersistence givenStatus = SkillMapper.toPersistence(userId, given, skill);
         userSkillStatusRepository.saveAndFlush(givenStatus);
@@ -124,7 +196,7 @@ public class SkillService {
                         .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
 
         SkillDomain current = buildSkillDomain(status);
-        SkillDomain updated = progress.putOnCooldown(current);
+        SkillDomain updated = skillProgressService.putOnCooldown(current);
 
         userSkillStatusRepository.saveAndFlush(
                 SkillMapper.toPersistence(userId, updated, status.getSkill())
@@ -142,7 +214,7 @@ public class SkillService {
                         .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
 
         SkillDomain current = buildSkillDomain(status);
-        SkillDomain updated = progress.removeCooldown(current);
+        SkillDomain updated = skillProgressService.removeCooldown(current);
 
         userSkillStatusRepository.saveAndFlush(
                 SkillMapper.toPersistence(userId, updated, status.getSkill())
@@ -171,7 +243,7 @@ public class SkillService {
         }
 
         SkillDomain current = buildSkillDomain(status);
-        SkillDomain updated = progress.equipSkill(current, equipSkillDTO.getDeckSlot());
+        SkillDomain updated = skillProgressService.equipSkill(current, equipSkillDTO.getDeckSlot());
 
         userSkillStatusRepository.saveAndFlush(
                 SkillMapper.toPersistence(userId, updated, status.getSkill())
@@ -188,7 +260,7 @@ public class SkillService {
                         .orElseThrow(() -> new UserSkillStatusNotFoundException(userId, skillId));
 
         SkillDomain current = buildSkillDomain(status);
-        SkillDomain updated = progress.unequipSkill(current);
+        SkillDomain updated = skillProgressService.unequipSkill(current);
 
         userSkillStatusRepository.saveAndFlush(
                 SkillMapper.toPersistence(userId, updated, status.getSkill())

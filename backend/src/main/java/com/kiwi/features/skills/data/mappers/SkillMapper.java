@@ -1,4 +1,10 @@
-package com.kiwi.features.skills.data;
+package com.kiwi.features.skills.data.mappers;
+
+import com.kiwi.features.skills.data.domain.SkillDomain;
+import com.kiwi.features.skills.data.persistence.SkillPersistence;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusKey;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
+import com.kiwi.features.skills.data.DTO.SkillDTO;
 
 public class SkillMapper {
 

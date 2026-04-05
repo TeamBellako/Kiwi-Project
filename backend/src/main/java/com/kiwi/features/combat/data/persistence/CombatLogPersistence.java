@@ -1,13 +1,13 @@
 package com.kiwi.features.combat.data.persistence;
 
+import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
-import com.kiwi.features.combat.data.enums.SkillEffectResultType;
+import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
 
-//TODO ESTA CLASE HAY QUE REVISARLA AL FINAL PARA VER COMO METEMOS TODA LA INFO EN LA BBDD
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,16 +24,25 @@ public class CombatLogPersistence {
     @Column(name="combat_id", nullable = false)
     private Long combatId;
 
-    @Column(name="turn_number")
+    @Column(name="turn_number", nullable = false)
     private int turnNumber;
 
     @Enumerated(EnumType.STRING)
+    @Column(name="actor", nullable = false)
     private CombatActorType actor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="action_type", nullable = false)
+    private ActionType actionType;
 
     @Column(name="skill_id")
     private Long skillId;
 
+    @Column(name="skill_name")
+    private String skillName;
+
     @Enumerated(EnumType.STRING)
+    @Column(name="target")
     private CombatActorType target;
 
     @Enumerated(EnumType.STRING)
@@ -42,11 +51,17 @@ public class CombatLogPersistence {
 
     private Float value;
 
+    @Column(name="critic")
+    private Boolean critic = false;
+
     @Column(name="state_id")
     private Long stateId;
 
     @Column(name="status_duration")
     private Integer statusDuration;
+
+    @Column(name="blocked_skills")
+    private String blockedSkills;
 
     @Column(name="created_at")
     private Instant createdAt;

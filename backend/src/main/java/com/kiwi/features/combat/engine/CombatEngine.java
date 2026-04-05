@@ -1,7 +1,7 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.controllers.CombatStateService;
-import com.kiwi.features.combat.data.domain.ActorRuntime;
+import com.kiwi.features.combat.data.domain.ActorDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
 import com.kiwi.features.combat.data.enums.ActionType;
@@ -42,7 +42,7 @@ public class CombatEngine {
         CombatPersistence combat = context.getCombat();
 
         // USER TURN
-        ActorRuntime userActor = context.getActor(CombatActorType.USER);
+        ActorDomain userActor = context.getActor(CombatActorType.USER);
 
         //APPLY CURRENT STATES
         stateService.applyActiveStatesToActor(userActor,context);
@@ -81,7 +81,7 @@ public class CombatEngine {
         // ENEMY TURN
         if(combat.getEnemyHp() > 0) {
 
-            ActorRuntime enemyActor = context.getActor(CombatActorType.ENEMY);
+            ActorDomain enemyActor = context.getActor(CombatActorType.ENEMY);
 
             //APPLY CURRENT STATES
             stateService.applyActiveStatesToActor(enemyActor,context);

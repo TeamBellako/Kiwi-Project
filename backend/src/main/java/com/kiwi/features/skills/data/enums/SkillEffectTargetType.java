@@ -1,4 +1,4 @@
-package com.kiwi.features.combat.data.enums;
+package com.kiwi.features.skills.data.enums;
 
 public enum SkillEffectTargetType {
     OPPONENT,

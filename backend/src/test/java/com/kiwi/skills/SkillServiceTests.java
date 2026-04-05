@@ -2,8 +2,8 @@ package com.kiwi.skills;
 
 import com.kiwi.features.skills.controllers.SkillService;
 import com.kiwi.features.skills.controllers.SkillProgressService;
-import com.kiwi.features.skills.data.SkillDTO;
-import com.kiwi.features.skills.data.UserSkillStatusPersistence;
+import com.kiwi.features.skills.data.DTO.SkillDTO;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
 import com.kiwi.features.skills.exceptions.SkillLevelUpNotFoundException;
 import com.kiwi.features.skills.exceptions.SkillNotFoundException;

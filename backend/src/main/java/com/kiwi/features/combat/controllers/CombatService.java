@@ -10,12 +10,12 @@ import com.kiwi.features.combat.engine.CombatContextBuilder;
 import com.kiwi.features.combat.engine.CombatEngine;
 import com.kiwi.features.combat.repositories.*;
 import com.kiwi.features.skills.controllers.SkillService;
+import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -174,6 +174,9 @@ public class CombatService {
         CombatActorDTO enemyDTO = buildEnemyCombatActorDTO(combat.getEnemyHp(), enemy, combat.getId(),
                 elementsMap,statesMap);
 
+        List<SkillCombatDomain> userSkills = skillService.getCombatSkillsForUser(userId);
+
+        List<SkillCombatDomain> enemySkills = skillService.getCombatSkillsForEnemy(enemy.getId());
 
         CombatContext context =
                 contextBuilder.build(

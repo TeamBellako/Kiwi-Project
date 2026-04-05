@@ -1,6 +1,11 @@
 package com.kiwi.skills;
 
-import com.kiwi.features.skills.data.*;
+import com.kiwi.features.skills.data.persistence.SkillPersistence;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusKey;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
+import com.kiwi.features.skills.data.DTO.EquipSkillDTO;
+import com.kiwi.features.skills.data.DTO.SkillDTO;
+import com.kiwi.features.skills.data.enums.CooldownType;
 
 import java.time.Instant;
 

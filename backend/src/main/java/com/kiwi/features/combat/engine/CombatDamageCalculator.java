@@ -2,15 +2,15 @@ package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.controllers.CombatStateService;
 import com.kiwi.features.combat.data.domain.CombatStatusAppliedDomain;
-import com.kiwi.features.combat.data.domain.ActorRuntime;
-import com.kiwi.features.skills.data.SkillEffectDomain;
-import com.kiwi.features.skills.data.SkillCombatDomain;
+import com.kiwi.features.combat.data.domain.ActorDomain;
+import com.kiwi.features.skills.data.domain.SkillEffectDomain;
+import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.AttackType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
-import com.kiwi.features.combat.data.enums.SkillEffectResultType;
-import com.kiwi.features.skills.data.SkillEffectResultDTO;
+import com.kiwi.features.skills.data.enums.SkillEffectResultType;
+import com.kiwi.features.skills.data.DTO.SkillEffectResultDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ public class CombatDamageCalculator {
             CombatActorType actorType,
             Long skillId
     ) {
-        // No skills availables
+        // No skills available
         if(skillId == -1) {
 
             return CombatActionDTO.builder()
@@ -40,9 +40,12 @@ public class CombatDamageCalculator {
                     .build();
         }
 
-        ActorRuntime attacker = context.getActor(actorType);
+        ActorDomain attacker = context.getActor(actorType);
 
-        SkillCombatDomain skill = attacker.getSkills().get(skillId);
+        SkillCombatDomain skill = attacker.getSkills().stream()
+                .filter(s -> s.getId().equals(skillId))
+                .findFirst()
+                .orElse(null); // TODO throw exception
 
         List<SkillEffectResultDTO> effectsResults = new ArrayList<>();
 
@@ -51,7 +54,7 @@ public class CombatDamageCalculator {
         //todo: ESTO HAY QUE TENER CUIDADO PORQUE EL ORDEN DEBE IMPORTAR (AÑADIR CAMPO PARA QUE SE ELIJA ORDEN DEFINIR ORDEN FIJO DAMAGE/HEAL/STATUS)
         for (SkillEffectDomain effect : skill.getEffects()) {
 
-            ActorRuntime target = context.getTarget(actorType, effect.getTarget());
+            ActorDomain target = context.getTarget(actorType, effect.getTarget());
 
             switch (effect.getEffectType()) {
 
@@ -86,8 +89,8 @@ public class CombatDamageCalculator {
     // ------------------------------------------------
 
     private SkillEffectResultDTO applyDamage(
-            ActorRuntime attacker,
-            ActorRuntime victim,
+            ActorDomain attacker,
+            ActorDomain victim,
             SkillEffectDomain effect
     ) {
 
@@ -101,7 +104,7 @@ public class CombatDamageCalculator {
 
         if (roll > hitChance) {
             return SkillEffectResultDTO.builder()
-                    .type(SkillEffectResultType.MISS.name())
+                    .typeResult(SkillEffectResultType.MISS.name())
                     .target(victim.getType().name())
                     .build();
         }
@@ -154,7 +157,7 @@ public class CombatDamageCalculator {
             attacker.heal(damage);
 
             return SkillEffectResultDTO.builder()
-                    .type(SkillEffectResultType.HEAL.name())
+                    .typeResult(SkillEffectResultType.HEAL.name())
                     .target(attacker.getType().name())
                     .value((float) damage)
                     .critic(false)
@@ -164,7 +167,7 @@ public class CombatDamageCalculator {
         victim.damage(damage);
 
         return SkillEffectResultDTO.builder()
-                .type(SkillEffectResultType.DAMAGE.name())
+                .typeResult(SkillEffectResultType.DAMAGE.name())
                 .target(victim.getType().name())
                 .value((float) damage)
                 .critic(crit)
@@ -174,7 +177,7 @@ public class CombatDamageCalculator {
     // ------------------------------------------------
 
     private SkillEffectResultDTO applyHeal(
-            ActorRuntime target,
+            ActorDomain target,
             SkillEffectDomain effect
     ) {
 
@@ -184,7 +187,7 @@ public class CombatDamageCalculator {
         target.heal(heal);
 
         return SkillEffectResultDTO.builder()
-                .type(SkillEffectResultType.HEAL.name())
+                .typeResult(SkillEffectResultType.HEAL.name())
                 .target(target.getType().name())
                 .value((float) heal)
                 .critic(false)
@@ -194,8 +197,8 @@ public class CombatDamageCalculator {
     // ------------------------------------------------
 
     private SkillEffectResultDTO applyStatus(
-            ActorRuntime attacker,
-            ActorRuntime target,
+            ActorDomain attacker,
+            ActorDomain target,
             SkillEffectDomain effect,
             Long skillId,
             Long combatId
@@ -213,17 +216,16 @@ public class CombatDamageCalculator {
             }
         }
 
-        CombatStatusAppliedDomain state = new CombatStatusAppliedDomain(
-                effect.getStateId(),
-                effect.getStateName(),
-                effect.getStatusDuration(),
-                effect.getPower()
-        );
+        CombatStatusAppliedDomain state = CombatStatusAppliedDomain.builder()
+                        .stateId( effect.getStateId())
+                        .name(effect.getStateName())
+                        .remainingTurns( effect.getStatusDuration())
+                        .value(effect.getPower()).build();
 
         CombatStatusAppliedDTO stateDTO = stateService.applyNewState(state, target, skillId, combatId);
 
         return SkillEffectResultDTO.builder()
-                .type(SkillEffectResultType.STATUS_APPLIED.name())
+                .typeResult(SkillEffectResultType.STATUS_APPLIED.name())
                 .target(target.getType().name())
                 .statusApplied(stateDTO)
                 .build();

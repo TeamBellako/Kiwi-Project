@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.dto;
 
-import com.kiwi.features.skills.data.SkillEffectResultDTO;
+import com.kiwi.features.skills.data.DTO.SkillEffectResultDTO;
 import lombok.*;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class CombatActionDTO {
 
     private String actor;     // USER / ENEMY
 
-    private String actionType;
+    private String actionType; // ActionType enum
 
     private String stateName;
     private int value;

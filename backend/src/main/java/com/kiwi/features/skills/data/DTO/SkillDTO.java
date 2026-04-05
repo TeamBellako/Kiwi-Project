@@ -1,7 +1,6 @@
-package com.kiwi.features.skills.data;
+package com.kiwi.features.skills.data.DTO;
 
 import lombok.*;
-import java.time.Instant;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @EqualsAndHashCode @ToString
 public class SkillDTO {

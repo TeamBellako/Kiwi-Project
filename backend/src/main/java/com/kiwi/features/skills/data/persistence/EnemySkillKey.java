@@ -1,4 +1,4 @@
-package com.kiwi.features.skills.data;
+package com.kiwi.features.skills.data.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -13,10 +13,10 @@ import java.io.Serializable;
 @Builder
 @EqualsAndHashCode
 @Embeddable
-public class UserSkillStatusKey implements Serializable {
+public class EnemySkillKey implements Serializable {
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "enemy_id")
+    private Long enemyId;
 
     @Column(name = "skill_id")
     private Long skillId;

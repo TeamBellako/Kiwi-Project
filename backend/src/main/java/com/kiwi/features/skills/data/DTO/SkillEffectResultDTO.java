@@ -1,4 +1,4 @@
-package com.kiwi.features.skills.data;
+package com.kiwi.features.skills.data.DTO;
 
 import com.kiwi.features.combat.data.dto.CombatStatusAppliedDTO;
 import lombok.*;
@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 public class SkillEffectResultDTO {
 
-    private String type; // DAMAGE / HEAL / APPLY_STATUS / MISS
+    private String typeResult; // DAMAGE / HEAL / STATUS_APPLIED / STATUS_REMOVED / MISS
 
     private String target; // USER / ENEMY / ALLY
 

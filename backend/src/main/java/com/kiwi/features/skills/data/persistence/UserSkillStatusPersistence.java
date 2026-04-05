@@ -1,4 +1,4 @@
-package com.kiwi.features.skills.data;
+package com.kiwi.features.skills.data.persistence;
 
 import jakarta.persistence.*;
 import lombok.*;
