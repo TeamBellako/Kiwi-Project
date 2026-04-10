@@ -1,7 +1,7 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.controllers.CombatStateService;
-import com.kiwi.features.combat.data.domain.CombatStatusAppliedDomain;
+import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
 import com.kiwi.features.combat.data.domain.ActorDomain;
 import com.kiwi.features.skills.data.domain.SkillEffectDomain;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
@@ -42,10 +42,11 @@ public class CombatDamageCalculator {
 
         ActorDomain attacker = context.getActor(actorType);
 
-        SkillCombatDomain skill = attacker.getSkills().stream()
-                .filter(s -> s.getId().equals(skillId))
-                .findFirst()
-                .orElse(null); // TODO throw exception
+        SkillCombatDomain skill = attacker.getSkills().get(skillId);
+
+        if(skill == null) {
+            //todo THROW EXCEPTION
+        }
 
         List<SkillEffectResultDTO> effectsResults = new ArrayList<>();
 
@@ -216,18 +217,18 @@ public class CombatDamageCalculator {
             }
         }
 
-        CombatStatusAppliedDomain state = CombatStatusAppliedDomain.builder()
+        CombatActiveStatusDomain state = CombatActiveStatusDomain.builder()
                         .stateId( effect.getStateId())
                         .name(effect.getStateName())
                         .remainingTurns( effect.getStatusDuration())
                         .value(effect.getPower()).build();
 
-        CombatStatusAppliedDTO stateDTO = stateService.applyNewState(state, target, skillId, combatId);
+        CombatActiveStatusDTO activeStatusDTO = stateService.applyNewState(state, target, skillId, combatId);
 
         return SkillEffectResultDTO.builder()
                 .typeResult(SkillEffectResultType.STATUS_APPLIED.name())
                 .target(target.getType().name())
-                .statusApplied(stateDTO)
+                .activeStatus(activeStatusDTO)
                 .build();
     }
 }

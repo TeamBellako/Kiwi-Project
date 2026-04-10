@@ -12,13 +12,9 @@ import lombok.*;
 @Table(name = "user_status_resistances")
 public class UserStatusResistancePersistence {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private UserStatusResistanceKey id;
 
-    private Long userId;
-
-    private Long stateId;
-
-    private float resistance;
+    @Column(name = "resistance", nullable = false)
+    private Float resistance;
 }

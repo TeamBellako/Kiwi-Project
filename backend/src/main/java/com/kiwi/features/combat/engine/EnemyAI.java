@@ -20,8 +20,7 @@ public class EnemyAI {
         ActorDomain enemy = context.getEnemy();
         ActorDomain user = context.getUser();
 
-        List<SkillCombatDomain> skills =
-                new ArrayList<>(enemy.getSkills().values());
+        List<SkillCombatDomain> skills = new ArrayList<>(enemy.getSkills().values());
 
         Long bestSkillId = -1L;
 

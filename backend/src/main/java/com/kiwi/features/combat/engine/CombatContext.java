@@ -1,6 +1,7 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.data.domain.ActorDomain;
+import com.kiwi.features.combat.data.domain.CombatDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.skills.data.enums.SkillEffectTargetType;
@@ -12,21 +13,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@Builder
 @Getter
 public class CombatContext {
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
-    private CombatPersistence combat; // TODO esto se tiene que cambiar
+    private final CombatDomain combat;
 
-    private ActorDomain user;
-    private ActorDomain enemy;
+    private final ActorDomain user;
+    private final ActorDomain enemy;
 
-    private List<CombatActionDTO> actions = new ArrayList<>();
+    private final List<CombatActionDTO> actions = new ArrayList<>();
 
     public CombatContext(
-            CombatPersistence combat,
+            CombatDomain combat,
             ActorDomain user,
             ActorDomain enemy
     ) {

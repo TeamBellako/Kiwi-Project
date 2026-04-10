@@ -11,19 +11,7 @@ import java.util.Optional;
 
 public interface CombatLogRepository extends JpaRepository<CombatLogPersistence, Long> {
 
-    @Query("SELECT cl FROM CombatLogPersistence cl WHERE cl.combatId = :combatId ORDER BY cl.turnNumber ASC, cl.id ASC")
-    List<CombatLogPersistence> findAllByCombatId(@Param("combatId") Long combatId);
+    List<CombatLogPersistence> findByCombatIdOrderByIdAsc(Long combatId);
 
-    @Query("""
-       SELECT cl.skillId
-       FROM CombatLogPersistence cl
-       WHERE cl.combatId = :combatId
-         AND cl.actor = :actor
-         AND cl.skillId IS NOT NULL
-       ORDER BY cl.turnNumber DESC, cl.id DESC
-       """)
-    Optional<Long> findLastSkillUsedByActorSkillId(
-            @Param("combatId") Long combatId,
-            @Param("actor") CombatActorType actor
-    );
+    void deleteByCombatId(Long combatId);
 }

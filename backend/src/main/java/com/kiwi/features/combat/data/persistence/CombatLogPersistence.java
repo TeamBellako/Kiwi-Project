@@ -61,7 +61,7 @@ public class CombatLogPersistence {
     private Integer statusDuration;
 
     @Column(name="blocked_skills")
-    private String blockedSkills;
+    private String blockedSkills;  // separated by ','
 
     @Column(name="created_at")
     private Instant createdAt;

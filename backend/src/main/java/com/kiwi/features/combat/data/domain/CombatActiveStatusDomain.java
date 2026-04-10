@@ -5,7 +5,7 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-public class CombatStatusAppliedDomain {
+public class CombatActiveStatusDomain {
 
     private Long stateId;
     private String name;

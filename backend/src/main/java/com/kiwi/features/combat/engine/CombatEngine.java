@@ -2,6 +2,7 @@ package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.controllers.CombatStateService;
 import com.kiwi.features.combat.data.domain.ActorDomain;
+import com.kiwi.features.combat.data.domain.CombatDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
 import com.kiwi.features.combat.data.enums.ActionType;
@@ -39,16 +40,13 @@ public class CombatEngine {
             Long userSkillId
     ) {
 
-        CombatPersistence combat = context.getCombat();
+        CombatDomain combat = context.getCombat();
 
         // USER TURN
         ActorDomain userActor = context.getActor(CombatActorType.USER);
 
         //APPLY CURRENT STATES
         stateService.applyActiveStatesToActor(userActor,context);
-
-        //REDUCE STATES TURNS
-        stateService.reduceStatesTurnsToActor(userActor, context);
 
         //CHECK USER LIFE
         if(combat.getUserHp() <= 0) {
@@ -78,6 +76,9 @@ public class CombatEngine {
             context.addAction(action);
         }
 
+        //REDUCE STATES TURNS
+        stateService.reduceStatesTurnsToActor(userActor, context);
+
         // ENEMY TURN
         if(combat.getEnemyHp() > 0) {
 
@@ -85,9 +86,6 @@ public class CombatEngine {
 
             //APPLY CURRENT STATES
             stateService.applyActiveStatesToActor(enemyActor,context);
-
-            //REDUCE STATES TURNS
-            stateService.reduceStatesTurnsToActor(enemyActor, context);
 
             //CHECK ENEMY LIFE
             if(combat.getEnemyHp() <= 0) {
@@ -119,6 +117,9 @@ public class CombatEngine {
                 }
                 context.addAction(action);
             }
+
+            //REDUCE STATES TURNS
+            stateService.reduceStatesTurnsToActor(enemyActor, context);
         }
 
         // TURN UPDATE
@@ -137,7 +138,7 @@ public class CombatEngine {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private CombatTurnResultDTO buildCombatTurnResultDTO(CombatContext context, CombatPersistence combat)
+    private CombatTurnResultDTO buildCombatTurnResultDTO(CombatContext context, CombatDomain combat)
     {
         return CombatTurnResultDTO.builder()
                 .combatId(combat.getId())
@@ -149,7 +150,7 @@ public class CombatEngine {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public CombatTurnResultDTO buildTimeoutCombatTurnResultDTO(Long userId, CombatPersistence combat) {
+    public CombatTurnResultDTO buildTimeoutCombatTurnResultDTO(Long userId, CombatDomain combat) {
 
         List<CombatActionDTO> actions = new ArrayList<>();
 
@@ -165,7 +166,7 @@ public class CombatEngine {
                 .combatId(combat.getId())
                 .turnNumber(combat.getTurnNumber())
                 .actions(actions)
-                .combatStatus(CombatGeneralStatus.USER_LOST.toString())
+                .combatStatus(combat.getCombatStatus().name())
                 .build();
     }
 

@@ -10,8 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "combat_status_effects")
-public class CombatStatusAppliedPersistence {
+@Table(name = "combat_active_status")
+public class CombatActiveStatusPersistence {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

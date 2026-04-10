@@ -12,13 +12,9 @@ import lombok.*;
 @Table(name = "user_elemental_multipliers")
 public class UserElementMultiplierPersistence {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private UserElementalMultiplierKey id;
 
-    private Long userId;
-
-    private Long elementId;
-
-    private float multiplier;
+    @Column(name = "multiplier", nullable = false)
+    private Float multiplier;
 }

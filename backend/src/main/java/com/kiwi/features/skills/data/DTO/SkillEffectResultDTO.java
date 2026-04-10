@@ -1,6 +1,6 @@
 package com.kiwi.features.skills.data.DTO;
 
-import com.kiwi.features.combat.data.dto.CombatStatusAppliedDTO;
+import com.kiwi.features.combat.data.dto.CombatActiveStatusDTO;
 import lombok.*;
 
 @Getter
@@ -18,5 +18,5 @@ public class SkillEffectResultDTO {
 
     private boolean critic = false;
 
-    private CombatStatusAppliedDTO statusApplied;
+    private CombatActiveStatusDTO activeStatus;
 }

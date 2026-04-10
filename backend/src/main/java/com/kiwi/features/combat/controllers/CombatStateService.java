@@ -1,16 +1,17 @@
 package com.kiwi.features.combat.controllers;
 
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
-import com.kiwi.features.combat.data.dto.CombatStatusAppliedDTO;
+import com.kiwi.features.combat.data.dto.CombatActiveStatusDTO;
 import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.persistence.CombatStatePersistence;
-import com.kiwi.features.combat.data.persistence.CombatStatusAppliedPersistence;
-import com.kiwi.features.combat.data.domain.CombatStatusAppliedDomain;
+import com.kiwi.features.combat.data.persistence.CombatActiveStatusPersistence;
+import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
 import com.kiwi.features.combat.data.domain.ActorDomain;
 import com.kiwi.features.combat.engine.CombatContext;
 import com.kiwi.features.combat.repositories.CombatStateRepository;
-import com.kiwi.features.combat.repositories.CombatStatusEffectRepository;
+import com.kiwi.features.combat.repositories.CombatActiveStatusRepository;
+import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -19,13 +20,13 @@ import java.util.*;
 public class CombatStateService {
 
     private final CombatStateRepository stateRepository;
-    private final CombatStatusEffectRepository statusEffectRepository;
+    private final CombatActiveStatusRepository activeStatusRepository;
 
     private final Random random = new Random();
 
-    public CombatStateService(CombatStateRepository stateRepository, CombatStatusEffectRepository statusEffectRepository) {
+    public CombatStateService(CombatStateRepository stateRepository, CombatActiveStatusRepository activeStatusRepository) {
         this.stateRepository = stateRepository;
-        this.statusEffectRepository = statusEffectRepository;
+        this.activeStatusRepository = activeStatusRepository;
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -33,7 +34,7 @@ public class CombatStateService {
     public void applyActiveStatesToActor(ActorDomain actor, CombatContext context)
     {
         // TODO en la BBDD tendrán que tener estos ids
-        for (CombatStatusAppliedDomain state : actor.getStates()) {
+        for (CombatActiveStatusDomain state : actor.getStates()) {
 
             if (state.getStateId() == 1) { // BURN
                 int damage = applyDamage(actor, state.getValue());
@@ -116,7 +117,10 @@ public class CombatStateService {
                                 .build();
 
                 context.addAction(action);
-                actor.setBlockedSkills(blockedSkillIds);
+
+                blockedSkillIds.forEach(actor.getSkills()::remove);
+
+                //todo guardar las blocked skills en la bbdd
 
             }
         }
@@ -137,7 +141,7 @@ public class CombatStateService {
     {
         float multiplier = 1f;
 
-        for (CombatStatusAppliedDomain s : attacker.getStates()) {
+        for (CombatActiveStatusDomain s : attacker.getStates()) {
 
             if (s.getStateId() == 10) { // ATK UP
                 multiplier *= 1.5f;
@@ -148,7 +152,7 @@ public class CombatStateService {
             }
         }
 
-        for (CombatStatusAppliedDomain s : victim.getStates()) {
+        for (CombatActiveStatusDomain s : victim.getStates()) {
 
             if (s.getStateId() == 12) { // DEF UP
                 multiplier *= 0.5f;
@@ -166,11 +170,11 @@ public class CombatStateService {
 
     public void reduceStatesTurnsToActor(ActorDomain actor, CombatContext context)
     {
-        Iterator<CombatStatusAppliedDomain> statesIt =
+        Iterator<CombatActiveStatusDomain> statesIt =
                 actor.getStates().iterator();
 
         while (statesIt.hasNext()) {
-            CombatStatusAppliedDomain state = statesIt.next();
+            CombatActiveStatusDomain state = statesIt.next();
 
             CombatActionDTO action =
                     CombatActionDTO.builder()
@@ -195,33 +199,33 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public CombatStatusAppliedDTO applyNewState(CombatStatusAppliedDomain stateRuntime, ActorDomain target, Long skillId, Long combatId)
+    public CombatActiveStatusDTO applyNewState(CombatActiveStatusDomain stateDomain, ActorDomain target, Long skillId, Long combatId)
     {
-        Optional<CombatStatePersistence> statePersistence = stateRepository.findById(stateRuntime.getStateId());
+        Optional<CombatStatePersistence> statePersistence = stateRepository.findById(stateDomain.getStateId());
 
         if (statePersistence.isPresent()) {
 
-            target.getStates().add(stateRuntime);
+            target.getStates().add(stateDomain);
 
-            CombatStatusAppliedPersistence statusEffectPersistence =
-                    CombatStatusAppliedPersistence.builder()
+            CombatActiveStatusPersistence statusEffectPersistence =
+                    CombatActiveStatusPersistence.builder()
                             .combatId(combatId)
                             .sourceSkillId(skillId)
                             .target(target.getType())
-                            .stateId(stateRuntime.getStateId())
-                            .value(stateRuntime.getValue())
-                            .remainingTurns(stateRuntime.getRemainingTurns())
+                            .stateId(stateDomain.getStateId())
+                            .value(stateDomain.getValue())
+                            .remainingTurns(stateDomain.getRemainingTurns())
                             .build();
 
-            statusEffectRepository.save(statusEffectPersistence);
+            activeStatusRepository.save(statusEffectPersistence);
 
-            return CombatStatusAppliedDTO.builder()
-                    .stateId(stateRuntime.getStateId())
-                    .name(stateRuntime.getName())
+            return CombatActiveStatusDTO.builder()
+                    .stateId(stateDomain.getStateId())
+                    .name(stateDomain.getName())
                     .icon(statePersistence.get().getIcon())
                     .description(statePersistence.get().getDescription())
-                    .remainingTurns(stateRuntime.getRemainingTurns())
-                    .value(stateRuntime.getValue())
+                    .remainingTurns(stateDomain.getRemainingTurns())
+                    .value(stateDomain.getValue())
                     .build();
         }
         else {
@@ -232,20 +236,20 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public List<CombatStatusAppliedDTO> getCurrentStatusAppliedDTO(Long combatId, CombatActorType targetType)
+    public List<CombatActiveStatusDTO> getActiveStatusDTO(Long combatId, CombatActorType targetType)
     {
-        List<CombatStatusAppliedDTO> currentSatesDTO = new ArrayList<>();
+        List<CombatActiveStatusDTO> activeStatusDTO = new ArrayList<>();
 
-        List<CombatStatusAppliedPersistence> statusEffectList = statusEffectRepository.findByCombatIdAndTargetType(combatId, targetType);
+        List<CombatActiveStatusPersistence> statusEffectList = activeStatusRepository.findByCombatIdAndTargetType(combatId, targetType);
 
-                for (CombatStatusAppliedPersistence statusEffect : statusEffectList){
+                for (CombatActiveStatusPersistence statusEffect : statusEffectList){
 
                     Optional<CombatStatePersistence> statePersistence = stateRepository.findById(statusEffect.getStateId());
 
                     if (statePersistence.isPresent()) {
 
-                        CombatStatusAppliedDTO statusDTO =
-                                CombatStatusAppliedDTO.builder()
+                        CombatActiveStatusDTO statusDTO =
+                                CombatActiveStatusDTO.builder()
                                 .stateId(statusEffect.getStateId())
                                 .name(statePersistence.get().getName())
                                 .icon(statePersistence.get().getIcon())
@@ -254,7 +258,7 @@ public class CombatStateService {
                                 .value(statusEffect.getValue())
                                 .build();
 
-                        currentSatesDTO.add(statusDTO);
+                        activeStatusDTO.add(statusDTO);
                     }
                     else
                     {
@@ -264,7 +268,7 @@ public class CombatStateService {
 
 
 
-        return currentSatesDTO;
+        return activeStatusDTO;
     }
 
 }

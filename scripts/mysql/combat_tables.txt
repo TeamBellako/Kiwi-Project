@@ -44,51 +44,45 @@ CREATE TABLE IF NOT EXISTS user_stats (
 );
 
 CREATE TABLE IF NOT EXISTS user_elemental_multipliers (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-
     user_id BIGINT NOT NULL,
-
     element_id BIGINT NOT NULL,
 
     multiplier FLOAT NOT NULL,
-	
-	UNIQUE (user_id, element_id),
-	
+
+    PRIMARY KEY (user_id, element_id),
+
     CONSTRAINT fk_user_elemental_multipliers_users
         FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-	
-	CONSTRAINT fk_user_elemental_multipliers_elements
-		FOREIGN KEY (element_id)
-		REFERENCES combat_elements(id)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
+
+    CONSTRAINT fk_user_elemental_multipliers_elements
+        FOREIGN KEY (element_id)
+        REFERENCES combat_elements(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS user_status_resistances (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-
     user_id BIGINT NOT NULL,
-
     state_id BIGINT NOT NULL,
 
     resistance FLOAT NOT NULL,
-	
-	UNIQUE (user_id, state_id),
-	
+
+    PRIMARY KEY (user_id, state_id),
+
     CONSTRAINT fk_user_status_resistances_users
         FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-	
-	CONSTRAINT fk_user_status_resistances_states
-		FOREIGN KEY (state_id)
-		REFERENCES combat_states(id)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
+
+    CONSTRAINT fk_user_status_resistances_states
+        FOREIGN KEY (state_id)
+        REFERENCES combat_states(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS enemies (
@@ -113,15 +107,12 @@ CREATE TABLE IF NOT EXISTS enemies (
 );
 
 CREATE TABLE IF NOT EXISTS enemy_elemental_multipliers (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-
     enemy_id BIGINT NOT NULL,
-
     element_id BIGINT NOT NULL,
 
     multiplier FLOAT NOT NULL,
 	
-	UNIQUE (enemy_id, element_id),
+	PRIMARY KEY (enemy_id, element_id),
 	
     CONSTRAINT fk_enemy_elemental_multipliers_enemies
         FOREIGN KEY (enemy_id)
@@ -137,15 +128,12 @@ CREATE TABLE IF NOT EXISTS enemy_elemental_multipliers (
 );
 
 CREATE TABLE IF NOT EXISTS enemy_status_resistances (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-
     enemy_id BIGINT NOT NULL,
-
     state_id BIGINT NOT NULL,
 
     resistance FLOAT NOT NULL,
 	
-	UNIQUE (enemy_id, state_id),
+	PRIMARY KEY (enemy_id, state_id),
 	
     CONSTRAINT fk_enemy_status_resistances_enemies
         FOREIGN KEY (enemy_id)
@@ -156,6 +144,37 @@ CREATE TABLE IF NOT EXISTS enemy_status_resistances (
 	CONSTRAINT fk_enemy_status_resistances_states
 		FOREIGN KEY (state_id)
 		REFERENCES combat_states(id)
+		ON DELETE CASCADE
+		ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS enemy_skill (
+    enemy_id BIGINT NOT NULL,
+    skill_id BIGINT NOT NULL,
+
+    PRIMARY KEY (enemy_id, skill_id),
+
+    CONSTRAINT fk_enemy
+        FOREIGN KEY (enemy_id)
+        REFERENCES enemies(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_skill
+        FOREIGN KEY (skill_id)
+        REFERENCES skills(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS combat_config (
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	enemy_id BIGINT NOT NULL,
+	time_limit INT,	
+	
+    CONSTRAINT fk_combat_config_enemy
+        FOREIGN KEY (enemy_id)
+        REFERENCES enemies(id)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE
 );
@@ -238,7 +257,7 @@ CREATE TABLE IF NOT EXISTS skill_effects (
 		ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS combat_status_effects (
+CREATE TABLE IF NOT EXISTS combat_active_status (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
 
     combat_id BIGINT NOT NULL,
@@ -274,6 +293,50 @@ CREATE TABLE IF NOT EXISTS combat_status_effects (
 		ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS combat_last_skill (
+    combat_id BIGINT NOT NULL,
+    actor ENUM('USER','ENEMY') NOT NULL,
+    skill_id BIGINT NOT NULL,
+
+    PRIMARY KEY (combat_id, actor),
+
+    INDEX idx_combat_last_skill_combat (combat_id),
+
+    CONSTRAINT fk_combat_last_skill_combats
+        FOREIGN KEY (combat_id)
+        REFERENCES combats(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_combat_last_skill_skills
+        FOREIGN KEY (skill_id)
+        REFERENCES skills(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS combat_blocked_skills (
+    combat_id BIGINT NOT NULL,
+    actor ENUM('USER','ENEMY') NOT NULL,
+    skill_id BIGINT NOT NULL,
+
+    PRIMARY KEY (combat_id, actor, skill_id),
+
+    INDEX idx_combat_blocked_skills_combat (combat_id),
+
+    CONSTRAINT fk_combat_blocked_skills_combats
+        FOREIGN KEY (combat_id)
+        REFERENCES combats(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_combat_blocked_skills_skills
+        FOREIGN KEY (skill_id)
+        REFERENCES skills(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS combat_log (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
 
@@ -287,6 +350,7 @@ CREATE TABLE IF NOT EXISTS combat_log (
         'SKILL_REPEAT_BY_STATE',
         'ACTOR_DAMAGED_BY_STATE',
         'BLOCKED_SKILLS_BY_STATE',
+		'RELEASED_SKILLS_BY_STATE',
         'SKIP',
         'STATUS_TURN_REDUCED',
         'STATUS_FINISHED',
@@ -337,34 +401,5 @@ CREATE TABLE IF NOT EXISTS combat_log (
         ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS combat_config (
-	id BIGINT AUTO_INCREMENT PRIMARY KEY,
-	enemy_id BIGINT NOT NULL,
-	time_limit INT,	
-	
-    CONSTRAINT fk_combat_config_enemy
-        FOREIGN KEY (enemy_id)
-        REFERENCES enemies(id)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
-);
 
-CREATE TABLE IF NOT EXISTS enemy_skill (
-    enemy_id BIGINT NOT NULL,
-    skill_id BIGINT NOT NULL,
-
-    PRIMARY KEY (enemy_id, skill_id),
-
-    CONSTRAINT fk_enemy
-        FOREIGN KEY (enemy_id)
-        REFERENCES enemies(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_skill
-        FOREIGN KEY (skill_id)
-        REFERENCES skills(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
 

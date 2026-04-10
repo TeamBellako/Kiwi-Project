@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CombatStatusAppliedDTO {
+public class CombatActiveStatusDTO {
 
     private Long stateId;
 

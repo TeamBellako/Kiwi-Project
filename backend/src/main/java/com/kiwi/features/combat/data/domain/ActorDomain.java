@@ -32,12 +32,10 @@ public class ActorDomain {
     private Map<Long, Float> elementMultipliers;
     private Map<Long, Float> statusResistances;
 
-    private List<CombatStatusAppliedDomain> states;
-
-    private List<SkillCombatDomain> skills;
+    private List<CombatActiveStatusDomain> states;
 
     @Setter
-    private List<Long> blockedSkills;
+    private  Map<Long, SkillCombatDomain> skills;
 
     @Setter
     private ActionType actionModifierType;

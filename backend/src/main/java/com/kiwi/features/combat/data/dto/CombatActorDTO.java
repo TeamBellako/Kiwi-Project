@@ -21,5 +21,5 @@ public class CombatActorDTO {
 
     private List<StatusResistanceDTO> statusResistances;
 
-    private List<CombatStatusAppliedDTO> statusApplied;
+    private List<CombatActiveStatusDTO> activeStatus;
 }

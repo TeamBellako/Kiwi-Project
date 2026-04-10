@@ -12,13 +12,9 @@ import lombok.*;
 @Table(name = "enemy_elemental_multipliers")
 public class EnemyElementMultiplierPersistence {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private EnemyElementalMultiplierKey id;
 
-    private Long enemyId;
-
-    private Long elementId;
-
-    private float multiplier;
+    @Column(name = "multiplier", nullable = false)
+    private Float multiplier;
 }
