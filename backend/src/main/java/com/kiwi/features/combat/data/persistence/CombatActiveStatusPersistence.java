@@ -20,17 +20,17 @@ public class CombatActiveStatusPersistence {
     @Column(name="combat_id", nullable = false)
     private Long combatId;
 
-    @Column(name="source_skill_id")
+    @Column(name="source_skill_id", nullable = false)
     private Long sourceSkillId;
 
     @Enumerated(EnumType.STRING)
     private CombatActorType target;
 
-    @Column(name="state_id")
+    @Column(name="state_id", nullable = false)
     private Long stateId;
 
     private Float value;
 
-    @Column(name="remaining_turns")
+    @Column(name="remaining_turns", nullable = false)
     private int remainingTurns;
 }

@@ -170,9 +170,9 @@ public class CombatService {
         Map<Long, CombatStatePersistence> statesMap = loadStatesMap();
 
 
-        List<ElementMultiplierDomain> userElements = loadEnemyElements(userId, elementsMap);
-        List<StatusResistanceDomain> userResistances = loadEnemyResistances(userId, statesMap);
-        List<CombatActiveStatusDomain> userActiveStatus = combatStateService.getActiveStatusDTO(combatId, CombatActorType.ENEMY);
+        List<ElementMultiplierDomain> userElements = loadUserElements(userId, elementsMap);
+        List<StatusResistanceDomain> userResistances = loadUserResistances(userId, statesMap);
+        List<CombatActiveStatusDomain> userActiveStatus = combatStateService.getActiveStatusDomain(combatId, CombatActorType.ENEMY);
         List<SkillCombatDomain> userSkills = skillService.getCombatSkillsForUser(userId);
         List<Long> userSkillsBlocked = combatLogService.getSkillsBlocked(combatId, CombatActorType.USER);
         Long userLastSkillUsed = combatLogService.getLastSkillUsed(combatId, CombatActorType.USER);
@@ -194,7 +194,7 @@ public class CombatService {
 
         List<ElementMultiplierDomain> enemyElements = loadEnemyElements(combatDomain.getEnemyId(), elementsMap);
         List<StatusResistanceDomain> enemyResistances = loadEnemyResistances(combatDomain.getEnemyId(), statesMap);
-        List<CombatActiveStatusDomain> enemyActiveStatus = combatStateService.getActiveStatusDTO(combatId, CombatActorType.ENEMY);
+        List<CombatActiveStatusDomain> enemyActiveStatus = combatStateService.getActiveStatusDomain(combatId, CombatActorType.ENEMY);
         List<SkillCombatDomain> enemySkills = skillService.getCombatSkillsForEnemy(combatPersistence.getEnemyId());
         Long enemyLastSkillUsed = combatLogService.getLastSkillUsed(combatId, CombatActorType.ENEMY);
 
@@ -216,7 +216,6 @@ public class CombatService {
 
         CombatTurnResultDTO result = combatEngine.executeTurn(context, skillId);
 
-        AAAAAAAAAAAAAAA ESTO ES LO QUE HAY QUE REVISAR QUE SE GUARDE BIEN TODO EL LOG A LO MEJOR HAY QUE GUARDAR INFO REDUNDANTE SI NO QUEREMOS VOLVER A BUSCAR LOS STATES Y SKILLS DESDE EL FRONT DE NUEVO
         // save log
         combatLogService.saveCombatActions(result.getActions(),combatId,combatPersistence.getTurnNumber());
 
@@ -291,6 +290,8 @@ public class CombatService {
     //------------------------------------------------------------------------------------------------------------------
     // AUXILIARY FUNCTIONS
     //------------------------------------------------------------------------------------------------------------------
+
+
 
     private Map<Long, CombatElementPersistence> loadElementsMap() {
         return combatElementRepository.findAll()
@@ -400,19 +401,12 @@ public class CombatService {
     private CombatActorDTO buildUserCombatActorDTO(Long userId, int currentHp, UserStatsPersistence userStats, Long combatId, Map<Long,
             CombatElementPersistence> elementsMap, Map<Long, CombatStatePersistence> statesMap){
 
-        List<ElementMultiplierDTO> actorElements =
-                loadUserElements(userId, elementsMap)
-                        .stream()
-                        .map(ElementMultiplierMapper::toDTO)
-                        .toList();
+        List<ElementMultiplierDTO> actorElements = ElementMultiplierMapper.toDTOList(loadUserElements(userId, elementsMap));
 
         List<StatusResistanceDTO> actorResistances =
-                loadUserResistances(userId, statesMap)
-                        .stream()
-                        .map(StatusResistanceMapper::toDTO)
-                        .toList();
+                StatusResistanceMapper.toDTOList(loadUserResistances(userId, statesMap));
 
-        List<CombatActiveStatusDTO> activeStatus = combatStateService.getActiveStatusDTO(combatId, CombatActorType.USER);
+        List<CombatActiveStatusDTO> activeStatus = CombatActiveStatusMapper.toDTOList(combatStateService.getActiveStatusDomain(combatId, CombatActorType.USER));
 
         StatsDTO statsDTO = StatsMapper.toDTO(userStats);
 
@@ -431,20 +425,12 @@ public class CombatService {
     private CombatActorDTO buildEnemyCombatActorDTO(int currentHp, EnemyPersistence enemyPersistence, Long combatId, Map<Long,
             CombatElementPersistence> elementsMap, Map<Long, CombatStatePersistence> statesMap){
 
-        List<ElementMultiplierDTO> actorElements =
-                loadEnemyElements(enemyPersistence.getId(), elementsMap)
-                        .stream()
-                        .map(ElementMultiplierMapper::toDTO)
-                        .toList();
+        List<ElementMultiplierDTO> actorElements = ElementMultiplierMapper.toDTOList(loadEnemyElements(enemyPersistence.getId(), elementsMap));
 
         List<StatusResistanceDTO> actorResistances =
-                loadEnemyResistances(enemyPersistence.getId(), statesMap)
-                        .stream()
-                        .map(StatusResistanceMapper::toDTO)
-                        .toList();
+            StatusResistanceMapper.toDTOList(loadEnemyResistances(enemyPersistence.getId(), statesMap));
 
-
-        List<CombatActiveStatusDTO> activeStatus = combatStateService.getActiveStatusDTO(combatId, CombatActorType.ENEMY);
+        List<CombatActiveStatusDTO> activeStatus = CombatActiveStatusMapper.toDTOList(combatStateService.getActiveStatusDomain(combatId, CombatActorType.ENEMY));
 
         StatsDTO statsDTO = StatsMapper.toDTO(enemyPersistence);
 

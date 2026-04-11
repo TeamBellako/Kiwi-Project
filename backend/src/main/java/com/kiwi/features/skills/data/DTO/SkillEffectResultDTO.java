@@ -18,5 +18,5 @@ public class SkillEffectResultDTO {
 
     private boolean critic = false;
 
-    private CombatActiveStatusDTO activeStatus;
+    private CombatActiveStatusDTO appliedStatus;
 }

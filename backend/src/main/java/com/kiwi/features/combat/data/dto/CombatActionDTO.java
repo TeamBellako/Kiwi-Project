@@ -17,7 +17,8 @@ public class CombatActionDTO {
     private String actionType; // ActionType enum
 
     private String stateName;
-    private Integer value;
+    private Long stateId;
+    private Float value;
     private List<Long> blockedSkills;
 
     private String skillName;

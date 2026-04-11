@@ -15,15 +15,4 @@ public class CombatBlockedSkillPersistence {
 
     @EmbeddedId
     private CombatBlockedSkillKey id;
-
-    @MapsId("combatId")
-    @Column(name = "combat_id")
-    private Long combatId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "actor")
-    private CombatActorType actor;
-
-    @Column(name = "skill_id")
-    private Long skillId;
 }

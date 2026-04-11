@@ -262,7 +262,7 @@ CREATE TABLE IF NOT EXISTS combat_active_status (
 
     combat_id BIGINT NOT NULL,
 	
-	source_skill_id BIGINT,
+	source_skill_id BIGINT NOT NULL,
 
     target ENUM('USER','ENEMY') NOT NULL,
 
@@ -371,9 +371,12 @@ CREATE TABLE IF NOT EXISTS combat_log (
     ) NULL,
 
     value FLOAT NULL,
+	
     critic BOOLEAN DEFAULT FALSE,
 
     state_id BIGINT NULL,
+	state_name VARCHAR(100) NULL,
+	
     status_duration INT NULL, -- remainingTurns
 
     blocked_skills VARCHAR(255) NULL, -- ids separados por comas

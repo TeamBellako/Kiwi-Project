@@ -57,6 +57,9 @@ public class CombatLogPersistence {
     @Column(name="state_id")
     private Long stateId;
 
+    @Column(name="state_name")
+    private String stateName;
+
     @Column(name="status_duration")
     private Integer statusDuration;
 

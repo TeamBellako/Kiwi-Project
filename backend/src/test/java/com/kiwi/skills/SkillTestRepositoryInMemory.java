@@ -78,11 +78,21 @@ public class SkillTestRepositoryInMemory implements SkillRepository {
     @Override public Page<SkillPersistence> findAll(Pageable pageable) { return Page.empty(); }
 
     @Override public void deleteAllInBatch() {}
+
+    @Override @Deprecated
+    public SkillPersistence getOne(Long aLong) {
+        return null;
+    }
+
+    @Override @Deprecated
+    public SkillPersistence getById(Long aLong) {
+        return null;
+    }
+
     @Override public void deleteAllInBatch(Iterable<SkillPersistence> entities) {}
     @Override public void deleteAllByIdInBatch(Iterable<Long> longs) {}
 
-    @Override public SkillPersistence getOne(Long aLong) { return null; }
-    @Override public SkillPersistence getById(Long aLong) { return null; }
+
     @Override public SkillPersistence getReferenceById(Long aLong) { return null; }
 
     @Override

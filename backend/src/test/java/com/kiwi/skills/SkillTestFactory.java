@@ -1,8 +1,9 @@
 package com.kiwi.skills;
 
-import com.kiwi.features.skills.data.persistence.SkillPersistence;
-import com.kiwi.features.skills.data.persistence.UserSkillStatusKey;
-import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
+import com.kiwi.features.combat.data.persistence.EnemyPersistence;
+import com.kiwi.features.skills.data.enums.SkillEffectTargetType;
+import com.kiwi.features.skills.data.enums.SkillEffectType;
+import com.kiwi.features.skills.data.persistence.*;
 import com.kiwi.features.skills.data.DTO.EquipSkillDTO;
 import com.kiwi.features.skills.data.DTO.SkillDTO;
 import com.kiwi.features.skills.data.enums.CooldownType;
@@ -92,5 +93,36 @@ public class SkillTestFactory {
     ){
         return EquipSkillDTO.builder()
                 .deckSlot(deckSlot).build();
+    }
+
+    public static SkillEffectPersistence skillEffect1(Long skillId) {
+        SkillEffectPersistence e = new SkillEffectPersistence();
+        e.setSkillId(skillId);
+        e.setTarget(SkillEffectTargetType.OPPONENT);
+        e.setEffectType(SkillEffectType.DAMAGE);
+        e.setPower(1.5f);
+        return e;
+    }
+
+    public static SkillEffectPersistence skillEffect2(Long skillId) {
+        SkillEffectPersistence e = new SkillEffectPersistence();
+        e.setSkillId(skillId);
+        e.setTarget(SkillEffectTargetType.OPPONENT);
+        e.setEffectType(SkillEffectType.APPLY_STATUS);
+        e.setStateId(1L);
+        e.setStatusDuration(2);
+        return e;
+    }
+
+    public static EnemySkillPersistence enemySkill(Long enemyId, SkillPersistence skill) {
+        EnemySkillPersistence e = new EnemySkillPersistence();
+
+        EnemyPersistence enemy = new EnemyPersistence();
+        enemy.setId(enemyId);
+
+        e.setEnemy(enemy);
+        e.setSkill(skill);
+
+        return e;
     }
 }

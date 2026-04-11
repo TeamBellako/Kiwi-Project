@@ -4,6 +4,7 @@ import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import com.kiwi.features.skills.data.domain.SkillDomain;
 import com.kiwi.features.skills.data.mappers.SkillCombatMapper;
 import com.kiwi.features.skills.data.mappers.SkillMapper;
+import com.kiwi.features.skills.data.persistence.EnemySkillPersistence;
 import com.kiwi.features.skills.data.persistence.SkillEffectPersistence;
 import com.kiwi.features.skills.data.persistence.SkillPersistence;
 import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
@@ -120,8 +121,11 @@ public class SkillService {
     @Transactional
     public List<SkillCombatDomain> getCombatSkillsForEnemy(Long enemyId) {
 
-        List<SkillPersistence> skills =
-                enemySkillRepository.findSkillsByEnemyId(enemyId);
+        List<EnemySkillPersistence> enemySkills = enemySkillRepository.findByEnemy_Id(enemyId);
+
+        List<SkillPersistence> skills =  enemySkills.stream()
+                .map(EnemySkillPersistence::getSkill)
+                .toList();
 
         List<Long> skillIds = skills.stream()
                 .map(SkillPersistence::getId)

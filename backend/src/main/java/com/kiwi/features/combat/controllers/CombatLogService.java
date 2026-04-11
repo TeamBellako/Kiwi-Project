@@ -4,13 +4,11 @@ import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.mappers.CombatActionMapper;
-import com.kiwi.features.combat.data.persistence.CombatBlockedSkillPersistence;
-import com.kiwi.features.combat.data.persistence.CombatLastSkillKey;
-import com.kiwi.features.combat.data.persistence.CombatLastSkillPersistence;
-import com.kiwi.features.combat.data.persistence.CombatLogPersistence;
+import com.kiwi.features.combat.data.persistence.*;
 import com.kiwi.features.combat.repositories.CombatBlockedSkillRepository;
 import com.kiwi.features.combat.repositories.CombatLastSkillRepository;
 import com.kiwi.features.combat.repositories.CombatLogRepository;
+import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,33 +44,116 @@ public class CombatLogService {
         return actions;
     }
 
+    void deleteCombatLog(Long combatId){
+
+        combatLogRepository.deleteByCombatId(combatId);
+    }
+
 
     @Transactional
     public void saveCombatActions(List<CombatActionDTO> actions, Long combatId, int turnNumber) {
-
-        List<CombatLogPersistence> logPersistenceAction = actions.stream()
-                .map(a -> CombatLogPersistence.builder()
-                        .combatId(combatId)
-                        .turnNumber(turnNumber)
-                        .actor(CombatActorType.valueOf(a.getActor()))
-                        .actionType(ActionType.valueOf(a.getActionType()))
-                        .skillName(a.getSkillName())
-                        .stateId(a.getStateName())
-                        .value(a.getValue() != null ? a.getValue() : null)
-                        .blockedSkills(a.getBlockedSkills() != null
-                                ? a.getBlockedSkills().toString()
-                                : null)
-                        .createdAt(Instant.now())
-                        .build()
-                )
+        List<CombatLogPersistence> logs = actions.stream()
+                .flatMap(a -> mapAction(a, combatId, turnNumber).stream())
                 .toList();
 
-        combatLogRepository.saveAll(logPersistenceAction);
+        combatLogRepository.saveAll(logs);
     }
 
-    void deleteCombatLog(Long combatId){
-        combatLogRepository.deleteByCombatId(combatId);
+
+    private List<CombatLogPersistence> mapAction(
+            CombatActionDTO action,
+            Long combatId,
+            int turnNumber
+    ) {
+
+        ActionType type = ActionType.valueOf(action.getActionType());
+
+        return switch (type) {
+
+            case SKILL_USED -> mapSkillUsed(action, combatId, turnNumber);
+
+            case ACTOR_BLOCKED_BY_STATE,
+                 SKILL_REPEAT_BY_STATE,
+                 STATUS_TURN_REDUCED,
+                 STATUS_FINISHED -> List.of(
+                    baseBuilder(action, combatId, turnNumber)
+                            .stateName(action.getStateName())
+                            .stateId(action.getStateId())
+                            .build()
+            );
+
+            case ACTOR_DAMAGED_BY_STATE -> List.of(
+                    baseBuilder(action, combatId, turnNumber)
+                            .stateName(action.getStateName())
+                            .stateId(action.getStateId())
+                            .value(action.getValue())
+                            .build()
+            );
+
+            case BLOCKED_SKILLS_BY_STATE,
+                 RELEASED_SKILLS_BY_STATE -> List.of(
+                    baseBuilder(action, combatId, turnNumber)
+                            .stateName(action.getStateName())
+                            .stateId(action.getStateId())
+                            .blockedSkills(CombatActionMapper.blockedSkillsToString(action.getBlockedSkills()))
+                            .build()
+            );
+
+            case SKIP, TIMEOUT -> List.of(
+                    baseBuilder(action, combatId, turnNumber).build()
+            );
+        };
     }
+
+    private CombatLogPersistence.CombatLogPersistenceBuilder baseBuilder(
+            CombatActionDTO action,
+            Long combatId,
+            int turnNumber
+    ) {
+        return CombatLogPersistence.builder()
+                .combatId(combatId)
+                .turnNumber(turnNumber)
+                .actor(CombatActorType.valueOf(action.getActor()))
+                .actionType(ActionType.valueOf(action.getActionType()))
+                .createdAt(Instant.now());
+    }
+
+    private List<CombatLogPersistence> mapSkillUsed(
+            CombatActionDTO action,
+            Long combatId,
+            int turnNumber
+    ) {
+
+        if (action.getEffects() == null || action.getEffects().isEmpty()) {
+            return List.of(
+                    baseBuilder(action, combatId, turnNumber)
+                            .skillName(action.getSkillName())
+                            .build()
+            );
+        }
+
+        return action.getEffects().stream()
+                .map(effect -> {
+
+                    CombatLogPersistence.CombatLogPersistenceBuilder builder =
+                            baseBuilder(action, combatId, turnNumber)
+                                    .skillName(action.getSkillName())
+                                    .effectType(SkillEffectResultType.valueOf(effect.getTypeResult()))
+                                    .target(CombatActorType.valueOf(effect.getTarget()))
+                                    .value(effect.getValue())
+                                    .critic(effect.isCritic());
+
+                    if (effect.getAppliedStatus() != null) {
+                        builder
+                                .stateId(effect.getAppliedStatus().getStateId())
+                                .statusDuration(effect.getAppliedStatus().getRemainingTurns());
+                    }
+
+                    return builder.build();
+                })
+                .toList();
+    }
+
 
 
     //------------------------------------------------------------------------------------------------------------------
@@ -104,11 +185,11 @@ public class CombatLogService {
     public Long getLastSkillUsed (Long combatId, CombatActorType actor){
 
         Optional<Long> skillId = combatLastSkillRepository.findSkillIdByIdCombatIdAndIdActor(combatId, actor);
-
         return skillId.orElse(-1L);
     }
 
     void deleteLastSkillsUsed(Long combatId){
+
         combatLogRepository.deleteByCombatId(combatId);
     }
 
@@ -120,14 +201,21 @@ public class CombatLogService {
         deleteCombatLog(combatId);
 
         List<CombatBlockedSkillPersistence> userBlockedSkillsPersistence = userSkillIds.stream()
-                .map(id -> new CombatBlockedSkillPersistence(combatId, CombatActorType.USER, id))
+                .map(id ->
+                        CombatBlockedSkillPersistence.builder()
+                                .id(new CombatBlockedSkillKey(combatId, CombatActorType.USER, id))
+                                .build())
                 .toList();
 
         List<CombatBlockedSkillPersistence> enemyBlockedSkillsPersistence = enemySkillIds.stream()
-                .map(id -> new CombatBlockedSkillPersistence(combatId, CombatActorType.ENEMY, id))
+                .map(id ->
+                        CombatBlockedSkillPersistence.builder()
+                                .id(new CombatBlockedSkillKey(combatId, CombatActorType.ENEMY, id))
+                                .build())
                 .toList();
 
-        combatBlockedSkillRepository.saveAll();
+        combatBlockedSkillRepository.saveAll(userBlockedSkillsPersistence);
+        combatBlockedSkillRepository.saveAll(enemyBlockedSkillsPersistence);
     }
 
     public List<Long> getSkillsBlocked(Long combatId, CombatActorType actor){
@@ -136,8 +224,8 @@ public class CombatLogService {
     }
 
     void deleteSkillsBlocked(Long combatId){
+
         combatLogRepository.deleteByCombatId(combatId);
     }
-
 
 }

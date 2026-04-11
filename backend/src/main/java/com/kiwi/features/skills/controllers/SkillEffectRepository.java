@@ -9,8 +9,6 @@ import java.util.List;
 @Repository
 public interface SkillEffectRepository extends JpaRepository<SkillEffectPersistence, Long> {
 
-    List<SkillEffectPersistence> findBySkillId(Long skillId);
-
     List<SkillEffectPersistence> findBySkillIdIn(List<Long> skillIds);
 
 }

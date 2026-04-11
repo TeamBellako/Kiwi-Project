@@ -19,6 +19,16 @@ public class UserSkillStatusTestRepositoryInMemory implements UserSkillStatusRep
     }
 
     @Override
+    public List<UserSkillStatusPersistence> findByIdUserIdAndDeckSlotGreaterThan(Long userId, int deckSlot) {
+        return store.values().stream()
+                .filter(s ->
+                        s.getId().getUserId().equals(userId) &&
+                                s.getDeckSlot() > deckSlot
+                )
+                .toList();
+    }
+
+    @Override
     public List<UserSkillStatusPersistence> findByIdUserId(Long userId) {
         return store.values().stream()
                 .filter(us -> us.getId().getUserId().equals(userId))
@@ -93,8 +103,8 @@ public class UserSkillStatusTestRepositoryInMemory implements UserSkillStatusRep
     @Override public void deleteAllInBatch(Iterable<UserSkillStatusPersistence> entities) {}
     @Override public void deleteAllByIdInBatch(Iterable<UserSkillStatusKey> keys) {}
 
-    @Override public UserSkillStatusPersistence getOne(UserSkillStatusKey key) { return null; }
-    @Override public UserSkillStatusPersistence getById(UserSkillStatusKey key) { return null; }
+    @Override @Deprecated public UserSkillStatusPersistence getOne(UserSkillStatusKey key) { return null; }
+    @Override @Deprecated public UserSkillStatusPersistence getById(UserSkillStatusKey key) { return null; }
     @Override public UserSkillStatusPersistence getReferenceById(UserSkillStatusKey key) { return null; }
 
     @Override

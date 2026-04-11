@@ -10,13 +10,6 @@ import java.util.List;
 
 public interface EnemySkillRepository extends JpaRepository<EnemySkillPersistence, EnemySkillKey> {
 
-    @Query("""
-            SELECT s
-            FROM SkillPersistence s
-            JOIN EnemySkillPersistence es
-            ON s.id = es.id.skillId
-            WHERE es.id.enemyId = :enemyId
-    """)
-    List<SkillPersistence> findSkillsByEnemyId(Long enemyId);
+    List<EnemySkillPersistence> findByEnemy_Id(Long enemyId);
 
 }

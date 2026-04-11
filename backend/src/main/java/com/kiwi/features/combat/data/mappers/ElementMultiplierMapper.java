@@ -6,6 +6,8 @@ import com.kiwi.features.combat.data.persistence.CombatElementPersistence;
 import com.kiwi.features.combat.data.persistence.EnemyElementMultiplierPersistence;
 import com.kiwi.features.combat.data.persistence.UserElementMultiplierPersistence;
 
+import java.util.List;
+
 public class ElementMultiplierMapper {
 
     public static ElementMultiplierDTO toDTO(ElementMultiplierDomain element) {
@@ -16,6 +18,12 @@ public class ElementMultiplierMapper {
                 .multiplier(element.getMultiplier())
                 .description(element.getDescription())
                 .build();
+    }
+
+    public static List<ElementMultiplierDTO> toDTOList(List<ElementMultiplierDomain> list) {
+        return list.stream()
+                .map(ElementMultiplierMapper::toDTO)
+                .toList();
     }
 
     public static ElementMultiplierDomain toDomain(EnemyElementMultiplierPersistence multiplier, CombatElementPersistence element) {

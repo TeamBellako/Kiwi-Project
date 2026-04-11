@@ -23,8 +23,6 @@ public class SkillEffectDomain {
 
     private Long stateId;
 
-    private String stateName;
-
     private Integer statusDuration;
 
 }

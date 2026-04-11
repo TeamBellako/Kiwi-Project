@@ -6,6 +6,8 @@ import com.kiwi.features.combat.data.persistence.CombatStatePersistence;
 import com.kiwi.features.combat.data.persistence.EnemyStatusResistancePersistence;
 import com.kiwi.features.combat.data.persistence.UserStatusResistancePersistence;
 
+import java.util.List;
+
 public class StatusResistanceMapper {
 
     public static StatusResistanceDTO toDTO(StatusResistanceDomain state) {
@@ -16,6 +18,12 @@ public class StatusResistanceMapper {
                 .resistance(state.getResistance())
                 .stateDescription(state.getStateDescription())
                 .build();
+    }
+
+    public static List<StatusResistanceDTO> toDTOList(List<StatusResistanceDomain> list) {
+        return list.stream()
+                .map(StatusResistanceMapper::toDTO)
+                .toList();
     }
 
     public static StatusResistanceDomain toDomain(EnemyStatusResistancePersistence resistance, CombatStatePersistence state) {

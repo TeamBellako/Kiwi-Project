@@ -4,14 +4,15 @@ import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.dto.CombatActiveStatusDTO;
 import com.kiwi.features.combat.data.enums.ActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.combat.data.mappers.CombatActiveStatusMapper;
 import com.kiwi.features.combat.data.persistence.CombatStatePersistence;
 import com.kiwi.features.combat.data.persistence.CombatActiveStatusPersistence;
 import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
 import com.kiwi.features.combat.data.domain.ActorDomain;
 import com.kiwi.features.combat.engine.CombatContext;
+import com.kiwi.features.combat.exceptions.CombatStateNotFoundException;
 import com.kiwi.features.combat.repositories.CombatStateRepository;
 import com.kiwi.features.combat.repositories.CombatActiveStatusRepository;
-import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -44,7 +45,7 @@ public class CombatStateService {
                                 .actor(actor.getType().name())
                                 .actionType(ActionType.ACTOR_DAMAGED_BY_STATE.name())
                                 .stateName(state.getName())
-                                .value(damage)
+                                .value((float)damage)
                                 .build();
 
                 context.addAction(action);
@@ -58,7 +59,7 @@ public class CombatStateService {
                                 .actor(actor.getType().name())
                                 .actionType(ActionType.ACTOR_DAMAGED_BY_STATE.name())
                                 .stateName(state.getName())
-                                .value(damage)
+                                .value((float)damage)
                                 .build();
 
                 context.addAction(action);
@@ -119,18 +120,15 @@ public class CombatStateService {
                 context.addAction(action);
 
                 blockedSkillIds.forEach(actor.getSkills()::remove);
-
-                //todo guardar las blocked skills en la bbdd
-
             }
         }
     }
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    private int applyDamage(ActorDomain actor, float value)
+    private int applyDamage(ActorDomain actor, Float value)
     {
-        int damage = (int) (actor.getMaxHp() * value); // 0.05 TBC
+        int damage = Math.round(actor.getMaxHp() * value);
         actor.damage(damage);
         return damage;
     }
@@ -199,76 +197,49 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public CombatActiveStatusDTO applyNewState(CombatActiveStatusDomain stateDomain, ActorDomain target, Long skillId, Long combatId)
+    public CombatActiveStatusDTO applyNewState(Long stateId, Integer statusDuration, Float power, ActorDomain target, Long skillId, Long combatId)
     {
-        Optional<CombatStatePersistence> statePersistence = stateRepository.findById(stateDomain.getStateId());
+        CombatStatePersistence statePersistence =
+                        stateRepository.findById(stateId)
+                        .orElseThrow(() -> new CombatStateNotFoundException(stateId));
 
-        if (statePersistence.isPresent()) {
-
-            target.getStates().add(stateDomain);
-
-            CombatActiveStatusPersistence statusEffectPersistence =
+        CombatActiveStatusPersistence statusEffectPersistence =
                     CombatActiveStatusPersistence.builder()
                             .combatId(combatId)
                             .sourceSkillId(skillId)
                             .target(target.getType())
-                            .stateId(stateDomain.getStateId())
-                            .value(stateDomain.getValue())
-                            .remainingTurns(stateDomain.getRemainingTurns())
+                            .stateId(stateId)
+                            .value(power)
+                            .remainingTurns(statusDuration)
                             .build();
 
-            activeStatusRepository.save(statusEffectPersistence);
+        activeStatusRepository.save(statusEffectPersistence);
 
-            return CombatActiveStatusDTO.builder()
-                    .stateId(stateDomain.getStateId())
-                    .name(stateDomain.getName())
-                    .icon(statePersistence.get().getIcon())
-                    .description(statePersistence.get().getDescription())
-                    .remainingTurns(stateDomain.getRemainingTurns())
-                    .value(stateDomain.getValue())
-                    .build();
-        }
-        else {
-            throw new IllegalStateException("Combat state does not exist");
-        }
+        CombatActiveStatusDomain stateDomain = CombatActiveStatusMapper.toDomain(statusEffectPersistence, statePersistence);
+        target.getStates().add(stateDomain);
 
+            return CombatActiveStatusMapper.toDTO(stateDomain);
     }
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public List<CombatActiveStatusDTO> getActiveStatusDTO(Long combatId, CombatActorType targetType)
+    public List<CombatActiveStatusDomain> getActiveStatusDomain(Long combatId, CombatActorType targetType)
     {
-        List<CombatActiveStatusDTO> activeStatusDTO = new ArrayList<>();
+        List<CombatActiveStatusDomain> activeStatusDomainList = new ArrayList<>();
 
-        List<CombatActiveStatusPersistence> statusEffectList = activeStatusRepository.findByCombatIdAndTargetType(combatId, targetType);
+        List<CombatActiveStatusPersistence> activeStatusPersitenceList = activeStatusRepository.findByCombatIdAndTargetType(combatId, targetType);
 
-                for (CombatActiveStatusPersistence statusEffect : statusEffectList){
+                for (CombatActiveStatusPersistence activeStatusPersistence : activeStatusPersitenceList)
+                {
+                    CombatStatePersistence stateInfoPersistence =
+                        stateRepository.findById(activeStatusPersistence.getStateId())
+                                .orElseThrow(() -> new CombatStateNotFoundException(activeStatusPersistence.getStateId()));
 
-                    Optional<CombatStatePersistence> statePersistence = stateRepository.findById(statusEffect.getStateId());
-
-                    if (statePersistence.isPresent()) {
-
-                        CombatActiveStatusDTO statusDTO =
-                                CombatActiveStatusDTO.builder()
-                                .stateId(statusEffect.getStateId())
-                                .name(statePersistence.get().getName())
-                                .icon(statePersistence.get().getIcon())
-                                .description(statePersistence.get().getDescription())
-                                .remainingTurns(statusEffect.getRemainingTurns())
-                                .value(statusEffect.getValue())
-                                .build();
-
-                        activeStatusDTO.add(statusDTO);
-                    }
-                    else
-                    {
-                        throw new IllegalStateException("Combat state does not exist");
-                    }
+                        CombatActiveStatusDomain activeStatusDomain = CombatActiveStatusMapper.toDomain(activeStatusPersistence, stateInfoPersistence);
+                        activeStatusDomainList.add(activeStatusDomain);
                 }
 
-
-
-        return activeStatusDTO;
+        return activeStatusDomainList;
     }
 
 }

@@ -149,8 +149,7 @@ public class CombatDamageCalculator {
                         * elementMultiplier
                         * stateMultiplier;
 
-        int damage =
-                (int) (baseDamage * modifiers);
+        int damage = Math.round(baseDamage * modifiers);
 
         // ABSORB
         if (elementMultiplier == -1f) {
@@ -160,7 +159,7 @@ public class CombatDamageCalculator {
             return SkillEffectResultDTO.builder()
                     .typeResult(SkillEffectResultType.HEAL.name())
                     .target(attacker.getType().name())
-                    .value((float) damage)
+                    .value((float)damage)
                     .critic(false)
                     .build();
         }
@@ -170,7 +169,7 @@ public class CombatDamageCalculator {
         return SkillEffectResultDTO.builder()
                 .typeResult(SkillEffectResultType.DAMAGE.name())
                 .target(victim.getType().name())
-                .value((float) damage)
+                .value((float)damage)
                 .critic(crit)
                 .build();
     }
@@ -182,15 +181,14 @@ public class CombatDamageCalculator {
             SkillEffectDomain effect
     ) {
 
-        int heal =
-                (int) (target.getMaxHp() * effect.getPower());
+        int heal = Math.round(target.getMaxHp() * effect.getPower());
 
         target.heal(heal);
 
         return SkillEffectResultDTO.builder()
                 .typeResult(SkillEffectResultType.HEAL.name())
                 .target(target.getType().name())
-                .value((float) heal)
+                .value((float)heal)
                 .critic(false)
                 .build();
     }
@@ -217,18 +215,12 @@ public class CombatDamageCalculator {
             }
         }
 
-        CombatActiveStatusDomain state = CombatActiveStatusDomain.builder()
-                        .stateId( effect.getStateId())
-                        .name(effect.getStateName())
-                        .remainingTurns( effect.getStatusDuration())
-                        .value(effect.getPower()).build();
-
-        CombatActiveStatusDTO activeStatusDTO = stateService.applyNewState(state, target, skillId, combatId);
+        CombatActiveStatusDTO activeStatusDTO = stateService.applyNewState(effect.getStateId(), effect.getStatusDuration(), effect.getPower(), target, skillId, combatId);
 
         return SkillEffectResultDTO.builder()
                 .typeResult(SkillEffectResultType.STATUS_APPLIED.name())
                 .target(target.getType().name())
-                .activeStatus(activeStatusDTO)
+                .appliedStatus(activeStatusDTO)
                 .build();
     }
 }

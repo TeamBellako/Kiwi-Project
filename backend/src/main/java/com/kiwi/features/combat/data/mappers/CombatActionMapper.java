@@ -17,9 +17,11 @@ public class CombatActionMapper {
         CombatActionDTO.CombatActionDTOBuilder builder = CombatActionDTO.builder()
                 .actor(log.getActor() != null ? log.getActor().name() : null)
                 .actionType(log.getActionType() != null ? log.getActionType().name() : null)
-                .value(log.getValue() != null ? Math.round(log.getValue()) : 0)
                 .skillName(log.getSkillName())
-                .blockedSkills(parseBlockedSkills(log.getBlockedSkills()));
+                .stateId(log.getStateId())
+                .stateName(log.getStateName())
+                .value(log.getValue())
+                .blockedSkills(blockedSkillsToList(log.getBlockedSkills()));
 
         if (log.getEffectType() != null) {
 
@@ -31,29 +33,23 @@ public class CombatActionMapper {
                             .critic(Boolean.TRUE.equals(log.getCritic()));
 
             if (log.getStateId() != null) {
-                effectBuilder.activeStatus(
+                effectBuilder.appliedStatus(
                         CombatActiveStatusDTO.builder()
                                 .stateId(log.getStateId())
-                                .remainingTurns(
-                                        log.getStatusDuration() != null
-                                                ? log.getStatusDuration()
-                                                : 0
-                                )
+                                .name(log.getStateName())
+                                .remainingTurns(log.getStatusDuration())
+                                .value(log.getValue())
                                 .build()
                 );
             }
 
             builder.effects(List.of(effectBuilder.build()));
-        } else {
-            builder.effects(Collections.emptyList());
         }
 
         return builder.build();
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
-
-    private static List<Long> parseBlockedSkills(String blockedSkills) {
+    public static List<Long> blockedSkillsToList(String blockedSkills) {
 
         if (blockedSkills == null || blockedSkills.isBlank()) {
             return Collections.emptyList();
@@ -64,5 +60,13 @@ public class CombatActionMapper {
                 .filter(s -> !s.isEmpty())
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
+    }
+
+    public static String blockedSkillsToString(List<Long> list) {
+        return list == null ? null :
+                list.stream()
+                        .map(String::valueOf)
+                        .reduce((a, b) -> a + "," + b)
+                        .orElse(null);
     }
 }

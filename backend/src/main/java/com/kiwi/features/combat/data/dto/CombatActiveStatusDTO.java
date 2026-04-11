@@ -13,11 +13,11 @@ public class CombatActiveStatusDTO {
 
     private String name;
 
-    private int icon;
+    private Integer icon;
 
     private String description;
 
-    private int remainingTurns;
+    private Integer remainingTurns;
 
     private Float value;
 }

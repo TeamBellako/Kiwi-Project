@@ -186,6 +186,4 @@ public class SkillsIntegrationTests {
         assertEquals(0, status.getDeckSlot());
     }
 
-
-
 }
