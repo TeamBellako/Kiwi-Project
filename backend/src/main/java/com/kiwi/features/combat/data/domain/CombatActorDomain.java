@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.domain;
 
-import com.kiwi.features.combat.data.enums.ActionType;
+import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Getter
 @Builder
-public class ActorDomain {
+public class CombatActorDomain {
 
     private CombatActorType type;
 
@@ -29,8 +29,8 @@ public class ActorDomain {
     private int eva;
     private int lck;
 
-    private Map<Long, Float> elementMultipliers;
-    private Map<Long, Float> statusResistances;
+    private Map<Long, ElementMultiplierDomain> elementMultipliers;
+    private Map<Long, StatusResistanceDomain> statusResistances;
 
     private List<CombatActiveStatusDomain> states;
 
@@ -38,7 +38,7 @@ public class ActorDomain {
     private  Map<Long, SkillCombatDomain> skills;
 
     @Setter
-    private ActionType actionModifierType;
+    private CombatActionType actionModifierType;
 
     @Setter
     private Long lastSkillUsed;

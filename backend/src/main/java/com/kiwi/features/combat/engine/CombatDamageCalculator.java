@@ -1,16 +1,18 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.controllers.CombatStateService;
-import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
-import com.kiwi.features.combat.data.domain.ActorDomain;
+import com.kiwi.features.combat.data.domain.CombatActorDomain;
+import com.kiwi.features.combat.data.domain.ElementMultiplierDomain;
+import com.kiwi.features.combat.data.domain.StatusResistanceDomain;
 import com.kiwi.features.skills.data.domain.SkillEffectDomain;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import com.kiwi.features.combat.data.dto.*;
-import com.kiwi.features.combat.data.enums.ActionType;
+import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.AttackType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 import com.kiwi.features.skills.data.DTO.SkillEffectResultDTO;
+import com.kiwi.features.skills.data.enums.SkillEffectType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +25,11 @@ import java.util.Random;
 public class CombatDamageCalculator {
 
     private final CombatStateService stateService;
+    private final CombatStatusManager statusManager;
 
-    private final Random random = new Random();
+    private final Random random;
+
+    //------------------------------------------------------------------------------------------------------------------
 
     public CombatActionDTO executeSkill(
             CombatContext context,
@@ -35,63 +40,77 @@ public class CombatDamageCalculator {
         if(skillId == -1) {
 
             return CombatActionDTO.builder()
-                    .actionType(ActionType.SKIP.name())
+                    .actionType(CombatActionType.SKIP.name())
                     .actor(actorType.name())
                     .build();
         }
 
-        ActorDomain attacker = context.getActor(actorType);
+        CombatActorDomain attacker = context.getActor(actorType);
 
         SkillCombatDomain skill = attacker.getSkills().get(skillId);
 
         if(skill == null) {
-            //todo THROW EXCEPTION
+            throw new IllegalStateException("Skill does not exist.");
         }
 
         List<SkillEffectResultDTO> effectsResults = new ArrayList<>();
 
         attacker.setLastSkillUsed(skillId);
 
-        //todo: ESTO HAY QUE TENER CUIDADO PORQUE EL ORDEN DEBE IMPORTAR (AÑADIR CAMPO PARA QUE SE ELIJA ORDEN DEFINIR ORDEN FIJO DAMAGE/HEAL/STATUS)
-        for (SkillEffectDomain effect : skill.getEffects()) {
-
-            ActorDomain target = context.getTarget(actorType, effect.getTarget());
-
-            switch (effect.getEffectType()) {
-
-                case DAMAGE -> effectsResults.add(
-                        applyDamage(attacker, target, effect)
-                );
-
-                case HEAL -> effectsResults.add(
-                        applyHeal(target, effect)
-                );
-
-                case APPLY_STATUS -> {
-
-                    SkillEffectResultDTO statusEffect =
-                            applyStatus(attacker, target, effect, skillId, context.getCombat().getId());
-
-                    if(statusEffect != null) {
-                        effectsResults.add(statusEffect);
-                    }
-                }
-            }
-        }
+        applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.DAMAGE);
+        applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.HEAL);
+        applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.APPLY_STATUS);
 
         return CombatActionDTO.builder()
-                .actionType(ActionType.SKILL_USED.name())
+                .actionType(CombatActionType.SKILL_USED.name())
                 .actor(actorType.name())
                 .skillName(skill.getName())
                 .effects(effectsResults)
                 .build();
     }
 
-    // ------------------------------------------------
+    //------------------------------------------------------------------------------------------------------------------
+
+    private void applyEffects(
+            CombatContext context,
+            CombatActorDomain attacker,
+            SkillCombatDomain skill,
+            Long skillId,
+            List<SkillEffectResultDTO> results,
+            SkillEffectType type
+    ) {
+        for (SkillEffectDomain effect : skill.getEffects()) {
+
+            if (effect.getEffectType() != type) continue;
+
+            CombatActorDomain target = context.getTarget(attacker.getType(), effect.getTarget());
+
+            switch (type) {
+                case DAMAGE -> results.add(
+                        applyDamage(attacker, target, effect)
+                );
+
+                case HEAL -> results.add(
+                        applyHeal(target, effect)
+                );
+
+                case APPLY_STATUS -> {
+                    SkillEffectResultDTO statusEffect =
+                            applyStatus(attacker, target, effect, skillId, context.getCombat().getId());
+
+                    if (statusEffect != null) {
+                        results.add(statusEffect);
+                    }
+                }
+            }
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
 
     private SkillEffectResultDTO applyDamage(
-            ActorDomain attacker,
-            ActorDomain victim,
+            CombatActorDomain attacker,
+            CombatActorDomain victim,
             SkillEffectDomain effect
     ) {
 
@@ -135,24 +154,28 @@ public class CombatDamageCalculator {
                 0.9f + random.nextFloat() * 0.2f;
 
         // ELEMENT
-        float elementMultiplier =
+        ElementMultiplierDomain elementMultiplier =
                 victim.getElementMultipliers()
-                        .getOrDefault(effect.getElementId(), 1f);
+                        .getOrDefault(effect.getElementId(), null);
+
+        float elementMultiplierValue = (elementMultiplier != null)
+                ? elementMultiplier.getMultiplier()
+                : 1f;
 
         // STATE MULTIPLIER
         float stateMultiplier =
-                stateService.calculateStateMultiplier(attacker, victim);
+                statusManager.calculateStateMultiplier(attacker, victim);
 
         float modifiers =
                 variance
                         * critMultiplier
-                        * elementMultiplier
+                        * elementMultiplierValue
                         * stateMultiplier;
 
         int damage = Math.round(baseDamage * modifiers);
 
         // ABSORB
-        if (elementMultiplier == -1f) {
+        if (elementMultiplierValue == -1f) {
 
             attacker.heal(damage);
 
@@ -174,10 +197,10 @@ public class CombatDamageCalculator {
                 .build();
     }
 
-    // ------------------------------------------------
+    //------------------------------------------------------------------------------------------------------------------
 
     private SkillEffectResultDTO applyHeal(
-            ActorDomain target,
+            CombatActorDomain target,
             SkillEffectDomain effect
     ) {
 
@@ -193,22 +216,26 @@ public class CombatDamageCalculator {
                 .build();
     }
 
-    // ------------------------------------------------
+    //------------------------------------------------------------------------------------------------------------------
 
     private SkillEffectResultDTO applyStatus(
-            ActorDomain attacker,
-            ActorDomain target,
+            CombatActorDomain attacker,
+            CombatActorDomain target,
             SkillEffectDomain effect,
             Long skillId,
             Long combatId
     ) {
 
         if (attacker != target) {
-            float resistance =
+            StatusResistanceDomain statusSResistance =
                     target.getStatusResistances()
-                            .getOrDefault(effect.getStateId(), 0f);
+                            .getOrDefault(effect.getStateId(), null);
 
-            float chance = 1f - resistance;
+            float resistanceValue = (statusSResistance != null)
+                    ? statusSResistance.getResistance()
+                    : 0f;
+
+            float chance = 1f - resistanceValue;
 
             if (random.nextFloat() > chance) {
                 return null;
@@ -223,4 +250,6 @@ public class CombatDamageCalculator {
                 .appliedStatus(activeStatusDTO)
                 .build();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
 }

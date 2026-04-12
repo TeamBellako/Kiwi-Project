@@ -11,11 +11,9 @@ import java.util.List;
 @Builder
 public class CombatActorDTO {
 
-    private Long actorId;
-
     private int currentHp;
 
-    private StatsDTO stats;
+    private CombatStatsDTO stats;
 
     private List<ElementMultiplierDTO> elementalMultipliers;
 

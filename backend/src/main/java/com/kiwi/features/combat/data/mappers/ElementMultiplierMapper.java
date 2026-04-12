@@ -10,6 +10,8 @@ import java.util.List;
 
 public class ElementMultiplierMapper {
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public static ElementMultiplierDTO toDTO(ElementMultiplierDomain element) {
         return ElementMultiplierDTO.builder()
                 .elementId(element.getElementId())
@@ -20,11 +22,15 @@ public class ElementMultiplierMapper {
                 .build();
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public static List<ElementMultiplierDTO> toDTOList(List<ElementMultiplierDomain> list) {
         return list.stream()
                 .map(ElementMultiplierMapper::toDTO)
                 .toList();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
 
     public static ElementMultiplierDomain toDomain(EnemyElementMultiplierPersistence multiplier, CombatElementPersistence element) {
         return ElementMultiplierDomain.builder()
@@ -36,6 +42,8 @@ public class ElementMultiplierMapper {
                 .build();
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public static ElementMultiplierDomain toDomain(UserElementMultiplierPersistence multiplier, CombatElementPersistence element) {
         return ElementMultiplierDomain.builder()
                 .elementId(element.getId())
@@ -45,4 +53,7 @@ public class ElementMultiplierMapper {
                 .description(element.getDescription())
                 .build();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+
 }

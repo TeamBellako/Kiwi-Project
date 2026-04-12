@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.persistence;
 
-import com.kiwi.features.combat.data.enums.ActionType;
+import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 import jakarta.persistence.*;
@@ -33,7 +33,7 @@ public class CombatLogPersistence {
 
     @Enumerated(EnumType.STRING)
     @Column(name="action_type", nullable = false)
-    private ActionType actionType;
+    private CombatActionType combatActionType;
 
     @Column(name="skill_id")
     private Long skillId;

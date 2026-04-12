@@ -9,6 +9,8 @@ import java.util.List;
 
 public class CombatActiveStatusMapper {
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public static CombatActiveStatusDomain toDomain (CombatActiveStatusPersistence activeStatusPersistence, CombatStatePersistence statePersistence) {
 
         return CombatActiveStatusDomain.builder()
@@ -20,6 +22,8 @@ public class CombatActiveStatusMapper {
                 .value(activeStatusPersistence.getValue())
                 .build();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
 
    public static CombatActiveStatusDTO toDTO (CombatActiveStatusDomain domain){
 
@@ -33,10 +37,14 @@ public class CombatActiveStatusMapper {
                 .build();
    }
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public static List<CombatActiveStatusDTO> toDTOList(List<CombatActiveStatusDomain> list) {
         return list.stream()
                 .map(CombatActiveStatusMapper::toDTO)
                 .toList();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
 
 }

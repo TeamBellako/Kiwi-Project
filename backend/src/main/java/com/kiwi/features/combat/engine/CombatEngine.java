@@ -1,37 +1,26 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.controllers.CombatStateService;
-import com.kiwi.features.combat.data.domain.ActorDomain;
+import com.kiwi.features.combat.data.domain.CombatActorDomain;
 import com.kiwi.features.combat.data.domain.CombatDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
-import com.kiwi.features.combat.data.enums.ActionType;
+import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
-import com.kiwi.features.combat.data.persistence.CombatPersistence;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class CombatEngine {
 
     private final CombatDamageCalculator damageCalculator;
-    private final CombatStateService stateService;
+    private final CombatStatusManager statusManager;
     private final EnemyAI enemyAI;
-
-    //------------------------------------------------------------------------------------------------------------------
-
-    public CombatEngine(
-            CombatDamageCalculator damageCalculator,
-            CombatStateService stateService,
-            EnemyAI enemyAI
-    ) {
-        this.damageCalculator = damageCalculator;
-        this.stateService = stateService;
-        this.enemyAI = enemyAI;
-    }
 
     //------------------------------------------------------------------------------------------------------------------
 
@@ -43,10 +32,10 @@ public class CombatEngine {
         CombatDomain combat = context.getCombat();
 
         // USER TURN
-        ActorDomain userActor = context.getActor(CombatActorType.USER);
+        CombatActorDomain userActor = context.getActor(CombatActorType.USER);
 
         //APPLY CURRENT STATES
-        stateService.applyActiveStatesToActor(userActor,context);
+        statusManager.applyActiveStatesEffectsToActor(userActor,context);
 
         //CHECK USER LIFE
         if(combat.getUserHp() <= 0) {
@@ -55,9 +44,9 @@ public class CombatEngine {
         }
 
         //EXECUTE ACTION
-        if (userActor.getActionModifierType() != ActionType.ACTOR_BLOCKED_BY_STATE) {
+        if (userActor.getActionModifierType() != CombatActionType.ACTOR_BLOCKED_BY_STATE) {
             CombatActionDTO action;
-            if ( userActor.getActionModifierType() == ActionType.SKILL_REPEAT_BY_STATE) {
+            if ( userActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
                 action = damageCalculator.executeSkill(
                         context,
@@ -77,15 +66,15 @@ public class CombatEngine {
         }
 
         //REDUCE STATES TURNS
-        stateService.reduceStatesTurnsToActor(userActor, context);
+        statusManager.reduceStatesTurnsToActor(userActor, context);
 
         // ENEMY TURN
         if(combat.getEnemyHp() > 0) {
 
-            ActorDomain enemyActor = context.getActor(CombatActorType.ENEMY);
+            CombatActorDomain enemyActor = context.getActor(CombatActorType.ENEMY);
 
             //APPLY CURRENT STATES
-            stateService.applyActiveStatesToActor(enemyActor,context);
+            statusManager.applyActiveStatesEffectsToActor(enemyActor,context);
 
             //CHECK ENEMY LIFE
             if(combat.getEnemyHp() <= 0) {
@@ -97,9 +86,9 @@ public class CombatEngine {
             Long enemySkill = enemyAI.chooseSkill(context);
 
             //EXECUTE ACTION
-            if (enemyActor.getActionModifierType() != ActionType.ACTOR_BLOCKED_BY_STATE) {
+            if (enemyActor.getActionModifierType() != CombatActionType.ACTOR_BLOCKED_BY_STATE) {
                 CombatActionDTO action;
-                if (enemyActor.getActionModifierType() == ActionType.SKILL_REPEAT_BY_STATE) {
+                if (enemyActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
                     action = damageCalculator.executeSkill(
                             context,
@@ -119,7 +108,7 @@ public class CombatEngine {
             }
 
             //REDUCE STATES TURNS
-            stateService.reduceStatesTurnsToActor(enemyActor, context);
+            statusManager.reduceStatesTurnsToActor(enemyActor, context);
         }
 
         // TURN UPDATE
@@ -143,7 +132,7 @@ public class CombatEngine {
         return CombatTurnResultDTO.builder()
                 .combatId(combat.getId())
                 .turnNumber(combat.getTurnNumber())
-                .actions(context.getActions())
+                .actions(context.getActionsDTOs())
                 .combatStatus(combat.getCombatStatus().name())
                 .build();
     }
@@ -157,7 +146,7 @@ public class CombatEngine {
         CombatActionDTO action =
                 CombatActionDTO.builder()
                         .actor(CombatActorType.USER.name())
-                        .actionType(ActionType.TIMEOUT.name())
+                        .actionType(CombatActionType.TIMEOUT.name())
                         .build();
 
         actions.add(action);

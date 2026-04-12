@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.enums;
 
-public enum ActionType {
+public enum CombatActionType {
     SKILL_USED,
     ACTOR_BLOCKED_BY_STATE,          // FREEZE
     SKILL_REPEAT_BY_STATE,    // CONFUSION

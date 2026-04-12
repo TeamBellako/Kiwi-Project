@@ -10,6 +10,8 @@ import java.util.List;
 
 public class StatusResistanceMapper {
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public static StatusResistanceDTO toDTO(StatusResistanceDomain state) {
         return StatusResistanceDTO.builder()
                 .stateId(state.getStateId())
@@ -20,11 +22,15 @@ public class StatusResistanceMapper {
                 .build();
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public static List<StatusResistanceDTO> toDTOList(List<StatusResistanceDomain> list) {
         return list.stream()
                 .map(StatusResistanceMapper::toDTO)
                 .toList();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
 
     public static StatusResistanceDomain toDomain(EnemyStatusResistancePersistence resistance, CombatStatePersistence state) {
         return StatusResistanceDomain.builder()
@@ -36,6 +42,8 @@ public class StatusResistanceMapper {
                 .build();
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+
     public static StatusResistanceDomain toDomain(UserStatusResistancePersistence resistance, CombatStatePersistence state) {
         return StatusResistanceDomain.builder()
                 .stateId(state.getId())
@@ -45,4 +53,7 @@ public class StatusResistanceMapper {
                 .stateDescription(state.getDescription())
                 .build();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+
 }

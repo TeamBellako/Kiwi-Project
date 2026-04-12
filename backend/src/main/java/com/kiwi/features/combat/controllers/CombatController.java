@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/combat")
 public class CombatController {
 
-    private final CombatService combatService;
+    private final CombatFacadeService combatFacadeService;
     private final UsersService usersService;
 
     public CombatController(
-            CombatService combatService,
+            CombatFacadeService combatFacadeService,
             UsersService usersService
     ) {
-        this.combatService = combatService;
+        this.combatFacadeService = combatFacadeService;
         this.usersService = usersService;
     }
 
@@ -41,7 +41,7 @@ public class CombatController {
                 .getId();
 
         return ResponseEntity.ok(
-                combatService.startOrResumeCombat(userId, combatConfigId)
+                combatFacadeService.startOrResumeCombat(userId, combatConfigId)
         );
     }
 
@@ -61,7 +61,7 @@ public class CombatController {
                 .getId();
 
         return ResponseEntity.ok(
-                combatService.executeTurn(userId, combatId, skillId)
+                combatFacadeService.executeTurn(userId, combatId, skillId)
         );
     }
 
@@ -80,7 +80,7 @@ public class CombatController {
                 .getId();
 
         return ResponseEntity.ok(
-                combatService.timeOutCombat(userId, combatId)
+                combatFacadeService.timeOut(userId, combatId)
         );
     }
 

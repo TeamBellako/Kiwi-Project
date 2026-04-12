@@ -8,6 +8,5 @@ import java.util.List;
 
 public interface CombatActiveStatusRepository extends JpaRepository<CombatActiveStatusPersistence, Long> {
 
-    //TODO PORQUE ME LO HE INVENTAO
-    List<CombatActiveStatusPersistence> findByCombatIdAndTargetType(Long combatId, CombatActorType targetType);
+    List<CombatActiveStatusPersistence> findByCombatIdAndTarget(Long combatId, CombatActorType target);
 }

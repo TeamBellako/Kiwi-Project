@@ -1,8 +1,10 @@
 package com.kiwi.features.combat.engine;
 
-import com.kiwi.features.combat.data.domain.ActorDomain;
+import com.kiwi.features.combat.data.domain.CombatActorDomain;
+import com.kiwi.features.combat.data.domain.StatusResistanceDomain;
 import com.kiwi.features.skills.data.domain.SkillEffectDomain;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -11,14 +13,17 @@ import java.util.Random;
 
 //TODO CAMBIAR A LA IA PROPUESTA EN EL NOTION
 @Component
+@RequiredArgsConstructor
 public class EnemyAI {
 
-    private final Random random = new Random();
+    private final Random random;
+
+    //------------------------------------------------------------------------------------------------------------------
 
     public Long chooseSkill(CombatContext context) {
 
-        ActorDomain enemy = context.getEnemy();
-        ActorDomain user = context.getUser();
+        CombatActorDomain enemy = context.getEnemy();
+        CombatActorDomain user = context.getUser();
 
         List<SkillCombatDomain> skills = new ArrayList<>(enemy.getSkills().values());
 
@@ -44,8 +49,8 @@ public class EnemyAI {
 
     private float evaluateSkill(
             SkillCombatDomain skill,
-            ActorDomain enemy,
-            ActorDomain user
+            CombatActorDomain enemy,
+            CombatActorDomain user
     ) {
 
         float score = 0;
@@ -81,11 +86,15 @@ public class EnemyAI {
 
                 case APPLY_STATUS -> {
 
-                    float resistance =
+                    StatusResistanceDomain statusSResistance =
                             user.getStatusResistances()
-                                    .getOrDefault(effect.getStateId(),0f);
+                                    .getOrDefault(effect.getStateId(), null);
 
-                    score += (1f - resistance) * 30;
+                    float resistanceValue = (statusSResistance != null)
+                            ? statusSResistance.getResistance()
+                            : 0f;
+
+                    score += (1f - resistanceValue) * 30;
                 }
             }
         }

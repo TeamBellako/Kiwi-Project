@@ -1,12 +1,14 @@
 package com.kiwi.features.combat.data.mappers;
 
-import com.kiwi.features.combat.data.domain.CombatDomain;
+import com.kiwi.features.combat.data.domain.*;
 import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 
 import java.util.List;
 
 public class CombatMapper {
+
+    //------------------------------------------------------------------------------------------------------------------
 
     public static CombatDomain toDomain(CombatPersistence combat) {
         return CombatDomain.builder()
@@ -21,6 +23,8 @@ public class CombatMapper {
                 .combatStatus(combat.getCombatStatus())
                 .build();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
 
     public static CombatDTO toDTO(
             CombatPersistence combat,
@@ -46,4 +50,7 @@ public class CombatMapper {
                 .log(log)
                 .build();
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+
 }

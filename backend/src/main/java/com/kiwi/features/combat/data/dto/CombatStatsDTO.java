@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StatsDTO {
+public class CombatStatsDTO {
 
     private int maxHp;
 
