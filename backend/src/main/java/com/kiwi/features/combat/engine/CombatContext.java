@@ -1,5 +1,6 @@
 package com.kiwi.features.combat.engine;
 
+import com.kiwi.features.combat.data.domain.CombatActionDomain;
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
 import com.kiwi.features.combat.data.domain.CombatDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
@@ -18,7 +19,7 @@ public class CombatContext {
     private final CombatActorDomain user;
     private final CombatActorDomain enemy;
 
-    private final List<CombatActionDTO> actionsDTOs = new ArrayList<>();
+    private final List<CombatActionDomain> actions = new ArrayList<>();
 
     //------------------------------------------------------------------------------------------------------------------
 
@@ -64,8 +65,8 @@ public class CombatContext {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public void addAction(CombatActionDTO action) {
-        actionsDTOs.add(action);
+    public void addAction(CombatActionDomain action) {
+        actions.add(action);
     }
 
     //------------------------------------------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ public class CombatStateService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public CombatActiveStatusDTO applyNewState(Long stateId, Integer statusDuration, Float power, CombatActorDomain target, Long skillId, Long combatId)
+    public CombatActiveStatusDomain applyNewState(Long stateId, Integer statusDuration, Float power, CombatActorDomain target, Long skillId, Long combatId)
     {
         CombatStatePersistence statePersistence =
                         stateRepository.findById(stateId)
@@ -47,7 +47,7 @@ public class CombatStateService {
         CombatActiveStatusDomain stateDomain = CombatActiveStatusMapper.toDomain(statusEffectPersistence, statePersistence);
         target.getStates().add(stateDomain);
 
-            return CombatActiveStatusMapper.toDTO(stateDomain);
+            return stateDomain;
     }
 
     // ----------------------------------------------------------------------------------------------------------------

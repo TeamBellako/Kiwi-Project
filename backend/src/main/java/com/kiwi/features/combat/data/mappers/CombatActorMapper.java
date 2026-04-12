@@ -13,6 +13,7 @@ import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CombatActorMapper {
@@ -68,14 +69,14 @@ public class CombatActorMapper {
                 actorElements.stream()
                         .collect(Collectors.toMap(
                                 ElementMultiplierDomain::getElementId,
-                                e -> e
+                                Function.identity()
                         ));
 
         Map<Long, StatusResistanceDomain> resistanceMap =
                 actorResistances.stream()
                         .collect(Collectors.toMap(
                                 StatusResistanceDomain::getStateId,
-                                r -> r
+                                Function.identity()
                         ));
 
         return CombatActorDomain.builder()

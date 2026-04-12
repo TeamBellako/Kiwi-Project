@@ -1,9 +1,7 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.controllers.CombatStateService;
-import com.kiwi.features.combat.data.domain.CombatActorDomain;
-import com.kiwi.features.combat.data.domain.ElementMultiplierDomain;
-import com.kiwi.features.combat.data.domain.StatusResistanceDomain;
+import com.kiwi.features.combat.data.domain.*;
 import com.kiwi.features.skills.data.domain.SkillEffectDomain;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import com.kiwi.features.combat.data.dto.*;
@@ -31,7 +29,7 @@ public class CombatDamageCalculator {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public CombatActionDTO executeSkill(
+    public CombatActionDomain executeSkill(
             CombatContext context,
             CombatActorType actorType,
             Long skillId
@@ -39,9 +37,9 @@ public class CombatDamageCalculator {
         // No skills available
         if(skillId == -1) {
 
-            return CombatActionDTO.builder()
-                    .actionType(CombatActionType.SKIP.name())
-                    .actor(actorType.name())
+            return CombatActionDomain.builder()
+                    .actionType(CombatActionType.SKIP)
+                    .actor(actorType)
                     .build();
         }
 
@@ -53,7 +51,8 @@ public class CombatDamageCalculator {
             throw new IllegalStateException("Skill does not exist.");
         }
 
-        List<SkillEffectResultDTO> effectsResults = new ArrayList<>();
+        List<SkillEffectResultDomain> effectsResults = new ArrayList<>();
+
 
         attacker.setLastSkillUsed(skillId);
 
@@ -61,11 +60,11 @@ public class CombatDamageCalculator {
         applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.HEAL);
         applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.APPLY_STATUS);
 
-        return CombatActionDTO.builder()
-                .actionType(CombatActionType.SKILL_USED.name())
-                .actor(actorType.name())
+        return CombatActionDomain.builder()
+                .actionType(CombatActionType.SKILL_USED)
+                .actor(actorType)
                 .skillName(skill.getName())
-                .effects(effectsResults)
+                .skillEffectsResults(effectsResults)
                 .build();
     }
 
@@ -76,7 +75,7 @@ public class CombatDamageCalculator {
             CombatActorDomain attacker,
             SkillCombatDomain skill,
             Long skillId,
-            List<SkillEffectResultDTO> results,
+            List<SkillEffectResultDomain> results,
             SkillEffectType type
     ) {
         for (SkillEffectDomain effect : skill.getEffects()) {
@@ -95,7 +94,7 @@ public class CombatDamageCalculator {
                 );
 
                 case APPLY_STATUS -> {
-                    SkillEffectResultDTO statusEffect =
+                    SkillEffectResultDomain statusEffect =
                             applyStatus(attacker, target, effect, skillId, context.getCombat().getId());
 
                     if (statusEffect != null) {
@@ -108,7 +107,7 @@ public class CombatDamageCalculator {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private SkillEffectResultDTO applyDamage(
+    private SkillEffectResultDomain applyDamage(
             CombatActorDomain attacker,
             CombatActorDomain victim,
             SkillEffectDomain effect
@@ -123,9 +122,9 @@ public class CombatDamageCalculator {
         int roll = random.nextInt(100);
 
         if (roll > hitChance) {
-            return SkillEffectResultDTO.builder()
-                    .typeResult(SkillEffectResultType.MISS.name())
-                    .target(victim.getType().name())
+            return SkillEffectResultDomain.builder()
+                    .typeResult(SkillEffectResultType.MISS)
+                    .target(victim.getType())
                     .build();
         }
 
@@ -179,9 +178,9 @@ public class CombatDamageCalculator {
 
             attacker.heal(damage);
 
-            return SkillEffectResultDTO.builder()
-                    .typeResult(SkillEffectResultType.HEAL.name())
-                    .target(attacker.getType().name())
+            return SkillEffectResultDomain.builder()
+                    .typeResult(SkillEffectResultType.HEAL)
+                    .target(attacker.getType())
                     .value((float)damage)
                     .critic(false)
                     .build();
@@ -189,9 +188,9 @@ public class CombatDamageCalculator {
 
         victim.damage(damage);
 
-        return SkillEffectResultDTO.builder()
-                .typeResult(SkillEffectResultType.DAMAGE.name())
-                .target(victim.getType().name())
+        return SkillEffectResultDomain.builder()
+                .typeResult(SkillEffectResultType.DAMAGE)
+                .target(victim.getType())
                 .value((float)damage)
                 .critic(crit)
                 .build();
@@ -199,7 +198,7 @@ public class CombatDamageCalculator {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private SkillEffectResultDTO applyHeal(
+    private SkillEffectResultDomain applyHeal(
             CombatActorDomain target,
             SkillEffectDomain effect
     ) {
@@ -208,9 +207,9 @@ public class CombatDamageCalculator {
 
         target.heal(heal);
 
-        return SkillEffectResultDTO.builder()
-                .typeResult(SkillEffectResultType.HEAL.name())
-                .target(target.getType().name())
+        return SkillEffectResultDomain.builder()
+                .typeResult(SkillEffectResultType.HEAL)
+                .target(target.getType())
                 .value((float)heal)
                 .critic(false)
                 .build();
@@ -218,7 +217,7 @@ public class CombatDamageCalculator {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private SkillEffectResultDTO applyStatus(
+    private SkillEffectResultDomain applyStatus(
             CombatActorDomain attacker,
             CombatActorDomain target,
             SkillEffectDomain effect,
@@ -242,12 +241,12 @@ public class CombatDamageCalculator {
             }
         }
 
-        CombatActiveStatusDTO activeStatusDTO = stateService.applyNewState(effect.getStateId(), effect.getStatusDuration(), effect.getPower(), target, skillId, combatId);
+        CombatActiveStatusDomain activeStatusDomain = stateService.applyNewState(effect.getStateId(), effect.getStatusDuration(), effect.getPower(), target, skillId, combatId);
 
-        return SkillEffectResultDTO.builder()
-                .typeResult(SkillEffectResultType.STATUS_APPLIED.name())
-                .target(target.getType().name())
-                .appliedStatus(activeStatusDTO)
+        return SkillEffectResultDomain.builder()
+                .typeResult(SkillEffectResultType.STATUS_APPLIED)
+                .target(target.getType())
+                .appliedStatus(activeStatusDomain)
                 .build();
     }
 

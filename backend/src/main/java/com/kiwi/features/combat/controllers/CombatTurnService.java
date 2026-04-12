@@ -2,9 +2,11 @@ package com.kiwi.features.combat.controllers;
 
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
 import com.kiwi.features.combat.data.domain.CombatDomain;
+import com.kiwi.features.combat.data.domain.CombatTurnResultDomain;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.mappers.CombatMapper;
+import com.kiwi.features.combat.data.mappers.CombatTurnResultMapper;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import com.kiwi.features.combat.engine.CombatContext;
 import com.kiwi.features.combat.engine.CombatEngine;
@@ -62,7 +64,7 @@ public class CombatTurnService {
                 enemy
         );
 
-        CombatTurnResultDTO result = combatEngine.executeTurn(context, skillId);
+        CombatTurnResultDomain result = combatEngine.executeTurn(context, skillId);
 
         combatLogService.saveCombatActions(result.getActions(), combat.getId(), combat.getTurnNumber());
 
@@ -85,7 +87,7 @@ public class CombatTurnService {
                 context.getEnemy()
         );
 
-        return result;
+        return CombatTurnResultMapper.toDTO(result);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -114,7 +116,7 @@ public class CombatTurnService {
                     null
             );
 
-            return combatEngine.buildTimeoutCombatTurnResultDTO(userId, combatDomain);
+            return CombatTurnResultMapper.toDTO(combatEngine.buildTimeoutCombatTurnResult(combatDomain));
         }
 
         return new CombatTurnResultDTO();

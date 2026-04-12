@@ -1,5 +1,6 @@
 package com.kiwi.features.combat.engine;
 
+import com.kiwi.features.combat.data.domain.CombatActionDomain;
 import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
@@ -28,12 +29,12 @@ public class CombatStatusManager {
             switch (stateType) {
                 case BURN:
                     int burnDamage = applyDamage(actor, state.getValue());
-                    CombatActionDTO burnAction =
-                            CombatActionDTO.builder()
-                                    .actor(actor.getType().name())
-                                    .actionType(CombatActionType.ACTOR_DAMAGED_BY_STATE.name())
-                                    .stateName(state.getName())
-                                    .value((float) burnDamage)
+                    CombatActionDomain burnAction =
+                            CombatActionDomain.builder()
+                                    .actor(actor.getType())
+                                    .actionType(CombatActionType.ACTOR_DAMAGED_BY_STATE)
+                                    .state(state)
+                                    .stateEffectValue((float) burnDamage)
                                     .build();
 
                     context.addAction(burnAction);
@@ -41,12 +42,12 @@ public class CombatStatusManager {
 
                 case POISON:
                     int posionDamage = applyDamage(actor, state.getValue());
-                    CombatActionDTO posionAction =
-                            CombatActionDTO.builder()
-                                    .actor(actor.getType().name())
-                                    .actionType(CombatActionType.ACTOR_DAMAGED_BY_STATE.name())
-                                    .stateName(state.getName())
-                                    .value((float) posionDamage)
+                    CombatActionDomain posionAction =
+                            CombatActionDomain.builder()
+                                    .actor(actor.getType())
+                                    .actionType(CombatActionType.ACTOR_DAMAGED_BY_STATE)
+                                    .state(state)
+                                    .stateEffectValue((float) posionDamage)
                                     .build();
 
                     context.addAction(posionAction);
@@ -55,11 +56,11 @@ public class CombatStatusManager {
                     if (random.nextInt(100) < 80) {
                         actor.setActionModifierType(CombatActionType.ACTOR_BLOCKED_BY_STATE);
 
-                        CombatActionDTO freezeAction =
-                                CombatActionDTO.builder()
-                                        .actor(actor.getType().name())
-                                        .actionType(CombatActionType.ACTOR_BLOCKED_BY_STATE.name())
-                                        .stateName(state.getName())
+                        CombatActionDomain freezeAction =
+                                CombatActionDomain.builder()
+                                        .actor(actor.getType())
+                                        .actionType(CombatActionType.ACTOR_BLOCKED_BY_STATE)
+                                        .state(state)
                                         .build();
 
                         context.addAction(freezeAction);
@@ -69,11 +70,11 @@ public class CombatStatusManager {
                     if (actor.getLastSkillUsed() != null && random.nextInt(100) < 40) {
                         actor.setActionModifierType(CombatActionType.SKILL_REPEAT_BY_STATE);
 
-                        CombatActionDTO action =
-                                CombatActionDTO.builder()
-                                        .actor(actor.getType().name())
-                                        .actionType(CombatActionType.SKILL_REPEAT_BY_STATE.name())
-                                        .stateName(state.getName())
+                        CombatActionDomain action =
+                                CombatActionDomain.builder()
+                                        .actor(actor.getType())
+                                        .actionType(CombatActionType.SKILL_REPEAT_BY_STATE)
+                                        .state(state)
                                         .build();
 
                         context.addAction(action);
@@ -91,11 +92,11 @@ public class CombatStatusManager {
                             .limit(2)
                             .toList();
 
-                    CombatActionDTO action =
-                            CombatActionDTO.builder()
-                                    .actor(actor.getType().name())
-                                    .actionType(CombatActionType.BLOCKED_SKILLS_BY_STATE.name())
-                                    .stateName(state.getName())
+                    CombatActionDomain action =
+                            CombatActionDomain.builder()
+                                    .actor(actor.getType())
+                                    .actionType(CombatActionType.BLOCKED_SKILLS_BY_STATE)
+                                    .state(state)
                                     .blockedSkills(blockedSkillIds)
                                     .build();
 
@@ -157,11 +158,11 @@ public class CombatStatusManager {
         while (statesIt.hasNext()) {
             CombatActiveStatusDomain state = statesIt.next();
 
-            CombatActionDTO action =
-                    CombatActionDTO.builder()
-                            .actor(actor.getType().name())
-                            .actionType(CombatActionType.STATUS_TURN_REDUCED.name())
-                            .stateName(state.getName())
+            CombatActionDomain action =
+                    CombatActionDomain.builder()
+                            .actor(actor.getType())
+                            .actionType(CombatActionType.STATUS_TURN_REDUCED)
+                            .state(state)
                             .build();
 
             state.setRemainingTurns(
@@ -171,7 +172,7 @@ public class CombatStatusManager {
             if (state.getRemainingTurns() <= 0) {
                 statesIt.remove();
 
-                action.setActionType(CombatActionType.STATUS_FINISHED.name());
+                action.setActionType(CombatActionType.STATUS_FINISHED);
             }
 
             context.addAction(action);

@@ -1,10 +1,9 @@
 package com.kiwi.features.combat.engine;
 
-import com.kiwi.features.combat.controllers.CombatStateService;
+import com.kiwi.features.combat.data.domain.CombatActionDomain;
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
 import com.kiwi.features.combat.data.domain.CombatDomain;
-import com.kiwi.features.combat.data.dto.CombatActionDTO;
-import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
+import com.kiwi.features.combat.data.domain.CombatTurnResultDomain;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
@@ -24,7 +23,7 @@ public class CombatEngine {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public CombatTurnResultDTO executeTurn(
+    public CombatTurnResultDomain executeTurn(
             CombatContext context,
             Long userSkillId
     ) {
@@ -40,12 +39,12 @@ public class CombatEngine {
         //CHECK USER LIFE
         if(combat.getUserHp() <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
-            return buildCombatTurnResultDTO(context, combat);
+            return buildCombatTurnResult(context, combat);
         }
 
         //EXECUTE ACTION
         if (userActor.getActionModifierType() != CombatActionType.ACTOR_BLOCKED_BY_STATE) {
-            CombatActionDTO action;
+            CombatActionDomain action;
             if ( userActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
                 action = damageCalculator.executeSkill(
@@ -79,7 +78,7 @@ public class CombatEngine {
             //CHECK ENEMY LIFE
             if(combat.getEnemyHp() <= 0) {
                 combat.setCombatStatus(CombatGeneralStatus.USER_WON);
-                return buildCombatTurnResultDTO(context, combat);
+                return buildCombatTurnResult(context, combat);
             }
 
             //CHOOSE SKILL
@@ -87,7 +86,7 @@ public class CombatEngine {
 
             //EXECUTE ACTION
             if (enemyActor.getActionModifierType() != CombatActionType.ACTOR_BLOCKED_BY_STATE) {
-                CombatActionDTO action;
+                CombatActionDomain action;
                 if (enemyActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
                     action = damageCalculator.executeSkill(
@@ -122,40 +121,40 @@ public class CombatEngine {
             combat.setCombatStatus(CombatGeneralStatus.USER_WON);
         }
 
-        return buildCombatTurnResultDTO(context, combat);
+        return buildCombatTurnResult(context, combat);
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private CombatTurnResultDTO buildCombatTurnResultDTO(CombatContext context, CombatDomain combat)
+    private CombatTurnResultDomain buildCombatTurnResult(CombatContext context, CombatDomain combat)
     {
-        return CombatTurnResultDTO.builder()
+        return CombatTurnResultDomain.builder()
                 .combatId(combat.getId())
                 .turnNumber(combat.getTurnNumber())
-                .actions(context.getActionsDTOs())
-                .combatStatus(combat.getCombatStatus().name())
+                .actions(context.getActions())
+                .combatStatus(combat.getCombatStatus())
                 .build();
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public CombatTurnResultDTO buildTimeoutCombatTurnResultDTO(Long userId, CombatDomain combat) {
+    public CombatTurnResultDomain buildTimeoutCombatTurnResult(CombatDomain combat) {
 
-        List<CombatActionDTO> actions = new ArrayList<>();
+        List<CombatActionDomain> actions = new ArrayList<>();
 
-        CombatActionDTO action =
-                CombatActionDTO.builder()
-                        .actor(CombatActorType.USER.name())
-                        .actionType(CombatActionType.TIMEOUT.name())
+        CombatActionDomain action =
+                CombatActionDomain.builder()
+                        .actor(CombatActorType.USER)
+                        .actionType(CombatActionType.TIMEOUT)
                         .build();
 
         actions.add(action);
 
-        return CombatTurnResultDTO.builder()
+        return CombatTurnResultDomain.builder()
                 .combatId(combat.getId())
                 .turnNumber(combat.getTurnNumber())
                 .actions(actions)
-                .combatStatus(combat.getCombatStatus().name())
+                .combatStatus(combat.getCombatStatus())
                 .build();
     }
 

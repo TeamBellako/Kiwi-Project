@@ -7,8 +7,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class CombatActionDTO {
 
@@ -18,9 +16,9 @@ public class CombatActionDTO {
 
     private String stateName;
     private Long stateId;
-    private Float value;
+    private Float stateEffectValue;
     private List<Long> blockedSkills;
 
     private String skillName;
-    private List<SkillEffectResultDTO> effects;
+    private List<SkillEffectResultDTO> skillEffectsResults;
 }

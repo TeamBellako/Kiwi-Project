@@ -1,95 +1,24 @@
 package com.kiwi.features.combat.data.mappers;
 
+import com.kiwi.features.combat.data.domain.CombatActionDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
-import com.kiwi.features.combat.data.dto.CombatActiveStatusDTO;
-import com.kiwi.features.combat.data.enums.CombatActionType;
-import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.persistence.CombatLogPersistence;
-import com.kiwi.features.skills.data.DTO.SkillEffectResultDTO;
-import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CombatActionMapper {
 
-    //------------------------------------------------------------------------------------------------------------------
-
-    public static CombatActionDTO toDTO(CombatLogPersistence log) {
-
-        CombatActionDTO.CombatActionDTOBuilder builder = CombatActionDTO.builder()
-                .actor(log.getActor() != null ? log.getActor().name() : null)
-                .actionType(log.getCombatActionType() != null ? log.getCombatActionType().name() : null)
-                .skillName(log.getSkillName())
-                .stateId(log.getStateId())
-                .stateName(log.getStateName())
-                .value(log.getValue())
-                .blockedSkills(blockedSkillsToList(log.getBlockedSkills()));
-
-        if (log.getEffectType() != null) {
-
-            SkillEffectResultDTO.SkillEffectResultDTOBuilder effectBuilder =
-                    SkillEffectResultDTO.builder()
-                            .typeResult(log.getEffectType().name())
-                            .target(log.getTarget() != null ? log.getTarget().name() : null)
-                            .value(log.getValue())
-                            .critic(Boolean.TRUE.equals(log.getCritic()));
-
-            if (log.getStateId() != null) {
-                effectBuilder.appliedStatus(
-                        CombatActiveStatusDTO.builder()
-                                .stateId(log.getStateId())
-                                .name(log.getStateName())
-                                .remainingTurns(log.getStatusDuration())
-                                .value(log.getValue())
-                                .build()
-                );
-            }
-
-            builder.effects(List.of(effectBuilder.build()));
-        }
-
-        return builder.build();
-    }
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public static List<Long> blockedSkillsToList(String blockedSkills) {
-
-        if (blockedSkills == null || blockedSkills.isBlank()) {
-            return Collections.emptyList();
-        }
-
-        return Arrays.stream(blockedSkills.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
-    public static String blockedSkillsToString(List<Long> list) {
-        return list == null ? null :
-                list.stream()
-                        .map(String::valueOf)
-                        .reduce((a, b) -> a + "," + b)
-                        .orElse(null);
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
-    public static List<CombatLogPersistence> mapCombatAction(
-            CombatActionDTO action,
+    public static List<CombatLogPersistence> toCombatLogPersistence(
+            CombatActionDomain action,
             Long combatId,
             int turnNumber
     ) {
-        CombatActionType type = CombatActionType.valueOf(action.getActionType());
 
-        return switch (type) {
+        return switch (action.getActionType()) {
 
             case SKILL_USED -> mapSkillUsed(action, combatId, turnNumber);
 
@@ -97,25 +26,25 @@ public class CombatActionMapper {
                  SKILL_REPEAT_BY_STATE,
                  STATUS_TURN_REDUCED,
                  STATUS_FINISHED -> List.of(
-                    base(action, combatId, turnNumber)
-                            .stateName(action.getStateName())
-                            .stateId(action.getStateId())
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
+                            .stateName(action.getState()  != null ? action.getState().getName() : null)
+                            .stateId(action.getState()  != null ? action.getState().getStateId() : null)
                             .build()
             );
 
             case ACTOR_DAMAGED_BY_STATE -> List.of(
-                    base(action, combatId, turnNumber)
-                            .stateName(action.getStateName())
-                            .stateId(action.getStateId())
-                            .value(action.getValue())
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
+                            .stateName(action.getState()  != null ? action.getState().getName() : null)
+                            .stateId(action.getState()  != null ? action.getState().getStateId() : null)
+                            .value(action.getStateEffectValue())
                             .build()
             );
 
             case BLOCKED_SKILLS_BY_STATE,
                  RELEASED_SKILLS_BY_STATE -> List.of(
-                    base(action, combatId, turnNumber)
-                            .stateName(action.getStateName())
-                            .stateId(action.getStateId())
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
+                            .stateName(action.getState()  != null ? action.getState().getName() : null)
+                            .stateId(action.getState()  != null ? action.getState().getStateId() : null)
                             .blockedSkills(
                                     CombatActionMapper.blockedSkillsToString(action.getBlockedSkills())
                             )
@@ -123,7 +52,7 @@ public class CombatActionMapper {
             );
 
             case SKIP, TIMEOUT -> List.of(
-                    base(action, combatId, turnNumber).build()
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber).build()
             );
         };
     }
@@ -131,26 +60,26 @@ public class CombatActionMapper {
     //------------------------------------------------------------------------------------------------------------------
 
     private static List<CombatLogPersistence> mapSkillUsed(
-            CombatActionDTO action,
+            CombatActionDomain action,
             Long combatId,
             int turnNumber
     ) {
 
-        if (action.getEffects() == null || action.getEffects().isEmpty()) {
+        if (action.getSkillEffectsResults() == null || action.getSkillEffectsResults().isEmpty()) {
             return List.of(
-                    base(action, combatId, turnNumber)
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
                             .skillName(action.getSkillName())
                             .build()
             );
         }
 
-        return action.getEffects().stream()
+        return action.getSkillEffectsResults().stream()
                 .map(effect -> {
                     CombatLogPersistence.CombatLogPersistenceBuilder builder =
-                            base(action, combatId, turnNumber)
+                            baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
                                     .skillName(action.getSkillName())
-                                    .effectType(SkillEffectResultType.valueOf(effect.getTypeResult()))
-                                    .target(CombatActorType.valueOf(effect.getTarget()))
+                                    .effectType(effect.getTypeResult())
+                                    .target(effect.getTarget())
                                     .value(effect.getValue())
                                     .critic(effect.isCritic());
 
@@ -167,17 +96,59 @@ public class CombatActionMapper {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private static CombatLogPersistence.CombatLogPersistenceBuilder base(
-            CombatActionDTO action,
+    private static CombatLogPersistence.CombatLogPersistenceBuilder baseCombatLogPersistenceBuilder(
+            CombatActionDomain action,
             Long combatId,
             int turnNumber
     ) {
         return CombatLogPersistence.builder()
                 .combatId(combatId)
                 .turnNumber(turnNumber)
-                .actor(CombatActorType.valueOf(action.getActor()))
-                .combatActionType(CombatActionType.valueOf(action.getActionType()))
+                .actor(action.getActor() != null ? action.getActor() : null)
+                .combatActionType(action.getActionType() != null ? action.getActionType() : null)
                 .createdAt(Instant.now());
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public static String blockedSkillsToString(List<Long> list) {
+        return list == null ? null :
+                list.stream()
+                        .map(String::valueOf)
+                        .reduce((a, b) -> a + "," + b)
+                        .orElse(null);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public static CombatActionDTO toDTO(CombatActionDomain action) {
+
+        return CombatActionDTO.builder()
+                .actor(action.getActor() != null ? action.getActor().name() : null)
+                .actionType(action.getActionType() != null ? action.getActionType().name() : null)
+                .skillName(action.getSkillName())
+                .stateEffectValue(action.getStateEffectValue())
+                .blockedSkills(action.getBlockedSkills())
+                .stateName(action.getState() != null ? action.getState().getName() : null)
+                .stateId(action.getState() != null ? action.getState().getStateId() : null)
+                .skillEffectsResults(
+                        action.getSkillEffectsResults() == null
+                                ? List.of()
+                                : action.getSkillEffectsResults().stream()
+                                .map(SkillEffectResultMapper::toDTO)
+                                .toList()
+                )
+                .build();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public static List<CombatActionDTO> toDTOList(List<CombatActionDomain> actions) {
+        if (actions == null) return List.of();
+
+        return actions.stream()
+                .map(CombatActionMapper::toDTO)
+                .toList();
     }
 
     //------------------------------------------------------------------------------------------------------------------

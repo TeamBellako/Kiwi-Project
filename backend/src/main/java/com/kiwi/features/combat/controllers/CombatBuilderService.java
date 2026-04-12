@@ -1,8 +1,6 @@
 package com.kiwi.features.combat.controllers;
 
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
-import com.kiwi.features.combat.data.domain.ElementMultiplierDomain;
-import com.kiwi.features.combat.data.domain.StatusResistanceDomain;
 import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.mappers.*;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;

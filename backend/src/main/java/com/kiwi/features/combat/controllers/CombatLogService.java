@@ -1,21 +1,15 @@
 package com.kiwi.features.combat.controllers;
 
+import com.kiwi.features.combat.data.domain.CombatActionDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
-import com.kiwi.features.combat.data.enums.CombatActionType;
-import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.mappers.CombatActionMapper;
 import com.kiwi.features.combat.data.persistence.*;
-import com.kiwi.features.combat.repositories.CombatBlockedSkillRepository;
-import com.kiwi.features.combat.repositories.CombatLastSkillRepository;
 import com.kiwi.features.combat.repositories.CombatLogRepository;
-import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class CombatLogService {
@@ -53,9 +47,9 @@ public class CombatLogService {
     //------------------------------------------------------------------------------------------------------------------
 
     @Transactional
-    public void saveCombatActions(List<CombatActionDTO> actions, Long combatId, int turnNumber) {
+    public void saveCombatActions(List<CombatActionDomain> actions, Long combatId, int turnNumber) {
         List<CombatLogPersistence> logs = actions.stream()
-                .flatMap(a -> CombatActionMapper.mapCombatAction(a, combatId, turnNumber).stream())
+                .flatMap(a -> CombatActionMapper.toCombatLogPersistence(a, combatId, turnNumber).stream())
                 .toList();
 
         combatLogRepository.saveAll(logs);
