@@ -167,7 +167,7 @@ fun GoalComponent(
             ) {
                 Kiwi_Label2(
                     KiwiTextArguments(
-                        currentGoal.action,
+                        currentGoal.resolveAction(),
                         TextAlign.Center,
                         kiwiColors.color6,
                     ),

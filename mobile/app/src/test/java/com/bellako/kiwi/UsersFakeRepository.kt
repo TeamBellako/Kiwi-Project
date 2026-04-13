@@ -16,4 +16,3 @@ fun UsersFakeRepository(): UsersRepository =
             override suspend fun getMyUserPoints(): UserPointsDTO = UserPointsDTO(0, 0)
         },
     )
-

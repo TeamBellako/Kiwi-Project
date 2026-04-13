@@ -3,12 +3,12 @@ package com.bellako.kiwi
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.users.data.UserPointsDTO
 import com.bellako.kiwi.features.users.model.AuthRepository
 import com.bellako.kiwi.features.users.model.IUsersAPI
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.model.UsersRepository
 import com.bellako.kiwi.features.users.model.UsersViewModel
-import com.bellako.kiwi.features.users.data.UserPointsDTO
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.invalidUsersDTO
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validLoggedDTO
 import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO

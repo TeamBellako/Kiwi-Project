@@ -8,4 +8,15 @@ data class GoalDomain(
     override val type: GoalType,
     override val category: GoalCategory,
     override val reward: Int,
-) : IGoal
+) : IGoal {
+    override fun resolveAction(): String {
+        val regex = Regex("@[a-zA-Z0-9_]+")
+        var result = action
+
+        regex.findAll(action).forEach { match ->
+            result = result.replace(match.value, target.toString())
+        }
+
+        return result
+    }
+}
