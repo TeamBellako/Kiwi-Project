@@ -8,4 +8,6 @@ interface IGoal {
     val type: GoalType
     val category: GoalCategory
     val reward: Int
+
+    fun resolveAction(): String
 }

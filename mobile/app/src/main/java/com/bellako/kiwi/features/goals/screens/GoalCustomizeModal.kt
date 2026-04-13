@@ -121,7 +121,7 @@ fun GoalCustomize(
             ) {
                 Kiwi_H2(
                     KiwiTextArguments(
-                        goal.action,
+                        goal.resolveAction(),
                         TextAlign.Center,
                         color = kiwiColor.color6,
                     ),

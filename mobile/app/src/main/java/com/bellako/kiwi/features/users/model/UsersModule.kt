@@ -16,10 +16,11 @@ object UsersModule {
     @Provides
     @Singleton
     fun provideUsersApi(jwtAuthInterceptor: JwtAuthInterceptor): IUsersAPI {
-        val client = OkHttpClient
-            .Builder()
-            .addInterceptor(jwtAuthInterceptor)
-            .build()
+        val client =
+            OkHttpClient
+                .Builder()
+                .addInterceptor(jwtAuthInterceptor)
+                .build()
 
         return Retrofit
             .Builder()
