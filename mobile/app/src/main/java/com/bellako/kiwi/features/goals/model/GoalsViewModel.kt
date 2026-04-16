@@ -418,4 +418,25 @@ class GoalsViewModel
                 notifyNewGoals(goalDefinitions)
             }
         }
+
+        @Suppress("ReturnCount")
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun getDailyGoalsProgress(date: String): Float {
+            val currentGoals = getGoalsByDate(date).getOrElse { return 0f }
+
+            if (currentGoals.isEmpty()) return 0f
+
+            val progress =
+                currentGoals
+                    .map { goal ->
+                        if (goal.target <= 0) {
+                            0f
+                        } else {
+                            (goal.value.toFloat() / goal.target.toFloat()).coerceIn(0f, 1f)
+                        }
+                    }.average()
+                    .toFloat()
+
+            return progress
+        }
     }

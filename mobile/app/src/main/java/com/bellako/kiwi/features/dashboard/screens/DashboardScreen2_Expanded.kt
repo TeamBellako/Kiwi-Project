@@ -18,6 +18,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +45,7 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.CoroutineScope
+import java.time.LocalDate
 
 val LocalGoalsViewModel = compositionLocalOf<IGoalsViewModel?> { null }
 
@@ -60,6 +62,11 @@ fun DashboardScreen2_Expanded(
     shouldShowCalendarView: MutableState<Boolean>,
     isLoading: Boolean,
 ) {
+    var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(Unit) {
+        dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(LocalDate.now().toString())
+    }
+
     ComposableEngagementMeasuring("expanded")
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -79,12 +86,17 @@ fun DashboardScreen2_Expanded(
                 metricsState = metricsState,
                 shouldShowCalendarView = shouldShowCalendarView,
                 personalityViewModel = personalityViewModel,
+                goalsViewModel = goalsViewModel,
             )
         } else {
             Kiwi_Spacer(Spacing.small)
 
             @Suppress("MagicNumber")
-            CurrentDayIndicator(getResponsiveSizeHeight(180.dp), 0.7f, 0.20f)
+            CurrentDayIndicator(
+                getResponsiveSizeHeight(180.dp),
+                dailyGoalProgress,
+                metricsState.getAppUsageProgress(),
+            )
 
             CalendarWeekView(
                 context = context,
@@ -94,6 +106,7 @@ fun DashboardScreen2_Expanded(
                 metricsState = metricsState,
                 personalityViewModel = personalityViewModel,
                 isLoading = isLoading,
+                goalsViewModel = goalsViewModel,
             ) {
                 shouldShowCalendarView.value = true
             }
