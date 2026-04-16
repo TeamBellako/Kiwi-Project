@@ -419,6 +419,7 @@ class GoalsViewModel
             }
         }
 
+        @Suppress("ReturnCount")
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun getDailyGoalsProgress(date: String): Float {
             val currentGoals = getGoalsByDate(date).getOrElse { return 0f }
