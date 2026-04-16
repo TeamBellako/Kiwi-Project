@@ -86,6 +86,7 @@ fun DashboardScreen2_Expanded(
                 metricsState = metricsState,
                 shouldShowCalendarView = shouldShowCalendarView,
                 personalityViewModel = personalityViewModel,
+                goalsViewModel = goalsViewModel,
             )
         } else {
             Kiwi_Spacer(Spacing.small)
@@ -105,6 +106,7 @@ fun DashboardScreen2_Expanded(
                 metricsState = metricsState,
                 personalityViewModel = personalityViewModel,
                 isLoading = isLoading,
+                goalsViewModel = goalsViewModel,
             ) {
                 shouldShowCalendarView.value = true
             }

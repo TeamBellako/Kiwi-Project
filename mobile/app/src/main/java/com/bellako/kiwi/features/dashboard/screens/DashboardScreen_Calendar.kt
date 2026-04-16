@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -63,6 +64,7 @@ import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.common.utils.DAYS_IN_WEEK
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
@@ -107,58 +109,62 @@ fun CurrentDayIndicator(
         Kiwi_Image(
             R.drawable.heart_exterior_completed,
             "Day indicator challenges fill",
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer {
-                    clip = true
-                    shape = object : Shape {
-                        override fun createOutline(
-                            size: Size,
-                            layoutDirection: LayoutDirection,
-                            density: Density,
-                        ): Outline {
-                            val progress = dailyGoalsProgress.coerceIn(0f, 1f)
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        clip = true
+                        shape =
+                            object : Shape {
+                                override fun createOutline(
+                                    size: Size,
+                                    layoutDirection: LayoutDirection,
+                                    density: Density,
+                                ): Outline {
+                                    val progress = dailyGoalsProgress.coerceIn(0f, 1f)
 
-                            val radius = min(size.width, size.height) / 2f
-                            val center = Offset(size.width / 2f, size.height / 2f)
+                                    val radius = min(size.width, size.height) / 2f
+                                    val center = Offset(size.width / 2f, size.height / 2f)
 
-                            val rect = Rect(
-                                center.x - radius,
-                                center.y - radius,
-                                center.x + radius,
-                                center.y + radius,
-                            )
+                                    val rect =
+                                        Rect(
+                                            center.x - radius,
+                                            center.y - radius,
+                                            center.x + radius,
+                                            center.y + radius,
+                                        )
 
-                            if (progress >= 1f) {
-                                return Outline.Generic(
-                                    Path().apply {
-                                        addOval(rect)
+                                    if (progress >= 1f) {
+                                        return Outline.Generic(
+                                            Path().apply {
+                                                addOval(rect)
+                                            },
+                                        )
                                     }
-                                )
+
+                                    if (progress <= 0f) {
+                                        return Outline.Generic(Path())
+                                    }
+
+                                    val sweep = 180f * progress
+                                    val startAngle = 90f + sweep
+
+                                    val path =
+                                        Path().apply {
+                                            moveTo(center.x, center.y)
+                                            arcTo(
+                                                rect = rect,
+                                                startAngleDegrees = startAngle,
+                                                sweepAngleDegrees = -2f * sweep,
+                                                forceMoveTo = false,
+                                            )
+                                            close()
+                                        }
+
+                                    return Outline.Generic(path)
+                                }
                             }
-
-                            if (progress <= 0f) {
-                                return Outline.Generic(Path())
-                            }
-
-                            val sweep = 180f * progress
-                            val startAngle = 90f + sweep
-
-                            val path = Path().apply {
-                                moveTo(center.x, center.y)
-                                arcTo(
-                                    rect = rect,
-                                    startAngleDegrees = startAngle,
-                                    sweepAngleDegrees = -2f * sweep,
-                                    forceMoveTo = false,
-                                )
-                                close()
-                            }
-
-                            return Outline.Generic(path)
-                        }
-                    }
-                }
+                    },
         )
 
         Kiwi_Image(
@@ -208,6 +214,7 @@ fun CalendarWeekView(
     metricsViewModel: IMetricsViewModel,
     personalityViewModel: IPersonalityViewModel,
     isLoading: Boolean,
+    goalsViewModel: IGoalsViewModel,
     onCalendarViewClicked: () -> Unit,
 ) {
     val date = stringToDate(metricsState.date)
@@ -242,6 +249,11 @@ fun CalendarWeekView(
                 val day = startOfWeek.plusDays(index.toLong())
                 val isSelected = selectedDayIndex == index
 
+                var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
+                LaunchedEffect(Unit) {
+                    dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(day.toString())
+                }
+
                 Box(modifier = Modifier.weight(1f)) {
                     CalendarDayView(
                         usersViewModel = usersViewModel,
@@ -261,6 +273,8 @@ fun CalendarWeekView(
                             )
                         },
                         testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
+                        hasCompletedDailyGoals = dailyGoalProgress >= 1F,
+                        hasCompletedAppUsages = metricsState.getAppUsageProgress() >= 1F,
                     )
                 }
             }
@@ -284,6 +298,7 @@ fun CalendarMonthView(
     personalityViewModel: IPersonalityViewModel,
     modifier: Modifier = Modifier,
     shouldShowCalendarView: MutableState<Boolean>,
+    goalsViewModel: IGoalsViewModel,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val selectedMonth = remember { mutableStateOf(YearMonth.from(stringToDate(metricsState.date))) }
@@ -375,6 +390,7 @@ fun CalendarMonthView(
                 shouldShowCalendarView = shouldShowCalendarView,
                 month = month,
                 personalityViewModel = personalityViewModel,
+                goalsViewModel = goalsViewModel,
             )
         }
     }
@@ -392,6 +408,7 @@ fun CalendarMonth(
     personalityViewModel: IPersonalityViewModel,
     month: YearMonth,
     shouldShowCalendarView: MutableState<Boolean>,
+    goalsViewModel: IGoalsViewModel,
 ) {
     val startOfMonth = month.atDay(1)
     val endOfMonth = month.atEndOfMonth()
@@ -417,6 +434,11 @@ fun CalendarMonth(
                     val dayOffset = dayIndex - startDayOfWeek
                     val dayDate = startOfMonth.plusDays(dayOffset.toLong())
 
+                    var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
+                    LaunchedEffect(Unit) {
+                        dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(dayDate.toString())
+                    }
+
                     Box(
                         modifier = Modifier.weight(1f),
                         contentAlignment = Alignment.Center,
@@ -440,6 +462,8 @@ fun CalendarMonth(
                                     shouldShowCalendarView.value = false
                                 },
                                 testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
+                                hasCompletedDailyGoals = dailyGoalProgress >= 1F,
+                                hasCompletedAppUsages = metricsState.getAppUsageProgress() >= 1F,
                             )
                         } else {
                             Kiwi_Spacer()
@@ -459,8 +483,8 @@ fun CalendarDayView(
     canSelectBeforeRegisterDate: Boolean = true,
     day: LocalDate,
     isSelected: Boolean,
-    isCompletedChallenges: Boolean = false,
-    isCompletedStepsScreen: Boolean = false,
+    hasCompletedDailyGoals: Boolean,
+    hasCompletedAppUsages: Boolean,
     onClicked: () -> Unit,
     testTag: String,
 ) {
@@ -508,7 +532,7 @@ fun CalendarDayView(
                         ).size(getResponsiveSizeHeight(16.dp)),
             ) {
                 Kiwi_Image(
-                    if (isCompletedChallenges) {
+                    if (hasCompletedDailyGoals) {
                         R.drawable.tiny_heart_exterior_filled
                     } else {
                         if (isSelected) {
@@ -524,7 +548,7 @@ fun CalendarDayView(
                 )
 
                 Kiwi_Image(
-                    if (isCompletedStepsScreen) {
+                    if (hasCompletedAppUsages) {
                         R.drawable.tiny_heart_filled
                     } else {
                         if (isSelected) {
