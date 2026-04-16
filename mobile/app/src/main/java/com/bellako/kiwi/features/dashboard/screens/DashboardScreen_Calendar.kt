@@ -82,14 +82,14 @@ import kotlin.math.min
 @Composable
 fun CurrentDayIndicator(
     size: Dp,
-    challengesProgress: Float,
-    dailyStatsProgress: Float,
+    dailyGoalsProgress: Float,
+    appUsageProgress: Float,
 ) {
     Box(
         modifier = Modifier.size(size),
     ) {
         Kiwi_Image(
-            if (challengesProgress == 1f && dailyStatsProgress == 1f) {
+            if (dailyGoalsProgress == 1f && appUsageProgress == 1f) {
                 R.drawable.heart_bg_completed
             } else {
                 R.drawable.heart_bg_empty
@@ -107,51 +107,58 @@ fun CurrentDayIndicator(
         Kiwi_Image(
             R.drawable.heart_exterior_completed,
             "Day indicator challenges fill",
-            modifier =
-                Modifier
-                    .matchParentSize()
-                    .graphicsLayer {
-                        clip = true
-                        shape =
-                            object : Shape {
-                                @Suppress("MagicNumber")
-                                override fun createOutline(
-                                    size: Size,
-                                    layoutDirection: LayoutDirection,
-                                    density: Density,
-                                ): Outline {
-                                    val progress = challengesProgress.coerceIn(0f, 1f)
-                                    val sweep = 180f * progress
+            modifier = Modifier
+                .matchParentSize()
+                .graphicsLayer {
+                    clip = true
+                    shape = object : Shape {
+                        override fun createOutline(
+                            size: Size,
+                            layoutDirection: LayoutDirection,
+                            density: Density,
+                        ): Outline {
+                            val progress = dailyGoalsProgress.coerceIn(0f, 1f)
 
-                                    val radius = min(size.width, size.height) / 2f
-                                    val center = Offset(size.width / 2f, size.height / 2f)
+                            val radius = min(size.width, size.height) / 2f
+                            val center = Offset(size.width / 2f, size.height / 2f)
 
-                                    val rect =
-                                        Rect(
-                                            center.x - radius,
-                                            center.y - radius,
-                                            center.x + radius,
-                                            center.y + radius,
-                                        )
+                            val rect = Rect(
+                                center.x - radius,
+                                center.y - radius,
+                                center.x + radius,
+                                center.y + radius,
+                            )
 
-                                    val startAngle = 90f + sweep
-
-                                    val path =
-                                        Path().apply {
-                                            moveTo(center.x, center.y)
-                                            arcTo(
-                                                rect = rect,
-                                                startAngleDegrees = startAngle,
-                                                sweepAngleDegrees = -2 * sweep,
-                                                forceMoveTo = false,
-                                            )
-                                            close()
-                                        }
-
-                                    return Outline.Generic(path)
-                                }
+                            if (progress >= 1f) {
+                                return Outline.Generic(
+                                    Path().apply {
+                                        addOval(rect)
+                                    }
+                                )
                             }
-                    },
+
+                            if (progress <= 0f) {
+                                return Outline.Generic(Path())
+                            }
+
+                            val sweep = 180f * progress
+                            val startAngle = 90f + sweep
+
+                            val path = Path().apply {
+                                moveTo(center.x, center.y)
+                                arcTo(
+                                    rect = rect,
+                                    startAngleDegrees = startAngle,
+                                    sweepAngleDegrees = -2f * sweep,
+                                    forceMoveTo = false,
+                                )
+                                close()
+                            }
+
+                            return Outline.Generic(path)
+                        }
+                    }
+                }
         )
 
         Kiwi_Image(
@@ -176,7 +183,7 @@ fun CurrentDayIndicator(
                                     layoutDirection: LayoutDirection,
                                     density: Density,
                                 ): Outline {
-                                    val progress = dailyStatsProgress.coerceIn(0f, 1f)
+                                    val progress = appUsageProgress.coerceIn(0f, 1f)
                                     val topPadding = size.height * 0.28f
                                     val bottomPadding = size.height * 0.28f
                                     val usableHeight = size.height - topPadding - bottomPadding

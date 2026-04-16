@@ -150,6 +150,7 @@ fun DashboardScreen(
                     DashboardScreen0_Hidden()
                 } else if (currentStateIndex <= 1) {
                     DashboardScreen1_Collapsed(
+                        goalsViewModel = goalsViewModel,
                         metricsState = metricsState!!,
                         isLoading = isLoading,
                         onCalendarViewClicked = {

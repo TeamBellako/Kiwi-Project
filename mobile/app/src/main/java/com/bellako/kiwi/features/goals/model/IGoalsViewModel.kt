@@ -27,4 +27,6 @@ interface IGoalsViewModel {
     suspend fun getGoalDefinitions(): Result<List<GoalDomain>>
 
     suspend fun checkAndNotifyGoals()
+
+    suspend fun getDailyGoalsProgress(date: String): Float
 }

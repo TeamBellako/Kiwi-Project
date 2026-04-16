@@ -164,4 +164,6 @@ class GoalsFakeViewModel(
     override suspend fun checkAndNotifyGoals() {
         // Implementación fake - no hace nada
     }
+
+    override suspend fun getDailyGoalsProgress(date: String): Float = 0.2F
 }
