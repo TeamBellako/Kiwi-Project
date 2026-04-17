@@ -45,7 +45,6 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.CoroutineScope
-import java.time.LocalDate
 
 val LocalGoalsViewModel = compositionLocalOf<IGoalsViewModel?> { null }
 
@@ -63,8 +62,8 @@ fun DashboardScreen2_Expanded(
     isLoading: Boolean,
 ) {
     var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
-    LaunchedEffect(Unit) {
-        dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(LocalDate.now().toString())
+    LaunchedEffect(metricsState) {
+        dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(metricsState.date)
     }
 
     ComposableEngagementMeasuring("expanded")

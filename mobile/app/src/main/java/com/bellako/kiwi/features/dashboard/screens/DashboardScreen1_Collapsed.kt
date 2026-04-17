@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,7 +26,6 @@ import com.bellako.kiwi.features.metrics.data.MetricsState
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -63,8 +61,8 @@ private fun CollapsedSummaryCard(
     val kiwiColors = LocalKiwiColors.current
 
     var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
-    LaunchedEffect(Unit) {
-        dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(LocalDate.now().toString())
+    LaunchedEffect(metricsState) {
+        dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(metricsState.date)
     }
 
     Box(
