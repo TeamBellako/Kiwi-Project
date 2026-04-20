@@ -1,5 +1,6 @@
 package com.kiwi.features.skills.data.persistence;
 
+import com.kiwi.features.skills.data.enums.SkillType;
 import com.kiwi.features.skills.data.enums.CooldownType;
 import jakarta.persistence.*;
 import lombok.*;

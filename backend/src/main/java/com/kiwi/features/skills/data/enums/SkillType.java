@@ -1,4 +1,4 @@
-package com.kiwi.features.skills.data;
+package com.kiwi.features.skills.data.enums;
 
 public enum SkillType {
     ADAPTABILITY,
