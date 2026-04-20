@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface EnemyStatusResistanceRepository extends JpaRepository<EnemyStatusResistancePersistence, Long> {
 
-    List<EnemyStatusResistancePersistence> findByEnemyId(Long enemyId);
+    List<EnemyStatusResistancePersistence> findByIdEnemyId(Long enemyId);
 
 }

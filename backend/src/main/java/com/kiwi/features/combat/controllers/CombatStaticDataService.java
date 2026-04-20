@@ -51,7 +51,7 @@ public class CombatStaticDataService {
     ) {
 
         List<UserElementMultiplierPersistence> elementMultipliers =
-                userElementMultiplierRepository.findByUserId(userId);
+                userElementMultiplierRepository.findByIdUserId(userId);
 
         return elementMultipliers.stream()
                 .map(multiplier -> {
@@ -72,7 +72,7 @@ public class CombatStaticDataService {
     ) {
 
         List<EnemyElementMultiplierPersistence> elementMultipliers =
-                enemyElementMultiplierRepository.findByEnemyId(enemyId);
+                enemyElementMultiplierRepository.findByIdEnemyId(enemyId);
 
         return elementMultipliers.stream()
                 .map(multiplier -> {
@@ -93,7 +93,7 @@ public class CombatStaticDataService {
     ) {
 
         List<UserStatusResistancePersistence> resistances =
-                userStatusResistanceRepository.findByUserId(userId);
+                userStatusResistanceRepository.findByIdUserId(userId);
 
         return resistances.stream()
                 .map(resistance -> {
@@ -114,7 +114,7 @@ public class CombatStaticDataService {
     ) {
 
         List<EnemyStatusResistancePersistence> resistances =
-                enemyStatusResistanceRepository.findByEnemyId(enemyId);
+                enemyStatusResistanceRepository.findByIdEnemyId(enemyId);
 
         return resistances.stream()
                 .map(resistance -> {

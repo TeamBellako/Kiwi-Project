@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface EnemyElementMultiplierRepository extends JpaRepository<EnemyElementMultiplierPersistence, Long> {
 
-    List<EnemyElementMultiplierPersistence> findByEnemyId(Long enemyId);
+    List<EnemyElementMultiplierPersistence> findByIdEnemyId(Long enemyId);
 
 }

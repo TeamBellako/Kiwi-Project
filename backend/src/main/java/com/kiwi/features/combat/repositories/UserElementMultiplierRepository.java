@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface UserElementMultiplierRepository extends JpaRepository<UserElementMultiplierPersistence, Long> {
 
-    List<UserElementMultiplierPersistence> findByUserId(Long userId);
+    List<UserElementMultiplierPersistence> findByIdUserId(Long userId);
 
 }
