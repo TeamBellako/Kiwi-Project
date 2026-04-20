@@ -13,29 +13,59 @@ public class CombatProgressService {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public void updateTimeOut(CombatDomain combat) {
+    public void updateTimeOut(CombatDomain combatDomain) {
 
-        if (combat.getEndsAt() != null) {
+        if (combatDomain.getEndsAt() != null) {
             Instant now = Instant.now();
 
-            if (combat.getEndsAt().isBefore(now)) {
-                combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
+            if (combatDomain.getEndsAt().isBefore(now)) {
+                combatDomain.setCombatStatus(CombatGeneralStatus.USER_LOST);
             }
         }
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
+    public void updateAbandon(CombatDomain combatDomain) {
+
+        combatDomain.setCombatStatus(CombatGeneralStatus.USER_LOST);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
     public void applyTurnResult(
             CombatPersistence combat,
-            CombatDomain domain,
+            CombatDomain combatDomain,
             CombatActorDomain user,
             CombatActorDomain enemy
     ) {
-        combat.setUserHp(user.getHp());
-        combat.setEnemyHp(enemy.getHp());
-        combat.setCombatStatus(domain.getCombatStatus());
-        combat.setTurnNumber(domain.getTurnNumber());
+
+        if(user != null) {
+            combat.setUserHp(user.getStats().getCurrentHp());
+            combat.setUserMaxHp(user.getStats().getMaxHp());
+            combat.setUserPatk(user.getStats().getPatk());
+            combat.setUserMatk(user.getStats().getMatk());
+            combat.setUserPdef(user.getStats().getPdef());
+            combat.setUserMdef(user.getStats().getMdef());
+            combat.setUserAcc(user.getStats().getAcc());
+            combat.setUserEva(user.getStats().getEva());
+            combat.setUserLck(user.getStats().getLck());
+        }
+
+        if(enemy != null) {
+            combat.setEnemyHp(enemy.getStats().getCurrentHp());
+            combat.setEnemyMaxHp(enemy.getStats().getMaxHp());
+            combat.setEnemyPatk(enemy.getStats().getPatk());
+            combat.setEnemyMatk(enemy.getStats().getMatk());
+            combat.setEnemyPdef(enemy.getStats().getPdef());
+            combat.setEnemyMdef(enemy.getStats().getMdef());
+            combat.setEnemyAcc(enemy.getStats().getAcc());
+            combat.setEnemyEva(enemy.getStats().getEva());
+            combat.setEnemyLck(enemy.getStats().getLck());
+        }
+
+        combat.setCombatStatus(combatDomain.getCombatStatus());
+        combat.setTurnNumber(combatDomain.getTurnNumber());
     }
 
     //------------------------------------------------------------------------------------------------------------------

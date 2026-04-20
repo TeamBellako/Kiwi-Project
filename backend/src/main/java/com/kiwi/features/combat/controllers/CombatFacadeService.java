@@ -5,7 +5,6 @@ import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import com.kiwi.features.combat.exceptions.CombatNotFoundException;
-import com.kiwi.features.combat.repositories.CombatRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,28 +15,25 @@ public class CombatFacadeService {
     private final CombatBuilderService combatBuilderService;
     private final CombatTurnService combatTurnService;
 
-    private final CombatRepository combatRepository;
-
     //------------------------------------------------------------------------------------------------------------------
 
     public CombatFacadeService(
             CombatService combatService,
             CombatBuilderService combatBuilderService,
-            CombatTurnService combatTurnService,
-            CombatRepository combatRepository
+            CombatTurnService combatTurnService
     ) {
         this.combatService = combatService;
         this.combatBuilderService = combatBuilderService;
         this.combatTurnService = combatTurnService;
-        this.combatRepository = combatRepository;
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
     // START / RESUME
+    @Transactional
     public CombatDTO startOrResumeCombat(Long userId, Long configId) {
 
-        CombatPersistence combat = combatService.startOrCreate(userId, configId);
+        CombatPersistence combat = combatService.startOrResume(userId, configId);
 
         return combatBuilderService.buildCombatDTO(combat);
     }
@@ -48,7 +44,7 @@ public class CombatFacadeService {
     @Transactional
     public CombatTurnResultDTO executeTurn(Long userId, Long combatId, Long skillId) {
 
-        CombatPersistence combat = combatRepository.findById(combatId)
+        CombatPersistence combat = combatService.findCombat(combatId)
                 .orElseThrow(() -> new CombatNotFoundException(combatId));
 
         CombatTurnResultDTO result =
@@ -64,13 +60,29 @@ public class CombatFacadeService {
     //------------------------------------------------------------------------------------------------------------------
 
     // TIMEOUT
+    @Transactional
     public CombatTurnResultDTO timeOut(Long userId, Long combatId) {
 
-        CombatPersistence combat = combatRepository.findById(combatId)
+        CombatPersistence combat = combatService.findCombat(combatId)
                 .orElseThrow(() -> new CombatNotFoundException(combatId));
 
         CombatTurnResultDTO result =
-                combatTurnService.handleTimeout(userId, combat);
+                combatTurnService.handleTimeout(combat);
+
+        combatService.cleanDatabase(combat.getId());
+
+        return result;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    // ABANDON
+    public CombatTurnResultDTO abandon(Long userId, Long combatId) {
+        CombatPersistence combat = combatService.findCombat(combatId)
+                .orElseThrow(() -> new CombatNotFoundException(combatId));
+
+        CombatTurnResultDTO result =
+                combatTurnService.handleAbandon(combat);
 
         combatService.cleanDatabase(combat.getId());
 

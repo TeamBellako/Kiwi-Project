@@ -84,4 +84,23 @@ public class CombatController {
         );
     }
 
+    // ============================================================================================
+    // TIME OUT
+    // ============================================================================================
+
+    @PostMapping("/{combatId}/abandon")
+    public ResponseEntity<CombatTurnResultDTO> abandonCombat(
+            @AuthenticationPrincipal @NotNull UserDetails userDetails,
+            @PathVariable Long combatId
+    ) {
+
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+                .orElseThrow()
+                .getId();
+
+        return ResponseEntity.ok(
+                combatFacadeService.abandon(userId, combatId)
+        );
+    }
+
 }

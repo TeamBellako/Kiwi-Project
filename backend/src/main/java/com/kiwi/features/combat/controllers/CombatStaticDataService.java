@@ -14,10 +14,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class CombatDataService {
+public class CombatStaticDataService {
 
     private final CombatElementRepository combatElementRepository;
-    private final CombatStateRepository combatStateRepository;
     private final UserElementMultiplierRepository userElementMultiplierRepository;
     private final EnemyElementMultiplierRepository enemyElementMultiplierRepository;
     private final UserStatusResistanceRepository userStatusResistanceRepository;
@@ -25,9 +24,8 @@ public class CombatDataService {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public CombatDataService(CombatElementRepository combatElementRepository, CombatStateRepository combatStateRepository, UserElementMultiplierRepository userElementMultiplierRepository, EnemyElementMultiplierRepository enemyElementMultiplierRepository, UserStatusResistanceRepository userStatusResistanceRepository, EnemyStatusResistanceRepository enemyStatusResistanceRepository) {
+    public CombatStaticDataService(CombatElementRepository combatElementRepository, CombatStatesRepository combatStatesRepository, UserElementMultiplierRepository userElementMultiplierRepository, EnemyElementMultiplierRepository enemyElementMultiplierRepository, UserStatusResistanceRepository userStatusResistanceRepository, EnemyStatusResistanceRepository enemyStatusResistanceRepository) {
         this.combatElementRepository = combatElementRepository;
-        this.combatStateRepository = combatStateRepository;
         this.userElementMultiplierRepository = userElementMultiplierRepository;
         this.enemyElementMultiplierRepository = enemyElementMultiplierRepository;
         this.userStatusResistanceRepository = userStatusResistanceRepository;
@@ -41,17 +39,6 @@ public class CombatDataService {
                 .stream()
                 .collect(Collectors.toMap(
                         CombatElementPersistence::getId,
-                        Function.identity()
-                ));
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
-    public Map<Long, CombatStatePersistence> loadStatesMap() {
-        return combatStateRepository.findAll()
-                .stream()
-                .collect(Collectors.toMap(
-                        CombatStatePersistence::getId,
                         Function.identity()
                 ));
     }

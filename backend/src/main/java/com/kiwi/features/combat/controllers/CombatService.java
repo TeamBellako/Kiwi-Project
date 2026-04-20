@@ -1,7 +1,5 @@
 package com.kiwi.features.combat.controllers;
 
-import com.kiwi.features.combat.data.domain.*;
-import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.mappers.*;
 import com.kiwi.features.combat.data.persistence.*;
 import com.kiwi.features.combat.repositories.*;
@@ -47,7 +45,14 @@ public class CombatService {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public CombatPersistence startOrCreate(Long userId, Long configId) {
+    public Optional<CombatPersistence> findCombat(Long combatId) {
+
+        return combatRepository.findById(combatId);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public CombatPersistence startOrResume(Long userId, Long configId) {
 
         Optional<CombatPersistence> existing =
                 combatRepository.findByUserIdAndCombatConfigId(userId, configId);
@@ -60,15 +65,15 @@ public class CombatService {
         CombatConfigPersistence config = combatConfigRepository.findById(configId).orElseThrow();
         EnemyPersistence enemy = enemyRepository.findById(config.getEnemyId()).orElseThrow();
 
-        CombatPersistence combat = CombatPersistence.builder()
-                .userId(userId)
-                .combatConfigId(configId)
-                .enemyId(enemy.getId())
-                .userHp(stats.getMaxHp())
-                .enemyHp(enemy.getMaxHp())
-                .turnNumber(1)
-                .endsAt(Instant.now().plus(config.getTimeLimit(), ChronoUnit.MINUTES))
-                .build();
+        Instant endsAt = Instant.now().plus(config.getTimeLimit(), ChronoUnit.MINUTES);
+
+        CombatPersistence combat = CombatMapper.toNewCombat(
+                userId,
+                configId,
+                stats,
+                enemy,
+                endsAt
+        );
 
         return combatRepository.save(combat);
     }

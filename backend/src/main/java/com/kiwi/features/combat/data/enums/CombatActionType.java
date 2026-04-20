@@ -11,4 +11,5 @@ public enum CombatActionType {
     STATUS_TURN_REDUCED,
     STATUS_FINISHED,
     TIMEOUT,
+    ABANDON,
 }

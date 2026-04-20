@@ -1,15 +1,14 @@
 package com.kiwi.features.combat.engine;
 
-import com.kiwi.features.combat.controllers.CombatStateService;
+import com.kiwi.features.combat.controllers.CombatStatesService;
 import com.kiwi.features.combat.data.domain.*;
+import com.kiwi.features.combat.data.enums.StatModificationType;
 import com.kiwi.features.skills.data.domain.SkillEffectDomain;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
-import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.AttackType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.skills.data.enums.SkillEffectResultType;
-import com.kiwi.features.skills.data.DTO.SkillEffectResultDTO;
 import com.kiwi.features.skills.data.enums.SkillEffectType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,9 +19,9 @@ import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
-public class CombatDamageCalculator {
+public class SkillsManager {
 
-    private final CombatStateService stateService;
+    private final CombatStatesService stateService;
     private final CombatStatusManager statusManager;
 
     private final Random random;
@@ -58,6 +57,7 @@ public class CombatDamageCalculator {
 
         applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.DAMAGE);
         applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.HEAL);
+        applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.MODIFY_STAT);
         applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.APPLY_STATUS);
 
         return CombatActionDomain.builder()
@@ -93,6 +93,10 @@ public class CombatDamageCalculator {
                         applyHeal(target, effect)
                 );
 
+                case MODIFY_STAT -> results.add(
+                        applyModifyStat(target, effect)
+                );
+
                 case APPLY_STATUS -> {
                     SkillEffectResultDomain statusEffect =
                             applyStatus(attacker, target, effect, skillId, context.getCombat().getId());
@@ -115,8 +119,8 @@ public class CombatDamageCalculator {
 
         // ACCURACY CHECK
         int hitChance =
-                attacker.getAcc()
-                        - victim.getEva()
+                attacker.getStats().getAcc()
+                        - victim.getStats().getEva()
                         + effect.getHitChance();
 
         int roll = random.nextInt(100);
@@ -131,20 +135,20 @@ public class CombatDamageCalculator {
         // ATK / DEF
         float atk =
                 effect.getAttackType() == AttackType.PHYSICAL
-                        ? attacker.getPatk()
-                        : attacker.getMatk();
+                        ? attacker.getStats().getPatk()
+                        : attacker.getStats().getMatk();
 
         float def =
                 effect.getAttackType() == AttackType.MAGICAL
-                        ? victim.getPdef()
-                        : victim.getMdef();
+                        ? victim.getStats().getPdef()
+                        : victim.getStats().getMdef();
 
         float baseDamage =
                 (atk / Math.max(def, 1)) * effect.getPower();
 
         // CRIT
         boolean crit =
-                random.nextInt(120) < attacker.getLck();
+                random.nextInt(120) < attacker.getStats().getLck();
 
         float critMultiplier = crit ? 2f : 1f;
 
@@ -203,7 +207,7 @@ public class CombatDamageCalculator {
             SkillEffectDomain effect
     ) {
 
-        int heal = Math.round(target.getMaxHp() * effect.getPower());
+        int heal = Math.round(target.getStats().getMaxHp() * effect.getPower());
 
         target.heal(heal);
 
@@ -213,6 +217,106 @@ public class CombatDamageCalculator {
                 .value((float)heal)
                 .critic(false)
                 .build();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private SkillEffectResultDomain applyModifyStat(
+            CombatActorDomain target,
+            SkillEffectDomain effect
+    ) {
+
+        StatsDomain stats = target.getStats();
+
+        float value = effect.getPower();
+
+        int newValue = switch (effect.getStatAffected()) {
+
+            case CURRENT_HP -> applyModification(
+                    stats.getCurrentHp(),
+                    value,
+                    effect.getStatModification()
+            );
+
+            case MAX_HP -> applyModification(
+                    stats.getMaxHp(),
+                    value,
+                    effect.getStatModification()
+            );
+
+            case PATK -> applyModification(
+                    stats.getPatk(),
+                    value,
+                    effect.getStatModification()
+            );
+
+            case MATK -> applyModification(
+                    stats.getMatk(),
+                    value,
+                    effect.getStatModification()
+            );
+
+            case PDEF -> applyModification(
+                    stats.getPdef(),
+                    value,
+                    effect.getStatModification()
+            );
+
+            case MDEF -> applyModification(
+                    stats.getMdef(),
+                    value,
+                    effect.getStatModification()
+            );
+
+            case ACC -> applyModification(
+                    stats.getAcc(),
+                    value,
+                    effect.getStatModification()
+            );
+
+            case EVA -> applyModification(
+                    stats.getEva(),
+                    value,
+                    effect.getStatModification()
+            );
+
+            case LCK -> applyModification(
+                    stats.getLck(),
+                    value,
+                    effect.getStatModification()
+            );
+        };
+
+        switch (effect.getStatAffected()) {
+            case CURRENT_HP -> stats.setCurrentHp(Math.max(0, newValue));
+            case MAX_HP -> stats.setMaxHp(Math.max(1, newValue));
+            case PATK -> stats.setPatk(newValue);
+            case MATK -> stats.setMatk(newValue);
+            case PDEF -> stats.setPdef(newValue);
+            case MDEF -> stats.setMdef(newValue);
+            case ACC -> stats.setAcc(newValue);
+            case EVA -> stats.setEva(newValue);
+            case LCK -> stats.setLck(newValue);
+        }
+
+        return SkillEffectResultDomain.builder()
+                .typeResult(SkillEffectResultType.MODIFY_STAT)
+                .statAffected(effect.getStatAffected())
+                .target(target.getType())
+                .value((float)newValue)
+                .build();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private int applyModification(int base, float power, StatModificationType type) {
+
+        return switch (type) {
+            case SUM -> Math.round(base + power);
+            case SUB -> Math.round(base - power);
+            case MUL -> Math.round(base * power);
+            case DIV -> power != 0 ? Math.round(base / power) : base;
+        };
     }
 
     //------------------------------------------------------------------------------------------------------------------

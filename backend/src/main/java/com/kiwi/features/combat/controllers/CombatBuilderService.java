@@ -1,7 +1,8 @@
 package com.kiwi.features.combat.controllers;
 
-import com.kiwi.features.combat.data.domain.CombatActorDomain;
+import com.kiwi.features.combat.data.domain.*;
 import com.kiwi.features.combat.data.dto.*;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.mappers.*;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import com.kiwi.features.combat.data.persistence.EnemyPersistence;
@@ -10,28 +11,33 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CombatBuilderService {
 
-    private final CombatActorBuilderService actorBuilderService;
-    private final CombatLogService combatLogService;
+
     private final EnemyRepository enemyRepository;
+    private final CombatLogService combatLogService;
+    private final CombatActorBuilderService combatActorBuilderService;
 
     public CombatBuilderService(
-            CombatActorBuilderService actorBuilderService,
             CombatLogService combatLogService,
-            EnemyRepository enemyRepository
+            EnemyRepository enemyRepository,
+            CombatActorBuilderService combatActorBuilderService
     ) {
-        this.actorBuilderService = actorBuilderService;
         this.combatLogService = combatLogService;
         this.enemyRepository = enemyRepository;
+        this.combatActorBuilderService = combatActorBuilderService;
     }
 
     public CombatDTO buildCombatDTO(CombatPersistence combat) {
 
-        CombatActorDomain user = actorBuilderService.buildUser(combat.getUserId(), combat);
-        CombatActorDomain enemy = actorBuilderService.buildEnemy(combat.getEnemyId(), combat);
+        Map<CombatActorType, CombatActorDomain> actors =
+                combatActorBuilderService.buildActors(combat);
+
+        CombatActorDomain user = actors.get(CombatActorType.USER);
+        CombatActorDomain enemy = actors.get(CombatActorType.ENEMY);
 
         CombatActorDTO userDTO = mapActorToDTO(user);
         CombatActorDTO enemyDTO = mapActorToDTO(enemy);
@@ -57,15 +63,15 @@ public class CombatBuilderService {
     private CombatActorDTO mapActorToDTO(CombatActorDomain actor) {
 
         return CombatActorMapper.toDTO(
-                actor.getHp(),
-                StatsMapper.toDTO(actor),
+                StatsMapper.toDTO(actor.getStats()),
                 ElementMultiplierMapper.toDTOList(
                         new ArrayList<>(actor.getElementMultipliers().values())
                 ),
                 StatusResistanceMapper.toDTOList(
                         new ArrayList<>(actor.getStatusResistances().values())
                 ),
-                CombatActiveStatusMapper.toDTOList(actor.getStates())
+                CombatActiveStatusMapper.toDTOList(actor.getActiveStatuses())
         );
     }
+
 }

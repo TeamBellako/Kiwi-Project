@@ -1,6 +1,8 @@
 package com.kiwi.features.skills.data.persistence;
 
 import com.kiwi.features.combat.data.enums.AttackType;
+import com.kiwi.features.combat.data.enums.StatModificationType;
+import com.kiwi.features.combat.data.enums.StatType;
 import com.kiwi.features.skills.data.enums.SkillEffectTargetType;
 import com.kiwi.features.skills.data.enums.SkillEffectType;
 import jakarta.persistence.*;
@@ -29,6 +31,14 @@ public class SkillEffectPersistence {
     @Enumerated(EnumType.STRING)
     @Column(name="effect_type", nullable = false)
     private SkillEffectType effectType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="stat_affected")
+    private StatType statAffected;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="stat_modification")
+    private StatModificationType statModification;
 
     private Float power;
 

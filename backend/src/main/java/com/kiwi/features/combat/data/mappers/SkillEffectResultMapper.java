@@ -11,6 +11,7 @@ public class SkillEffectResultMapper {
         return SkillEffectResultDTO.builder()
                 .typeResult(e.getTypeResult() != null ? e.getTypeResult().name() : null)
                 .target(e.getTarget() != null ? e.getTarget().name() : null)
+                .statAffected(e.getStatAffected() != null ? e.getStatAffected().name() : null)
                 .value(e.getValue())
                 .critic(e.isCritic())
                 .appliedStatus(

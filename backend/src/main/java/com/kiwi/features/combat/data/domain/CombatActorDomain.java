@@ -16,23 +16,12 @@ public class CombatActorDomain {
 
     private CombatActorType type;
 
-    private int hp;
-    private int maxHp;
-
-    private int patk;
-    private int matk;
-
-    private int pdef;
-    private int mdef;
-
-    private int acc;
-    private int eva;
-    private int lck;
+    private StatsDomain stats;
 
     private Map<Long, ElementMultiplierDomain> elementMultipliers;
     private Map<Long, StatusResistanceDomain> statusResistances;
 
-    private List<CombatActiveStatusDomain> states;
+    private List<CombatActiveStatusDomain> activeStatuses;
 
     @Setter
     private  Map<Long, SkillCombatDomain> skills;
@@ -44,11 +33,13 @@ public class CombatActorDomain {
     private Long lastSkillUsed;
 
     public void damage(int amount) {
-        hp = Math.max(0, hp - amount);
+
+        stats.setCurrentHp(Math.max(0, stats.getCurrentHp() - amount));
     }
 
     public void heal(int amount) {
-        hp = Math.min(maxHp, hp + amount);
+
+        stats.setCurrentHp(Math.min(stats.getMaxHp(), stats.getCurrentHp() + amount));
     }
 
 }

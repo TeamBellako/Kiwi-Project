@@ -1,13 +1,11 @@
-package com.kiwi.features.combat.data.dto;
+package com.kiwi.features.combat.data.domain;
 
 import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class CombatStatsDTO {
+public class StatsDomain {
 
     private int currentHp;
     private int maxHp;

@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS user_stats (
     user_id BIGINT PRIMARY KEY,
 
     max_hp INT NOT NULL,
-    tim INT NOT NULL,
 
     patk INT NOT NULL,
     matk INT NOT NULL,
@@ -92,7 +91,6 @@ CREATE TABLE IF NOT EXISTS enemies (
 	sprite VARCHAR(100) NOT NULL,
 
     max_hp INT NOT NULL,
-    tim INT NOT NULL,
 
     patk INT NOT NULL,
     matk INT NOT NULL,
@@ -188,11 +186,28 @@ CREATE TABLE IF NOT EXISTS combats (
     enemy_id BIGINT NOT NULL,
 
 	user_hp INT NOT NULL,
+	user_max_hp INT NOT NULL,
+    user_patk INT NOT NULL,
+    user_matk INT NOT NULL,
+    user_pdef INT NOT NULL,
+    user_mdef INT NOT NULL,
+    user_acc INT NOT NULL,
+    user_eva INT NOT NULL,
+    user_lck INT NOT NULL,
+	
 	enemy_hp INT NOT NULL,
+	enemy_max_hp INT NOT NULL,
+    enemy_patk INT NOT NULL,
+    enemy_matk INT NOT NULL,
+    enemy_pdef INT NOT NULL,
+    enemy_mdef INT NOT NULL,
+    enemy_acc INT NOT NULL,
+    enemy_eva INT NOT NULL,
+    enemy_lck INT NOT NULL,
 
     turn_number INT NOT NULL DEFAULT 1,
 	
-	ends_at TIMESTAMP,
+	ends_at TIMESTAMP NULL,
 
     combat_status ENUM('ONGOING','USER_WON','USER_LOST') NOT NULL,
 
@@ -224,9 +239,13 @@ CREATE TABLE IF NOT EXISTS skill_effects (
 	
 	target ENUM('OPPONENT','SELF','ALLY') NOT NULL DEFAULT 'OPPONENT',
 
-    effect_type ENUM('DAMAGE','HEAL','APPLY_STATUS') NOT NULL,
+    effect_type ENUM('DAMAGE','HEAL','APPLY_STATUS','MODIFY_STAT') NOT NULL,
+	
+	stat_affected ENUM('CURRENT_HP','MAX_HP','PATK','MATK','PDEF','MDEF','ACC','EVA','LCK') NULL,
+	
+	stat_modification ENUM('SUM','SUB','MUL','DIV') NULL,
 
-    power INT,
+    power FLOAT,
 
     attack_type ENUM('PHYSICAL','MAGICAL'),
 	
@@ -365,10 +384,13 @@ CREATE TABLE IF NOT EXISTS combat_log (
     effect_type ENUM(
         'DAMAGE',
         'HEAL',
+		'MODIFY_STAT',
         'STATUS_APPLIED',
         'STATUS_REMOVED',
         'MISS'
     ) NULL,
+	
+	stat_affected ENUM('CURRENT_HP','MAX_HP','PATK','MATK','PDEF','MDEF','ACC','EVA','LCK') NULL,
 
     value FLOAT NULL,
 	

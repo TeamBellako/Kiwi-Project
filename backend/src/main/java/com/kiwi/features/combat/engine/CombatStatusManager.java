@@ -3,7 +3,6 @@ package com.kiwi.features.combat.engine;
 import com.kiwi.features.combat.data.domain.CombatActionDomain;
 import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
-import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatStateTypes;
 
@@ -22,7 +21,7 @@ public class CombatStatusManager {
 
     public void applyActiveStatesEffectsToActor(CombatActorDomain actor, CombatContext context)
     {
-        for (CombatActiveStatusDomain state : actor.getStates()) {
+        for (CombatActiveStatusDomain state : actor.getActiveStatuses()) {
 
             CombatStateTypes stateType = CombatStateTypes.fromId(state.getStateId().intValue());
 
@@ -112,7 +111,7 @@ public class CombatStatusManager {
 
     private int applyDamage(CombatActorDomain actor, Float value)
     {
-        int damage = Math.round(actor.getMaxHp() * value);
+        int damage = Math.round(actor.getStats().getMaxHp() * value);
         actor.damage(damage);
         return damage;
     }
@@ -123,7 +122,7 @@ public class CombatStatusManager {
     {
         float multiplier = 1f;
 
-        for (CombatActiveStatusDomain s : attacker.getStates()) {
+        for (CombatActiveStatusDomain s : attacker.getActiveStatuses()) {
 
             if (s.getStateId() == 10) { // ATK UP
                 multiplier *= 1.5f;
@@ -134,7 +133,7 @@ public class CombatStatusManager {
             }
         }
 
-        for (CombatActiveStatusDomain s : victim.getStates()) {
+        for (CombatActiveStatusDomain s : victim.getActiveStatuses()) {
 
             if (s.getStateId() == 12) { // DEF UP
                 multiplier *= 0.5f;
@@ -153,7 +152,7 @@ public class CombatStatusManager {
     public void reduceStatesTurnsToActor(CombatActorDomain actor, CombatContext context)
     {
         Iterator<CombatActiveStatusDomain> statesIt =
-                actor.getStates().iterator();
+                actor.getActiveStatuses().iterator();
 
         while (statesIt.hasNext()) {
             CombatActiveStatusDomain state = statesIt.next();

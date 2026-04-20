@@ -4,17 +4,22 @@ import com.kiwi.features.combat.data.domain.CombatActorDomain;
 import com.kiwi.features.combat.data.domain.CombatDomain;
 import com.kiwi.features.combat.data.domain.CombatTurnResultDomain;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.mappers.CombatMapper;
 import com.kiwi.features.combat.data.mappers.CombatTurnResultMapper;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import com.kiwi.features.combat.engine.CombatContext;
 import com.kiwi.features.combat.engine.CombatEngine;
+import com.kiwi.features.combat.exceptions.CombatFinishedException;
+import com.kiwi.features.combat.exceptions.CombatNotFoundException;
+import com.kiwi.features.combat.exceptions.NotTimedCombatException;
 import com.kiwi.features.skills.controllers.SkillService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 @Service
 public class CombatTurnService {
@@ -25,8 +30,7 @@ public class CombatTurnService {
     private final CombatBlockedSkillService blockedSkillService;
     private final CombatProgressService combatProgressService;
     private final SkillService skillService;
-
-    private final CombatActorBuilderService actorBuilderService;
+    private final CombatActorBuilderService combatActorBuilderService;
 
     //------------------------------------------------------------------------------------------------------------------
 
@@ -36,8 +40,7 @@ public class CombatTurnService {
             CombatLastSkillService lastSkillService,
             CombatBlockedSkillService blockedSkillService,
             CombatProgressService combatProgressService,
-            SkillService skillService,
-            CombatActorBuilderService actorBuilderService
+            SkillService skillService, CombatActorBuilderService combatActorBuilderService
     ) {
         this.combatEngine = combatEngine;
         this.combatLogService = combatLogService;
@@ -45,7 +48,7 @@ public class CombatTurnService {
         this.blockedSkillService = blockedSkillService;
         this.combatProgressService = combatProgressService;
         this.skillService = skillService;
-        this.actorBuilderService = actorBuilderService;
+        this.combatActorBuilderService = combatActorBuilderService;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -55,8 +58,11 @@ public class CombatTurnService {
 
         skillService.putSkillOnCooldown(userId, skillId);
 
-        CombatActorDomain user = actorBuilderService.buildUser(userId, combat);
-        CombatActorDomain enemy = actorBuilderService.buildEnemy(combat.getEnemyId(), combat);
+        Map<CombatActorType, CombatActorDomain> actors =
+                combatActorBuilderService.buildActors(combat);
+
+        CombatActorDomain user = actors.get(CombatActorType.USER);
+        CombatActorDomain enemy = actors.get(CombatActorType.ENEMY);
 
         CombatContext context = new CombatContext(
                 CombatMapper.toDomain(combat),
@@ -93,14 +99,14 @@ public class CombatTurnService {
     //------------------------------------------------------------------------------------------------------------------
 
     @Transactional
-    public CombatTurnResultDTO handleTimeout(Long userId, CombatPersistence combat) {
+    public CombatTurnResultDTO handleTimeout(CombatPersistence combat) {
 
         if (combat.getCombatStatus() != CombatGeneralStatus.ONGOING) {
-            throw new IllegalStateException("Combat already finished");
+            throw new CombatFinishedException(combat.getId());
         }
 
         if (combat.getEndsAt() == null) {
-            throw new IllegalStateException("No timed combat");
+            throw new NotTimedCombatException(combat.getId());
         }
 
         CombatDomain combatDomain = CombatMapper.toDomain(combat);
@@ -120,6 +126,29 @@ public class CombatTurnService {
         }
 
         return new CombatTurnResultDTO();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public CombatTurnResultDTO handleAbandon(CombatPersistence combat) {
+
+        if (combat.getCombatStatus() != CombatGeneralStatus.ONGOING) {
+            throw new CombatFinishedException(combat.getId());
+        }
+
+        CombatDomain combatDomain = CombatMapper.toDomain(combat);
+
+        combatProgressService.updateAbandon(combatDomain);
+
+        combatProgressService.applyTurnResult(
+                combat,
+                combatDomain,
+                null,
+                null
+        );
+
+        return CombatTurnResultMapper.toDTO(combatEngine.buildAbandonCombatTurnResult(combatDomain));
+
     }
 
     //------------------------------------------------------------------------------------------------------------------

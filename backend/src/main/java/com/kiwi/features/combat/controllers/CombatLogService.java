@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class CombatLogService {
@@ -26,15 +27,43 @@ public class CombatLogService {
 
     public List<CombatActionDTO> getCombatLog(Long combatId){
 
-        List<CombatActionDTO> actions = new ArrayList<>();
-        List<CombatLogPersistence> actionsPersistence = combatLogRepository.findByCombatIdOrderByIdAsc(combatId);
+        List<CombatLogPersistence> logs =
+                combatLogRepository.findByCombatIdOrderByIdAsc(combatId);
 
-        for (CombatLogPersistence combatLogPersistence : actionsPersistence) {
-            CombatActionDTO action = CombatActionMapper.toDTO(combatLogPersistence);
-            actions.add(action);
+        List<CombatActionDTO> result = new ArrayList<>();
+
+        List<CombatLogPersistence> currentGroup = new ArrayList<>();
+
+        for (CombatLogPersistence log : logs) {
+
+            if (currentGroup.isEmpty()) {
+                currentGroup.add(log);
+                continue;
+            }
+
+            CombatLogPersistence first = currentGroup.get(0);
+
+            if (isSameAction(first, log)) {
+                currentGroup.add(log);
+            } else {
+                result.add(CombatActionMapper.toDTOGroup(currentGroup));
+                currentGroup.clear();
+                currentGroup.add(log);
+            }
         }
 
-        return actions;
+        if (!currentGroup.isEmpty()) {
+            result.add(CombatActionMapper.toDTOGroup(currentGroup));
+        }
+
+        return result;
+    }
+
+    private boolean isSameAction(CombatLogPersistence a, CombatLogPersistence b) {
+        return a.getTurnNumber() == b.getTurnNumber()
+                && a.getActor() == b.getActor()
+                && a.getCombatActionType() == b.getCombatActionType()
+                && Objects.equals(a.getSkillName(), b.getSkillName());
     }
 
     //------------------------------------------------------------------------------------------------------------------

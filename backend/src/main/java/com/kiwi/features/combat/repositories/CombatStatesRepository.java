@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CombatStateRepository extends JpaRepository<CombatStatePersistence, Long> {
+public interface CombatStatesRepository extends JpaRepository<CombatStatePersistence, Long> {
 
     List<CombatStatePersistence> findByIdIn(List<Long> ids);
 }

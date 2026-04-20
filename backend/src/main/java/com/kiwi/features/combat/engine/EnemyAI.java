@@ -63,13 +63,13 @@ public class EnemyAI {
 
                     float atk =
                             effect.getAttackType().isPhysical()
-                                    ? enemy.getPatk()
-                                    : enemy.getMatk();
+                                    ? enemy.getStats().getPatk()
+                                    : enemy.getStats().getMatk();
 
                     float def =
                             effect.getAttackType().isPhysical()
-                                    ? user.getPdef()
-                                    : user.getMdef();
+                                    ? user.getStats().getPdef()
+                                    : user.getStats().getMdef();
 
                     float damage =
                             (atk / def) * effect.getPower();
@@ -79,7 +79,7 @@ public class EnemyAI {
 
                 case HEAL -> {
 
-                    if(enemy.getHp() < enemy.getMaxHp() * 0.4f) {
+                    if(enemy.getStats().getCurrentHp() < enemy.getStats().getMaxHp() * 0.4f) {
                         score += 50;
                     }
                 }

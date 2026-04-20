@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CombatEngine {
 
-    private final CombatDamageCalculator damageCalculator;
+    private final SkillsManager skillsManager;
     private final CombatStatusManager statusManager;
     private final EnemyAI enemyAI;
 
@@ -47,14 +47,14 @@ public class CombatEngine {
             CombatActionDomain action;
             if ( userActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
-                action = damageCalculator.executeSkill(
+                action = skillsManager.executeSkill(
                         context,
                         CombatActorType.USER,
                         userActor.getLastSkillUsed()
                 );
 
             } else {
-                action = damageCalculator.executeSkill(
+                action = skillsManager.executeSkill(
                         context,
                         CombatActorType.USER,
                         userSkillId
@@ -89,14 +89,14 @@ public class CombatEngine {
                 CombatActionDomain action;
                 if (enemyActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
-                    action = damageCalculator.executeSkill(
+                    action = skillsManager.executeSkill(
                             context,
                             CombatActorType.ENEMY,
                             enemyActor.getLastSkillUsed()
                     );
 
                 } else {
-                    action = damageCalculator.executeSkill(
+                    action = skillsManager.executeSkill(
                             context,
                             CombatActorType.ENEMY,
                             enemySkill
@@ -114,10 +114,10 @@ public class CombatEngine {
         combat.setTurnNumber(combat.getTurnNumber() + 1);
 
         // CHECK COMBAT END
-        if(context.getUser().getHp() <= 0) {
+        if(context.getUser().getStats().getCurrentHp() <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
         }
-        if(context.getEnemy().getHp() <= 0) {
+        if(context.getEnemy().getStats().getCurrentHp() <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_WON);
         }
 
@@ -146,6 +146,28 @@ public class CombatEngine {
                 CombatActionDomain.builder()
                         .actor(CombatActorType.USER)
                         .actionType(CombatActionType.TIMEOUT)
+                        .build();
+
+        actions.add(action);
+
+        return CombatTurnResultDomain.builder()
+                .combatId(combat.getId())
+                .turnNumber(combat.getTurnNumber())
+                .actions(actions)
+                .combatStatus(combat.getCombatStatus())
+                .build();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public CombatTurnResultDomain buildAbandonCombatTurnResult(CombatDomain combat) {
+
+        List<CombatActionDomain> actions = new ArrayList<>();
+
+        CombatActionDomain action =
+                CombatActionDomain.builder()
+                        .actor(CombatActorType.USER)
+                        .actionType(CombatActionType.ABANDON)
                         .build();
 
         actions.add(action);

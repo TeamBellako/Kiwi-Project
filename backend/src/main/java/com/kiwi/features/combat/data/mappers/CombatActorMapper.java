@@ -1,9 +1,6 @@
 package com.kiwi.features.combat.data.mappers;
 
-import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
-import com.kiwi.features.combat.data.domain.CombatActorDomain;
-import com.kiwi.features.combat.data.domain.ElementMultiplierDomain;
-import com.kiwi.features.combat.data.domain.StatusResistanceDomain;
+import com.kiwi.features.combat.data.domain.*;
 import com.kiwi.features.combat.data.dto.*;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
@@ -20,13 +17,11 @@ public class CombatActorMapper {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public static CombatActorDTO toDTO(int currentHP,
-                                       CombatStatsDTO statsDTO,
+    public static CombatActorDTO toDTO(CombatStatsDTO statsDTO,
                                        List<ElementMultiplierDTO> actorElements,
                                        List<StatusResistanceDTO> actorResistances,
                                        List<CombatActiveStatusDTO> activeStatus) {
         return CombatActorDTO.builder()
-                .currentHp(currentHP)
                 .stats(statsDTO)
                 .elementalMultipliers(actorElements)
                 .statusResistances(actorResistances)
@@ -37,20 +32,12 @@ public class CombatActorMapper {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private static CombatActorDomain buildActorDomainInternal(
+    public static CombatActorDomain buildActorDomain(
             CombatActorType actorType,
-            int currentHP,
-            int maxHp,
-            int patk,
-            int matk,
-            int pdef,
-            int mdef,
-            int acc,
-            int eva,
-            int lck,
-            List<ElementMultiplierDomain> actorElements,
-            List<StatusResistanceDomain> actorResistances,
-            List<CombatActiveStatusDomain> activeStatus,
+            StatsDomain stats,
+            List<ElementMultiplierDomain> elements,
+            List<StatusResistanceDomain> resistances,
+            List<CombatActiveStatusDomain> statuses,
             List<SkillCombatDomain> skills,
             List<Long> skillsBlocked,
             Long lastSkillUsed
@@ -66,14 +53,14 @@ public class CombatActorMapper {
         skillsBlocked.forEach(skillsMap::remove);
 
         Map<Long, ElementMultiplierDomain> elementsMap =
-                actorElements.stream()
+                elements.stream()
                         .collect(Collectors.toMap(
                                 ElementMultiplierDomain::getElementId,
                                 Function.identity()
                         ));
 
         Map<Long, StatusResistanceDomain> resistanceMap =
-                actorResistances.stream()
+                resistances.stream()
                         .collect(Collectors.toMap(
                                 StatusResistanceDomain::getStateId,
                                 Function.identity()
@@ -81,88 +68,14 @@ public class CombatActorMapper {
 
         return CombatActorDomain.builder()
                 .type(actorType)
-                .hp(currentHP)
-                .maxHp(maxHp)
-                .patk(patk)
-                .matk(matk)
-                .pdef(pdef)
-                .mdef(mdef)
-                .acc(acc)
-                .eva(eva)
-                .lck(lck)
+                .stats(stats)
                 .elementMultipliers(elementsMap)
                 .statusResistances(resistanceMap)
-                .states(activeStatus)
+                .activeStatuses(statuses)
                 .skills(skillsMap)
                 .lastSkillUsed(lastSkillUsed)
                 .actionModifierType(CombatActionType.SKILL_USED)
                 .build();
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
-    public static CombatActorDomain buildActorDomain(
-            CombatActorType actorType,
-            int currentHP,
-            UserStatsPersistence stats,
-            List<ElementMultiplierDomain> elements,
-            List<StatusResistanceDomain> resistances,
-            List<CombatActiveStatusDomain> states,
-            List<SkillCombatDomain> skills,
-            List<Long> skillsBlocked,
-            Long lastSkillUsed
-    ) {
-        return buildActorDomainInternal(
-                actorType,
-                currentHP,
-                stats.getMaxHp(),
-                stats.getPatk(),
-                stats.getMatk(),
-                stats.getPdef(),
-                stats.getMdef(),
-                stats.getAcc(),
-                stats.getEva(),
-                stats.getLck(),
-                elements,
-                resistances,
-                states,
-                skills,
-                skillsBlocked,
-                lastSkillUsed
-        );
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
-    public static CombatActorDomain buildActorDomain(
-            CombatActorType actorType,
-            int currentHP,
-            EnemyPersistence stats,
-            List<ElementMultiplierDomain> elements,
-            List<StatusResistanceDomain> resistances,
-            List<CombatActiveStatusDomain> states,
-            List<SkillCombatDomain> skills,
-            List<Long> skillsBlocked,
-            Long lastSkillUsed
-    ) {
-        return buildActorDomainInternal(
-                actorType,
-                currentHP,
-                stats.getMaxHp(),
-                stats.getPatk(),
-                stats.getMatk(),
-                stats.getPdef(),
-                stats.getMdef(),
-                stats.getAcc(),
-                stats.getEva(),
-                stats.getLck(),
-                elements,
-                resistances,
-                states,
-                skills,
-                skillsBlocked,
-                lastSkillUsed
-        );
     }
 
     //------------------------------------------------------------------------------------------------------------------

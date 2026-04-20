@@ -7,6 +7,8 @@ import com.kiwi.features.combat.repositories.CombatBlockedSkillRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class CombatBlockedSkillService {
@@ -48,10 +50,34 @@ public class CombatBlockedSkillService {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public List<Long> getBlockedSkills(Long combatId, CombatActorType actor) {
+    public Map<CombatActorType, List<Long>> getBlockedSkills(Long combatId) {
 
-        return repository.findSkillIdByIdCombatIdAndIdActor(combatId, actor);
+        List<CombatBlockedSkillPersistence> list =
+                repository.findById_CombatId(combatId);
+
+        return list.stream()
+                .collect(Collectors.groupingBy(
+                        e -> e.getId().getActor(),
+                        Collectors.mapping(
+                                e -> e.getId().getSkillId(),
+                                Collectors.toList()
+                        )
+                ));
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public List<Long> getBlockedSkillsForActor(
+            Map<CombatActorType, List<Long>> skillsBlocked,
+            CombatActorType combatActorType
+    ) {
+        if (skillsBlocked == null || combatActorType == null) {
+            return List.of();
+        }
+
+        return skillsBlocked.getOrDefault(combatActorType, List.of());
+    }
+
 
     //------------------------------------------------------------------------------------------------------------------
 

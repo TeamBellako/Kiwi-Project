@@ -2,6 +2,7 @@ package com.kiwi.features.combat.data.persistence;
 
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.combat.data.enums.StatType;
 import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,6 +49,10 @@ public class CombatLogPersistence {
     @Enumerated(EnumType.STRING)
     @Column(name="effect_type")
     private SkillEffectResultType effectType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="stat_affected")
+    private StatType statAffected;
 
     private Float value;
 

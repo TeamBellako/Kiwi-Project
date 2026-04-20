@@ -6,6 +6,9 @@ import com.kiwi.features.combat.data.persistence.CombatLastSkillPersistence;
 import com.kiwi.features.combat.repositories.CombatLastSkillRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Component
 public class CombatLastSkillService {
 
@@ -42,15 +45,32 @@ public class CombatLastSkillService {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public Long getLastSkill(Long combatId, CombatActorType actor) {
-        return repository
-                .findSkillIdByIdCombatIdAndIdActor(combatId, actor)
-                .orElse(-1L);
+    public Map<CombatActorType, Long> getLastSkills(Long combatId) {
+        return repository.findById_CombatId(combatId)
+                .stream()
+                .collect(Collectors.toMap(
+                        e -> e.getId().getActor(),
+                        CombatLastSkillPersistence::getSkillId
+                ));
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public Long getLastSkillForActor(
+            Map<CombatActorType, Long> lastSkillsUsed,
+            CombatActorType combatActorType
+    ) {
+        if (lastSkillsUsed == null || combatActorType == null) {
+            return -1L;
+        }
+
+        return lastSkillsUsed.getOrDefault(combatActorType, -1L);
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
     public void deleteByCombatId(Long combatId) {
+
         repository.deleteByIdCombatId(combatId);
     }
 

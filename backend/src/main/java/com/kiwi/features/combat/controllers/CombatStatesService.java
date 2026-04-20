@@ -1,6 +1,5 @@
 package com.kiwi.features.combat.controllers;
 
-import com.kiwi.features.combat.data.dto.CombatActiveStatusDTO;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.mappers.CombatActiveStatusMapper;
 import com.kiwi.features.combat.data.persistence.CombatStatePersistence;
@@ -8,8 +7,8 @@ import com.kiwi.features.combat.data.persistence.CombatActiveStatusPersistence;
 import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
 import com.kiwi.features.combat.exceptions.CombatStateNotFoundException;
-import com.kiwi.features.combat.repositories.CombatStateRepository;
-import com.kiwi.features.combat.repositories.CombatActiveStatusRepository;
+import com.kiwi.features.combat.repositories.CombatStatesRepository;
+import com.kiwi.features.combat.repositories.CombatActiveStatusesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,17 +18,17 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class CombatStateService {
+public class CombatStatesService {
 
-    private final CombatStateRepository stateRepository;
-    private final CombatActiveStatusRepository activeStatusRepository;
+    private final CombatStatesRepository statesRepository;
+    private final CombatActiveStatusesRepository activeStatusesRepository;
 
     // ----------------------------------------------------------------------------------------------------------------
 
     public CombatActiveStatusDomain applyNewState(Long stateId, Integer statusDuration, Float power, CombatActorDomain target, Long skillId, Long combatId)
     {
         CombatStatePersistence statePersistence =
-                        stateRepository.findById(stateId)
+                        statesRepository.findById(stateId)
                         .orElseThrow(() -> new CombatStateNotFoundException(stateId));
 
         CombatActiveStatusPersistence statusEffectPersistence =
@@ -42,51 +41,76 @@ public class CombatStateService {
                             .remainingTurns(statusDuration)
                             .build();
 
-        activeStatusRepository.save(statusEffectPersistence);
+        activeStatusesRepository.save(statusEffectPersistence);
 
         CombatActiveStatusDomain stateDomain = CombatActiveStatusMapper.toDomain(statusEffectPersistence, statePersistence);
-        target.getStates().add(stateDomain);
+        target.getActiveStatuses().add(stateDomain);
 
             return stateDomain;
     }
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public List<CombatActiveStatusDomain> getActiveStatus(Long combatId, CombatActorType targetType)
+    public Map<Long, CombatStatePersistence> loadStatesMap() {
+        return statesRepository.findAll()
+                .stream()
+                .collect(Collectors.toMap(
+                        CombatStatePersistence::getId,
+                        Function.identity()
+                ));
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    public Map<CombatActorType, List<CombatActiveStatusDomain>> getActiveStatuses(Long combatId)
     {
-        List<CombatActiveStatusDomain> activeStatusDomainList = new ArrayList<>();
+        Map<CombatActorType, List<CombatActiveStatusDomain>> result = new HashMap<>();
 
-        List<CombatActiveStatusPersistence> activeStatusPersitenceList = activeStatusRepository.findByCombatIdAndTarget(combatId, targetType);
+        List<CombatActiveStatusPersistence> list =
+                activeStatusesRepository.findByCombatId(combatId);
 
-        List<Long> stateIds = activeStatusPersitenceList.stream()
+        List<Long> stateIds = list.stream()
                 .map(CombatActiveStatusPersistence::getStateId)
                 .distinct()
                 .toList();
 
         Map<Long, CombatStatePersistence> statesMap =
-                stateRepository.findByIdIn(stateIds)
+                statesRepository.findByIdIn(stateIds)
                         .stream()
                         .collect(Collectors.toMap(
                                 CombatStatePersistence::getId,
                                 Function.identity()
                         ));
 
-        for (CombatActiveStatusPersistence activeStatusPersistence : activeStatusPersitenceList) {
+        for (CombatActiveStatusPersistence p : list) {
 
-            CombatStatePersistence stateInfoPersistence =
-                    statesMap.get(activeStatusPersistence.getStateId());
+            CombatStatePersistence state = statesMap.get(p.getStateId());
 
-            if (stateInfoPersistence == null) {
-                throw new CombatStateNotFoundException(activeStatusPersistence.getStateId());
+            if (state == null) {
+                throw new CombatStateNotFoundException(p.getStateId());
             }
 
-            CombatActiveStatusDomain activeStatusDomain =
-                    CombatActiveStatusMapper.toDomain(activeStatusPersistence, stateInfoPersistence);
+            CombatActiveStatusDomain domain =
+                    CombatActiveStatusMapper.toDomain(p, state);
 
-            activeStatusDomainList.add(activeStatusDomain);
+            result.computeIfAbsent(p.getTarget(), k -> new ArrayList<>())
+                    .add(domain);
         }
 
-        return activeStatusDomainList;
+        return result;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    public List<CombatActiveStatusDomain> getActiveStatusesForActor(
+            Map<CombatActorType, List<CombatActiveStatusDomain>> activeStatuses,
+            CombatActorType combatActorType
+    ) {
+        if (activeStatuses == null || combatActorType == null) {
+            return List.of();
+        }
+
+        return activeStatuses.getOrDefault(combatActorType, List.of());
     }
 
     // ----------------------------------------------------------------------------------------------------------------

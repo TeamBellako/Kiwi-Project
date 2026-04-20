@@ -28,6 +28,8 @@ public class SkillCombatMapper {
         return SkillEffectDomain.builder()
                 .effectType(e.getEffectType())
                 .target(e.getTarget())
+                .statAffected(e.getStatAffected())
+                .statModification(e.getStatModification())
                 .power(e.getPower())
                 .attackType(e.getAttackType())
                 .elementId(e.getElementId())

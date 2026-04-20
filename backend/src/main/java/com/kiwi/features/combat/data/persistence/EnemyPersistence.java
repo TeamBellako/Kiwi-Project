@@ -20,7 +20,6 @@ public class EnemyPersistence {
     private String sprite;
 
     private int maxHp;
-    private int tim;
 
     private int patk;
     private int matk;
