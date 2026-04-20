@@ -2,8 +2,8 @@ package com.kiwi.skills;
 
 import com.kiwi.features.skills.controllers.SkillService;
 import com.kiwi.features.skills.controllers.SkillProgressService;
-import com.kiwi.features.skills.data.SkillDTO;
-import com.kiwi.features.skills.data.UserSkillStatusPersistence;
+import com.kiwi.features.skills.data.DTO.SkillDTO;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
 import com.kiwi.features.skills.exceptions.SkillLevelUpNotFoundException;
 import com.kiwi.features.skills.exceptions.SkillNotFoundException;
@@ -20,14 +20,20 @@ public class SkillServiceTests {
     private final SkillTestRepositoryInMemory skillRepo =
             new SkillTestRepositoryInMemory();
 
-    private final UserSkillStatusTestRepositoryInMemory statusRepo =
+    private final UserSkillStatusTestRepositoryInMemory userSkillStatusRepo =
             new UserSkillStatusTestRepositoryInMemory();
 
-    private final SkillProgressService progress =
+    private final SkillProgressService skillProgress =
             new SkillProgressService();
 
+    private final SkillEffectTestRepositoryInMemory skillEffectRepo =
+            new SkillEffectTestRepositoryInMemory();
+
+    private final EnemySkillTestRepositoryInMemory enemySkillRepo =
+            new EnemySkillTestRepositoryInMemory();
+
     private final SkillService service =
-            new SkillService(skillRepo, statusRepo, progress);
+            new SkillService(skillRepo, userSkillStatusRepo, skillProgress, skillEffectRepo, enemySkillRepo);
 
     private final Long userId = 1L;
 
@@ -41,8 +47,8 @@ public class SkillServiceTests {
         var skill1 = skillRepo.saveAndFlush(persistenceSkill(1L));
         var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
 
-        statusRepo.saveAndFlush(equippedSkill(userId, skill1));
-        statusRepo.saveAndFlush(unEquippedSkill(userId, skill2));
+        userSkillStatusRepo.saveAndFlush(equippedSkill(userId, skill1));
+        userSkillStatusRepo.saveAndFlush(unEquippedSkill(userId, skill2));
 
         var result = service.getAllSkillsForUser(userId);
 
@@ -60,7 +66,7 @@ public class SkillServiceTests {
         // forced expired cooldown
         status.setCooldownUntil(Instant.now().minusSeconds(60));
 
-        statusRepo.saveAndFlush(status);
+        userSkillStatusRepo.saveAndFlush(status);
 
         var result = service.getAllSkillsForUser(userId);
 
@@ -71,7 +77,7 @@ public class SkillServiceTests {
         assertNull(dto.getCooldownUntil());
 
         UserSkillStatusPersistence updated =
-                statusRepo
+                userSkillStatusRepo
                         .findByIdUserIdAndIdSkillId(userId, skill.getId())
                         .orElseThrow();
 
@@ -112,7 +118,7 @@ public class SkillServiceTests {
         skillRepo.saveAndFlush(skill1);
         skillRepo.saveAndFlush(skill2);
 
-        statusRepo.saveAndFlush(
+        userSkillStatusRepo.saveAndFlush(
                 unEquippedSkill(userId, skill2)
         );
 
@@ -127,7 +133,7 @@ public class SkillServiceTests {
         skill.setLevelupSkillId(null);
         skillRepo.saveAndFlush(skill);
 
-        statusRepo.saveAndFlush(
+        userSkillStatusRepo.saveAndFlush(
                 unEquippedSkill(userId, skill)
         );
 
@@ -142,7 +148,7 @@ public class SkillServiceTests {
     public void putSkillOnCooldown_success() {
 
         var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
-        statusRepo.saveAndFlush(
+        userSkillStatusRepo.saveAndFlush(
                 equippedSkill(userId, skill)
         );
 
@@ -163,7 +169,7 @@ public class SkillServiceTests {
     public void removeCooldownOfSkill_success() {
 
         var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
-        statusRepo.saveAndFlush(
+        userSkillStatusRepo.saveAndFlush(
                 cooldownSkill(userId, skill)
         );
 
@@ -182,7 +188,7 @@ public class SkillServiceTests {
 
         var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
 
-        statusRepo.saveAndFlush(
+        userSkillStatusRepo.saveAndFlush(
                 unEquippedSkill(userId, skill)
         );
 
@@ -205,11 +211,11 @@ public class SkillServiceTests {
         var skill1 = skillRepo.saveAndFlush(persistenceSkill(1L));
         var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
 
-        statusRepo.saveAndFlush(
+        userSkillStatusRepo.saveAndFlush(
                 equippedSkill(userId, skill1)
         );
 
-        statusRepo.saveAndFlush(
+        userSkillStatusRepo.saveAndFlush(
                 unEquippedSkill(userId, skill2)
         );
 
@@ -225,7 +231,7 @@ public class SkillServiceTests {
 
         var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
 
-        statusRepo.saveAndFlush(
+        userSkillStatusRepo.saveAndFlush(
                 equippedSkill(userId, skill)
         );
 
@@ -241,4 +247,126 @@ public class SkillServiceTests {
 
         service.unequipSkill(userId, skill.getId());
     }
+
+    // ============================================================================================
+    // SKILL COMBAT EFFECTS
+    // ============================================================================================
+
+    @Test
+    public void getCombatSkillsForUser_returnsSkillsWithEffects() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        userSkillStatusRepo.saveAndFlush(
+                equippedSkill(userId, skill)
+        );
+
+        skillEffectRepo.save(skillEffect1(skill.getId()));
+        skillEffectRepo.save(skillEffect2(skill.getId()));
+
+        var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
+
+        userSkillStatusRepo.saveAndFlush(
+                equippedSkill(userId, skill2)
+        );
+
+        skillEffectRepo.save(skillEffect2(skill2.getId()));
+
+        var result = service.getCombatSkillsForUser(userId);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void getCombatSkillsForEnemy_returnsSkillsWithEffects() {
+
+        Long enemyId = 99L;
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+        skillEffectRepo.save(skillEffect1(skill.getId()));
+
+        var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
+        skillEffectRepo.save(skillEffect2(skill2.getId()));
+
+        enemySkillRepo.save(enemySkill(enemyId, skill));
+        enemySkillRepo.save(enemySkill(enemyId, skill2));
+
+        var result = service.getCombatSkillsForEnemy(enemyId);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void getCombatSkillsForUser_skillWithoutEffects() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        userSkillStatusRepo.saveAndFlush(
+                equippedSkill(userId, skill)
+        );
+
+        var result = service.getCombatSkillsForUser(userId);
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getEffects().isEmpty());
+    }
+
+    @Test
+    public void getCombatSkillsForUser_skillWithMultipleEffects() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        userSkillStatusRepo.saveAndFlush(
+                equippedSkill(userId, skill)
+        );
+
+        skillEffectRepo.save(skillEffect1(skill.getId()));
+        skillEffectRepo.save(skillEffect2(skill.getId()));
+
+        var result = service.getCombatSkillsForUser(userId);
+
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(0).getEffects().size());
+    }
+
+    @Test
+    public void getCombatSkillsForEnemy_noSkills() {
+
+        Long enemyId = 99L;
+
+        var result = service.getCombatSkillsForEnemy(enemyId);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void getCombatSkillsForUser_noEquippedSkills() {
+
+        var skill = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        userSkillStatusRepo.saveAndFlush(
+                unEquippedSkill(userId, skill)
+        );
+
+        var result = service.getCombatSkillsForUser(userId);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void getCombatSkillsForUser_ignoresEffectsFromOtherSkills() {
+
+        var skill1 = skillRepo.saveAndFlush(persistenceSkill(1L));
+
+        var skill2 = skillRepo.saveAndFlush(persistenceSkill(2L));
+        skillEffectRepo.save(skillEffect1(skill2.getId()));
+
+        userSkillStatusRepo.saveAndFlush(equippedSkill(userId, skill1));
+
+        var result = service.getCombatSkillsForUser(userId);
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getEffects().isEmpty());
+    }
+
 }

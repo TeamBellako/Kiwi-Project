@@ -1,7 +1,7 @@
 package com.kiwi.features.skills.controllers;
 
-import com.kiwi.features.skills.data.UserSkillStatusKey;
-import com.kiwi.features.skills.data.UserSkillStatusPersistence;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusKey;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -18,4 +18,6 @@ public interface UserSkillStatusRepository
     );
 
     Optional<UserSkillStatusPersistence> findByIdUserIdAndIdSkillId(Long userId, Long skillId);
+
+    List<UserSkillStatusPersistence> findByIdUserIdAndDeckSlotGreaterThan(Long userId, int deckSlot);
 }

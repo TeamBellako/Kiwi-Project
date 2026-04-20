@@ -7,7 +7,7 @@ import com.kiwi.config.JacksonConfig;
 import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.skills.controllers.SkillRepository;
 import com.kiwi.features.skills.controllers.UserSkillStatusRepository;
-import com.kiwi.features.skills.data.SkillPersistence;
+import com.kiwi.features.skills.data.persistence.SkillPersistence;
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersDomain;
@@ -185,7 +185,5 @@ public class SkillsIntegrationTests {
 
         assertEquals(0, status.getDeckSlot());
     }
-
-
 
 }

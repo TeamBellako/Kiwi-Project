@@ -1,7 +1,8 @@
 package com.kiwi.skills;
 
+import com.kiwi.features.skills.data.persistence.UserSkillStatusKey;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 import com.kiwi.features.skills.controllers.UserSkillStatusRepository;
-import com.kiwi.features.skills.data.*;
 import org.springframework.data.domain.*;
 import org.springframework.data.repository.query.FluentQuery;
 
@@ -15,6 +16,16 @@ public class UserSkillStatusTestRepositoryInMemory implements UserSkillStatusRep
     @Override
     public Optional<UserSkillStatusPersistence> findByIdUserIdAndIdSkillId(Long userId, Long skillId) {
         return Optional.ofNullable(store.get(new UserSkillStatusKey(userId, skillId)));
+    }
+
+    @Override
+    public List<UserSkillStatusPersistence> findByIdUserIdAndDeckSlotGreaterThan(Long userId, int deckSlot) {
+        return store.values().stream()
+                .filter(s ->
+                        s.getId().getUserId().equals(userId) &&
+                                s.getDeckSlot() > deckSlot
+                )
+                .toList();
     }
 
     @Override
@@ -92,8 +103,8 @@ public class UserSkillStatusTestRepositoryInMemory implements UserSkillStatusRep
     @Override public void deleteAllInBatch(Iterable<UserSkillStatusPersistence> entities) {}
     @Override public void deleteAllByIdInBatch(Iterable<UserSkillStatusKey> keys) {}
 
-    @Override public UserSkillStatusPersistence getOne(UserSkillStatusKey key) { return null; }
-    @Override public UserSkillStatusPersistence getById(UserSkillStatusKey key) { return null; }
+    @Override @Deprecated public UserSkillStatusPersistence getOne(UserSkillStatusKey key) { return null; }
+    @Override @Deprecated public UserSkillStatusPersistence getById(UserSkillStatusKey key) { return null; }
     @Override public UserSkillStatusPersistence getReferenceById(UserSkillStatusKey key) { return null; }
 
     @Override

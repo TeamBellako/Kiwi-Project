@@ -1,0 +1,15 @@
+package com.kiwi.features.skills.controllers;
+
+import com.kiwi.features.skills.data.persistence.EnemySkillKey;
+import com.kiwi.features.skills.data.persistence.EnemySkillPersistence;
+import com.kiwi.features.skills.data.persistence.SkillPersistence;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface EnemySkillRepository extends JpaRepository<EnemySkillPersistence, EnemySkillKey> {
+
+    List<EnemySkillPersistence> findByEnemy_Id(Long enemyId);
+
+}

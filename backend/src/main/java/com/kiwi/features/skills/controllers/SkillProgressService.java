@@ -1,7 +1,11 @@
 package com.kiwi.features.skills.controllers;
 
-import com.kiwi.features.skills.data.*;
+import com.kiwi.features.skills.data.domain.SkillDomain;
+import com.kiwi.features.skills.data.mappers.SkillMapper;
+import com.kiwi.features.skills.data.persistence.SkillPersistence;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 
+import com.kiwi.features.skills.data.enums.CooldownType;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;

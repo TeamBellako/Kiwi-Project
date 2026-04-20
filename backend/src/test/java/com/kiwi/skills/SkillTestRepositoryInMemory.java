@@ -1,7 +1,7 @@
 package com.kiwi.skills;
 
 import com.kiwi.features.skills.controllers.SkillRepository;
-import com.kiwi.features.skills.data.SkillPersistence;
+import com.kiwi.features.skills.data.persistence.SkillPersistence;
 import org.springframework.data.domain.*;
 import org.springframework.data.repository.query.FluentQuery;
 
@@ -78,11 +78,21 @@ public class SkillTestRepositoryInMemory implements SkillRepository {
     @Override public Page<SkillPersistence> findAll(Pageable pageable) { return Page.empty(); }
 
     @Override public void deleteAllInBatch() {}
+
+    @Override @Deprecated
+    public SkillPersistence getOne(Long aLong) {
+        return null;
+    }
+
+    @Override @Deprecated
+    public SkillPersistence getById(Long aLong) {
+        return null;
+    }
+
     @Override public void deleteAllInBatch(Iterable<SkillPersistence> entities) {}
     @Override public void deleteAllByIdInBatch(Iterable<Long> longs) {}
 
-    @Override public SkillPersistence getOne(Long aLong) { return null; }
-    @Override public SkillPersistence getById(Long aLong) { return null; }
+
     @Override public SkillPersistence getReferenceById(Long aLong) { return null; }
 
     @Override
@@ -121,5 +131,10 @@ public class SkillTestRepositoryInMemory implements SkillRepository {
             Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction
     ) {
         return null;
+    }
+
+    @Override
+    public List<SkillPersistence> findByIdIn(List<Long> ids) {
+        return List.of();
     }
 }
