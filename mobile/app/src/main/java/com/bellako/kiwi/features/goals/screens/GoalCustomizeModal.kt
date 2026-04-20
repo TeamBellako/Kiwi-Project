@@ -48,6 +48,7 @@ import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
+import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -61,10 +62,10 @@ import kotlin.math.roundToInt
 @Composable
 @Suppress("LongMethod")
 fun GoalCustomize(
-    goal: GoalDomain,
+    goal: UserGoalStatusDomain,
     goalsViewModel: IGoalsViewModel,
     onDismiss: () -> Unit = {},
-    onGoalUpdated: (GoalDomain) -> Unit = {},
+    onGoalUpdated: (UserGoalStatusDomain) -> Unit = {},
 ) {
     val buttonsWidth = getResponsiveSizeWidth(150.dp)
     val coroutineScope = rememberCoroutineScope()
@@ -120,7 +121,7 @@ fun GoalCustomize(
             ) {
                 Kiwi_H2(
                     KiwiTextArguments(
-                        goal.action,
+                        goal.resolveAction(),
                         TextAlign.Center,
                         color = kiwiColor.color6,
                     ),
@@ -227,10 +228,10 @@ fun GoalCustomize(
 @SuppressLint("RememberInComposition")
 @Composable
 fun GoalCustomizeModal(
-    goal: GoalDomain,
+    goal: UserGoalStatusDomain,
     goalsViewModel: IGoalsViewModel,
     onDismiss: () -> Unit = {},
-    onGoalUpdated: (GoalDomain) -> Unit = {},
+    onGoalUpdated: (UserGoalStatusDomain) -> Unit = {},
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -284,8 +285,10 @@ fun GoalCustomiceModal_Preview() {
         ) {
             GoalCustomizeModal(
                 goal =
-                    GoalDomain(
+                    UserGoalStatusDomain(
                         1,
+                        1,
+                        "Walk 9000 Steps",
                         9000,
                         "Walk 9000 Steps",
                         GoalType.EXERCISE,

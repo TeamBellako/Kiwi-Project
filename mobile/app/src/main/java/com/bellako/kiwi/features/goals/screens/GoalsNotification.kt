@@ -31,7 +31,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
-import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -96,16 +95,18 @@ fun GoalsNotification(
                             .offset(x = getResponsiveSizeWidth(-9.5.dp), y = getResponsiveSizeWidth(-2.5.dp)),
                     alignment = Alignment.Center,
                 )
-                Kiwi_Image(
-                    painter = painterResource(id = goalIcon(goals[1].type)),
-                    alt = "Goal icon",
-                    colorFilter = ColorFilter.tint(kiwiColor.colorF),
-                    modifier =
-                        Modifier
-                            .size(getResponsiveSizeWidth(30.dp))
-                            .offset(x = getResponsiveSizeWidth(9.5.dp), y = getResponsiveSizeWidth(2.5.dp)),
-                    alignment = Alignment.Center,
-                )
+                if (goals.size > 1) {
+                    Kiwi_Image(
+                        painter = painterResource(id = goalIcon(goals[1].type)),
+                        alt = "Goal icon",
+                        colorFilter = ColorFilter.tint(kiwiColor.colorF),
+                        modifier =
+                            Modifier
+                                .size(getResponsiveSizeWidth(30.dp))
+                                .offset(x = getResponsiveSizeWidth(9.5.dp), y = getResponsiveSizeWidth(2.5.dp)),
+                        alignment = Alignment.Center,
+                    )
+                }
             }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -161,24 +162,22 @@ fun GoalsNotification_Card_Preview() {
                     goals =
                         listOf(
                             GoalDomain(
-                                1,
-                                2,
-                                "Programa el modal lo mejor que sepas",
-                                GoalType.PRODUCTIVITY,
-                                GoalCategory.DAILY_CHALLENGES,
-                                GoalStatus.COMPLETED,
-                                1000,
-                                value = 2,
+                                id = 1,
+                                name = "Programa el modal lo mejor que sepas",
+                                target = 2,
+                                action = "Programa el modal lo mejor que sepas",
+                                type = GoalType.PRODUCTIVITY,
+                                category = GoalCategory.DAILY_CHALLENGES,
+                                reward = 1000,
                             ),
                             GoalDomain(
-                                2,
-                                10,
-                                "Esto está fuera de tu alcance",
-                                GoalType.PRODUCTIVITY,
-                                GoalCategory.DAILY_CHALLENGES,
-                                GoalStatus.NOT_COMPLETED,
-                                1000,
-                                value = 5,
+                                id = 2,
+                                name = "Esto está fuera de tu alcance",
+                                target = 10,
+                                action = "Esto está fuera de tu alcance",
+                                type = GoalType.PRODUCTIVITY,
+                                category = GoalCategory.DAILY_CHALLENGES,
+                                reward = 1000,
                             ),
                         ),
                 )

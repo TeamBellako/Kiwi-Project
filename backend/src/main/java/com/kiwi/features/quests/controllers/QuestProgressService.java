@@ -21,7 +21,10 @@ public class QuestProgressService {
                 quest.getExperience(),
                 quest.getIcon(),
                 QuestStatus.ACTIVE,
-                quest.getSubquests()
+                quest.getSubquests(),
+                quest.getOnCompletedAction(),
+                quest.getOnCompletedEntity(), 
+                quest.getOnCompletedEntityId()
         );
     }
 
@@ -36,7 +39,10 @@ public class QuestProgressService {
                 quest.getExperience(),
                 quest.getIcon(),
                 QuestStatus.COMPLETED,
-                quest.getSubquests()
+                quest.getSubquests(),
+                quest.getOnCompletedAction(),
+                quest.getOnCompletedEntity(),
+                quest.getOnCompletedEntityId()
         );
     }
 
@@ -54,7 +60,9 @@ public class QuestProgressService {
                 subquest.getName(),
                 subquest.getExperience(),
                 subquest.getOrder(),
-                SubquestStatus.ACTIVE
+                SubquestStatus.ACTIVE,
+                subquest.getOnCompletedEvent(),
+                subquest.getOnCompletedEntityId()
         );
     }
 
@@ -67,7 +75,9 @@ public class QuestProgressService {
                 subquest.getName(),
                 subquest.getExperience(),
                 subquest.getOrder(),
-                SubquestStatus.COMPLETED
+                SubquestStatus.COMPLETED,
+                subquest.getOnCompletedEvent(),
+                subquest.getOnCompletedEntityId()
         );
     }
 
@@ -80,7 +90,9 @@ public class QuestProgressService {
                 subquest.getName(),
                 subquest.getExperience(),
                 subquest.getOrder(),
-                SubquestStatus.FAILED
+                SubquestStatus.FAILED,
+                subquest.getOnCompletedEvent(),
+                subquest.getOnCompletedEntityId()
         );
     }
 }

@@ -17,7 +17,7 @@ public class SkillTestFactory {
         s.setName("Skill " + id);
         s.setDescription("Description " + id);
         s.setQuote("Quote " + id);
-        s.setIcon(1);
+        s.setSkillType(SkillType.FOCUS);
 
         s.setCooldownType(CooldownType.TIME);
         s.setCooldownTimeMinutes(10);
@@ -74,7 +74,7 @@ public class SkillTestFactory {
                 .name("Skill " + id)
                 .description("Desc")
                 .quote("Quote")
-                .icon(1)
+                .type("FOCUS")
 
                 .cooldownType("OTHER")
                 .cooldownGoalId(null)

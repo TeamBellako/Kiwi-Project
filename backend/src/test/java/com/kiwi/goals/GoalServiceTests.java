@@ -20,7 +20,8 @@ import static org.mockito.Mockito.*;
 
 public class GoalServiceTests {
 
-    private GoalTestRepositoryInMemory goalRepository;
+    private GoalTestRepositoryInMemory userGoalStatusRepository;
+    private GoalDefinitionRepositoryInMemory goalDefinitionRepository;
     private UsersTestRepositoryInMemory usersRepository;
     private UsersService usersService;
     private GoalService goalService;
@@ -30,12 +31,12 @@ public class GoalServiceTests {
 
     @Before
     public void setUp() {
-        goalRepository = new GoalTestRepositoryInMemory();
+        userGoalStatusRepository = new GoalTestRepositoryInMemory();
+        goalDefinitionRepository = new GoalDefinitionRepositoryInMemory();
         usersRepository = new UsersTestRepositoryInMemory();
         usersService = mock(UsersService.class);
-        goalService = new GoalService(goalRepository, usersRepository, usersService);
+        goalService = new GoalService(userGoalStatusRepository, goalDefinitionRepository, usersRepository, usersService);
 
-        // Create test user
         testUser = new UsersPersistence();
         testUser.setId(1L);
         testUser.setEmail("test@test.com");
@@ -43,7 +44,6 @@ public class GoalServiceTests {
         testUser.setTotalPoints(500);
         usersRepository.save(testUser);
 
-        // Mock authentication
         authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("test@test.com");
     }
@@ -54,36 +54,38 @@ public class GoalServiceTests {
 
     @Test
     public void createGoals_valid_savesGoals() {
-        List<GoalDTO> request = List.of(
+        GoalPersistence def = goalDefinitionRepository.save(exerciseGoalDefinition(null));
+
+        List<UserGoalStatusDTO> request = List.of(
                 inProgressGoalDTO(null),
                 inProgressGoalDTO(null)
         );
+        request.forEach(dto -> dto.setGoalId(def.getId()));
 
-        List<GoalDTO> result = goalService.createGoals(request, authentication);
+        List<UserGoalStatusDTO> result = goalService.createGoals(request, authentication);
 
         assertEquals(2, result.size());
-        assertEquals(2, goalRepository.count());
+        assertEquals(2, userGoalStatusRepository.count());
     }
 
     @Test
     public void createGoals_addsNewGoalsWithoutReplacing() {
         LocalDate date = LocalDate.now();
-        
-        // Create initial goals without explicit IDs
-        goalRepository.save(inProgressGoalPersistence(null, date, testUser));
-        goalRepository.save(inProgressGoalPersistence(null, date, testUser));
+        GoalPersistence def = goalDefinitionRepository.save(exerciseGoalDefinition(null));
 
-        assertEquals(2, goalRepository.count());
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(null, date, testUser));
 
-        // Create new goals for same date
-        List<GoalDTO> request = List.of(
-                inProgressGoalDTO(null)
-        );
+        assertEquals(2, userGoalStatusRepository.count());
 
-        List<GoalDTO> result = goalService.createGoals(request, authentication);
+        UserGoalStatusDTO dto = inProgressGoalDTO(null);
+        dto.setGoalId(def.getId());
+        List<UserGoalStatusDTO> request = List.of(dto);
+
+        List<UserGoalStatusDTO> result = goalService.createGoals(request, authentication);
 
         assertEquals(1, result.size());
-        assertEquals(3, goalRepository.count());
+        assertEquals(3, userGoalStatusRepository.count());
     }
 
     // ============================================================================================
@@ -93,10 +95,9 @@ public class GoalServiceTests {
     @Test
     public void getGoalById_valid_returnsGoal() {
         LocalDate date = LocalDate.now();
-        GoalPersistence goal = inProgressGoalPersistence(1L, date, testUser);
-        goalRepository.save(goal);
+        userGoalStatusRepository.save(inProgressGoalPersistence(1L, date, testUser));
 
-        GoalDTO result = goalService.getGoalById(1L, authentication);
+        UserGoalStatusDTO result = goalService.getGoalById(1L, authentication);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -108,17 +109,16 @@ public class GoalServiceTests {
         goalService.getGoalById(999L, authentication);
     }
 
-
     @Test
     public void getGoalsByDate_valid_returnsGoalsForDate() {
         LocalDate date = LocalDate.now();
         LocalDate otherDate = LocalDate.now().minusDays(1);
 
-        goalRepository.save(inProgressGoalPersistence(1L, date, testUser));
-        goalRepository.save(inProgressGoalPersistence(2L, date, testUser));
-        goalRepository.save(inProgressGoalPersistence(3L, otherDate, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(1L, date, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(2L, date, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(3L, otherDate, testUser));
 
-        List<GoalDTO> result = goalService.getGoalsByDate(date.toString(), authentication);
+        List<UserGoalStatusDTO> result = goalService.getGoalsByDate(date.toString(), authentication);
 
         assertEquals(2, result.size());
         assertEquals(date.toString(), result.get(0).getDate());
@@ -129,15 +129,13 @@ public class GoalServiceTests {
         LocalDate date1 = LocalDate.now();
         LocalDate date2 = LocalDate.now().minusDays(1);
 
-        goalRepository.save(inProgressGoalPersistence(1L, date1, testUser));
-        goalRepository.save(inProgressGoalPersistence(2L, date1, testUser));
-        goalRepository.save(inProgressGoalPersistence(3L, date2, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(1L, date1, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(2L, date1, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(3L, date2, testUser));
 
-        List<GoalDTO> result = goalService.getAllGoals(authentication);
+        List<UserGoalStatusDTO> result = goalService.getAllGoals(authentication);
 
         assertEquals(3, result.size());
-        
-        // Should be sorted descending by date
         assertEquals(date1.toString(), result.get(0).getDate());
         assertEquals(date1.toString(), result.get(1).getDate());
         assertEquals(date2.toString(), result.get(2).getDate());
@@ -149,20 +147,14 @@ public class GoalServiceTests {
         LocalDate today = LocalDate.now();
         LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
 
-        // IN_PROGRESS goals from yesterday and two days ago
-        goalRepository.save(inProgressGoalPersistence(1L, yesterday, testUser));
-        goalRepository.save(inProgressGoalPersistence(2L, twoDaysAgo, testUser));
-        
-        // IN_PROGRESS goal from today (should NOT be included)
-        goalRepository.save(inProgressGoalPersistence(3L, today, testUser));
-        
-        // COMPLETED goal from yesterday (should NOT be included)
-        goalRepository.save(completedGoalPersistence(4L, yesterday, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(1L, yesterday, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(2L, twoDaysAgo, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(3L, today, testUser));
+        userGoalStatusRepository.save(completedGoalPersistence(4L, yesterday, testUser));
 
-        List<GoalDTO> result = goalService.getGoalsInProgress(authentication);
+        List<UserGoalStatusDTO> result = goalService.getGoalsInProgress(authentication);
 
         assertEquals(2, result.size());
-        // Verify they are IN_PROGRESS and from before today
         assertTrue(result.stream().allMatch(g -> g.getStatus().equals("IN_PROGRESS")));
     }
 
@@ -170,36 +162,28 @@ public class GoalServiceTests {
     public void getAppGoals_valid_returnsOnlyAppUsageGoals() {
         LocalDate date = LocalDate.now();
 
-        // App usage goals
-        goalRepository.save(appGoalPersistence(1L, date, testUser));
-        goalRepository.save(appGoalPersistence(2L, date.minusDays(1), testUser));
+        userGoalStatusRepository.save(appGoalPersistence(1L, date, testUser));
+        userGoalStatusRepository.save(appGoalPersistence(2L, date.minusDays(1), testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(3L, date, testUser));
 
-        // other
-        goalRepository.save(inProgressGoalPersistence(3L, date, testUser));
-
-        List<GoalDTO> result = goalService.getAppGoals(authentication);
+        List<UserGoalStatusDTO> result = goalService.getAppGoals(authentication);
 
         assertEquals(2, result.size());
-        assertTrue(result.stream()
-                .allMatch(g -> g.getCategory().equals("APP_USAGE")));
+        assertTrue(result.stream().allMatch(g -> g.getCategory().equals("APP_USAGE")));
     }
 
     @Test
     public void getSkillGoals_valid_returnsOnlySkillGoals() {
         LocalDate date = LocalDate.now();
 
-        // Skill goals
-        goalRepository.save(skillGoalPersistence(1L, date, testUser));
-        goalRepository.save(skillGoalPersistence(2L, date.minusDays(1), testUser));
+        userGoalStatusRepository.save(skillGoalPersistence(1L, date, testUser));
+        userGoalStatusRepository.save(skillGoalPersistence(2L, date.minusDays(1), testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(3L, date, testUser));
 
-        // other
-        goalRepository.save(inProgressGoalPersistence(3L, date, testUser));
-
-        List<GoalDTO> result = goalService.getSkillGoals(authentication);
+        List<UserGoalStatusDTO> result = goalService.getSkillGoals(authentication);
 
         assertEquals(2, result.size());
-        assertTrue(result.stream()
-                .allMatch(g -> g.getCategory().equals("SKILL")));
+        assertTrue(result.stream().allMatch(g -> g.getCategory().equals("SKILL")));
     }
 
     @Test
@@ -211,11 +195,10 @@ public class GoalServiceTests {
         otherUser.setEmail("other@test.com");
         usersRepository.save(otherUser);
 
-        goalRepository.save(appGoalPersistence(1L, date, testUser));
+        userGoalStatusRepository.save(appGoalPersistence(1L, date, testUser));
+        userGoalStatusRepository.save(appGoalPersistence(2L, date, otherUser));
 
-        goalRepository.save(appGoalPersistence(2L, date, otherUser));
-
-        List<GoalDTO> result = goalService.getAppGoals(authentication);
+        List<UserGoalStatusDTO> result = goalService.getAppGoals(authentication);
 
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getId());
@@ -228,22 +211,21 @@ public class GoalServiceTests {
     @Test
     public void completeGoal_valid_changesStatusAndAddsPoints() {
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = inProgressGoalPersistence(1L, date, testUser);
-        goalRepository.save(goal);
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        userGoalStatusRepository.save(entry);
 
-        GoalDTO result = goalService.completeGoal(1L, authentication);
+        UserGoalStatusDTO result = goalService.completeGoal(1L, authentication);
 
         assertEquals("COMPLETED", result.getStatus());
-        verify(usersService, times(1)).addPointsToUser(testUser.getId(), goal.getReward());
+        verify(usersService, times(1)).addPointsToUser(testUser.getId(), entry.getGoal().getReward());
     }
 
     @Test
     public void completeGoal_alreadyCompleted_doesNotAddPoints() {
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = completedGoalPersistence(1L, date, testUser);
-        goalRepository.save(goal);
+        userGoalStatusRepository.save(completedGoalPersistence(1L, date, testUser));
 
-        GoalDTO result = goalService.completeGoal(1L, authentication);
+        UserGoalStatusDTO result = goalService.completeGoal(1L, authentication);
 
         assertEquals("COMPLETED", result.getStatus());
         verify(usersService, never()).addPointsToUser(any(), any());
@@ -252,10 +234,9 @@ public class GoalServiceTests {
     @Test
     public void completeGoal_notInProgress_doesNotChangeStatus() {
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = notCompletedGoalPersistence(1L, date, testUser);
-        goalRepository.save(goal);
+        userGoalStatusRepository.save(notCompletedGoalPersistence(1L, date, testUser));
 
-        GoalDTO result = goalService.completeGoal(1L, authentication);
+        UserGoalStatusDTO result = goalService.completeGoal(1L, authentication);
 
         assertEquals("NOT_COMPLETED", result.getStatus());
         verify(usersService, never()).addPointsToUser(any(), any());
@@ -269,18 +250,14 @@ public class GoalServiceTests {
     @Test(expected = GoalUnauthorizedException.class)
     public void completeGoal_differentUser_throwsException() {
         LocalDate date = LocalDate.now().minusDays(1);
-        
-        // Create another user
+
         UsersPersistence otherUser = new UsersPersistence();
         otherUser.setId(2L);
         otherUser.setEmail("other@test.com");
         usersRepository.save(otherUser);
 
-        // Create goal for other user
-        GoalPersistence goal = inProgressGoalPersistence(1L, date, otherUser);
-        goalRepository.save(goal);
+        userGoalStatusRepository.save(inProgressGoalPersistence(1L, date, otherUser));
 
-        // Try to complete with current user
         goalService.completeGoal(1L, authentication);
     }
 
@@ -291,10 +268,9 @@ public class GoalServiceTests {
     @Test
     public void uncompleteGoal_valid_changesStatus() {
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = inProgressGoalPersistence(1L, date, testUser);
-        goalRepository.save(goal);
+        userGoalStatusRepository.save(inProgressGoalPersistence(1L, date, testUser));
 
-        GoalDTO result = goalService.uncompleteGoal(1L, authentication);
+        UserGoalStatusDTO result = goalService.uncompleteGoal(1L, authentication);
 
         assertEquals("NOT_COMPLETED", result.getStatus());
     }
@@ -302,10 +278,9 @@ public class GoalServiceTests {
     @Test
     public void uncompleteGoal_notInProgress_doesNotChangeStatus() {
         LocalDate date = LocalDate.now().minusDays(1);
-        GoalPersistence goal = completedGoalPersistence(1L, date, testUser);
-        goalRepository.save(goal);
+        userGoalStatusRepository.save(completedGoalPersistence(1L, date, testUser));
 
-        GoalDTO result = goalService.uncompleteGoal(1L, authentication);
+        UserGoalStatusDTO result = goalService.uncompleteGoal(1L, authentication);
 
         assertEquals("COMPLETED", result.getStatus());
     }
@@ -318,18 +293,15 @@ public class GoalServiceTests {
     @Test(expected = GoalUnauthorizedException.class)
     public void uncompleteGoal_differentUser_throwsException() {
         LocalDate date = LocalDate.now().minusDays(1);
-        
-        // Create another user
+
         UsersPersistence otherUser = new UsersPersistence();
         otherUser.setId(2L);
         otherUser.setEmail("other@test.com");
         usersRepository.save(otherUser);
 
-        // Create goal for other user
-        GoalPersistence goal = inProgressGoalPersistence(1L, date, otherUser);
-        goalRepository.save(goal);
+        userGoalStatusRepository.save(inProgressGoalPersistence(1L, date, otherUser));
 
-        // Try to uncomplete with current user
         goalService.uncompleteGoal(1L, authentication);
     }
 }
+

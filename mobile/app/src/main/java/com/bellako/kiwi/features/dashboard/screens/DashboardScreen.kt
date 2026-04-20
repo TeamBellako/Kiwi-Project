@@ -150,6 +150,7 @@ fun DashboardScreen(
                     DashboardScreen0_Hidden()
                 } else if (currentStateIndex <= 1) {
                     DashboardScreen1_Collapsed(
+                        goalsViewModel = goalsViewModel,
                         metricsState = metricsState!!,
                         isLoading = isLoading,
                         onCalendarViewClicked = {
@@ -383,6 +384,14 @@ fun DashboardModal_Preview(
     initialLayout: DashboardLayout = DashboardLayout.HIDDEN,
     nodesViewModel: NodesFakeViewModel = NodesFakeViewModel(),
     goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel(),
+    usersViewModel: UsersFakeViewModel =
+        UsersFakeViewModel(
+            UsersState(
+                validUsersDTO().email,
+                validUsersDTO().password,
+                validUsersDTO().registerDate,
+            ),
+        ),
 ) {
     val nav = rememberNavController()
     Kiwi_Theme {
@@ -394,10 +403,9 @@ fun DashboardModal_Preview(
                 Box(modifier = Modifier.padding(paddingValues)) {
                     MapScreen(
                         nodesViewModel = nodesViewModel,
-                        navController = nav,
                         goalsViewModel = goalsViewModel,
                         mapViewModel = MapViewModel(),
-                        notificationManager = NotificationManager(),
+                        usersViewModel = usersViewModel,
                     )
                     DashboardScreen(
                         usersViewModel =

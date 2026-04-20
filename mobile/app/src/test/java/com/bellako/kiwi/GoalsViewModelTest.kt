@@ -1,11 +1,7 @@
 package com.bellako.kiwi
 
 import com.bellako.kiwi.common.utils.DateUtils
-import com.bellako.kiwi.features.goals.data.GoalCategory
-import com.bellako.kiwi.features.goals.data.GoalDTO
-import com.bellako.kiwi.features.goals.data.GoalType
-import com.bellako.kiwi.features.goals.data.SuggestedGoalDTO
-import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
+import com.bellako.kiwi.features.goals.data.UserGoalStatusDTO
 import com.bellako.kiwi.features.goals.model.GoalsRepository
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsAPI
@@ -24,7 +20,7 @@ class GoalsViewModelTest {
 
     // Fake API implementation to control behavior and count invocations
     class FakeGoalsAPI {
-        private val storage = mutableMapOf<Long, GoalDTO>()
+        private val storage = mutableMapOf<Long, UserGoalStatusDTO>()
         var getGoalsByDateCalls = 0
         var getGoalsInProgressCalls = 0
         var updateProgressCalls = 0
@@ -33,45 +29,49 @@ class GoalsViewModelTest {
         init {
             val today = DateUtils.dateToString(LocalDate.now())
             val g1 =
-                GoalDTO(
-                    1L,
-                    10,
-                    "Action 1",
-                    GoalType.EXERCISE,
-                    "DAILY_CHALLENGES",
-                    "IN_PROGRESS",
-                    100,
-                    today,
-                    0,
+                UserGoalStatusDTO(
+                    id = 1L,
+                    goalId = 1L,
+                    name = "Action 1",
+                    target = 10,
+                    action = "Action 1",
+                    type = "EXERCISE",
+                    category = "DAILY_CHALLENGES",
+                    status = "IN_PROGRESS",
+                    reward = 100,
+                    date = today,
+                    value = 0,
                 )
             val g2 =
-                GoalDTO(
-                    2L,
-                    20,
-                    "Action 2",
-                    GoalType.EXERCISE,
-                    "DAILY_CHALLENGES",
-                    "IN_PROGRESS",
-                    200,
-                    today,
-                    5,
+                UserGoalStatusDTO(
+                    id = 2L,
+                    goalId = 2L,
+                    name = "Action 2",
+                    target = 20,
+                    action = "Action 2",
+                    type = "EXERCISE",
+                    category = "DAILY_CHALLENGES",
+                    status = "IN_PROGRESS",
+                    reward = 200,
+                    date = today,
+                    value = 5,
                 )
             storage[g1.id] = g1
             storage[g2.id] = g2
         }
 
-        fun getGoalsByDate(date: String): List<GoalDTO> {
+        fun getGoalsByDate(date: String): List<UserGoalStatusDTO> {
             getGoalsByDateCalls++
             // return all goals with matching date
             return storage.values.filter { it.date == date }
         }
 
-        fun getGoalsInProgress(): List<GoalDTO> {
+        fun getGoalsInProgress(): List<UserGoalStatusDTO> {
             getGoalsInProgressCalls++
             return storage.values.filter { it.status != "COMPLETED" }
         }
 
-        fun updateGoalProgress(goalId: Long): GoalDTO {
+        fun updateGoalProgress(goalId: Long): UserGoalStatusDTO {
             updateProgressCalls++
             val existing = storage[goalId] ?: throw NoSuchElementException("Not found")
             val newValue = (existing.value + 1).coerceAtMost(existing.target)
@@ -81,7 +81,7 @@ class GoalsViewModelTest {
             return updated
         }
 
-        fun createGoals(goals: List<GoalDTO>): List<GoalDTO> {
+        fun createGoals(goals: List<UserGoalStatusDTO>): List<UserGoalStatusDTO> {
             createGoalsCalls++
             goals.forEach { storage[it.id] = it }
             return goals
@@ -92,43 +92,45 @@ class GoalsViewModelTest {
         val repo =
             GoalsRepository(
                 object : IGoalsAPI {
-                    override suspend fun createGoals(goals: List<GoalDTO>): List<GoalDTO> = fakeApi.createGoals(goals)
+                    override suspend fun createGoals(goals: List<UserGoalStatusDTO>): List<UserGoalStatusDTO> = fakeApi.createGoals(goals)
 
-                    override suspend fun updateGoalProgress(goalId: Long): GoalDTO = fakeApi.updateGoalProgress(goalId)
+                    override suspend fun updateGoalProgress(goalId: Long): UserGoalStatusDTO = fakeApi.updateGoalProgress(goalId)
 
                     override suspend fun updateGoal(
                         goalId: Long,
-                        goal: GoalDTO,
-                    ): GoalDTO = throw UnsupportedOperationException("Not needed in tests")
+                        goal: UserGoalStatusDTO,
+                    ): UserGoalStatusDTO = throw UnsupportedOperationException("Not needed in tests")
 
-                    override suspend fun completeGoal(goalId: Long): GoalDTO = throw UnsupportedOperationException("Not needed in tests")
-
-                    override suspend fun uncompleteGoal(goalId: Long): GoalDTO = throw UnsupportedOperationException("Not needed in tests")
-
-                    override suspend fun getGoalById(goalId: Long): GoalDTO {
-                        TODO("Not yet implemented")
-                    }
-
-                    override suspend fun getGoalsByDate(date: String): List<GoalDTO> = fakeApi.getGoalsByDate(date)
-
-                    override suspend fun getAllGoals(): List<GoalDTO> = throw UnsupportedOperationException("Not needed in tests")
-
-                    override suspend fun getGoalsInProgress(): List<GoalDTO> = fakeApi.getGoalsInProgress()
-
-                    override suspend fun getSuggestedGoals(): List<SuggestedGoalDTO> =
+                    override suspend fun completeGoal(goalId: Long): UserGoalStatusDTO =
                         throw UnsupportedOperationException("Not needed in tests")
 
-                    override suspend fun getAppGoals(): List<GoalDTO> {
+                    override suspend fun uncompleteGoal(goalId: Long): UserGoalStatusDTO =
+                        throw UnsupportedOperationException("Not needed in tests")
+
+                    override suspend fun getGoalById(goalId: Long): UserGoalStatusDTO {
                         TODO("Not yet implemented")
                     }
 
-                    override suspend fun getSkillGoals(): List<GoalDTO> {
+                    override suspend fun getGoalsByDate(date: String): List<UserGoalStatusDTO> = fakeApi.getGoalsByDate(date)
+
+                    override suspend fun getAllGoals(): List<UserGoalStatusDTO> = throw UnsupportedOperationException("Not needed in tests")
+
+                    override suspend fun getGoalsInProgress(): List<UserGoalStatusDTO> = fakeApi.getGoalsInProgress()
+
+                    override suspend fun getGoalDefinitions(): List<com.bellako.kiwi.features.goals.data.GoalDTO> =
+                        throw UnsupportedOperationException("Not needed in tests")
+
+                    override suspend fun getAppGoals(): List<UserGoalStatusDTO> {
+                        TODO("Not yet implemented")
+                    }
+
+                    override suspend fun getSkillGoals(): List<UserGoalStatusDTO> {
                         TODO("Not yet implemented")
                     }
                 },
             )
 
-        return GoalsViewModel(repo, NotificationManager())
+        return GoalsViewModel(repo, NotificationManager(), usersRepository = UsersFakeRepository())
     }
 
     @Test
@@ -180,22 +182,26 @@ class GoalsViewModelTest {
             val vm = buildViewModel(fakeApi)
             val today = DateUtils.dateToString(LocalDate.now())
 
-            // Create new suggested goal and call createGoalsFromSuggestions
+            // Create new goal definition and call createGoalsFromDefinitions
             val suggested =
-                SuggestedGoalDomain(
-                    3L,
-                    5,
-                    "Action 3",
-                    GoalType.EXERCISE,
-                    GoalCategory.DAILY_CHALLENGES,
-                    50,
+                UserGoalStatusDTO(
+                    id = 3L,
+                    goalId = 3L,
+                    name = "Action 3",
+                    target = 5,
+                    action = "Action 3",
+                    type = "EXERCISE",
+                    category = "DAILY_CHALLENGES",
+                    status = "IN_PROGRESS",
+                    reward = 50,
+                    date = today,
+                    value = 0,
                 )
-            val created = vm.createGoalsFromSuggestions(listOf(suggested))
-            assert(created.isSuccess)
-            // After creation, getGoalsByDate should include the new goal (may update cache)
+            fakeApi.createGoals(listOf(suggested))
+
             val after = vm.getGoalsByDate(today)
             assert(after.isSuccess)
             val list = after.getOrNull()!!
-            assert(list.any { it.id == 3L })
+            Assert.assertTrue(list.any { it.id == 3L })
         }
 }

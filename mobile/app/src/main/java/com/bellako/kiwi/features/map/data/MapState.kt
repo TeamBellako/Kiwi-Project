@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import com.bellako.kiwi.R
 
 data class MapInfo(
+    val mapTitle: String = "MINDVEIL",
     val mapResourceId: Int = R.drawable.mindveil_4k,
     val maxZoom: Float = 8f,
     val backgroundColor: Color = Color.White,

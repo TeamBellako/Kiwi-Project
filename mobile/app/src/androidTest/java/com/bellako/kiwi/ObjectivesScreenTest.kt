@@ -42,7 +42,11 @@ class ObjectivesScreenTest {
 
         rule.setContent {
             Kiwi_Theme {
-                ObjectivesScreen(questsViewModel = questFakeViewModel, goalsFakeViewModel, focusedQuestId = focusedQuestId)
+                ObjectivesScreen(
+                    questsViewModel = questFakeViewModel,
+                    goalsViewModel = goalsFakeViewModel,
+                    focusedQuestId = focusedQuestId,
+                )
             }
         }
 

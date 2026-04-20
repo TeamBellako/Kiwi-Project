@@ -59,11 +59,13 @@ CREATE TABLE IF NOT EXISTS nodes (
   icon INT NOT NULL,
   cord_x FLOAT NOT NULL,
   cord_y FLOAT NOT NULL,
-  event_on_execution BIGINT NOT NULL,
   name VARCHAR(255) NOT NULL,
   display_name VARCHAR(255),
   map_id INT NOT NULL,
   is_first_node_of_map BOOLEAN DEFAULT FALSE,
+  on_execution_action VARCHAR(255),
+  on_execution_entity VARCHAR(255),
+  on_execution_entity_id INT,
   CONSTRAINT uq_nodes_name UNIQUE (name),
   CHECK (
     cord_x >= 0.0 AND cord_x <= 1.0
@@ -80,36 +82,62 @@ CREATE TABLE IF NOT EXISTS node_edges (
   CONSTRAINT fk_node_edges_to_node FOREIGN KEY (to_node_id) REFERENCES nodes(id) ON DELETE CASCADE
 );
 
--- Create goals table with a foreign key to users
+-- Drop and recreate goals-related tables to reset auto-increment and seed data.
+-- user_goal_status must be dropped first due to FK dependency on goals.
+DROP TABLE IF EXISTS user_goal_status;
+DROP TABLE IF EXISTS goals;
+
+-- Create goals table (goal definitions, formerly suggested_goals)
 CREATE TABLE IF NOT EXISTS goals (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    target BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
     action TEXT,
-    type VARCHAR(50) NOT NULL,
-    category VARCHAR(50) NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    reward INT NOT NULL,
-    date DATE NOT NULL,
-    "value" BIGINT NOT NULL,
-
-    -- Foreign key to users table
-    user_id BIGINT NOT NULL,
-    CONSTRAINT fk_goals_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- Add index for efficient queries by user and date
-CREATE INDEX IF NOT EXISTS idx_user_date ON goals (user_id, date);
-
--- Create suggested_goals table
-CREATE TABLE IF NOT EXISTS suggested_goals (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    target BIGINT NOT NULL,
-    action TEXT,
+    target INT NOT NULL,
     type VARCHAR(50) NOT NULL,
     category VARCHAR(50) NOT NULL,
     reward INT NOT NULL
 );
 
+-- Seed goal definitions used by tests (IDs: 1=exercise, 2=app, 3=skill)
+INSERT INTO goals (name, action, target, type, category, reward)
+    VALUES ('Exercise Goal', 'Exercise for 30 minutes', 30, 'EXERCISE', 'DAILY_CHALLENGES', 10);
+INSERT INTO goals (name, action, target, type, category, reward)
+    VALUES ('App Usage Goal', 'Improve Java skills', 100, 'PRODUCTIVITY', 'APP_USAGE', 50);
+INSERT INTO goals (name, action, target, type, category, reward)
+    VALUES ('Skill Goal', 'Improve Java skills', 100, 'PRODUCTIVITY', 'SKILL', 50);
+
+-- Create user_goal_status table (per-user goal tracking, formerly goals)
+CREATE TABLE IF NOT EXISTS user_goal_status (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    goal_id BIGINT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    date DATE NOT NULL,
+    value INT NOT NULL,
+    CONSTRAINT fk_ugs_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ugs_goals FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tips (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    text VARCHAR(255) NOT NULL,
+    read_more_url VARCHAR(255)
+);
+
+INSERT INTO tips (title, text, read_more_url) 
+    VALUES ('Pomodoro Timer', 'Just work, bro', 'https://www.todoist.com/es/productivity-methods/pomodoro-technique');
+    
+CREATE TABLE IF NOT EXISTS incidences (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS user_incidences (
+    user_id BIGINT NOT NULL,
+    incidence_id BIGINT NOT NULL,
+    value BOOLEAN NOT NULL DEFAULT FALSE
+);
 
 
 

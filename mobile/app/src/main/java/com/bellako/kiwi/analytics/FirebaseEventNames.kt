@@ -1,6 +1,13 @@
 package com.bellako.kiwi.analytics
 
 object FirebaseEventNames {
+    // Pirate metrics
+    const val USER_ACQUIRED = "USER_ACQUIRED"
+    const val USER_ACTIVATED = "USER_ACTIVATED"
+    const val USER_RETAINED = "USER_RETAINED"
+    const val USER_REVENUE = "USER_REVENUE"
+    const val USER_REFERRED = "USER_REFERRED"
+
     // Retention
     const val APP_OPENED = "APP_OPENED"
     const val PERMISSION_GRANTED = "PERMISSION_GRANTED"

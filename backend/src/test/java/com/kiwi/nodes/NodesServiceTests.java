@@ -6,6 +6,7 @@ import com.kiwi.features.nodes.data.NodeStatus;
 import com.kiwi.features.nodes.exceptions.NodeInaccessibleException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
 import org.junit.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import static org.junit.jupiter.api.Assertions.*;
 import static com.kiwi.nodes.NodesTestFactory.*;
 
@@ -21,7 +22,7 @@ public class NodesServiceTests {
             new NodesProgressService();
 
     private final NodesService service =
-            new NodesService(nodeRepo, statusRepo, progress);
+            new NodesService(nodeRepo, statusRepo, progress, event -> {});
 
     private final Long userId = 1L;
 
@@ -57,7 +58,7 @@ public class NodesServiceTests {
         statusRepo.saveUserStatus(lockedStatus(userId, node.getId()));
 
         var result = service.unlockNode(userId, node.getId());
-        assertEquals(NodeStatus.OPEN.name(), result.getStatus());
+        assertEquals(NodeStatus.OPEN.name(), result.get(0).getStatus());
     }
 
     @Test(expected = NodeInaccessibleException.class)

@@ -6,7 +6,7 @@ import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.GoalsListState
-import com.bellako.kiwi.features.goals.data.SuggestedGoalDomain
+import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,34 +27,38 @@ class GoalsFakeViewModel(
     @Suppress("MagicNumber")
     private val initialGoals =
         listOf(
-            GoalDomain(
-                1,
-                10,
-                "Meditate for at least 10 minutes",
-                GoalType.MEDITATION,
-                GoalCategory.DAILY_CHALLENGES,
-                GoalStatus.IN_PROGRESS,
-                150,
+            UserGoalStatusDomain(
+                id = 1,
+                goalId = 1,
+                name = "Meditate for at least 10 minutes",
+                target = 10,
+                action = "Meditate for at least 10 minutes",
+                type = GoalType.MEDITATION,
+                category = GoalCategory.DAILY_CHALLENGES,
+                status = GoalStatus.IN_PROGRESS,
+                reward = 150,
                 value = 0,
             ),
-            GoalDomain(
-                2,
-                30,
-                "Exercise for 30 minutes",
-                GoalType.EXERCISE,
-                GoalCategory.DAILY_CHALLENGES,
-                GoalStatus.IN_PROGRESS,
-                200,
+            UserGoalStatusDomain(
+                id = 2,
+                goalId = 2,
+                name = "Exercise for 30 minutes",
+                target = 30,
+                action = "Exercise for 30 minutes",
+                type = GoalType.EXERCISE,
+                category = GoalCategory.DAILY_CHALLENGES,
+                status = GoalStatus.IN_PROGRESS,
+                reward = 200,
                 value = 10,
             ),
         )
 
-    private val fakeGoalsMap: MutableMap<Long, GoalDomain> =
+    private val fakeGoalsMap: MutableMap<Long, UserGoalStatusDomain> =
         initialGoals.associateBy { it.id }.toMutableMap()
 
     // ---------------------------------------------------------------------------------------------
 
-    override suspend fun createGoalsFromSuggestions(suggestedGoals: List<SuggestedGoalDomain>): Result<Unit> =
+    override suspend fun createGoalsFromDefinitions(goalDefinitions: List<GoalDomain>): Result<Unit> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -63,7 +67,7 @@ class GoalsFakeViewModel(
             Result.success(Unit)
         }
 
-    override suspend fun updateGoalProgress(goalId: Long): Result<GoalDomain> =
+    override suspend fun updateGoalProgress(goalId: Long): Result<UserGoalStatusDomain> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -81,7 +85,7 @@ class GoalsFakeViewModel(
             Result.success(updated)
         }
 
-    override suspend fun updateGoal(goal: GoalDomain): Result<GoalDomain> =
+    override suspend fun updateGoal(goal: UserGoalStatusDomain): Result<UserGoalStatusDomain> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -119,7 +123,7 @@ class GoalsFakeViewModel(
             Result.success(Unit)
         }
 
-    override suspend fun getGoalsByDate(date: String): Result<List<GoalDomain>> =
+    override suspend fun getGoalsByDate(date: String): Result<List<UserGoalStatusDomain>> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -138,7 +142,7 @@ class GoalsFakeViewModel(
             Result.success(Unit)
         }
 
-    override suspend fun getGoalsInProgress(): Result<List<GoalDomain>> =
+    override suspend fun getGoalsInProgress(): Result<List<UserGoalStatusDomain>> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -148,7 +152,7 @@ class GoalsFakeViewModel(
             Result.success(fakeGoalsMap.values.filter { it.status != GoalStatus.COMPLETED })
         }
 
-    override suspend fun getSuggestedGoals(): Result<List<SuggestedGoalDomain>> =
+    override suspend fun getGoalDefinitions(): Result<List<GoalDomain>> =
         if (fakeError) {
             handleError(fakeException)
             Result.failure(fakeException)
@@ -160,4 +164,6 @@ class GoalsFakeViewModel(
     override suspend fun checkAndNotifyGoals() {
         // Implementación fake - no hace nada
     }
+
+    override suspend fun getDailyGoalsProgress(date: String): Float = 0.2F
 }

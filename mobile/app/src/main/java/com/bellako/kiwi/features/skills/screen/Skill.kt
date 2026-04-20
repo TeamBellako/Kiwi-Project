@@ -98,7 +98,7 @@ fun SkillComponent(
                         .padding(start = getResponsiveSizeHeight(20.dp)),
             ) {
                 Kiwi_Image(
-                    skillIcon(skill.icon),
+                    skill.icon,
                     "Skill Icon",
                     modifier =
                         Modifier
@@ -227,14 +227,6 @@ fun skillDecoration(
         }
     } else {
         R.drawable.skill_deco
-    }
-
-@DrawableRes
-fun skillIcon(skillIcon: Int): Int =
-    when (skillIcon) {
-        1 -> R.drawable.ic_skill_1
-        2 -> R.drawable.ic_skill_2
-        else -> R.drawable.ic_skill_3
     }
 
 fun skillStatusText(isCooldown: Boolean): String =

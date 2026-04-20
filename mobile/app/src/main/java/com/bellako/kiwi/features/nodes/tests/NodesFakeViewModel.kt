@@ -84,11 +84,12 @@ class NodesFakeViewModel(
                         price = 0,
                         cordX = 0f,
                         cordY = 0f,
-                        eventOnExecution = 0,
                         name = "Node $connectedId",
                         displayName = "Node $connectedId",
                         connectedNodeIds = emptyList(),
                         mapId = 0,
+                        onExecutionEvent = "",
+                        onExecutionEntityId = 0,
                     )
                 currentNodes[connectedId] = newNode
             }

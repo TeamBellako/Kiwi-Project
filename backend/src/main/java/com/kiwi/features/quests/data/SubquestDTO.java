@@ -9,4 +9,6 @@ public class SubquestDTO {
     private int experience;
     private int order;
     private String status;
+    private String onCompletedEvent;
+    private int onCompletedEntityId;
 }

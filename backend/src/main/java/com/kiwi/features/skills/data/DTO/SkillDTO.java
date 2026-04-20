@@ -9,7 +9,7 @@ public class SkillDTO {
     private String name;
     private String description;
     private String quote;
-    private int icon;
+    private String type;
 
     private String cooldownType;
     private Long cooldownGoalId;

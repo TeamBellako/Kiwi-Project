@@ -258,21 +258,14 @@ fun NodeAction(
     onUnlockNode: (Long) -> Unit,
     onCompleteNode: (Long) -> Unit,
     onRetryNode: (Long) -> Unit,
+    currentPoints: Int = 0,
     modifier: Modifier = Modifier,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val hasName = node.displayName.isNotEmpty()
 
- /*   var heightPx by remember { mutableIntStateOf(0) }
-    val density = LocalDensity.current
-
-    val offsetModifier =
-        if (heightPx > 0) {
-            val halfHeightDp = with(density) { (heightPx / 2).toDp() }
-            Modifier.offset(y = verticalOffset + halfHeightDp)
-        } else {
-            Modifier
-        }*/
+    val isBlankNode = node.onExecutionEvent == "_"
+    if (isBlankNode && node.status != NodeStatus.LOCKED) return
 
     Column(
         modifier = modifier,
@@ -285,7 +278,7 @@ fun NodeAction(
             contentAlignment = Alignment.Center,
         ) {
             Kiwi_Image(
-                if (hasName)R.drawable.node_button_big else R.drawable.node_button_small,
+                if (hasName) R.drawable.node_button_big else R.drawable.node_button_small,
                 "Node action background",
                 modifier =
                     Modifier
@@ -306,23 +299,26 @@ fun NodeAction(
                     )
                 }
                 when (node.status) {
-                    NodeStatus.LOCKED ->
-                        UnlockButton("Unlock") {
+                    NodeStatus.LOCKED -> {
+                        UnlockButton("Unlock", currentPoints >= node.price) {
                             onUnlockNode(
                                 node.id,
                             )
                         }
+                    }
 
-                    NodeStatus.OPEN ->
+                    NodeStatus.OPEN -> {
                         PlayButton("Play") {
                             onCompleteNode(node.id)
                         }
+                    }
 
-                    NodeStatus.COMPLETED ->
+                    NodeStatus.COMPLETED -> {
                         PlayButton("Replay") {
                             onRetryNode(node.id)
                             replayFirebaseEvent(node.id)
                         }
+                    }
 
                     else -> {}
                 }
@@ -360,7 +356,7 @@ fun NodeAction(
                                     fontWeight = FontWeight.Bold,
                                 ),
                         ) {
-                            append(node.price.toString())
+                            append("$currentPoints/${node.price}")
                         }
                     }
 
@@ -435,8 +431,11 @@ private fun nodeIcon(
     nodeIcon: Int,
 ): Int =
     when (nodeStatus) {
-        NodeStatus.LOCKED -> R.drawable.node_locked
-        NodeStatus.OPEN ->
+        NodeStatus.LOCKED -> {
+            R.drawable.node_locked
+        }
+
+        NodeStatus.OPEN -> {
             when (nodeIcon) {
                 1 -> R.drawable.node_main_quest
                 2 -> R.drawable.node_side_quest
@@ -444,8 +443,15 @@ private fun nodeIcon(
                 4 -> R.drawable.node_tip
                 else -> R.drawable.node_base
             }
-        NodeStatus.COMPLETED -> R.drawable.node_completed
-        else -> R.drawable.node_blocked
+        }
+
+        NodeStatus.COMPLETED -> {
+            R.drawable.node_completed
+        }
+
+        else -> {
+            R.drawable.node_blocked
+        }
     }
 
 fun nodeToScreen(
@@ -514,7 +520,6 @@ fun Node_Preview() {
                         0.65f,
                         3,
                         100,
-                        4,
                         "node3",
                         "VIGILARIS CITY",
                         listOf(4L),
@@ -539,6 +544,7 @@ fun Node_Preview() {
                         },
                         onRetryNode = { id ->
                         },
+                        currentPoints = 50,
                     )
                 }
             }

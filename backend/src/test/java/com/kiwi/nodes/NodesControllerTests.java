@@ -23,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,8 +61,8 @@ public class NodesControllerTests {
 
         when(nodesService.getNodesForUser(1L))
                 .thenReturn(List.of(
-                        new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, 1L, "node1", "Node 1", List.of(2L), 0, true),
-                        new NodesDTO(2L, NodeStatus.LOCKED.name(), 0, 120, 0.7f, 0.25f, 4L, "node2", "Node 2", List.of(), 0, false)
+                        new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, "node1", "Node 1", List.of(2L), 0, true, "", 0),
+                        new NodesDTO(2L, NodeStatus.LOCKED.name(), 0, 120, 0.7f, 0.25f, "node2", "Node 2", List.of(), 0, false, "", 0)
                 ));
 
         mockMvc.perform(get(baseAPIUrl)
@@ -77,9 +78,11 @@ public class NodesControllerTests {
                     setId(1L);
                     setEmail("test@test.com");
                 }}));
-
+        
+        List<NodesDTO> mockResult = new ArrayList<>();
+        mockResult.add(new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, "node1", "Node 1", List.of(2L), 0, true, "", 0));
         when(nodesService.unlockNode(1L, 1L))
-                .thenReturn(new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, 1L, "node1", "Node 1", List.of(2L), 0, true));
+                .thenReturn(mockResult);
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/1/unlock", null)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -96,7 +99,7 @@ public class NodesControllerTests {
                 }}));
 
         when(nodesService.completeNode(1L, 2L))
-                .thenReturn(List.of(new NodesDTO(3L, NodeStatus.LOCKED.name(), 0, 150, 0.8f, 0.4f, 5L, "node3", "Node 3", List.of(),0, false)));
+                .thenReturn(List.of(new NodesDTO(3L, NodeStatus.LOCKED.name(), 0, 150, 0.8f, 0.4f, "node3", "Node 3", List.of(),0, false, "", 0)));
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/2/complete", null)
                         .contentType(MediaType.APPLICATION_JSON))

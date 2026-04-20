@@ -11,12 +11,10 @@ import lombok.*;
 @ToString
 public class GoalDTO {
     private Long id;
-    private Long target;
+    private String name;
     private String action;
+    private Integer target;
     private String type;
     private String category;
-    private String status;
     private Integer reward;
-    private String date;
-    private Long value;
 }

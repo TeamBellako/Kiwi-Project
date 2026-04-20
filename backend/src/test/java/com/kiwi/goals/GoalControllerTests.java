@@ -5,7 +5,7 @@ import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.goals.controllers.GoalController;
 import com.kiwi.features.goals.controllers.GoalService;
-import com.kiwi.features.goals.data.GoalDTO;
+import com.kiwi.features.goals.data.UserGoalStatusDTO;
 import com.kiwi.features.goals.exceptions.GoalNotFoundException;
 import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
 import com.kiwi.features.users.controllers.CustomUserDetailsService;
@@ -52,8 +52,8 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void createGoals_valid_returnsCreated() throws Exception {
-        List<GoalDTO> request = List.of(inProgressGoalDTO(1L));
-        List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
+        List<UserGoalStatusDTO> request = List.of(inProgressGoalDTO(1L));
+        List<UserGoalStatusDTO> response = List.of(inProgressGoalDTO(1L));
 
         when(goalService.createGoals(any(), any())).thenReturn(response);
 
@@ -66,7 +66,7 @@ public class GoalControllerTests {
     @WithMockUser(username = "test@test.com")
     public void getGoalById_valid_returnsOk() throws Exception {
         Long goalId = 1L;
-        GoalDTO response = inProgressGoalDTO(goalId);
+        UserGoalStatusDTO response = inProgressGoalDTO(goalId);
 
         when(goalService.getGoalById(eq(goalId), any())).thenReturn(response);
 
@@ -105,7 +105,7 @@ public class GoalControllerTests {
     @WithMockUser(username = "test@test.com")
     public void getGoalsByDate_valid_returnsOk() throws Exception {
         String date = LocalDate.now().toString();
-        List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
+        List<UserGoalStatusDTO> response = List.of(inProgressGoalDTO(1L));
 
         when(goalService.getGoalsByDate(eq(date), any())).thenReturn(response);
 
@@ -118,7 +118,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void getAllGoals_valid_returnsOk() throws Exception {
-        List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
+        List<UserGoalStatusDTO> response = List.of(inProgressGoalDTO(1L));
 
         when(goalService.getAllGoals(any())).thenReturn(response);
 
@@ -130,7 +130,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void getInProgressGoals_valid_returnsOk() throws Exception {
-        List<GoalDTO> response = List.of(inProgressGoalDTO(1L));
+        List<UserGoalStatusDTO> response = List.of(inProgressGoalDTO(1L));
 
         when(goalService.getGoalsInProgress(any())).thenReturn(response);
 
@@ -142,7 +142,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void getAppGoals_valid_returnsOk() throws Exception {
-        List<GoalDTO> response = List.of(appGoalDTO(1L));
+        List<UserGoalStatusDTO> response = List.of(appGoalDTO(1L));
 
         when(goalService.getAppGoals(any())).thenReturn(response);
 
@@ -154,7 +154,7 @@ public class GoalControllerTests {
     @Test
     @WithMockUser(username = "test@test.com")
     public void getSkillGoals_valid_returnsOk() throws Exception {
-        List<GoalDTO> response = List.of(skillGoalDTO(1L));
+        List<UserGoalStatusDTO> response = List.of(skillGoalDTO(1L));
 
         when(goalService.getSkillGoals(any())).thenReturn(response);
 
@@ -167,7 +167,7 @@ public class GoalControllerTests {
     @WithMockUser(username = "test@test.com")
     public void completeGoal_valid_returnsOk() throws Exception {
         Long goalId = 1L;
-        GoalDTO response = completedGoalDTO(goalId);
+        UserGoalStatusDTO response = completedGoalDTO(goalId);
 
         when(goalService.completeGoal(eq(goalId), any())).thenReturn(response);
 
@@ -206,7 +206,7 @@ public class GoalControllerTests {
     @WithMockUser(username = "test@test.com")
     public void uncompleteGoal_valid_returnsOk() throws Exception {
         Long goalId = 1L;
-        GoalDTO response = notCompletedGoalDTO(goalId);
+        UserGoalStatusDTO response = notCompletedGoalDTO(goalId);
 
         when(goalService.uncompleteGoal(eq(goalId), any())).thenReturn(response);
 

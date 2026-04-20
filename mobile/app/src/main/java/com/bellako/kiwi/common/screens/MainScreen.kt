@@ -4,7 +4,18 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -12,8 +23,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -35,15 +49,23 @@ import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.conversations.data.ConversationType
+import com.bellako.kiwi.features.conversations.model.ConversationViewModel
+import com.bellako.kiwi.features.conversations.screens.ConversationScreen
+import com.bellako.kiwi.features.conversations.screens.DialogueScreen
 import com.bellako.kiwi.features.dashboard.screens.DashboardScreen
+import com.bellako.kiwi.features.goals.data.IGoal
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.screens.GoalNotificationType
+import com.bellako.kiwi.features.goals.screens.GoalsModal
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
+import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
 import com.bellako.kiwi.features.objectives.ObjectivesScreen
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityViewModel
@@ -56,6 +78,8 @@ import com.bellako.kiwi.features.settings.screens.SettingsScreen
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
 import com.bellako.kiwi.features.skills.model.SkillsViewModel
 import com.bellako.kiwi.features.skills.screen.SkillsScreen
+import com.bellako.kiwi.features.tips.model.TipsViewModel
+import com.bellako.kiwi.features.tips.screen.TipScreen
 import com.bellako.kiwi.features.users.model.UsersViewModel
 import com.bellako.kiwi.features.users.screens.LogInScreen
 import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
@@ -63,6 +87,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 
+@Suppress("LongParameterList")
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainScreen(
@@ -76,6 +101,8 @@ fun MainScreen(
     skillsViewModel: SkillsViewModel = hiltViewModel(),
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     notificationManager: NotificationManager,
+    conversationViewModel: ConversationViewModel = hiltViewModel(),
+    tipsViewModel: TipsViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -103,6 +130,8 @@ fun MainScreen(
             skillsViewModel = skillsViewModel,
             appBarViewModel = appBarViewModel,
             notificationManager = notificationManager,
+            conversationViewModel = conversationViewModel,
+            tipsViewModel = tipsViewModel,
         )
     }
 }
@@ -116,6 +145,7 @@ private fun AppScreenWrapper(screen: @Composable () -> Unit) {
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
+@Suppress("LongParameterList", "ComplexMethod", "MagicNumber", "LongMethod")
 private fun AppScreen(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
@@ -128,6 +158,8 @@ private fun AppScreen(
     skillsViewModel: SkillsViewModel,
     appBarViewModel: AppBarViewModel,
     notificationManager: NotificationManager,
+    conversationViewModel: ConversationViewModel,
+    tipsViewModel: TipsViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -135,6 +167,11 @@ private fun AppScreen(
     val isLoginScreen = isLoginScreen(route)
 
     val showDashboard = route == ScreenRoutes.HOME
+
+    val activeConversation by conversationViewModel.active.collectAsState()
+    val isConversationVisible by conversationViewModel.isVisible.collectAsState()
+
+    val isTipVisible by tipsViewModel.isVisible.collectAsState()
 
     LaunchedEffect(notificationManager) {
         notificationManager.notifications.collect { event ->
@@ -144,62 +181,179 @@ private fun AppScreen(
                         appBarViewModel.onNewContent(ScreenRoutes.OBJECTIVES)
                     }
                 }
+
                 is NotificationEvent.Skill -> {
                     appBarViewModel.onNewContent(ScreenRoutes.SKILLS)
                 }
+
                 else -> {
                 }
             }
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            if (!isLoginScreen && isLoginCompleted) {
-                AppBarScreen(
-                    navController = navController,
-                    appBarViewModel = appBarViewModel,
-                )
-            }
-        },
-        content = { paddingValues ->
-            Box(Modifier.padding(paddingValues)) {
-                AppNavHost(
-                    navController = navController,
-                    usersViewModel = usersViewModel,
-                    settingsViewModel = settingsViewModel,
-                    personalityViewModel = personalityViewModel,
-                    nodesViewModel = nodesViewModel,
-                    questsViewModel = questsViewModel,
-                    goalsViewModel = goalsViewModel,
-                    skillsViewModel = skillsViewModel,
-                    notificationManager = notificationManager,
-                )
+    val goalsModalRequest = remember { mutableStateOf<Pair<GoalNotificationType, List<IGoal>>?>(null) }
 
-                if (showDashboard) {
-                    DashboardScreen(
-                        usersViewModel = usersViewModel,
-                        metricsViewModel = metricsViewModel,
-                        personalityViewModel = personalityViewModel,
-                        goalsViewModel = goalsViewModel,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            bottomBar = {
+                if (!isLoginScreen && isLoginCompleted) {
+                    AppBarScreen(
+                        navController = navController,
+                        appBarViewModel = appBarViewModel,
                     )
                 }
-
-                if (!isLoginScreen && isLoginCompleted) {
-                    Kiwi_LoggedInScreen(
+            },
+            content = { paddingValues ->
+                Box(Modifier.padding(paddingValues)) {
+                    AppNavHost(
+                        navController = navController,
+                        usersViewModel = usersViewModel,
                         settingsViewModel = settingsViewModel,
                         personalityViewModel = personalityViewModel,
+                        nodesViewModel = nodesViewModel,
+                        questsViewModel = questsViewModel,
+                        goalsViewModel = goalsViewModel,
+                        skillsViewModel = skillsViewModel,
+                    )
+
+                    if (showDashboard && !isConversationVisible) {
+                        DashboardScreen(
+                            usersViewModel = usersViewModel,
+                            metricsViewModel = metricsViewModel,
+                            personalityViewModel = personalityViewModel,
+                            goalsViewModel = goalsViewModel,
+                        )
+                    }
+
+                    if (!isLoginScreen && isLoginCompleted) {
+                        Kiwi_LoggedInScreen(
+                            settingsViewModel = settingsViewModel,
+                            personalityViewModel = personalityViewModel,
+                        )
+                    }
+
+                    LaunchedEffect(isLoginCompleted) {
+                        if (isLoginCompleted) {
+                            skillsViewModel.onUserLoggedIn()
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isConversationVisible,
+                        enter =
+                            slideInVertically(
+                                initialOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        exit =
+                            slideOutVertically(
+                                targetOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                    ) {
+                        activeConversation?.let { conversation ->
+                            Box(modifier = Modifier.matchParentSize()) {
+                                if (conversation.type == ConversationType.SMALL) {
+                                    DialogueScreen(
+                                        conversation = conversation,
+                                        viewModel = conversationViewModel,
+                                    )
+                                } else {
+                                    ConversationScreen(
+                                        conversation = conversation,
+                                        viewModel = conversationViewModel,
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    TipModal(isTipVisible, tipsViewModel)
+                }
+            },
+        )
+
+        // Overlay global de notificaciones — único colector, siempre activo
+        if (!isLoginScreen && isLoginCompleted) {
+            NotificationOverlay(
+                notificationManager = notificationManager,
+                onGoalClick = { type, goals ->
+                    goalsModalRequest.value = type to goals
+                    notificationManager.dismissCurrent()
+                },
+                onQuestClick = { type, quest, subquestId ->
+                    if (type != QuestNotificationType.QUEST_COMPLETED) {
+                        navController.navigate("OBJECTIVES/${quest.id}")
+                    }
+                    notificationManager.dismissCurrent()
+                },
+                onSkillClick = { _, skill ->
+                    navController.navigate("SKILLS/${skill.id}")
+                    notificationManager.dismissCurrent()
+                },
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .zIndex(10f),
+            )
+
+            goalsModalRequest.value?.let { (type, goals) ->
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .zIndex(11f),
+                ) {
+                    GoalsModal(
+                        goalModalType = type,
+                        goals = goals,
+                        goalsViewModel = goalsViewModel,
+                        onDismiss = { goalsModalRequest.value = null },
                     )
                 }
-
-                LaunchedEffect(isLoginCompleted) {
-                    if (isLoginCompleted) {
-                        skillsViewModel.onUserLoggedIn()
-                    }
-                }
             }
-        },
-    )
+        }
+    }
+}
+
+@Composable
+private fun TipModal(
+    isTipVisible: Boolean,
+    tipsViewModel: TipsViewModel,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        AnimatedVisibility(
+            visible = isTipVisible,
+            enter = fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.7f)),
+            )
+        }
+
+        AnimatedVisibility(
+            visible = isTipVisible,
+            enter =
+                scaleIn(
+                    initialScale = 0.6f,
+                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+            exit =
+                scaleOut(
+                    targetScale = 0.3f,
+                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+        ) {
+            TipScreen(tipsViewModel)
+        }
+    }
 }
 
 private fun isLoginScreen(route: String?): Boolean =
@@ -221,7 +375,6 @@ fun AppNavHost(
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
-    notificationManager: NotificationManager,
 ) {
     NavHost(
         navController = navController,
@@ -286,16 +439,18 @@ fun AppNavHost(
                 MapScreen(
                     nodesViewModel = nodesViewModel,
                     goalsViewModel = goalsViewModel,
-                    notificationManager = notificationManager,
-                    navController = navController,
                     mapViewModel = hiltViewModel(),
+                    usersViewModel = usersViewModel,
                 )
             }
         }
 
         composable(ScreenRoutes.OBJECTIVES) {
             AppScreenWrapper {
-                ObjectivesScreen(questsViewModel = questsViewModel, goalsViewModel = goalsViewModel)
+                ObjectivesScreen(
+                    questsViewModel = questsViewModel,
+                    goalsViewModel = goalsViewModel,
+                )
             }
         }
 
@@ -344,7 +499,9 @@ fun AppNavHost(
         composable(ScreenRoutes.WIP) {
             AppScreenWrapper {
                 Kiwi_Music_Home()
-                WIPModalScreen()
+                WIPModalScreen(
+                    navController = navController,
+                )
             }
         }
     }

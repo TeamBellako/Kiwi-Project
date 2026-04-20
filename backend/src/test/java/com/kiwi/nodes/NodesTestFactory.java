@@ -11,7 +11,6 @@ public class NodesTestFactory {
         n.setPrice(0);
         n.setCordX(0);
         n.setCordY(0);
-        n.setEventOnExecution(0L);
         n.setName("Node"+nodeId);
         n.setMapId(mapId);
         return n;
@@ -66,12 +65,13 @@ public class NodesTestFactory {
                 100,
                 0f,
                 0f,
-                null,
                 "node" + id,
                 "Node " + id,
                 List.of(),
                 0,
-                true
+                true,
+                "",
+                0
         );
     }
 }

@@ -44,7 +44,7 @@ public class NodesController {
     }
 
     @PostMapping("/{nodeId}/unlock")
-    public ResponseEntity<NodesDTO> unlockNode(
+    public ResponseEntity<List<NodesDTO>> unlockNode(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long nodeId
     ) {

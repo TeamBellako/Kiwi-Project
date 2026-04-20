@@ -31,6 +31,8 @@ object QuestsTestFactory {
                     subquest(2, "Objective 2", SubquestStatus.COMPLETED),
                     subquest(3, "Objective 3", SubquestStatus.ACTIVE),
                 ),
+            "_",
+            0,
         )
 
     fun questWithFourSubquests(): QuestDomain =
@@ -48,6 +50,8 @@ object QuestsTestFactory {
                     subquest(6, "Objective 3", SubquestStatus.ACTIVE),
                     subquest(7, "Objective 4", SubquestStatus.LOCKED),
                 ),
+            "_",
+            0,
         )
 
     fun questCompleted(): QuestDomain =
@@ -62,6 +66,8 @@ object QuestsTestFactory {
                 listOf(
                     subquest(8, "Objective 1", SubquestStatus.COMPLETED),
                 ),
+            "_",
+            0,
         )
 
     fun newQuest(): QuestDomain =
@@ -78,6 +84,8 @@ object QuestsTestFactory {
                     subquest(10, "Objective 2", SubquestStatus.LOCKED),
                     subquest(11, "Objective 3", SubquestStatus.LOCKED),
                 ),
+            "_",
+            0,
         )
 
     private fun subquest(
@@ -91,5 +99,7 @@ object QuestsTestFactory {
             experience = 50,
             order = id,
             status = status,
+            onCompletedEvent = "_",
+            onCompletedEntityId = 0,
         )
 }
