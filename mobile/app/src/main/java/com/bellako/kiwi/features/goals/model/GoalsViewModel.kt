@@ -74,6 +74,8 @@ class GoalsViewModel
 
                 // Mantener fecha de cache actualizada
                 cacheDate = getCurrentDate()
+
+                EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
             }
         }
 
@@ -181,8 +183,6 @@ class GoalsViewModel
                 val updatedDomain = UserGoalStatusDataMapper.toDomain(updatedDTO)
 
                 updateGoalInCache(updatedDomain)
-
-                EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
 
                 Result.success(updatedDomain)
             } else {
