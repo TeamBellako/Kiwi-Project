@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -76,6 +78,23 @@ fun DashboardScreen2_Expanded(
         }
     }
 
+    val animatedDailyGoalProgress by animateFloatAsState(
+        targetValue = dailyGoalProgress,
+        animationSpec = tween(durationMillis = 600),
+        label = "dailyGoalProgress",
+    )
+
+    var appUsageProgress by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(metricsState) {
+        appUsageProgress = metricsState.getAppUsageProgress()
+    }
+
+    val animatedAppUsageProgress by animateFloatAsState(
+        targetValue = appUsageProgress,
+        animationSpec = tween(durationMillis = 600),
+        label = "appUsageProgress",
+    )
+
     ComposableEngagementMeasuring("expanded")
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -103,8 +122,8 @@ fun DashboardScreen2_Expanded(
             @Suppress("MagicNumber")
             CurrentDayIndicator(
                 getResponsiveSizeHeight(180.dp),
-                dailyGoalProgress,
-                metricsState.getAppUsageProgress(),
+                animatedDailyGoalProgress,
+                animatedAppUsageProgress,
             )
 
             CalendarWeekView(

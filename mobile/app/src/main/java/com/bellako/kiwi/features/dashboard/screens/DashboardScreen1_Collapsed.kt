@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -75,6 +77,23 @@ private fun CollapsedSummaryCard(
         }
     }
 
+    val animatedDailyGoalProgress by animateFloatAsState(
+        targetValue = dailyGoalProgress,
+        animationSpec = tween(durationMillis = 600),
+        label = "dailyGoalProgress",
+    )
+
+    var appUsageProgress by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(metricsState) {
+        appUsageProgress = metricsState.getAppUsageProgress()
+    }
+
+    val animatedAppUsageProgress by animateFloatAsState(
+        targetValue = appUsageProgress,
+        animationSpec = tween(durationMillis = 600),
+        label = "appUsageProgress",
+    )
+
     Box(
         modifier =
             Modifier
@@ -91,8 +110,8 @@ private fun CollapsedSummaryCard(
                 @Suppress("MagicNumber")
                 CurrentDayIndicator(
                     getResponsiveSizeHeight(100.dp),
-                    dailyGoalProgress,
-                    metricsState.getAppUsageProgress(),
+                    animatedDailyGoalProgress,
+                    animatedAppUsageProgress,
                 )
             }
             Box(
