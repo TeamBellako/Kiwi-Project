@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS enemy_skill (
         ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS combat_config (
+CREATE TABLE IF NOT EXISTS combat_configs (
 	id BIGINT AUTO_INCREMENT PRIMARY KEY,
 	enemy_id BIGINT NOT NULL,
 	time_limit INT,	
