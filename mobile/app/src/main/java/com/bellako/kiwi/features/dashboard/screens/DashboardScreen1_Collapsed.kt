@@ -14,12 +14,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.metrics.data.MetricsState
@@ -63,6 +66,13 @@ private fun CollapsedSummaryCard(
     var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(metricsState) {
         dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(metricsState.date)
+    }
+
+    val currentDate by rememberUpdatedState(metricsState.date)
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.DAILY_GOALS_UPDATED) {
+            dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(currentDate)
+        }
     }
 
     Box(

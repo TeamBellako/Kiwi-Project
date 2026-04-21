@@ -21,6 +21,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.tests.DashboardModalTestTags
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
@@ -64,6 +67,13 @@ fun DashboardScreen2_Expanded(
     var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(metricsState) {
         dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(metricsState.date)
+    }
+
+    val currentDate by rememberUpdatedState(metricsState.date)
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.DAILY_GOALS_UPDATED) {
+            dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(currentDate)
+        }
     }
 
     ComposableEngagementMeasuring("expanded")
