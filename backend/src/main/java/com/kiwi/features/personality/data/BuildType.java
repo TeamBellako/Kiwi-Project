@@ -5,22 +5,44 @@ import java.util.Optional;
 
 public enum BuildType {
 
+    // Element IDs: 1=Adaptability, 2=Control, 3=Empathy, 4=Focus, 5=Motivation, 6=Resilience
     BERSERKER(
             new BuildStats(100, 10, 5, 5, 3, 8, 6, 4),
-            List.of(/* skill IDs */),
-            List.of(/* new ElementMultiplierConfig(elementId, multiplier) */),
+            List.of(1000L, 1080L, 1070L, 3010L, 3030L),
+            List.of(
+                    new ElementMultiplierConfig(1, 1.0f),  // Adaptability
+                    new ElementMultiplierConfig(2, 1.0f),  // Control
+                    new ElementMultiplierConfig(3, 1.0f),  // Empathy
+                    new ElementMultiplierConfig(4, 1.5f),  // Focus
+                    new ElementMultiplierConfig(5, 1.0f),  // Motivation
+                    new ElementMultiplierConfig(6, 0.5f)   // Resilience
+            ),
             List.of(/* new StatusResistanceConfig(stateId, resistance) */)
     ),
     SHAMAN(
             new BuildStats(100, 5, 10, 3, 5, 6, 6, 8),
-            List.of(/* skill IDs */),
-            List.of(/* new ElementMultiplierConfig(elementId, multiplier) */),
+            List.of(5000L, 2010L, 2020L, 2040L, 5010L, 5030L),
+            List.of(
+                    new ElementMultiplierConfig(1, 0.5f),  // Adaptability
+                    new ElementMultiplierConfig(2, 1.5f),  // Control
+                    new ElementMultiplierConfig(3, 1.0f),  // Empathy
+                    new ElementMultiplierConfig(4, 1.0f),  // Focus
+                    new ElementMultiplierConfig(5, 1.0f),  // Motivation
+                    new ElementMultiplierConfig(6, 1.0f)   // Resilience
+            ),
             List.of(/* new StatusResistanceConfig(stateId, resistance) */)
     ),
     MONK(
             new BuildStats(100, 7, 7, 7, 7, 7, 7, 4),
-            List.of(/* skill IDs */),
-            List.of(/* new ElementMultiplierConfig(elementId, multiplier) */),
+            List.of(4000L, 4020L, 4030L, 6010L, 6020L),
+            List.of(
+                    new ElementMultiplierConfig(1, 1.5f),  // Adaptability
+                    new ElementMultiplierConfig(2, 0.5f),  // Control
+                    new ElementMultiplierConfig(3, 1.0f),  // Empathy
+                    new ElementMultiplierConfig(4, 1.0f),  // Focus
+                    new ElementMultiplierConfig(5, 1.0f),  // Motivation
+                    new ElementMultiplierConfig(6, 1.0f)   // Resilience
+            ),
             List.of(/* new StatusResistanceConfig(stateId, resistance) */)
     );
 
