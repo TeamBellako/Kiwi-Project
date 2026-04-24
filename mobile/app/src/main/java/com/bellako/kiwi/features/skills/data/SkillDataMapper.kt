@@ -21,10 +21,7 @@ object SkillDataMapper {
                     levelupSkillId = dto.levelupSkillId,
                     isCooldown = dto.cooldown,
                     deckSlot = dto.deckSlot,
-                    cooldownOtherDescription =
-                        requireNotNull(dto.cooldownOtherDescription) {
-                            "cooldownOtherDescription is required for OTHER cooldown"
-                        },
+                    cooldownOtherDescription = dto.cooldownOtherDescription ?: "",
                 )
 
             CooldownType.TIME ->

@@ -97,7 +97,7 @@ class SkillsViewModel
             val goalsData = loadSkillGoals()
             val updatedSkills =
                 skillDTOs.map { dto ->
-                    if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL) {
+                    if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL && dto.cooldownGoalId != null) {
                         SkillDataMapper.toGoalDomain(dto, goalsData[dto.cooldownGoalId]!!)
                     } else {
                         SkillDataMapper.toDomainWithoutGoal(dto)
