@@ -225,6 +225,8 @@ fun GoalsModal_Preview(goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel()
                             GoalStatus.COMPLETED,
                             1000,
                             value = 5,
+                            onCompletedEvent = "_",
+                            onCompletedEntityId = 0,
                         ),
                         UserGoalStatusDomain(
                             2,
@@ -237,6 +239,8 @@ fun GoalsModal_Preview(goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel()
                             GoalStatus.NOT_COMPLETED,
                             1000,
                             value = 5,
+                            onCompletedEvent = "_",
+                            onCompletedEntityId = 0,
                         ),
                     ),
                 goalsViewModel = goalsViewModel,

@@ -12,6 +12,6 @@ data class GoalState(
     val reward: Int = 0,
     val value: Int = 0,
     val date: String = "",
-    val onCompletedEvent: String = "_",
+    val onCompletedEvent: String = "",
     val onCompletedEntityId: Int = 0,
 )

@@ -12,8 +12,8 @@ data class UserGoalStatusDomain(
     override val reward: Int,
     val date: String = "",
     val value: Int = 0,
-    val onCompletedEvent: String = "_",
-    val onCompletedEntityId: Int = 0,
+    val onCompletedEvent: String,
+    val onCompletedEntityId: Int,
 ) : IGoal {
     override fun resolveAction(): String {
         val regex = Regex("@[a-zA-Z0-9_]+")

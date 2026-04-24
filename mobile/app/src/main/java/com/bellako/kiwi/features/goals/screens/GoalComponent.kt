@@ -264,6 +264,8 @@ fun GoalComponent_Preview() {
                         GoalStatus.COMPLETED,
                         1000,
                         value = 1,
+                        onCompletedEvent = "_",
+                        onCompletedEntityId = 0,
                     ),
                     goalFakeViewModel,
                 )
@@ -279,6 +281,8 @@ fun GoalComponent_Preview() {
                         GoalStatus.NOT_COMPLETED,
                         1000,
                         value = 2,
+                        onCompletedEvent = "_",
+                        onCompletedEntityId = 0,
                     ),
                     goalFakeViewModel,
                 )
@@ -294,6 +298,8 @@ fun GoalComponent_Preview() {
                         GoalStatus.IN_PROGRESS,
                         1000,
                         value = 0,
+                        onCompletedEvent = "_",
+                        onCompletedEntityId = 0,
                     ),
                     goalFakeViewModel,
                 )

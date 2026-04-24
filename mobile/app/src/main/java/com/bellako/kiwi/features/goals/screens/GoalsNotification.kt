@@ -169,6 +169,8 @@ fun GoalsNotification_Card_Preview() {
                                 type = GoalType.PRODUCTIVITY,
                                 category = GoalCategory.DAILY_CHALLENGES,
                                 reward = 1000,
+                                onCompletedEvent = "_",
+                                onCompletedEntityId = 0,
                             ),
                             GoalDomain(
                                 id = 2,
@@ -178,6 +180,8 @@ fun GoalsNotification_Card_Preview() {
                                 type = GoalType.PRODUCTIVITY,
                                 category = GoalCategory.DAILY_CHALLENGES,
                                 reward = 1000,
+                                onCompletedEvent = "_",
+                                onCompletedEntityId = 0,
                             ),
                         ),
                 )
