@@ -17,6 +17,7 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
@@ -38,6 +39,7 @@ class SignUpScreen2Test {
     private lateinit var usersFakeViewModel: UsersFakeViewModel
     private lateinit var usersState: UsersState
 
+    private lateinit var skillsFakeViewModel: SkillsFakeViewModel
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
     private lateinit var personalityState: PersonalityState
 
@@ -59,6 +61,7 @@ class SignUpScreen2Test {
 
         usersFakeViewModel = UsersFakeViewModel(usersState)
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
+        skillsFakeViewModel = SkillsFakeViewModel()
 
         rule.setContent {
             val navController = rememberNavController()
@@ -74,6 +77,7 @@ class SignUpScreen2Test {
                     SignUpScreen3_Test(
                         usersViewModel = usersFakeViewModel,
                         personalityViewModel = personalityFakeViewModel,
+                        skillsViewModel = skillsFakeViewModel,
                         navController = navController,
                     )
                 }
