@@ -10,6 +10,8 @@ object GoalDataMapper {
             type = stringToType(dto.type),
             category = stringToCategory(dto.category),
             reward = dto.reward,
+            onCompletedEvent = dto.onCompletedEvent,
+            onCompletedEntityId = dto.onCompletedEntityId,
         )
 
     fun toDTO(domain: GoalDomain): GoalDTO =
@@ -21,6 +23,8 @@ object GoalDataMapper {
             type = typeToString(domain.type),
             category = categoryToString(domain.category),
             reward = domain.reward,
+            onCompletedEvent = domain.onCompletedEvent,
+            onCompletedEntityId = domain.onCompletedEntityId,
         )
 
     fun toUserGoalStatusState(
@@ -38,6 +42,8 @@ object GoalDataMapper {
             status = "IN_PROGRESS",
             reward = domain.reward,
             date = date,
+            onCompletedEvent = domain.onCompletedEvent,
+            onCompletedEntityId = domain.onCompletedEntityId,
         )
 
     private fun stringToType(type: String?): GoalType =

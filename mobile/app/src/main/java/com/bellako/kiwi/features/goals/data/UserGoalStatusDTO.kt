@@ -12,4 +12,6 @@ data class UserGoalStatusDTO(
     val reward: Int,
     val date: String = "",
     val value: Int = 0,
+    val onCompletedEvent: String = "_",
+    val onCompletedEntityId: Int = 0,
 )

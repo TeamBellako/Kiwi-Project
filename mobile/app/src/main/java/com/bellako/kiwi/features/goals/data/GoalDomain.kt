@@ -8,6 +8,8 @@ data class GoalDomain(
     override val type: GoalType,
     override val category: GoalCategory,
     override val reward: Int,
+    val onCompletedEvent: String = "_",
+    val onCompletedEntityId: Int = 0,
 ) : IGoal {
     override fun resolveAction(): String {
         val regex = Regex("@[a-zA-Z0-9_]+")

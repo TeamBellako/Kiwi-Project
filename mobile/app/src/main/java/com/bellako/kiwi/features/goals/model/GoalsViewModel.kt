@@ -225,6 +225,13 @@ class GoalsViewModel
 
                 EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
 
+                if (updatedDomain.onCompletedEvent != "_") {
+                    EventBus.emitEvent(
+                        EventType.valueOf(updatedDomain.onCompletedEvent),
+                        EventPayload.EntityIdPayload(updatedDomain.onCompletedEntityId),
+                    )
+                }
+
                 updateGoalInCache(updatedDomain)
                 usersRepository.getMyUserPoints() // Refrescar puntos al completar goal
             }.also {
