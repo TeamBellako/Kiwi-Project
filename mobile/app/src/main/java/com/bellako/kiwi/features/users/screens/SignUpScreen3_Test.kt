@@ -1,6 +1,8 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -43,6 +46,9 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.skills.model.ISkillsViewModel
+import com.bellako.kiwi.features.skills.screen.AllSkillsGrid
+import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
@@ -51,29 +57,31 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SignUpScreen3_Test(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
+    skillsViewModel: ISkillsViewModel,
     navController: NavController,
 ) {
     SignUpScreen {
         Question(
             usersViewModel,
             personalityViewModel,
+            skillsViewModel,
             navController,
         )
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun Question(
     usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
+    skillsViewModel: ISkillsViewModel,
     navController: NavController,
 ) {
     val isPreview = LocalInspectionMode.current
@@ -84,8 +92,10 @@ private fun Question(
     val personalityUiState by personalityViewModel.uiState.collectAsState()
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
 
+    val skillsIsLoading by skillsViewModel.isLoading.collectAsState()
+
     var localLoading by remember { mutableStateOf(false) }
-    val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
+    val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading || skillsIsLoading } }
 
     personalityState?.let { currentPersonalityState ->
         if (usersUiState == UIState.GeneralError || personalityUiState == UIState.GeneralError) {
@@ -94,14 +104,16 @@ private fun Question(
                 personalityViewModel.resetUiState()
             })
         } else {
-            Options(personalityViewModel, navController, currentPersonalityState, isLoading, isPreview)
+            Options(personalityViewModel, skillsViewModel, navController, currentPersonalityState, isLoading, isPreview)
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun Options(
     personalityViewModel: IPersonalityViewModel,
+    skillsViewModel: ISkillsViewModel,
     navController: NavController,
     currentPersonalityState: PersonalityState,
     isLoading: Boolean,
@@ -110,7 +122,7 @@ private fun Options(
     var shouldShowBuildModal by remember { mutableStateOf(false) }
 
     if (shouldShowBuildModal) {
-        BuildModal(personalityViewModel, navController)
+        BuildModal(personalityViewModel, skillsViewModel, navController)
     } else {
         Column(
             modifier =
@@ -193,12 +205,23 @@ private fun Options(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun BuildModal(
     personalityViewModel: IPersonalityViewModel,
+    skillsViewModel: ISkillsViewModel,
     navController: NavController,
 ) {
     val personalityState by personalityViewModel.state.collectAsState()
+    val skillsState by skillsViewModel.state.collectAsState()
+    val isLoading by skillsViewModel.isLoading.collectAsState()
+
+    LaunchedEffect(Unit) {
+        if (personalityViewModel.updateBuild().isSuccess) {
+            firebaseLogEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
+            skillsViewModel.loadSkills()
+        }
+    }
 
     Column(
         modifier =
@@ -249,6 +272,14 @@ private fun BuildModal(
             ),
         )
 
+        AllSkillsGrid(
+            skills = skillsState?.allSkills ?: emptyList(),
+            onClick = {},
+            onApplyGoalProgress = { _, _, _ -> },
+        )
+
+        Kiwi_Spacer()
+
         Kiwi_FixedSizeButton(
             textArguments =
                 KiwiTextArguments(
@@ -258,14 +289,9 @@ private fun BuildModal(
                     modifier = Modifier.padding(8.dp),
                 ),
             color = kiwiColors.color3A,
+            enabled = !isLoading,
             onClick = {
-                CoroutineScope(Dispatchers.Main).launch {
-                    if (personalityViewModel.updateBuild().isSuccess) {
-                        firebaseLogEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
-
-                        navController.navigate(ScreenRoutes.SIGNUP4_APPS)
-                    }
-                }
+                navController.navigate(ScreenRoutes.SIGNUP4_APPS)
             },
         )
     }
@@ -277,6 +303,7 @@ private fun BuildModal(
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SignUpScreen3_Test_Preview() {
     Kiwi_Theme {
@@ -300,6 +327,7 @@ fun SignUpScreen3_Test_Preview() {
                         validPersonalityDTO().neutralApps,
                     ),
                 ),
+            skillsViewModel = SkillsFakeViewModel(),
             navController = rememberNavController(),
         )
     }

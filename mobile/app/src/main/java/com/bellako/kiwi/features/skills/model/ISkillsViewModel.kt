@@ -48,4 +48,6 @@ interface ISkillsViewModel : IBaseViewModel<SkillsState> {
         goalId: Long,
         newProgress: Int,
     )
+
+    suspend fun loadSkills(): Result<Unit>
 }

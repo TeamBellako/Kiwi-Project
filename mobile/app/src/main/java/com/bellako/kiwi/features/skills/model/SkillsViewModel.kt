@@ -338,6 +338,9 @@ class SkillsViewModel
         // HELPERS
         // ------------------------------------------------------------------------------------------
 
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun loadSkills(): Result<Unit> = runCatching { loadAllSkills() }
+
         fun onUserLoggedIn() {
             viewModelScope.launch {
                 loadAllSkills()
