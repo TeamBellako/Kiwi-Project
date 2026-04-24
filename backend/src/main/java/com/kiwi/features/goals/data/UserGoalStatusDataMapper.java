@@ -25,6 +25,7 @@ public class UserGoalStatusDataMapper {
 
     public static UserGoalStatusDTO toDTO(UserGoalStatusPersistence entity) {
         GoalPersistence goal = entity.getGoal();
+        String onCompletedEvent = goal.getOnCompletedAction() + '_' + goal.getOnCompletedEntity();
         return UserGoalStatusDTO.builder()
                 .id(entity.getId())
                 .goalId(goal.getId())
@@ -34,6 +35,8 @@ public class UserGoalStatusDataMapper {
                 .type(goal.getType().name())
                 .category(goal.getCategory().name())
                 .reward(goal.getReward())
+                .onCompletedEntityId(goal.getOnCompletedEntityId())
+                .onCompletedEvent(onCompletedEvent)
                 .status(entity.getStatus().name())
                 .date(entity.getDate().format(DATE_FORMATTER))
                 .value(entity.getValue())
