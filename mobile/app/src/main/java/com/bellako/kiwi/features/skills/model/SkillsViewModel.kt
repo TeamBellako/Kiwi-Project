@@ -43,6 +43,7 @@ const val ONE_SECOND_MILLISECONDS = 1_000L
 @OptIn(DelicateCoroutinesApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
+@Suppress("TooManyFunctions")
 class SkillsViewModel
     @Inject
     constructor(

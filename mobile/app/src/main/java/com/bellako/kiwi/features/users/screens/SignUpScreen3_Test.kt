@@ -3,10 +3,16 @@ package com.bellako.kiwi.features.users.screens
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
@@ -37,6 +43,9 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_Label1
+import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
@@ -46,8 +55,11 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
-import com.bellako.kiwi.features.skills.screen.AllSkillsGrid
+import com.bellako.kiwi.features.skills.screen.SkillBackground
+import com.bellako.kiwi.features.skills.screen.skillStatusColor
+import com.bellako.kiwi.features.skills.screen.skillStatusText
 import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
@@ -57,8 +69,10 @@ import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import kotlinx.coroutines.delay
 
 @RequiresApi(Build.VERSION_CODES.O)
+@Suppress("MagicNumber")
 @Composable
 fun SignUpScreen3_Test(
     usersViewModel: IUsersViewModel,
@@ -207,6 +221,7 @@ private fun Options(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("MagicNumber")
 private fun BuildModal(
     personalityViewModel: IPersonalityViewModel,
     skillsViewModel: ISkillsViewModel,
@@ -214,13 +229,33 @@ private fun BuildModal(
 ) {
     val personalityState by personalityViewModel.state.collectAsState()
     val skillsState by skillsViewModel.state.collectAsState()
-    val isLoading by skillsViewModel.isLoading.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+    val skillsIsLoading by skillsViewModel.isLoading.collectAsState()
+
+    val skills = skillsState?.allSkills ?: emptyList()
+
+    var buildVisible by remember { mutableStateOf(false) }
+    var skillsVisible by remember { mutableStateOf(false) }
+    var buttonVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (personalityViewModel.updateBuild().isSuccess) {
             firebaseLogEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
             skillsViewModel.loadSkills()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        buildVisible = true
+    }
+
+    LaunchedEffect(skills.isNotEmpty()) {
+        if (skills.isEmpty()) return@LaunchedEffect
+        delay(900)
+        skillsVisible = true
+        delay(600)
+        buttonVisible = true
     }
 
     Column(
@@ -245,55 +280,128 @@ private fun BuildModal(
             ),
         )
 
-        Kiwi_H2(
-            KiwiTextArguments(
-                personalityState?.build ?: "",
-                TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                modifier =
-                    Modifier.padding(
-                        top = getResponsiveSizeHeight(Spacing.medium),
-                        bottom = getResponsiveSizeHeight(Spacing.small),
+        AnimatedVisibility(
+            visible = buildVisible,
+            enter = fadeIn(animationSpec = tween(700)),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Kiwi_H2(
+                    KiwiTextArguments(
+                        personalityState?.build ?: "",
+                        TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
+                        modifier =
+                            Modifier.padding(
+                                top = getResponsiveSizeHeight(Spacing.medium),
+                                bottom = getResponsiveSizeHeight(Spacing.small),
+                            ),
                     ),
-            ),
-        )
+                )
 
-        Kiwi_Spacer()
+                Kiwi_Spacer()
 
-        Kiwi_P1(
-            KiwiTextArguments(
-                text = "And these are your initial skills:",
-                TextAlign.Center,
-                modifier =
-                    Modifier.padding(
-                        top = getResponsiveSizeHeight(Spacing.medium),
-                        bottom = getResponsiveSizeHeight(Spacing.small),
+                Kiwi_P1(
+                    KiwiTextArguments(
+                        text = "And these are your initial skills:",
+                        TextAlign.Center,
+                        modifier =
+                            Modifier.padding(
+                                top = getResponsiveSizeHeight(Spacing.medium),
+                                bottom = getResponsiveSizeHeight(Spacing.small),
+                            ),
                     ),
-            ),
-        )
+                )
+            }
+        }
 
-        AllSkillsGrid(
-            skills = skillsState?.allSkills ?: emptyList(),
-            onClick = {},
-            onApplyGoalProgress = { _, _, _ -> },
-        )
+        skills.chunked(2).forEachIndexed { rowIndex, rowSkills ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                rowSkills.forEach { skill ->
+                    AnimatedVisibility(
+                        visible = skillsVisible,
+                        enter = fadeIn(animationSpec = tween(600)),
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        OnboardingSkillItem(skill)
+                    }
+                }
+                if (rowSkills.size == 1) {
+                    Box(modifier = Modifier.weight(1f))
+                }
+            }
+            Kiwi_Spacer(Spacing.small)
+        }
 
-        Kiwi_Spacer()
+        AnimatedVisibility(
+            visible = buttonVisible,
+            enter = fadeIn(animationSpec = tween(600)),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Kiwi_Spacer()
+                Kiwi_FixedSizeButton(
+                    textArguments =
+                        KiwiTextArguments(
+                            "Get Started",
+                            color = kiwiColors.color6,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(8.dp),
+                        ),
+                    color = kiwiColors.color3A,
+                    enabled = !personalityIsLoading && !skillsIsLoading,
+                    onClick = {
+                        navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                    },
+                )
+            }
+        }
+    }
+}
 
-        Kiwi_FixedSizeButton(
-            textArguments =
-                KiwiTextArguments(
-                    "Get Started",
-                    color = kiwiColors.color6,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(8.dp),
-                ),
-            color = kiwiColors.color3A,
-            enabled = !isLoading,
-            onClick = {
-                navController.navigate(ScreenRoutes.SIGNUP4_APPS)
-            },
-        )
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+private fun OnboardingSkillItem(skill: SkillDomain) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        SkillBackground(skill, false)
+
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.padding(start = getResponsiveSizeHeight(20.dp))) {
+                Kiwi_Image(
+                    skill.icon,
+                    "Skill Icon",
+                    modifier = Modifier.size(getResponsiveSizeHeight(40.dp)),
+                )
+            }
+
+            Column(modifier = Modifier.padding(end = getResponsiveSizeHeight(15.dp))) {
+                Kiwi_Label1(
+                    KiwiTextArguments(
+                        text = skill.name,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    ),
+                )
+                Kiwi_Label3(
+                    KiwiTextArguments(
+                        color = skillStatusColor(kiwiColors, skill.isCooldown),
+                        text = skillStatusText(skill.isCooldown),
+                        italic = true,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    ),
+                )
+            }
+        }
     }
 }
 
