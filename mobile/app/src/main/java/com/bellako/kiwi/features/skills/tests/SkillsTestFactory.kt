@@ -29,7 +29,7 @@ object SkillsTestFactory {
     fun timeCooldownSkillEquipped(): SkillDomain =
         SkillDomain.Time(
             id = 1,
-            name = "Time Skill",
+            name = "Strategic Advantage",
             type = SkillType.ADAPTABILITY,
             description = "Skill with time-based cooldown",
             quote = "Patience is power",

@@ -1,6 +1,7 @@
 package com.kiwi.personality;
 
 import com.kiwi.common.types.Email;
+import com.kiwi.features.personality.controllers.BuildInitializationService;
 import com.kiwi.features.personality.controllers.PersonalityRepository;
 import com.kiwi.features.personality.controllers.PersonalityService;
 import com.kiwi.features.personality.data.PersonalityDataMapper;
@@ -24,7 +25,8 @@ public class PersonalityServiceTests {
 
     private final PersonalityRepository personalityRepository = Mockito.mock(PersonalityRepository.class);
     private final UsersService usersService = Mockito.mock(UsersService.class);
-    private final PersonalityService personalityService = new PersonalityService(personalityRepository, usersService);
+    private final BuildInitializationService buildInitializationService = Mockito.mock(BuildInitializationService.class);
+    private final PersonalityService personalityService = new PersonalityService(personalityRepository, usersService, buildInitializationService);
 
     @Test
     public void getPersonality_valid() {

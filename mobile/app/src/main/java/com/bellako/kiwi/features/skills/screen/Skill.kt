@@ -40,6 +40,7 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label1
+import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.skills.data.SkillDomain
@@ -112,7 +113,7 @@ fun SkillComponent(
                     Modifier
                         .padding(end = getResponsiveSizeHeight(15.dp)),
             ) {
-                Kiwi_Label1(
+                Kiwi_Label2(
                     KiwiTextArguments(
                         text = skill.name,
                         textAlign = TextAlign.Center,

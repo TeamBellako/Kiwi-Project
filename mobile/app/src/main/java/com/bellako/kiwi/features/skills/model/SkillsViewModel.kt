@@ -43,6 +43,7 @@ const val ONE_SECOND_MILLISECONDS = 1_000L
 @OptIn(DelicateCoroutinesApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
+@Suppress("TooManyFunctions")
 class SkillsViewModel
     @Inject
     constructor(
@@ -97,7 +98,7 @@ class SkillsViewModel
             val goalsData = loadSkillGoals()
             val updatedSkills =
                 skillDTOs.map { dto ->
-                    if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL) {
+                    if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL && dto.cooldownGoalId != null) {
                         SkillDataMapper.toGoalDomain(dto, goalsData[dto.cooldownGoalId]!!)
                     } else {
                         SkillDataMapper.toDomainWithoutGoal(dto)
@@ -337,6 +338,9 @@ class SkillsViewModel
         // ------------------------------------------------------------------------------------------
         // HELPERS
         // ------------------------------------------------------------------------------------------
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun loadSkills(): Result<Unit> = runCatching { loadAllSkills() }
 
         fun onUserLoggedIn() {
             viewModelScope.launch {

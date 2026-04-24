@@ -418,6 +418,7 @@ fun AppNavHost(
                 SignUpScreen3_Test(
                     usersViewModel = usersViewModel,
                     personalityViewModel = personalityViewModel,
+                    skillsViewModel = skillsViewModel,
                     navController = navController,
                 )
             }
