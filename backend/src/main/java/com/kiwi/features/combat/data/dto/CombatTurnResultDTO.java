@@ -19,4 +19,7 @@ public class CombatTurnResultDTO {
 
     private String combatStatus;
 
+    private String onCompletedEvent;
+    private int onCompletedEntityId;
+
 }
