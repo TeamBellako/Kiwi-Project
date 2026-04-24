@@ -19,6 +19,8 @@ public class UserGoalStatusDTO {
     private String type;
     private String category;
     private Integer reward;
+    private Integer onCompletedEntityId;
+    private String onCompletedEvent;
     // Per-user status fields
     private String status;
     private String date;

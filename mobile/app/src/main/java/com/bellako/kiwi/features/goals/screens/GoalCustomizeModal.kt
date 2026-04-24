@@ -296,6 +296,8 @@ fun GoalCustomiceModal_Preview() {
                         GoalStatus.IN_PROGRESS,
                         100,
                         value = 2000,
+                        onCompletedEvent = "_",
+                        onCompletedEntityId = 0,
                     ),
                 goalsViewModel = GoalsFakeViewModel(),
             )

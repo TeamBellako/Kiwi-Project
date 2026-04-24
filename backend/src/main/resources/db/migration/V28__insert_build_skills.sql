@@ -1,4 +1,4 @@
-INSERT INTO skills (id, type, name, description, cooldown_type, cooldown_goal_id, cooldown_time_minutes, cooldown_other_description, levelup_skill_id) VALUES
+INSERT IGNORE INTO skills (id, type, name, description, cooldown_type, cooldown_goal_id, cooldown_time_minutes, cooldown_other_description, levelup_skill_id) VALUES
 -- Berserker (Motivation)
 (1000, 'MOTIVATION',   'Battle Cry',        'Berserker exclusive trait. Attack becomes increasingly powerful (10% each turn; max 200%) as long as offensive abilities are used in a streak.', 'OTHER', NULL, NULL, NULL, NULL),
 (1070, 'MOTIVATION',   'Adrenaline Rush',   '+PATK 100% (2 turns)',                                                                                                                           'OTHER', NULL, NULL, NULL, NULL),

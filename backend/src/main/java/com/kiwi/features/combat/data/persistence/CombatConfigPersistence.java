@@ -21,4 +21,13 @@ public class CombatConfigPersistence {
 
     @Column(name="time_limit")
     private Integer timeLimit;
+
+    @Column(name = "on_completed_action")
+    private String onCompletedAction;
+
+    @Column(name = "on_completed_entity")
+    private String onCompletedEntity = "";
+
+    @Column(name = "on_completed_entity_id")
+    private int onCompletedEntityId = 0;
 }

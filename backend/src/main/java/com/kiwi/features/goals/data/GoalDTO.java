@@ -17,4 +17,8 @@ public class GoalDTO {
     private String type;
     private String category;
     private Integer reward;
+    private String onCompletedAction;
+    private String onCompletedEntity;
+    private Integer onCompletedEntityId;
+    private String onCompletedEvent;
 }

@@ -3,8 +3,10 @@ package com.kiwi.features.combat.controllers;
 import com.kiwi.features.combat.data.dto.CombatDTO;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
+import com.kiwi.features.combat.data.persistence.CombatConfigPersistence;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import com.kiwi.features.combat.exceptions.CombatNotFoundException;
+import com.kiwi.features.combat.repositories.CombatConfigRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,17 +16,20 @@ public class CombatFacadeService {
     private final CombatService combatService;
     private final CombatBuilderService combatBuilderService;
     private final CombatTurnService combatTurnService;
+    private final CombatConfigRepository combatConfigRepository;
 
     //------------------------------------------------------------------------------------------------------------------
 
     public CombatFacadeService(
             CombatService combatService,
             CombatBuilderService combatBuilderService,
-            CombatTurnService combatTurnService
+            CombatTurnService combatTurnService,
+            CombatConfigRepository combatConfigRepository
     ) {
         this.combatService = combatService;
         this.combatBuilderService = combatBuilderService;
         this.combatTurnService = combatTurnService;
+        this.combatConfigRepository = combatConfigRepository;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -54,7 +59,7 @@ public class CombatFacadeService {
             combatService.cleanDatabase(combatId);
         }
 
-        return result;
+        return enrichWithConfig(result, combat.getCombatConfigId());
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -71,7 +76,7 @@ public class CombatFacadeService {
 
         combatService.cleanDatabase(combat.getId());
 
-        return result;
+        return enrichWithConfig(result, combat.getCombatConfigId());
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -86,6 +91,15 @@ public class CombatFacadeService {
 
         combatService.cleanDatabase(combat.getId());
 
+        return enrichWithConfig(result, combat.getCombatConfigId());
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private CombatTurnResultDTO enrichWithConfig(CombatTurnResultDTO result, Long configId) {
+        CombatConfigPersistence config = combatConfigRepository.findById(configId).orElseThrow();
+        result.setOnCompletedEvent(config.getOnCompletedAction() + '_' + config.getOnCompletedEntity());
+        result.setOnCompletedEntityId(config.getOnCompletedEntityId());
         return result;
     }
 }

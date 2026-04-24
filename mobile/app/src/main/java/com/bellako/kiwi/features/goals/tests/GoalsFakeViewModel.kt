@@ -38,6 +38,8 @@ class GoalsFakeViewModel(
                 status = GoalStatus.IN_PROGRESS,
                 reward = 150,
                 value = 0,
+                onCompletedEvent = "_",
+                onCompletedEntityId = 0,
             ),
             UserGoalStatusDomain(
                 id = 2,
@@ -50,6 +52,8 @@ class GoalsFakeViewModel(
                 status = GoalStatus.IN_PROGRESS,
                 reward = 200,
                 value = 10,
+                onCompletedEvent = "_",
+                onCompletedEntityId = 0,
             ),
         )
 

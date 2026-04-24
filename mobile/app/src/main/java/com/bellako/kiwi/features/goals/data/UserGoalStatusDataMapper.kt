@@ -14,6 +14,8 @@ object UserGoalStatusDataMapper {
             reward = dto.reward,
             date = dto.date,
             value = dto.value,
+            onCompletedEvent = dto.onCompletedEvent,
+            onCompletedEntityId = dto.onCompletedEntityId,
         )
 
     fun toDomain(state: GoalState): UserGoalStatusDomain =
@@ -29,6 +31,8 @@ object UserGoalStatusDataMapper {
             reward = state.reward,
             date = state.date,
             value = state.value,
+            onCompletedEvent = state.onCompletedEvent,
+            onCompletedEntityId = state.onCompletedEntityId,
         )
 
     fun toState(domain: UserGoalStatusDomain): GoalState =
@@ -44,6 +48,8 @@ object UserGoalStatusDataMapper {
             reward = domain.reward,
             value = domain.value,
             date = domain.date,
+            onCompletedEvent = domain.onCompletedEvent,
+            onCompletedEntityId = domain.onCompletedEntityId,
         )
 
     fun toState(dto: UserGoalStatusDTO): GoalState = toState(toDomain(dto))
@@ -61,6 +67,8 @@ object UserGoalStatusDataMapper {
             reward = domain.reward,
             date = domain.date,
             value = domain.value,
+            onCompletedEvent = domain.onCompletedEvent,
+            onCompletedEntityId = domain.onCompletedEntityId,
         )
 
     fun toDTO(state: GoalState): UserGoalStatusDTO = toDTO(toDomain(state))
