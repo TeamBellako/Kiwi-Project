@@ -214,6 +214,34 @@ public class GoalServiceTests {
     }
 
     // ============================================================================================
+    // GET GOAL DEFINITIONS (suggestions)
+    // ============================================================================================
+
+    @Test
+    public void getGoalDefinitions_onlyReturnsDailyChallenges() {
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));       // DAILY_CHALLENGES
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));       // DAILY_CHALLENGES
+        goalDefinitionRepository.save(appGoalDefinition(null));            // APP_USAGE - debe excluirse
+        goalDefinitionRepository.save(skillGoalDefinition(null));          // SKILL - debe excluirse
+
+        List<GoalDTO> result = goalService.getGoalDefinitions(authentication);
+
+        assertTrue(result.stream().allMatch(g -> g.getCategory().equals("DAILY_CHALLENGES")));
+    }
+
+    @Test
+    public void getGoalDefinitions_returnsAtMostTwo() {
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));
+
+        List<GoalDTO> result = goalService.getGoalDefinitions(authentication);
+
+        assertTrue(result.size() <= 2);
+    }
+
+    // ============================================================================================
     // COMPLETE GOAL
     // ============================================================================================
 

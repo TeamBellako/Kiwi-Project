@@ -20,7 +20,8 @@ public interface GoalRepository extends JpaRepository<GoalPersistence, Long> {
             LEFT JOIN user_goal_progress ugp
                 ON ugp.user_id = :userId
                AND ugp.goal_type = g.type
-            WHERE g.difficulty = COALESCE(ugp.current_difficulty, 1)
+            WHERE g.category = 'DAILY_CHALLENGES'
+              AND g.difficulty = COALESCE(ugp.current_difficulty, 1)
             ORDER BY RAND()
             LIMIT 2
             """, nativeQuery = true)
