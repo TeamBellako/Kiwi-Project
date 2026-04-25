@@ -21,19 +21,72 @@ public class GoalService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
     private final UserGoalStatusRepository userGoalStatusRepository;
+    private final UserGoalProgressRepository userGoalProgressRepository;
     private final GoalRepository goalRepository;
     private final UsersRepository usersRepository;
     private final UsersService usersService;
 
     public GoalService(
             UserGoalStatusRepository userGoalStatusRepository,
+            UserGoalProgressRepository userGoalProgressRepository,
             GoalRepository goalRepository,
             UsersRepository usersRepository,
             UsersService usersService) {
         this.userGoalStatusRepository = userGoalStatusRepository;
+        this.userGoalProgressRepository = userGoalProgressRepository;
         this.goalRepository = goalRepository;
         this.usersRepository = usersRepository;
         this.usersService = usersService;
+    }
+
+    private void updateUserGoalProgressAfterCompletion(UsersPersistence user, GoalPersistence goal) {
+        UserGoalProgressKey progressKey = UserGoalProgressKey.builder()
+                .userId(user.getId())
+                .goalType(goal.getType().name())
+                .build();
+
+        UserGoalProgressPersistence progress = userGoalProgressRepository.findById(progressKey)
+                .orElseGet(() -> UserGoalProgressPersistence.builder()
+                        .id(progressKey)
+                        .currentDifficulty(1)
+                        .goalsCompletedAtDifficulty(0)
+                        .goalsFailedAtDifficulty(0)
+                        .build());
+
+        progress.setGoalsCompletedAtDifficulty(progress.getGoalsCompletedAtDifficulty() + 1);
+        progress.setGoalsFailedAtDifficulty(0);
+
+        if (progress.getGoalsCompletedAtDifficulty() >= 3) {
+            progress.setCurrentDifficulty(progress.getCurrentDifficulty() + 1);
+            progress.setGoalsCompletedAtDifficulty(0);
+        }
+
+        userGoalProgressRepository.save(progress);
+    }
+
+    private void updateUserGoalProgressAfterFailure(UsersPersistence user, GoalPersistence goal) {
+        UserGoalProgressKey progressKey = UserGoalProgressKey.builder()
+                .userId(user.getId())
+                .goalType(goal.getType().name())
+                .build();
+
+        UserGoalProgressPersistence progress = userGoalProgressRepository.findById(progressKey)
+                .orElseGet(() -> UserGoalProgressPersistence.builder()
+                        .id(progressKey)
+                        .currentDifficulty(1)
+                        .goalsCompletedAtDifficulty(0)
+                        .goalsFailedAtDifficulty(0)
+                        .build());
+
+        progress.setGoalsFailedAtDifficulty(progress.getGoalsFailedAtDifficulty() + 1);
+        progress.setGoalsCompletedAtDifficulty(0);
+
+        if (progress.getGoalsFailedAtDifficulty() >= 3) {
+            progress.setCurrentDifficulty(Math.max(1, progress.getCurrentDifficulty() - 1));
+            progress.setGoalsFailedAtDifficulty(0);
+        }
+
+        userGoalProgressRepository.save(progress);
     }
 
     private UsersPersistence getUserFromAuthentication(Authentication authentication) {
@@ -128,6 +181,7 @@ public class GoalService {
         }
 
         usersService.addPointsToUser(user.getId(), entry.getGoal().getReward());
+        updateUserGoalProgressAfterCompletion(user, entry.getGoal());
 
         entry.setStatus(GoalStatus.COMPLETED);
         entry.setValue(entry.getGoal().getTarget());
@@ -155,6 +209,7 @@ public class GoalService {
             return UserGoalStatusDataMapper.toDTO(entry);
         }
 
+        updateUserGoalProgressAfterFailure(user, entry.getGoal());
         entry.setStatus(GoalStatus.NOT_COMPLETED);
 
         return UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.saveAndFlush(entry));
@@ -223,8 +278,10 @@ public class GoalService {
                 .collect(Collectors.toList());
     }
 
-    public List<GoalDTO> getGoalDefinitions() {
-        return goalRepository.findTwoRandom()
+    public List<GoalDTO> getGoalDefinitions(Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+
+        return goalRepository.findTwoRandomForUser(user.getId())
                 .stream()
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
