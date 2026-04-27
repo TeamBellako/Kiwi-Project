@@ -146,10 +146,18 @@ fun CombatScreen(
         }
 
         Column(modifier = Modifier.fillMaxSize()) {
-            CombatHeader(
-                title = "Ongoing Combat",
-                onClose = { showAbandonConfirm = true },
-            )
+            Box {
+                CombatHeader(
+                    title = "Ongoing Combat",
+                    onClose = { showAbandonConfirm = true },
+                )
+                if (isLogOpen) {
+                    LogDimOverlay(
+                        modifier = Modifier.matchParentSize(),
+                        onDismiss = { isLogOpen = false },
+                    )
+                }
+            }
 
             Box(
                 modifier =
@@ -166,11 +174,9 @@ fun CombatScreen(
                 )
 
                 if (isLogOpen) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = LOG_DIM_ALPHA)),
+                    LogDimOverlay(
+                        modifier = Modifier.fillMaxSize(),
+                        onDismiss = { isLogOpen = false },
                     )
 
                     CombatLog(
@@ -181,47 +187,61 @@ fun CombatScreen(
                                 .padding(
                                     horizontal = getResponsiveSizeWidth(Spacing.medium),
                                     vertical = getResponsiveSizeHeight(Spacing.small),
-                                ).fillMaxHeight(LOG_HEIGHT_FRACTION),
+                                ).fillMaxHeight(LOG_HEIGHT_FRACTION)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    onClick = {},
+                                ),
                     )
                 }
             }
 
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .background(
-                            Brush.verticalGradient(
-                                BOTTOM_PANEL_GRADIENT_START to Color.Transparent,
-                                BOTTOM_PANEL_GRADIENT_MID to colors.color2,
-                                BOTTOM_PANEL_GRADIENT_END to colors.color2,
+            Box {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Brush.verticalGradient(
+                                    BOTTOM_PANEL_GRADIENT_START to Color.Transparent,
+                                    BOTTOM_PANEL_GRADIENT_MID to colors.color2,
+                                    BOTTOM_PANEL_GRADIENT_END to colors.color2,
+                                ),
+                            ).padding(
+                                horizontal = getResponsiveSizeWidth(Spacing.medium),
+                                vertical = getResponsiveSizeHeight(Spacing.small),
                             ),
-                        ).padding(
-                            horizontal = getResponsiveSizeWidth(Spacing.medium),
-                            vertical = getResponsiveSizeHeight(Spacing.small),
-                        ),
-            ) {
-                CombatTurnIndicator(
-                    message = turnMessage,
-                    isLogOpen = isLogOpen,
-                    onClick = { isLogOpen = !isLogOpen },
-                )
+                ) {
+                    CombatTurnIndicator(
+                        message = turnMessage,
+                        isLogOpen = isLogOpen,
+                        onClick = { isLogOpen = !isLogOpen },
+                    )
 
-                Kiwi_Spacer(Spacing.medium)
+                    Kiwi_Spacer(Spacing.medium)
 
-                PlayerControls(
-                    deckSkills = deckSkills,
-                    userActor = combat.user,
-                    isOverlayOpen = isOverlayOpen,
-                    selectedStatus = selectedStatus,
-                    onSkillClick = onSkillClick,
-                    onStatusClick = { status ->
-                        selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
-                    },
-                    onDismissPopup = { selectedStatus = null },
-                )
+                    PlayerControls(
+                        deckSkills = deckSkills,
+                        userActor = combat.user,
+                        isOverlayOpen = isOverlayOpen,
+                        selectedStatus = selectedStatus,
+                        onSkillClick = onSkillClick,
+                        onStatusClick = { status ->
+                            selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
+                        },
+                        onDismissPopup = { selectedStatus = null },
+                    )
 
-                Kiwi_Spacer(Spacing.large)
+                    Kiwi_Spacer(Spacing.large)
+                }
+
+                if (isLogOpen) {
+                    LogDimOverlay(
+                        modifier = Modifier.matchParentSize(),
+                        onDismiss = { isLogOpen = false },
+                    )
+                }
             }
         }
     }
@@ -370,6 +390,23 @@ private fun currentTurnMessage(
     } else {
         userTurnMessage()
     }
+}
+
+@Composable
+private fun LogDimOverlay(
+    modifier: Modifier = Modifier,
+    onDismiss: () -> Unit,
+) {
+    Box(
+        modifier =
+            modifier
+                .background(Color.Black.copy(alpha = LOG_DIM_ALPHA))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onDismiss,
+                ),
+    )
 }
 
 private fun resolveEnemySprite(
