@@ -14,11 +14,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val DISMISS_ANIMATION_DURATION_MS = 500L
 
 @OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
@@ -30,6 +33,9 @@ class CombatViewModel
     ) : BaseViewModel() {
         private val _active = MutableStateFlow<CombatDomain?>(null)
         val active: StateFlow<CombatDomain?> = _active.asStateFlow()
+
+        private val _isVisible = MutableStateFlow(false)
+        val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
         private val _lastTurnActions = MutableStateFlow<List<CombatActionDomain>>(emptyList())
         val lastTurnActions: StateFlow<List<CombatActionDomain>> = _lastTurnActions.asStateFlow()
@@ -49,9 +55,22 @@ class CombatViewModel
                     val combat = repository.startOrResumeCombat(combatConfigId)
                     _active.value = combat
                     _lastTurnActions.value = combat.log
+                    _isVisible.value = true
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
                 }
+            }
+        }
+
+        fun confirmAbandon() {
+            val current = _active.value ?: return
+            viewModelScope.launch {
+                try {
+                    repository.abandonCombat(current.id)
+                } catch (e: Throwable) {
+                    setUiState(mapExceptionToUIState(e))
+                }
+                dismiss()
             }
         }
 
@@ -102,6 +121,9 @@ class CombatViewModel
                         event != null &&
                         event != "_" &&
                         entityId != null
+
+                _isVisible.value = false
+                delay(DISMISS_ANIMATION_DURATION_MS)
 
                 if (shouldTriggerOnCompletedEvent) {
                     EventBus.emitEvent(

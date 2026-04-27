@@ -39,6 +39,7 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.combat.components.CombatAbandonConfirmModal
 import com.bellako.kiwi.features.combat.components.CombatDeck
 import com.bellako.kiwi.features.combat.components.CombatHealthBar
 import com.bellako.kiwi.features.combat.components.CombatHeader
@@ -82,13 +83,14 @@ private val STATUS_POPUP_BOTTOM_OFFSET = 44.dp
 fun CombatScreen(
     combat: CombatDomain,
     deckSkills: List<SkillDomain>,
-    onClose: () -> Unit = {},
+    onConfirmAbandon: () -> Unit = {},
     onSkillClick: (Long) -> Unit = {},
 ) {
     val colors = LocalKiwiColors.current
     val context = LocalContext.current
     var isLogOpen by rememberSaveable(combat.id) { mutableStateOf(false) }
     var selectedStatus by remember(combat.id) { mutableStateOf<CombatActiveStatusDomain?>(null) }
+    var showAbandonConfirm by rememberSaveable(combat.id) { mutableStateOf(false) }
     val isOverlayOpen = isLogOpen || selectedStatus != null
 
     val enemyName = combat.enemyName.ifBlank { DEFAULT_ENEMY_NAME }
@@ -111,7 +113,7 @@ fun CombatScreen(
     ) {
         CombatHeader(
             title = "Ongoing Combat",
-            onClose = onClose,
+            onClose = { showAbandonConfirm = true },
         )
 
         Box(
@@ -186,6 +188,16 @@ fun CombatScreen(
 
             Kiwi_Spacer(Spacing.large)
         }
+    }
+
+    if (showAbandonConfirm) {
+        CombatAbandonConfirmModal(
+            onConfirm = {
+                showAbandonConfirm = false
+                onConfirmAbandon()
+            },
+            onCancel = { showAbandonConfirm = false },
+        )
     }
 }
 

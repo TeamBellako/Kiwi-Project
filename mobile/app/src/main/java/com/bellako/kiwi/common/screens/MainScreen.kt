@@ -49,6 +49,8 @@ import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.combat.model.CombatViewModel
+import com.bellako.kiwi.features.combat.screens.CombatScreen
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
 import com.bellako.kiwi.features.conversations.screens.ConversationScreen
@@ -102,6 +104,7 @@ fun MainScreen(
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     notificationManager: NotificationManager,
     conversationViewModel: ConversationViewModel = hiltViewModel(),
+    combatViewModel: CombatViewModel = hiltViewModel(),
     tipsViewModel: TipsViewModel = hiltViewModel(),
 ) {
     val navController = rememberNavController()
@@ -131,6 +134,7 @@ fun MainScreen(
             appBarViewModel = appBarViewModel,
             notificationManager = notificationManager,
             conversationViewModel = conversationViewModel,
+            combatViewModel = combatViewModel,
             tipsViewModel = tipsViewModel,
         )
     }
@@ -159,6 +163,7 @@ private fun AppScreen(
     appBarViewModel: AppBarViewModel,
     notificationManager: NotificationManager,
     conversationViewModel: ConversationViewModel,
+    combatViewModel: CombatViewModel,
     tipsViewModel: TipsViewModel,
 ) {
     val isLoginCompleted = usersViewModel.isLoginCompleted.collectAsState().value
@@ -170,6 +175,10 @@ private fun AppScreen(
 
     val activeConversation by conversationViewModel.active.collectAsState()
     val isConversationVisible by conversationViewModel.isVisible.collectAsState()
+
+    val activeCombat by combatViewModel.active.collectAsState()
+    val isCombatVisible by combatViewModel.isVisible.collectAsState()
+    val skillsState by skillsViewModel.state.collectAsState()
 
     val isTipVisible by tipsViewModel.isVisible.collectAsState()
 
@@ -217,7 +226,7 @@ private fun AppScreen(
                         skillsViewModel = skillsViewModel,
                     )
 
-                    if (showDashboard && !isConversationVisible) {
+                    if (showDashboard && !isConversationVisible && !isCombatVisible) {
                         DashboardScreen(
                             usersViewModel = usersViewModel,
                             metricsViewModel = metricsViewModel,
@@ -265,6 +274,30 @@ private fun AppScreen(
                                         viewModel = conversationViewModel,
                                     )
                                 }
+                            }
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isCombatVisible,
+                        enter =
+                            slideInVertically(
+                                initialOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        exit =
+                            slideOutVertically(
+                                targetOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                    ) {
+                        activeCombat?.let { combat ->
+                            Box(modifier = Modifier.matchParentSize()) {
+                                CombatScreen(
+                                    combat = combat,
+                                    deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                    onConfirmAbandon = combatViewModel::confirmAbandon,
+                                )
                             }
                         }
                     }
