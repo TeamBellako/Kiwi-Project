@@ -57,12 +57,14 @@ public class CombatMapper {
             CombatActorDTO enemy,
             String enemyName,
             String enemySprite,
+            Long backgroundId,
             List<CombatActionDTO> log
     ) {
 
         return CombatDTO.builder()
                 .id(combat.getId())
                 .combatConfigId(combat.getCombatConfigId())
+                .backgroundId(backgroundId)
                 .turnNumber(combat.getTurnNumber())
                 .combatStatus(combat.getCombatStatus().toString())
                 .endsAt(combat.getEndsAt() != null

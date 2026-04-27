@@ -15,6 +15,8 @@ public class CombatDTO {
 
     private Long combatConfigId;
 
+    private Long backgroundId;
+
     private int turnNumber;
 
     private Long endsAt;
