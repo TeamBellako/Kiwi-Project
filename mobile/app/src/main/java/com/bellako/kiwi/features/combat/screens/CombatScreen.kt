@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -76,6 +78,11 @@ private const val DEFAULT_ENEMY_NAME = "Enemy"
 private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
 private const val BOTTOM_PANEL_GRADIENT_MID = 0.5f
 private const val BOTTOM_PANEL_GRADIENT_END = 1f
+private const val BACKGROUND_SATURATION = 0.45f
+private const val EDGE_FADE_TOP_ALPHA = 0.75f
+private const val EDGE_FADE_BOTTOM_ALPHA = 0.95f
+private const val EDGE_FADE_TOP_END = 0.18f
+private const val EDGE_FADE_BOTTOM_START = 0.55f
 private val STATUS_POPUP_BOTTOM_OFFSET = 44.dp
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -105,88 +112,117 @@ fun CombatScreen(
             )
         }
 
-    Column(
+    Box(
         modifier =
             Modifier
                 .fillMaxSize()
                 .background(colors.color2),
     ) {
-        CombatHeader(
-            title = "Ongoing Combat",
-            onClose = { showAbandonConfirm = true },
-        )
-
-        Box(
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-        ) {
-            EnemyArena(
-                enemySprite = combat.enemySprite,
-                currentHp = combat.enemy.stats.currentHp,
-                maxHp = combat.enemy.stats.maxHp,
-                endsAt = combat.endsAt,
-                context = context,
+        resolveBackground(combat.backgroundId)?.let { backgroundResId ->
+            Kiwi_Image(
+                painterResourceId = backgroundResId,
+                alt = "Combat background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                colorFilter =
+                    ColorFilter.colorMatrix(
+                        ColorMatrix().apply { setToSaturation(BACKGROUND_SATURATION) },
+                    ),
             )
 
-            if (isLogOpen) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = LOG_DIM_ALPHA)),
-                )
-
-                CombatLog(
-                    entries = logEntries,
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(
-                                horizontal = getResponsiveSizeWidth(Spacing.medium),
-                                vertical = getResponsiveSizeHeight(Spacing.small),
-                            ).fillMaxHeight(LOG_HEIGHT_FRACTION),
-                )
-            }
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                0f to colors.color2.copy(alpha = EDGE_FADE_TOP_ALPHA),
+                                EDGE_FADE_TOP_END to Color.Transparent,
+                                EDGE_FADE_BOTTOM_START to Color.Transparent,
+                                1f to colors.color2.copy(alpha = EDGE_FADE_BOTTOM_ALPHA),
+                            ),
+                        ),
+            )
         }
 
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            BOTTOM_PANEL_GRADIENT_START to Color.Transparent,
-                            BOTTOM_PANEL_GRADIENT_MID to colors.color2,
-                            BOTTOM_PANEL_GRADIENT_END to colors.color2,
+        Column(modifier = Modifier.fillMaxSize()) {
+            CombatHeader(
+                title = "Ongoing Combat",
+                onClose = { showAbandonConfirm = true },
+            )
+
+            Box(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+            ) {
+                EnemyArena(
+                    enemySprite = combat.enemySprite,
+                    currentHp = combat.enemy.stats.currentHp,
+                    maxHp = combat.enemy.stats.maxHp,
+                    endsAt = combat.endsAt,
+                    context = context,
+                )
+
+                if (isLogOpen) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = LOG_DIM_ALPHA)),
+                    )
+
+                    CombatLog(
+                        entries = logEntries,
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(
+                                    horizontal = getResponsiveSizeWidth(Spacing.medium),
+                                    vertical = getResponsiveSizeHeight(Spacing.small),
+                                ).fillMaxHeight(LOG_HEIGHT_FRACTION),
+                    )
+                }
+            }
+
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.verticalGradient(
+                                BOTTOM_PANEL_GRADIENT_START to Color.Transparent,
+                                BOTTOM_PANEL_GRADIENT_MID to colors.color2,
+                                BOTTOM_PANEL_GRADIENT_END to colors.color2,
+                            ),
+                        ).padding(
+                            horizontal = getResponsiveSizeWidth(Spacing.medium),
+                            vertical = getResponsiveSizeHeight(Spacing.small),
                         ),
-                    ).padding(
-                        horizontal = getResponsiveSizeWidth(Spacing.medium),
-                        vertical = getResponsiveSizeHeight(Spacing.small),
-                    ),
-        ) {
-            CombatTurnIndicator(
-                message = turnMessage,
-                isLogOpen = isLogOpen,
-                onClick = { isLogOpen = !isLogOpen },
-            )
+            ) {
+                CombatTurnIndicator(
+                    message = turnMessage,
+                    isLogOpen = isLogOpen,
+                    onClick = { isLogOpen = !isLogOpen },
+                )
 
-            Kiwi_Spacer(Spacing.medium)
+                Kiwi_Spacer(Spacing.medium)
 
-            PlayerControls(
-                deckSkills = deckSkills,
-                userActor = combat.user,
-                isOverlayOpen = isOverlayOpen,
-                selectedStatus = selectedStatus,
-                onSkillClick = onSkillClick,
-                onStatusClick = { status ->
-                    selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
-                },
-                onDismissPopup = { selectedStatus = null },
-            )
+                PlayerControls(
+                    deckSkills = deckSkills,
+                    userActor = combat.user,
+                    isOverlayOpen = isOverlayOpen,
+                    selectedStatus = selectedStatus,
+                    onSkillClick = onSkillClick,
+                    onStatusClick = { status ->
+                        selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
+                    },
+                    onDismissPopup = { selectedStatus = null },
+                )
 
-            Kiwi_Spacer(Spacing.large)
+                Kiwi_Spacer(Spacing.large)
+            }
         }
     }
 
@@ -349,6 +385,12 @@ private fun resolveEnemySprite(
     return if (resolved != 0) resolved else R.drawable.liria_neutral
 }
 
+private fun resolveBackground(backgroundId: Long?): Int? =
+    when (backgroundId) {
+        1L -> R.drawable.background_mindveil
+        else -> null
+    }
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Suppress("MagicNumber")
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
@@ -435,6 +477,7 @@ private fun previewCombat(): CombatDomain =
     CombatTestFactory.validCombatDomain(
         enemyName = "Procrastinogre",
         enemySprite = "liria_neutral",
+        backgroundId = 1L,
         endsAt = System.currentTimeMillis() + 7L * 3600L * 1000L,
         enemy =
             CombatTestFactory.validCombatActorDomain(

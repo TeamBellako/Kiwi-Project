@@ -121,6 +121,7 @@ data class CombatDomain(
     val combatStatus: CombatGeneralStatus,
     val enemyName: String,
     val enemySprite: String,
+    val backgroundId: Long? = null,
     val user: CombatActorDomain,
     val enemy: CombatActorDomain,
     val log: List<CombatActionDomain> = emptyList(),

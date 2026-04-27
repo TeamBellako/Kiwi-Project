@@ -82,6 +82,7 @@ data class CombatDTO(
     val combatStatus: String,
     val enemyName: String,
     val enemySprite: String,
+    val backgroundId: Long? = null,
     val user: CombatActorDTO,
     val enemy: CombatActorDTO,
     val log: List<CombatActionDTO> = emptyList(),
