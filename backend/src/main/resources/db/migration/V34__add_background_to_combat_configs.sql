@@ -6,6 +6,6 @@ ALTER TABLE combat_configs
         ON DELETE SET NULL
         ON UPDATE CASCADE;
 
-UPDATE backgrounds SET name = 'mindveil_background' WHERE id = 1;
+UPDATE backgrounds SET name = 'background_mindveil' WHERE id = 1;
 
 UPDATE combat_configs SET background = 1 WHERE id = 1;
