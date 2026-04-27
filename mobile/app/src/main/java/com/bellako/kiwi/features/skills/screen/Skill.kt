@@ -73,12 +73,12 @@ fun SkillComponent(
                 .pointerInput(isDisabled) {
                     detectTapGestures(
                         onTap = {
+                            showModal = true
+                        },
+                        onLongPress = {
                             if (!isDisabled) {
                                 onClick()
                             }
-                        },
-                        onLongPress = {
-                            showModal = true
                         },
                     )
                 },
