@@ -178,6 +178,7 @@ private fun AppScreen(
 
     val activeCombat by combatViewModel.active.collectAsState()
     val isCombatVisible by combatViewModel.isVisible.collectAsState()
+    val isCombatTurnPlaying by combatViewModel.isTurnPlaying.collectAsState()
     val skillsState by skillsViewModel.state.collectAsState()
 
     val isTipVisible by tipsViewModel.isVisible.collectAsState()
@@ -296,7 +297,9 @@ private fun AppScreen(
                                 CombatScreen(
                                     combat = combat,
                                     deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                    isTurnPlaying = isCombatTurnPlaying,
                                     onConfirmAbandon = combatViewModel::confirmAbandon,
+                                    onSkillClick = combatViewModel::executeTurn,
                                 )
                             }
                         }

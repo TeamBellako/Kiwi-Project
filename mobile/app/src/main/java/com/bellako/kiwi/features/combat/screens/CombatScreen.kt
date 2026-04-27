@@ -90,6 +90,7 @@ private val STATUS_POPUP_BOTTOM_OFFSET = 44.dp
 fun CombatScreen(
     combat: CombatDomain,
     deckSkills: List<SkillDomain>,
+    isTurnPlaying: Boolean = false,
     onConfirmAbandon: () -> Unit = {},
     onSkillClick: (Long) -> Unit = {},
 ) {
@@ -98,7 +99,7 @@ fun CombatScreen(
     var isLogOpen by rememberSaveable(combat.id) { mutableStateOf(false) }
     var selectedStatus by remember(combat.id) { mutableStateOf<CombatActiveStatusDomain?>(null) }
     var showAbandonConfirm by rememberSaveable(combat.id) { mutableStateOf(false) }
-    val isOverlayOpen = isLogOpen || selectedStatus != null
+    val isOverlayOpen = isLogOpen || selectedStatus != null || isTurnPlaying
 
     val enemyName = combat.enemyName.ifBlank { DEFAULT_ENEMY_NAME }
     val turnMessage = currentTurnMessage(combat, enemyName)

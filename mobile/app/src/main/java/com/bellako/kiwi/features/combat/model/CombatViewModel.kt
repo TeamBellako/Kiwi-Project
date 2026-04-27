@@ -7,9 +7,15 @@ import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.features.combat.data.CombatActionDomain
+import com.bellako.kiwi.features.combat.data.CombatActionType
+import com.bellako.kiwi.features.combat.data.CombatActiveStatusDomain
+import com.bellako.kiwi.features.combat.data.CombatActor
+import com.bellako.kiwi.features.combat.data.CombatActorDomain
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.data.CombatTurnResultDomain
+import com.bellako.kiwi.features.combat.data.SkillEffectResultDomain
+import com.bellako.kiwi.features.combat.data.SkillEffectResultType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +28,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val DISMISS_ANIMATION_DURATION_MS = 500L
+private const val TURN_INITIAL_DELAY_MS = 250L
+private const val TURN_ACTION_DELAY_MS = 800L
 
 @OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
@@ -39,6 +47,9 @@ class CombatViewModel
 
         private val _lastTurnActions = MutableStateFlow<List<CombatActionDomain>>(emptyList())
         val lastTurnActions: StateFlow<List<CombatActionDomain>> = _lastTurnActions.asStateFlow()
+
+        private val _isTurnPlaying = MutableStateFlow(false)
+        val isTurnPlaying: StateFlow<Boolean> = _isTurnPlaying.asStateFlow()
 
         init {
             GlobalScope.launch(Dispatchers.Main) {
@@ -76,12 +87,16 @@ class CombatViewModel
 
         fun executeTurn(skillId: Long) {
             val current = _active.value ?: return
+            if (_isTurnPlaying.value) return
             viewModelScope.launch {
+                _isTurnPlaying.value = true
                 try {
                     val result = repository.executeTurn(current.id, skillId)
-                    applyTurnResult(result)
+                    playTurnResult(result)
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
+                } finally {
+                    _isTurnPlaying.value = false
                 }
             }
         }
@@ -149,4 +164,146 @@ class CombatViewModel
                 )
             _lastTurnActions.value = result.actions
         }
+
+        private suspend fun playTurnResult(result: CombatTurnResultDomain) {
+            val initial = _active.value ?: return
+            var state = initial.copy(turnNumber = result.turnNumber)
+            _active.value = state
+
+            if (result.actions.isNotEmpty()) {
+                delay(TURN_INITIAL_DELAY_MS)
+            }
+
+            for (action in result.actions) {
+                state = applyAction(state, action)
+                _active.value = state
+                delay(TURN_ACTION_DELAY_MS)
+            }
+
+            val isTerminal = result.combatStatus != CombatGeneralStatus.ONGOING
+            _active.value =
+                state.copy(
+                    combatStatus = result.combatStatus,
+                    onCompletedEvent = if (isTerminal) result.onCompletedEvent else null,
+                    onCompletedEntityId = if (isTerminal) result.onCompletedEntityId else null,
+                )
+            _lastTurnActions.value = result.actions
+        }
+
+        private fun applyAction(
+            combat: CombatDomain,
+            action: CombatActionDomain,
+        ): CombatDomain {
+            val withLog = combat.copy(log = combat.log + action)
+            return when (action.actionType) {
+                CombatActionType.SKILL_USED ->
+                    action.skillEffectsResults.fold(withLog) { acc, effect -> applyEffect(acc, effect) }
+                CombatActionType.ACTOR_DAMAGED_BY_STATE -> {
+                    val damage = (action.stateEffectValue ?: 0f).toInt()
+                    if (damage == 0) withLog else applyHpDelta(withLog, action.actor, -damage)
+                }
+                CombatActionType.STATUS_TURN_REDUCED ->
+                    updateActiveStatuses(withLog, action.actor) { statuses ->
+                        statuses.map { status ->
+                            if (status.stateId == action.stateId) {
+                                status.copy(remainingTurns = status.remainingTurns - 1)
+                            } else {
+                                status
+                            }
+                        }
+                    }
+                CombatActionType.STATUS_FINISHED ->
+                    updateActiveStatuses(withLog, action.actor) { statuses ->
+                        statuses.filterNot { it.stateId == action.stateId }
+                    }
+                else -> withLog
+            }
+        }
+
+        private fun applyEffect(
+            combat: CombatDomain,
+            effect: SkillEffectResultDomain,
+        ): CombatDomain =
+            when (effect.typeResult) {
+                SkillEffectResultType.DAMAGE ->
+                    applyHpDelta(combat, effect.target, -(effect.value ?: 0f).toInt())
+                SkillEffectResultType.HEAL ->
+                    applyHpDelta(combat, effect.target, (effect.value ?: 0f).toInt())
+                SkillEffectResultType.MODIFY_STAT ->
+                    applyStatDelta(combat, effect.target, effect.statAffected, (effect.value ?: 0f).toInt())
+                SkillEffectResultType.STATUS_APPLIED -> {
+                    val status = effect.appliedStatus
+                    if (status == null) {
+                        combat
+                    } else {
+                        updateActiveStatuses(combat, effect.target) { it + status }
+                    }
+                }
+                SkillEffectResultType.STATUS_REMOVED -> {
+                    val statusId = effect.appliedStatus?.stateId
+                    if (statusId == null) {
+                        combat
+                    } else {
+                        updateActiveStatuses(combat, effect.target) { statuses ->
+                            statuses.filterNot { it.stateId == statusId }
+                        }
+                    }
+                }
+                SkillEffectResultType.MISS -> combat
+            }
+
+        private fun applyHpDelta(
+            combat: CombatDomain,
+            target: CombatActor,
+            delta: Int,
+        ): CombatDomain =
+            updateActor(combat, target) { actor ->
+                val newHp = (actor.stats.currentHp + delta).coerceIn(0, actor.stats.maxHp)
+                actor.copy(stats = actor.stats.copy(currentHp = newHp))
+            }
+
+        @Suppress("CyclomaticComplexMethod")
+        private fun applyStatDelta(
+            combat: CombatDomain,
+            target: CombatActor,
+            statName: String?,
+            delta: Int,
+        ): CombatDomain {
+            if (statName == null) return combat
+            return updateActor(combat, target) { actor ->
+                val s = actor.stats
+                val newStats =
+                    when (statName.lowercase()) {
+                        "currenthp" ->
+                            s.copy(currentHp = (s.currentHp + delta).coerceIn(0, s.maxHp))
+                        "maxhp" -> s.copy(maxHp = s.maxHp + delta)
+                        "patk" -> s.copy(patk = s.patk + delta)
+                        "matk" -> s.copy(matk = s.matk + delta)
+                        "pdef" -> s.copy(pdef = s.pdef + delta)
+                        "mdef" -> s.copy(mdef = s.mdef + delta)
+                        "acc" -> s.copy(acc = s.acc + delta)
+                        "eva" -> s.copy(eva = s.eva + delta)
+                        "lck" -> s.copy(lck = s.lck + delta)
+                        else -> s
+                    }
+                actor.copy(stats = newStats)
+            }
+        }
+
+        private fun updateActiveStatuses(
+            combat: CombatDomain,
+            target: CombatActor,
+            transform: (List<CombatActiveStatusDomain>) -> List<CombatActiveStatusDomain>,
+        ): CombatDomain = updateActor(combat, target) { it.copy(activeStatus = transform(it.activeStatus)) }
+
+        private fun updateActor(
+            combat: CombatDomain,
+            target: CombatActor,
+            transform: (CombatActorDomain) -> CombatActorDomain,
+        ): CombatDomain =
+            when (target) {
+                CombatActor.USER -> combat.copy(user = transform(combat.user))
+                CombatActor.ENEMY -> combat.copy(enemy = transform(combat.enemy))
+                CombatActor.ALLY -> combat
+            }
     }
