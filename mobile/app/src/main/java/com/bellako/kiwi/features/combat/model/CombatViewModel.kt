@@ -29,8 +29,7 @@ import javax.inject.Inject
 
 private const val DISMISS_ANIMATION_DURATION_MS = 500L
 private const val TURN_INITIAL_DELAY_MS = 250L
-private const val LOG_BLINK_DELAY_MS = 1000L
-private const val STATS_LERP_DELAY_MS = 700L
+private const val TURN_BEAT_MS = 1500L
 
 @OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
@@ -199,10 +198,9 @@ class CombatViewModel
                 actions.firstOrNull()?.actor == CombatActor.USER &&
                 actions.first().actionType == CombatActionType.SKILL_USED
             ) {
-                delay(LOG_BLINK_DELAY_MS)
                 state = applyActionEffects(state, actions.first())
                 _active.value = state
-                delay(STATS_LERP_DELAY_MS)
+                delay(TURN_BEAT_MS)
                 startIndex = 1
             } else if (actions.isNotEmpty()) {
                 delay(TURN_INITIAL_DELAY_MS)
@@ -211,11 +209,9 @@ class CombatViewModel
             for (i in startIndex until actions.size) {
                 val action = actions[i]
                 state = state.copy(log = state.log + action)
-                _active.value = state
-                delay(LOG_BLINK_DELAY_MS)
                 state = applyActionEffects(state, action)
                 _active.value = state
-                delay(STATS_LERP_DELAY_MS)
+                delay(TURN_BEAT_MS)
             }
 
             val isTerminal = result.combatStatus != CombatGeneralStatus.ONGOING

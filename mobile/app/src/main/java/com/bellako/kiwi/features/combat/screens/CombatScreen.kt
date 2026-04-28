@@ -376,24 +376,21 @@ private fun currentTurnMessage(
     enemyName: String,
 ): AnnotatedString {
     val colors = LocalKiwiColors.current
-    val lastEnemySkill =
-        combat.log.lastOrNull {
-            it.actor == CombatActor.ENEMY && it.actionType == CombatActionType.SKILL_USED
+    val lastSkill =
+        combat.log.lastOrNull { it.actionType == CombatActionType.SKILL_USED }
+    val skillName = lastSkill?.skillName
+    if (lastSkill == null || skillName == null) return userTurnMessage()
+
+    val actorName = if (lastSkill.actor == CombatActor.USER) "You" else enemyName
+    return buildAnnotatedString {
+        withStyle(SpanStyle(color = colors.color7A, fontStyle = FontStyle.Italic)) {
+            append(actorName)
         }
-    val skillName = lastEnemySkill?.skillName
-    return if (lastEnemySkill != null && skillName != null) {
-        buildAnnotatedString {
-            withStyle(SpanStyle(color = colors.color7A, fontStyle = FontStyle.Italic)) {
-                append(enemyName)
-            }
-            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(" used ") }
-            withStyle(SpanStyle(color = colors.color8A, fontStyle = FontStyle.Italic)) {
-                append(skillName)
-            }
-            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("!") }
+        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(" used ") }
+        withStyle(SpanStyle(color = colors.color8A, fontStyle = FontStyle.Italic)) {
+            append(skillName)
         }
-    } else {
-        userTurnMessage()
+        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("!") }
     }
 }
 
