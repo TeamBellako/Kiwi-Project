@@ -95,11 +95,12 @@ class SkillsViewModel
         private suspend fun loadAllSkills() {
             val skillDTOs = skillsRepository.getAllSkills()
 
-            val goalsData = loadSkillGoals()
+            val goalsData: Map<Long, GoalData> = loadSkillGoals()
             val updatedSkills =
                 skillDTOs.map { dto ->
                     if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL && dto.cooldownGoalId != null) {
-                        SkillDataMapper.toGoalDomain(dto, goalsData[dto.cooldownGoalId]!!)
+                        val skillGoalData = goalsData[dto.cooldownGoalId]
+                        SkillDataMapper.toGoalDomain(dto, skillGoalData!!)
                     } else {
                         SkillDataMapper.toDomainWithoutGoal(dto)
                     }
@@ -403,12 +404,24 @@ class SkillsViewModel
             return null
         }
 
-        private suspend fun loadSkillGoals(): Map<Long, GoalData> =
-            goalsRepository
-                .getSkillGoals()
-                .getOrNull()
-                ?.associate { it.id to it.toGoalData() }
-                ?: emptyMap()
+        private suspend fun loadSkillGoals(): Map<Long, GoalData> {
+            val skillGoalsResult: Result<List<UserGoalStatusDTO>> = goalsRepository.getSkillGoals()
+
+            val skillGoals: List<UserGoalStatusDTO>? = skillGoalsResult.getOrNull()
+
+            if (skillGoals == null) {
+                return emptyMap()
+            }
+
+            val skillGoalsById: Map<Long, GoalData> =
+                skillGoals.associate { skillGoal ->
+                    val id: Long = skillGoal.goalId
+                    val goalData: GoalData = skillGoal.toGoalData()
+                    id to goalData
+                }
+
+            return skillGoalsById
+        }
 
         private fun UserGoalStatusDTO.toGoalData(): GoalData =
             GoalData(
