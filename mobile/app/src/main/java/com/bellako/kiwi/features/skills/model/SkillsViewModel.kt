@@ -62,6 +62,11 @@ class SkillsViewModel
                     giveSkill(payload.targetEntityId.toLong())
                 }
             }
+            GlobalScope.launch(Dispatchers.Main) {
+                listenToEvent(EventType.THROW_SKILL) {
+                    loadSkills()
+                }
+            }
         }
 
         override fun notify(

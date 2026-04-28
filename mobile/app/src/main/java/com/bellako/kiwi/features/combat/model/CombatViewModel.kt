@@ -107,6 +107,10 @@ class CombatViewModel
                 _isTurnPlaying.value = true
                 try {
                     val result = repository.executeTurn(current.id, skillId)
+                    EventBus.emitEvent(
+                        EventType.THROW_SKILL,
+                        EventPayload.EntityIdPayload(skillId.toInt()),
+                    )
                     playTurnResult(result, hasOptimisticPlayerSkill = hasOptimisticPlayerSkill)
                 } catch (e: Throwable) {
                     if (hasOptimisticPlayerSkill) {
