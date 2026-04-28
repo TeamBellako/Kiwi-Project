@@ -49,7 +49,11 @@ import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
+import com.bellako.kiwi.features.combat.data.CombatActionType
+import com.bellako.kiwi.features.combat.data.CombatDomain
+import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.model.CombatViewModel
+import com.bellako.kiwi.features.combat.screens.CombatDefeatScreen
 import com.bellako.kiwi.features.combat.screens.CombatScreen
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
@@ -296,18 +300,26 @@ private fun AppScreen(
                     ) {
                         activeCombat?.let { combat ->
                             Box(modifier = Modifier.matchParentSize()) {
-                                CombatScreen(
-                                    combat = combat,
-                                    deckSkills = skillsState?.deckSkills ?: emptyList(),
-                                    isTurnPlaying = isCombatTurnPlaying,
-                                    onConfirmAbandon = combatViewModel::confirmAbandon,
-                                    onSkillClick = { skillId, skillName ->
-                                        combatViewModel.executeTurn(skillId, skillName)
-                                    },
-                                    onApplyGoalProgress = { skillId, goalId, newProgress ->
-                                        skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
-                                    },
-                                )
+                                if (isCombatDefeat(combat)) {
+                                    CombatDefeatScreen(
+                                        combat = combat,
+                                        deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                        onContinue = combatViewModel::dismiss,
+                                    )
+                                } else {
+                                    CombatScreen(
+                                        combat = combat,
+                                        deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                        isTurnPlaying = isCombatTurnPlaying,
+                                        onConfirmAbandon = combatViewModel::confirmAbandon,
+                                        onSkillClick = { skillId, skillName ->
+                                            combatViewModel.executeTurn(skillId, skillName)
+                                        },
+                                        onApplyGoalProgress = { skillId, goalId, newProgress ->
+                                            skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -398,6 +410,10 @@ private fun TipModal(
         }
     }
 }
+
+private fun isCombatDefeat(combat: CombatDomain): Boolean =
+    combat.combatStatus == CombatGeneralStatus.USER_LOST &&
+        combat.log.none { it.actionType == CombatActionType.ABANDON }
 
 private fun isLoginScreen(route: String?): Boolean =
     route == null ||
