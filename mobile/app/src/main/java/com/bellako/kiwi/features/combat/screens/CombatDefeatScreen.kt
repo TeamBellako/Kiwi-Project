@@ -9,13 +9,16 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -67,6 +70,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
 private const val DEFEAT_BACKGROUND_SATURATION = 0.05f
+private const val DEFEAT_BACKGROUND_DIM_ALPHA = 0.7f
 private const val EDGE_FADE_TOP_ALPHA = 0.85f
 private const val EDGE_FADE_BOTTOM_ALPHA = 0.95f
 private const val EDGE_FADE_TOP_END = 0.18f
@@ -300,89 +304,113 @@ private fun SkillsUsedList(skillsUsed: List<SkillUsedSummary>) {
 private fun SkillUsedRow(entry: SkillUsedSummary) {
     val colors = LocalKiwiColors.current
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .background(
+                    color = colors.color3A,
+                    shape = RoundedCornerShape(getResponsiveSizeHeight(SKILL_CARD_RADIUS)),
+                ).border(
+                    width = getResponsiveSizeHeight(1.dp),
+                    color = colors.color5C,
+                    shape = RoundedCornerShape(getResponsiveSizeHeight(SKILL_CARD_RADIUS)),
+                ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .background(
-                        color = colors.color3A,
-                        shape = RoundedCornerShape(getResponsiveSizeHeight(SKILL_CARD_RADIUS)),
-                    ).border(
-                        width = getResponsiveSizeHeight(1.dp),
-                        color = colors.color5C,
-                        shape = RoundedCornerShape(getResponsiveSizeHeight(SKILL_CARD_RADIUS)),
-                    ).padding(
-                        horizontal = getResponsiveSizeWidth(Spacing.medium),
-                        vertical = getResponsiveSizeHeight(Spacing.small),
-                    ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier =
-                    Modifier
-                        .size(getResponsiveSizeHeight(SKILL_ICON_SIZE))
-                        .background(color = colors.color5, shape = CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (entry.iconRes != null) {
-                    Kiwi_Image(
-                        painterResourceId = entry.iconRes,
-                        alt = entry.name,
-                        modifier = Modifier.size(getResponsiveSizeHeight(SKILL_ICON_SIZE - 12.dp)),
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.size(getResponsiveSizeWidth(Spacing.small)))
-
-            Column {
-                Kiwi_Label2(
-                    KiwiTextArguments(
-                        text = entry.name,
-                        color = colors.colorF,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                )
-                Kiwi_P3(
-                    KiwiTextArguments(
-                        text = "x${entry.count}",
-                        color = colors.color7A,
-                    ),
-                )
-            }
-        }
+        SkillInfoColumn(
+            entry = entry,
+            modifier = Modifier.weight(1f),
+        )
 
         if (entry.equivalentText != null) {
-            Spacer(modifier = Modifier.size(getResponsiveSizeWidth(Spacing.small)))
             Box(
                 modifier =
                     Modifier
-                        .weight(1f)
-                        .background(
-                            color = colors.color3A,
-                            shape = RoundedCornerShape(getResponsiveSizeHeight(SKILL_CARD_RADIUS)),
-                        ).border(
-                            width = getResponsiveSizeHeight(1.dp),
-                            color = colors.color5C,
-                            shape = RoundedCornerShape(getResponsiveSizeHeight(SKILL_CARD_RADIUS)),
-                        ).padding(
-                            horizontal = getResponsiveSizeWidth(Spacing.medium),
-                            vertical = getResponsiveSizeHeight(Spacing.small),
-                        ),
-            ) {
-                Kiwi_P3(
-                    KiwiTextArguments(
-                        text = entry.equivalentText,
-                        color = colors.color7A,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    ),
+                        .fillMaxHeight()
+                        .width(getResponsiveSizeHeight(1.dp))
+                        .background(colors.color5C),
+            )
+            EquivalentColumn(
+                text = entry.equivalentText,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SkillInfoColumn(
+    entry: SkillUsedSummary,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalKiwiColors.current
+    Row(
+        modifier =
+            modifier.padding(
+                horizontal = getResponsiveSizeWidth(Spacing.medium),
+                vertical = getResponsiveSizeHeight(Spacing.small),
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(getResponsiveSizeHeight(SKILL_ICON_SIZE))
+                    .background(color = colors.color5, shape = CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (entry.iconRes != null) {
+                Kiwi_Image(
+                    painterResourceId = entry.iconRes,
+                    alt = entry.name,
+                    modifier = Modifier.size(getResponsiveSizeHeight(SKILL_ICON_SIZE - 12.dp)),
                 )
             }
         }
+
+        Spacer(modifier = Modifier.size(getResponsiveSizeWidth(Spacing.small)))
+
+        Column {
+            Kiwi_Label2(
+                KiwiTextArguments(
+                    text = entry.name,
+                    color = colors.colorF,
+                    fontWeight = FontWeight.Bold,
+                ),
+            )
+            Kiwi_P3(
+                KiwiTextArguments(
+                    text = "x${entry.count}",
+                    color = colors.color7A,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun EquivalentColumn(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalKiwiColors.current
+    Box(
+        modifier =
+            modifier.padding(
+                horizontal = getResponsiveSizeWidth(Spacing.medium),
+                vertical = getResponsiveSizeHeight(Spacing.small),
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Kiwi_P3(
+            KiwiTextArguments(
+                text = text,
+                color = colors.color7A,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            ),
+        )
     }
 }
 
@@ -399,6 +427,12 @@ private fun DefeatBackground(backgroundId: Long?) {
             ColorFilter.colorMatrix(
                 ColorMatrix().apply { setToSaturation(DEFEAT_BACKGROUND_SATURATION) },
             ),
+    )
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(colors.color2.copy(alpha = DEFEAT_BACKGROUND_DIM_ALPHA)),
     )
     Box(
         modifier =
