@@ -261,6 +261,9 @@ fun SkillDetails(
                         (goalProgress * target).toInt()
 
                     onApplyGoalProgress(skill.id, skill.goalData.id, newValue)
+                    if (newValue >= target) {
+                        onDismiss()
+                    }
                 }
             }
         }

@@ -209,7 +209,7 @@ class SkillsViewModel
                     ),
                 )
 
-                if (!skillDto.cooldown) {
+                if (!skillDto.cooldown && skillState is SkillDomain.Time) {
                     notifyCooldownFinished(skillState)
                 }
 
