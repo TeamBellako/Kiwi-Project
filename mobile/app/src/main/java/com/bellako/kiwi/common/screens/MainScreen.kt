@@ -207,7 +207,7 @@ private fun AppScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             bottomBar = {
-                if (!isLoginScreen && isLoginCompleted) {
+                if (!isLoginScreen && isLoginCompleted && !isCombatVisible) {
                     AppBarScreen(
                         navController = navController,
                         appBarViewModel = appBarViewModel,
@@ -246,6 +246,7 @@ private fun AppScreen(
                     LaunchedEffect(isLoginCompleted) {
                         if (isLoginCompleted) {
                             skillsViewModel.onUserLoggedIn()
+                            combatViewModel.tryResumeActive()
                         }
                     }
 

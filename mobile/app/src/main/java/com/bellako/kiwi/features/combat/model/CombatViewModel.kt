@@ -73,6 +73,21 @@ class CombatViewModel
             }
         }
 
+        fun tryResumeActive() {
+            if (_active.value != null) return
+            viewModelScope.launch {
+                try {
+                    val combat = repository.getActiveCombat() ?: return@launch
+                    if (combat.combatStatus != CombatGeneralStatus.ONGOING) return@launch
+                    _active.value = combat
+                    _lastTurnActions.value = combat.log
+                    _isVisible.value = true
+                } catch (e: Throwable) {
+                    setUiState(mapExceptionToUIState(e))
+                }
+            }
+        }
+
         fun confirmAbandon() {
             val current = _active.value ?: return
             viewModelScope.launch {

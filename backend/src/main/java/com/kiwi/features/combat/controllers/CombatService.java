@@ -1,5 +1,6 @@
 package com.kiwi.features.combat.controllers;
 
+import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.mappers.*;
 import com.kiwi.features.combat.data.persistence.*;
 import com.kiwi.features.combat.repositories.*;
@@ -52,13 +53,25 @@ public class CombatService {
 
     //------------------------------------------------------------------------------------------------------------------
 
+    public Optional<CombatPersistence> findActiveCombat(Long userId) {
+
+        return combatRepository.findFirstByUserIdAndCombatStatus(userId, CombatGeneralStatus.ONGOING);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
     public CombatPersistence startOrResume(Long userId, Long configId) {
 
         Optional<CombatPersistence> existing =
                 combatRepository.findByUserIdAndCombatConfigId(userId, configId);
 
         if (existing.isPresent()) {
-            return existing.get();
+            CombatPersistence previous = existing.get();
+            if (previous.getCombatStatus() == CombatGeneralStatus.ONGOING) {
+                return previous;
+            }
+            combatRepository.delete(previous);
+            combatRepository.flush();
         }
 
         UserStatsPersistence stats = userStatsRepository.findById(userId).orElseThrow();
@@ -85,6 +98,36 @@ public class CombatService {
         combatLogService.deleteCombatLog(combatId);
         lastSkillService.deleteByCombatId(combatId);
         blockedSkillService.deleteByCombatId(combatId);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public void resetStatsToOriginalConfig(CombatPersistence combat) {
+
+        UserStatsPersistence stats = userStatsRepository.findById(combat.getUserId()).orElseThrow();
+        EnemyPersistence enemy = enemyRepository.findById(combat.getEnemyId()).orElseThrow();
+
+        combat.setUserHp(stats.getMaxHp());
+        combat.setUserMaxHp(stats.getMaxHp());
+        combat.setUserPatk(stats.getPatk());
+        combat.setUserMatk(stats.getMatk());
+        combat.setUserPdef(stats.getPdef());
+        combat.setUserMdef(stats.getMdef());
+        combat.setUserAcc(stats.getAcc());
+        combat.setUserEva(stats.getEva());
+        combat.setUserLck(stats.getLck());
+
+        combat.setEnemyHp(enemy.getMaxHp());
+        combat.setEnemyMaxHp(enemy.getMaxHp());
+        combat.setEnemyPatk(enemy.getPatk());
+        combat.setEnemyMatk(enemy.getMatk());
+        combat.setEnemyPdef(enemy.getPdef());
+        combat.setEnemyMdef(enemy.getMdef());
+        combat.setEnemyAcc(enemy.getAcc());
+        combat.setEnemyEva(enemy.getEva());
+        combat.setEnemyLck(enemy.getLck());
+
+        combatRepository.save(combat);
     }
 
     //------------------------------------------------------------------------------------------------------------------

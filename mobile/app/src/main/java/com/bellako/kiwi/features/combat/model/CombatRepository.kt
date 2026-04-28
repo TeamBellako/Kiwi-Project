@@ -7,6 +7,11 @@ import com.bellako.kiwi.features.combat.data.CombatTurnResultDomain
 class CombatRepository(
     private val api: ICombatAPI,
 ) {
+    suspend fun getActiveCombat(): CombatDomain? {
+        val dto = api.getActiveCombat() ?: return null
+        return CombatDataMapper.toDomain(dto)
+    }
+
     suspend fun startOrResumeCombat(combatConfigId: Long): CombatDomain =
         CombatDataMapper.toDomain(api.startOrResumeCombat(combatConfigId))
 
