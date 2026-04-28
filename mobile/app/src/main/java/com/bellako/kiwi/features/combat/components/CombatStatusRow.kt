@@ -138,8 +138,7 @@ fun CombatStatusPopup(
     }
 }
 
-private fun remainingTurnsLabel(remainingTurns: Int): String =
-    if (remainingTurns == 1) "1 Turn Left" else "$remainingTurns Turns Left"
+private fun remainingTurnsLabel(remainingTurns: Int): String = if (remainingTurns == 1) "1 Turn Left" else "$remainingTurns Turns Left"
 
 private fun statusIcon(status: CombatActiveStatusDomain): ImageVector {
     val key = status.name.lowercase()

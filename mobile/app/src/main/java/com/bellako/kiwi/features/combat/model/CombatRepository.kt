@@ -12,17 +12,14 @@ class CombatRepository(
         return CombatDataMapper.toDomain(dto)
     }
 
-    suspend fun startOrResumeCombat(combatConfigId: Long): CombatDomain =
-        CombatDataMapper.toDomain(api.startOrResumeCombat(combatConfigId))
+    suspend fun startOrResumeCombat(combatConfigId: Long): CombatDomain = CombatDataMapper.toDomain(api.startOrResumeCombat(combatConfigId))
 
     suspend fun executeTurn(
         combatId: Long,
         skillId: Long,
     ): CombatTurnResultDomain = CombatDataMapper.toDomain(api.executeTurn(combatId, skillId))
 
-    suspend fun timeoutCombat(combatId: Long): CombatTurnResultDomain =
-        CombatDataMapper.toDomain(api.timeoutCombat(combatId))
+    suspend fun timeoutCombat(combatId: Long): CombatTurnResultDomain = CombatDataMapper.toDomain(api.timeoutCombat(combatId))
 
-    suspend fun abandonCombat(combatId: Long): CombatTurnResultDomain =
-        CombatDataMapper.toDomain(api.abandonCombat(combatId))
+    suspend fun abandonCombat(combatId: Long): CombatTurnResultDomain = CombatDataMapper.toDomain(api.abandonCombat(combatId))
 }

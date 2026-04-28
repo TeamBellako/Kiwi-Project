@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.AnnotatedString.Builder as AnnotatedStringBuilder
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,12 +38,13 @@ import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.tests.CombatTestFactory
-import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.KiwiColorsData
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
+import androidx.compose.ui.text.AnnotatedString.Builder as AnnotatedStringBuilder
 
 private val LOG_RADIUS = 12.dp
 private val LOG_INNER_PADDING = 16.dp
@@ -54,11 +54,17 @@ private const val BLINK_FADE_MS = 220
 private const val BLINK_CYCLES = 2
 
 sealed class CombatLogEntry {
-    data class Action(val text: AnnotatedString) : CombatLogEntry()
+    data class Action(
+        val text: AnnotatedString,
+    ) : CombatLogEntry()
 
-    data class TurnSeparator(val turnNumber: Int) : CombatLogEntry()
+    data class TurnSeparator(
+        val turnNumber: Int,
+    ) : CombatLogEntry()
 
-    data class Intro(val text: AnnotatedString) : CombatLogEntry()
+    data class Intro(
+        val text: AnnotatedString,
+    ) : CombatLogEntry()
 }
 
 @Composable
