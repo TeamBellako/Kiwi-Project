@@ -3,6 +3,8 @@ package com.bellako.kiwi.features.combat.screens
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,10 +14,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -35,7 +41,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -73,6 +84,13 @@ private const val HEALTH_BAR_WIDTH_FRACTION = 0.6f
 private const val PLAYER_HEALTH_BAR_WIDTH_FRACTION = 0.5f
 private const val SPRITE_HEIGHT_FRACTION = 0.7f
 private const val LOG_HEIGHT_FRACTION = 0.85f
+private const val DAMAGE_WIGGLE_CYCLES = 4
+private const val DAMAGE_WIGGLE_AMPLITUDE_PX = 22f
+private const val DAMAGE_WIGGLE_STEP_MS = 50
+private const val DAMAGE_FLASH_CYCLES = 3
+private const val DAMAGE_FLASH_STEP_MS = 90L
+private const val DAMAGE_FLASH_RED_ALPHA = 0.65f
+private const val DAMAGE_FLASH_DIM_ALPHA = 0.4f
 private const val LOG_DIM_ALPHA = 0.55f
 private const val DEFAULT_ENEMY_NAME = "Enemy"
 private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
@@ -339,6 +357,41 @@ private fun EnemyArena(
     endsAt: Long?,
     context: Context,
 ) {
+    var previousHp by remember { mutableIntStateOf(currentHp) }
+    var damageTrigger by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(currentHp) {
+        if (currentHp < previousHp) damageTrigger++
+        previousHp = currentHp
+    }
+
+    val offsetX = remember { Animatable(0f) }
+    val redAlpha = remember { Animatable(0f) }
+    val spriteAlpha = remember { Animatable(1f) }
+
+    LaunchedEffect(damageTrigger) {
+        if (damageTrigger == 0) return@LaunchedEffect
+        coroutineScope {
+            launch {
+                repeat(DAMAGE_WIGGLE_CYCLES) {
+                    offsetX.animateTo(DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
+                    offsetX.animateTo(-DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
+                }
+                offsetX.animateTo(0f, tween(DAMAGE_WIGGLE_STEP_MS))
+            }
+            launch {
+                repeat(DAMAGE_FLASH_CYCLES) {
+                    redAlpha.snapTo(DAMAGE_FLASH_RED_ALPHA)
+                    spriteAlpha.snapTo(DAMAGE_FLASH_DIM_ALPHA)
+                    delay(DAMAGE_FLASH_STEP_MS)
+                    redAlpha.snapTo(0f)
+                    spriteAlpha.snapTo(1f)
+                    delay(DAMAGE_FLASH_STEP_MS)
+                }
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Kiwi_Image(
             painterResourceId = resolveEnemySprite(enemySprite, context),
@@ -346,8 +399,19 @@ private fun EnemyArena(
             modifier =
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .fillMaxHeight(SPRITE_HEIGHT_FRACTION),
+                    .fillMaxHeight(SPRITE_HEIGHT_FRACTION)
+                    .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                    .alpha(spriteAlpha.value),
             contentScale = ContentScale.Fit,
+            colorFilter =
+                if (redAlpha.value > 0f) {
+                    ColorFilter.tint(
+                        Color.Red.copy(alpha = redAlpha.value),
+                        BlendMode.SrcAtop,
+                    )
+                } else {
+                    null
+                },
         )
 
         Column(
