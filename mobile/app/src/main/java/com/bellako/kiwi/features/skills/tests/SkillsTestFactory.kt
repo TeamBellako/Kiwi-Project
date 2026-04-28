@@ -56,7 +56,7 @@ object SkillsTestFactory {
             isCooldown = true,
             deckSlot = 2,
             cooldownGoalId = 1001L,
-            goalData = GoalData("Do 10 push ups", 1, 10),
+            goalData = GoalData(1L, "Do 10 push ups", 1, 10, 1001L),
         )
 
     fun otherCooldownSkillUnequipped(): SkillDomain =

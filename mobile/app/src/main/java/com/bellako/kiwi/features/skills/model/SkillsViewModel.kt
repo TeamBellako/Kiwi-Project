@@ -99,8 +99,11 @@ class SkillsViewModel
             val updatedSkills =
                 skillDTOs.map { dto ->
                     if (CooldownType.valueOf(dto.cooldownType) == CooldownType.GOAL && dto.cooldownGoalId != null) {
-                        val skillGoalData = goalsData[dto.cooldownGoalId]
-                        SkillDataMapper.toGoalDomain(dto, skillGoalData!!)
+                        val skillGoalData =
+                            goalsData.values.find { it.goalId == dto.cooldownGoalId }
+                                ?: error("No GoalData found for cooldownGoalId=${dto.cooldownGoalId}")
+
+                        SkillDataMapper.toGoalDomain(dto, skillGoalData)
                     } else {
                         SkillDataMapper.toDomainWithoutGoal(dto)
                     }
@@ -415,7 +418,7 @@ class SkillsViewModel
 
             val skillGoalsById: Map<Long, GoalData> =
                 skillGoals.associate { skillGoal ->
-                    val id: Long = skillGoal.goalId
+                    val id: Long = skillGoal.id
                     val goalData: GoalData = skillGoal.toGoalData()
                     id to goalData
                 }
@@ -425,9 +428,11 @@ class SkillsViewModel
 
         private fun UserGoalStatusDTO.toGoalData(): GoalData =
             GoalData(
+                id = id,
                 action = action,
                 progress = value,
                 target = target,
+                goalId = goalId,
             )
 
         @RequiresApi(Build.VERSION_CODES.O)
