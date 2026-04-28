@@ -46,6 +46,7 @@ const val ALL_SKILLS_SECTION_INDEX = 4
 fun SkillsScreen(
     skillsViewModel: ISkillsViewModel,
     focusedSkillId: Long? = null,
+    isDeckLocked: Boolean = false,
 ) {
     val skillsState by skillsViewModel.state.collectAsState()
     val kiwiColors = LocalKiwiColors.current
@@ -103,6 +104,7 @@ fun SkillsScreen(
             skillsState?.let {
                 DeckGrid(
                     it.deckSkills,
+                    isLocked = isDeckLocked,
                     onClick =
                         { id ->
 
@@ -140,6 +142,7 @@ fun SkillsScreen(
             skillsState?.let {
                 AllSkillsGrid(
                     it.allSkills,
+                    isLocked = isDeckLocked,
                     onClick =
                         { id ->
 
@@ -165,6 +168,7 @@ fun DeckGrid(
     skills: List<SkillDomain>,
     onClick: (Long) -> Unit,
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
+    isLocked: Boolean = false,
 ) {
     val slotMap = skills.associateBy { it.deckSlot }
 
@@ -178,7 +182,7 @@ fun DeckGrid(
                 if (skill != null) {
                     SkillComponent(
                         skill = skill,
-                        isDisabled = false,
+                        isDisabled = isLocked,
                         onClick = { onClick(skill.id) },
                         modifier = Modifier.weight(SKILL_WEIGHT),
                         onApplyGoalProgress,
@@ -202,6 +206,7 @@ fun AllSkillsGrid(
     skills: List<SkillDomain>,
     onClick: (Long) -> Unit,
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
+    isLocked: Boolean = false,
 ) {
     skills.chunked(2).forEach { rowSkills ->
         Row(
@@ -211,7 +216,7 @@ fun AllSkillsGrid(
             rowSkills.forEach { skill ->
                 SkillComponent(
                     skill = skill,
-                    isDisabled = skill.deckSlot != 0,
+                    isDisabled = isLocked || skill.deckSlot != 0,
                     onClick = { onClick(skill.id) },
                     modifier = Modifier.weight(SKILL_WEIGHT),
                     onApplyGoalProgress,

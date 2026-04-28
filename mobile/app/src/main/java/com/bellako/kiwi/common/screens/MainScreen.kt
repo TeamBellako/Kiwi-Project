@@ -207,7 +207,7 @@ private fun AppScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             bottomBar = {
-                if (!isLoginScreen && isLoginCompleted && !isCombatVisible) {
+                if (!isLoginScreen && isLoginCompleted) {
                     AppBarScreen(
                         navController = navController,
                         appBarViewModel = appBarViewModel,
@@ -225,6 +225,7 @@ private fun AppScreen(
                         questsViewModel = questsViewModel,
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
+                        isCombatActive = activeCombat != null,
                     )
 
                     if (showDashboard && !isConversationVisible && !isCombatVisible) {
@@ -281,7 +282,7 @@ private fun AppScreen(
                     }
 
                     AnimatedVisibility(
-                        visible = isCombatVisible,
+                        visible = isCombatVisible && showDashboard,
                         enter =
                             slideInVertically(
                                 initialOffsetY = { fullHeight -> fullHeight },
@@ -417,6 +418,7 @@ fun AppNavHost(
     questsViewModel: IQuestsViewModel,
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
+    isCombatActive: Boolean = false,
 ) {
     NavHost(
         navController = navController,
@@ -512,7 +514,10 @@ fun AppNavHost(
 
         composable(ScreenRoutes.SKILLS) {
             AppScreenWrapper {
-                SkillsScreen(skillsViewModel = skillsViewModel)
+                SkillsScreen(
+                    skillsViewModel = skillsViewModel,
+                    isDeckLocked = isCombatActive,
+                )
             }
         }
 
@@ -525,6 +530,7 @@ fun AppNavHost(
             SkillsScreen(
                 skillsViewModel = skillsViewModel,
                 focusedSkillId = questId,
+                isDeckLocked = isCombatActive,
             )
         }
 
