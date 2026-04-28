@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -43,10 +44,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -54,8 +51,8 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.combat.components.CombatAbandonConfirmModal
 import com.bellako.kiwi.features.combat.components.CombatDeck
-import com.bellako.kiwi.features.combat.components.CombatHealthBar
 import com.bellako.kiwi.features.combat.components.CombatHeader
+import com.bellako.kiwi.features.combat.components.CombatHealthBar
 import com.bellako.kiwi.features.combat.components.CombatLog
 import com.bellako.kiwi.features.combat.components.CombatStatusPopup
 import com.bellako.kiwi.features.combat.components.CombatStatusRow
@@ -79,6 +76,10 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 private const val HEALTH_BAR_WIDTH_FRACTION = 0.6f
 private const val PLAYER_HEALTH_BAR_WIDTH_FRACTION = 0.5f
@@ -91,6 +92,15 @@ private const val DAMAGE_FLASH_CYCLES = 3
 private const val DAMAGE_FLASH_STEP_MS = 90L
 private const val DAMAGE_FLASH_RED_ALPHA = 0.65f
 private const val DAMAGE_FLASH_DIM_ALPHA = 0.4f
+private const val PLAYER_SHAKE_CYCLES = 4
+private const val PLAYER_SHAKE_AMPLITUDE_PX = 28f
+private const val PLAYER_SHAKE_STEP_MS = 50
+private const val PLAYER_FLASH_CYCLES = 2
+private const val PLAYER_FLASH_STEP_MS = 90L
+private const val PLAYER_FLASH_ALPHA = 0.15f
+private const val PLAYER_VIGNETTE_PEAK_ALPHA = 0.3f
+private const val PLAYER_VIGNETTE_RISE_MS = 120
+private const val PLAYER_VIGNETTE_FALL_MS = 500
 private const val LOG_DIM_ALPHA = 0.55f
 private const val DEFAULT_ENEMY_NAME = "Enemy"
 private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
@@ -132,138 +142,207 @@ fun CombatScreen(
             )
         }
 
+    var previousUserHp by remember(combat.id) { mutableIntStateOf(combat.user.stats.currentHp) }
+    var playerDamageTrigger by remember(combat.id) { mutableIntStateOf(0) }
+    LaunchedEffect(combat.user.stats.currentHp) {
+        if (combat.user.stats.currentHp < previousUserHp) playerDamageTrigger++
+        previousUserHp = combat.user.stats.currentHp
+    }
+
+    val shakeOffsetX = remember { Animatable(0f) }
+    val playerFlashAlpha = remember { Animatable(0f) }
+    val vignetteAlpha = remember { Animatable(0f) }
+
+    LaunchedEffect(playerDamageTrigger) {
+        if (playerDamageTrigger == 0) return@LaunchedEffect
+        coroutineScope {
+            launch {
+                repeat(PLAYER_SHAKE_CYCLES) {
+                    shakeOffsetX.animateTo(PLAYER_SHAKE_AMPLITUDE_PX, tween(PLAYER_SHAKE_STEP_MS))
+                    shakeOffsetX.animateTo(-PLAYER_SHAKE_AMPLITUDE_PX, tween(PLAYER_SHAKE_STEP_MS))
+                }
+                shakeOffsetX.animateTo(0f, tween(PLAYER_SHAKE_STEP_MS))
+            }
+            launch {
+                repeat(PLAYER_FLASH_CYCLES) {
+                    playerFlashAlpha.snapTo(PLAYER_FLASH_ALPHA)
+                    delay(PLAYER_FLASH_STEP_MS)
+                    playerFlashAlpha.snapTo(0f)
+                    delay(PLAYER_FLASH_STEP_MS)
+                }
+            }
+            launch {
+                vignetteAlpha.animateTo(PLAYER_VIGNETTE_PEAK_ALPHA, tween(PLAYER_VIGNETTE_RISE_MS))
+                vignetteAlpha.animateTo(0f, tween(PLAYER_VIGNETTE_FALL_MS))
+            }
+        }
+    }
+
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
                 .background(colors.color2),
     ) {
-        resolveBackground(combat.backgroundId)?.let { backgroundResId ->
-            Kiwi_Image(
-                painterResourceId = backgroundResId,
-                alt = "Combat background",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                colorFilter =
-                    ColorFilter.colorMatrix(
-                        ColorMatrix().apply { setToSaturation(BACKGROUND_SATURATION) },
-                    ),
-            )
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { translationX = shakeOffsetX.value },
+        ) {
+            resolveBackground(combat.backgroundId)?.let { backgroundResId ->
+                Kiwi_Image(
+                    painterResourceId = backgroundResId,
+                    alt = "Combat background",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    colorFilter =
+                        ColorFilter.colorMatrix(
+                            ColorMatrix().apply { setToSaturation(BACKGROUND_SATURATION) },
+                        ),
+                )
 
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    0f to colors.color2.copy(alpha = EDGE_FADE_TOP_ALPHA),
+                                    EDGE_FADE_TOP_END to Color.Transparent,
+                                    EDGE_FADE_BOTTOM_START to Color.Transparent,
+                                    1f to colors.color2.copy(alpha = EDGE_FADE_BOTTOM_ALPHA),
+                                ),
+                            ),
+                )
+            }
+
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box {
+                    CombatHeader(
+                        title = "Ongoing Combat",
+                        onClose = { showAbandonConfirm = true },
+                    )
+                    if (isLogOpen) {
+                        LogDimOverlay(
+                            modifier = Modifier.matchParentSize(),
+                            onDismiss = { isLogOpen = false },
+                        )
+                    }
+                }
+
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                ) {
+                    EnemyArena(
+                        enemySprite = combat.enemySprite,
+                        currentHp = combat.enemy.stats.currentHp,
+                        maxHp = combat.enemy.stats.maxHp,
+                        endsAt = combat.endsAt,
+                        context = context,
+                    )
+
+                    if (isLogOpen) {
+                        LogDimOverlay(
+                            modifier = Modifier.fillMaxSize(),
+                            onDismiss = { isLogOpen = false },
+                        )
+
+                        CombatLog(
+                            entries = logEntries,
+                            modifier =
+                                Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(
+                                        horizontal = getResponsiveSizeWidth(Spacing.medium),
+                                        vertical = getResponsiveSizeHeight(Spacing.small),
+                                    ).fillMaxHeight(LOG_HEIGHT_FRACTION)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        onClick = {},
+                                    ),
+                        )
+                    }
+                }
+
+                Box {
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    Brush.verticalGradient(
+                                        BOTTOM_PANEL_GRADIENT_START to Color.Transparent,
+                                        BOTTOM_PANEL_GRADIENT_MID to colors.color2,
+                                        BOTTOM_PANEL_GRADIENT_END to colors.color2,
+                                    ),
+                                ).padding(
+                                    horizontal = getResponsiveSizeWidth(Spacing.medium),
+                                    vertical = getResponsiveSizeHeight(Spacing.small),
+                                ),
+                    ) {
+                        CombatTurnIndicator(
+                            message = turnMessage,
+                            isLogOpen = isLogOpen,
+                            onClick = { isLogOpen = !isLogOpen },
+                        )
+
+                        Kiwi_Spacer(Spacing.medium)
+
+                        PlayerControls(
+                            deckSkills = deckSkills,
+                            userActor = combat.user,
+                            isOverlayOpen = isOverlayOpen,
+                            selectedStatus = selectedStatus,
+                            onSkillClick = onSkillClick,
+                            onApplyGoalProgress = onApplyGoalProgress,
+                            onStatusClick = { status ->
+                                selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
+                            },
+                            onDismissPopup = { selectedStatus = null },
+                        )
+
+                        Kiwi_Spacer(Spacing.large)
+                    }
+
+                    if (isLogOpen) {
+                        LogDimOverlay(
+                            modifier = Modifier.matchParentSize(),
+                            onDismiss = { isLogOpen = false },
+                        )
+                    }
+                }
+            }
+        }
+
+        if (playerFlashAlpha.value > 0f) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Red.copy(alpha = playerFlashAlpha.value)),
+            )
+        }
+
+        if (vignetteAlpha.value > 0f) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .background(
-                            Brush.verticalGradient(
-                                0f to colors.color2.copy(alpha = EDGE_FADE_TOP_ALPHA),
-                                EDGE_FADE_TOP_END to Color.Transparent,
-                                EDGE_FADE_BOTTOM_START to Color.Transparent,
-                                1f to colors.color2.copy(alpha = EDGE_FADE_BOTTOM_ALPHA),
+                            Brush.radialGradient(
+                                colors =
+                                    listOf(
+                                        Color.Red.copy(alpha = 0f),
+                                        Color.Red.copy(alpha = vignetteAlpha.value),
+                                    ),
                             ),
                         ),
             )
-        }
-
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box {
-                CombatHeader(
-                    title = "Ongoing Combat",
-                    onClose = { showAbandonConfirm = true },
-                )
-                if (isLogOpen) {
-                    LogDimOverlay(
-                        modifier = Modifier.matchParentSize(),
-                        onDismiss = { isLogOpen = false },
-                    )
-                }
-            }
-
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-            ) {
-                EnemyArena(
-                    enemySprite = combat.enemySprite,
-                    currentHp = combat.enemy.stats.currentHp,
-                    maxHp = combat.enemy.stats.maxHp,
-                    endsAt = combat.endsAt,
-                    context = context,
-                )
-
-                if (isLogOpen) {
-                    LogDimOverlay(
-                        modifier = Modifier.fillMaxSize(),
-                        onDismiss = { isLogOpen = false },
-                    )
-
-                    CombatLog(
-                        entries = logEntries,
-                        modifier =
-                            Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(
-                                    horizontal = getResponsiveSizeWidth(Spacing.medium),
-                                    vertical = getResponsiveSizeHeight(Spacing.small),
-                                ).fillMaxHeight(LOG_HEIGHT_FRACTION)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = {},
-                                ),
-                    )
-                }
-            }
-
-            Box {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .background(
-                                Brush.verticalGradient(
-                                    BOTTOM_PANEL_GRADIENT_START to Color.Transparent,
-                                    BOTTOM_PANEL_GRADIENT_MID to colors.color2,
-                                    BOTTOM_PANEL_GRADIENT_END to colors.color2,
-                                ),
-                            ).padding(
-                                horizontal = getResponsiveSizeWidth(Spacing.medium),
-                                vertical = getResponsiveSizeHeight(Spacing.small),
-                            ),
-                ) {
-                    CombatTurnIndicator(
-                        message = turnMessage,
-                        isLogOpen = isLogOpen,
-                        onClick = { isLogOpen = !isLogOpen },
-                    )
-
-                    Kiwi_Spacer(Spacing.medium)
-
-                    PlayerControls(
-                        deckSkills = deckSkills,
-                        userActor = combat.user,
-                        isOverlayOpen = isOverlayOpen,
-                        selectedStatus = selectedStatus,
-                        onSkillClick = onSkillClick,
-                        onApplyGoalProgress = onApplyGoalProgress,
-                        onStatusClick = { status ->
-                            selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
-                        },
-                        onDismissPopup = { selectedStatus = null },
-                    )
-
-                    Kiwi_Spacer(Spacing.large)
-                }
-
-                if (isLogOpen) {
-                    LogDimOverlay(
-                        modifier = Modifier.matchParentSize(),
-                        onDismiss = { isLogOpen = false },
-                    )
-                }
-            }
         }
     }
 
