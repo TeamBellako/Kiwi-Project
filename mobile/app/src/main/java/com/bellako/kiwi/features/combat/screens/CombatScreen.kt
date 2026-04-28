@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,6 +55,7 @@ import com.bellako.kiwi.features.combat.components.CombatDeck
 import com.bellako.kiwi.features.combat.components.CombatHeader
 import com.bellako.kiwi.features.combat.components.CombatHealthBar
 import com.bellako.kiwi.features.combat.components.CombatLog
+import com.bellako.kiwi.features.combat.components.CombatLogEntry
 import com.bellako.kiwi.features.combat.components.CombatStatusPopup
 import com.bellako.kiwi.features.combat.components.CombatStatusRow
 import com.bellako.kiwi.features.combat.components.CombatTimer
@@ -142,41 +144,7 @@ fun CombatScreen(
             )
         }
 
-    var previousUserHp by remember(combat.id) { mutableIntStateOf(combat.user.stats.currentHp) }
-    var playerDamageTrigger by remember(combat.id) { mutableIntStateOf(0) }
-    LaunchedEffect(combat.user.stats.currentHp) {
-        if (combat.user.stats.currentHp < previousUserHp) playerDamageTrigger++
-        previousUserHp = combat.user.stats.currentHp
-    }
-
-    val shakeOffsetX = remember { Animatable(0f) }
-    val playerFlashAlpha = remember { Animatable(0f) }
-    val vignetteAlpha = remember { Animatable(0f) }
-
-    LaunchedEffect(playerDamageTrigger) {
-        if (playerDamageTrigger == 0) return@LaunchedEffect
-        coroutineScope {
-            launch {
-                repeat(PLAYER_SHAKE_CYCLES) {
-                    shakeOffsetX.animateTo(PLAYER_SHAKE_AMPLITUDE_PX, tween(PLAYER_SHAKE_STEP_MS))
-                    shakeOffsetX.animateTo(-PLAYER_SHAKE_AMPLITUDE_PX, tween(PLAYER_SHAKE_STEP_MS))
-                }
-                shakeOffsetX.animateTo(0f, tween(PLAYER_SHAKE_STEP_MS))
-            }
-            launch {
-                repeat(PLAYER_FLASH_CYCLES) {
-                    playerFlashAlpha.snapTo(PLAYER_FLASH_ALPHA)
-                    delay(PLAYER_FLASH_STEP_MS)
-                    playerFlashAlpha.snapTo(0f)
-                    delay(PLAYER_FLASH_STEP_MS)
-                }
-            }
-            launch {
-                vignetteAlpha.animateTo(PLAYER_VIGNETTE_PEAK_ALPHA, tween(PLAYER_VIGNETTE_RISE_MS))
-                vignetteAlpha.animateTo(0f, tween(PLAYER_VIGNETTE_FALL_MS))
-            }
-        }
-    }
+    val playerVfx = rememberPlayerDamageVfx(combat.user.stats.currentHp, combat.id)
 
     Box(
         modifier =
@@ -188,34 +156,9 @@ fun CombatScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .graphicsLayer { translationX = shakeOffsetX.value },
+                    .graphicsLayer { translationX = playerVfx.shakeOffsetX.value },
         ) {
-            resolveBackground(combat.backgroundId)?.let { backgroundResId ->
-                Kiwi_Image(
-                    painterResourceId = backgroundResId,
-                    alt = "Combat background",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    colorFilter =
-                        ColorFilter.colorMatrix(
-                            ColorMatrix().apply { setToSaturation(BACKGROUND_SATURATION) },
-                        ),
-                )
-
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    0f to colors.color2.copy(alpha = EDGE_FADE_TOP_ALPHA),
-                                    EDGE_FADE_TOP_END to Color.Transparent,
-                                    EDGE_FADE_BOTTOM_START to Color.Transparent,
-                                    1f to colors.color2.copy(alpha = EDGE_FADE_BOTTOM_ALPHA),
-                                ),
-                            ),
-                )
-            }
+            CombatBackground(combat.backgroundId)
 
             Column(modifier = Modifier.fillMaxSize()) {
                 Box {
@@ -231,43 +174,13 @@ fun CombatScreen(
                     }
                 }
 
-                Box(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                ) {
-                    EnemyArena(
-                        enemySprite = combat.enemySprite,
-                        currentHp = combat.enemy.stats.currentHp,
-                        maxHp = combat.enemy.stats.maxHp,
-                        endsAt = combat.endsAt,
-                        context = context,
-                    )
-
-                    if (isLogOpen) {
-                        LogDimOverlay(
-                            modifier = Modifier.fillMaxSize(),
-                            onDismiss = { isLogOpen = false },
-                        )
-
-                        CombatLog(
-                            entries = logEntries,
-                            modifier =
-                                Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(
-                                        horizontal = getResponsiveSizeWidth(Spacing.medium),
-                                        vertical = getResponsiveSizeHeight(Spacing.small),
-                                    ).fillMaxHeight(LOG_HEIGHT_FRACTION)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() },
-                                        onClick = {},
-                                    ),
-                        )
-                    }
-                }
+                CombatBattleArea(
+                    combat = combat,
+                    isLogOpen = isLogOpen,
+                    onDismissLog = { isLogOpen = false },
+                    logEntries = logEntries,
+                    context = context,
+                )
 
                 Box {
                     Column(
@@ -319,31 +232,7 @@ fun CombatScreen(
             }
         }
 
-        if (playerFlashAlpha.value > 0f) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.Red.copy(alpha = playerFlashAlpha.value)),
-            )
-        }
-
-        if (vignetteAlpha.value > 0f) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.radialGradient(
-                                colors =
-                                    listOf(
-                                        Color.Red.copy(alpha = 0f),
-                                        Color.Red.copy(alpha = vignetteAlpha.value),
-                                    ),
-                            ),
-                        ),
-            )
-        }
+        PlayerDamageOverlays(playerVfx)
     }
 
     if (showAbandonConfirm) {
@@ -552,6 +441,159 @@ private fun LogDimOverlay(
                     onClick = onDismiss,
                 ),
     )
+}
+
+private class PlayerDamageVfx(
+    val shakeOffsetX: Animatable<Float, *>,
+    val flashAlpha: Animatable<Float, *>,
+    val vignetteAlpha: Animatable<Float, *>,
+)
+
+@Composable
+private fun rememberPlayerDamageVfx(
+    currentHp: Int,
+    key: Any,
+): PlayerDamageVfx {
+    val shakeOffsetX = remember(key) { Animatable(0f) }
+    val flashAlpha = remember(key) { Animatable(0f) }
+    val vignetteAlpha = remember(key) { Animatable(0f) }
+    var previousHp by remember(key) { mutableIntStateOf(currentHp) }
+    var trigger by remember(key) { mutableIntStateOf(0) }
+
+    LaunchedEffect(currentHp) {
+        if (currentHp < previousHp) trigger++
+        previousHp = currentHp
+    }
+
+    LaunchedEffect(trigger) {
+        if (trigger == 0) return@LaunchedEffect
+        coroutineScope {
+            launch {
+                repeat(PLAYER_SHAKE_CYCLES) {
+                    shakeOffsetX.animateTo(PLAYER_SHAKE_AMPLITUDE_PX, tween(PLAYER_SHAKE_STEP_MS))
+                    shakeOffsetX.animateTo(-PLAYER_SHAKE_AMPLITUDE_PX, tween(PLAYER_SHAKE_STEP_MS))
+                }
+                shakeOffsetX.animateTo(0f, tween(PLAYER_SHAKE_STEP_MS))
+            }
+            launch {
+                repeat(PLAYER_FLASH_CYCLES) {
+                    flashAlpha.snapTo(PLAYER_FLASH_ALPHA)
+                    delay(PLAYER_FLASH_STEP_MS)
+                    flashAlpha.snapTo(0f)
+                    delay(PLAYER_FLASH_STEP_MS)
+                }
+            }
+            launch {
+                vignetteAlpha.animateTo(PLAYER_VIGNETTE_PEAK_ALPHA, tween(PLAYER_VIGNETTE_RISE_MS))
+                vignetteAlpha.animateTo(0f, tween(PLAYER_VIGNETTE_FALL_MS))
+            }
+        }
+    }
+    return PlayerDamageVfx(shakeOffsetX, flashAlpha, vignetteAlpha)
+}
+
+@Composable
+private fun PlayerDamageOverlays(vfx: PlayerDamageVfx) {
+    if (vfx.flashAlpha.value > 0f) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Red.copy(alpha = vfx.flashAlpha.value)),
+        )
+    }
+    if (vfx.vignetteAlpha.value > 0f) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.radialGradient(
+                            colors =
+                                listOf(
+                                    Color.Red.copy(alpha = 0f),
+                                    Color.Red.copy(alpha = vfx.vignetteAlpha.value),
+                                ),
+                        ),
+                    ),
+        )
+    }
+}
+
+@Composable
+private fun CombatBackground(backgroundId: Long?) {
+    val colors = LocalKiwiColors.current
+    val resId = resolveBackground(backgroundId) ?: return
+    Kiwi_Image(
+        painterResourceId = resId,
+        alt = "Combat background",
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop,
+        colorFilter =
+            ColorFilter.colorMatrix(
+                ColorMatrix().apply { setToSaturation(BACKGROUND_SATURATION) },
+            ),
+    )
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        0f to colors.color2.copy(alpha = EDGE_FADE_TOP_ALPHA),
+                        EDGE_FADE_TOP_END to Color.Transparent,
+                        EDGE_FADE_BOTTOM_START to Color.Transparent,
+                        1f to colors.color2.copy(alpha = EDGE_FADE_BOTTOM_ALPHA),
+                    ),
+                ),
+    )
+}
+
+@Composable
+private fun ColumnScope.CombatBattleArea(
+    combat: CombatDomain,
+    isLogOpen: Boolean,
+    onDismissLog: () -> Unit,
+    logEntries: List<CombatLogEntry>,
+    context: Context,
+) {
+    Box(
+        modifier =
+            Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+    ) {
+        EnemyArena(
+            enemySprite = combat.enemySprite,
+            currentHp = combat.enemy.stats.currentHp,
+            maxHp = combat.enemy.stats.maxHp,
+            endsAt = combat.endsAt,
+            context = context,
+        )
+
+        if (isLogOpen) {
+            LogDimOverlay(
+                modifier = Modifier.fillMaxSize(),
+                onDismiss = onDismissLog,
+            )
+
+            CombatLog(
+                entries = logEntries,
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(
+                            horizontal = getResponsiveSizeWidth(Spacing.medium),
+                            vertical = getResponsiveSizeHeight(Spacing.small),
+                        ).fillMaxHeight(LOG_HEIGHT_FRACTION)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {},
+                        ),
+            )
+        }
+    }
 }
 
 private fun resolveEnemySprite(

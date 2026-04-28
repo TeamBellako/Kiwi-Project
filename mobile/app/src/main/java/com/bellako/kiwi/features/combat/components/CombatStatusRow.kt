@@ -140,6 +140,7 @@ fun CombatStatusPopup(
 
 private fun remainingTurnsLabel(remainingTurns: Int): String = if (remainingTurns == 1) "1 Turn Left" else "$remainingTurns Turns Left"
 
+@Suppress("CyclomaticComplexMethod")
 private fun statusIcon(status: CombatActiveStatusDomain): ImageVector {
     val key = status.name.lowercase()
     return when {

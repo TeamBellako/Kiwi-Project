@@ -198,6 +198,7 @@ fun buildCombatLogEntries(
     return result
 }
 
+@Suppress("CyclomaticComplexMethod")
 private fun formatAction(
     action: CombatActionDomain,
     enemyName: String,

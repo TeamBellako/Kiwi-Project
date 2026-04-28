@@ -38,7 +38,6 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
-private val INDICATOR_HEIGHT = 56.dp
 private val INDICATOR_RADIUS = 12.dp
 private val CHEVRON_SIZE = 14.dp
 private const val CHEVRON_OPEN_ROTATION = 180f
