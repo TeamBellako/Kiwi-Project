@@ -1,8 +1,11 @@
 package com.bellako.kiwi.features.combat.components
 
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -25,6 +28,8 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 
+private const val HP_LERP_DURATION_MS = 600
+
 @Composable
 fun CombatHealthBar(
     currentHp: Int,
@@ -34,11 +39,16 @@ fun CombatHealthBar(
     label: String = "HP bar",
 ) {
     val colors = LocalKiwiColors.current
+    val animatedHp by animateIntAsState(
+        targetValue = currentHp,
+        animationSpec = tween(durationMillis = HP_LERP_DURATION_MS),
+        label = "combat_hp_lerp",
+    )
     val percentage =
         if (maxHp <= 0) {
             0f
         } else {
-            (currentHp.toFloat() / maxHp.toFloat()).coerceIn(0f, 1f)
+            (animatedHp.toFloat() / maxHp.toFloat()).coerceIn(0f, 1f)
         }
 
     Box(
@@ -75,7 +85,7 @@ fun CombatHealthBar(
 
         Kiwi_Label3(
             KiwiTextArguments(
-                text = "$currentHp/$maxHp",
+                text = "$animatedHp/$maxHp",
                 color = colors.colorF,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,

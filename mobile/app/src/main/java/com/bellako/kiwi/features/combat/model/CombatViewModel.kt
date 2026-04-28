@@ -29,7 +29,8 @@ import javax.inject.Inject
 
 private const val DISMISS_ANIMATION_DURATION_MS = 500L
 private const val TURN_INITIAL_DELAY_MS = 250L
-private const val TURN_ACTION_DELAY_MS = 800L
+private const val LOG_BLINK_DELAY_MS = 1000L
+private const val STATS_LERP_DELAY_MS = 700L
 
 @OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
@@ -85,15 +86,33 @@ class CombatViewModel
             }
         }
 
-        fun executeTurn(skillId: Long) {
+        fun executeTurn(
+            skillId: Long,
+            skillName: String? = null,
+        ) {
             val current = _active.value ?: return
             if (_isTurnPlaying.value) return
+
+            val hasOptimisticPlayerSkill = !skillName.isNullOrBlank()
+            if (hasOptimisticPlayerSkill) {
+                val optimisticAction =
+                    CombatActionDomain(
+                        actor = CombatActor.USER,
+                        actionType = CombatActionType.SKILL_USED,
+                        skillName = skillName,
+                    )
+                _active.value = current.copy(log = current.log + optimisticAction)
+            }
+
             viewModelScope.launch {
                 _isTurnPlaying.value = true
                 try {
                     val result = repository.executeTurn(current.id, skillId)
-                    playTurnResult(result)
+                    playTurnResult(result, hasOptimisticPlayerSkill = hasOptimisticPlayerSkill)
                 } catch (e: Throwable) {
+                    if (hasOptimisticPlayerSkill) {
+                        _active.value = current
+                    }
                     setUiState(mapExceptionToUIState(e))
                 } finally {
                     _isTurnPlaying.value = false
@@ -165,19 +184,38 @@ class CombatViewModel
             _lastTurnActions.value = result.actions
         }
 
-        private suspend fun playTurnResult(result: CombatTurnResultDomain) {
+        private suspend fun playTurnResult(
+            result: CombatTurnResultDomain,
+            hasOptimisticPlayerSkill: Boolean = false,
+        ) {
             val initial = _active.value ?: return
             var state = initial.copy(turnNumber = result.turnNumber)
             _active.value = state
 
-            if (result.actions.isNotEmpty()) {
+            val actions = result.actions
+            var startIndex = 0
+
+            if (hasOptimisticPlayerSkill &&
+                actions.firstOrNull()?.actor == CombatActor.USER &&
+                actions.first().actionType == CombatActionType.SKILL_USED
+            ) {
+                delay(LOG_BLINK_DELAY_MS)
+                state = applyActionEffects(state, actions.first())
+                _active.value = state
+                delay(STATS_LERP_DELAY_MS)
+                startIndex = 1
+            } else if (actions.isNotEmpty()) {
                 delay(TURN_INITIAL_DELAY_MS)
             }
 
-            for (action in result.actions) {
-                state = applyAction(state, action)
+            for (i in startIndex until actions.size) {
+                val action = actions[i]
+                state = state.copy(log = state.log + action)
                 _active.value = state
-                delay(TURN_ACTION_DELAY_MS)
+                delay(LOG_BLINK_DELAY_MS)
+                state = applyActionEffects(state, action)
+                _active.value = state
+                delay(STATS_LERP_DELAY_MS)
             }
 
             val isTerminal = result.combatStatus != CombatGeneralStatus.ONGOING
@@ -190,20 +228,19 @@ class CombatViewModel
             _lastTurnActions.value = result.actions
         }
 
-        private fun applyAction(
+        private fun applyActionEffects(
             combat: CombatDomain,
             action: CombatActionDomain,
-        ): CombatDomain {
-            val withLog = combat.copy(log = combat.log + action)
-            return when (action.actionType) {
+        ): CombatDomain =
+            when (action.actionType) {
                 CombatActionType.SKILL_USED ->
-                    action.skillEffectsResults.fold(withLog) { acc, effect -> applyEffect(acc, effect) }
+                    action.skillEffectsResults.fold(combat) { acc, effect -> applyEffect(acc, effect) }
                 CombatActionType.ACTOR_DAMAGED_BY_STATE -> {
                     val damage = (action.stateEffectValue ?: 0f).toInt()
-                    if (damage == 0) withLog else applyHpDelta(withLog, action.actor, -damage)
+                    if (damage == 0) combat else applyHpDelta(combat, action.actor, -damage)
                 }
                 CombatActionType.STATUS_TURN_REDUCED ->
-                    updateActiveStatuses(withLog, action.actor) { statuses ->
+                    updateActiveStatuses(combat, action.actor) { statuses ->
                         statuses.map { status ->
                             if (status.stateId == action.stateId) {
                                 status.copy(remainingTurns = status.remainingTurns - 1)
@@ -213,12 +250,11 @@ class CombatViewModel
                         }
                     }
                 CombatActionType.STATUS_FINISHED ->
-                    updateActiveStatuses(withLog, action.actor) { statuses ->
+                    updateActiveStatuses(combat, action.actor) { statuses ->
                         statuses.filterNot { it.stateId == action.stateId }
                     }
-                else -> withLog
+                else -> combat
             }
-        }
 
         private fun applyEffect(
             combat: CombatDomain,

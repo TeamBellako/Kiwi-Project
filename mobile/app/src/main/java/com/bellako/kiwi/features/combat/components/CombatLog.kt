@@ -1,5 +1,7 @@
 package com.bellako.kiwi.features.combat.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -8,13 +10,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -46,6 +49,9 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 private val LOG_RADIUS = 12.dp
 private val LOG_INNER_PADDING = 16.dp
 private const val USER_NAME_PLACEHOLDER = "You"
+private const val BLINK_DIM_ALPHA = 0.35f
+private const val BLINK_FADE_MS = 220
+private const val BLINK_CYCLES = 2
 
 sealed class CombatLogEntry {
     data class Action(val text: AnnotatedString) : CombatLogEntry()
@@ -62,10 +68,16 @@ fun CombatLog(
 ) {
     val colors = LocalKiwiColors.current
     val listState = rememberLazyListState()
+    val blinkAlpha = remember { Animatable(1f) }
 
     LaunchedEffect(entries.size) {
         if (entries.isNotEmpty()) {
             listState.animateScrollToItem(entries.size - 1)
+            blinkAlpha.snapTo(1f)
+            repeat(BLINK_CYCLES) {
+                blinkAlpha.animateTo(BLINK_DIM_ALPHA, tween(durationMillis = BLINK_FADE_MS))
+                blinkAlpha.animateTo(1f, tween(durationMillis = BLINK_FADE_MS))
+            }
         }
     }
 
@@ -93,14 +105,20 @@ fun CombatLog(
                     ),
             verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
         ) {
-            items(entries) { entry ->
+            itemsIndexed(entries) { index, entry ->
+                val entryModifier =
+                    if (index == entries.lastIndex) {
+                        Modifier.alpha(blinkAlpha.value)
+                    } else {
+                        Modifier
+                    }
                 when (entry) {
                     is CombatLogEntry.Action ->
                         Kiwi_AnnotatedString_P2(
                             KiwiAnnotatedStringArguments(
                                 text = entry.text,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().then(entryModifier),
                             ),
                         )
 
@@ -109,17 +127,19 @@ fun CombatLog(
                             KiwiAnnotatedStringArguments(
                                 text = entry.text,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().then(entryModifier),
                             ),
                         )
 
                     is CombatLogEntry.TurnSeparator -> {
                         Kiwi_Spacer(Spacing.xSmall)
-                        Kiwi_HorizontalLine_Text(
-                            text = "Turn ${entry.turnNumber}",
-                            color = colors.color5C,
-                            textColor = colors.color7A,
-                        )
+                        Box(modifier = entryModifier) {
+                            Kiwi_HorizontalLine_Text(
+                                text = "Turn ${entry.turnNumber}",
+                                color = colors.color5C,
+                                textColor = colors.color7A,
+                            )
+                        }
                         Kiwi_Spacer(Spacing.xSmall)
                     }
                 }

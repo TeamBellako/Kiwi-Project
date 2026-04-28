@@ -299,7 +299,12 @@ private fun AppScreen(
                                     deckSkills = skillsState?.deckSkills ?: emptyList(),
                                     isTurnPlaying = isCombatTurnPlaying,
                                     onConfirmAbandon = combatViewModel::confirmAbandon,
-                                    onSkillClick = combatViewModel::executeTurn,
+                                    onSkillClick = { skillId, skillName ->
+                                        combatViewModel.executeTurn(skillId, skillName)
+                                    },
+                                    onApplyGoalProgress = { skillId, goalId, newProgress ->
+                                        skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
+                                    },
                                 )
                             }
                         }

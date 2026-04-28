@@ -27,7 +27,8 @@ private const val SKILL_WEIGHT = 0.5f
 fun CombatDeck(
     deckSkills: List<SkillDomain>,
     isDisabled: Boolean,
-    onSkillClick: (Long) -> Unit,
+    onSkillClick: (skillId: Long, skillName: String) -> Unit,
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val slotMap = deckSkills.associateBy { it.deckSlot }
@@ -44,9 +45,9 @@ fun CombatDeck(
                         SkillComponent(
                             skill = skill,
                             isDisabled = isDisabled || skill.isCooldown,
-                            onClick = { onSkillClick(skill.id) },
+                            onClick = { onSkillClick(skill.id, skill.name) },
                             modifier = Modifier.weight(SKILL_WEIGHT),
-                            onApplyGoalProgress = { _, _, _ -> },
+                            onApplyGoalProgress = onApplyGoalProgress,
                         )
                     } else {
                         Kiwi_Image(
@@ -74,7 +75,8 @@ fun CombatDeck_Preview() {
                     SkillsTestFactory.goalCooldownSkillEquipped(),
                 ),
             isDisabled = false,
-            onSkillClick = {},
+            onSkillClick = { _, _ -> },
+            onApplyGoalProgress = { _, _, _ -> },
         )
     }
 }

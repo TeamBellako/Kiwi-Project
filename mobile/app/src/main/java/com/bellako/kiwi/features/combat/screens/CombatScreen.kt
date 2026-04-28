@@ -92,7 +92,8 @@ fun CombatScreen(
     deckSkills: List<SkillDomain>,
     isTurnPlaying: Boolean = false,
     onConfirmAbandon: () -> Unit = {},
-    onSkillClick: (Long) -> Unit = {},
+    onSkillClick: (skillId: Long, skillName: String) -> Unit = { _, _ -> },
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit = { _, _, _ -> },
 ) {
     val colors = LocalKiwiColors.current
     val context = LocalContext.current
@@ -228,6 +229,7 @@ fun CombatScreen(
                         isOverlayOpen = isOverlayOpen,
                         selectedStatus = selectedStatus,
                         onSkillClick = onSkillClick,
+                        onApplyGoalProgress = onApplyGoalProgress,
                         onStatusClick = { status ->
                             selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
                         },
@@ -265,7 +267,8 @@ private fun PlayerControls(
     userActor: CombatActorDomain,
     isOverlayOpen: Boolean,
     selectedStatus: CombatActiveStatusDomain?,
-    onSkillClick: (Long) -> Unit,
+    onSkillClick: (skillId: Long, skillName: String) -> Unit,
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
     onStatusClick: (CombatActiveStatusDomain) -> Unit,
     onDismissPopup: () -> Unit,
 ) {
@@ -278,6 +281,7 @@ private fun PlayerControls(
                 deckSkills = deckSkills,
                 isDisabled = isOverlayOpen,
                 onSkillClick = onSkillClick,
+                onApplyGoalProgress = onApplyGoalProgress,
                 modifier = Modifier.alpha(dimAlpha),
             )
 
