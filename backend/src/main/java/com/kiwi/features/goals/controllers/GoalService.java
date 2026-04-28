@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class GoalService {
@@ -216,11 +217,18 @@ public class GoalService {
     public List<UserGoalStatusDTO> getSkillGoals(Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
-        return userGoalStatusRepository
-                .findByUserAndGoal_Category(user, GoalCategory.SKILL)
-                .stream()
-                .map(UserGoalStatusDataMapper::toDTO)
-                .collect(Collectors.toList());
+        List<UserGoalStatusPersistence> skillGoalStatuses =
+                userGoalStatusRepository.findByUserAndGoal_Category(user, GoalCategory.SKILL);
+
+        Stream<UserGoalStatusPersistence> skillGoalStatusStream = skillGoalStatuses.stream();
+
+        Stream<UserGoalStatusDTO> skillGoalStatusDTOStream =
+                skillGoalStatusStream.map(UserGoalStatusDataMapper::toDTO);
+
+        List<UserGoalStatusDTO> skillGoalStatusDTOs =
+                skillGoalStatusDTOStream.collect(Collectors.toList());
+
+        return skillGoalStatusDTOs;
     }
 
     public List<GoalDTO> getGoalDefinitions() {

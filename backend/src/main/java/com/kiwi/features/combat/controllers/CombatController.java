@@ -46,6 +46,24 @@ public class CombatController {
     }
 
     // ============================================================================================
+    // GET ACTIVE COMBAT
+    // ============================================================================================
+
+    @GetMapping("/active")
+    public ResponseEntity<CombatDTO> getActiveCombat(
+            @AuthenticationPrincipal @NotNull UserDetails userDetails
+    ) {
+
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+                .orElseThrow()
+                .getId();
+
+        return combatFacadeService.getActiveCombat(userId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    // ============================================================================================
     // EXECUTE TURN
     // ============================================================================================
 
