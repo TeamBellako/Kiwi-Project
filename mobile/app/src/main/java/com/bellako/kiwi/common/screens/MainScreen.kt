@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -24,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -92,6 +94,10 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
+import kotlinx.coroutines.delay
+
+private const val DEFEAT_TRANSITION_DELAY_MS = 1800L
+private const val DEFEAT_FADE_MS = 600
 
 @Suppress("LongParameterList")
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -300,25 +306,40 @@ private fun AppScreen(
                     ) {
                         activeCombat?.let { combat ->
                             Box(modifier = Modifier.matchParentSize()) {
-                                if (isCombatDefeat(combat)) {
-                                    CombatDefeatScreen(
-                                        combat = combat,
-                                        deckSkills = skillsState?.deckSkills ?: emptyList(),
-                                        onContinue = combatViewModel::dismiss,
-                                    )
-                                } else {
-                                    CombatScreen(
-                                        combat = combat,
-                                        deckSkills = skillsState?.deckSkills ?: emptyList(),
-                                        isTurnPlaying = isCombatTurnPlaying,
-                                        onConfirmAbandon = combatViewModel::confirmAbandon,
-                                        onSkillClick = { skillId, skillName ->
-                                            combatViewModel.executeTurn(skillId, skillName)
-                                        },
-                                        onApplyGoalProgress = { skillId, goalId, newProgress ->
-                                            skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
-                                        },
-                                    )
+                                val showDefeat = produceState(false, combat.id, isCombatDefeat(combat)) {
+                                    value =
+                                        if (isCombatDefeat(combat)) {
+                                            delay(DEFEAT_TRANSITION_DELAY_MS)
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                }
+                                Crossfade(
+                                    targetState = showDefeat.value,
+                                    animationSpec = tween(DEFEAT_FADE_MS, easing = EaseInOut),
+                                    label = "combat_to_defeat",
+                                ) { isDefeat ->
+                                    if (isDefeat) {
+                                        CombatDefeatScreen(
+                                            combat = combat,
+                                            deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                            onContinue = combatViewModel::dismiss,
+                                        )
+                                    } else {
+                                        CombatScreen(
+                                            combat = combat,
+                                            deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                            isTurnPlaying = isCombatTurnPlaying,
+                                            onConfirmAbandon = combatViewModel::confirmAbandon,
+                                            onSkillClick = { skillId, skillName ->
+                                                combatViewModel.executeTurn(skillId, skillName)
+                                            },
+                                            onApplyGoalProgress = { skillId, goalId, newProgress ->
+                                                skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         }
