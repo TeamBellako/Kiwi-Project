@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS combats (
 
 	CONSTRAINT fk_combats_config
 		FOREIGN KEY (combat_config_id)
-		REFERENCES combat_config(id)
+		REFERENCES combat_configs(id)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE,
 	
