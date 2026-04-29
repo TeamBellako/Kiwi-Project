@@ -1,6 +1,7 @@
 package com.kiwi.features.combat.data.persistence;
 
 import com.kiwi.features.sprites.data.BackgroundPersistence;
+import com.kiwi.features.sprites.data.FxPersistence;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +27,10 @@ public class CombatConfigPersistence {
     @ManyToOne(optional = true)
     @JoinColumn(name = "background", nullable = true)
     private BackgroundPersistence background;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "sfx", nullable = true)
+    private FxPersistence sfx;
 
     @Column(name = "on_completed_action")
     private String onCompletedAction;

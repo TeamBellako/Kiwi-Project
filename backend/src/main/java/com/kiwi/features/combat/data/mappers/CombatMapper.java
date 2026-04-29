@@ -58,6 +58,7 @@ public class CombatMapper {
             String enemyName,
             String enemySprite,
             Long backgroundId,
+            Long sfxId,
             List<CombatActionDTO> log
     ) {
 
@@ -65,6 +66,7 @@ public class CombatMapper {
                 .id(combat.getId())
                 .combatConfigId(combat.getCombatConfigId())
                 .backgroundId(backgroundId)
+                .sfxId(sfxId)
                 .turnNumber(combat.getTurnNumber())
                 .combatStatus(combat.getCombatStatus().toString())
                 .endsAt(combat.getEndsAt() != null
