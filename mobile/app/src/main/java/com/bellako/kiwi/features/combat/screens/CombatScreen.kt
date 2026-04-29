@@ -68,6 +68,7 @@ import com.bellako.kiwi.features.combat.data.CombatActiveStatusDomain
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatActorDomain
 import com.bellako.kiwi.features.combat.data.CombatDomain
+import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.tests.CombatTestFactory
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
@@ -111,6 +112,8 @@ private const val DEATH_BLINK_PEAK_ALPHA = 0.55f
 private const val DEATH_BLINK_TROUGH_ALPHA = 0.15f
 private const val DEATH_HOLD_RISE_MS = 200
 private const val DEATH_HOLD_ALPHA = 0.6f
+private const val ENEMY_DEFEAT_FADE_DELAY_MS = 200L
+private const val ENEMY_DEFEAT_FADE_MS = 800
 private const val LOG_DIM_ALPHA = 0.55f
 private const val DEFAULT_ENEMY_NAME = "Enemy"
 private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
@@ -189,6 +192,7 @@ fun CombatScreen(
                     onDismissLog = { isLogOpen = false },
                     logEntries = logEntries,
                     context = context,
+                    isEnemyDefeated = combat.combatStatus == CombatGeneralStatus.USER_WON,
                 )
 
                 Box {
@@ -334,6 +338,7 @@ private fun EnemyArena(
     maxHp: Int,
     endsAt: Long?,
     context: Context,
+    isEnemyDefeated: Boolean = false,
 ) {
     var previousHp by remember { mutableIntStateOf(currentHp) }
     var damageTrigger by remember { mutableIntStateOf(0) }
@@ -368,6 +373,12 @@ private fun EnemyArena(
                 }
             }
         }
+    }
+
+    LaunchedEffect(isEnemyDefeated) {
+        if (!isEnemyDefeated) return@LaunchedEffect
+        delay(ENEMY_DEFEAT_FADE_DELAY_MS)
+        spriteAlpha.animateTo(0f, tween(ENEMY_DEFEAT_FADE_MS))
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -606,6 +617,7 @@ private fun ColumnScope.CombatBattleArea(
     onDismissLog: () -> Unit,
     logEntries: List<CombatLogEntry>,
     context: Context,
+    isEnemyDefeated: Boolean = false,
 ) {
     Box(
         modifier =
@@ -619,6 +631,7 @@ private fun ColumnScope.CombatBattleArea(
             maxHp = combat.enemy.stats.maxHp,
             endsAt = combat.endsAt,
             context = context,
+            isEnemyDefeated = isEnemyDefeated,
         )
 
         if (isLogOpen) {

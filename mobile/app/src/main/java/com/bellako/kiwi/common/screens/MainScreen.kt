@@ -57,6 +57,7 @@ import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.model.CombatViewModel
 import com.bellako.kiwi.features.combat.screens.CombatDefeatScreen
 import com.bellako.kiwi.features.combat.screens.CombatScreen
+import com.bellako.kiwi.features.combat.screens.CombatVictoryScreen
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
 import com.bellako.kiwi.features.conversations.screens.ConversationScreen
@@ -98,6 +99,8 @@ import kotlinx.coroutines.delay
 
 private const val DEFEAT_TRANSITION_DELAY_MS = 1800L
 private const val DEFEAT_FADE_MS = 600
+private const val VICTORY_TRANSITION_DELAY_MS = 1200L
+private const val VICTORY_FADE_MS = 600
 
 @Suppress("LongParameterList")
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -306,39 +309,58 @@ private fun AppScreen(
                     ) {
                         activeCombat?.let { combat ->
                             Box(modifier = Modifier.matchParentSize()) {
-                                val showDefeat = produceState(false, combat.id, isCombatDefeat(combat)) {
+                                val isDefeat = isCombatDefeat(combat)
+                                val isVictory = isCombatVictory(combat)
+                                val phase = produceState(CombatPhase.COMBAT, combat.id, isDefeat, isVictory) {
                                     value =
-                                        if (isCombatDefeat(combat)) {
-                                            delay(DEFEAT_TRANSITION_DELAY_MS)
-                                            true
-                                        } else {
-                                            false
+                                        when {
+                                            isDefeat -> {
+                                                delay(DEFEAT_TRANSITION_DELAY_MS)
+                                                CombatPhase.DEFEAT
+                                            }
+                                            isVictory -> {
+                                                delay(VICTORY_TRANSITION_DELAY_MS)
+                                                CombatPhase.VICTORY
+                                            }
+                                            else -> CombatPhase.COMBAT
                                         }
                                 }
+                                val fadeDuration =
+                                    when (phase.value) {
+                                        CombatPhase.VICTORY -> VICTORY_FADE_MS
+                                        else -> DEFEAT_FADE_MS
+                                    }
                                 Crossfade(
-                                    targetState = showDefeat.value,
-                                    animationSpec = tween(DEFEAT_FADE_MS, easing = EaseInOut),
-                                    label = "combat_to_defeat",
-                                ) { isDefeat ->
-                                    if (isDefeat) {
-                                        CombatDefeatScreen(
-                                            combat = combat,
-                                            deckSkills = skillsState?.deckSkills ?: emptyList(),
-                                            onContinue = combatViewModel::dismiss,
-                                        )
-                                    } else {
-                                        CombatScreen(
-                                            combat = combat,
-                                            deckSkills = skillsState?.deckSkills ?: emptyList(),
-                                            isTurnPlaying = isCombatTurnPlaying,
-                                            onConfirmAbandon = combatViewModel::confirmAbandon,
-                                            onSkillClick = { skillId, skillName ->
-                                                combatViewModel.executeTurn(skillId, skillName)
-                                            },
-                                            onApplyGoalProgress = { skillId, goalId, newProgress ->
-                                                skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
-                                            },
-                                        )
+                                    targetState = phase.value,
+                                    animationSpec = tween(fadeDuration, easing = EaseInOut),
+                                    label = "combat_phase",
+                                ) { current ->
+                                    when (current) {
+                                        CombatPhase.DEFEAT ->
+                                            CombatDefeatScreen(
+                                                combat = combat,
+                                                deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                                onContinue = combatViewModel::dismiss,
+                                            )
+                                        CombatPhase.VICTORY ->
+                                            CombatVictoryScreen(
+                                                combat = combat,
+                                                deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                                onContinue = combatViewModel::dismiss,
+                                            )
+                                        CombatPhase.COMBAT ->
+                                            CombatScreen(
+                                                combat = combat,
+                                                deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                                isTurnPlaying = isCombatTurnPlaying,
+                                                onConfirmAbandon = combatViewModel::confirmAbandon,
+                                                onSkillClick = { skillId, skillName ->
+                                                    combatViewModel.executeTurn(skillId, skillName)
+                                                },
+                                                onApplyGoalProgress = { skillId, goalId, newProgress ->
+                                                    skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
+                                                },
+                                            )
                                     }
                                 }
                             }
@@ -435,6 +457,10 @@ private fun TipModal(
 private fun isCombatDefeat(combat: CombatDomain): Boolean =
     combat.combatStatus == CombatGeneralStatus.USER_LOST &&
         combat.log.none { it.actionType == CombatActionType.ABANDON }
+
+private fun isCombatVictory(combat: CombatDomain): Boolean = combat.combatStatus == CombatGeneralStatus.USER_WON
+
+private enum class CombatPhase { COMBAT, VICTORY, DEFEAT }
 
 private fun isLoginScreen(route: String?): Boolean =
     route == null ||
