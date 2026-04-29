@@ -1,13 +1,5 @@
 -- Simplifies the placeholder combat (id 1) for easier end-to-end testing:
--- enemy has 1000 HP and a single deterministic skill that deals 10 damage,
 -- and Insight Strike's cooldown is moved to a goal-based cooldown.
-
--- ============================================================================
--- ENEMY: 1000 HP training dummy
--- ============================================================================
-UPDATE enemies
-SET max_hp = 1000
-WHERE id = 1;
 
 -- ============================================================================
 -- ENEMY SKILL: a single skill that deals a flat 10 damage to the player.
