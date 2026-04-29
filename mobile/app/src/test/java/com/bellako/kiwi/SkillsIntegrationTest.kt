@@ -26,6 +26,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -48,7 +49,7 @@ class SkillsIntegrationTest {
         api = mock(ISkillsAPI::class.java)
         goalsRepository = mock(GoalsRepository::class.java)
         repository = SkillsRepository(api)
-        viewModel = SkillsViewModel(repository, goalsRepository, notificationManager)
+        viewModel = SkillsViewModel(repository, goalsRepository, notificationManager, RuntimeEnvironment.getApplication())
     }
 
     // -------------------------------------------------------------------------

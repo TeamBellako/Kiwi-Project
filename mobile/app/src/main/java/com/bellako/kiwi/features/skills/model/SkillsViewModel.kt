@@ -1,8 +1,10 @@
 package com.bellako.kiwi.features.skills.model
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.services.eventbus.EventPayload
@@ -23,6 +25,7 @@ import com.bellako.kiwi.features.skills.data.SkillsState
 import com.bellako.kiwi.features.skills.screen.ONE_MINUTE_SECONDS
 import com.bellako.kiwi.features.skills.screen.SkillNotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -50,6 +53,7 @@ class SkillsViewModel
         private val skillsRepository: SkillsRepository,
         private val goalsRepository: GoalsRepository,
         private val notificationManager: NotificationManager,
+        @ApplicationContext private val context: Context,
     ) : BaseViewModel(),
         ISkillsViewModel {
         private val _state = MutableStateFlow(SkillsState())
@@ -63,7 +67,9 @@ class SkillsViewModel
                 }
             }
             GlobalScope.launch(Dispatchers.Main) {
-                listenToEvent(EventType.THROW_SKILL) {
+                listenToEvent(EventType.THROW_SKILL) { eventPayload ->
+                    val payload = eventPayload as EventPayload.EntityIdPayload
+                    playOnThrowSFX(payload.targetEntityId.toLong())
                     loadSkills()
                 }
             }
@@ -93,6 +99,11 @@ class SkillsViewModel
                 SkillNotificationType.READY,
                 skill,
             )
+        }
+
+        private fun playOnThrowSFX(skillId: Long) {
+            val skill = _state.value.skills[skillId] ?: return
+            AudioManager.playSFX(context, skill.onThrowSFX)
         }
 
         // LOAD
