@@ -140,7 +140,7 @@ class CombatIntegrationTest {
     // -------------------------------------------------------------------------
 
     @Test
-    fun `dismiss after USER_WON emits onCompletedEvent and clears active`() =
+    fun `onVictoryContinue emits onCompletedEvent and clears active`() =
         runTest(mainDispatcherRule.dispatcher) {
             val combatDomain = CombatTestFactory.validCombatDomain(id = 1L)
             val turnResult =
@@ -163,7 +163,7 @@ class CombatIntegrationTest {
                     EventBus.eventFlow.first { (type, _) -> type == EventType.COMPLETE_QUEST }
                 }
 
-            viewModel.dismiss()
+            viewModel.onVictoryContinue()
             advanceUntilIdle()
 
             val (type, payload) = emittedEvent.await()
@@ -208,13 +208,12 @@ class CombatIntegrationTest {
         }
 
     @Test
-    fun `dismiss with onCompletedEvent placeholder clears state without emitting`() =
+    fun `onVictoryContinue with no follow-up event clears state without emitting`() =
         runTest(mainDispatcherRule.dispatcher) {
-            // Build a terminal active state with the "_" placeholder so dismiss should NOT emit.
-            val combatDomain =
-                CombatTestFactory.validCombatDomain(id = 1L)
+            // Backend signals "no follow-up" via the "_" sentinel; the mapper turns it into null.
+            val combatDomain = CombatTestFactory.validCombatDomain(id = 1L)
             val turnResult =
-                CombatTestFactory.userWonTurnResult(combatId = 1L, onCompletedEvent = "_", onCompletedEntityId = 0)
+                CombatTestFactory.userWonTurnResult(combatId = 1L, onCompletedEvent = null, onCompletedEntityId = null)
 
             whenever(api.startOrResumeCombat(1L)).thenReturn(CombatDataMapper.toDTO(combatDomain))
             whenever(api.executeTurn(1L, 5L)).thenReturn(CombatDataMapper.toDTO(turnResult))
@@ -224,9 +223,17 @@ class CombatIntegrationTest {
             viewModel.executeTurn(5L)
             advanceUntilIdle()
 
-            viewModel.dismiss()
-            advanceUntilIdle()
+            var receivedEvent: Pair<EventType, EventPayload>? = null
+            val collectorJob =
+                launch {
+                    EventBus.eventFlow.collect { receivedEvent = it }
+                }
 
+            viewModel.onVictoryContinue()
+            advanceUntilIdle()
+            collectorJob.cancel()
+
+            assertNull(receivedEvent)
             assertNull(viewModel.active.value)
             assertTrue(viewModel.lastTurnActions.value.isEmpty())
         }

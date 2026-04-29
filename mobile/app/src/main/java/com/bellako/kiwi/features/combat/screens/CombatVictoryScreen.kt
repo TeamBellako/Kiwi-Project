@@ -22,8 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -54,8 +52,7 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
-private const val DEFEAT_BACKGROUND_SATURATION = 0.05f
-private const val DEFEAT_BACKGROUND_DIM_ALPHA = 0.7f
+private const val VICTORY_BACKGROUND_DIM_ALPHA = 0.45f
 private const val EDGE_FADE_TOP_ALPHA = 0.85f
 private const val EDGE_FADE_BOTTOM_ALPHA = 0.95f
 private const val EDGE_FADE_TOP_END = 0.18f
@@ -65,7 +62,7 @@ private val CONTINUE_BUTTON_HORIZONTAL_MARGIN = 56.dp
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CombatDefeatScreen(
+fun CombatVictoryScreen(
     combat: CombatDomain,
     deckSkills: List<SkillDomain>,
     onContinue: () -> Unit,
@@ -94,14 +91,14 @@ fun CombatDefeatScreen(
                 .fillMaxSize()
                 .background(colors.color2),
     ) {
-        DefeatBackground(combat.backgroundId)
+        VictoryBackground(combat.backgroundId)
 
         Column(modifier = Modifier.fillMaxSize()) {
-            DefeatHeader()
+            VictoryHeader()
 
             Kiwi_Spacer(Spacing.large)
 
-            DefeatBanner()
+            VictoryBanner()
 
             Kiwi_Spacer(Spacing.large)
 
@@ -173,7 +170,7 @@ fun CombatDefeatScreen(
 }
 
 @Composable
-private fun DefeatHeader() {
+private fun VictoryHeader() {
     val colors = LocalKiwiColors.current
     Box(
         modifier =
@@ -197,7 +194,7 @@ private fun DefeatHeader() {
 }
 
 @Composable
-private fun DefeatBanner() {
+private fun VictoryBanner() {
     val colors = LocalKiwiColors.current
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -205,7 +202,7 @@ private fun DefeatBanner() {
     ) {
         Kiwi_H2(
             KiwiTextArguments(
-                text = "You Have Been Defeated",
+                text = "You Have Won!",
                 color = colors.colorF,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -215,7 +212,7 @@ private fun DefeatBanner() {
         Kiwi_Spacer(Spacing.small)
         Kiwi_P2(
             KiwiTextArguments(
-                text = "Your Will Is Not Strong Enough Yet",
+                text = "Your Inner Spirit Grows",
                 color = colors.color7A,
                 italic = true,
                 textAlign = TextAlign.Center,
@@ -226,24 +223,20 @@ private fun DefeatBanner() {
 }
 
 @Composable
-private fun DefeatBackground(backgroundId: Long?) {
+private fun VictoryBackground(backgroundId: Long?) {
     val colors = LocalKiwiColors.current
-    val resId = resolveDefeatBackground(backgroundId) ?: return
+    val resId = resolveVictoryBackground(backgroundId) ?: return
     Kiwi_Image(
         painterResourceId = resId,
         alt = "Combat background",
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,
-        colorFilter =
-            ColorFilter.colorMatrix(
-                ColorMatrix().apply { setToSaturation(DEFEAT_BACKGROUND_SATURATION) },
-            ),
     )
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(colors.color2.copy(alpha = DEFEAT_BACKGROUND_DIM_ALPHA)),
+                .background(colors.color2.copy(alpha = VICTORY_BACKGROUND_DIM_ALPHA)),
     )
     Box(
         modifier =
@@ -260,7 +253,7 @@ private fun DefeatBackground(backgroundId: Long?) {
     )
 }
 
-private fun resolveDefeatBackground(backgroundId: Long?): Int? =
+private fun resolveVictoryBackground(backgroundId: Long?): Int? =
     when (backgroundId) {
         1L -> R.drawable.background_mindveil
         else -> null
@@ -272,7 +265,7 @@ private fun resolveDefeatBackground(backgroundId: Long?): Int? =
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun CombatDefeatScreen_Preview() {
+fun CombatVictoryScreen_Preview() {
     Kiwi_Theme {
         Scaffold(
             bottomBar = {
@@ -286,8 +279,8 @@ fun CombatDefeatScreen_Preview() {
                         .padding(paddingValues)
                         .fillMaxSize(),
             ) {
-                CombatDefeatScreen(
-                    combat = previewDefeatedCombat(),
+                CombatVictoryScreen(
+                    combat = previewWonCombat(),
                     deckSkills =
                         listOf(
                             SkillsTestFactory.timeCooldownSkillEquipped(),
@@ -302,13 +295,13 @@ fun CombatDefeatScreen_Preview() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Suppress("MagicNumber")
-private fun previewDefeatedCombat(): CombatDomain {
+private fun previewWonCombat(): CombatDomain {
     val base =
         CombatTestFactory.validCombatDomain(
             enemyName = "Procrastinogre",
             enemySprite = "liria_neutral",
             backgroundId = 1L,
-            user =
+            enemy =
                 CombatTestFactory.validCombatActorDomain(
                     stats =
                         CombatTestFactory.validCombatStatsDomain(
@@ -326,5 +319,5 @@ private fun previewDefeatedCombat(): CombatDomain {
             CombatTestFactory.skillUsedAction(skillName = "Goal Skill"),
             CombatTestFactory.skillUsedAction(skillName = "Goal Skill"),
         )
-    return base.copy(log = log, combatStatus = CombatGeneralStatus.USER_LOST)
+    return base.copy(log = log, combatStatus = CombatGeneralStatus.USER_WON)
 }

@@ -181,21 +181,25 @@ class CombatViewModel
         }
 
         fun dismiss() {
+            if (_active.value == null) return
+            viewModelScope.launch {
+                _isVisible.value = false
+                delay(DISMISS_ANIMATION_DURATION_MS)
+                _active.value = null
+                _lastTurnActions.value = emptyList()
+            }
+        }
+
+        fun onVictoryContinue() {
             val current = _active.value ?: return
             viewModelScope.launch {
                 val event = current.onCompletedEvent
                 val entityId = current.onCompletedEntityId
 
-                val shouldTriggerOnCompletedEvent =
-                    current.combatStatus == CombatGeneralStatus.USER_WON &&
-                        event != null &&
-                        event != "_" &&
-                        entityId != null
-
                 _isVisible.value = false
                 delay(DISMISS_ANIMATION_DURATION_MS)
 
-                if (shouldTriggerOnCompletedEvent) {
+                if (event != null && entityId != null) {
                     EventBus.emitEvent(
                         EventType.valueOf(event),
                         EventPayload.EntityIdPayload(entityId),

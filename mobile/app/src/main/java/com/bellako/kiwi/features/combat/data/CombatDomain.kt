@@ -136,6 +136,6 @@ data class CombatTurnResultDomain(
     val turnNumber: Int,
     val actions: List<CombatActionDomain> = emptyList(),
     val combatStatus: CombatGeneralStatus,
-    val onCompletedEvent: String,
-    val onCompletedEntityId: Int,
+    val onCompletedEvent: String? = null,
+    val onCompletedEntityId: Int? = null,
 )

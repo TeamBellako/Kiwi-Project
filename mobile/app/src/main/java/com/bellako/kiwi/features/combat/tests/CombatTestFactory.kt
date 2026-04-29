@@ -117,15 +117,15 @@ object CombatTestFactory {
             turnNumber = turnNumber,
             actions = actions,
             combatStatus = CombatGeneralStatus.ONGOING,
-            onCompletedEvent = "_",
-            onCompletedEntityId = 0,
+            onCompletedEvent = null,
+            onCompletedEntityId = null,
         )
 
     fun userWonTurnResult(
         combatId: Long = 1L,
         turnNumber: Int = 5,
-        onCompletedEvent: String = "COMPLETE_QUEST",
-        onCompletedEntityId: Int = 42,
+        onCompletedEvent: String? = "COMPLETE_QUEST",
+        onCompletedEntityId: Int? = 42,
         actions: List<CombatActionDomain> = listOf(skillUsedAction(damage = 100f)),
     ): CombatTurnResultDomain =
         CombatTurnResultDomain(
@@ -140,8 +140,8 @@ object CombatTestFactory {
     fun userLostTurnResult(
         combatId: Long = 1L,
         turnNumber: Int = 5,
-        onCompletedEvent: String = "COMPLETE_QUEST",
-        onCompletedEntityId: Int = 42,
+        onCompletedEvent: String? = "COMPLETE_QUEST",
+        onCompletedEntityId: Int? = 42,
         actions: List<CombatActionDomain> = listOf(skillUsedAction(actor = CombatActor.ENEMY, damage = 200f)),
     ): CombatTurnResultDomain =
         CombatTurnResultDomain(
@@ -156,8 +156,8 @@ object CombatTestFactory {
     fun timeoutTurnResult(
         combatId: Long = 1L,
         turnNumber: Int = 3,
-        onCompletedEvent: String = "COMPLETE_QUEST",
-        onCompletedEntityId: Int = 42,
+        onCompletedEvent: String? = "COMPLETE_QUEST",
+        onCompletedEntityId: Int? = 42,
     ): CombatTurnResultDomain =
         CombatTurnResultDomain(
             combatId = combatId,
@@ -171,8 +171,8 @@ object CombatTestFactory {
     fun abandonTurnResult(
         combatId: Long = 1L,
         turnNumber: Int = 3,
-        onCompletedEvent: String = "COMPLETE_QUEST",
-        onCompletedEntityId: Int = 42,
+        onCompletedEvent: String? = "COMPLETE_QUEST",
+        onCompletedEntityId: Int? = 42,
     ): CombatTurnResultDomain =
         CombatTurnResultDomain(
             combatId = combatId,

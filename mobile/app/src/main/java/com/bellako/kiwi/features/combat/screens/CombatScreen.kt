@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -68,6 +69,7 @@ import com.bellako.kiwi.features.combat.data.CombatActiveStatusDomain
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatActorDomain
 import com.bellako.kiwi.features.combat.data.CombatDomain
+import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.tests.CombatTestFactory
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
@@ -80,6 +82,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -111,6 +114,8 @@ private const val DEATH_BLINK_PEAK_ALPHA = 0.55f
 private const val DEATH_BLINK_TROUGH_ALPHA = 0.15f
 private const val DEATH_HOLD_RISE_MS = 200
 private const val DEATH_HOLD_ALPHA = 0.6f
+private const val ENEMY_DEFEAT_POST_DAMAGE_PAUSE_MS = 250L
+private const val ENEMY_DEFEAT_FADE_MS = 800
 private const val LOG_DIM_ALPHA = 0.55f
 private const val DEFAULT_ENEMY_NAME = "Enemy"
 private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
@@ -189,6 +194,7 @@ fun CombatScreen(
                     onDismissLog = { isLogOpen = false },
                     logEntries = logEntries,
                     context = context,
+                    isEnemyDefeated = combat.combatStatus == CombatGeneralStatus.USER_WON,
                 )
 
                 Box {
@@ -334,6 +340,7 @@ private fun EnemyArena(
     maxHp: Int,
     endsAt: Long?,
     context: Context,
+    isEnemyDefeated: Boolean = false,
 ) {
     var previousHp by remember { mutableIntStateOf(currentHp) }
     var damageTrigger by remember { mutableIntStateOf(0) }
@@ -346,28 +353,41 @@ private fun EnemyArena(
     val offsetX = remember { Animatable(0f) }
     val redAlpha = remember { Animatable(0f) }
     val spriteAlpha = remember { Animatable(1f) }
+    var isDamageAnimating by remember { mutableStateOf(false) }
 
     LaunchedEffect(damageTrigger) {
         if (damageTrigger == 0) return@LaunchedEffect
-        coroutineScope {
-            launch {
-                repeat(DAMAGE_WIGGLE_CYCLES) {
-                    offsetX.animateTo(DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
-                    offsetX.animateTo(-DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
+        isDamageAnimating = true
+        try {
+            coroutineScope {
+                launch {
+                    repeat(DAMAGE_WIGGLE_CYCLES) {
+                        offsetX.animateTo(DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
+                        offsetX.animateTo(-DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
+                    }
+                    offsetX.animateTo(0f, tween(DAMAGE_WIGGLE_STEP_MS))
                 }
-                offsetX.animateTo(0f, tween(DAMAGE_WIGGLE_STEP_MS))
-            }
-            launch {
-                repeat(DAMAGE_FLASH_CYCLES) {
-                    redAlpha.snapTo(DAMAGE_FLASH_RED_ALPHA)
-                    spriteAlpha.snapTo(DAMAGE_FLASH_DIM_ALPHA)
-                    delay(DAMAGE_FLASH_STEP_MS)
-                    redAlpha.snapTo(0f)
-                    spriteAlpha.snapTo(1f)
-                    delay(DAMAGE_FLASH_STEP_MS)
+                launch {
+                    repeat(DAMAGE_FLASH_CYCLES) {
+                        redAlpha.snapTo(DAMAGE_FLASH_RED_ALPHA)
+                        spriteAlpha.snapTo(DAMAGE_FLASH_DIM_ALPHA)
+                        delay(DAMAGE_FLASH_STEP_MS)
+                        redAlpha.snapTo(0f)
+                        spriteAlpha.snapTo(1f)
+                        delay(DAMAGE_FLASH_STEP_MS)
+                    }
                 }
             }
+        } finally {
+            isDamageAnimating = false
         }
+    }
+
+    LaunchedEffect(isEnemyDefeated) {
+        if (!isEnemyDefeated) return@LaunchedEffect
+        snapshotFlow { isDamageAnimating }.first { !it }
+        delay(ENEMY_DEFEAT_POST_DAMAGE_PAUSE_MS)
+        spriteAlpha.animateTo(0f, tween(ENEMY_DEFEAT_FADE_MS))
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -606,6 +626,7 @@ private fun ColumnScope.CombatBattleArea(
     onDismissLog: () -> Unit,
     logEntries: List<CombatLogEntry>,
     context: Context,
+    isEnemyDefeated: Boolean = false,
 ) {
     Box(
         modifier =
@@ -619,6 +640,7 @@ private fun ColumnScope.CombatBattleArea(
             maxHp = combat.enemy.stats.maxHp,
             endsAt = combat.endsAt,
             context = context,
+            isEnemyDefeated = isEnemyDefeated,
         )
 
         if (isLogOpen) {
