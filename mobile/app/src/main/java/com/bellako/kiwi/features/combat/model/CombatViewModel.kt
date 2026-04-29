@@ -423,6 +423,7 @@ class CombatViewModel
             }
         }
 
+        @Suppress("CyclomaticComplexMethod")
         private fun resolveStatusSFX(
             status: CombatActiveStatusDomain?,
             value: Float?,
