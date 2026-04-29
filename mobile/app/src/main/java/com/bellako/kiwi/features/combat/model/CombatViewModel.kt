@@ -1,6 +1,9 @@
 package com.bellako.kiwi.features.combat.model
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
+import com.bellako.kiwi.R
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
@@ -17,6 +20,7 @@ import com.bellako.kiwi.features.combat.data.CombatTurnResultDomain
 import com.bellako.kiwi.features.combat.data.SkillEffectResultDomain
 import com.bellako.kiwi.features.combat.data.SkillEffectResultType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -40,6 +44,7 @@ class CombatViewModel
     @Inject
     constructor(
         private val repository: CombatRepository,
+        @ApplicationContext private val context: Context,
     ) : BaseViewModel() {
         private val _active = MutableStateFlow<CombatDomain?>(null)
         val active: StateFlow<CombatDomain?> = _active.asStateFlow()
@@ -241,6 +246,7 @@ class CombatViewModel
             ) {
                 state = applyActionEffects(state, actions.first())
                 _active.value = state
+                playActionSFX(actions.first())
                 delay(TURN_BEAT_MS)
                 startIndex = 1
             } else if (actions.isNotEmpty()) {
@@ -252,6 +258,7 @@ class CombatViewModel
                 state = state.copy(log = state.log + action)
                 state = applyActionEffects(state, action)
                 _active.value = state
+                playActionSFX(action)
                 delay(TURN_BEAT_MS)
             }
 
@@ -379,4 +386,59 @@ class CombatViewModel
                 CombatActor.ENEMY -> combat.copy(enemy = transform(combat.enemy))
                 CombatActor.ALLY -> combat
             }
+
+        private fun playActionSFX(action: CombatActionDomain) {
+            when (action.actionType) {
+                CombatActionType.SKILL_USED ->
+                    action.skillEffectsResults.forEach { effect ->
+                        resolveEffectSFX(effect)?.let { AudioManager.playSFX(context, it) }
+                    }
+                CombatActionType.ACTOR_DAMAGED_BY_STATE ->
+                    AudioManager.playSFX(context, R.raw.snd_stats_healthdown)
+                else -> Unit
+            }
+        }
+
+        private fun resolveEffectSFX(effect: SkillEffectResultDomain): Int? =
+            when (effect.typeResult) {
+                SkillEffectResultType.DAMAGE -> R.raw.snd_stats_healthdown
+                SkillEffectResultType.HEAL -> R.raw.snd_stats_healthup
+                SkillEffectResultType.MODIFY_STAT -> resolveStatSFX(effect.statAffected, effect.value)
+                SkillEffectResultType.STATUS_APPLIED -> resolveStatusSFX(effect.appliedStatus, effect.value)
+                SkillEffectResultType.STATUS_REMOVED -> R.raw.snd_states_reversion
+                SkillEffectResultType.MISS -> null
+            }
+
+        private fun resolveStatSFX(
+            statAffected: String?,
+            value: Float?,
+        ): Int {
+            val isHp = statAffected?.equals("currentHp", ignoreCase = true) == true
+            val positive = (value ?: 0f) >= 0f
+            return when {
+                isHp && positive -> R.raw.snd_stats_healthup
+                isHp -> R.raw.snd_stats_healthdown
+                positive -> R.raw.snd_stats_generalstatup
+                else -> R.raw.snd_stats_generalstatdown
+            }
+        }
+
+        @Suppress("CyclomaticComplexMethod")
+        private fun resolveStatusSFX(
+            status: CombatActiveStatusDomain?,
+            value: Float?,
+        ): Int {
+            val name = status?.name?.lowercase() ?: return R.raw.snd_states_statup
+            return when {
+                name.contains("freez") || name.contains("froz") -> R.raw.snd_states_freeze
+                name.contains("confus") -> R.raw.snd_states_confusion
+                name.contains("block") || name.contains("silenc") -> R.raw.snd_states_buffblock
+                name.contains("revers") || name.contains("reflect") -> R.raw.snd_states_reversion
+                name.contains("burn") || name.contains("poison") || name.contains("venom") ->
+                    R.raw.snd_states_burnpoison
+                name.contains("mut") -> R.raw.snd_states_mutis
+                (value ?: 0f) < 0f -> R.raw.snd_states_statdown
+                else -> R.raw.snd_states_statup
+            }
+        }
     }

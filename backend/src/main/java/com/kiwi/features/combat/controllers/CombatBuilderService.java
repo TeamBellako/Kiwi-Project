@@ -57,6 +57,10 @@ public class CombatBuilderService {
                 ? config.getBackground().getId()
                 : null;
 
+        Long sfxId = config.getSfx() != null
+                ? config.getSfx().getId()
+                : null;
+
         List<CombatActionDTO> log =
                 combatLogService.getCombatLog(combat.getId());
 
@@ -67,6 +71,7 @@ public class CombatBuilderService {
                 enemyEntity.getName(),
                 enemyEntity.getSprite(),
                 backgroundId,
+                sfxId,
                 log
         );
     }

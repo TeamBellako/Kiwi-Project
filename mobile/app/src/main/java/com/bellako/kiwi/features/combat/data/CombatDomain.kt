@@ -122,6 +122,7 @@ data class CombatDomain(
     val enemyName: String,
     val enemySprite: String,
     val backgroundId: Long? = null,
+    val musicId: Long? = null,
     val user: CombatActorDomain,
     val enemy: CombatActorDomain,
     val log: List<CombatActionDomain> = emptyList(),

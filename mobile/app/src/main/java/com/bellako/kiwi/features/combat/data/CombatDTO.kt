@@ -83,6 +83,7 @@ data class CombatDTO(
     val enemyName: String,
     val enemySprite: String,
     val backgroundId: Long? = null,
+    val musicId: Long? = null,
     val user: CombatActorDTO,
     val enemy: CombatActorDTO,
     val log: List<CombatActionDTO> = emptyList(),
