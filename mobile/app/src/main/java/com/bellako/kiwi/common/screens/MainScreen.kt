@@ -311,20 +311,21 @@ private fun AppScreen(
                             Box(modifier = Modifier.matchParentSize()) {
                                 val isDefeat = isCombatDefeat(combat)
                                 val isVictory = isCombatVictory(combat)
-                                val phase = produceState(CombatPhase.COMBAT, combat.id, isDefeat, isVictory) {
-                                    value =
-                                        when {
-                                            isDefeat -> {
-                                                delay(DEFEAT_TRANSITION_DELAY_MS)
-                                                CombatPhase.DEFEAT
+                                val phase =
+                                    produceState(CombatPhase.COMBAT, combat.id, isDefeat, isVictory) {
+                                        value =
+                                            when {
+                                                isDefeat -> {
+                                                    delay(DEFEAT_TRANSITION_DELAY_MS)
+                                                    CombatPhase.DEFEAT
+                                                }
+                                                isVictory -> {
+                                                    delay(VICTORY_TRANSITION_DELAY_MS)
+                                                    CombatPhase.VICTORY
+                                                }
+                                                else -> CombatPhase.COMBAT
                                             }
-                                            isVictory -> {
-                                                delay(VICTORY_TRANSITION_DELAY_MS)
-                                                CombatPhase.VICTORY
-                                            }
-                                            else -> CombatPhase.COMBAT
-                                        }
-                                }
+                                    }
                                 val fadeDuration =
                                     when (phase.value) {
                                         CombatPhase.VICTORY -> VICTORY_FADE_MS
@@ -346,7 +347,7 @@ private fun AppScreen(
                                             CombatVictoryScreen(
                                                 combat = combat,
                                                 deckSkills = skillsState?.deckSkills ?: emptyList(),
-                                                onContinue = combatViewModel::dismiss,
+                                                onContinue = combatViewModel::onVictoryContinue,
                                             )
                                         CombatPhase.COMBAT ->
                                             CombatScreen(

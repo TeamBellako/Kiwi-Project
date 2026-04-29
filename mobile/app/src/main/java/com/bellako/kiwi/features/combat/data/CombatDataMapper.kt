@@ -1,5 +1,7 @@
 package com.bellako.kiwi.features.combat.data
 
+private const val NO_COMPLETION_EVENT_SENTINEL = "_"
+
 object CombatDataMapper {
     fun toDomain(dto: CombatDTO): CombatDomain =
         CombatDomain(
@@ -16,15 +18,17 @@ object CombatDataMapper {
             log = dto.log.map { toDomain(it) },
         )
 
-    fun toDomain(dto: CombatTurnResultDTO): CombatTurnResultDomain =
-        CombatTurnResultDomain(
+    fun toDomain(dto: CombatTurnResultDTO): CombatTurnResultDomain {
+        val hasEvent = dto.onCompletedEvent != NO_COMPLETION_EVENT_SENTINEL
+        return CombatTurnResultDomain(
             combatId = dto.combatId,
             turnNumber = dto.turnNumber,
             actions = dto.actions.map { toDomain(it) },
             combatStatus = enumValueOf<CombatGeneralStatus>(dto.combatStatus),
-            onCompletedEvent = dto.onCompletedEvent,
-            onCompletedEntityId = dto.onCompletedEntityId,
+            onCompletedEvent = if (hasEvent) dto.onCompletedEvent else null,
+            onCompletedEntityId = if (hasEvent) dto.onCompletedEntityId else null,
         )
+    }
 
     fun toDomain(dto: CombatActorDTO): CombatActorDomain =
         CombatActorDomain(
@@ -118,8 +122,8 @@ object CombatDataMapper {
             turnNumber = domain.turnNumber,
             actions = domain.actions.map { toDTO(it) },
             combatStatus = domain.combatStatus.name,
-            onCompletedEvent = domain.onCompletedEvent,
-            onCompletedEntityId = domain.onCompletedEntityId,
+            onCompletedEvent = domain.onCompletedEvent ?: NO_COMPLETION_EVENT_SENTINEL,
+            onCompletedEntityId = domain.onCompletedEntityId ?: 0,
         )
 
     fun toDTO(domain: CombatActorDomain): CombatActorDTO =
