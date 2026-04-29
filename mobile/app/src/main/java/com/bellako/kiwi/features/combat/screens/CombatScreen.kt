@@ -103,6 +103,14 @@ private const val PLAYER_FLASH_ALPHA = 0.15f
 private const val PLAYER_VIGNETTE_PEAK_ALPHA = 0.3f
 private const val PLAYER_VIGNETTE_RISE_MS = 120
 private const val PLAYER_VIGNETTE_FALL_MS = 500
+private const val DEATH_PAUSE_MS = 400L
+private const val DEATH_BLINK_CYCLES = 3
+private const val DEATH_BLINK_RISE_MS = 180
+private const val DEATH_BLINK_FALL_MS = 220
+private const val DEATH_BLINK_PEAK_ALPHA = 0.55f
+private const val DEATH_BLINK_TROUGH_ALPHA = 0.15f
+private const val DEATH_HOLD_RISE_MS = 200
+private const val DEATH_HOLD_ALPHA = 0.6f
 private const val LOG_DIM_ALPHA = 0.55f
 private const val DEFAULT_ENEMY_NAME = "Enemy"
 private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
@@ -145,6 +153,7 @@ fun CombatScreen(
         }
 
     val playerVfx = rememberPlayerDamageVfx(combat.user.stats.currentHp, combat.id)
+    val deathVignetteAlpha = rememberDeathSequenceVfx(combat.user.stats.currentHp == 0, combat.id)
 
     Box(
         modifier =
@@ -233,6 +242,7 @@ fun CombatScreen(
         }
 
         PlayerDamageOverlays(playerVfx)
+        DeathSequenceOverlay(deathVignetteAlpha.value)
     }
 
     if (showAbandonConfirm) {
@@ -490,6 +500,46 @@ private fun rememberPlayerDamageVfx(
         }
     }
     return PlayerDamageVfx(shakeOffsetX, flashAlpha, vignetteAlpha)
+}
+
+@Composable
+private fun rememberDeathSequenceVfx(
+    isPlayerDefeated: Boolean,
+    key: Any,
+): Animatable<Float, *> {
+    val alpha = remember(key) { Animatable(0f) }
+    LaunchedEffect(isPlayerDefeated, key) {
+        if (!isPlayerDefeated) {
+            alpha.snapTo(0f)
+            return@LaunchedEffect
+        }
+        delay(DEATH_PAUSE_MS)
+        repeat(DEATH_BLINK_CYCLES) {
+            alpha.animateTo(DEATH_BLINK_PEAK_ALPHA, tween(DEATH_BLINK_RISE_MS))
+            alpha.animateTo(DEATH_BLINK_TROUGH_ALPHA, tween(DEATH_BLINK_FALL_MS))
+        }
+        alpha.animateTo(DEATH_HOLD_ALPHA, tween(DEATH_HOLD_RISE_MS))
+    }
+    return alpha
+}
+
+@Composable
+private fun DeathSequenceOverlay(alpha: Float) {
+    if (alpha <= 0f) return
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors =
+                            listOf(
+                                Color.Red.copy(alpha = alpha * 0.4f),
+                                Color.Red.copy(alpha = alpha),
+                            ),
+                    ),
+                ),
+    )
 }
 
 @Composable

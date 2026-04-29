@@ -67,6 +67,10 @@ public class CombatFacadeService {
         CombatTurnResultDTO result =
                 combatTurnService.executeTurn(userId, combat, skillId);
 
+        if (combat.getCombatStatus() == CombatGeneralStatus.USER_LOST) {
+            combatService.resetStatsToOriginalConfig(combat);
+        }
+
         if (combat.getCombatStatus() != CombatGeneralStatus.ONGOING) {
             combatService.cleanDatabase(combatId);
         }
@@ -85,6 +89,10 @@ public class CombatFacadeService {
 
         CombatTurnResultDTO result =
                 combatTurnService.handleTimeout(combat);
+
+        if (combat.getCombatStatus() == CombatGeneralStatus.USER_LOST) {
+            combatService.resetStatsToOriginalConfig(combat);
+        }
 
         combatService.cleanDatabase(combat.getId());
 

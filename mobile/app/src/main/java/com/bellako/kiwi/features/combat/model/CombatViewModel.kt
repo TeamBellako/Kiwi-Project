@@ -24,6 +24,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -57,6 +59,22 @@ class CombatViewModel
                     val p = payload as EventPayload.EntityIdPayload
                     start(p.targetEntityId.toLong())
                 }
+            }
+            watchForTimeout()
+        }
+
+        private fun watchForTimeout() {
+            viewModelScope.launch {
+                combine(_active, _isTurnPlaying) { combat, isPlaying -> combat to isPlaying }
+                    .collectLatest { (combat, isPlaying) ->
+                        if (combat == null) return@collectLatest
+                        if (combat.combatStatus != CombatGeneralStatus.ONGOING) return@collectLatest
+                        if (isPlaying) return@collectLatest
+                        val endsAt = combat.endsAt ?: return@collectLatest
+                        val remaining = endsAt - System.currentTimeMillis()
+                        if (remaining > 0) delay(remaining)
+                        timeout()
+                    }
             }
         }
 
