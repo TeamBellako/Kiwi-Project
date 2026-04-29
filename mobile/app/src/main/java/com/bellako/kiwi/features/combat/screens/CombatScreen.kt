@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -81,6 +82,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -112,7 +114,7 @@ private const val DEATH_BLINK_PEAK_ALPHA = 0.55f
 private const val DEATH_BLINK_TROUGH_ALPHA = 0.15f
 private const val DEATH_HOLD_RISE_MS = 200
 private const val DEATH_HOLD_ALPHA = 0.6f
-private const val ENEMY_DEFEAT_FADE_DELAY_MS = 200L
+private const val ENEMY_DEFEAT_POST_DAMAGE_PAUSE_MS = 250L
 private const val ENEMY_DEFEAT_FADE_MS = 800
 private const val LOG_DIM_ALPHA = 0.55f
 private const val DEFAULT_ENEMY_NAME = "Enemy"
@@ -351,33 +353,40 @@ private fun EnemyArena(
     val offsetX = remember { Animatable(0f) }
     val redAlpha = remember { Animatable(0f) }
     val spriteAlpha = remember { Animatable(1f) }
+    var isDamageAnimating by remember { mutableStateOf(false) }
 
     LaunchedEffect(damageTrigger) {
         if (damageTrigger == 0) return@LaunchedEffect
-        coroutineScope {
-            launch {
-                repeat(DAMAGE_WIGGLE_CYCLES) {
-                    offsetX.animateTo(DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
-                    offsetX.animateTo(-DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
+        isDamageAnimating = true
+        try {
+            coroutineScope {
+                launch {
+                    repeat(DAMAGE_WIGGLE_CYCLES) {
+                        offsetX.animateTo(DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
+                        offsetX.animateTo(-DAMAGE_WIGGLE_AMPLITUDE_PX, tween(DAMAGE_WIGGLE_STEP_MS))
+                    }
+                    offsetX.animateTo(0f, tween(DAMAGE_WIGGLE_STEP_MS))
                 }
-                offsetX.animateTo(0f, tween(DAMAGE_WIGGLE_STEP_MS))
-            }
-            launch {
-                repeat(DAMAGE_FLASH_CYCLES) {
-                    redAlpha.snapTo(DAMAGE_FLASH_RED_ALPHA)
-                    spriteAlpha.snapTo(DAMAGE_FLASH_DIM_ALPHA)
-                    delay(DAMAGE_FLASH_STEP_MS)
-                    redAlpha.snapTo(0f)
-                    spriteAlpha.snapTo(1f)
-                    delay(DAMAGE_FLASH_STEP_MS)
+                launch {
+                    repeat(DAMAGE_FLASH_CYCLES) {
+                        redAlpha.snapTo(DAMAGE_FLASH_RED_ALPHA)
+                        spriteAlpha.snapTo(DAMAGE_FLASH_DIM_ALPHA)
+                        delay(DAMAGE_FLASH_STEP_MS)
+                        redAlpha.snapTo(0f)
+                        spriteAlpha.snapTo(1f)
+                        delay(DAMAGE_FLASH_STEP_MS)
+                    }
                 }
             }
+        } finally {
+            isDamageAnimating = false
         }
     }
 
     LaunchedEffect(isEnemyDefeated) {
         if (!isEnemyDefeated) return@LaunchedEffect
-        delay(ENEMY_DEFEAT_FADE_DELAY_MS)
+        snapshotFlow { isDamageAnimating }.first { !it }
+        delay(ENEMY_DEFEAT_POST_DAMAGE_PAUSE_MS)
         spriteAlpha.animateTo(0f, tween(ENEMY_DEFEAT_FADE_MS))
     }
 
