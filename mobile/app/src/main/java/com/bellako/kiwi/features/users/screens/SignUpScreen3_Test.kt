@@ -366,7 +366,7 @@ private fun OnboardingSkillItem(skill: SkillDomain) {
     val kiwiColors = LocalKiwiColors.current
 
     Box(modifier = Modifier.fillMaxWidth()) {
-        SkillBackground(skill, false)
+        SkillBackground(skill, 0f)
 
         Row(
             modifier =
