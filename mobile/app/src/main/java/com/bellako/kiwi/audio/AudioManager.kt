@@ -290,13 +290,14 @@ object AudioManager {
         }
     }
 
-    /** Plays a new SFX once */
+    /** Plays a new SFX once, or looping if specified */
     fun playSFX(
         context: Context,
         resId: Int,
         baseVolume: Float = 1f,
+        looping: Boolean = false,
     ) {
-        sfxManager.updateOrCreateLayer(context, AudioLayer(resId, baseVolume, true), 0, false)
+        sfxManager.updateOrCreateLayer(context, AudioLayer(resId, baseVolume, true), 0, looping)
     }
 
     /** Stops a currently playing SFX */
