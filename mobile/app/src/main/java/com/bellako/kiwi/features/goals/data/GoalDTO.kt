@@ -8,6 +8,7 @@ data class GoalDTO(
     val type: String,
     val category: String,
     val reward: Int,
+    val difficulty: Int = 1,
     val onCompletedEvent: String = "_",
     val onCompletedEntityId: Int = 0,
 )

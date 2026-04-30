@@ -10,6 +10,7 @@ data class UserGoalStatusDomain(
     override val category: GoalCategory,
     val status: GoalStatus,
     override val reward: Int,
+    val difficulty: GoalDifficulty = GoalDifficulty.EASY,
     val date: String = "",
     val value: Int = 0,
     val onCompletedEvent: String,
