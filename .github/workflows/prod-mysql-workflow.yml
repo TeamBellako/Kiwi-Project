@@ -44,7 +44,6 @@ jobs:
           kubectl create secret generic mysql-secret \
             --from-literal=MYSQL_ROOT_PASSWORD='${{ secrets.MYSQL_ROOT_PASSWORD }}' \
             --from-literal=MYSQL_DATABASE='${{ secrets.MYSQL_DATABASE }}' \
-            --from-literal=MYSQL_INIT_TABLE='${{ secrets.MYSQL_INIT_TABLE }}' \
             --from-literal=BACKEND_DB_USERNAME='${{ secrets.BACKEND_DB_USERNAME }}' \
             --from-literal=BACKEND_DB_PASSWORD='${{ secrets.BACKEND_DB_PASSWORD }}' \
             --from-literal=TEAM_ROLE='${{ secrets.TEAM_ROLE }}' \
