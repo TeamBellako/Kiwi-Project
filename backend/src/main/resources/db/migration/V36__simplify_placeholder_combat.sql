@@ -29,12 +29,20 @@ INSERT IGNORE INTO goals
     (id, name, action, target, type, category, reward, on_completed_action, on_completed_entity, on_completed_entity_id) VALUES
 (4, 'Insight Strike cooldown', 'Placeholder goal to gate Insight Strike cooldown', 1, 'EXERCISE', 'SKILL', 0, '', '', 0);
 
-INSERT IGNORE INTO user_goal_status (id, user_id, goal_id, status, date, value) VALUES
-(21, 19, 4, 'NOT_COMPLETED', CURDATE(), 0);
+INSERT IGNORE INTO user_goal_status (user_id, goal_id, status, date, value)
+SELECT 17, 4, 'NOT_COMPLETED', CURDATE(), 0
+WHERE EXISTS (SELECT 1 FROM users WHERE id = 17);
 
 UPDATE skills
 SET cooldown_type = 'GOAL',
-    cooldown_goal_id = 4,
+    cooldown_goal_id = (
+        SELECT ugs.id
+        FROM user_goal_status ugs
+        WHERE ugs.user_id = 17
+          AND ugs.goal_id = 4
+        ORDER BY ugs.id
+        LIMIT 1
+    ),
     cooldown_time_minutes = NULL,
     cooldown_other_description = NULL
 WHERE id = 2020;
