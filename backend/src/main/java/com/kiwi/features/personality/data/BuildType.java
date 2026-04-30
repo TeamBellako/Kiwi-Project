@@ -8,7 +8,7 @@ public enum BuildType {
     // Element IDs: 1=Adaptability, 2=Control, 3=Empathy, 4=Focus, 5=Motivation, 6=Resilience
     BERSERKER(
             new BuildStats(100, 10, 5, 5, 3, 8, 6, 4),
-            List.of(1000L),
+            List.of(1000L, 1001L),
             List.of(
                     new ElementMultiplierConfig(1, 1.0f),  // Adaptability
                     new ElementMultiplierConfig(2, 1.0f),  // Control
@@ -21,7 +21,7 @@ public enum BuildType {
     ),
     SHAMAN(
             new BuildStats(100, 5, 10, 3, 5, 6, 6, 8),
-            List.of(1000L),
+            List.of(1000L, 1001L),
             List.of(
                     new ElementMultiplierConfig(1, 0.5f),  // Adaptability
                     new ElementMultiplierConfig(2, 1.5f),  // Control
@@ -34,7 +34,7 @@ public enum BuildType {
     ),
     MONK(
             new BuildStats(100, 7, 7, 7, 7, 7, 7, 4),
-            List.of(1000L),
+            List.of(1000L, 1001L),
             List.of(
                     new ElementMultiplierConfig(1, 1.5f),  // Adaptability
                     new ElementMultiplierConfig(2, 0.5f),  // Control
