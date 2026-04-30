@@ -10,6 +10,8 @@ import com.kiwi.features.combat.repositories.CombatConfigRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class CombatFacadeService {
 
@@ -45,6 +47,16 @@ public class CombatFacadeService {
 
     //------------------------------------------------------------------------------------------------------------------
 
+    // GET ACTIVE
+    @Transactional(readOnly = true)
+    public Optional<CombatDTO> getActiveCombat(Long userId) {
+
+        return combatService.findActiveCombat(userId)
+                .map(combatBuilderService::buildCombatDTO);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
     // EXECUTE TURN
     @Transactional
     public CombatTurnResultDTO executeTurn(Long userId, Long combatId, Long skillId) {
@@ -54,6 +66,10 @@ public class CombatFacadeService {
 
         CombatTurnResultDTO result =
                 combatTurnService.executeTurn(userId, combat, skillId);
+
+        if (combat.getCombatStatus() == CombatGeneralStatus.USER_LOST) {
+            combatService.resetStatsToOriginalConfig(combat);
+        }
 
         if (combat.getCombatStatus() != CombatGeneralStatus.ONGOING) {
             combatService.cleanDatabase(combatId);
@@ -74,6 +90,10 @@ public class CombatFacadeService {
         CombatTurnResultDTO result =
                 combatTurnService.handleTimeout(combat);
 
+        if (combat.getCombatStatus() == CombatGeneralStatus.USER_LOST) {
+            combatService.resetStatsToOriginalConfig(combat);
+        }
+
         combatService.cleanDatabase(combat.getId());
 
         return enrichWithConfig(result, combat.getCombatConfigId());
@@ -82,6 +102,7 @@ public class CombatFacadeService {
     //------------------------------------------------------------------------------------------------------------------
 
     // ABANDON
+    @Transactional
     public CombatTurnResultDTO abandon(Long userId, Long combatId) {
         CombatPersistence combat = combatService.findCombat(combatId)
                 .orElseThrow(() -> new CombatNotFoundException(combatId));
@@ -89,6 +110,7 @@ public class CombatFacadeService {
         CombatTurnResultDTO result =
                 combatTurnService.handleAbandon(combat);
 
+        combatService.resetStatsToOriginalConfig(combat);
         combatService.cleanDatabase(combat.getId());
 
         return enrichWithConfig(result, combat.getCombatConfigId());

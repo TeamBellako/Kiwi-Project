@@ -188,8 +188,7 @@ class SkillsFakeViewModel
             )
         }
 
-        override suspend fun loadSkills(): Result<Unit> =
-            if (fakeError) Result.failure(fakeException) else Result.success(Unit)
+        override suspend fun loadSkills(): Result<Unit> = if (fakeError) Result.failure(fakeException) else Result.success(Unit)
 
         // INTERNAL
         private fun updateSkill(

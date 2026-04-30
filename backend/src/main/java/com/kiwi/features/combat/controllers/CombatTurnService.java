@@ -80,11 +80,11 @@ public class CombatTurnService {
                 context.getEnemy().getLastSkillUsed()
         );
 
-        blockedSkillService.syncBlockedSkills(
-                combat.getId(),
-                new ArrayList<>(context.getUser().getSkills().keySet()),
-                new ArrayList<>(context.getEnemy().getSkills().keySet())
-        );
+//        blockedSkillService.syncBlockedSkills(
+//                combat.getId(),
+//                new ArrayList<>(context.getUser().getSkills().keySet()),
+//                new ArrayList<>(context.getEnemy().getSkills().keySet())
+//        );
 
         combatProgressService.applyTurnResult(
                 combat,

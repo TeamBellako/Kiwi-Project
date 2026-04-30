@@ -260,7 +260,10 @@ fun SkillDetails(
                     val newValue =
                         (goalProgress * target).toInt()
 
-                    onApplyGoalProgress(skill.id, skill.cooldownGoalId, newValue)
+                    onApplyGoalProgress(skill.id, skill.goalData.id, newValue)
+                    if (newValue >= target) {
+                        onDismiss()
+                    }
                 }
             }
         }

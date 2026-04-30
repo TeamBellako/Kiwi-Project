@@ -68,7 +68,7 @@ public class CombatEngine {
         statusManager.reduceStatesTurnsToActor(userActor, context);
 
         // ENEMY TURN
-        if(combat.getEnemyHp() > 0) {
+        if(context.getEnemy().getStats().getCurrentHp() > 0) {
 
             CombatActorDomain enemyActor = context.getActor(CombatActorType.ENEMY);
 

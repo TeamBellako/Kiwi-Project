@@ -61,7 +61,9 @@ sealed class SkillDomain {
 }
 
 data class GoalData(
+    val id: Long,
     val action: String,
     val progress: Int,
     val target: Int,
+    val goalId: Long,
 )
