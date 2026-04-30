@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.combat.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -95,14 +93,8 @@ fun CombatStatusPopup(
         modifier =
             modifier
                 .widthIn(max = maxWidth)
-                .background(
-                    color = colors.color3A,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(STATUS_POPUP_RADIUS)),
-                ).border(
-                    width = getResponsiveSizeHeight(1.dp),
-                    color = colors.color5C,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(STATUS_POPUP_RADIUS)),
-                ).padding(
+                .combatPanel(bgColor = colors.color3A, borderColor = colors.color5C, radius = STATUS_POPUP_RADIUS)
+                .padding(
                     horizontal = getResponsiveSizeWidth(Spacing.medium),
                     vertical = getResponsiveSizeHeight(Spacing.small),
                 ),

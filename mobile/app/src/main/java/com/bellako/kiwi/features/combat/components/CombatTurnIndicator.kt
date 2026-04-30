@@ -1,21 +1,15 @@
 package com.bellako.kiwi.features.combat.components
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,9 +36,6 @@ private val INDICATOR_RADIUS = 12.dp
 private val CHEVRON_SIZE = 14.dp
 private const val CHEVRON_OPEN_ROTATION = 180f
 private const val CHEVRON_CLOSED_ROTATION = 0f
-private const val BLINK_DIM_ALPHA = 0.35f
-private const val BLINK_FADE_MS = 220
-private const val BLINK_CYCLES = 2
 
 @Composable
 fun CombatTurnIndicator(
@@ -58,28 +49,18 @@ fun CombatTurnIndicator(
         targetValue = if (isLogOpen) CHEVRON_CLOSED_ROTATION else CHEVRON_OPEN_ROTATION,
         label = "combat_turn_chevron",
     )
-    val blinkAlpha = remember { Animatable(1f) }
+    val blinkAlpha = rememberBlinkAlpha()
 
     LaunchedEffect(message.text) {
-        blinkAlpha.snapTo(1f)
-        repeat(BLINK_CYCLES) {
-            blinkAlpha.animateTo(BLINK_DIM_ALPHA, tween(durationMillis = BLINK_FADE_MS))
-            blinkAlpha.animateTo(1f, tween(durationMillis = BLINK_FADE_MS))
-        }
+        blinkAlpha.blink()
     }
 
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(
-                    color = colors.color3A,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(INDICATOR_RADIUS)),
-                ).border(
-                    width = getResponsiveSizeHeight(1.dp),
-                    color = colors.color5C,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(INDICATOR_RADIUS)),
-                ).clickable(onClick = onClick)
+                .combatPanel(bgColor = colors.color3A, borderColor = colors.color5C, radius = INDICATOR_RADIUS)
+                .clickable(onClick = onClick)
                 .padding(
                     horizontal = getResponsiveSizeWidth(Spacing.medium),
                     vertical = getResponsiveSizeHeight(Spacing.medium),
