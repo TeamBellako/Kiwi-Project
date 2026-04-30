@@ -41,12 +41,12 @@ INSERT IGNORE INTO goals (id, name, action, target, type, category, reward) VALU
 INSERT IGNORE INTO skills
     (id, type, name, description, cooldown_type, cooldown_goal_id, cooldown_time_minutes, cooldown_other_description, levelup_skill_id) VALUES
 (1000, 'MOTIVATION', 'Attack',     'Deals 40 physical damage.', 'GOAL',  100,  NULL, NULL, NULL),
-(2000, 'MOTIVATION', 'Dummy Slap', 'Deals 10 physical damage.', 'OTHER', NULL, NULL, NULL, NULL);
+(2000, 'MOTIVATION', 'Dummy Slap', 'Deals 30 physical damage.', 'OTHER', NULL, NULL, NULL, NULL);
 
 INSERT IGNORE INTO skill_effects
     (skill_id, target,    effect_type, stat_affected, stat_modification, power, attack_type, element_id, hit_chance, state_id, status_duration) VALUES
 (1000,        'OPPONENT', 'DAMAGE',    NULL,          NULL,              40.0,  'PHYSICAL',  5,          100,        NULL,     NULL),
-(2000,        'OPPONENT', 'DAMAGE',    NULL,          NULL,              10.0,  'PHYSICAL',  5,          100,        NULL,     NULL);
+(2000,        'OPPONENT', 'DAMAGE',    NULL,          NULL,              30.0,  'PHYSICAL',  5,          100,        NULL,     NULL);
 
 -- ============================================================================
 -- TRAINING DUMMY ENEMY
