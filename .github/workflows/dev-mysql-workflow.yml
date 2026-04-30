@@ -37,7 +37,7 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
 
-      - name: Create Kubernetes secrets for credentials
+      - name: Create the Kubernetes secrets for credentials
         run: |
           kubectl create secret generic mysql-secret \
             --from-literal=MYSQL_ROOT_PASSWORD='${{ secrets.MYSQL_ROOT_PASSWORD }}' \
