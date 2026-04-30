@@ -10,6 +10,7 @@ on:
       - 'k8s/dev/dev-mysql-service.yaml'
       - 'k8s/dev/dev-mysql-configmap.yaml'
       - 'k8s/dev/dev-mysql-pvc.yaml'
+      - 'k8s/dev/dev-mysql-init-job.yaml'
   pull_request:
     branches:
       - develop
@@ -19,6 +20,7 @@ on:
       - 'k8s/dev/dev-mysql-service.yaml'
       - 'k8s/dev/dev-mysql-configmap.yaml'
       - 'k8s/dev/dev-mysql-pvc.yaml'
+      - 'k8s/dev/dev-mysql-init-job.yaml'
 
 jobs:
   # ---- CD: deploy on pushes ----
@@ -65,3 +67,12 @@ jobs:
         run: |
           kubectl apply -f k8s/dev/dev-mysql-deployment.yaml
           kubectl apply -f k8s/dev/dev-mysql-service.yaml
+
+      - name: Wait for MySQL deployment to be ready
+        run: kubectl rollout status deployment/kiwi-mysql-dev -n dev --timeout=180s
+
+      - name: Run MySQL init Job
+        run: |
+          kubectl delete job kiwi-mysql-dev-init -n dev --ignore-not-found
+          kubectl apply -f k8s/dev/dev-mysql-init-job.yaml
+          kubectl wait --for=condition=complete job/kiwi-mysql-dev-init -n dev --timeout=180s
