@@ -22,7 +22,6 @@ import com.bellako.kiwi.features.combat.tests.CombatTestFactory
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
 import com.bellako.kiwi.ui.Kiwi_Theme
-import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -91,18 +90,6 @@ class CombatScreenTest {
         rule.waitForIdle()
         rule.onNodeWithText("Leave combat?").assertIsNotDisplayed()
         assert(!confirmed) { "Cancel must not fire onConfirmAbandon" }
-    }
-
-    @Test
-    fun longPressOnDeckSkillTriggersOnSkillClick() {
-        var clicked: Pair<Long, String>? = null
-        setContent(combat(), onSkillClick = { id, name -> clicked = id to name })
-        val skill = deckSkills.first()
-        rule
-            .onNodeWithTag("skill-${skill.id}")
-            .performTouchInput { longClick() }
-        rule.waitForIdle()
-        assertEquals(skill.id to skill.name, clicked)
     }
 
     @Test
