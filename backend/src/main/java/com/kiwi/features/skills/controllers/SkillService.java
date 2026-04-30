@@ -11,10 +11,12 @@ import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 import com.kiwi.features.skills.data.DTO.EquipSkillDTO;
 import com.kiwi.features.skills.data.DTO.SkillDTO;
 import com.kiwi.features.skills.data.enums.CooldownType;
+import com.kiwi.features.skills.events.SkillGivenEvent;
 import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
 import com.kiwi.features.skills.exceptions.SkillLevelUpNotFoundException;
 import com.kiwi.features.skills.exceptions.SkillNotFoundException;
 import com.kiwi.features.skills.exceptions.UserSkillStatusNotFoundException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,17 +33,20 @@ public class SkillService {
     private final SkillProgressService skillProgressService;
     private final SkillEffectRepository skillEffectRepository;
     private final EnemySkillRepository enemySkillRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public SkillService(
             SkillRepository skillRepository,
             UserSkillStatusRepository userSkillStatusRepository,
-            SkillProgressService skillProgressService, SkillEffectRepository skillEffectRepository, EnemySkillRepository enemySkillRepository
+            SkillProgressService skillProgressService, SkillEffectRepository skillEffectRepository, EnemySkillRepository enemySkillRepository,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.skillRepository = skillRepository;
         this.userSkillStatusRepository = userSkillStatusRepository;
         this.skillProgressService = skillProgressService;
         this.skillEffectRepository = skillEffectRepository;
         this.enemySkillRepository = enemySkillRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     // ============================================================================================
@@ -166,6 +171,11 @@ public class SkillService {
 
         UserSkillStatusPersistence givenStatus = SkillMapper.toPersistence(userId, given, skill);
         userSkillStatusRepository.saveAndFlush(givenStatus);
+
+        Long cooldownGoalId = skill.getCooldownType() == CooldownType.GOAL
+                ? skill.getCooldownGoalId()
+                : null;
+        eventPublisher.publishEvent(new SkillGivenEvent(userId, skillId, cooldownGoalId));
 
         return SkillMapper.toDTO(buildSkillDomain(givenStatus));
     }

@@ -43,12 +43,6 @@ INSERT IGNORE INTO skills
 (1000, 'MOTIVATION', 'Attack',     'Deals 40 physical damage.', 'GOAL',  100,  NULL, NULL, NULL),
 (2000, 'MOTIVATION', 'Dummy Slap', 'Deals 10 physical damage.', 'OTHER', NULL, NULL, NULL, NULL);
 
--- Place the Attack skill in the test user's deck so it is usable without going
--- through build initialization. INSERT IGNORE silently no-ops if user 19 has
--- not been created yet (FK violations are downgraded to warnings).
-INSERT IGNORE INTO user_skill_status (user_id, skill_id, is_cooldown, cooldown_until, deck_slot) VALUES
-(19, 1000, FALSE, NULL, 1);
-
 INSERT IGNORE INTO skill_effects
     (skill_id, target,    effect_type, stat_affected, stat_modification, power, attack_type, element_id, hit_chance, state_id, status_duration) VALUES
 (1000,        'OPPONENT', 'DAMAGE',    NULL,          NULL,              40.0,  'PHYSICAL',  5,          100,        NULL,     NULL),
