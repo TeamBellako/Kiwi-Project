@@ -55,10 +55,10 @@ public class SkillsManager {
 
         attacker.setLastSkillUsed(skillId);
 
-        applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.DAMAGE);
-        applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.HEAL);
-        applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.MODIFY_STAT);
-        applyEffects(context, attacker, skill, skillId, effectsResults, SkillEffectType.APPLY_STATUS);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.DAMAGE);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.HEAL);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.MODIFY_STAT);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.APPLY_STATUS);
 
         return CombatActionDomain.builder()
                 .actionType(CombatActionType.SKILL_USED)
@@ -74,7 +74,6 @@ public class SkillsManager {
             CombatContext context,
             CombatActorDomain attacker,
             SkillCombatDomain skill,
-            Long skillId,
             List<SkillEffectResultDomain> results,
             SkillEffectType type
     ) {
@@ -86,7 +85,7 @@ public class SkillsManager {
 
             switch (type) {
                 case DAMAGE -> results.add(
-                        applyDamage(attacker, target, effect)
+                        applyDamage(attacker, target, effect, skill.getElementId())
                 );
 
                 case HEAL -> results.add(
@@ -99,7 +98,7 @@ public class SkillsManager {
 
                 case APPLY_STATUS -> {
                     SkillEffectResultDomain statusEffect =
-                            applyStatus(attacker, target, effect, skillId, context.getCombat().getId());
+                            applyStatus(attacker, target, effect, skill.getId(), context.getCombat().getId());
 
                     if (statusEffect != null) {
                         results.add(statusEffect);
@@ -114,7 +113,8 @@ public class SkillsManager {
     private SkillEffectResultDomain applyDamage(
             CombatActorDomain attacker,
             CombatActorDomain victim,
-            SkillEffectDomain effect
+            SkillEffectDomain effect,
+            Long skillElementId
     ) {
 
         // ACCURACY CHECK
@@ -159,7 +159,7 @@ public class SkillsManager {
         // ELEMENT
         ElementMultiplierDomain elementMultiplier =
                 victim.getElementMultipliers()
-                        .getOrDefault(effect.getElementId(), null);
+                        .getOrDefault(skillElementId, null);
 
         float elementMultiplierValue = (elementMultiplier != null)
                 ? elementMultiplier.getMultiplier()

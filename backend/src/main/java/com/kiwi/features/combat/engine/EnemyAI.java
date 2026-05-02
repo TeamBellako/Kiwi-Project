@@ -7,9 +7,7 @@ import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 //TODO CAMBIAR A LA IA PROPUESTA EN EL NOTION
 @Component
@@ -25,7 +23,10 @@ public class EnemyAI {
         CombatActorDomain enemy = context.getEnemy();
         CombatActorDomain user = context.getUser();
 
-        List<SkillCombatDomain> skills = new ArrayList<>(enemy.getSkills().values());
+        Map<Long, SkillCombatDomain> availableSkills = new HashMap<>(enemy.getSkills());
+        enemy.getBlockedSkills().forEach(availableSkills::remove);
+
+        List<SkillCombatDomain> skills = new ArrayList<>(availableSkills.values());
 
         Long bestSkillId = -1L;
 

@@ -1,5 +1,7 @@
 package com.kiwi.features.skills.controllers;
 
+import com.kiwi.features.combat.data.persistence.CombatElementPersistence;
+import com.kiwi.features.combat.repositories.CombatElementRepository;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import com.kiwi.features.skills.data.domain.SkillDomain;
 import com.kiwi.features.skills.data.mappers.SkillCombatMapper;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 public class SkillService {
 
     private final SkillRepository skillRepository;
+    private final CombatElementRepository elementRepository;
     private final UserSkillStatusRepository userSkillStatusRepository;
     private final SkillProgressService skillProgressService;
     private final SkillEffectRepository skillEffectRepository;
@@ -36,12 +39,13 @@ public class SkillService {
     private final ApplicationEventPublisher eventPublisher;
 
     public SkillService(
-            SkillRepository skillRepository,
+            SkillRepository skillRepository, CombatElementRepository elementRepository,
             UserSkillStatusRepository userSkillStatusRepository,
             SkillProgressService skillProgressService, SkillEffectRepository skillEffectRepository, EnemySkillRepository enemySkillRepository,
             ApplicationEventPublisher eventPublisher
     ) {
         this.skillRepository = skillRepository;
+        this.elementRepository = elementRepository;
         this.userSkillStatusRepository = userSkillStatusRepository;
         this.skillProgressService = skillProgressService;
         this.skillEffectRepository = skillEffectRepository;
@@ -87,8 +91,23 @@ public class SkillService {
             }
         }
 
+        List<Long> elementIds = domains.stream()
+                .map(SkillDomain::getElementId)
+                .distinct()
+                .toList();
+
+        Map<Long, String> elementNames = elementRepository.findAllById(elementIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        CombatElementPersistence::getId,
+                        CombatElementPersistence::getName
+                ));
+
         return domains.stream()
-                .map(SkillMapper::toDTO)
+                .map(domain -> SkillMapper.toDTO(
+                        domain,
+                        elementNames.getOrDefault(domain.getElementId(), "")
+                ))
                 .toList();
     }
 
@@ -177,7 +196,7 @@ public class SkillService {
                 : null;
         eventPublisher.publishEvent(new SkillGivenEvent(userId, skillId, cooldownGoalId));
 
-        return SkillMapper.toDTO(buildSkillDomain(givenStatus));
+        return SkillMapper.toDTO(buildSkillDomain(givenStatus), getElementName(skill.getElementId()));
     }
 
     @Transactional
@@ -216,7 +235,7 @@ public class SkillService {
                 SkillMapper.toPersistence(userId, updated, status.getSkill())
         );
 
-        return SkillMapper.toDTO(updated);
+        return SkillMapper.toDTO(updated, getElementName(updated.getElementId()));
     }
 
     @Transactional
@@ -234,7 +253,7 @@ public class SkillService {
                 SkillMapper.toPersistence(userId, updated, status.getSkill())
         );
 
-        return SkillMapper.toDTO(updated);
+        return SkillMapper.toDTO(updated, getElementName(updated.getElementId()));
     }
 
     // ============================================================================================
@@ -263,7 +282,7 @@ public class SkillService {
                 SkillMapper.toPersistence(userId, updated, status.getSkill())
         );
 
-        return SkillMapper.toDTO(updated);
+        return SkillMapper.toDTO(updated, getElementName(updated.getElementId()));
     }
 
     public SkillDTO unequipSkill(Long userId, long skillId) {
@@ -280,7 +299,7 @@ public class SkillService {
                 SkillMapper.toPersistence(userId, updated, status.getSkill())
         );
 
-        return SkillMapper.toDTO(updated);
+        return SkillMapper.toDTO(updated, getElementName(updated.getElementId()));
     }
 
     // ============================================================================================
@@ -289,5 +308,10 @@ public class SkillService {
 
     private SkillDomain buildSkillDomain(UserSkillStatusPersistence status) {
         return SkillMapper.toDomain(status.getSkill(), status);
+    }
+
+    private String getElementName(Long elementId) {
+        Optional<CombatElementPersistence> element = elementRepository.findById(elementId);
+        return element.isPresent() ? element.get().getName() : "";
     }
 }

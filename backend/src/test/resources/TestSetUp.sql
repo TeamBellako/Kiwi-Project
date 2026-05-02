@@ -142,10 +142,18 @@ CREATE TABLE IF NOT EXISTS user_incidences (
     value BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+INSERT INTO combat_elements (id, name, icon, description) VALUES
+(1, 'Adaptability', 1, ''),
+(2, 'Control',      2, ''),
+(3, 'Empathy',      3, ''),
+(4, 'Focus',        4, ''),
+(5, 'Motivation',   5, ''),
+(6, 'Resilience',   6, '');
+
 INSERT INTO skills
-    (id, type, name, description, cooldown_type, cooldown_goal_id, cooldown_time_minutes, cooldown_other_description, levelup_skill_id) VALUES
-(1001, 'MOTIVATION', 'Fake Attack', 'Deals 1 physical damage.', 'GOAL', 101, NULL, NULL, NULL),
-(1000, 'MOTIVATION', 'Attack',     'Deals 40 physical damage.', 'GOAL',  100,  NULL, NULL, NULL);
+    (id, element_id, name, description, cooldown_type, cooldown_goal_id, cooldown_time_minutes, cooldown_other_description, levelup_skill_id) VALUES
+(1001, 1, 'Fake Attack', 'Deals 1 physical damage.', 'GOAL', 101, NULL, NULL, NULL),
+(1000, 2, 'Attack',     'Deals 40 physical damage.', 'GOAL',  100,  NULL, NULL, NULL);
 
 
 

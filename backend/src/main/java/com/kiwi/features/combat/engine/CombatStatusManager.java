@@ -101,7 +101,7 @@ public class CombatStatusManager {
 
                     context.addAction(action);
 
-                    blockedSkillIds.forEach(actor.getSkills()::remove);
+                    actor.setBlockedSkills(blockedSkillIds);
                     break;
             }
         }

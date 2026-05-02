@@ -27,6 +27,9 @@ public class CombatActorDomain {
     private  Map<Long, SkillCombatDomain> skills;
 
     @Setter
+    private  List<Long> blockedSkills;
+
+    @Setter
     private CombatActionType actionModifierType;
 
     @Setter

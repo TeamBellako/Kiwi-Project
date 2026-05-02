@@ -46,9 +46,6 @@ public class SkillEffectPersistence {
     @Column(name="attack_type")
     private AttackType attackType;
 
-    @Column(name="element_id")
-    private Long elementId;
-
     @Column(name="hit_chance")
     private Integer hitChance;
 

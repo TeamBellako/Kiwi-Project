@@ -3,7 +3,6 @@ package com.kiwi.skills;
 import com.kiwi.features.combat.data.persistence.EnemyPersistence;
 import com.kiwi.features.skills.data.enums.SkillEffectTargetType;
 import com.kiwi.features.skills.data.enums.SkillEffectType;
-import com.kiwi.features.skills.data.enums.SkillType;
 import com.kiwi.features.skills.data.persistence.*;
 import com.kiwi.features.skills.data.DTO.EquipSkillDTO;
 import com.kiwi.features.skills.data.DTO.SkillDTO;
@@ -18,7 +17,7 @@ public class SkillTestFactory {
         s.setName("Skill " + id);
         s.setDescription("Description " + id);
         s.setQuote("Quote " + id);
-        s.setSkillType(SkillType.FOCUS);
+        s.setElementId(1L);
 
         s.setCooldownType(CooldownType.TIME);
         s.setCooldownTimeMinutes(10);
@@ -75,7 +74,7 @@ public class SkillTestFactory {
                 .name("Skill " + id)
                 .description("Desc")
                 .quote("Quote")
-                .type("FOCUS")
+                .elementName("FOCUS")
 
                 .cooldownType("OTHER")
                 .cooldownGoalId(null)

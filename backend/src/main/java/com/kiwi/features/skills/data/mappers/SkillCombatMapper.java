@@ -16,6 +16,7 @@ public class SkillCombatMapper {
         return SkillCombatDomain.builder()
                 .id(skill.getId())
                 .name(skill.getName())
+                .elementId(skill.getElementId())
                 .effects(
                         effects.stream()
                                 .map(SkillCombatMapper::toEffectDomain)
@@ -32,7 +33,6 @@ public class SkillCombatMapper {
                 .statModification(e.getStatModification())
                 .power(e.getPower())
                 .attackType(e.getAttackType())
-                .elementId(e.getElementId())
                 .hitChance(e.getHitChance())
                 .stateId(e.getStateId())
                 .statusDuration(e.getStatusDuration())
