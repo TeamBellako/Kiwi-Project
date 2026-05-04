@@ -117,15 +117,15 @@ CREATE TABLE IF NOT EXISTS node_edges (
     UNIQUE KEY uq_node_edge (from_node_id, to_node_id)
 );
 
-INSERT IGNORE INTO nodes (id, icon, price, cord_x, cord_y, event_on_execution, name, display_name, map_id, is_first_node_of_map)
+INSERT IGNORE INTO nodes (id, icon, price, cord_x, cord_y, name, display_name, map_id, is_first_node_of_map)
 VALUES
-(1, 1, 120, 0.585, 0.12, 0, 'node_1', 'START', 0, TRUE),
-(2, 0, 140, 0.623, 0.175, 0, 'node_2', NULL, 0, FALSE),
-(3, 0, 180, 0.66, 0.228, 0, 'node_3', NULL, 0, FALSE),
-(4, 2, 100, 0.598, 0.228, 0, 'node_4', 'CAVE OF THE DEEP BREATH', 0, FALSE),
-(5, 0, 180, 0.66, 0.275, 0, 'node_5', NULL, 0, FALSE),
-(6, 3, 140, 0.615, 0.295, 0, 'node_6', 'CITY', 0, FALSE),
-(7, 1, 120, 0.585, 0.12, 0, 'node_7', 'MAP_SWITCH', 1, TRUE);
+(1, 1, 120, 0.585, 0.12, 'node_1', 'START', 0, TRUE),
+(2, 0, 140, 0.623, 0.175, 'node_2', NULL, 0, FALSE),
+(3, 0, 180, 0.66, 0.228, 'node_3', NULL, 0, FALSE),
+(4, 2, 100, 0.598, 0.228, 'node_4', 'CAVE OF THE DEEP BREATH', 0, FALSE),
+(5, 0, 180, 0.66, 0.275, 'node_5', NULL, 0, FALSE),
+(6, 3, 140, 0.615, 0.295, 'node_6', 'CITY', 0, FALSE),
+(7, 1, 120, 0.585, 0.12, 'node_7', 'MAP_SWITCH', 1, TRUE);
 
 INSERT IGNORE INTO node_edges (from_node_id, to_node_id)
 VALUES (1,2),(2,3),(3,4),(3,5),(5,6);

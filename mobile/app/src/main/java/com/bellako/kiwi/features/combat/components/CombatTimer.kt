@@ -1,10 +1,7 @@
 package com.bellako.kiwi.features.combat.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,6 +26,7 @@ private const val TIMER_TICK_MILLIS = 1000L
 private const val SECONDS_PER_MINUTE = 60L
 private const val SECONDS_PER_HOUR = 3600L
 private const val EMPTY_TIMER = "--:--:--"
+private val TIMER_RADIUS = 20.dp
 
 @Composable
 fun CombatTimer(
@@ -56,14 +54,8 @@ fun CombatTimer(
     Box(
         modifier =
             modifier
-                .background(
-                    color = colors.color2,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(20.dp)),
-                ).border(
-                    width = getResponsiveSizeHeight(1.dp),
-                    color = colors.color5C,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(20.dp)),
-                ).padding(
+                .combatPanel(bgColor = colors.color2, borderColor = colors.color5C, radius = TIMER_RADIUS)
+                .padding(
                     horizontal = getResponsiveSizeWidth(Spacing.medium),
                     vertical = getResponsiveSizeHeight(Spacing.xSmall),
                 ),

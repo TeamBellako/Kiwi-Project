@@ -28,6 +28,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -47,7 +48,7 @@ class CombatIntegrationTest {
     fun setUp() {
         api = mock(ICombatAPI::class.java)
         repository = CombatRepository(api)
-        viewModel = CombatViewModel(repository)
+        viewModel = CombatViewModel(repository, RuntimeEnvironment.getApplication())
     }
 
     // -------------------------------------------------------------------------

@@ -33,7 +33,7 @@ public class SkillServiceTests {
             new EnemySkillTestRepositoryInMemory();
 
     private final SkillService service =
-            new SkillService(skillRepo, userSkillStatusRepo, skillProgress, skillEffectRepo, enemySkillRepo);
+            new SkillService(skillRepo, userSkillStatusRepo, skillProgress, skillEffectRepo, enemySkillRepo, event -> {});
 
     private final Long userId = 1L;
 

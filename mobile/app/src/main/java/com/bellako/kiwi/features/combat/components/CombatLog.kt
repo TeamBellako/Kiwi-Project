@@ -1,9 +1,6 @@
 package com.bellako.kiwi.features.combat.components
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -49,9 +45,6 @@ import androidx.compose.ui.text.AnnotatedString.Builder as AnnotatedStringBuilde
 private val LOG_RADIUS = 12.dp
 private val LOG_INNER_PADDING = 16.dp
 private const val USER_NAME_PLACEHOLDER = "You"
-private const val BLINK_DIM_ALPHA = 0.35f
-private const val BLINK_FADE_MS = 220
-private const val BLINK_CYCLES = 2
 
 sealed class CombatLogEntry {
     data class Action(
@@ -74,16 +67,12 @@ fun CombatLog(
 ) {
     val colors = LocalKiwiColors.current
     val listState = rememberLazyListState()
-    val blinkAlpha = remember { Animatable(1f) }
+    val blinkAlpha = rememberBlinkAlpha()
 
     LaunchedEffect(entries.size) {
         if (entries.isNotEmpty()) {
             listState.animateScrollToItem(entries.size - 1)
-            blinkAlpha.snapTo(1f)
-            repeat(BLINK_CYCLES) {
-                blinkAlpha.animateTo(BLINK_DIM_ALPHA, tween(durationMillis = BLINK_FADE_MS))
-                blinkAlpha.animateTo(1f, tween(durationMillis = BLINK_FADE_MS))
-            }
+            blinkAlpha.blink()
         }
     }
 
@@ -91,14 +80,7 @@ fun CombatLog(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(
-                    color = colors.color3A,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(LOG_RADIUS)),
-                ).border(
-                    width = getResponsiveSizeHeight(1.dp),
-                    color = colors.color5C,
-                    shape = RoundedCornerShape(getResponsiveSizeHeight(LOG_RADIUS)),
-                ),
+                .combatPanel(bgColor = colors.color3A, borderColor = colors.color5C, radius = LOG_RADIUS),
     ) {
         LazyColumn(
             state = listState,

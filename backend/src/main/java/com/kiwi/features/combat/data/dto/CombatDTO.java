@@ -17,6 +17,8 @@ public class CombatDTO {
 
     private Long backgroundId;
 
+    private Long sfxId;
+
     private int turnNumber;
 
     private Long endsAt;

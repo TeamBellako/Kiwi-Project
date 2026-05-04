@@ -1,17 +1,17 @@
 -- sprites
-INSERT INTO sprites (id, name) VALUES (1, 'Liria');
+INSERT IGNORE INTO sprites (id, name) VALUES (1, 'Liria');
 
 -- expressions
-INSERT INTO expressions (id, name) VALUES (1, 'Normal');
+INSERT IGNORE INTO expressions (id, name) VALUES (1, 'Normal');
 
 -- backgrounds
-INSERT INTO backgrounds (id, name) VALUES (1, 'Castel');
+INSERT IGNORE INTO backgrounds (id, name) VALUES (1, 'Castel');
 
 -- fx
-INSERT INTO fx (id, name) VALUES (1, 'Pasos');
+INSERT IGNORE INTO fx (id, name) VALUES (1, 'Pasos');
 
 -- conversations
-INSERT INTO conversations (
+INSERT IGNORE INTO conversations (
     id, name, type, sprite, expresion, background, fx, dark, dialog, dialog_m, dialog_w, delay_start_ms, delay_end_ms, next_event, event_id
 ) VALUES
 (1, 'Intro', 'SMALL', 1, 1, NULL, NULL, 0, "Wellcome to GrowTale and wellcome to Minveil. I'm Liria 😊", "Wellcome to GrowTale and wellcome to Minveil. I'm Liria 😊", "Wellcome to GrowTale and wellcome to Minveil. I'm Liria 😊", NULL, NULL, 'END', NULL),
@@ -21,7 +21,7 @@ INSERT INTO conversations (
 (5, 'Ejemplo 4', 'FULL', 1, 1, NULL, 1, 0, 'Bueno... solo quería ser amable', 'Bueno... solo quería ser amable', 'Bueno... solo quería ser amable', NULL, NULL, 'END', NULL),
 (6, 'Ejemplo 5', 'FULL', 1, 1, NULL, 1, 1, 'Las tortas te las doy yo', 'Las tortas te las doy yo', 'Las tortas te las doy yo', NULL, NULL, 'BATTLE', NULL);
 -- conversation_options
-INSERT INTO conversation_options (
+INSERT IGNORE INTO conversation_options (
     id, conversation_id, text, text_m, text_w, next_event_id, cost
 ) VALUES
 (1, 2, 'No, tengo frío', 'No, tengo frío', 'No, tengo frío', 3, NULL),
