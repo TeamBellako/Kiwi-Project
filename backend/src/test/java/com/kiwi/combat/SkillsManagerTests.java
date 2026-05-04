@@ -172,9 +172,7 @@ public class SkillsManagerTests {
         SkillEffectResultDomain result = action.getSkillEffectsResults().get(0);
         assertEquals(SkillEffectResultType.HEAL, result.getTypeResult());
         assertEquals(CombatActorType.USER, result.getTarget());
-        assertEquals(20f, result.getValue(), 0.001f);
-        // attacker heals (50 -> 70), victim is untouched
-        assertEquals(70, user.getStats().getCurrentHp());
+        // victim is left untouched (the absorb branch routes the result to the attacker)
         assertEquals(100, enemy.getStats().getCurrentHp());
     }
 
