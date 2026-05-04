@@ -1,11 +1,14 @@
 package com.kiwi.combat;
 
+import com.kiwi.features.combat.data.dto.CombatDTO;
+import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.persistence.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Random;
 
 public class CombatTestFactory {
@@ -163,6 +166,32 @@ public class CombatTestFactory {
     public static CombatBlockedSkillPersistence blockedSkill(Long combatId, CombatActorType actor, Long skillId) {
         return CombatBlockedSkillPersistence.builder()
                 .id(new CombatBlockedSkillKey(combatId, actor, skillId))
+                .build();
+    }
+
+    // =========================================================================
+    // DTOs
+    // =========================================================================
+
+    public static CombatDTO combatDTO(Long id) {
+        return CombatDTO.builder()
+                .id(id)
+                .combatConfigId(1L + RANDOM.nextInt(100))
+                .turnNumber(1 + RANDOM.nextInt(10))
+                .combatStatus(CombatGeneralStatus.ONGOING.name())
+                .endsAt(Instant.now().plusSeconds(600).toEpochMilli())
+                .enemyName("Enemy " + id)
+                .enemySprite("sprite_" + id)
+                .log(List.of())
+                .build();
+    }
+
+    public static CombatTurnResultDTO combatTurnResultDTO(Long combatId) {
+        return CombatTurnResultDTO.builder()
+                .combatId(combatId)
+                .turnNumber(1 + RANDOM.nextInt(10))
+                .actions(List.of())
+                .combatStatus(CombatGeneralStatus.ONGOING.name())
                 .build();
     }
 }
