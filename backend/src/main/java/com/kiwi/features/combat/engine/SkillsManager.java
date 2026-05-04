@@ -139,7 +139,7 @@ public class SkillsManager {
                         : attacker.getStats().getMatk();
 
         float def =
-                effect.getAttackType() == AttackType.MAGICAL
+                effect.getAttackType() == AttackType.PHYSICAL
                         ? victim.getStats().getPdef()
                         : victim.getStats().getMdef();
 
@@ -179,7 +179,6 @@ public class SkillsManager {
 
         // ABSORB
         if (elementMultiplierValue == -1f) {
-
             attacker.heal(damage);
 
             return SkillEffectResultDomain.builder()
