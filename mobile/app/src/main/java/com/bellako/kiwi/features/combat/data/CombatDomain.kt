@@ -126,6 +126,8 @@ data class CombatDomain(
     val user: CombatActorDomain,
     val enemy: CombatActorDomain,
     val log: List<CombatActionDomain> = emptyList(),
+    val barks: List<CombatBarkTriggerDomain> = emptyList(),
+    val firedBarkIds: List<Long> = emptyList(),
     /** Populated only after a terminal turn so dismiss() can fire the follow-up event. */
     val onCompletedEvent: String? = null,
     val onCompletedEntityId: Int? = null,

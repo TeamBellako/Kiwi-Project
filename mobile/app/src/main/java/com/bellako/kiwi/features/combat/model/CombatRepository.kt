@@ -22,4 +22,9 @@ class CombatRepository(
     suspend fun timeoutCombat(combatId: Long): CombatTurnResultDomain = CombatDataMapper.toDomain(api.timeoutCombat(combatId))
 
     suspend fun abandonCombat(combatId: Long): CombatTurnResultDomain = CombatDataMapper.toDomain(api.abandonCombat(combatId))
+
+    suspend fun markBarkFired(
+        combatId: Long,
+        triggerId: Long,
+    ) = api.markBarkFired(combatId, triggerId)
 }

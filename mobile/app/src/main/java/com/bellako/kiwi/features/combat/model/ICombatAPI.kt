@@ -30,4 +30,10 @@ interface ICombatAPI {
     suspend fun abandonCombat(
         @Path("combatId") combatId: Long,
     ): CombatTurnResultDTO
+
+    @POST("api/combat/{combatId}/barks/{triggerId}/fired")
+    suspend fun markBarkFired(
+        @Path("combatId") combatId: Long,
+        @Path("triggerId") triggerId: Long,
+    )
 }

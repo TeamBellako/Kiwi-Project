@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.combat.components.CombatAbandonConfirmModal
 import com.bellako.kiwi.features.combat.components.CombatBackground
+import com.bellako.kiwi.features.combat.components.CombatBarkBubble
 import com.bellako.kiwi.features.combat.components.CombatBattleArea
 import com.bellako.kiwi.features.combat.components.CombatHeader
 import com.bellako.kiwi.features.combat.components.CombatTurnIndicator
@@ -42,6 +44,7 @@ import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
 import com.bellako.kiwi.features.combat.components.rememberDeathSequenceVfx
 import com.bellako.kiwi.features.combat.components.rememberPlayerDamageVfx
 import com.bellako.kiwi.features.combat.components.userTurnMessage
+import com.bellako.kiwi.features.combat.data.ActiveBarkDomain
 import com.bellako.kiwi.features.combat.data.CombatActionDomain
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActiveStatusDomain
@@ -65,10 +68,13 @@ private const val BOTTOM_PANEL_GRADIENT_END = 1f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongParameterList")
 fun CombatScreen(
     combat: CombatDomain,
     deckSkills: List<SkillDomain>,
     isTurnPlaying: Boolean = false,
+    activeBark: ActiveBarkDomain? = null,
+    onBarkDismiss: () -> Unit = {},
     onConfirmAbandon: () -> Unit = {},
     onSkillClick: (skillId: Long, skillName: String) -> Unit = { _, _ -> },
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit = { _, _, _ -> },
@@ -78,7 +84,7 @@ fun CombatScreen(
     var isLogOpen by rememberSaveable(combat.id) { mutableStateOf(false) }
     var selectedStatus by remember(combat.id) { mutableStateOf<CombatActiveStatusDomain?>(null) }
     var showAbandonConfirm by rememberSaveable(combat.id) { mutableStateOf(false) }
-    val isOverlayOpen = isLogOpen || selectedStatus != null || isTurnPlaying
+    val isOverlayOpen = isLogOpen || selectedStatus != null || isTurnPlaying || activeBark != null
 
     val enemyName = combat.enemyName.ifBlank { DEFAULT_ENEMY_NAME }
     val turnMessage = currentTurnMessage(combat, enemyName)
@@ -179,6 +185,22 @@ fun CombatScreen(
                         )
                     }
                 }
+            }
+        }
+
+        activeBark?.let { bark ->
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter,
+            ) {
+                CombatBarkBubble(
+                    bark = bark,
+                    onDismiss = onBarkDismiss,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = getResponsiveSizeHeight(Spacing.xLarge)),
+                )
             }
         }
 
