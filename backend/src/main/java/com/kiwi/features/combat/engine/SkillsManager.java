@@ -2,12 +2,9 @@ package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.controllers.CombatStatesService;
 import com.kiwi.features.combat.data.domain.*;
-import com.kiwi.features.combat.data.enums.StatModificationType;
+import com.kiwi.features.combat.data.enums.*;
 import com.kiwi.features.skills.data.domain.SkillEffectDomain;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
-import com.kiwi.features.combat.data.enums.CombatActionType;
-import com.kiwi.features.combat.data.enums.AttackType;
-import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 import com.kiwi.features.skills.data.enums.SkillEffectType;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +49,6 @@ public class SkillsManager {
 
         List<SkillEffectResultDomain> effectsResults = new ArrayList<>();
 
-
         attacker.setLastSkillUsed(skillId);
 
         applyEffects(context, attacker, skill, effectsResults, SkillEffectType.DAMAGE);
@@ -81,29 +77,36 @@ public class SkillsManager {
 
             if (effect.getEffectType() != type) continue;
 
-            CombatActorDomain target = context.getTarget(attacker.getType(), effect.getTarget());
+            CombatActorDomain victim = context.getTarget(attacker.getType(), effect.getTarget());
+
+            if (victim.getActiveStatuses().stream()
+                    .anyMatch(s -> s.getStateId() == CombatStateTypes.INVINCIBLE.getId())) {
+
+                results.add(SkillEffectResultDomain.builder()
+                        .typeResult(SkillEffectResultType.IMMUNE)
+                        .target(victim.getType())
+                        .build());
+
+                continue;
+            }
 
             switch (type) {
                 case DAMAGE -> results.add(
-                        applyDamage(attacker, target, effect, skill.getElementId())
+                        applyDamage(context, attacker, victim, effect, skill.getElementId())
                 );
 
                 case HEAL -> results.add(
-                        applyHeal(target, effect)
+                        applyHeal(victim, effect)
                 );
 
                 case MODIFY_STAT -> results.add(
-                        applyModifyStat(target, effect)
+                        applyModifyStat(victim, effect)
                 );
 
-                case APPLY_STATUS -> {
-                    SkillEffectResultDomain statusEffect =
-                            applyStatus(attacker, target, effect, skill.getId(), context.getCombat().getId());
+                case APPLY_STATUS -> results.add(
+                        applyStatus(attacker, victim, effect, skill.getId(), context.getCombat().getId())
+                );
 
-                    if (statusEffect != null) {
-                        results.add(statusEffect);
-                    }
-                }
             }
         }
     }
@@ -111,6 +114,7 @@ public class SkillsManager {
     //------------------------------------------------------------------------------------------------------------------
 
     private SkillEffectResultDomain applyDamage(
+            CombatContext context,
             CombatActorDomain attacker,
             CombatActorDomain victim,
             SkillEffectDomain effect,
@@ -118,37 +122,45 @@ public class SkillsManager {
     ) {
 
         // ACCURACY CHECK
-        int hitChance =
-                attacker.getStats().getAcc()
-                        - victim.getStats().getEva()
-                        + effect.getHitChance();
+        boolean hasPrecision = attacker.getActiveStatuses().stream()
+                .anyMatch(s -> s.getStateId() == CombatStateTypes.PRECISION.getId());
+
+        int hitChance;
+
+        if (hasPrecision) {
+            hitChance = 100;
+        } else {
+            hitChance = statusManager.getEffectiveStat(attacker, StatType.ACC)
+                    - statusManager.getEffectiveStat(victim, StatType.EVA)
+                    + effect.getHitChance();
+        }
 
         int roll = random.nextInt(100);
 
         if (roll > hitChance) {
             return SkillEffectResultDomain.builder()
-                    .typeResult(SkillEffectResultType.MISS)
+                    .typeResult(SkillEffectResultType.MISS_DAMAGE)
                     .target(victim.getType())
                     .build();
         }
 
         // ATK / DEF
-        float atk =
+        float attackerAtk =
                 effect.getAttackType() == AttackType.PHYSICAL
-                        ? attacker.getStats().getPatk()
-                        : attacker.getStats().getMatk();
+                        ? statusManager.getEffectiveStat(attacker, StatType.PATK)
+                        : statusManager.getEffectiveStat(attacker, StatType.MATK);
 
-        float def =
+        float victimDef =
                 effect.getAttackType() == AttackType.MAGICAL
-                        ? victim.getStats().getPdef()
-                        : victim.getStats().getMdef();
+                        ? statusManager.getEffectiveStat(victim, StatType.PDEF)
+                        : statusManager.getEffectiveStat(victim, StatType.MDEF);
 
         float baseDamage =
-                (atk / Math.max(def, 1)) * effect.getPower();
+                (attackerAtk / Math.max(victimDef, 1)) * effect.getPower();
 
         // CRIT
         boolean crit =
-                random.nextInt(120) < attacker.getStats().getLck();
+                random.nextInt(120) < statusManager.getEffectiveStat(attacker, StatType.LCK);
 
         float critMultiplier = crit ? 2f : 1f;
 
@@ -166,8 +178,8 @@ public class SkillsManager {
                 : 1f;
 
         // STATE MULTIPLIER
-        float stateMultiplier =
-                statusManager.calculateStateMultiplier(attacker, victim);
+        float stateMultiplier = attackerAtk* victimDef;
+
 
         float modifiers =
                 variance
@@ -190,7 +202,37 @@ public class SkillsManager {
                     .build();
         }
 
-        victim.damage(damage);
+        int realDamage = victim.damage(damage, true);
+
+        // BOND STATE
+        CombatActiveStatusDomain bondState = victim.getActiveStatuses().stream()
+                .filter(s -> s.getStateId() == CombatStateTypes.BOND.getId())
+                .findFirst()
+                .orElse(null);
+
+        if (bondState != null) {
+
+            float stateValue = bondState.getValue();
+
+            CombatActorDomain other =
+                    (victim == context.getUser())
+                            ? context.getEnemy()
+                            : context.getUser();
+
+            int reflected = Math.round(realDamage * stateValue);
+
+            other.damage(reflected, true);
+
+            CombatActionDomain bondAction =
+                    CombatActionDomain.builder()
+                            .actor(other.getType())
+                            .actionType(CombatActionType.ACTOR_DAMAGED_BY_STATE)
+                            .state(bondState)
+                            .stateEffectValue((float) reflected)
+                            .build();
+
+            context.addAction(bondAction);
+        }
 
         return SkillEffectResultDomain.builder()
                 .typeResult(SkillEffectResultType.DAMAGE)
@@ -207,7 +249,7 @@ public class SkillsManager {
             SkillEffectDomain effect
     ) {
 
-        int heal = Math.round(target.getStats().getMaxHp() * effect.getPower());
+        int heal = Math.round(target.getStats().getStat(StatType.MAX_HP) * effect.getPower());
 
         target.heal(heal);
 
@@ -226,84 +268,49 @@ public class SkillsManager {
             SkillEffectDomain effect
     ) {
 
-        StatsDomain stats = target.getStats();
+        // CHECK BUFF_BLOCK
+        boolean hasBuffBlock = target.getActiveStatuses().stream()
+                .anyMatch(s -> s.getStateId() == CombatStateTypes.BUFF_BLOCK.getId());
 
-        float value = effect.getPower();
+        if (hasBuffBlock
+                && (effect.getStatModification() == StatModificationType.MUL
+                || effect.getStatModification() == StatModificationType.SUM)
+                && effect.getPower() > 1f) {
 
-        int newValue = switch (effect.getStatAffected()) {
-
-            case CURRENT_HP -> applyModification(
-                    stats.getCurrentHp(),
-                    value,
-                    effect.getStatModification()
-            );
-
-            case MAX_HP -> applyModification(
-                    stats.getMaxHp(),
-                    value,
-                    effect.getStatModification()
-            );
-
-            case PATK -> applyModification(
-                    stats.getPatk(),
-                    value,
-                    effect.getStatModification()
-            );
-
-            case MATK -> applyModification(
-                    stats.getMatk(),
-                    value,
-                    effect.getStatModification()
-            );
-
-            case PDEF -> applyModification(
-                    stats.getPdef(),
-                    value,
-                    effect.getStatModification()
-            );
-
-            case MDEF -> applyModification(
-                    stats.getMdef(),
-                    value,
-                    effect.getStatModification()
-            );
-
-            case ACC -> applyModification(
-                    stats.getAcc(),
-                    value,
-                    effect.getStatModification()
-            );
-
-            case EVA -> applyModification(
-                    stats.getEva(),
-                    value,
-                    effect.getStatModification()
-            );
-
-            case LCK -> applyModification(
-                    stats.getLck(),
-                    value,
-                    effect.getStatModification()
-            );
-        };
-
-        switch (effect.getStatAffected()) {
-            case CURRENT_HP -> stats.setCurrentHp(Math.max(0, newValue));
-            case MAX_HP -> stats.setMaxHp(Math.max(1, newValue));
-            case PATK -> stats.setPatk(newValue);
-            case MATK -> stats.setMatk(newValue);
-            case PDEF -> stats.setPdef(newValue);
-            case MDEF -> stats.setMdef(newValue);
-            case ACC -> stats.setAcc(newValue);
-            case EVA -> stats.setEva(newValue);
-            case LCK -> stats.setLck(newValue);
+            return null;
         }
+
+        StatType stat = effect.getStatAffected();
+
+        int baseValue = target.getStats().getStat(stat);
+        StatModificationType modificationType = effect.getStatModification();
+
+        // CHECK REVERSION
+        boolean hasReversion = target.getActiveStatuses().stream()
+                .anyMatch(s -> s.getStateId() == CombatStateTypes.REVERSION.getId());
+
+        if (hasReversion) {
+            switch (modificationType) {
+                case SUM -> modificationType = StatModificationType.SUB;
+                case SUB -> modificationType = StatModificationType.SUM;
+                case MUL -> modificationType = StatModificationType.DIV;
+                case DIV -> modificationType = StatModificationType.MUL;
+            }
+        }
+
+        int newValue = applyModification(
+                baseValue,
+                effect.getPower(),
+                modificationType
+        );
+
+        target.getStats().setStat(stat, newValue);
 
         return SkillEffectResultDomain.builder()
                 .typeResult(SkillEffectResultType.MODIFY_STAT)
-                .statAffected(effect.getStatAffected())
+                .statAffected(stat)
                 .target(target.getType())
-                .value((float)newValue)
+                .value((float) newValue)
                 .build();
     }
 
@@ -330,6 +337,7 @@ public class SkillsManager {
     ) {
 
         if (attacker != target) {
+
             StatusResistanceDomain statusSResistance =
                     target.getStatusResistances()
                             .getOrDefault(effect.getStateId(), null);
@@ -338,14 +346,24 @@ public class SkillsManager {
                     ? statusSResistance.getResistance()
                     : 0f;
 
-            float chance = 1f - resistanceValue;
+            boolean hasPrecision = attacker.getActiveStatuses().stream()
+                    .anyMatch(s -> s.getStateId() == CombatStateTypes.PRECISION.getId());
 
-            if (random.nextFloat() > chance) {
-                return null;
+            if (!hasPrecision) {
+                float chance = 1f - resistanceValue;
+
+                if (random.nextFloat() > chance) {
+                    return SkillEffectResultDomain.builder()
+                            .typeResult(SkillEffectResultType.MISS_STATUS)
+                            .target(target.getType())
+                            .build();
+                }
             }
+
         }
 
-        CombatActiveStatusDomain activeStatusDomain = stateService.applyNewState(effect.getStateId(), effect.getStatusDuration(), effect.getPower(), target, skillId, combatId);
+        CombatActiveStatusDomain activeStatusDomain = stateService.applyNewState(effect.getStateId(), effect.getStatusDuration(),
+                effect.getPower(), effect.getStatAffected(), target, skillId, combatId);
 
         return SkillEffectResultDomain.builder()
                 .typeResult(SkillEffectResultType.STATUS_APPLIED)

@@ -12,6 +12,8 @@ public class CombatStatsDTO {
     private int currentHp;
     private int maxHp;
 
+    private int shield;
+
     private int patk;
     private int matk;
 

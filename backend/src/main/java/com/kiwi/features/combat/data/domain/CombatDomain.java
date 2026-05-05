@@ -21,6 +21,7 @@ public class CombatDomain {
     // USER
     private Integer userHp;
     private Integer userMaxHp;
+    private Integer userShield;
     private Integer userPatk;
     private Integer userMatk;
     private Integer userPdef;
@@ -32,6 +33,7 @@ public class CombatDomain {
     // ENEMY
     private Integer enemyHp;
     private Integer enemyMaxHp;
+    private Integer enemyShield;
     private Integer enemyPatk;
     private Integer enemyMatk;
     private Integer enemyPdef;

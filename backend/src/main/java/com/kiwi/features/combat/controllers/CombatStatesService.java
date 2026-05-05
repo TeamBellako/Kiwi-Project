@@ -1,6 +1,7 @@
 package com.kiwi.features.combat.controllers;
 
 import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.combat.data.enums.StatType;
 import com.kiwi.features.combat.data.mappers.CombatActiveStatusMapper;
 import com.kiwi.features.combat.data.persistence.CombatStatePersistence;
 import com.kiwi.features.combat.data.persistence.CombatActiveStatusPersistence;
@@ -25,7 +26,8 @@ public class CombatStatesService {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public CombatActiveStatusDomain applyNewState(Long stateId, Integer statusDuration, Float power, CombatActorDomain target, Long skillId, Long combatId)
+    public CombatActiveStatusDomain applyNewState(Long stateId, Integer statusDuration, Float power, StatType statAffected,
+                                                  CombatActorDomain target, Long skillId, Long combatId)
     {
         CombatStatePersistence statePersistence =
                         statesRepository.findById(stateId)
@@ -38,6 +40,7 @@ public class CombatStatesService {
                             .target(target.getType())
                             .stateId(stateId)
                             .value(power)
+                            .statAffected(statAffected)
                             .remainingTurns(statusDuration)
                             .build();
 

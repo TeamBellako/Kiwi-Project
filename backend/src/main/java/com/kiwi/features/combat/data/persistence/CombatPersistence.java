@@ -35,6 +35,9 @@ public class CombatPersistence {
     @Column(name="user_max_hp", nullable = false)
     private Integer userMaxHp;
 
+    @Column(name="user_shield", nullable = false)
+    private Integer userShield;
+
     @Column(name="user_patk", nullable = false)
     private Integer userPatk;
 
@@ -62,6 +65,9 @@ public class CombatPersistence {
 
     @Column(name="enemy_max_hp", nullable = false)
     private Integer enemyMaxHp;
+
+    @Column(name="enemy_shield", nullable = false)
+    private Integer enemyShield;
 
     @Column(name="enemy_patk", nullable = false)
     private Integer enemyPatk;

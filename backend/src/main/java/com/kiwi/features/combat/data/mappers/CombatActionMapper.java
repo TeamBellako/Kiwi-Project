@@ -35,7 +35,8 @@ public class CombatActionMapper {
                             .build()
             );
 
-            case ACTOR_DAMAGED_BY_STATE -> List.of(
+            case ACTOR_HEALED_BY_STATE,
+                 ACTOR_DAMAGED_BY_STATE -> List.of(
                     baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
                             .stateName(action.getState()  != null ? action.getState().getName() : null)
                             .stateId(action.getState()  != null ? action.getState().getStateId() : null)
@@ -90,6 +91,8 @@ public class CombatActionMapper {
                     if (effect.getAppliedStatus() != null) {
                         builder
                                 .stateId(effect.getAppliedStatus().getStateId())
+                                .statAffected(effect.getStatAffected())
+                                .value(effect.getValue())
                                 .statusDuration(effect.getAppliedStatus().getRemainingTurns());
                     }
 

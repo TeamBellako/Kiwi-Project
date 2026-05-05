@@ -7,6 +7,7 @@ import com.kiwi.features.combat.data.domain.CombatTurnResultDomain;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
+import com.kiwi.features.combat.data.enums.StatType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -68,7 +69,7 @@ public class CombatEngine {
         statusManager.reduceStatesTurnsToActor(userActor, context);
 
         // ENEMY TURN
-        if(context.getEnemy().getStats().getCurrentHp() > 0) {
+        if(context.getEnemy().getStats().getStat(StatType.CURRENT_HP) > 0) {
 
             CombatActorDomain enemyActor = context.getActor(CombatActorType.ENEMY);
 
@@ -114,10 +115,10 @@ public class CombatEngine {
         combat.setTurnNumber(combat.getTurnNumber() + 1);
 
         // CHECK COMBAT END
-        if(context.getUser().getStats().getCurrentHp() <= 0) {
+        if(context.getUser().getStats().getStat(StatType.CURRENT_HP) <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
         }
-        if(context.getEnemy().getStats().getCurrentHp() <= 0) {
+        if(context.getEnemy().getStats().getStat(StatType.CURRENT_HP) <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_WON);
         }
 

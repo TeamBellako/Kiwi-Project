@@ -24,6 +24,7 @@ public class CombatMapper {
                 // USER
                 .userHp(combat.getUserHp())
                 .userMaxHp(combat.getUserMaxHp())
+                .userShield(combat.getUserShield())
                 .userPatk(combat.getUserPatk())
                 .userMatk(combat.getUserMatk())
                 .userPdef(combat.getUserPdef())
@@ -35,6 +36,7 @@ public class CombatMapper {
                 // ENEMY
                 .enemyHp(combat.getEnemyHp())
                 .enemyMaxHp(combat.getEnemyMaxHp())
+                .enemyShield(combat.getEnemyShield())
                 .enemyPatk(combat.getEnemyPatk())
                 .enemyMatk(combat.getEnemyMatk())
                 .enemyPdef(combat.getEnemyPdef())
@@ -99,6 +101,7 @@ public class CombatMapper {
                 // USER snapshot
                 .userHp(stats.getMaxHp())
                 .userMaxHp(stats.getMaxHp())
+                .userShield(stats.getShield())
                 .userPatk(stats.getPatk())
                 .userMatk(stats.getMatk())
                 .userPdef(stats.getPdef())
@@ -110,6 +113,7 @@ public class CombatMapper {
                 // ENEMY snapshot
                 .enemyHp(enemy.getMaxHp())
                 .enemyMaxHp(enemy.getMaxHp())
+                .userShield(enemy.getShield())
                 .enemyPatk(enemy.getPatk())
                 .enemyMatk(enemy.getMatk())
                 .enemyPdef(enemy.getPdef())

@@ -1,5 +1,6 @@
 package com.kiwi.features.combat.data.domain;
 
+import com.kiwi.features.combat.data.enums.StatType;
 import lombok.*;
 
 @Builder
@@ -18,4 +19,6 @@ public class CombatActiveStatusDomain {
     private int remainingTurns;
 
     private Float value;
+
+    private StatType statAffected;
 }
