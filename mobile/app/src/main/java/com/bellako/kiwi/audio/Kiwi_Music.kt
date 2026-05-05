@@ -5,6 +5,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.utils.AssetResolver
 
 @Suppress("MagicNumber")
 @Composable
@@ -68,12 +69,13 @@ fun Kiwi_Music_Settings() {
 
 @Suppress("MagicNumber")
 @Composable
-fun Kiwi_Music_Combat(musicId: Long?) {
+fun Kiwi_Music_Combat(music: String?) {
     val context = LocalContext.current
-    DisposableEffect(musicId) {
+    DisposableEffect(music) {
+        val resolved = AssetResolver.rawOr(context, music, R.raw.growtale_battleofhabits)
         AudioManager.playMusic(
             context,
-            listOf(AudioLayer(resolveCombatMusic(musicId), 0.35f, true)),
+            listOf(AudioLayer(resolved, 0.35f, true)),
         )
         onDispose {
             AudioManager.playMusic(
@@ -86,8 +88,3 @@ fun Kiwi_Music_Combat(musicId: Long?) {
         }
     }
 }
-
-private fun resolveCombatMusic(musicId: Long?): Int =
-    when (musicId) {
-        else -> R.raw.growtale_battleofhabits
-    }

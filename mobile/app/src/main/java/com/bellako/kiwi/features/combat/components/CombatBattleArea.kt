@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -33,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntOffset
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
@@ -221,12 +222,4 @@ internal fun LogDimOverlay(
 private fun resolveEnemySprite(
     spriteName: String,
     context: Context,
-): Int {
-    val resolved =
-        context.resources.getIdentifier(
-            spriteName,
-            "drawable",
-            context.packageName,
-        )
-    return if (resolved != 0) resolved else R.drawable.liria_neutral
-}
+): Int = AssetResolver.drawableOr(context, spriteName, R.drawable.character_liria_base)

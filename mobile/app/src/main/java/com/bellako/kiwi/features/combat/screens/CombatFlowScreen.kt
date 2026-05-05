@@ -41,7 +41,7 @@ fun CombatFlowScreen(
     onDismiss: () -> Unit,
     onVictoryContinue: () -> Unit,
 ) {
-    Kiwi_Music_Combat(combat.musicId)
+    Kiwi_Music_Combat(combat.music)
 
     Box(modifier = Modifier.fillMaxSize()) {
         val isDefeat = isCombatDefeat(combat)

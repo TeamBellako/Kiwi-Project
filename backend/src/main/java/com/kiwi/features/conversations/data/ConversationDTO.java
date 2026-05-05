@@ -16,10 +16,9 @@ public class ConversationDTO {
     private Long id;
     private String name;
     private ConversationType type;
-    private Long spriteId;
-    private Long expresionId;
-    private Long backgroundId;
-    private Long fxId;
+    private String sprite;
+    private String background;
+    private String fx;
     private Boolean dark;
     private Integer delayStartMs;
     private Integer delayEndMs;

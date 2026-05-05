@@ -15,9 +15,9 @@ public class CombatDTO {
 
     private Long combatConfigId;
 
-    private Long backgroundId;
+    private String background;
 
-    private Long sfxId;
+    private String sfx;
 
     private int turnNumber;
 
