@@ -44,6 +44,15 @@ public class CombatServiceTests {
     private final CombatBlockedSkillService blockedSkillService =
             new CombatBlockedSkillService(blockedSkillRepo);
 
+    private final CombatBarkTriggerTestRepositoryInMemory barkTriggerRepo =
+            new CombatBarkTriggerTestRepositoryInMemory();
+
+    private final CombatFiredBarkTestRepositoryInMemory firedBarkRepo =
+            new CombatFiredBarkTestRepositoryInMemory();
+
+    private final CombatBarkService barkService =
+            new CombatBarkService(barkTriggerRepo, firedBarkRepo);
+
     private final CombatService service = new CombatService(
             combatRepo,
             configRepo,
@@ -51,7 +60,8 @@ public class CombatServiceTests {
             userStatsRepo,
             combatLogService,
             lastSkillService,
-            blockedSkillService
+            blockedSkillService,
+            barkService
     );
 
     private final Long userId = 1L;

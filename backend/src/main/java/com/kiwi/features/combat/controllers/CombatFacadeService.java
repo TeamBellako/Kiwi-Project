@@ -7,8 +7,10 @@ import com.kiwi.features.combat.data.persistence.CombatConfigPersistence;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
 import com.kiwi.features.combat.exceptions.CombatNotFoundException;
 import com.kiwi.features.combat.repositories.CombatConfigRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -19,6 +21,7 @@ public class CombatFacadeService {
     private final CombatBuilderService combatBuilderService;
     private final CombatTurnService combatTurnService;
     private final CombatConfigRepository combatConfigRepository;
+    private final CombatBarkService combatBarkService;
 
     //------------------------------------------------------------------------------------------------------------------
 
@@ -26,12 +29,14 @@ public class CombatFacadeService {
             CombatService combatService,
             CombatBuilderService combatBuilderService,
             CombatTurnService combatTurnService,
-            CombatConfigRepository combatConfigRepository
+            CombatConfigRepository combatConfigRepository,
+            CombatBarkService combatBarkService
     ) {
         this.combatService = combatService;
         this.combatBuilderService = combatBuilderService;
         this.combatTurnService = combatTurnService;
         this.combatConfigRepository = combatConfigRepository;
+        this.combatBarkService = combatBarkService;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -114,6 +119,24 @@ public class CombatFacadeService {
         combatService.cleanDatabase(combat.getId());
 
         return enrichWithConfig(result, combat.getCombatConfigId());
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    // MARK BARK FIRED
+    @Transactional
+    public void markBarkFired(Long userId, Long combatId, Long triggerId) {
+
+        CombatPersistence combat = combatService.findCombat(combatId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (!combat.getUserId().equals(userId)
+                || combat.getCombatStatus() != CombatGeneralStatus.ONGOING
+                || !combatBarkService.triggerBelongsToConfig(triggerId, combat.getCombatConfigId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        combatBarkService.markFired(combatId, triggerId);
     }
 
     //------------------------------------------------------------------------------------------------------------------

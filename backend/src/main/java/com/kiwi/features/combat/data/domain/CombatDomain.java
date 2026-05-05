@@ -4,6 +4,7 @@ import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -45,4 +46,10 @@ public class CombatDomain {
     private Instant endsAt;
 
     private CombatGeneralStatus combatStatus;
+
+    @Builder.Default
+    private List<CombatBarkTriggerDomain> barks = List.of();
+
+    @Builder.Default
+    private List<Long> firedBarkIds = List.of();
 }

@@ -33,4 +33,10 @@ public class CombatDTO {
 
     private List<CombatActionDTO> log;
 
+    @Builder.Default
+    private List<CombatBarkTriggerDTO> barks = List.of();
+
+    @Builder.Default
+    private List<Long> firedBarkIds = List.of();
+
 }

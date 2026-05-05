@@ -23,6 +23,7 @@ public class CombatService {
     private final CombatLogService combatLogService;
     private final CombatLastSkillService lastSkillService;
     private final CombatBlockedSkillService blockedSkillService;
+    private final CombatBarkService barkService;
 
     //------------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +34,8 @@ public class CombatService {
             UserStatsRepository userStatsRepository,
             CombatLogService combatLogService,
             CombatLastSkillService lastSkillService,
-            CombatBlockedSkillService blockedSkillService
+            CombatBlockedSkillService blockedSkillService,
+            CombatBarkService barkService
     ) {
         this.combatRepository = combatRepository;
         this.combatConfigRepository = combatConfigRepository;
@@ -42,6 +44,7 @@ public class CombatService {
         this.combatLogService = combatLogService;
         this.lastSkillService = lastSkillService;
         this.blockedSkillService = blockedSkillService;
+        this.barkService = barkService;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -98,6 +101,7 @@ public class CombatService {
         combatLogService.deleteCombatLog(combatId);
         lastSkillService.deleteByCombatId(combatId);
         blockedSkillService.deleteByCombatId(combatId);
+        barkService.deleteByCombatId(combatId);
     }
 
     //------------------------------------------------------------------------------------------------------------------

@@ -59,7 +59,9 @@ public class CombatMapper {
             String enemySprite,
             String background,
             String sfx,
-            List<CombatActionDTO> log
+            List<CombatActionDTO> log,
+            List<CombatBarkTriggerDTO> barks,
+            List<Long> firedBarkIds
     ) {
 
         return CombatDTO.builder()
@@ -79,6 +81,8 @@ public class CombatMapper {
                 .enemySprite(enemySprite)
 
                 .log(log)
+                .barks(barks)
+                .firedBarkIds(firedBarkIds)
                 .build();
     }
 
