@@ -53,14 +53,6 @@ public class CombatBuilderService {
         CombatConfigPersistence config =
                 combatConfigRepository.findById(combat.getCombatConfigId()).orElseThrow();
 
-        Long backgroundId = config.getBackground() != null
-                ? config.getBackground().getId()
-                : null;
-
-        Long sfxId = config.getSfx() != null
-                ? config.getSfx().getId()
-                : null;
-
         List<CombatActionDTO> log =
                 combatLogService.getCombatLog(combat.getId());
 
@@ -70,8 +62,8 @@ public class CombatBuilderService {
                 enemyDTO,
                 enemyEntity.getName(),
                 enemyEntity.getSprite(),
-                backgroundId,
-                sfxId,
+                config.getBackground(),
+                config.getSfx(),
                 log
         );
     }

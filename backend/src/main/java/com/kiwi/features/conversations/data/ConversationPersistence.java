@@ -1,10 +1,5 @@
 package com.kiwi.features.conversations.data;
 
-import com.kiwi.features.sprites.data.ExpressionPersistence;
-import com.kiwi.features.sprites.data.SpritePersistence;
-import com.kiwi.features.sprites.data.BackgroundPersistence;
-import com.kiwi.features.sprites.data.FxPersistence;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,21 +19,14 @@ public class ConversationPersistence {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "sprite", nullable = false)
-    private SpritePersistence sprite;
+    @Column(name = "sprite", nullable = false)
+    private String sprite;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "expresion", nullable = false)
-    private ExpressionPersistence expresion;
+    @Column(name = "background")
+    private String background;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "background", nullable = true)
-    private BackgroundPersistence background;
-
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "fx", nullable = true)
-    private FxPersistence fx;
+    @Column(name = "fx")
+    private String fx;
 
     @Column(name = "dark", nullable = false)
     private Boolean dark;
