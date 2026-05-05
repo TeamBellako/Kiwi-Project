@@ -42,6 +42,7 @@ object GoalDataMapper {
             category = categoryToString(domain.category),
             status = "IN_PROGRESS",
             reward = domain.reward,
+            difficulty = domain.difficulty.name,
             date = date,
             onCompletedEvent = domain.onCompletedEvent,
             onCompletedEntityId = domain.onCompletedEntityId,
@@ -81,6 +82,7 @@ object GoalDataMapper {
             GoalCategory.SKILL -> "SKILL"
         }
 
+    @Suppress("MagicNumber")
     private fun intToDifficulty(difficulty: Int?): GoalDifficulty =
         when (difficulty) {
             1, 2 -> GoalDifficulty.EASY

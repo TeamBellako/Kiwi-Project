@@ -10,6 +10,7 @@ data class UserGoalStatusDTO(
     val category: String,
     val status: String,
     val reward: Int,
+    val difficulty: Int = 1,
     val date: String = "",
     val value: Int = 0,
     val onCompletedEvent: String = "_",

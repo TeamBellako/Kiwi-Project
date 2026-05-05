@@ -10,6 +10,7 @@ data class GoalState(
     val category: String = "DAILY_CHALLENGES",
     val status: String = "IN_PROGRESS",
     val reward: Int = 0,
+    val difficulty: String = "EASY",
     val value: Int = 0,
     val date: String = "",
     val onCompletedEvent: String = "",
