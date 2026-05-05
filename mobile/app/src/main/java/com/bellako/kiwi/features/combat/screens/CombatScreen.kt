@@ -107,7 +107,7 @@ fun CombatScreen(
                     .fillMaxSize()
                     .graphicsLayer { translationX = playerVfx.shakeOffsetX.value },
         ) {
-            CombatBackground(combat.backgroundId)
+            CombatBackground(combat.background)
 
             Column(modifier = Modifier.fillMaxSize()) {
                 Box {
@@ -307,7 +307,7 @@ private fun previewCombat(): CombatDomain =
     CombatTestFactory.validCombatDomain(
         enemyName = "Procrastinogre",
         enemySprite = "liria_neutral",
-        backgroundId = 1L,
+        background = "background_mindveil",
         endsAt = System.currentTimeMillis() + 7L * 3600L * 1000L,
         enemy =
             CombatTestFactory.validCombatActorDomain(
