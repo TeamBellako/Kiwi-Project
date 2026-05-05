@@ -23,13 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
@@ -91,7 +92,7 @@ fun CombatVictoryScreen(
                 .fillMaxSize()
                 .background(colors.color2),
     ) {
-        VictoryBackground(combat.backgroundId)
+        VictoryBackground(combat.background)
 
         Column(modifier = Modifier.fillMaxSize()) {
             VictoryHeader()
@@ -223,9 +224,9 @@ private fun VictoryBanner() {
 }
 
 @Composable
-private fun VictoryBackground(backgroundId: Long?) {
+private fun VictoryBackground(background: String?) {
     val colors = LocalKiwiColors.current
-    val resId = resolveVictoryBackground(backgroundId) ?: return
+    val resId = AssetResolver.drawable(LocalContext.current, background) ?: return
     Kiwi_Image(
         painterResourceId = resId,
         alt = "Combat background",
@@ -252,12 +253,6 @@ private fun VictoryBackground(backgroundId: Long?) {
                 ),
     )
 }
-
-private fun resolveVictoryBackground(backgroundId: Long?): Int? =
-    when (backgroundId) {
-        1L -> R.drawable.background_mindveil
-        else -> null
-    }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Suppress("MagicNumber")
@@ -300,7 +295,7 @@ private fun previewWonCombat(): CombatDomain {
         CombatTestFactory.validCombatDomain(
             enemyName = "Procrastinogre",
             enemySprite = "liria_neutral",
-            backgroundId = 1L,
+            background = "background_mindveil",
             enemy =
                 CombatTestFactory.validCombatActorDomain(
                     stats =

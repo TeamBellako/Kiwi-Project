@@ -40,6 +40,7 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.conversations.components.CharacterName
 import com.bellako.kiwi.features.conversations.components.ConversationOption
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
@@ -93,7 +94,8 @@ fun ConversationScreen(
         ) {
             // Sprite
             Kiwi_Image(
-                painterResourceId = R.drawable.liria_neutral,
+                painterResourceId =
+                    AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
                 alt = "Character Pose",
             )
         }
@@ -231,10 +233,9 @@ fun ConversationScreen_Preview() {
                         1L,
                         "Conversación de prueba",
                         ConversationType.FULL,
-                        1,
-                        1,
-                        1,
-                        1,
+                        "liria_neutral",
+                        null,
+                        null,
                         false,
                         0,
                         0,

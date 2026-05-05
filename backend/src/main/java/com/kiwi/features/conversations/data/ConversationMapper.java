@@ -1,10 +1,5 @@
 package com.kiwi.features.conversations.data;
 
-import com.kiwi.features.sprites.data.ExpressionPersistence;
-import com.kiwi.features.sprites.data.SpritePersistence;
-import com.kiwi.features.sprites.data.BackgroundPersistence;
-import com.kiwi.features.sprites.data.FxPersistence;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,10 +24,9 @@ public class ConversationMapper {
             .id(entity.getId())
             .name(entity.getName())
             .type(entity.getType())
-            .spriteId(entity.getSprite() != null ? entity.getSprite().getId() : null)
-            .expresionId(entity.getExpresion() != null ? entity.getExpresion().getId() : null)
-            .backgroundId(entity.getBackground() != null ? entity.getBackground().getId() : null)
-            .fxId(entity.getFx() != null ? entity.getFx().getId() : null)
+            .sprite(entity.getSprite())
+            .background(entity.getBackground())
+            .fx(entity.getFx())
             .dark(entity.getDark())
             .delayStartMs(entity.getDelayStartMs())
             .delayEndMs(entity.getDelayEndMs())
@@ -81,29 +75,9 @@ public class ConversationMapper {
         entity.setOnCompletedEntity(dto.getOnCompletedEntity());
         entity.setOnCompletedEntityId(dto.getOnCompletedEntityId());
         
-        if (dto.getSpriteId() != null) {
-            SpritePersistence sprite = new SpritePersistence();
-            sprite.setId(dto.getSpriteId());
-            entity.setSprite(sprite);
-        }
-        
-        if (dto.getExpresionId() != null) {
-            ExpressionPersistence expression = new ExpressionPersistence();
-            expression.setId(dto.getExpresionId());
-            entity.setExpresion(expression);
-        }
-        
-        if (dto.getBackgroundId() != null) {
-            BackgroundPersistence background = new BackgroundPersistence();
-            background.setId(dto.getBackgroundId());
-            entity.setBackground(background);
-        }
-        
-        if (dto.getFxId() != null) {
-            FxPersistence fx = new FxPersistence();
-            fx.setId(dto.getFxId());
-            entity.setFx(fx);
-        }
+        entity.setSprite(dto.getSprite());
+        entity.setBackground(dto.getBackground());
+        entity.setFx(dto.getFx());
         entity.setDark(dto.getDark());
 
         entity.setDelayStartMs(dto.getDelayStartMs());
