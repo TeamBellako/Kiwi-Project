@@ -2,6 +2,8 @@ package com.bellako.kiwi.features.combat.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -45,6 +47,7 @@ import com.bellako.kiwi.features.combat.components.rememberDeathSequenceVfx
 import com.bellako.kiwi.features.combat.components.rememberPlayerDamageVfx
 import com.bellako.kiwi.features.combat.components.userTurnMessage
 import com.bellako.kiwi.features.combat.data.ActiveBarkDomain
+import com.bellako.kiwi.features.combat.data.BarkDismissMode
 import com.bellako.kiwi.features.combat.data.CombatActionDomain
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActiveStatusDomain
@@ -52,6 +55,7 @@ import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.tests.CombatTestFactory
+import com.bellako.kiwi.features.conversations.tests.ConversationsTestFactory
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
 import com.bellako.kiwi.ui.KiwiColors
@@ -65,6 +69,8 @@ private const val DEFAULT_ENEMY_NAME = "Enemy"
 private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
 private const val BOTTOM_PANEL_GRADIENT_MID = 0.5f
 private const val BOTTOM_PANEL_GRADIENT_END = 1f
+private const val BARK_FADE_MS = 250
+private const val BARK_VERTICAL_BIAS = 0.15f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -188,19 +194,21 @@ fun CombatScreen(
             }
         }
 
-        activeBark?.let { bark ->
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.TopCenter,
-            ) {
-                CombatBarkBubble(
-                    bark = bark,
-                    onDismiss = onBarkDismiss,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = getResponsiveSizeHeight(Spacing.xLarge)),
-                )
+        Crossfade(
+            targetState = activeBark,
+            animationSpec = tween(BARK_FADE_MS),
+            label = "combat_bark",
+        ) { bark ->
+            if (bark != null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = BiasAlignment(0f, BARK_VERTICAL_BIAS),
+                ) {
+                    CombatBarkBubble(
+                        bark = bark,
+                        onDismiss = onBarkDismiss,
+                    )
+                }
             }
         }
 
@@ -319,6 +327,54 @@ fun CombatScreen_LogOpen_Preview() {
                             SkillsTestFactory.goalCooldownSkillEquipped(),
                         ),
                 )
+            }
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Suppress("MagicNumber")
+@Preview(name = "Bark - click", widthDp = 392, heightDp = 800)
+@Composable
+fun CombatScreen_Bark_Preview() {
+    Kiwi_Theme {
+        Scaffold(
+            bottomBar = {
+                AppBarScreen(navController = rememberNavController())
+            },
+        ) { paddingValues ->
+            Box(
+                modifier =
+                    Modifier
+                        .background(KiwiColors.color2)
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+            ) {
+                CombatScreen(
+                    combat = previewCombat(),
+                    deckSkills =
+                        listOf(
+                            SkillsTestFactory.timeCooldownSkillEquipped(),
+                            SkillsTestFactory.goalCooldownSkillEquipped(),
+                        ),
+                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = BiasAlignment(0f, BARK_VERTICAL_BIAS),
+                ) {
+                    CombatBarkBubble(
+                        bark =
+                            ActiveBarkDomain(
+                                triggerId = 1L,
+                                conversation =
+                                    ConversationsTestFactory.validConversationDomain(
+                                        dialog = "You dare challenge me, mortal? Your focus crumbles already.",
+                                    ),
+                                dismissMode = BarkDismissMode.CLICK,
+                            ),
+                        onDismiss = {},
+                    )
+                }
             }
         }
     }
