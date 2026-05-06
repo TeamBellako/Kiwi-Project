@@ -45,7 +45,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 private const val HEALTH_BAR_WIDTH_FRACTION = 0.6f
-private const val SPRITE_HEIGHT_FRACTION = 0.7f
 private const val LOG_HEIGHT_FRACTION = 0.85f
 private const val DAMAGE_WIGGLE_CYCLES = 4
 private const val DAMAGE_WIGGLE_AMPLITUDE_PX = 22f
@@ -73,13 +72,10 @@ internal fun ColumnScope.CombatBattleArea(
                 .weight(1f)
                 .fillMaxWidth(),
     ) {
-        EnemyArena(
-            enemySprite = combat.enemySprite,
+        EnemyHud(
             currentHp = combat.enemy.stats.currentHp,
             maxHp = combat.enemy.stats.maxHp,
             endsAt = combat.endsAt,
-            context = context,
-            isEnemyDefeated = isEnemyDefeated,
         )
 
         if (isLogOpen) {
@@ -108,13 +104,12 @@ internal fun ColumnScope.CombatBattleArea(
 }
 
 @Composable
-private fun EnemyArena(
+internal fun CombatEnemySprite(
     enemySprite: String,
     currentHp: Int,
-    maxHp: Int,
-    endsAt: Long?,
+    isEnemyDefeated: Boolean,
     context: Context,
-    isEnemyDefeated: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
     var previousHp by remember { mutableIntStateOf(currentHp) }
     var damageTrigger by remember { mutableIntStateOf(0) }
@@ -160,28 +155,34 @@ private fun EnemyArena(
         spriteAlpha.animateTo(0f, tween(ENEMY_DEFEAT_FADE_MS))
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Kiwi_Image(
-            painterResourceId = resolveEnemySprite(enemySprite, context),
-            alt = "Enemy sprite",
-            modifier =
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxHeight(SPRITE_HEIGHT_FRACTION)
-                    .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                    .alpha(spriteAlpha.value),
-            contentScale = ContentScale.Fit,
-            colorFilter =
-                if (redAlpha.value > 0f) {
-                    ColorFilter.tint(
-                        Color.Red.copy(alpha = redAlpha.value),
-                        BlendMode.SrcAtop,
-                    )
-                } else {
-                    null
-                },
-        )
+    Kiwi_Image(
+        painterResourceId = resolveEnemySprite(enemySprite, context),
+        alt = "Enemy sprite",
+        modifier =
+            modifier
+                .fillMaxSize()
+                .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+                .alpha(spriteAlpha.value),
+        contentScale = ContentScale.Fit,
+        colorFilter =
+            if (redAlpha.value > 0f) {
+                ColorFilter.tint(
+                    Color.Red.copy(alpha = redAlpha.value),
+                    BlendMode.SrcAtop,
+                )
+            } else {
+                null
+            },
+    )
+}
 
+@Composable
+private fun EnemyHud(
+    currentHp: Int,
+    maxHp: Int,
+    endsAt: Long?,
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier =
                 Modifier

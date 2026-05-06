@@ -36,6 +36,7 @@ import com.bellako.kiwi.features.combat.components.CombatAbandonConfirmModal
 import com.bellako.kiwi.features.combat.components.CombatBackground
 import com.bellako.kiwi.features.combat.components.CombatBarkBubble
 import com.bellako.kiwi.features.combat.components.CombatBattleArea
+import com.bellako.kiwi.features.combat.components.CombatEnemySprite
 import com.bellako.kiwi.features.combat.components.CombatHeader
 import com.bellako.kiwi.features.combat.components.CombatTurnIndicator
 import com.bellako.kiwi.features.combat.components.DeathSequenceOverlay
@@ -47,7 +48,6 @@ import com.bellako.kiwi.features.combat.components.rememberDeathSequenceVfx
 import com.bellako.kiwi.features.combat.components.rememberPlayerDamageVfx
 import com.bellako.kiwi.features.combat.components.userTurnMessage
 import com.bellako.kiwi.features.combat.data.ActiveBarkDomain
-import com.bellako.kiwi.features.combat.data.BarkDismissMode
 import com.bellako.kiwi.features.combat.data.CombatActionDomain
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActiveStatusDomain
@@ -55,7 +55,6 @@ import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.tests.CombatTestFactory
-import com.bellako.kiwi.features.conversations.tests.ConversationsTestFactory
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
 import com.bellako.kiwi.ui.KiwiColors
@@ -121,7 +120,14 @@ fun CombatScreen(
         ) {
             CombatBackground(combat.background)
 
-            Column(modifier = Modifier.fillMaxSize()) {
+            CombatEnemySprite(
+                enemySprite = combat.enemySprite,
+                currentHp = combat.enemy.stats.currentHp,
+                isEnemyDefeated = combat.combatStatus == CombatGeneralStatus.USER_WON,
+                context = context,
+            )
+
+            Column(modifier = Modifier.fillMaxSize().padding(top = Spacing.large)) {
                 Box {
                     CombatHeader(
                         title = "Ongoing Combat",
@@ -332,59 +338,11 @@ fun CombatScreen_LogOpen_Preview() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Suppress("MagicNumber")
-@Preview(name = "Bark - click", widthDp = 392, heightDp = 800)
-@Composable
-fun CombatScreen_Bark_Preview() {
-    Kiwi_Theme {
-        Scaffold(
-            bottomBar = {
-                AppBarScreen(navController = rememberNavController())
-            },
-        ) { paddingValues ->
-            Box(
-                modifier =
-                    Modifier
-                        .background(KiwiColors.color2)
-                        .padding(paddingValues)
-                        .fillMaxSize(),
-            ) {
-                CombatScreen(
-                    combat = previewCombat(),
-                    deckSkills =
-                        listOf(
-                            SkillsTestFactory.timeCooldownSkillEquipped(),
-                            SkillsTestFactory.goalCooldownSkillEquipped(),
-                        ),
-                )
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = BiasAlignment(0f, BARK_VERTICAL_BIAS),
-                ) {
-                    CombatBarkBubble(
-                        bark =
-                            ActiveBarkDomain(
-                                triggerId = 1L,
-                                conversation =
-                                    ConversationsTestFactory.validConversationDomain(
-                                        dialog = "You dare challenge me, mortal? Your focus crumbles already.",
-                                    ),
-                                dismissMode = BarkDismissMode.CLICK,
-                            ),
-                        onDismiss = {},
-                    )
-                }
-            }
-        }
-    }
-}
-
 @Suppress("MagicNumber")
 private fun previewCombat(): CombatDomain =
     CombatTestFactory.validCombatDomain(
-        enemyName = "Procrastinogre",
-        enemySprite = "liria_neutral",
+        enemyName = "Flicker",
+        enemySprite = "enemy_flicker_base",
         background = "background_mindveil",
         endsAt = System.currentTimeMillis() + 7L * 3600L * 1000L,
         enemy =
