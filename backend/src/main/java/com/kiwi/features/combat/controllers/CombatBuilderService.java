@@ -23,17 +23,20 @@ public class CombatBuilderService {
     private final CombatLogService combatLogService;
     private final CombatActorBuilderService combatActorBuilderService;
     private final CombatConfigRepository combatConfigRepository;
+    private final CombatBarkService combatBarkService;
 
     public CombatBuilderService(
             CombatLogService combatLogService,
             EnemyRepository enemyRepository,
             CombatActorBuilderService combatActorBuilderService,
-            CombatConfigRepository combatConfigRepository
+            CombatConfigRepository combatConfigRepository,
+            CombatBarkService combatBarkService
     ) {
         this.combatLogService = combatLogService;
         this.enemyRepository = enemyRepository;
         this.combatActorBuilderService = combatActorBuilderService;
         this.combatConfigRepository = combatConfigRepository;
+        this.combatBarkService = combatBarkService;
     }
 
     public CombatDTO buildCombatDTO(CombatPersistence combat) {
@@ -56,6 +59,12 @@ public class CombatBuilderService {
         List<CombatActionDTO> log =
                 combatLogService.getCombatLog(combat.getId());
 
+        List<CombatBarkTriggerDTO> barks = CombatBarkTriggerMapper.toDTOList(
+                combatBarkService.getTriggersForConfig(combat.getCombatConfigId())
+        );
+
+        List<Long> firedBarkIds = combatBarkService.getFiredTriggerIds(combat.getId());
+
         return CombatMapper.toDTO(
                 combat,
                 userDTO,
@@ -64,7 +73,9 @@ public class CombatBuilderService {
                 enemyEntity.getSprite(),
                 config.getBackground(),
                 config.getSfx(),
-                log
+                log,
+                barks,
+                firedBarkIds
         );
     }
 

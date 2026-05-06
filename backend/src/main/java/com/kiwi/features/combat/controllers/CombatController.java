@@ -121,4 +121,24 @@ public class CombatController {
         );
     }
 
+    // ============================================================================================
+    // MARK BARK FIRED
+    // ============================================================================================
+
+    @PostMapping("/{combatId}/barks/{triggerId}/fired")
+    public ResponseEntity<Void> markBarkFired(
+            @AuthenticationPrincipal @NotNull UserDetails userDetails,
+            @PathVariable Long combatId,
+            @PathVariable Long triggerId
+    ) {
+
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+                .orElseThrow()
+                .getId();
+
+        combatFacadeService.markBarkFired(userId, combatId, triggerId);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

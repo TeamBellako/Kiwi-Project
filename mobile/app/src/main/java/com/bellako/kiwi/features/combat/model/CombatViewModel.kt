@@ -9,6 +9,7 @@ import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.services.eventbus.listenToEvent
+import com.bellako.kiwi.features.combat.data.ActiveBarkDomain
 import com.bellako.kiwi.features.combat.data.CombatActionDomain
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActiveStatusDomain
@@ -39,15 +40,20 @@ private const val TURN_BEAT_MS = 1500L
 
 @OptIn(DelicateCoroutinesApi::class)
 @HiltViewModel
-@Suppress("TooGenericExceptionCaught")
+@Suppress("TooGenericExceptionCaught", "TooManyFunctions")
 class CombatViewModel
     @Inject
     constructor(
         private val repository: CombatRepository,
+        private val barkController: CombatBarkController,
         @ApplicationContext private val context: Context,
     ) : BaseViewModel() {
         private val _active = MutableStateFlow<CombatDomain?>(null)
         val active: StateFlow<CombatDomain?> = _active.asStateFlow()
+
+        val activeBark: StateFlow<ActiveBarkDomain?> = barkController.activeBark
+
+        fun dismissBark() = barkController.dismiss()
 
         private val _isVisible = MutableStateFlow(false)
         val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
@@ -90,6 +96,7 @@ class CombatViewModel
                     _active.value = combat
                     _lastTurnActions.value = combat.log
                     _isVisible.value = true
+                    barkController.onCombatStarted(combat)
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
                 }
@@ -105,6 +112,7 @@ class CombatViewModel
                     _active.value = combat
                     _lastTurnActions.value = combat.log
                     _isVisible.value = true
+                    barkController.onCombatStarted(combat)
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
                 }
@@ -149,7 +157,11 @@ class CombatViewModel
                         EventType.THROW_SKILL,
                         EventPayload.EntityIdPayload(skillId.toInt()),
                     )
-                    playTurnResult(result, hasOptimisticPlayerSkill = hasOptimisticPlayerSkill)
+                    playTurnResult(
+                        result,
+                        hasOptimisticPlayerSkill = hasOptimisticPlayerSkill,
+                        playerSkillId = skillId,
+                    )
                 } catch (e: Throwable) {
                     if (hasOptimisticPlayerSkill) {
                         _active.value = current
@@ -192,6 +204,7 @@ class CombatViewModel
                 delay(DISMISS_ANIMATION_DURATION_MS)
                 _active.value = null
                 _lastTurnActions.value = emptyList()
+                barkController.onCombatEnded()
             }
         }
 
@@ -212,6 +225,7 @@ class CombatViewModel
                 }
                 _active.value = null
                 _lastTurnActions.value = emptyList()
+                barkController.onCombatEnded()
             }
         }
 
@@ -232,6 +246,7 @@ class CombatViewModel
         private suspend fun playTurnResult(
             result: CombatTurnResultDomain,
             hasOptimisticPlayerSkill: Boolean = false,
+            playerSkillId: Long? = null,
         ) {
             val initial = _active.value ?: return
             var state = initial.copy(turnNumber = result.turnNumber)
@@ -244,10 +259,14 @@ class CombatViewModel
                 actions.firstOrNull()?.actor == CombatActor.USER &&
                 actions.first().actionType == CombatActionType.SKILL_USED
             ) {
+                val prev = state
                 state = applyActionEffects(state, actions.first())
                 _active.value = state
                 playActionSFX(actions.first())
+                playerSkillId?.let { barkController.onSkillUsed(CombatActor.USER, it) }
+                barkController.onCombatStateChanged(prev, state)
                 delay(TURN_BEAT_MS)
+                barkController.awaitNoActiveBark()
                 startIndex = 1
             } else if (actions.isNotEmpty()) {
                 delay(TURN_INITIAL_DELAY_MS)
@@ -255,11 +274,20 @@ class CombatViewModel
 
             for (i in startIndex until actions.size) {
                 val action = actions[i]
+                val prev = state
                 state = state.copy(log = state.log + action)
                 state = applyActionEffects(state, action)
                 _active.value = state
                 playActionSFX(action)
+                if (action.actor == CombatActor.USER &&
+                    action.actionType == CombatActionType.SKILL_USED &&
+                    playerSkillId != null
+                ) {
+                    barkController.onSkillUsed(CombatActor.USER, playerSkillId)
+                }
+                barkController.onCombatStateChanged(prev, state)
                 delay(TURN_BEAT_MS)
+                barkController.awaitNoActiveBark()
             }
 
             val isTerminal = result.combatStatus != CombatGeneralStatus.ONGOING

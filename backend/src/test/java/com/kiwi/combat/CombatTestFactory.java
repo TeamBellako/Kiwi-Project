@@ -2,6 +2,8 @@ package com.kiwi.combat;
 
 import com.kiwi.features.combat.data.dto.CombatDTO;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
+import com.kiwi.features.combat.data.enums.BarkDismissMode;
+import com.kiwi.features.combat.data.enums.BarkTriggerType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
@@ -166,6 +168,32 @@ public class CombatTestFactory {
     public static CombatBlockedSkillPersistence blockedSkill(Long combatId, CombatActorType actor, Long skillId) {
         return CombatBlockedSkillPersistence.builder()
                 .id(new CombatBlockedSkillKey(combatId, actor, skillId))
+                .build();
+    }
+
+    // =========================================================================
+    // BARK TRIGGER
+    // =========================================================================
+
+    public static CombatBarkTriggerPersistence barkTrigger(
+            Long combatConfigId,
+            BarkTriggerType type,
+            Long conversationId
+    ) {
+        return CombatBarkTriggerPersistence.builder()
+                .combatConfigId(combatConfigId)
+                .type(type)
+                .threshold(type == BarkTriggerType.SKILL_USED ? null : 50f)
+                .skillId(type == BarkTriggerType.SKILL_USED ? 1L : null)
+                .conversationId(conversationId)
+                .dismissMode(BarkDismissMode.AUTO)
+                .priority(0)
+                .build();
+    }
+
+    public static CombatFiredBarkPersistence firedBark(Long combatId, Long triggerId) {
+        return CombatFiredBarkPersistence.builder()
+                .id(new CombatFiredBarkKey(combatId, triggerId))
                 .build();
     }
 
