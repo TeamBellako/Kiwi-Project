@@ -96,18 +96,19 @@ CREATE TABLE IF NOT EXISTS goals (
     type VARCHAR(50) NOT NULL,
     category VARCHAR(50) NOT NULL,
     reward INT NOT NULL,
+    difficulty INT NOT NULL DEFAULT 1,
     on_completed_action VARCHAR(255),
     on_completed_entity VARCHAR(255),
     on_completed_entity_id INT
 );
 
 -- Seed goal definitions used by tests (IDs: 1=exercise, 2=app, 3=skill)
-INSERT INTO goals (name, action, target, type, category, reward, on_completed_action, on_completed_entity, on_completed_entity_id)
-    VALUES ('Exercise Goal', 'Exercise for 30 minutes', 30, 'EXERCISE', 'DAILY_CHALLENGES', 10, '', '', 0);
-INSERT INTO goals (name, action, target, type, category, reward, on_completed_action, on_completed_entity, on_completed_entity_id)
-    VALUES ('App Usage Goal', 'Improve Java skills', 100, 'PRODUCTIVITY', 'APP_USAGE', 50, '', '', 0);
-INSERT INTO goals (name, action, target, type, category, reward, on_completed_action, on_completed_entity, on_completed_entity_id)
-    VALUES ('Skill Goal', 'Improve Java skills', 100, 'PRODUCTIVITY', 'SKILL', 50, '', '', 0);
+INSERT INTO goals (name, action, target, type, category, reward, difficulty, on_completed_action, on_completed_entity, on_completed_entity_id)
+    VALUES ('Exercise Goal', 'Exercise for 30 minutes', 30, 'EXERCISE', 'DAILY_CHALLENGES', 10, 1, '', '', 0);
+INSERT INTO goals (name, action, target, type, category, reward, difficulty, on_completed_action, on_completed_entity, on_completed_entity_id)
+    VALUES ('App Usage Goal', 'Improve Java skills', 100, 'PRODUCTIVITY', 'APP_USAGE', 50, 1, '', '', 0);
+INSERT INTO goals (name, action, target, type, category, reward, difficulty, on_completed_action, on_completed_entity, on_completed_entity_id)
+    VALUES ('Skill Goal', 'Improve Java skills', 100, 'PRODUCTIVITY', 'SKILL', 50, 1, '', '', 0);
 
 -- Create user_goal_status table (per-user goal tracking, formerly goals)
 CREATE TABLE IF NOT EXISTS user_goal_status (
@@ -119,6 +120,16 @@ CREATE TABLE IF NOT EXISTS user_goal_status (
     value INT NOT NULL,
     CONSTRAINT fk_ugs_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_ugs_goals FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS user_goal_progress (
+    user_id BIGINT NOT NULL,
+    goal_type VARCHAR(50) NOT NULL,
+    current_difficulty INT NOT NULL DEFAULT 1,
+    goals_completed_at_difficulty INT NOT NULL DEFAULT 0,
+    goals_failed_at_difficulty INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, goal_type),
+    CONSTRAINT fk_ugp_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tips (

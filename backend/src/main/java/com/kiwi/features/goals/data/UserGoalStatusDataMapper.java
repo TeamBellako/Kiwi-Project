@@ -35,6 +35,7 @@ public class UserGoalStatusDataMapper {
                 .type(goal.getType().name())
                 .category(goal.getCategory().name())
                 .reward(goal.getReward())
+                .difficulty(goal.getDifficulty())
                 .onCompletedEntityId(goal.getOnCompletedEntityId())
                 .onCompletedEvent(onCompletedEvent)
                 .status(entity.getStatus().name())

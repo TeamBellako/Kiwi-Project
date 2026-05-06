@@ -12,6 +12,7 @@ object UserGoalStatusDataMapper {
             category = stringToCategory(dto.category),
             status = stringToStatus(dto.status),
             reward = dto.reward,
+            difficulty = intToDifficulty(dto.difficulty),
             date = dto.date,
             value = dto.value,
             onCompletedEvent = dto.onCompletedEvent,
@@ -29,6 +30,7 @@ object UserGoalStatusDataMapper {
             category = stringToCategory(state.category),
             status = stringToStatus(state.status),
             reward = state.reward,
+            difficulty = stringToDifficulty(state.difficulty),
             date = state.date,
             value = state.value,
             onCompletedEvent = state.onCompletedEvent,
@@ -46,6 +48,7 @@ object UserGoalStatusDataMapper {
             category = categoryToString(domain.category),
             status = statusToString(domain.status),
             reward = domain.reward,
+            difficulty = domain.difficulty.name,
             value = domain.value,
             date = domain.date,
             onCompletedEvent = domain.onCompletedEvent,
@@ -120,5 +123,22 @@ object UserGoalStatusDataMapper {
             GoalStatus.COMPLETED -> "COMPLETED"
             GoalStatus.NOT_COMPLETED -> "NOT_COMPLETED"
             GoalStatus.IN_PROGRESS -> "IN_PROGRESS"
+        }
+
+    @Suppress("MagicNumber")
+    private fun intToDifficulty(difficulty: Int?): GoalDifficulty =
+        when (difficulty) {
+            1, 2 -> GoalDifficulty.EASY
+            3 -> GoalDifficulty.MEDIUM
+            4, 5 -> GoalDifficulty.HARD
+            else -> GoalDifficulty.EASY
+        }
+
+    private fun stringToDifficulty(difficulty: String?): GoalDifficulty =
+        when (difficulty?.uppercase()) {
+            "EASY" -> GoalDifficulty.EASY
+            "MEDIUM" -> GoalDifficulty.MEDIUM
+            "HARD" -> GoalDifficulty.HARD
+            else -> GoalDifficulty.EASY
         }
 }

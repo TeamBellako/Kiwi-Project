@@ -8,6 +8,7 @@ data class GoalDomain(
     override val type: GoalType,
     override val category: GoalCategory,
     override val reward: Int,
+    val difficulty: GoalDifficulty = GoalDifficulty.EASY,
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
 ) : IGoal {

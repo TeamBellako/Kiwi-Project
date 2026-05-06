@@ -29,4 +29,6 @@ interface IGoalsViewModel {
     suspend fun checkAndNotifyGoals()
 
     suspend fun getDailyGoalsProgress(date: String): Float
+
+    suspend fun invalidateGoalsInProgressCache()
 }

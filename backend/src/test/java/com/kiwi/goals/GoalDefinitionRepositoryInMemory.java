@@ -44,8 +44,10 @@ public class GoalDefinitionRepositoryInMemory implements GoalRepository {
     }
 
     @Override
-    public List<GoalPersistence> findTwoRandom() {
+    public List<GoalPersistence> findTwoRandomForUser(Long userId) {
         List<GoalPersistence> all = new ArrayList<>(store.values());
+        all.removeIf(goal -> goal.getCategory() != GoalCategory.DAILY_CHALLENGES);
+        all.removeIf(goal -> goal.getDifficulty() != null && goal.getDifficulty() != 1);
         Collections.shuffle(all);
         return all.stream().limit(2).toList();
     }

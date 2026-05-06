@@ -10,6 +10,7 @@ object GoalDataMapper {
             type = stringToType(dto.type),
             category = stringToCategory(dto.category),
             reward = dto.reward,
+            difficulty = intToDifficulty(dto.difficulty),
             onCompletedEvent = dto.onCompletedEvent,
             onCompletedEntityId = dto.onCompletedEntityId,
         )
@@ -41,6 +42,7 @@ object GoalDataMapper {
             category = categoryToString(domain.category),
             status = "IN_PROGRESS",
             reward = domain.reward,
+            difficulty = domain.difficulty.name,
             date = date,
             onCompletedEvent = domain.onCompletedEvent,
             onCompletedEntityId = domain.onCompletedEntityId,
@@ -78,5 +80,14 @@ object GoalDataMapper {
             GoalCategory.DAILY_CHALLENGES -> "DAILY_CHALLENGES"
             GoalCategory.APP_USAGE -> "APP_USAGE"
             GoalCategory.SKILL -> "SKILL"
+        }
+
+    @Suppress("MagicNumber")
+    private fun intToDifficulty(difficulty: Int?): GoalDifficulty =
+        when (difficulty) {
+            1, 2 -> GoalDifficulty.EASY
+            3 -> GoalDifficulty.MEDIUM
+            4, 5 -> GoalDifficulty.HARD
+            else -> GoalDifficulty.EASY
         }
 }

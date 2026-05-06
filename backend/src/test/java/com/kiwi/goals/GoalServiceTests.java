@@ -1,6 +1,7 @@
 package com.kiwi.goals;
 
 import com.kiwi.features.goals.controllers.GoalService;
+import com.kiwi.features.goals.controllers.UserGoalProgressRepository;
 import com.kiwi.features.goals.data.*;
 import com.kiwi.features.goals.exceptions.GoalNotFoundException;
 import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static com.kiwi.goals.GoalsTestFactory.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +25,7 @@ public class GoalServiceTests {
     private GoalTestRepositoryInMemory userGoalStatusRepository;
     private GoalDefinitionRepositoryInMemory goalDefinitionRepository;
     private UsersTestRepositoryInMemory usersRepository;
+    private UserGoalProgressRepository userGoalProgressRepository;
     private UsersService usersService;
     private GoalService goalService;
 
@@ -34,8 +37,14 @@ public class GoalServiceTests {
         userGoalStatusRepository = new GoalTestRepositoryInMemory();
         goalDefinitionRepository = new GoalDefinitionRepositoryInMemory();
         usersRepository = new UsersTestRepositoryInMemory();
+        userGoalProgressRepository = mock(UserGoalProgressRepository.class);
         usersService = mock(UsersService.class);
-        goalService = new GoalService(userGoalStatusRepository, goalDefinitionRepository, usersRepository, usersService);
+        goalService = new GoalService(
+            userGoalStatusRepository,
+            userGoalProgressRepository,
+            goalDefinitionRepository,
+            usersRepository,
+            usersService);
 
         testUser = new UsersPersistence();
         testUser.setId(1L);
@@ -205,6 +214,34 @@ public class GoalServiceTests {
     }
 
     // ============================================================================================
+    // GET GOAL DEFINITIONS (suggestions)
+    // ============================================================================================
+
+    @Test
+    public void getGoalDefinitions_onlyReturnsDailyChallenges() {
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));       // DAILY_CHALLENGES
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));       // DAILY_CHALLENGES
+        goalDefinitionRepository.save(appGoalDefinition(null));            // APP_USAGE - debe excluirse
+        goalDefinitionRepository.save(skillGoalDefinition(null));          // SKILL - debe excluirse
+
+        List<GoalDTO> result = goalService.getGoalDefinitions(authentication);
+
+        assertTrue(result.stream().allMatch(g -> g.getCategory().equals("DAILY_CHALLENGES")));
+    }
+
+    @Test
+    public void getGoalDefinitions_returnsAtMostTwo() {
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));
+        goalDefinitionRepository.save(exerciseGoalDefinition(null));
+
+        List<GoalDTO> result = goalService.getGoalDefinitions(authentication);
+
+        assertTrue(result.size() <= 2);
+    }
+
+    // ============================================================================================
     // COMPLETE GOAL
     // ============================================================================================
 
@@ -213,12 +250,115 @@ public class GoalServiceTests {
         LocalDate date = LocalDate.now().minusDays(1);
         UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
         userGoalStatusRepository.save(entry);
+        when(userGoalProgressRepository.findById(any())).thenReturn(Optional.empty());
 
         UserGoalStatusDTO result = goalService.completeGoal(1L, authentication);
 
         assertEquals("COMPLETED", result.getStatus());
         verify(usersService, times(1)).addPointsToUser(testUser.getId(), entry.getGoal().getReward());
     }
+
+        @Test
+        public void completeGoal_updatesProgressAndResetsFailedCounter() {
+        LocalDate date = LocalDate.now().minusDays(1);
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        userGoalStatusRepository.save(entry);
+
+        UserGoalProgressKey progressKey = UserGoalProgressKey.builder()
+            .userId(testUser.getId())
+            .goalType(entry.getGoal().getType().name())
+            .build();
+        UserGoalProgressPersistence existingProgress = UserGoalProgressPersistence.builder()
+            .id(progressKey)
+            .currentDifficulty(1)
+            .goalsCompletedAtDifficulty(1)
+            .goalsFailedAtDifficulty(2)
+            .build();
+
+        when(userGoalProgressRepository.findById(progressKey)).thenReturn(Optional.of(existingProgress));
+        when(userGoalProgressRepository.save(any(UserGoalProgressPersistence.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        goalService.completeGoal(1L, authentication);
+
+        assertEquals(2, existingProgress.getGoalsCompletedAtDifficulty().intValue());
+        assertEquals(0, existingProgress.getGoalsFailedAtDifficulty().intValue());
+        assertEquals(1, existingProgress.getCurrentDifficulty().intValue());
+        verify(userGoalProgressRepository, times(1)).save(existingProgress);
+        }
+
+        @Test
+        public void completeGoal_reachingThreeCompleted_increasesDifficultyAndResetsCounter() {
+        LocalDate date = LocalDate.now().minusDays(1);
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        userGoalStatusRepository.save(entry);
+
+        UserGoalProgressKey progressKey = UserGoalProgressKey.builder()
+            .userId(testUser.getId())
+            .goalType(entry.getGoal().getType().name())
+            .build();
+        UserGoalProgressPersistence existingProgress = UserGoalProgressPersistence.builder()
+            .id(progressKey)
+            .currentDifficulty(2)
+            .goalsCompletedAtDifficulty(2)
+            .goalsFailedAtDifficulty(1)
+            .build();
+
+        when(userGoalProgressRepository.findById(progressKey)).thenReturn(Optional.of(existingProgress));
+        when(userGoalProgressRepository.save(any(UserGoalProgressPersistence.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        goalService.completeGoal(1L, authentication);
+
+        assertEquals(3, existingProgress.getCurrentDifficulty().intValue());
+        assertEquals(0, existingProgress.getGoalsCompletedAtDifficulty().intValue());
+        assertEquals(0, existingProgress.getGoalsFailedAtDifficulty().intValue());
+        }
+
+        @Test
+        public void completeThreeTimesThenFailThreeTimes_updatesDifficultyUpAndDown() {
+        LocalDate date = LocalDate.now().minusDays(1);
+
+        UserGoalProgressKey progressKey = UserGoalProgressKey.builder()
+            .userId(testUser.getId())
+            .goalType(GoalType.EXERCISE.name())
+            .build();
+        UserGoalProgressPersistence progress = UserGoalProgressPersistence.builder()
+            .id(progressKey)
+            .currentDifficulty(1)
+            .goalsCompletedAtDifficulty(0)
+            .goalsFailedAtDifficulty(0)
+            .build();
+
+        when(userGoalProgressRepository.findById(any(UserGoalProgressKey.class)))
+            .thenReturn(Optional.of(progress));
+        when(userGoalProgressRepository.save(any(UserGoalProgressPersistence.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        userGoalStatusRepository.save(inProgressGoalPersistence(101L, date, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(102L, date, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(103L, date, testUser));
+
+        goalService.completeGoal(101L, authentication);
+        goalService.completeGoal(102L, authentication);
+        goalService.completeGoal(103L, authentication);
+
+        assertEquals(2, progress.getCurrentDifficulty().intValue());
+        assertEquals(0, progress.getGoalsCompletedAtDifficulty().intValue());
+        assertEquals(0, progress.getGoalsFailedAtDifficulty().intValue());
+
+        userGoalStatusRepository.save(inProgressGoalPersistence(201L, date, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(202L, date, testUser));
+        userGoalStatusRepository.save(inProgressGoalPersistence(203L, date, testUser));
+
+        goalService.uncompleteGoal(201L, authentication);
+        goalService.uncompleteGoal(202L, authentication);
+        goalService.uncompleteGoal(203L, authentication);
+
+        assertEquals(1, progress.getCurrentDifficulty().intValue());
+        assertEquals(0, progress.getGoalsCompletedAtDifficulty().intValue());
+        assertEquals(0, progress.getGoalsFailedAtDifficulty().intValue());
+        }
 
     @Test
     public void completeGoal_alreadyCompleted_doesNotAddPoints() {
@@ -269,11 +409,96 @@ public class GoalServiceTests {
     public void uncompleteGoal_valid_changesStatus() {
         LocalDate date = LocalDate.now().minusDays(1);
         userGoalStatusRepository.save(inProgressGoalPersistence(1L, date, testUser));
+        when(userGoalProgressRepository.findById(any())).thenReturn(Optional.empty());
 
         UserGoalStatusDTO result = goalService.uncompleteGoal(1L, authentication);
 
         assertEquals("NOT_COMPLETED", result.getStatus());
     }
+
+        @Test
+        public void uncompleteGoal_updatesFailedProgressAndResetsCompletedCounter() {
+        LocalDate date = LocalDate.now().minusDays(1);
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        userGoalStatusRepository.save(entry);
+
+        UserGoalProgressKey progressKey = UserGoalProgressKey.builder()
+            .userId(testUser.getId())
+            .goalType(entry.getGoal().getType().name())
+            .build();
+        UserGoalProgressPersistence existingProgress = UserGoalProgressPersistence.builder()
+            .id(progressKey)
+            .currentDifficulty(2)
+            .goalsCompletedAtDifficulty(2)
+            .goalsFailedAtDifficulty(1)
+            .build();
+
+        when(userGoalProgressRepository.findById(progressKey)).thenReturn(Optional.of(existingProgress));
+        when(userGoalProgressRepository.save(any(UserGoalProgressPersistence.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        goalService.uncompleteGoal(1L, authentication);
+
+        assertEquals(0, existingProgress.getGoalsCompletedAtDifficulty().intValue());
+        assertEquals(2, existingProgress.getGoalsFailedAtDifficulty().intValue());
+        assertEquals(2, existingProgress.getCurrentDifficulty().intValue());
+        }
+
+        @Test
+        public void uncompleteGoal_reachingThreeFailures_decreasesDifficultyAndResetsCounter() {
+        LocalDate date = LocalDate.now().minusDays(1);
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        userGoalStatusRepository.save(entry);
+
+        UserGoalProgressKey progressKey = UserGoalProgressKey.builder()
+            .userId(testUser.getId())
+            .goalType(entry.getGoal().getType().name())
+            .build();
+        UserGoalProgressPersistence existingProgress = UserGoalProgressPersistence.builder()
+            .id(progressKey)
+            .currentDifficulty(3)
+            .goalsCompletedAtDifficulty(1)
+            .goalsFailedAtDifficulty(2)
+            .build();
+
+        when(userGoalProgressRepository.findById(progressKey)).thenReturn(Optional.of(existingProgress));
+        when(userGoalProgressRepository.save(any(UserGoalProgressPersistence.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        goalService.uncompleteGoal(1L, authentication);
+
+        assertEquals(2, existingProgress.getCurrentDifficulty().intValue());
+        assertEquals(0, existingProgress.getGoalsFailedAtDifficulty().intValue());
+        assertEquals(0, existingProgress.getGoalsCompletedAtDifficulty().intValue());
+        }
+
+        @Test
+        public void uncompleteGoal_atDifficultyOne_doesNotDecreaseBelowOne() {
+        LocalDate date = LocalDate.now().minusDays(1);
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        userGoalStatusRepository.save(entry);
+
+        UserGoalProgressKey progressKey = UserGoalProgressKey.builder()
+            .userId(testUser.getId())
+            .goalType(entry.getGoal().getType().name())
+            .build();
+        UserGoalProgressPersistence existingProgress = UserGoalProgressPersistence.builder()
+            .id(progressKey)
+            .currentDifficulty(1)
+            .goalsCompletedAtDifficulty(1)
+            .goalsFailedAtDifficulty(2)
+            .build();
+
+        when(userGoalProgressRepository.findById(progressKey)).thenReturn(Optional.of(existingProgress));
+        when(userGoalProgressRepository.save(any(UserGoalProgressPersistence.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        goalService.uncompleteGoal(1L, authentication);
+
+        assertEquals(1, existingProgress.getCurrentDifficulty().intValue());
+        assertEquals(0, existingProgress.getGoalsFailedAtDifficulty().intValue());
+        assertEquals(0, existingProgress.getGoalsCompletedAtDifficulty().intValue());
+        }
 
     @Test
     public void uncompleteGoal_notInProgress_doesNotChangeStatus() {

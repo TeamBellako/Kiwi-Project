@@ -9,7 +9,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,7 +44,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Slider
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.modals.WIPPopUpScreen
 import com.bellako.kiwi.features.goals.data.GoalCategory
-import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
@@ -163,15 +161,16 @@ fun GoalCustomize(
                                 shape = RoundedCornerShape(getResponsiveSizeWidth(25.dp)),
                             ).padding(
                                 horizontal = getResponsiveSizeWidth(12.dp),
+                                vertical = Spacing.small,
                             ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Kiwi_Label1(KiwiTextArguments("Easy", modifier = Modifier.padding(vertical = Spacing.small)))
-                    }
+                    Kiwi_Label1(
+                        KiwiTextArguments(
+                            goal.difficulty.name.lowercase().replaceFirstChar { it.uppercase() },
+                            color = kiwiColor.color6,
+                        ),
+                    )
                 }
 
                 Kiwi_FixedSizeButton(
