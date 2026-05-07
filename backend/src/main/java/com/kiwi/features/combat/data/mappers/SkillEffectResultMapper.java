@@ -1,6 +1,6 @@
 package com.kiwi.features.combat.data.mappers;
 
-import com.kiwi.features.combat.data.domain.SkillEffectResultDomain;
+import com.kiwi.features.skills.data.domain.SkillEffectResultDomain;
 import com.kiwi.features.combat.data.dto.CombatActiveStatusDTO;
 import com.kiwi.features.skills.data.DTO.SkillEffectResultDTO;
 
@@ -24,6 +24,8 @@ public class SkillEffectResultMapper {
                                 .value(e.getAppliedStatus().getValue())
                                 .build()
                 )
+                .turns(e.getTurns())
+                .resetCooldownSkills(e.getResetCooldownSkills())
                 .build();
     }
 }

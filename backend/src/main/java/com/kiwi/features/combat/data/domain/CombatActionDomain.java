@@ -2,6 +2,7 @@ package com.kiwi.features.combat.data.domain;
 
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.skills.data.domain.SkillEffectResultDomain;
 import lombok.*;
 
 import java.util.List;

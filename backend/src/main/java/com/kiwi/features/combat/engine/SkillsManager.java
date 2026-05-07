@@ -5,12 +5,14 @@ import com.kiwi.features.combat.data.domain.*;
 import com.kiwi.features.combat.data.enums.*;
 import com.kiwi.features.skills.data.domain.SkillEffectDomain;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
+import com.kiwi.features.skills.data.domain.SkillEffectResultDomain;
 import com.kiwi.features.skills.data.enums.SkillEffectResultType;
 import com.kiwi.features.skills.data.enums.SkillEffectType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -47,14 +49,21 @@ public class SkillsManager {
             throw new IllegalStateException("Skill does not exist.");
         }
 
+        SkillEffectContext effectContext = new SkillEffectContext(1f);
+
         List<SkillEffectResultDomain> effectsResults = new ArrayList<>();
 
         attacker.setLastSkillUsed(skillId);
 
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.DAMAGE);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.HEAL);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.MODIFY_STAT);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.APPLY_STATUS);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.RESET_COOLDOWNS, effectContext);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.APPLY_STATUS, effectContext);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.EXTEND_BUFFS, effectContext);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.SWAP_BUFFS, effectContext);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.COPY_BUFFS, effectContext);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.CONSUME_STATUS, effectContext);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.DAMAGE, effectContext);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.HEAL, effectContext);
+        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.MODIFY_STAT, effectContext);
 
         return CombatActionDomain.builder()
                 .actionType(CombatActionType.SKILL_USED)
@@ -71,7 +80,8 @@ public class SkillsManager {
             CombatActorDomain attacker,
             SkillCombatDomain skill,
             List<SkillEffectResultDomain> results,
-            SkillEffectType type
+            SkillEffectType type,
+            SkillEffectContext effectContext
     ) {
         for (SkillEffectDomain effect : skill.getEffects()) {
 
@@ -91,22 +101,41 @@ public class SkillsManager {
             }
 
             switch (type) {
-                case DAMAGE -> results.add(
-                        applyDamage(context, attacker, victim, effect, skill.getElementId())
-                );
-
-                case HEAL -> results.add(
-                        applyHeal(victim, effect)
-                );
-
-                case MODIFY_STAT -> results.add(
-                        applyModifyStat(victim, effect)
+                case RESET_COOLDOWNS -> results.add(
+                        applyResetCooldowns(attacker)
                 );
 
                 case APPLY_STATUS -> results.add(
                         applyStatus(attacker, victim, effect, skill.getId(), context.getCombat().getId())
                 );
 
+                case SWAP_BUFFS -> results.addAll(
+                                applySwapBuffs(attacker, victim)
+                );
+
+                case COPY_BUFFS -> results.addAll(
+                                applyCopyBuffs(attacker, victim)
+                );
+
+                case CONSUME_STATUS -> results.addAll(
+                                applyConsumeStatus(victim,effect,effectContext)
+                );
+
+                case EXTEND_BUFFS -> results.addAll(
+                                applyExtendBuffs(victim, effect)
+                );
+
+                case DAMAGE -> results.add(
+                        applyDamage(context, attacker, victim, effect, skill.getElementId(), effectContext)
+                );
+
+                case HEAL -> results.add(
+                        applyHeal(victim, effect, effectContext)
+                );
+
+                case MODIFY_STAT -> results.add(
+                        applyModifyStat(victim, effect, effectContext)
+                );
             }
         }
     }
@@ -118,7 +147,8 @@ public class SkillsManager {
             CombatActorDomain attacker,
             CombatActorDomain victim,
             SkillEffectDomain effect,
-            Long skillElementId
+            Long skillElementId,
+            SkillEffectContext effectContext
     ) {
 
         // ACCURACY CHECK
@@ -178,16 +208,19 @@ public class SkillsManager {
                 : 1f;
 
         // STATE MULTIPLIER
-        float stateMultiplier = attackerAtk* victimDef;
-
+        float stateMultiplier = attackerAtk * victimDef;
 
         float modifiers =
-                variance
+                        variance
                         * critMultiplier
                         * elementMultiplierValue
                         * stateMultiplier;
 
-        int damage = Math.round(baseDamage * modifiers);
+        int damage = Math.round(
+                        baseDamage
+                        * modifiers
+                        * effectContext.getConsumeMultiplier()
+        );
 
         // ABSORB
         if (elementMultiplierValue == -1f) {
@@ -246,10 +279,15 @@ public class SkillsManager {
 
     private SkillEffectResultDomain applyHeal(
             CombatActorDomain target,
-            SkillEffectDomain effect
+            SkillEffectDomain effect,
+            SkillEffectContext effectContext
     ) {
 
-        int heal = Math.round(target.getStats().getStat(StatType.MAX_HP) * effect.getPower());
+        int heal = Math.round(
+                        target.getStats().getStat(StatType.MAX_HP)
+                        * effect.getPower()
+                        * effectContext.getConsumeMultiplier()
+        );
 
         target.heal(heal);
 
@@ -265,7 +303,8 @@ public class SkillsManager {
 
     private SkillEffectResultDomain applyModifyStat(
             CombatActorDomain target,
-            SkillEffectDomain effect
+            SkillEffectDomain effect,
+            SkillEffectContext effectContext
     ) {
 
         // CHECK BUFF_BLOCK
@@ -300,7 +339,7 @@ public class SkillsManager {
 
         int newValue = applyModification(
                 baseValue,
-                effect.getPower(),
+                effect.getPower() * effectContext.getConsumeMultiplier(),
                 modificationType
         );
 
@@ -373,4 +412,174 @@ public class SkillsManager {
     }
 
     //------------------------------------------------------------------------------------------------------------------
+
+    private List<SkillEffectResultDomain> applyConsumeStatus(
+            CombatActorDomain target,
+            SkillEffectDomain effect,
+            SkillEffectContext effectContext
+    ) {
+
+        List<SkillEffectResultDomain> results =
+                new ArrayList<>();
+
+        int consumedTurns = 0;
+
+        Iterator<CombatActiveStatusDomain> it =
+                target.getActiveStatuses().iterator();
+
+        while (it.hasNext()) {
+
+            CombatActiveStatusDomain status = it.next();
+
+            int consumeTurns = effect.getTurns();
+
+            if (consumeTurns >= status.getRemainingTurns()) {
+
+                consumedTurns += status.getRemainingTurns();
+
+                it.remove();
+
+                results.add(
+                        SkillEffectResultDomain.builder()
+                                .typeResult(SkillEffectResultType.STATUS_REMOVED)
+                                .target(target.getType())
+                                .appliedStatus(status)
+                                .build()
+                );
+
+            } else {
+
+                consumedTurns += consumeTurns;
+
+                status.setRemainingTurns(
+                        status.getRemainingTurns() - consumeTurns
+                );
+
+                results.add(
+                        SkillEffectResultDomain.builder()
+                                .typeResult(SkillEffectResultType.STATUS_CONSUMED)
+                                .target(target.getType())
+                                .appliedStatus(status)
+                                .turns(consumeTurns)
+                                .build()
+                );
+            }
+        }
+
+        effectContext.setConsumeMultiplier(
+                effectContext.getConsumeMultiplier() + consumedTurns
+        );
+
+        return results;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private List<SkillEffectResultDomain> applyExtendBuffs(
+            CombatActorDomain target,
+            SkillEffectDomain effect
+    ) {
+
+        List<SkillEffectResultDomain> results =
+                new ArrayList<>();
+
+        for (CombatActiveStatusDomain status : target.getActiveStatuses()) {
+
+            status.setRemainingTurns(
+                    status.getRemainingTurns()
+                            + effect.getTurns()
+            );
+
+            results.add(
+                    SkillEffectResultDomain.builder()
+                            .typeResult(SkillEffectResultType.STATUS_EXTENDED)
+                            .target(target.getType())
+                            .appliedStatus(status)
+                            .turns(effect.getTurns())
+                            .build()
+            );
+        }
+
+        return results;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private List<SkillEffectResultDomain> applyCopyBuffs(
+            CombatActorDomain attacker,
+            CombatActorDomain target
+    ) {
+
+        attacker.getActiveStatuses().clear();
+
+        for (CombatActiveStatusDomain status : target.getActiveStatuses()) {
+
+            CombatActiveStatusDomain copied =
+                    CombatActiveStatusDomain.builder()
+                            .stateId(status.getStateId())
+                            .remainingTurns(status.getRemainingTurns())
+                            .value(status.getValue())
+                            .statAffected(status.getStatAffected())
+                            .build();
+
+            attacker.getActiveStatuses().add(copied);
+        }
+
+        return List.of(
+                SkillEffectResultDomain.builder()
+                        .typeResult(SkillEffectResultType.BUFFS_COPIED)
+                        .target(attacker.getType())
+                        .build()
+        );
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private List<SkillEffectResultDomain> applySwapBuffs(
+            CombatActorDomain attacker,
+            CombatActorDomain target
+    ) {
+
+        List<CombatActiveStatusDomain> attackerStatuses =
+                new ArrayList<>(attacker.getActiveStatuses());
+
+        List<CombatActiveStatusDomain> targetStatuses =
+                new ArrayList<>(target.getActiveStatuses());
+
+        attacker.getActiveStatuses().clear();
+        target.getActiveStatuses().clear();
+
+        attacker.getActiveStatuses().addAll(targetStatuses);
+        target.getActiveStatuses().addAll(attackerStatuses);
+
+        return List.of(
+                SkillEffectResultDomain.builder()
+                        .typeResult(SkillEffectResultType.BUFFS_SWAPPED)
+                        .target(target.getType())
+                        .build()
+        );
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    private SkillEffectResultDomain applyResetCooldowns(
+            CombatActorDomain attacker
+    ) {
+
+        List<Long> resetCooldownSkills = new ArrayList<>();
+
+        for (SkillCombatDomain skill : attacker.getSkills().values()) {
+            resetCooldownSkills.add(skill.getId());
+            attacker.getResetCooldownSkills().add(skill.getId());
+        }
+
+        return SkillEffectResultDomain.builder()
+                .typeResult(SkillEffectResultType.RESET_COOLDOWNS)
+                .target(attacker.getType())
+                .resetCooldownSkills(resetCooldownSkills)
+                .build();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
 }

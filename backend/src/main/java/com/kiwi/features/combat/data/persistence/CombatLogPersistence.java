@@ -71,6 +71,12 @@ public class CombatLogPersistence {
     @Column(name="blocked_skills")
     private String blockedSkills;  // separated by ','
 
+    @Column(name="reset_cooldown_skills")
+    private String resetCooldownSkills;  // separated by ','
+
+    @Column(name="turns")
+    private Integer turns;
+
     @Column(name="created_at")
     private Instant createdAt;
 }

@@ -32,6 +32,9 @@ public class CombatActorDomain {
     private  List<Long> blockedSkills;
 
     @Setter
+    private  List<Long> resetCooldownSkills;
+
+    @Setter
     private CombatActionType actionModifierType;
 
     @Setter

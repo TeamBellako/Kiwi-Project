@@ -36,6 +36,7 @@ public class SkillCombatMapper {
                 .hitChance(e.getHitChance())
                 .stateId(e.getStateId())
                 .statusDuration(e.getStatusDuration())
+                .turns(e.getTurns())
                 .build();
     }
 }

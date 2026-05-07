@@ -93,6 +93,11 @@ public class CombatTurnService {
                 context.getEnemy()
         );
 
+        for (Long resetCooldownId : context.getUser().getResetCooldownSkills())
+        {
+            skillService.removeCooldown(userId, resetCooldownId);
+        }
+
         return CombatTurnResultMapper.toDTO(result);
     }
 

@@ -54,4 +54,7 @@ public class SkillEffectPersistence {
 
     @Column(name="status_duration")
     private Integer statusDuration;
+
+    @Column(name="turns")
+    private Integer turns;
 }

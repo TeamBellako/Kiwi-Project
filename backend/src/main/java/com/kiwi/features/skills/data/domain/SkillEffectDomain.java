@@ -29,4 +29,6 @@ public class SkillEffectDomain {
 
     private Integer statusDuration;
 
+    private Integer turns;
+
 }
