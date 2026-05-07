@@ -38,7 +38,7 @@ public class CombatEngine {
         statusManager.applyActiveStatesEffectsToActor(userActor,context);
 
         //CHECK USER LIFE
-        if(combat.getUserHp() <= 0) {
+        if(userActor.getStats().getCurrentHp() <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
             return buildCombatTurnResult(context, combat);
         }
@@ -77,7 +77,7 @@ public class CombatEngine {
             statusManager.applyActiveStatesEffectsToActor(enemyActor,context);
 
             //CHECK ENEMY LIFE
-            if(combat.getEnemyHp() <= 0) {
+            if(enemyActor.getStats().getCurrentHp() <= 0) {
                 combat.setCombatStatus(CombatGeneralStatus.USER_WON);
                 return buildCombatTurnResult(context, combat);
             }

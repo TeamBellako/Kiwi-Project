@@ -367,6 +367,12 @@ class GoalsViewModel
             }
         }
 
+        override suspend fun invalidateGoalsInProgressCache() {
+            cacheMutex.withLock {
+                cachedGoalsInProgress = null
+            }
+        }
+
         // Limpiar cache cuando se destruye el ViewModel
         override fun onCleared() {
             super.onCleared()

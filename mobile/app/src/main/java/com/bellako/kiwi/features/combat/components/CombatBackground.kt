@@ -10,8 +10,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
-import com.bellako.kiwi.R
+import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.ui.LocalKiwiColors
 
 private const val BACKGROUND_SATURATION = 0.45f
@@ -21,9 +22,9 @@ private const val EDGE_FADE_TOP_END = 0.18f
 private const val EDGE_FADE_BOTTOM_START = 0.55f
 
 @Composable
-internal fun CombatBackground(backgroundId: Long?) {
+internal fun CombatBackground(background: String?) {
     val colors = LocalKiwiColors.current
-    val resId = resolveBackground(backgroundId) ?: return
+    val resId = AssetResolver.drawable(LocalContext.current, background) ?: return
     Kiwi_Image(
         painterResourceId = resId,
         alt = "Combat background",
@@ -48,9 +49,3 @@ internal fun CombatBackground(backgroundId: Long?) {
                 ),
     )
 }
-
-private fun resolveBackground(backgroundId: Long?): Int? =
-    when (backgroundId) {
-        1L -> R.drawable.background_mindveil
-        else -> null
-    }

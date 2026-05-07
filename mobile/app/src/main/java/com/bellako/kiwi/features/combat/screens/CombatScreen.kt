@@ -2,6 +2,8 @@ package com.bellako.kiwi.features.combat.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -31,7 +34,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.combat.components.CombatAbandonConfirmModal
 import com.bellako.kiwi.features.combat.components.CombatBackground
+import com.bellako.kiwi.features.combat.components.CombatBarkBubble
 import com.bellako.kiwi.features.combat.components.CombatBattleArea
+import com.bellako.kiwi.features.combat.components.CombatEnemySprite
 import com.bellako.kiwi.features.combat.components.CombatHeader
 import com.bellako.kiwi.features.combat.components.CombatTurnIndicator
 import com.bellako.kiwi.features.combat.components.DeathSequenceOverlay
@@ -42,6 +47,7 @@ import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
 import com.bellako.kiwi.features.combat.components.rememberDeathSequenceVfx
 import com.bellako.kiwi.features.combat.components.rememberPlayerDamageVfx
 import com.bellako.kiwi.features.combat.components.userTurnMessage
+import com.bellako.kiwi.features.combat.data.ActiveBarkDomain
 import com.bellako.kiwi.features.combat.data.CombatActionDomain
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActiveStatusDomain
@@ -62,13 +68,18 @@ private const val DEFAULT_ENEMY_NAME = "Enemy"
 private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
 private const val BOTTOM_PANEL_GRADIENT_MID = 0.5f
 private const val BOTTOM_PANEL_GRADIENT_END = 1f
+private const val BARK_FADE_MS = 250
+private const val BARK_VERTICAL_BIAS = 0.15f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongParameterList")
 fun CombatScreen(
     combat: CombatDomain,
     deckSkills: List<SkillDomain>,
     isTurnPlaying: Boolean = false,
+    activeBark: ActiveBarkDomain? = null,
+    onBarkDismiss: () -> Unit = {},
     onConfirmAbandon: () -> Unit = {},
     onSkillClick: (skillId: Long, skillName: String) -> Unit = { _, _ -> },
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit = { _, _, _ -> },
@@ -78,7 +89,7 @@ fun CombatScreen(
     var isLogOpen by rememberSaveable(combat.id) { mutableStateOf(false) }
     var selectedStatus by remember(combat.id) { mutableStateOf<CombatActiveStatusDomain?>(null) }
     var showAbandonConfirm by rememberSaveable(combat.id) { mutableStateOf(false) }
-    val isOverlayOpen = isLogOpen || selectedStatus != null || isTurnPlaying
+    val isOverlayOpen = isLogOpen || selectedStatus != null || isTurnPlaying || activeBark != null
 
     val enemyName = combat.enemyName.ifBlank { DEFAULT_ENEMY_NAME }
     val turnMessage = currentTurnMessage(combat, enemyName)
@@ -107,9 +118,16 @@ fun CombatScreen(
                     .fillMaxSize()
                     .graphicsLayer { translationX = playerVfx.shakeOffsetX.value },
         ) {
-            CombatBackground(combat.backgroundId)
+            CombatBackground(combat.background)
 
-            Column(modifier = Modifier.fillMaxSize()) {
+            CombatEnemySprite(
+                enemySprite = combat.enemySprite,
+                currentHp = combat.enemy.stats.currentHp,
+                isEnemyDefeated = combat.combatStatus == CombatGeneralStatus.USER_WON,
+                context = context,
+            )
+
+            Column(modifier = Modifier.fillMaxSize().padding(top = Spacing.large)) {
                 Box {
                     CombatHeader(
                         title = "Ongoing Combat",
@@ -178,6 +196,24 @@ fun CombatScreen(
                             onDismiss = { isLogOpen = false },
                         )
                     }
+                }
+            }
+        }
+
+        Crossfade(
+            targetState = activeBark,
+            animationSpec = tween(BARK_FADE_MS),
+            label = "combat_bark",
+        ) { bark ->
+            if (bark != null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = BiasAlignment(0f, BARK_VERTICAL_BIAS),
+                ) {
+                    CombatBarkBubble(
+                        bark = bark,
+                        onDismiss = onBarkDismiss,
+                    )
                 }
             }
         }
@@ -305,9 +341,9 @@ fun CombatScreen_LogOpen_Preview() {
 @Suppress("MagicNumber")
 private fun previewCombat(): CombatDomain =
     CombatTestFactory.validCombatDomain(
-        enemyName = "Procrastinogre",
-        enemySprite = "liria_neutral",
-        backgroundId = 1L,
+        enemyName = "Flicker",
+        enemySprite = "enemy_flicker_base",
+        background = "background_mindveil",
         endsAt = System.currentTimeMillis() + 7L * 3600L * 1000L,
         enemy =
             CombatTestFactory.validCombatActorDomain(

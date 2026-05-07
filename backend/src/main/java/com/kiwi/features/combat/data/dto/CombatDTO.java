@@ -15,9 +15,9 @@ public class CombatDTO {
 
     private Long combatConfigId;
 
-    private Long backgroundId;
+    private String background;
 
-    private Long sfxId;
+    private String sfx;
 
     private int turnNumber;
 
@@ -32,5 +32,11 @@ public class CombatDTO {
     private CombatActorDTO enemy;
 
     private List<CombatActionDTO> log;
+
+    @Builder.Default
+    private List<CombatBarkTriggerDTO> barks = List.of();
+
+    @Builder.Default
+    private List<Long> firedBarkIds = List.of();
 
 }

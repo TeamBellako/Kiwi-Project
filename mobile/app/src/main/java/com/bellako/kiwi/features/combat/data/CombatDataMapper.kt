@@ -12,11 +12,24 @@ object CombatDataMapper {
             combatStatus = enumValueOf<CombatGeneralStatus>(dto.combatStatus),
             enemyName = dto.enemyName,
             enemySprite = dto.enemySprite,
-            backgroundId = dto.backgroundId,
-            musicId = dto.musicId,
+            background = dto.background,
+            music = dto.music,
             user = toDomain(dto.user),
             enemy = toDomain(dto.enemy),
             log = dto.log.map { toDomain(it) },
+            barks = dto.barks.orEmpty().map { toDomain(it) },
+            firedBarkIds = dto.firedBarkIds.orEmpty(),
+        )
+
+    fun toDomain(dto: CombatBarkTriggerDTO): CombatBarkTriggerDomain =
+        CombatBarkTriggerDomain(
+            id = dto.id,
+            type = enumValueOf<BarkTriggerType>(dto.type),
+            threshold = dto.threshold,
+            skillId = dto.skillId,
+            conversationId = dto.conversationId,
+            dismissMode = dto.dismissMode?.let { enumValueOf<BarkDismissMode>(it) } ?: BarkDismissMode.AUTO,
+            priority = dto.priority ?: 0,
         )
 
     fun toDomain(dto: CombatTurnResultDTO): CombatTurnResultDomain {
@@ -111,11 +124,24 @@ object CombatDataMapper {
             combatStatus = domain.combatStatus.name,
             enemyName = domain.enemyName,
             enemySprite = domain.enemySprite,
-            backgroundId = domain.backgroundId,
-            musicId = domain.musicId,
+            background = domain.background,
+            music = domain.music,
             user = toDTO(domain.user),
             enemy = toDTO(domain.enemy),
             log = domain.log.map { toDTO(it) },
+            barks = domain.barks.map { toDTO(it) },
+            firedBarkIds = domain.firedBarkIds,
+        )
+
+    fun toDTO(domain: CombatBarkTriggerDomain): CombatBarkTriggerDTO =
+        CombatBarkTriggerDTO(
+            id = domain.id,
+            type = domain.type.name,
+            threshold = domain.threshold,
+            skillId = domain.skillId,
+            conversationId = domain.conversationId,
+            dismissMode = domain.dismissMode.name,
+            priority = domain.priority,
         )
 
     fun toDTO(domain: CombatTurnResultDomain): CombatTurnResultDTO =

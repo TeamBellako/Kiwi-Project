@@ -74,6 +74,17 @@ data class CombatActorDTO(
 )
 
 @Serializable
+data class CombatBarkTriggerDTO(
+    val id: Long,
+    val type: String,
+    val threshold: Float? = null,
+    val skillId: Long? = null,
+    val conversationId: Long,
+    val dismissMode: String? = null,
+    val priority: Int? = null,
+)
+
+@Serializable
 data class CombatDTO(
     val id: Long,
     val combatConfigId: Long,
@@ -82,11 +93,13 @@ data class CombatDTO(
     val combatStatus: String,
     val enemyName: String,
     val enemySprite: String,
-    val backgroundId: Long? = null,
-    val musicId: Long? = null,
+    val background: String? = null,
+    val music: String? = null,
     val user: CombatActorDTO,
     val enemy: CombatActorDTO,
     val log: List<CombatActionDTO> = emptyList(),
+    val barks: List<CombatBarkTriggerDTO>? = null,
+    val firedBarkIds: List<Long>? = null,
 )
 
 @Serializable

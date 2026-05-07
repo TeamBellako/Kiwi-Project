@@ -7,6 +7,7 @@ import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.combat.data.CombatDataMapper
 import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
+import com.bellako.kiwi.features.combat.model.CombatBarkController
 import com.bellako.kiwi.features.combat.model.CombatRepository
 import com.bellako.kiwi.features.combat.model.CombatViewModel
 import com.bellako.kiwi.features.combat.model.ICombatAPI
@@ -42,13 +43,15 @@ class CombatIntegrationTest {
 
     private lateinit var api: ICombatAPI
     private lateinit var repository: CombatRepository
+    private lateinit var barkController: CombatBarkController
     private lateinit var viewModel: CombatViewModel
 
     @Before
     fun setUp() {
         api = mock(ICombatAPI::class.java)
         repository = CombatRepository(api)
-        viewModel = CombatViewModel(repository, RuntimeEnvironment.getApplication())
+        barkController = mock(CombatBarkController::class.java)
+        viewModel = CombatViewModel(repository, barkController, RuntimeEnvironment.getApplication())
     }
 
     // -------------------------------------------------------------------------

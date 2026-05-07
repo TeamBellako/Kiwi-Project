@@ -28,6 +28,7 @@ public class GoalsTestFactory {
                 .type(type)
                 .category(category)
                 .reward(reward)
+            .difficulty(1)
                 .build();
     }
 

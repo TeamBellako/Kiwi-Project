@@ -23,17 +23,20 @@ public class CombatBuilderService {
     private final CombatLogService combatLogService;
     private final CombatActorBuilderService combatActorBuilderService;
     private final CombatConfigRepository combatConfigRepository;
+    private final CombatBarkService combatBarkService;
 
     public CombatBuilderService(
             CombatLogService combatLogService,
             EnemyRepository enemyRepository,
             CombatActorBuilderService combatActorBuilderService,
-            CombatConfigRepository combatConfigRepository
+            CombatConfigRepository combatConfigRepository,
+            CombatBarkService combatBarkService
     ) {
         this.combatLogService = combatLogService;
         this.enemyRepository = enemyRepository;
         this.combatActorBuilderService = combatActorBuilderService;
         this.combatConfigRepository = combatConfigRepository;
+        this.combatBarkService = combatBarkService;
     }
 
     public CombatDTO buildCombatDTO(CombatPersistence combat) {
@@ -53,16 +56,14 @@ public class CombatBuilderService {
         CombatConfigPersistence config =
                 combatConfigRepository.findById(combat.getCombatConfigId()).orElseThrow();
 
-        Long backgroundId = config.getBackground() != null
-                ? config.getBackground().getId()
-                : null;
-
-        Long sfxId = config.getSfx() != null
-                ? config.getSfx().getId()
-                : null;
-
         List<CombatActionDTO> log =
                 combatLogService.getCombatLog(combat.getId());
+
+        List<CombatBarkTriggerDTO> barks = CombatBarkTriggerMapper.toDTOList(
+                combatBarkService.getTriggersForConfig(combat.getCombatConfigId())
+        );
+
+        List<Long> firedBarkIds = combatBarkService.getFiredTriggerIds(combat.getId());
 
         return CombatMapper.toDTO(
                 combat,
@@ -70,9 +71,11 @@ public class CombatBuilderService {
                 enemyDTO,
                 enemyEntity.getName(),
                 enemyEntity.getSprite(),
-                backgroundId,
-                sfxId,
-                log
+                config.getBackground(),
+                config.getSfx(),
+                log,
+                barks,
+                firedBarkIds
         );
     }
 

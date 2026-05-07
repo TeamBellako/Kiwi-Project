@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.audio.Kiwi_Music_Combat
+import com.bellako.kiwi.features.combat.data.ActiveBarkDomain
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
@@ -31,25 +32,30 @@ private enum class CombatPhase { COMBAT, VICTORY, DEFEAT }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongParameterList")
 fun CombatFlowScreen(
     combat: CombatDomain,
     deckSkills: List<SkillDomain>,
     isTurnPlaying: Boolean,
+    activeBark: ActiveBarkDomain? = null,
+    onBarkDismiss: () -> Unit = {},
     onConfirmAbandon: () -> Unit,
     onSkillClick: (skillId: Long, skillName: String) -> Unit,
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
     onDismiss: () -> Unit,
     onVictoryContinue: () -> Unit,
 ) {
-    Kiwi_Music_Combat(combat.musicId)
+    Kiwi_Music_Combat(combat.music)
 
     Box(modifier = Modifier.fillMaxSize()) {
         val isDefeat = isCombatDefeat(combat)
         val isVictory = isCombatVictory(combat)
+        val isBarkActive = activeBark != null
         val phase =
-            produceState(CombatPhase.COMBAT, combat.id, isDefeat, isVictory) {
+            produceState(CombatPhase.COMBAT, combat.id, isDefeat, isVictory, isBarkActive) {
                 value =
                     when {
+                        isBarkActive -> CombatPhase.COMBAT
                         isDefeat -> {
                             delay(DEFEAT_TRANSITION_DELAY_MS)
                             CombatPhase.DEFEAT
@@ -99,6 +105,8 @@ fun CombatFlowScreen(
                         combat = combat,
                         deckSkills = deckSkills,
                         isTurnPlaying = isTurnPlaying,
+                        activeBark = activeBark,
+                        onBarkDismiss = onBarkDismiss,
                         onConfirmAbandon = onConfirmAbandon,
                         onSkillClick = onSkillClick,
                         onApplyGoalProgress = onApplyGoalProgress,

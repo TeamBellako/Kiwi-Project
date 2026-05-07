@@ -39,6 +39,9 @@ public class GoalPersistence {
     @Column(name = "reward", nullable = false)
     private Integer reward;
 
+    @Column(name = "difficulty", nullable = false)
+    private Integer difficulty;
+
     @Column(name = "on_completed_action")
     private String onCompletedAction;
 

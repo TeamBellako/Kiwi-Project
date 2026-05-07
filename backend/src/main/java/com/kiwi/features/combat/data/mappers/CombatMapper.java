@@ -59,16 +59,18 @@ public class CombatMapper {
             CombatActorDTO enemy,
             String enemyName,
             String enemySprite,
-            Long backgroundId,
-            Long sfxId,
-            List<CombatActionDTO> log
+            String background,
+            String sfx,
+            List<CombatActionDTO> log,
+            List<CombatBarkTriggerDTO> barks,
+            List<Long> firedBarkIds
     ) {
 
         return CombatDTO.builder()
                 .id(combat.getId())
                 .combatConfigId(combat.getCombatConfigId())
-                .backgroundId(backgroundId)
-                .sfxId(sfxId)
+                .background(background)
+                .sfx(sfx)
                 .turnNumber(combat.getTurnNumber())
                 .combatStatus(combat.getCombatStatus().toString())
                 .endsAt(combat.getEndsAt() != null
@@ -81,6 +83,8 @@ public class CombatMapper {
                 .enemySprite(enemySprite)
 
                 .log(log)
+                .barks(barks)
+                .firedBarkIds(firedBarkIds)
                 .build();
     }
 

@@ -181,6 +181,7 @@ fun GoalsModal(
                                         }
                                     }
                                 }
+                                goalsViewModel.invalidateGoalsInProgressCache()
                             }
                             onDismiss()
                         }
@@ -211,7 +212,7 @@ fun GoalsModal_Preview(goalsViewModel: GoalsFakeViewModel = GoalsFakeViewModel()
                     .background(LocalKiwiColors.current.color0),
         ) {
             GoalsModal(
-                goalModalType = GoalNotificationType.NEW,
+                goalModalType = GoalNotificationType.YESTERDAY,
                 goals =
                     listOf(
                         UserGoalStatusDomain(

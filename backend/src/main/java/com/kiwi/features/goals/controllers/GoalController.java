@@ -104,8 +104,8 @@ public class GoalController {
     }
 
     @GetMapping("/suggestions")
-    public ResponseEntity<List<GoalDTO>> getGoalDefinitions() {
-        List<GoalDTO> definitions = goalService.getGoalDefinitions();
+    public ResponseEntity<List<GoalDTO>> getGoalDefinitions(Authentication authentication) {
+        List<GoalDTO> definitions = goalService.getGoalDefinitions(authentication);
         return ResponseEntity.ok(definitions);
     }
 }
