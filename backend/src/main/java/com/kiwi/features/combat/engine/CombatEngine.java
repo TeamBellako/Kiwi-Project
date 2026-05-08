@@ -7,6 +7,7 @@ import com.kiwi.features.combat.data.domain.CombatTurnResultDomain;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
+import com.kiwi.features.combat.data.enums.StatType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,22 +25,20 @@ public class CombatEngine {
     //------------------------------------------------------------------------------------------------------------------
 
     public CombatTurnResultDomain executeTurn(
-            CombatContext context,
+            CombatDomain combat,
             Long userSkillId
     ) {
 
-        CombatDomain combat = context.getCombat();
-
         // USER TURN
-        CombatActorDomain userActor = context.getActor(CombatActorType.USER);
+        CombatActorDomain userActor = combat.getActor(CombatActorType.USER);
 
         //APPLY CURRENT STATES
-        statusManager.applyActiveStatesEffectsToActor(userActor,context);
+        statusManager.applyActiveStatesEffectsToActor(userActor, combat);
 
         //CHECK USER LIFE
         if(userActor.getStats().getCurrentHp() <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
-            return buildCombatTurnResult(context, combat);
+            return buildCombatTurnResult(combat);
         }
 
         //EXECUTE ACTION
@@ -48,41 +47,41 @@ public class CombatEngine {
             if ( userActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
                 action = skillsManager.executeSkill(
-                        context,
+                        combat,
                         CombatActorType.USER,
                         userActor.getLastSkillUsed()
                 );
 
             } else {
                 action = skillsManager.executeSkill(
-                        context,
+                        combat,
                         CombatActorType.USER,
                         userSkillId
                 );
 
             }
-            context.addAction(action);
+            combat.addAction(action);
         }
 
         //REDUCE STATES TURNS
-        statusManager.reduceStatesTurnsToActor(userActor, context);
+        statusManager.reduceStatesTurnsToActor(userActor, combat);
 
         // ENEMY TURN
-        if(context.getEnemy().getStats().getCurrentHp() > 0) {
+        if(combat.getEnemy().getStats().getStat(StatType.CURRENT_HP) > 0) {
 
-            CombatActorDomain enemyActor = context.getActor(CombatActorType.ENEMY);
+            CombatActorDomain enemyActor = combat.getActor(CombatActorType.ENEMY);
 
             //APPLY CURRENT STATES
-            statusManager.applyActiveStatesEffectsToActor(enemyActor,context);
+            statusManager.applyActiveStatesEffectsToActor(enemyActor, combat);
 
             //CHECK ENEMY LIFE
             if(enemyActor.getStats().getCurrentHp() <= 0) {
                 combat.setCombatStatus(CombatGeneralStatus.USER_WON);
-                return buildCombatTurnResult(context, combat);
+                return buildCombatTurnResult(combat);
             }
 
             //CHOOSE SKILL
-            Long enemySkill = enemyAI.chooseSkill(context);
+            Long enemySkill = enemyAI.chooseSkill(combat);
 
             //EXECUTE ACTION
             if (enemyActor.getActionModifierType() != CombatActionType.ACTOR_BLOCKED_BY_STATE) {
@@ -90,48 +89,48 @@ public class CombatEngine {
                 if (enemyActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
                     action = skillsManager.executeSkill(
-                            context,
+                            combat,
                             CombatActorType.ENEMY,
                             enemyActor.getLastSkillUsed()
                     );
 
                 } else {
                     action = skillsManager.executeSkill(
-                            context,
+                            combat,
                             CombatActorType.ENEMY,
                             enemySkill
                     );
 
                 }
-                context.addAction(action);
+                combat.addAction(action);
             }
 
             //REDUCE STATES TURNS
-            statusManager.reduceStatesTurnsToActor(enemyActor, context);
+            statusManager.reduceStatesTurnsToActor(enemyActor, combat);
         }
 
         // TURN UPDATE
         combat.setTurnNumber(combat.getTurnNumber() + 1);
 
         // CHECK COMBAT END
-        if(context.getUser().getStats().getCurrentHp() <= 0) {
+        if(combat.getUser().getStats().getStat(StatType.CURRENT_HP) <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
         }
-        if(context.getEnemy().getStats().getCurrentHp() <= 0) {
+        if(combat.getEnemy().getStats().getStat(StatType.CURRENT_HP) <= 0) {
             combat.setCombatStatus(CombatGeneralStatus.USER_WON);
         }
 
-        return buildCombatTurnResult(context, combat);
+        return buildCombatTurnResult(combat);
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private CombatTurnResultDomain buildCombatTurnResult(CombatContext context, CombatDomain combat)
+    private CombatTurnResultDomain buildCombatTurnResult(CombatDomain combat)
     {
         return CombatTurnResultDomain.builder()
                 .combatId(combat.getId())
                 .turnNumber(combat.getTurnNumber())
-                .actions(context.getActions())
+                .actions(combat.getActions())
                 .combatStatus(combat.getCombatStatus())
                 .build();
     }

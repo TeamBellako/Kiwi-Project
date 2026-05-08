@@ -120,9 +120,11 @@ public class CombatService {
         combat.setUserAcc(stats.getAcc());
         combat.setUserEva(stats.getEva());
         combat.setUserLck(stats.getLck());
+        combat.setUserShield(stats.getShield());
 
         combat.setEnemyHp(enemy.getMaxHp());
         combat.setEnemyMaxHp(enemy.getMaxHp());
+        combat.setEnemyShield(enemy.getShield());
         combat.setEnemyPatk(enemy.getPatk());
         combat.setEnemyMatk(enemy.getMatk());
         combat.setEnemyPdef(enemy.getPdef());

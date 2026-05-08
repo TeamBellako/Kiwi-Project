@@ -3,9 +3,11 @@ package com.kiwi.features.combat.engine;
 import com.kiwi.features.combat.data.domain.CombatActionDomain;
 import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
+import com.kiwi.features.combat.data.domain.CombatDomain;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatStateTypes;
 
+import com.kiwi.features.combat.data.enums.StatType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,37 +21,28 @@ public class CombatStatusManager {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public void applyActiveStatesEffectsToActor(CombatActorDomain actor, CombatContext context)
+    // TODO: habria que revisar prioridades porque no vas hacer confusion si estas freeze
+    public void applyActiveStatesEffectsToActor(CombatActorDomain actor, CombatDomain combat)
     {
         for (CombatActiveStatusDomain state : actor.getActiveStatuses()) {
 
             CombatStateTypes stateType = CombatStateTypes.fromId(state.getStateId().intValue());
 
             switch (stateType) {
-                case BURN:
-                    int burnDamage = applyDamage(actor, state.getValue());
-                    CombatActionDomain burnAction =
-                            CombatActionDomain.builder()
-                                    .actor(actor.getType())
-                                    .actionType(CombatActionType.ACTOR_DAMAGED_BY_STATE)
-                                    .state(state)
-                                    .stateEffectValue((float) burnDamage)
-                                    .build();
-
-                    context.addAction(burnAction);
-                    break;
-
                 case POISON:
-                    int posionDamage = applyDamage(actor, state.getValue());
-                    CombatActionDomain posionAction =
+
+                    int poisonDamage = Math.round(actor.getStats().getStat(StatType.MAX_HP) *  state.getValue());
+                    actor.damage(poisonDamage, false);
+
+                    CombatActionDomain poisonAction =
                             CombatActionDomain.builder()
                                     .actor(actor.getType())
                                     .actionType(CombatActionType.ACTOR_DAMAGED_BY_STATE)
                                     .state(state)
-                                    .stateEffectValue((float) posionDamage)
+                                    .stateEffectValue((float) poisonDamage)
                                     .build();
 
-                    context.addAction(posionAction);
+                    combat.addAction(poisonAction);
                     break;
                 case FREEZE:
                     if (random.nextInt(100) < 80) {
@@ -62,22 +55,28 @@ public class CombatStatusManager {
                                         .state(state)
                                         .build();
 
-                        context.addAction(freezeAction);
+                        combat.addAction(freezeAction);
                     }
                     break;
                 case CONFUSION:
-                    if (actor.getLastSkillUsed() != null && random.nextInt(100) < 40) {
-                        actor.setActionModifierType(CombatActionType.SKILL_REPEAT_BY_STATE);
-
-                        CombatActionDomain action =
-                                CombatActionDomain.builder()
-                                        .actor(actor.getType())
-                                        .actionType(CombatActionType.SKILL_REPEAT_BY_STATE)
-                                        .state(state)
-                                        .build();
-
-                        context.addAction(action);
+                case LOOP:
+                    if(actor.getLastSkillUsed() == null){
+                        break;
                     }
+
+                    if (stateType == CombatStateTypes.CONFUSION && random.nextInt(100) > 40) {
+                       break;
+                    }
+
+                    actor.setActionModifierType(CombatActionType.SKILL_REPEAT_BY_STATE);
+                    CombatActionDomain action =
+                            CombatActionDomain.builder()
+                                    .actor(actor.getType())
+                                    .actionType(CombatActionType.SKILL_REPEAT_BY_STATE)
+                                    .state(state)
+                                    .build();
+
+                    combat.addAction(action);
                     break;
                 case MUTIS:
                     List<Long> blockedSkillIds;
@@ -91,7 +90,7 @@ public class CombatStatusManager {
                             .limit(2)
                             .toList();
 
-                    CombatActionDomain action =
+                    CombatActionDomain mutisAction =
                             CombatActionDomain.builder()
                                     .actor(actor.getType())
                                     .actionType(CombatActionType.BLOCKED_SKILLS_BY_STATE)
@@ -99,9 +98,25 @@ public class CombatStatusManager {
                                     .blockedSkills(blockedSkillIds)
                                     .build();
 
-                    context.addAction(action);
+                    combat.addAction(mutisAction);
 
-                    blockedSkillIds.forEach(actor.getSkills()::remove);
+                    actor.setBlockedSkills(blockedSkillIds);
+                    break;
+
+                case REGENERATION:
+                    int heal = Math.round(actor.getStats().getStat(StatType.MAX_HP) * state.getValue());
+
+                    actor.heal(heal);
+
+                    CombatActionDomain regenAction =
+                            CombatActionDomain.builder()
+                                    .actor(actor.getType())
+                                    .actionType(CombatActionType.ACTOR_HEALED_BY_STATE)
+                                    .state(state)
+                                    .stateEffectValue((float) heal)
+                                    .build();
+
+                    combat.addAction(regenAction);
                     break;
             }
         }
@@ -109,47 +124,44 @@ public class CombatStatusManager {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    private int applyDamage(CombatActorDomain actor, Float value)
-    {
-        int damage = Math.round(actor.getStats().getMaxHp() * value);
-        actor.damage(damage);
-        return damage;
-    }
+    public int getEffectiveStat(
+            CombatActorDomain actor,
+            StatType stat
+    ) {
+        int base = actor.getStats().getStat(stat);
 
-    // ----------------------------------------------------------------------------------------------------------------
-
-    public float calculateStateMultiplier(CombatActorDomain attacker, CombatActorDomain victim)
-    {
         float multiplier = 1f;
 
-        for (CombatActiveStatusDomain s : attacker.getActiveStatuses()) {
+        for (CombatActiveStatusDomain s : actor.getActiveStatuses()) {
 
-            if (s.getStateId() == 10) { // ATK UP
-                multiplier *= 1.5f;
+            CombatStateTypes type =
+                    CombatStateTypes.fromId(s.getStateId().intValue());
+
+            if (type == CombatStateTypes.STAT_UP &&
+                    s.getStatAffected() == stat) {
+
+                multiplier *= s.getValue();
             }
 
-            if (s.getStateId() == 11) { // ATK DOWN
-                multiplier *= 0.5f;
+            if (type == CombatStateTypes.STAT_DOWN &&
+                    s.getStatAffected() == stat) {
+
+                multiplier *= s.getValue();
+            }
+
+            if (type == CombatStateTypes.FURY &&
+                    stat == StatType.PATK) {
+
+                multiplier *= s.getValue();
             }
         }
 
-        for (CombatActiveStatusDomain s : victim.getActiveStatuses()) {
-
-            if (s.getStateId() == 12) { // DEF UP
-                multiplier *= 0.5f;
-            }
-
-            if (s.getStateId() == 13) { // DEF DOWN
-                multiplier *= 1.5f;
-            }
-        }
-
-        return multiplier;
+        return Math.round(base * multiplier);
     }
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public void reduceStatesTurnsToActor(CombatActorDomain actor, CombatContext context)
+    public void reduceStatesTurnsToActor(CombatActorDomain actor, CombatDomain combat)
     {
         Iterator<CombatActiveStatusDomain> statesIt =
                 actor.getActiveStatuses().iterator();
@@ -174,7 +186,7 @@ public class CombatStatusManager {
                 action.setActionType(CombatActionType.STATUS_FINISHED);
             }
 
-            context.addAction(action);
+            combat.addAction(action);
         }
     }
 

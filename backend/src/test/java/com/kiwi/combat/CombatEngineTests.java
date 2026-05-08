@@ -7,7 +7,7 @@ import com.kiwi.features.combat.data.domain.CombatTurnResultDomain;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
-import com.kiwi.features.combat.engine.CombatContext;
+import com.kiwi.features.combat.data.enums.StatType;
 import com.kiwi.features.combat.engine.CombatEngine;
 import com.kiwi.features.combat.engine.CombatStatusManager;
 import com.kiwi.features.combat.engine.EnemyAI;
@@ -44,10 +44,6 @@ public class CombatEngineTests {
         when(enemyAI.chooseSkill(any())).thenReturn(99L);
     }
 
-    private CombatContext context(CombatActorDomain user, CombatActorDomain enemy, CombatDomain combat) {
-        return new CombatContext(combat, user, enemy);
-    }
-
     // ============================================================================================
     // EXECUTE TURN — HAPPY PATH
     // ============================================================================================
@@ -56,9 +52,9 @@ public class CombatEngineTests {
     public void executeTurn_happyPath_bothActorsAttack() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
-        CombatDomain combat = combat(100, 100);
+        CombatDomain combat = combat(user, enemy);
 
-        CombatTurnResultDomain result = engine.executeTurn(context(user, enemy, combat), 5L);
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
 
         verify(skillsManager).executeSkill(any(), eq(CombatActorType.USER), eq(5L));
         verify(enemyAI).chooseSkill(any());
@@ -73,8 +69,9 @@ public class CombatEngineTests {
     public void executeTurn_appliesActiveStatusesAndReducesTurnsForBothActors() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
 
-        engine.executeTurn(context(user, enemy, combat(100, 100)), 1L);
+        engine.executeTurn(combat, 1L);
 
         verify(statusManager).applyActiveStatesEffectsToActor(eq(user), any());
         verify(statusManager).applyActiveStatesEffectsToActor(eq(enemy), any());
@@ -91,8 +88,9 @@ public class CombatEngineTests {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         user.setActionModifierType(CombatActionType.ACTOR_BLOCKED_BY_STATE);
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
 
-        engine.executeTurn(context(user, enemy, combat(100, 100)), 5L);
+        engine.executeTurn(combat, 5L);
 
         verify(skillsManager, never()).executeSkill(any(), eq(CombatActorType.USER), any());
         verify(skillsManager).executeSkill(any(), eq(CombatActorType.ENEMY), eq(99L));
@@ -104,8 +102,9 @@ public class CombatEngineTests {
         user.setActionModifierType(CombatActionType.SKILL_REPEAT_BY_STATE);
         user.setLastSkillUsed(42L);
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
 
-        engine.executeTurn(context(user, enemy, combat(100, 100)), 5L);
+        engine.executeTurn(combat, 5L);
 
         verify(skillsManager).executeSkill(any(), eq(CombatActorType.USER), eq(42L));
         verify(skillsManager, never()).executeSkill(any(), eq(CombatActorType.USER), eq(5L));
@@ -116,8 +115,9 @@ public class CombatEngineTests {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
         enemy.setActionModifierType(CombatActionType.ACTOR_BLOCKED_BY_STATE);
+        CombatDomain combat = combat(user, enemy);
 
-        engine.executeTurn(context(user, enemy, combat(100, 100)), 5L);
+        engine.executeTurn(combat, 5L);
 
         verify(skillsManager).executeSkill(any(), eq(CombatActorType.USER), eq(5L));
         verify(skillsManager, never()).executeSkill(any(), eq(CombatActorType.ENEMY), any());
@@ -129,8 +129,9 @@ public class CombatEngineTests {
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
         enemy.setActionModifierType(CombatActionType.SKILL_REPEAT_BY_STATE);
         enemy.setLastSkillUsed(77L);
+        CombatDomain combat = combat(user, enemy);
 
-        engine.executeTurn(context(user, enemy, combat(100, 100)), 5L);
+        engine.executeTurn(combat, 5L);
 
         verify(skillsManager).executeSkill(any(), eq(CombatActorType.ENEMY), eq(77L));
         verify(skillsManager, never()).executeSkill(any(), eq(CombatActorType.ENEMY), eq(99L));
@@ -143,11 +144,11 @@ public class CombatEngineTests {
     @Test
     public void executeTurn_userHpZeroAtStart_returnsLostWithoutAttacking() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
-        user.getStats().setCurrentHp(0);
+        user.getStats().setStat(StatType.CURRENT_HP,0);
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
-        CombatDomain combat = combat(0, 100);
+        CombatDomain combat = combat(user, enemy);
 
-        CombatTurnResultDomain result = engine.executeTurn(context(user, enemy, combat), 5L);
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
 
         assertEquals(CombatGeneralStatus.USER_LOST, result.getCombatStatus());
         verify(skillsManager, never()).executeSkill(any(), any(), any());
@@ -159,10 +160,10 @@ public class CombatEngineTests {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
         // engine checks combat.enemyHp after user turn, but the gate before that uses the actor's current hp
-        enemy.getStats().setCurrentHp(0);
-        CombatDomain combat = combat(100, 0);
+        enemy.getStats().setStat(StatType.CURRENT_HP,0);
+        CombatDomain combat = combat(user, enemy);
 
-        CombatTurnResultDomain result = engine.executeTurn(context(user, enemy, combat), 5L);
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
 
         assertEquals(CombatGeneralStatus.USER_WON, result.getCombatStatus());
         verify(enemyAI, never()).chooseSkill(any());
@@ -173,18 +174,19 @@ public class CombatEngineTests {
     public void executeTurn_userKillsEnemyDuringTurn_setsWonAtEnd() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
 
         // user skill drops enemy hp to 0
         when(skillsManager.executeSkill(any(), eq(CombatActorType.USER), any()))
                 .thenAnswer(inv -> {
-                    enemy.getStats().setCurrentHp(0);
+                    enemy.getStats().setStat(StatType.CURRENT_HP,0);
                     return CombatActionDomain.builder()
                             .actor(CombatActorType.USER)
                             .actionType(CombatActionType.SKILL_USED)
                             .build();
                 });
 
-        CombatTurnResultDomain result = engine.executeTurn(context(user, enemy, combat(100, 100)), 5L);
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
 
         assertEquals(CombatGeneralStatus.USER_WON, result.getCombatStatus());
         // enemy turn skipped because currentHp == 0 at the gate
@@ -195,17 +197,18 @@ public class CombatEngineTests {
     public void executeTurn_enemyKillsUserDuringTurn_setsLostAtEnd() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
 
         when(skillsManager.executeSkill(any(), eq(CombatActorType.ENEMY), any()))
                 .thenAnswer(inv -> {
-                    user.getStats().setCurrentHp(0);
+                    user.getStats().setStat(StatType.CURRENT_HP,0);
                     return CombatActionDomain.builder()
                             .actor(CombatActorType.ENEMY)
                             .actionType(CombatActionType.SKILL_USED)
                             .build();
                 });
 
-        CombatTurnResultDomain result = engine.executeTurn(context(user, enemy, combat(100, 100)), 5L);
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
 
         assertEquals(CombatGeneralStatus.USER_LOST, result.getCombatStatus());
     }
@@ -218,10 +221,10 @@ public class CombatEngineTests {
     public void executeTurn_incrementsTurnNumberOnSurvive() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
-        CombatDomain combat = combat(100, 100);
+        CombatDomain combat = combat(user, enemy);
         combat.setTurnNumber(5);
 
-        CombatTurnResultDomain result = engine.executeTurn(context(user, enemy, combat), 5L);
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
 
         assertEquals(6, combat.getTurnNumber());
         assertEquals(6, result.getTurnNumber());
@@ -231,14 +234,15 @@ public class CombatEngineTests {
     public void executeTurn_userKilledByStateBeforeAction_returnsLostEarly() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
 
         // simulate a burn that drops the user from 100 -> 0 during applyActiveStates
         doAnswer(inv -> {
-            user.getStats().setCurrentHp(0);
+            user.getStats().setStat(StatType.CURRENT_HP,0);
             return null;
         }).when(statusManager).applyActiveStatesEffectsToActor(eq(user), any());
 
-        CombatTurnResultDomain result = engine.executeTurn(context(user, enemy, combat(100, 100)), 5L);
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
 
         assertEquals(CombatGeneralStatus.USER_LOST, result.getCombatStatus());
         verify(skillsManager, never()).executeSkill(any(), any(), any());
@@ -248,12 +252,12 @@ public class CombatEngineTests {
     @Test
     public void executeTurn_doesNotIncrementOnEarlyUserDeath() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
-        user.getStats().setCurrentHp(0);
+        user.getStats().setStat(StatType.CURRENT_HP,0);
         CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
-        CombatDomain combat = combat(0, 100);
+        CombatDomain combat = combat(user, enemy);
         combat.setTurnNumber(5);
 
-        engine.executeTurn(context(user, enemy, combat), 5L);
+        engine.executeTurn(combat, 5L);
 
         assertEquals(5, combat.getTurnNumber());
     }
@@ -264,7 +268,9 @@ public class CombatEngineTests {
 
     @Test
     public void buildTimeoutCombatTurnResult_emitsTimeoutAction() {
-        CombatDomain combat = combat(100, 100);
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
         combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
         combat.setTurnNumber(7);
 
@@ -279,7 +285,9 @@ public class CombatEngineTests {
 
     @Test
     public void buildAbandonCombatTurnResult_emitsAbandonAction() {
-        CombatDomain combat = combat(100, 100);
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
         combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
         combat.setTurnNumber(3);
 

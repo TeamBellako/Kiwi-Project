@@ -18,6 +18,8 @@ public class UserStatsPersistence {
 
     private int maxHp;
 
+    private int shield;
+
     private int patk;
     private int matk;
 

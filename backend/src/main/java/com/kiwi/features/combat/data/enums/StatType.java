@@ -10,4 +10,5 @@ public enum StatType {
     ACC,
     EVA,
     LCK,
+    SHIELD,
 }

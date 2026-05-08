@@ -12,6 +12,8 @@ public class SkillCombatDomain {
 
     private String name;
 
+    private Long elementId;
+
     private List<SkillEffectDomain> effects;
 
 }

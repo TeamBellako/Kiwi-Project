@@ -35,10 +35,11 @@ public class CombatProgressService {
 
     public void applyTurnResult(
             CombatPersistence combat,
-            CombatDomain combatDomain,
-            CombatActorDomain user,
-            CombatActorDomain enemy
+            CombatDomain combatDomain
+
     ) {
+        CombatActorDomain user = combatDomain.getUser();
+        CombatActorDomain enemy = combatDomain.getEnemy();
 
         if(user != null) {
             combat.setUserHp(user.getStats().getCurrentHp());
@@ -50,6 +51,7 @@ public class CombatProgressService {
             combat.setUserAcc(user.getStats().getAcc());
             combat.setUserEva(user.getStats().getEva());
             combat.setUserLck(user.getStats().getLck());
+            combat.setUserShield(user.getStats().getShield());
         }
 
         if(enemy != null) {
@@ -62,6 +64,7 @@ public class CombatProgressService {
             combat.setEnemyAcc(enemy.getStats().getAcc());
             combat.setEnemyEva(enemy.getStats().getEva());
             combat.setEnemyLck(enemy.getStats().getLck());
+            combat.setEnemyShield(enemy.getStats().getShield());
         }
 
         combat.setCombatStatus(combatDomain.getCombatStatus());

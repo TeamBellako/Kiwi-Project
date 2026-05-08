@@ -50,8 +50,6 @@ public class CombatActorMapper {
                                 skill -> skill
                         ));
 
-        skillsBlocked.forEach(skillsMap::remove);
-
         Map<Long, ElementMultiplierDomain> elementsMap =
                 elements.stream()
                         .collect(Collectors.toMap(
@@ -73,6 +71,7 @@ public class CombatActorMapper {
                 .statusResistances(resistanceMap)
                 .activeStatuses(statuses)
                 .skills(skillsMap)
+                .blockedSkills(skillsBlocked)
                 .lastSkillUsed(lastSkillUsed)
                 .actionModifierType(CombatActionType.SKILL_USED)
                 .build();

@@ -23,12 +23,12 @@ public class SkillEffectDomain {
 
     private AttackType attackType;
 
-    private Long elementId;
-
     private Integer hitChance;
 
     private Long stateId;
 
     private Integer statusDuration;
+
+    private Integer turns;
 
 }

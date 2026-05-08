@@ -35,7 +35,8 @@ public class CombatActionMapper {
                             .build()
             );
 
-            case ACTOR_DAMAGED_BY_STATE -> List.of(
+            case ACTOR_HEALED_BY_STATE,
+                 ACTOR_DAMAGED_BY_STATE -> List.of(
                     baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
                             .stateName(action.getState()  != null ? action.getState().getName() : null)
                             .stateId(action.getState()  != null ? action.getState().getStateId() : null)
@@ -49,7 +50,7 @@ public class CombatActionMapper {
                             .stateName(action.getState()  != null ? action.getState().getName() : null)
                             .stateId(action.getState()  != null ? action.getState().getStateId() : null)
                             .blockedSkills(
-                                    CombatActionMapper.blockedSkillsToString(action.getBlockedSkills())
+                                    CombatActionMapper.skillIdsToString(action.getBlockedSkills())
                             )
                             .build()
             );
@@ -85,15 +86,22 @@ public class CombatActionMapper {
                                     .target(effect.getTarget())
                                     .statAffected(effect.getStatAffected())
                                     .value(effect.getValue())
-                                    .critic(effect.isCritic());
-
+                                    .critic(effect.isCritic())
+                                    .turns(effect.getTurns())
+                                    .resetCooldownSkills(
+                                            skillIdsToString(effect.getResetCooldownSkills())
+                                    );
                     if (effect.getAppliedStatus() != null) {
                         builder
                                 .stateId(effect.getAppliedStatus().getStateId())
+                                .stateName(effect.getAppliedStatus().getName())
+                                .statAffected(effect.getStatAffected())
+                                .value(effect.getAppliedStatus().getValue())
                                 .statusDuration(effect.getAppliedStatus().getRemainingTurns());
                     }
 
                     return builder.build();
+
                 })
                 .toList();
     }
@@ -115,7 +123,7 @@ public class CombatActionMapper {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public static String blockedSkillsToString(List<Long> list) {
+    public static String skillIdsToString(List<Long> list) {
         return list == null ? null :
                 list.stream()
                         .map(String::valueOf)
@@ -171,7 +179,7 @@ public class CombatActionMapper {
                 .stateId(first.getStateId())
                 .stateEffectValue(first.getValue())
 
-                .blockedSkills(stringToBlockedSkills(first.getBlockedSkills()))
+                .blockedSkills(stringToSkillIds(first.getBlockedSkills()))
 
                 .skillEffectsResults(
                         logs.stream()
@@ -197,7 +205,11 @@ public class CombatActionMapper {
                         .target(log.getTarget() != null ? log.getTarget().name() : null)
                         .statAffected(log.getStatAffected() != null ? log.getStatAffected().name() : null)
                         .value(log.getValue())
-                        .critic(Boolean.TRUE.equals(log.getCritic()));
+                        .critic(Boolean.TRUE.equals(log.getCritic()))
+                        .turns(log.getTurns())
+                        .resetCooldownSkills(
+                                stringToSkillIds(log.getResetCooldownSkills())
+                        );
 
         if (log.getStateId() != null) {
             builder.appliedStatus(
@@ -215,7 +227,7 @@ public class CombatActionMapper {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    private static List<Long> stringToBlockedSkills(String value) {
+    private static List<Long> stringToSkillIds(String value) {
         if (value == null || value.isBlank()) return List.of();
 
         return Arrays.stream(value.split(","))

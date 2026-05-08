@@ -4,6 +4,8 @@ import com.kiwi.features.combat.data.dto.CombatActiveStatusDTO;
 import com.kiwi.features.combat.data.enums.StatType;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -11,7 +13,7 @@ import lombok.*;
 @Builder
 public class SkillEffectResultDTO {
 
-    private String typeResult; // DAMAGE / HEAL /  MODIFY_STAT / STATUS_APPLIED / STATUS_REMOVED / MISS
+    private String typeResult;
 
     private String target; // USER / ENEMY / ALLY
 
@@ -22,4 +24,8 @@ public class SkillEffectResultDTO {
     private boolean critic = false;
 
     private CombatActiveStatusDTO appliedStatus;
+
+    private Integer turns;
+
+    private List<Long> resetCooldownSkills;
 }

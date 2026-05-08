@@ -19,10 +19,11 @@ public class EngineTestFactory {
     // STATS
     // =========================================================================
 
-    public static StatsDomain stats(int hp, int patk, int matk, int pdef, int mdef, int acc, int eva, int lck) {
+    public static StatsDomain stats(int hp, int maxHp, int shield, int patk, int matk, int pdef, int mdef, int acc, int eva, int lck) {
         return StatsDomain.builder()
                 .currentHp(hp)
-                .maxHp(hp)
+                .maxHp(maxHp)
+                .shield(shield)
                 .patk(patk)
                 .matk(matk)
                 .pdef(pdef)
@@ -34,7 +35,7 @@ public class EngineTestFactory {
     }
 
     public static StatsDomain defaultStats() {
-        return stats(100, 100, 100, 10, 10, 100, 0, 0);
+        return stats(100, 100,25, 100, 100, 10, 10, 100, 0, 0);
     }
 
     // =========================================================================
@@ -65,17 +66,12 @@ public class EngineTestFactory {
     // =========================================================================
 
     public static SkillEffectDomain damageEffect(float power, AttackType attackType, int hitChance) {
-        return damageEffect(power, attackType, hitChance, null);
-    }
-
-    public static SkillEffectDomain damageEffect(float power, AttackType attackType, int hitChance, Long elementId) {
         return SkillEffectDomain.builder()
                 .effectType(SkillEffectType.DAMAGE)
                 .target(SkillEffectTargetType.OPPONENT)
                 .power(power)
                 .attackType(attackType)
                 .hitChance(hitChance)
-                .elementId(elementId)
                 .build();
     }
 
@@ -111,10 +107,11 @@ public class EngineTestFactory {
     // SKILLS
     // =========================================================================
 
-    public static SkillCombatDomain skill(Long id, String name, SkillEffectDomain... effects) {
+    public static SkillCombatDomain skill(Long id, String name, Long elementId, SkillEffectDomain... effects) {
         return SkillCombatDomain.builder()
                 .id(id)
                 .name(name)
+                .elementId(elementId)
                 .effects(Arrays.asList(effects))
                 .build();
     }
@@ -123,18 +120,7 @@ public class EngineTestFactory {
     // COMBAT
     // =========================================================================
 
-    public static CombatDomain combat(int userHp, int enemyHp) {
-        return CombatDomain.builder()
-                .id(1L)
-                .userId(1L)
-                .enemyId(1L)
-                .combatConfigId(1L)
-                .userHp(userHp)
-                .userMaxHp(userHp)
-                .enemyHp(enemyHp)
-                .enemyMaxHp(enemyHp)
-                .turnNumber(1)
-                .combatStatus(CombatGeneralStatus.ONGOING)
-                .build();
+    public static CombatDomain combat(CombatActorDomain user, CombatActorDomain enemy) {
+        return new CombatDomain(1L, 1L, user, enemy, 1, CombatGeneralStatus.ONGOING, null);
     }
 }

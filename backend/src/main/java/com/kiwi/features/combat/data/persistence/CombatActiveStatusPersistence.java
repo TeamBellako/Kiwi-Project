@@ -1,6 +1,7 @@
 package com.kiwi.features.combat.data.persistence;
 
 import com.kiwi.features.combat.data.enums.CombatActorType;
+import com.kiwi.features.combat.data.enums.StatType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,10 @@ public class CombatActiveStatusPersistence {
     private Long stateId;
 
     private Float value;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="stat_affected")
+    private StatType statAffected;
 
     @Column(name="remaining_turns", nullable = false)
     private int remainingTurns;

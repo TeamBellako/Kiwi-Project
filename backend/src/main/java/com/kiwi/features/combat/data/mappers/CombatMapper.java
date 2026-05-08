@@ -14,43 +14,6 @@ public class CombatMapper {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public static CombatDomain toDomain(CombatPersistence combat) {
-        return CombatDomain.builder()
-                .id(combat.getId())
-                .combatConfigId(combat.getCombatConfigId())
-                .userId(combat.getUserId())
-                .enemyId(combat.getEnemyId())
-
-                // USER
-                .userHp(combat.getUserHp())
-                .userMaxHp(combat.getUserMaxHp())
-                .userPatk(combat.getUserPatk())
-                .userMatk(combat.getUserMatk())
-                .userPdef(combat.getUserPdef())
-                .userMdef(combat.getUserMdef())
-                .userAcc(combat.getUserAcc())
-                .userEva(combat.getUserEva())
-                .userLck(combat.getUserLck())
-
-                // ENEMY
-                .enemyHp(combat.getEnemyHp())
-                .enemyMaxHp(combat.getEnemyMaxHp())
-                .enemyPatk(combat.getEnemyPatk())
-                .enemyMatk(combat.getEnemyMatk())
-                .enemyPdef(combat.getEnemyPdef())
-                .enemyMdef(combat.getEnemyMdef())
-                .enemyAcc(combat.getEnemyAcc())
-                .enemyEva(combat.getEnemyEva())
-                .enemyLck(combat.getEnemyLck())
-
-                .turnNumber(combat.getTurnNumber())
-                .endsAt(combat.getEndsAt())
-                .combatStatus(combat.getCombatStatus())
-                .build();
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
     public static CombatDTO toDTO(
             CombatPersistence combat,
             CombatActorDTO user,
@@ -103,6 +66,7 @@ public class CombatMapper {
                 // USER snapshot
                 .userHp(stats.getMaxHp())
                 .userMaxHp(stats.getMaxHp())
+                .userShield(stats.getShield())
                 .userPatk(stats.getPatk())
                 .userMatk(stats.getMatk())
                 .userPdef(stats.getPdef())
@@ -114,6 +78,7 @@ public class CombatMapper {
                 // ENEMY snapshot
                 .enemyHp(enemy.getMaxHp())
                 .enemyMaxHp(enemy.getMaxHp())
+                .enemyShield(enemy.getShield())
                 .enemyPatk(enemy.getPatk())
                 .enemyMatk(enemy.getMatk())
                 .enemyPdef(enemy.getPdef())

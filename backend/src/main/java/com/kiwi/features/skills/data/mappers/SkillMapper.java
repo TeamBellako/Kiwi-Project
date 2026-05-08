@@ -20,7 +20,7 @@ public class SkillMapper {
                 skill.getName(),
                 skill.getDescription(),
                 skill.getQuote(),
-                skill.getSkillType(),
+                skill.getElementId(),
 
                 skill.getCooldownType(),
                 skill.getCooldownGoalId(),
@@ -37,13 +37,13 @@ public class SkillMapper {
     // --------------------------------------------------------------------------------------------
     // SKILL DOMAIN → DTO
     // --------------------------------------------------------------------------------------------
-    public static SkillDTO toDTO(SkillDomain domain) {
+    public static SkillDTO toDTO(SkillDomain domain, String elementName) {
         SkillDTO dto = new SkillDTO();
         dto.setSkillId(domain.getSkillId());
         dto.setName(domain.getName());
         dto.setDescription(domain.getDescription());
         dto.setQuote(domain.getQuote());
-        dto.setType(domain.getType().name());
+        dto.setElementName(elementName);
 
         dto.setCooldownType(domain.getCooldownType().name());
         dto.setCooldownGoalId(domain.getCooldownGoalId());

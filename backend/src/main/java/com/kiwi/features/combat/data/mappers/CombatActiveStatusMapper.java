@@ -19,6 +19,7 @@ public class CombatActiveStatusMapper {
                 .icon(statePersistence.getIcon())
                 .description(statePersistence.getDescription())
                 .remainingTurns(activeStatusPersistence.getRemainingTurns())
+                .statAffected(activeStatusPersistence.getStatAffected())
                 .value(activeStatusPersistence.getValue())
                 .build();
     }

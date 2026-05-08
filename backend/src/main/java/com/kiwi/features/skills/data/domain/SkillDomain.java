@@ -1,6 +1,5 @@
 package com.kiwi.features.skills.data.domain;
 
-import com.kiwi.features.skills.data.enums.SkillType;
 import com.kiwi.features.skills.data.enums.CooldownType;
 import lombok.*;
 import java.time.Instant;
@@ -13,7 +12,7 @@ public class SkillDomain {
     private String name;
     private String description;
     private String quote;
-    private SkillType type;
+    private Long elementId;
 
     private CooldownType cooldownType;
     private Long cooldownGoalId;
@@ -25,7 +24,7 @@ public class SkillDomain {
     private Instant cooldownUntil;
     private int deckSlot;
 
-    public SkillDomain(Long id, String name, String description, String quote, SkillType skillType,
+    public SkillDomain(Long id, String name, String description, String quote, Long elementId,
                        CooldownType cooldownType, Long cooldownGoalId, Integer cooldownTimeMinutes,
                        String cooldownOtherDescription, Long levelupSkillId, boolean isCooldown,
                        Instant cooldownUntil, int deckSlot) {
@@ -33,7 +32,7 @@ public class SkillDomain {
         this.name = name;
         this.description = description;
         this.quote = quote;
-        this.type = skillType;
+        this.elementId = elementId;
         this.cooldownType = cooldownType;
         this.cooldownGoalId = cooldownGoalId;
         this.cooldownTimeMinutes = cooldownTimeMinutes;

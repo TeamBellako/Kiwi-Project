@@ -9,16 +9,13 @@ import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
 import com.kiwi.features.combat.data.mappers.CombatMapper;
 import com.kiwi.features.combat.data.mappers.CombatTurnResultMapper;
 import com.kiwi.features.combat.data.persistence.CombatPersistence;
-import com.kiwi.features.combat.engine.CombatContext;
 import com.kiwi.features.combat.engine.CombatEngine;
 import com.kiwi.features.combat.exceptions.CombatFinishedException;
-import com.kiwi.features.combat.exceptions.CombatNotFoundException;
 import com.kiwi.features.combat.exceptions.NotTimedCombatException;
 import com.kiwi.features.skills.controllers.SkillService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 @Service
@@ -54,44 +51,41 @@ public class CombatTurnService {
     //------------------------------------------------------------------------------------------------------------------
 
     @Transactional
-    public CombatTurnResultDTO executeTurn(Long userId, CombatPersistence combat, Long skillId) {
+    public CombatTurnResultDTO executeTurn(Long userId, CombatPersistence combatPersistence, Long skillId) {
 
         skillService.putSkillOnCooldown(userId, skillId);
 
         Map<CombatActorType, CombatActorDomain> actors =
-                combatActorBuilderService.buildActors(combat);
+                combatActorBuilderService.buildActors(combatPersistence);
 
         CombatActorDomain user = actors.get(CombatActorType.USER);
         CombatActorDomain enemy = actors.get(CombatActorType.ENEMY);
 
-        CombatContext context = new CombatContext(
-                CombatMapper.toDomain(combat),
-                user,
-                enemy
-        );
+        CombatDomain combatDomain = new CombatDomain(combatPersistence.getId(), combatPersistence.getCombatConfigId(), user, enemy,
+                combatPersistence.getTurnNumber(), combatPersistence.getCombatStatus(), combatPersistence.getEndsAt());
 
-        CombatTurnResultDomain result = combatEngine.executeTurn(context, skillId);
+        CombatTurnResultDomain result = combatEngine.executeTurn(combatDomain, skillId);
 
-        combatLogService.saveCombatActions(result.getActions(), combat.getId(), combat.getTurnNumber());
+        combatLogService.saveCombatActions(result.getActions(), combatPersistence.getId(), combatPersistence.getTurnNumber());
 
         lastSkillService.updateLastSkills(
-                combat.getId(),
-                context.getUser().getLastSkillUsed(),
-                context.getEnemy().getLastSkillUsed()
+                combatPersistence.getId(),
+                combatDomain.getUser().getLastSkillUsed(),
+                combatDomain.getEnemy().getLastSkillUsed()
         );
 
-//        blockedSkillService.syncBlockedSkills(
-//                combat.getId(),
-//                new ArrayList<>(context.getUser().getSkills().keySet()),
-//                new ArrayList<>(context.getEnemy().getSkills().keySet())
-//        );
-
-        combatProgressService.applyTurnResult(
-                combat,
-                CombatMapper.toDomain(combat),
-                context.getUser(),
-                context.getEnemy()
+        blockedSkillService.syncBlockedSkills(
+                combatPersistence.getId(),
+                combatDomain.getUser().getBlockedSkills(),
+                combatDomain.getEnemy().getBlockedSkills()
         );
+
+        combatProgressService.applyTurnResult(combatPersistence,combatDomain);
+
+        for (Long resetCooldownId : combatDomain.getUser().getResetCooldownSkills())
+        {
+            skillService.removeCooldown(userId, resetCooldownId);
+        }
 
         return CombatTurnResultMapper.toDTO(result);
     }
@@ -99,28 +93,24 @@ public class CombatTurnService {
     //------------------------------------------------------------------------------------------------------------------
 
     @Transactional
-    public CombatTurnResultDTO handleTimeout(CombatPersistence combat) {
+    public CombatTurnResultDTO handleTimeout(CombatPersistence combatPersistence) {
 
-        if (combat.getCombatStatus() != CombatGeneralStatus.ONGOING) {
-            throw new CombatFinishedException(combat.getId());
+        if (combatPersistence.getCombatStatus() != CombatGeneralStatus.ONGOING) {
+            throw new CombatFinishedException(combatPersistence.getId());
         }
 
-        if (combat.getEndsAt() == null) {
-            throw new NotTimedCombatException(combat.getId());
+        if (combatPersistence.getEndsAt() == null) {
+            throw new NotTimedCombatException(combatPersistence.getId());
         }
 
-        CombatDomain combatDomain = CombatMapper.toDomain(combat);
+        CombatDomain combatDomain = new CombatDomain(combatPersistence.getId(), combatPersistence.getCombatConfigId(), null, null,
+                combatPersistence.getTurnNumber(), combatPersistence.getCombatStatus(), combatPersistence.getEndsAt());
 
         combatProgressService.updateTimeOut(combatDomain);
 
         if (combatDomain.getCombatStatus() != CombatGeneralStatus.ONGOING) {
 
-            combatProgressService.applyTurnResult(
-                    combat,
-                    combatDomain,
-                    null,
-                    null
-            );
+            combatProgressService.applyTurnResult(combatPersistence, combatDomain);
 
             return CombatTurnResultMapper.toDTO(combatEngine.buildTimeoutCombatTurnResult(combatDomain));
         }
@@ -130,22 +120,18 @@ public class CombatTurnService {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public CombatTurnResultDTO handleAbandon(CombatPersistence combat) {
+    public CombatTurnResultDTO handleAbandon(CombatPersistence combatPersistence) {
 
-        if (combat.getCombatStatus() != CombatGeneralStatus.ONGOING) {
-            throw new CombatFinishedException(combat.getId());
+        if (combatPersistence.getCombatStatus() != CombatGeneralStatus.ONGOING) {
+            throw new CombatFinishedException(combatPersistence.getId());
         }
 
-        CombatDomain combatDomain = CombatMapper.toDomain(combat);
+        CombatDomain combatDomain = new CombatDomain(combatPersistence.getId(), combatPersistence.getCombatConfigId(), null, null,
+                combatPersistence.getTurnNumber(), combatPersistence.getCombatStatus(), combatPersistence.getEndsAt());
 
         combatProgressService.updateAbandon(combatDomain);
 
-        combatProgressService.applyTurnResult(
-                combat,
-                combatDomain,
-                null,
-                null
-        );
+        combatProgressService.applyTurnResult(combatPersistence,combatDomain);
 
         return CombatTurnResultMapper.toDTO(combatEngine.buildAbandonCombatTurnResult(combatDomain));
 

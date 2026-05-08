@@ -26,6 +26,9 @@ public class SkillServiceTests {
     private final SkillProgressService skillProgress =
             new SkillProgressService();
 
+    private final CombatElementTestRepositoryInMemory elementRepo =
+            new CombatElementTestRepositoryInMemory();
+
     private final SkillEffectTestRepositoryInMemory skillEffectRepo =
             new SkillEffectTestRepositoryInMemory();
 
@@ -33,7 +36,7 @@ public class SkillServiceTests {
             new EnemySkillTestRepositoryInMemory();
 
     private final SkillService service =
-            new SkillService(skillRepo, userSkillStatusRepo, skillProgress, skillEffectRepo, enemySkillRepo, event -> {});
+            new SkillService(skillRepo, elementRepo, userSkillStatusRepo, skillProgress,  skillEffectRepo, enemySkillRepo, event -> {});
 
     private final Long userId = 1L;
 
