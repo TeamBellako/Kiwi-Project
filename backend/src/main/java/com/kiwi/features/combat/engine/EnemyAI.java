@@ -1,6 +1,7 @@
 package com.kiwi.features.combat.engine;
 
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
+import com.kiwi.features.combat.data.domain.CombatDomain;
 import com.kiwi.features.combat.data.domain.StatusResistanceDomain;
 import com.kiwi.features.skills.data.domain.SkillEffectDomain;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
@@ -18,10 +19,10 @@ public class EnemyAI {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    public Long chooseSkill(CombatContext context) {
+    public Long chooseSkill(CombatDomain combat) {
 
-        CombatActorDomain enemy = context.getEnemy();
-        CombatActorDomain user = context.getUser();
+        CombatActorDomain enemy = combat.getEnemy();
+        CombatActorDomain user = combat.getUser();
 
         Map<Long, SkillCombatDomain> availableSkills = new HashMap<>(enemy.getSkills());
         enemy.getBlockedSkills().forEach(availableSkills::remove);

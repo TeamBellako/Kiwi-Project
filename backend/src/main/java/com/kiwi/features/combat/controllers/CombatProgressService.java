@@ -35,10 +35,11 @@ public class CombatProgressService {
 
     public void applyTurnResult(
             CombatPersistence combat,
-            CombatDomain combatDomain,
-            CombatActorDomain user,
-            CombatActorDomain enemy
+            CombatDomain combatDomain
+
     ) {
+        CombatActorDomain user = combatDomain.getUser();
+        CombatActorDomain enemy = combatDomain.getEnemy();
 
         if(user != null) {
             combat.setUserHp(user.getStats().getCurrentHp());

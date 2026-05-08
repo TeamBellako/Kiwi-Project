@@ -3,6 +3,7 @@ package com.kiwi.features.combat.engine;
 import com.kiwi.features.combat.data.domain.CombatActionDomain;
 import com.kiwi.features.combat.data.domain.CombatActiveStatusDomain;
 import com.kiwi.features.combat.data.domain.CombatActorDomain;
+import com.kiwi.features.combat.data.domain.CombatDomain;
 import com.kiwi.features.combat.data.enums.CombatActionType;
 import com.kiwi.features.combat.data.enums.CombatStateTypes;
 
@@ -21,7 +22,7 @@ public class CombatStatusManager {
     // ----------------------------------------------------------------------------------------------------------------
 
     // TODO: habria que revisar prioridades porque no vas hacer confusion si estas freeze
-    public void applyActiveStatesEffectsToActor(CombatActorDomain actor, CombatContext context)
+    public void applyActiveStatesEffectsToActor(CombatActorDomain actor, CombatDomain combat)
     {
         for (CombatActiveStatusDomain state : actor.getActiveStatuses()) {
 
@@ -41,7 +42,7 @@ public class CombatStatusManager {
                                     .stateEffectValue((float) poisonDamage)
                                     .build();
 
-                    context.addAction(poisonAction);
+                    combat.addAction(poisonAction);
                     break;
                 case FREEZE:
                     if (random.nextInt(100) < 80) {
@@ -54,7 +55,7 @@ public class CombatStatusManager {
                                         .state(state)
                                         .build();
 
-                        context.addAction(freezeAction);
+                        combat.addAction(freezeAction);
                     }
                     break;
                 case CONFUSION:
@@ -75,7 +76,7 @@ public class CombatStatusManager {
                                     .state(state)
                                     .build();
 
-                    context.addAction(action);
+                    combat.addAction(action);
                     break;
                 case MUTIS:
                     List<Long> blockedSkillIds;
@@ -97,7 +98,7 @@ public class CombatStatusManager {
                                     .blockedSkills(blockedSkillIds)
                                     .build();
 
-                    context.addAction(mutisAction);
+                    combat.addAction(mutisAction);
 
                     actor.setBlockedSkills(blockedSkillIds);
                     break;
@@ -115,7 +116,7 @@ public class CombatStatusManager {
                                     .stateEffectValue((float) heal)
                                     .build();
 
-                    context.addAction(regenAction);
+                    combat.addAction(regenAction);
                     break;
             }
         }
@@ -160,7 +161,7 @@ public class CombatStatusManager {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    public void reduceStatesTurnsToActor(CombatActorDomain actor, CombatContext context)
+    public void reduceStatesTurnsToActor(CombatActorDomain actor, CombatDomain combat)
     {
         Iterator<CombatActiveStatusDomain> statesIt =
                 actor.getActiveStatuses().iterator();
@@ -185,7 +186,7 @@ public class CombatStatusManager {
                 action.setActionType(CombatActionType.STATUS_FINISHED);
             }
 
-            context.addAction(action);
+            combat.addAction(action);
         }
     }
 

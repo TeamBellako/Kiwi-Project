@@ -28,7 +28,7 @@ public class SkillsManager {
     //------------------------------------------------------------------------------------------------------------------
 
     public CombatActionDomain executeSkill(
-            CombatContext context,
+            CombatDomain combat,
             CombatActorType actorType,
             Long skillId
     ) {
@@ -41,7 +41,7 @@ public class SkillsManager {
                     .build();
         }
 
-        CombatActorDomain attacker = context.getActor(actorType);
+        CombatActorDomain attacker = combat.getActor(actorType);
 
         SkillCombatDomain skill = attacker.getSkills().get(skillId);
 
@@ -55,15 +55,15 @@ public class SkillsManager {
 
         attacker.setLastSkillUsed(skillId);
 
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.RESET_COOLDOWNS, effectContext);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.APPLY_STATUS, effectContext);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.EXTEND_BUFFS, effectContext);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.SWAP_BUFFS, effectContext);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.COPY_BUFFS, effectContext);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.CONSUME_STATUS, effectContext);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.DAMAGE, effectContext);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.HEAL, effectContext);
-        applyEffects(context, attacker, skill, effectsResults, SkillEffectType.MODIFY_STAT, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.RESET_COOLDOWNS, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.APPLY_STATUS, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.EXTEND_BUFFS, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.SWAP_BUFFS, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.COPY_BUFFS, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.CONSUME_STATUS, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.DAMAGE, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.HEAL, effectContext);
+        applyEffects(combat, attacker, skill, effectsResults, SkillEffectType.MODIFY_STAT, effectContext);
 
         return CombatActionDomain.builder()
                 .actionType(CombatActionType.SKILL_USED)
@@ -76,7 +76,7 @@ public class SkillsManager {
     //------------------------------------------------------------------------------------------------------------------
 
     private void applyEffects(
-            CombatContext context,
+            CombatDomain combat,
             CombatActorDomain attacker,
             SkillCombatDomain skill,
             List<SkillEffectResultDomain> results,
@@ -87,7 +87,7 @@ public class SkillsManager {
 
             if (effect.getEffectType() != type) continue;
 
-            CombatActorDomain victim = context.getTarget(attacker.getType(), effect.getTarget());
+            CombatActorDomain victim = combat.getTarget(attacker.getType(), effect.getTarget());
 
             if (victim.getActiveStatuses().stream()
                     .anyMatch(s -> s.getStateId() == CombatStateTypes.INVINCIBLE.getId())) {
@@ -106,7 +106,7 @@ public class SkillsManager {
                 );
 
                 case APPLY_STATUS -> results.add(
-                        applyStatus(attacker, victim, effect, skill.getId(), context.getCombat().getId())
+                        applyStatus(attacker, victim, effect, skill.getId(), combat.getId())
                 );
 
                 case SWAP_BUFFS -> results.addAll(
@@ -126,7 +126,7 @@ public class SkillsManager {
                 );
 
                 case DAMAGE -> results.add(
-                        applyDamage(context, attacker, victim, effect, skill.getElementId(), effectContext)
+                        applyDamage(combat, attacker, victim, effect, skill.getElementId(), effectContext)
                 );
 
                 case HEAL -> results.add(
@@ -143,7 +143,7 @@ public class SkillsManager {
     //------------------------------------------------------------------------------------------------------------------
 
     private SkillEffectResultDomain applyDamage(
-            CombatContext context,
+            CombatDomain combat,
             CombatActorDomain attacker,
             CombatActorDomain victim,
             SkillEffectDomain effect,
@@ -174,23 +174,21 @@ public class SkillsManager {
                     .build();
         }
 
-        // ATK / DEF
+        // ATK / DEF (includes STATE_MULTIPLIERS)
         float attackerAtk =
                 effect.getAttackType() == AttackType.PHYSICAL
                         ? statusManager.getEffectiveStat(attacker, StatType.PATK)
                         : statusManager.getEffectiveStat(attacker, StatType.MATK);
 
         float victimDef =
-                effect.getAttackType() == AttackType.MAGICAL
+                effect.getAttackType() == AttackType.PHYSICAL
                         ? statusManager.getEffectiveStat(victim, StatType.PDEF)
                         : statusManager.getEffectiveStat(victim, StatType.MDEF);
 
-        float baseDamage =
-                (attackerAtk / Math.max(victimDef, 1)) * effect.getPower();
+        float baseDamage = (attackerAtk / Math.max(victimDef, 1)) * effect.getPower();
 
         // CRIT
-        boolean crit =
-                random.nextInt(120) < statusManager.getEffectiveStat(attacker, StatType.LCK);
+        boolean crit = random.nextInt(120) < statusManager.getEffectiveStat(attacker, StatType.LCK);
 
         float critMultiplier = crit ? 2f : 1f;
 
@@ -207,20 +205,9 @@ public class SkillsManager {
                 ? elementMultiplier.getMultiplier()
                 : 1f;
 
-        // STATE MULTIPLIER
-        float stateMultiplier = attackerAtk * victimDef;
+        float modifiers = variance * critMultiplier * elementMultiplierValue;
 
-        float modifiers =
-                        variance
-                        * critMultiplier
-                        * elementMultiplierValue
-                        * stateMultiplier;
-
-        int damage = Math.round(
-                        baseDamage
-                        * modifiers
-                        * effectContext.getConsumeMultiplier()
-        );
+        int damage = Math.round(baseDamage* modifiers* effectContext.getConsumeMultiplier());
 
         // ABSORB
         if (elementMultiplierValue == -1f) {
@@ -248,9 +235,9 @@ public class SkillsManager {
             float stateValue = bondState.getValue();
 
             CombatActorDomain other =
-                    (victim == context.getUser())
-                            ? context.getEnemy()
-                            : context.getUser();
+                    (victim == combat.getUser())
+                            ? combat.getEnemy()
+                            : combat.getUser();
 
             int reflected = Math.round(realDamage * stateValue);
 
@@ -264,7 +251,7 @@ public class SkillsManager {
                             .stateEffectValue((float) reflected)
                             .build();
 
-            context.addAction(bondAction);
+            combat.addAction(bondAction);
         }
 
         return SkillEffectResultDomain.builder()

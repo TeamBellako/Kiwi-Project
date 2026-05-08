@@ -33,6 +33,7 @@ public class CombatTestFactory {
         return UserStatsPersistence.builder()
                 .userId(userId)
                 .maxHp(randHp())
+                .shield(randStat())
                 .patk(randStat())
                 .matk(randStat())
                 .pdef(randStat())
@@ -53,6 +54,7 @@ public class CombatTestFactory {
                 .name("Enemy " + id)
                 .sprite("sprite_" + id)
                 .maxHp(randHp())
+                .shield(randStat())
                 .patk(randStat())
                 .matk(randStat())
                 .pdef(randStat())
@@ -111,6 +113,7 @@ public class CombatTestFactory {
 
                 .userHp(stats.getMaxHp())
                 .userMaxHp(stats.getMaxHp())
+                .userShield(stats.getShield())
                 .userPatk(stats.getPatk())
                 .userMatk(stats.getMatk())
                 .userPdef(stats.getPdef())
@@ -121,6 +124,7 @@ public class CombatTestFactory {
 
                 .enemyHp(enemy.getMaxHp())
                 .enemyMaxHp(enemy.getMaxHp())
+                .enemyShield(enemy.getShield())
                 .enemyPatk(enemy.getPatk())
                 .enemyMatk(enemy.getMatk())
                 .enemyPdef(enemy.getPdef())

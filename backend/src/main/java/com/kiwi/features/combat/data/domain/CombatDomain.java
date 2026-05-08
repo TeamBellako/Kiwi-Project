@@ -1,57 +1,87 @@
 package com.kiwi.features.combat.data.domain;
 
+import com.kiwi.features.combat.data.enums.CombatActorType;
 import com.kiwi.features.combat.data.enums.CombatGeneralStatus;
+import com.kiwi.features.skills.data.enums.SkillEffectTargetType;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-@Builder
 public class CombatDomain {
 
-    private Long id;
+    private final Long id;
 
-    private Long combatConfigId;
+    private final Long combatConfigId;
 
-    private Long userId;
+    private final CombatActorDomain user;
+    private final CombatActorDomain enemy;
 
-    private Long enemyId;
-
-    // USER
-    private Integer userHp;
-    private Integer userMaxHp;
-    private Integer userShield;
-    private Integer userPatk;
-    private Integer userMatk;
-    private Integer userPdef;
-    private Integer userMdef;
-    private Integer userAcc;
-    private Integer userEva;
-    private Integer userLck;
-
-    // ENEMY
-    private Integer enemyHp;
-    private Integer enemyMaxHp;
-    private Integer enemyShield;
-    private Integer enemyPatk;
-    private Integer enemyMatk;
-    private Integer enemyPdef;
-    private Integer enemyMdef;
-    private Integer enemyAcc;
-    private Integer enemyEva;
-    private Integer enemyLck;
+    private final List<CombatActionDomain> actions = new ArrayList<>();
 
     private int turnNumber;
 
-    private Instant endsAt;
-
     private CombatGeneralStatus combatStatus;
 
-    @Builder.Default
+    private Instant endsAt;
+
     private List<CombatBarkTriggerDomain> barks = List.of();
 
-    @Builder.Default
     private List<Long> firedBarkIds = List.of();
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public CombatDomain(
+            Long id, Long combatConfigId, CombatActorDomain user,
+            CombatActorDomain enemy, int turnNumber, CombatGeneralStatus combatStatus, Instant endsAt
+    ) {
+        this.id = id;
+        this.combatConfigId = combatConfigId;
+        this.user = user;
+        this.enemy = enemy;
+        this.turnNumber = turnNumber;
+        this.combatStatus = combatStatus;
+        this.endsAt = endsAt;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public CombatActorDomain getActor(CombatActorType actor) {
+
+        return actor == CombatActorType.USER ? user : enemy;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public CombatActorDomain getTarget(CombatActorType actor, SkillEffectTargetType targetType) {
+
+        if (actor == CombatActorType.USER){
+            if (targetType == SkillEffectTargetType.SELF)
+            {
+                return user;
+            } // Ally check goes here in the future
+            else{
+                return enemy;
+            }
+        }
+        else{
+            if (targetType == SkillEffectTargetType.SELF)
+            {
+                return enemy;
+            } else {
+                return user;
+            }
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    public void addAction(CombatActionDomain action) {
+        actions.add(action);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
 }
