@@ -8,6 +8,7 @@ import com.kiwi.features.combat.data.persistence.EnemyPersistence;
 import com.kiwi.features.combat.data.persistence.UserStatsPersistence;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -72,6 +73,7 @@ public class CombatActorMapper {
                 .activeStatuses(statuses)
                 .skills(skillsMap)
                 .blockedSkills(skillsBlocked)
+                .resetCooldownSkills(new ArrayList<>())
                 .lastSkillUsed(lastSkillUsed)
                 .actionModifierType(CombatActionType.SKILL_USED)
                 .build();
