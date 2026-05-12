@@ -147,8 +147,6 @@ fun CombatScreen(
                     isLogOpen = isLogOpen,
                     onDismissLog = { isLogOpen = false },
                     logEntries = logEntries,
-                    context = context,
-                    isEnemyDefeated = combat.combatStatus == CombatGeneralStatus.USER_WON,
                 )
 
                 Box {
