@@ -13,11 +13,11 @@ object SkillDataMapper {
                 SkillDomain.Other(
                     id = dto.skillId,
                     name = dto.name,
-                    type = SkillType.valueOf(dto.type),
+                    type = parseSkillType(dto.elementName),
                     description = dto.description,
                     quote = dto.quote,
-                    icon = resolveIcon(SkillType.valueOf(dto.type)),
-                    onThrowSFX = resolveOnThrowSFX(SkillType.valueOf(dto.type)),
+                    icon = resolveIcon(parseSkillType(dto.elementName)),
+                    onThrowSFX = resolveOnThrowSFX(parseSkillType(dto.elementName)),
                     levelupSkillId = dto.levelupSkillId,
                     isCooldown = dto.cooldown,
                     deckSlot = dto.deckSlot,
@@ -28,11 +28,11 @@ object SkillDataMapper {
                 SkillDomain.Time(
                     id = dto.skillId,
                     name = dto.name,
-                    type = SkillType.valueOf(dto.type),
+                    type = parseSkillType(dto.elementName),
                     description = dto.description,
                     quote = dto.quote,
-                    icon = resolveIcon(SkillType.valueOf(dto.type)),
-                    onThrowSFX = resolveOnThrowSFX(SkillType.valueOf(dto.type)),
+                    icon = resolveIcon(parseSkillType(dto.elementName)),
+                    onThrowSFX = resolveOnThrowSFX(parseSkillType(dto.elementName)),
                     levelupSkillId = dto.levelupSkillId,
                     isCooldown = dto.cooldown,
                     deckSlot = dto.deckSlot,
@@ -58,11 +58,11 @@ object SkillDataMapper {
         return SkillDomain.Goal(
             id = dto.skillId,
             name = dto.name,
-            type = SkillType.valueOf(dto.type),
+            type = parseSkillType(dto.elementName),
             description = dto.description,
             quote = dto.quote,
-            icon = resolveIcon(SkillType.valueOf(dto.type)),
-            onThrowSFX = resolveOnThrowSFX(SkillType.valueOf(dto.type)),
+            icon = resolveIcon(parseSkillType(dto.elementName)),
+            onThrowSFX = resolveOnThrowSFX(parseSkillType(dto.elementName)),
             levelupSkillId = dto.levelupSkillId,
             isCooldown = dto.cooldown,
             deckSlot = dto.deckSlot,
@@ -81,7 +81,7 @@ object SkillDataMapper {
                 SkillDTO(
                     skillId = domain.id,
                     name = domain.name,
-                    type = domain.type.name,
+                    elementName = domain.type.name,
                     description = domain.description,
                     quote = domain.quote,
                     levelupSkillId = domain.levelupSkillId,
@@ -98,7 +98,7 @@ object SkillDataMapper {
                 SkillDTO(
                     skillId = domain.id,
                     name = domain.name,
-                    type = domain.type.name,
+                    elementName = domain.type.name,
                     description = domain.description,
                     quote = domain.quote,
                     levelupSkillId = domain.levelupSkillId,
@@ -115,7 +115,7 @@ object SkillDataMapper {
                 SkillDTO(
                     skillId = domain.id,
                     name = domain.name,
-                    type = domain.type.name,
+                    elementName = domain.type.name,
                     description = domain.description,
                     quote = domain.quote,
                     levelupSkillId = domain.levelupSkillId,
@@ -128,6 +128,10 @@ object SkillDataMapper {
                     cooldownOtherDescription = null,
                 )
         }
+
+    private fun parseSkillType(raw: String?): SkillType =
+        raw?.let { runCatching { SkillType.valueOf(it.uppercase()) }.getOrNull() }
+            ?: SkillType.RESILIENCE
 
     private fun resolveIcon(type: SkillType): Int =
         when (type) {
