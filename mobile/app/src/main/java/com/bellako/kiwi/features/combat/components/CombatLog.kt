@@ -238,6 +238,11 @@ private fun formatAction(
                 append(" skipped the turn.")
             }
 
+            CombatActionType.ACTOR_SKIPPED_BY_TURNS -> {
+                appendActor(actorName, colors)
+                append("'s turn was skipped!")
+            }
+
             CombatActionType.STATUS_TURN_REDUCED -> {
                 appendStatus(action.stateName, colors)
                 append(" weakens on ")

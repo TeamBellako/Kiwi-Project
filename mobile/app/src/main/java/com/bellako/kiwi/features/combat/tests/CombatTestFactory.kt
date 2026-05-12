@@ -23,6 +23,7 @@ object CombatTestFactory {
         acc: Int = 90,
         eva: Int = 10,
         lck: Int = 5,
+        turns: Int = 0,
     ): CombatStatsDomain =
         CombatStatsDomain(
             currentHp = currentHp,
@@ -34,6 +35,7 @@ object CombatTestFactory {
             acc = acc,
             eva = eva,
             lck = lck,
+            turns = turns,
         )
 
     fun validCombatActorDomain(stats: CombatStatsDomain = validCombatStatsDomain()): CombatActorDomain =
