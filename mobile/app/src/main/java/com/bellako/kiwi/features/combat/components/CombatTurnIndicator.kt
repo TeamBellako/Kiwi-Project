@@ -45,6 +45,7 @@ private const val CHEVRON_CLOSED_ROTATION = 0f
 // Inner-glow hues for the turn indicator. Tweak alpha or the base color to retune the feedback.
 @Suppress("MagicNumber")
 private val TURN_GLOW_DAMAGE = Color(0xB3D63A2F)
+
 @Suppress("MagicNumber")
 private val TURN_GLOW_STAT_MOD = Color(0xB330B0FF)
 
@@ -123,6 +124,7 @@ fun userTurnMessage(): AnnotatedString {
  *
  * Priority: a damage hit on the player wins over any stat-modifying effect in the same action.
  */
+@Suppress("ReturnCount")
 fun combatTurnGlowColor(action: CombatActionDomain?): Color? {
     if (action == null) return null
     if (action.actionType == CombatActionType.ACTOR_DAMAGED_BY_STATE && action.actor == CombatActor.USER) {
