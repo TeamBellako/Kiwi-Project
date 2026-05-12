@@ -55,7 +55,7 @@ public class CombatActionMapper {
                             .build()
             );
 
-            case SKIP, TIMEOUT, ABANDON -> List.of(
+            case SKIP, TIMEOUT, ABANDON, ACTOR_SKIPPED_BY_TURNS -> List.of(
                     baseCombatLogPersistenceBuilder(action, combatId, turnNumber).build()
             );
         };

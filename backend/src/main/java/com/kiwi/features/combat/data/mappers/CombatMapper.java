@@ -74,6 +74,7 @@ public class CombatMapper {
                 .userAcc(stats.getAcc())
                 .userEva(stats.getEva())
                 .userLck(stats.getLck())
+                .userTurns(0)
 
                 // ENEMY snapshot
                 .enemyHp(enemy.getMaxHp())
@@ -86,6 +87,7 @@ public class CombatMapper {
                 .enemyAcc(enemy.getAcc())
                 .enemyEva(enemy.getEva())
                 .enemyLck(enemy.getLck())
+                .enemyTurns(0)
 
                 .turnNumber(1)
                 .combatStatus(CombatGeneralStatus.ONGOING)

@@ -13,6 +13,7 @@ data class CombatStatsDTO(
     val acc: Int,
     val eva: Int,
     val lck: Int,
+    val turns: Int = 0,
 )
 
 @Serializable
@@ -110,4 +111,5 @@ data class CombatTurnResultDTO(
     val combatStatus: String,
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
+    val bonusActionPending: Boolean = false,
 )

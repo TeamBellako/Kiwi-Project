@@ -133,9 +133,10 @@ public class SkillsManager {
                         applyHeal(victim, effect, effectContext)
                 );
 
-                case MODIFY_STAT -> results.add(
-                        applyModifyStat(victim, effect, effectContext)
-                );
+                case MODIFY_STAT -> {
+                    SkillEffectResultDomain r = applyModifyStat(victim, effect, effectContext);
+                    if (r != null) results.add(r);
+                }
             }
         }
     }
@@ -322,6 +323,22 @@ public class SkillsManager {
                 case MUL -> modificationType = StatModificationType.DIV;
                 case DIV -> modificationType = StatModificationType.MUL;
             }
+        }
+
+        // TURNS: action-economy counter — only SUM/SUB allowed, bypasses consume multiplier
+        if (stat == StatType.TURNS) {
+            if (modificationType != StatModificationType.SUM
+                    && modificationType != StatModificationType.SUB) {
+                return null;
+            }
+            int newTurns = applyModification(baseValue, effect.getPower(), modificationType);
+            target.getStats().setStat(stat, newTurns);
+            return SkillEffectResultDomain.builder()
+                    .typeResult(SkillEffectResultType.MODIFY_STAT)
+                    .statAffected(stat)
+                    .target(target.getType())
+                    .value((float) newTurns)
+                    .build();
         }
 
         int newValue = applyModification(

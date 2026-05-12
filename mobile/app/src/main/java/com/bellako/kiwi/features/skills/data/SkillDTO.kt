@@ -3,7 +3,7 @@ package com.bellako.kiwi.features.skills.data
 data class SkillDTO(
     val skillId: Long,
     val name: String,
-    val type: String,
+    val elementName: String,
     val description: String,
     val quote: String?,
     val cooldownType: String,

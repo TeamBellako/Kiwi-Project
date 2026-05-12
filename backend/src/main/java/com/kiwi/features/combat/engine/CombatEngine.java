@@ -32,19 +32,34 @@ public class CombatEngine {
         // USER TURN
         CombatActorDomain userActor = combat.getActor(CombatActorType.USER);
 
-        //APPLY CURRENT STATES
-        statusManager.applyActiveStatesEffectsToActor(userActor, combat);
+        // user.turns > 0 at start = mid-round bonus action (the round started in a previous call).
+        // States already ticked then; do NOT tick again.
+        boolean isMidRoundBonus = userActor.getStats().getStat(StatType.TURNS) > 0;
 
-        //CHECK USER LIFE
-        if(userActor.getStats().getCurrentHp() <= 0) {
-            combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
-            return buildCombatTurnResult(combat);
+        if (!isMidRoundBonus) {
+            //APPLY CURRENT STATES
+            statusManager.applyActiveStatesEffectsToActor(userActor, combat);
+
+            //CHECK USER LIFE
+            if (userActor.getStats().getCurrentHp() <= 0) {
+                combat.setCombatStatus(CombatGeneralStatus.USER_LOST);
+                return buildCombatTurnResult(combat);
+            }
         }
 
-        //EXECUTE ACTION
-        if (userActor.getActionModifierType() != CombatActionType.ACTOR_BLOCKED_BY_STATE) {
+        //EXECUTE ACTION (skipped if user is in TURNS debt)
+        if (userActor.getStats().getStat(StatType.TURNS) < 0) {
+            userActor.getStats().setStat(
+                    StatType.TURNS,
+                    userActor.getStats().getStat(StatType.TURNS) + 1
+            );
+            combat.addAction(CombatActionDomain.builder()
+                    .actor(CombatActorType.USER)
+                    .actionType(CombatActionType.ACTOR_SKIPPED_BY_TURNS)
+                    .build());
+        } else if (userActor.getActionModifierType() != CombatActionType.ACTOR_BLOCKED_BY_STATE) {
             CombatActionDomain action;
-            if ( userActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
+            if (userActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
                 action = skillsManager.executeSkill(
                         combat,
@@ -63,11 +78,26 @@ public class CombatEngine {
             combat.addAction(action);
         }
 
-        //REDUCE STATES TURNS
+        // Consume one bonus action if we were in mid-round bonus mode.
+        if (isMidRoundBonus) {
+            userActor.getStats().setStat(
+                    StatType.TURNS,
+                    userActor.getStats().getStat(StatType.TURNS) - 1
+            );
+        }
+
+        // If user still has positive TURNS, more bonus actions are pending.
+        // Return early without enemy phase, without state-tick, without turnNumber++.
+        if (userActor.getStats().getStat(StatType.TURNS) > 0) {
+            return buildCombatTurnResult(combat, true);
+        }
+
+        //REDUCE STATES TURNS (user)
         statusManager.reduceStatesTurnsToActor(userActor, combat);
 
         // ENEMY TURN
-        if(combat.getEnemy().getStats().getStat(StatType.CURRENT_HP) > 0) {
+        if(combat.getEnemy().getStats().getStat(StatType.CURRENT_HP) > 0
+                && combat.getUser().getStats().getStat(StatType.CURRENT_HP) > 0) {
 
             CombatActorDomain enemyActor = combat.getActor(CombatActorType.ENEMY);
 
@@ -80,11 +110,39 @@ public class CombatEngine {
                 return buildCombatTurnResult(combat);
             }
 
-            //CHOOSE SKILL
-            Long enemySkill = enemyAI.chooseSkill(combat);
+            // ENEMY TURNS counter drives action count this round.
+            // > 0: extra actions (drain by 1, run 2 actions).
+            // < 0: skip (drain by 1 toward 0, run 0 actions and emit ACTOR_SKIPPED_BY_TURNS).
+            int enemyActions = 1;
 
-            //EXECUTE ACTION
-            if (enemyActor.getActionModifierType() != CombatActionType.ACTOR_BLOCKED_BY_STATE) {
+            if (enemyActor.getStats().getStat(StatType.TURNS) > 0) {
+                enemyActor.getStats().setStat(
+                        StatType.TURNS,
+                        enemyActor.getStats().getStat(StatType.TURNS) - 1
+                );
+                enemyActions += 1;
+            }
+            if (enemyActor.getStats().getStat(StatType.TURNS) < 0) {
+                enemyActor.getStats().setStat(
+                        StatType.TURNS,
+                        enemyActor.getStats().getStat(StatType.TURNS) + 1
+                );
+                enemyActions -= 1;
+            }
+            enemyActions = Math.max(0, enemyActions);
+
+            if (enemyActions == 0) {
+                combat.addAction(CombatActionDomain.builder()
+                        .actor(CombatActorType.ENEMY)
+                        .actionType(CombatActionType.ACTOR_SKIPPED_BY_TURNS)
+                        .build());
+            }
+
+            //EXECUTE ACTIONS
+            for (int i = 0; i < enemyActions; i++) {
+                if (enemyActor.getActionModifierType() == CombatActionType.ACTOR_BLOCKED_BY_STATE) {
+                    break;
+                }
                 CombatActionDomain action;
                 if (enemyActor.getActionModifierType() == CombatActionType.SKILL_REPEAT_BY_STATE) {
 
@@ -95,6 +153,7 @@ public class CombatEngine {
                     );
 
                 } else {
+                    Long enemySkill = enemyAI.chooseSkill(combat);
                     action = skillsManager.executeSkill(
                             combat,
                             CombatActorType.ENEMY,
@@ -127,11 +186,17 @@ public class CombatEngine {
 
     private CombatTurnResultDomain buildCombatTurnResult(CombatDomain combat)
     {
+        return buildCombatTurnResult(combat, false);
+    }
+
+    private CombatTurnResultDomain buildCombatTurnResult(CombatDomain combat, boolean bonusActionPending)
+    {
         return CombatTurnResultDomain.builder()
                 .combatId(combat.getId())
                 .turnNumber(combat.getTurnNumber())
                 .actions(combat.getActions())
                 .combatStatus(combat.getCombatStatus())
+                .bonusActionPending(bonusActionPending)
                 .build();
     }
 

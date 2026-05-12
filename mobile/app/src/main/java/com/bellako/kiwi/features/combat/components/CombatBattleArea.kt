@@ -63,8 +63,6 @@ internal fun ColumnScope.CombatBattleArea(
     isLogOpen: Boolean,
     onDismissLog: () -> Unit,
     logEntries: List<CombatLogEntry>,
-    context: Context,
-    isEnemyDefeated: Boolean = false,
 ) {
     Box(
         modifier =

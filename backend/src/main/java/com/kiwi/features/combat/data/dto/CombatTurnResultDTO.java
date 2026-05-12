@@ -22,4 +22,6 @@ public class CombatTurnResultDTO {
     private String onCompletedEvent;
     private int onCompletedEntityId;
 
+    private boolean bonusActionPending;
+
 }

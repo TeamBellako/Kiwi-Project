@@ -23,6 +23,7 @@ public class StatsMapper {
                 .acc(combat.getUserAcc())
                 .eva(combat.getUserEva())
                 .lck(combat.getUserLck())
+                .turns(combat.getUserTurns())
                 .build();
     }
 
@@ -40,6 +41,7 @@ public class StatsMapper {
                 .acc(combat.getEnemyAcc())
                 .eva(combat.getEnemyEva())
                 .lck(combat.getEnemyLck())
+                .turns(combat.getEnemyTurns())
                 .build();
     }
 
@@ -57,6 +59,7 @@ public class StatsMapper {
                 .acc(stats.getAcc())
                 .eva(stats.getEva())
                 .lck(stats.getLck())
+                .turns(stats.getTurns())
                 .build();
     }
 

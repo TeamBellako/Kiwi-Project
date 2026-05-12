@@ -17,6 +17,7 @@ public class CombatTurnResultMapper {
                 .turnNumber(domain.getTurnNumber())
                 .actions(actionDTOList)
                 .combatStatus(domain.getCombatStatus().name())
+                .bonusActionPending(domain.isBonusActionPending())
                 .build();
     }
 }

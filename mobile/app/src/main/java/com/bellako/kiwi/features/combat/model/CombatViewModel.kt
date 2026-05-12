@@ -392,6 +392,7 @@ class CombatViewModel
                         "acc" -> s.copy(acc = s.acc + delta)
                         "eva" -> s.copy(eva = s.eva + delta)
                         "lck" -> s.copy(lck = s.lck + delta)
+                        "turns" -> s.copy(turns = s.turns + delta)
                         else -> s
                     }
                 actor.copy(stats = newStats)

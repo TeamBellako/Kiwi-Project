@@ -44,6 +44,7 @@ import com.bellako.kiwi.features.combat.components.LogDimOverlay
 import com.bellako.kiwi.features.combat.components.PlayerControls
 import com.bellako.kiwi.features.combat.components.PlayerDamageOverlays
 import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
+import com.bellako.kiwi.features.combat.components.combatTurnGlowColor
 import com.bellako.kiwi.features.combat.components.rememberDeathSequenceVfx
 import com.bellako.kiwi.features.combat.components.rememberPlayerDamageVfx
 import com.bellako.kiwi.features.combat.components.userTurnMessage
@@ -146,8 +147,6 @@ fun CombatScreen(
                     isLogOpen = isLogOpen,
                     onDismissLog = { isLogOpen = false },
                     logEntries = logEntries,
-                    context = context,
-                    isEnemyDefeated = combat.combatStatus == CombatGeneralStatus.USER_WON,
                 )
 
                 Box {
@@ -170,6 +169,7 @@ fun CombatScreen(
                             message = turnMessage,
                             isLogOpen = isLogOpen,
                             onClick = { isLogOpen = !isLogOpen },
+                            glowColor = combatTurnGlowColor(combat.log.lastOrNull()),
                         )
 
                         Kiwi_Spacer(Spacing.medium)

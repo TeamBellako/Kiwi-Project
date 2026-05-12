@@ -29,6 +29,7 @@ enum class CombatActionType {
     STATUS_FINISHED,
     TIMEOUT,
     ABANDON,
+    ACTOR_SKIPPED_BY_TURNS,
 }
 
 @Serializable
@@ -52,6 +53,12 @@ data class CombatStatsDomain(
     val acc: Int,
     val eva: Int,
     val lck: Int,
+    /**
+     * Action-economy counter. Positive values queue extra turns for this actor;
+     * negative values cause turns to be skipped. Drained automatically by the
+     * backend as turns are taken — treat the backend as the source of truth.
+     */
+    val turns: Int = 0,
 )
 
 @Serializable
@@ -141,4 +148,10 @@ data class CombatTurnResultDomain(
     val combatStatus: CombatGeneralStatus,
     val onCompletedEvent: String? = null,
     val onCompletedEntityId: Int? = null,
+    /**
+     * When true, the user has more turns queued: the enemy phase did not run and the
+     * client should hand control back to the skill picker. Set by skills that grant
+     * extra user turns (e.g. Inner Focus).
+     */
+    val bonusActionPending: Boolean = false,
 )

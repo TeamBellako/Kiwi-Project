@@ -17,4 +17,6 @@ public class CombatTurnResultDomain {
     private List<CombatActionDomain> actions;
 
     private CombatGeneralStatus combatStatus;
+
+    private boolean bonusActionPending;
 }

@@ -164,7 +164,9 @@ INSERT INTO combat_elements (id, name, icon, description) VALUES
 INSERT INTO skills
     (id, element_id, name, description, cooldown_type, cooldown_goal_id, cooldown_time_minutes, cooldown_other_description, levelup_skill_id) VALUES
 (1001, 1, 'Fake Attack', 'Deals 1 physical damage.', 'GOAL', 101, NULL, NULL, NULL),
-(1000, 2, 'Attack',     'Deals 40 physical damage.', 'GOAL',  100,  NULL, NULL, NULL);
+(1000, 2, 'Attack',     'Deals 40 physical damage.', 'GOAL',  100,  NULL, NULL, NULL),
+(1002, 5, 'Inner Focus', 'Grants you an extra turn on the next exchange.', 'GOAL', 102, NULL, NULL, NULL),
+(1003, 5, 'Mental Lock', 'Skips the opponent''s next turn.',              'GOAL', 103, NULL, NULL, NULL);
 
 
 

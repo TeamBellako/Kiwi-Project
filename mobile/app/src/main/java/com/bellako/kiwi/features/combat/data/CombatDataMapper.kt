@@ -41,6 +41,7 @@ object CombatDataMapper {
             combatStatus = enumValueOf<CombatGeneralStatus>(dto.combatStatus),
             onCompletedEvent = if (hasEvent) dto.onCompletedEvent else null,
             onCompletedEntityId = if (hasEvent) dto.onCompletedEntityId else null,
+            bonusActionPending = dto.bonusActionPending,
         )
     }
 
@@ -63,6 +64,7 @@ object CombatDataMapper {
             acc = dto.acc,
             eva = dto.eva,
             lck = dto.lck,
+            turns = dto.turns,
         )
 
     fun toDomain(dto: ElementMultiplierDTO): ElementMultiplierDomain =
@@ -152,6 +154,7 @@ object CombatDataMapper {
             combatStatus = domain.combatStatus.name,
             onCompletedEvent = domain.onCompletedEvent ?: NO_COMPLETION_EVENT_SENTINEL,
             onCompletedEntityId = domain.onCompletedEntityId ?: 0,
+            bonusActionPending = domain.bonusActionPending,
         )
 
     fun toDTO(domain: CombatActorDomain): CombatActorDTO =
@@ -173,6 +176,7 @@ object CombatDataMapper {
             acc = domain.acc,
             eva = domain.eva,
             lck = domain.lck,
+            turns = domain.turns,
         )
 
     fun toDTO(domain: ElementMultiplierDomain): ElementMultiplierDTO =

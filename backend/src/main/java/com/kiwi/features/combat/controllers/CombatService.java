@@ -121,6 +121,7 @@ public class CombatService {
         combat.setUserEva(stats.getEva());
         combat.setUserLck(stats.getLck());
         combat.setUserShield(stats.getShield());
+        combat.setUserTurns(0);
 
         combat.setEnemyHp(enemy.getMaxHp());
         combat.setEnemyMaxHp(enemy.getMaxHp());
@@ -132,6 +133,7 @@ public class CombatService {
         combat.setEnemyAcc(enemy.getAcc());
         combat.setEnemyEva(enemy.getEva());
         combat.setEnemyLck(enemy.getLck());
+        combat.setEnemyTurns(0);
 
         combatRepository.save(combat);
     }

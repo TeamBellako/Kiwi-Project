@@ -58,6 +58,8 @@ public class EngineTestFactory {
                 .statusResistances(new HashMap<>())
                 .activeStatuses(new ArrayList<>())
                 .skills(new HashMap<>(skills))
+                .blockedSkills(new ArrayList<>())
+                .resetCooldownSkills(new ArrayList<>())
                 .build();
     }
 
@@ -93,6 +95,16 @@ public class EngineTestFactory {
                 .build();
     }
 
+    public static SkillEffectDomain modifyTurnsEffect(SkillEffectTargetType target, StatModificationType mod, float power) {
+        return SkillEffectDomain.builder()
+                .effectType(SkillEffectType.MODIFY_STAT)
+                .target(target)
+                .statAffected(StatType.TURNS)
+                .statModification(mod)
+                .power(power)
+                .build();
+    }
+
     public static SkillEffectDomain applyStatusEffect(Long stateId, int duration, float power) {
         return SkillEffectDomain.builder()
                 .effectType(SkillEffectType.APPLY_STATUS)
@@ -100,6 +112,52 @@ public class EngineTestFactory {
                 .stateId(stateId)
                 .statusDuration(duration)
                 .power(power)
+                .build();
+    }
+
+    public static SkillEffectDomain consumeStatusEffect(int turns) {
+        return SkillEffectDomain.builder()
+                .effectType(SkillEffectType.CONSUME_STATUS)
+                .target(SkillEffectTargetType.OPPONENT)
+                .turns(turns)
+                .build();
+    }
+
+    public static SkillEffectDomain extendBuffsEffect(int turns) {
+        return SkillEffectDomain.builder()
+                .effectType(SkillEffectType.EXTEND_BUFFS)
+                .target(SkillEffectTargetType.SELF)
+                .turns(turns)
+                .build();
+    }
+
+    public static SkillEffectDomain copyBuffsEffect() {
+        return SkillEffectDomain.builder()
+                .effectType(SkillEffectType.COPY_BUFFS)
+                .target(SkillEffectTargetType.OPPONENT)
+                .build();
+    }
+
+    public static SkillEffectDomain swapBuffsEffect() {
+        return SkillEffectDomain.builder()
+                .effectType(SkillEffectType.SWAP_BUFFS)
+                .target(SkillEffectTargetType.OPPONENT)
+                .build();
+    }
+
+    public static SkillEffectDomain resetCooldownsEffect() {
+        return SkillEffectDomain.builder()
+                .effectType(SkillEffectType.RESET_COOLDOWNS)
+                .target(SkillEffectTargetType.SELF)
+                .build();
+    }
+
+    public static CombatActiveStatusDomain activeStatus(Long stateId, int remainingTurns, Float value, StatType statAffected) {
+        return CombatActiveStatusDomain.builder()
+                .stateId(stateId)
+                .remainingTurns(remainingTurns)
+                .value(value)
+                .statAffected(statAffected)
                 .build();
     }
 
