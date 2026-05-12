@@ -24,4 +24,6 @@ public class CombatStatsDTO {
     private int eva;
 
     private int lck;
+
+    private int turns;
 }

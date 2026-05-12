@@ -23,6 +23,8 @@ public class StatsDomain {
 
     private int lck;
 
+    private int turns;
+
     //------------------------------------------------------------------------------------------------------------------
 
     public int getStat(StatType stat) {
@@ -69,6 +71,10 @@ public class StatsDomain {
                return this.lck;
            }
 
+           case TURNS -> {
+               return this.turns;
+           }
+
        }
 
        throw new IllegalArgumentException("Not valid stat type");
@@ -95,6 +101,8 @@ public class StatsDomain {
             case EVA -> this.eva = value;
 
             case LCK -> this.lck = value;
+
+            case TURNS -> this.turns = value;
         }
     }
 

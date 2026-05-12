@@ -283,6 +283,177 @@ public class CombatEngineTests {
         assertEquals(CombatActorType.USER, result.getActions().get(0).getActor());
     }
 
+    // ============================================================================================
+    // TURNS — ACTION ECONOMY
+    // ============================================================================================
+
+    @Test
+    public void executeTurn_userBonusAfterSkill_returnsEarlyWithBonusPending() {
+        // User uses an ExtraTurn-like skill that sets user.turns to +1 during execution.
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+        combat.setTurnNumber(5);
+
+        when(skillsManager.executeSkill(any(), eq(CombatActorType.USER), eq(1002L)))
+                .thenAnswer(inv -> {
+                    user.getStats().setStat(StatType.TURNS, 1);
+                    return CombatActionDomain.builder()
+                            .actor(CombatActorType.USER)
+                            .actionType(CombatActionType.SKILL_USED)
+                            .build();
+                });
+
+        CombatTurnResultDomain result = engine.executeTurn(combat, 1002L);
+
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.USER), eq(1002L));
+        // Enemy phase MUST NOT run
+        verify(skillsManager, never()).executeSkill(any(), eq(CombatActorType.ENEMY), any());
+        verify(enemyAI, never()).chooseSkill(any());
+        // State turns must NOT tick on user (round not over)
+        verify(statusManager, never()).reduceStatesTurnsToActor(eq(user), any());
+        // turnNumber stays put
+        assertEquals(5, combat.getTurnNumber());
+        // Counter preserved for the next call
+        assertEquals(1, user.getStats().getStat(StatType.TURNS));
+        // Flag set so mobile knows to ask for another skill
+        assertTrue(result.isBonusActionPending());
+    }
+
+    @Test
+    public void executeTurn_midRoundBonus_skipsApplyStatesAndConsumesOneBonus() {
+        // Second call: user.turns starts at +1 (a bonus action is pending).
+        // applyActiveStates must NOT run on user, and the counter must drain by 1.
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        user.getStats().setStat(StatType.TURNS, 1);
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+        combat.setTurnNumber(5);
+
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
+
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.USER), eq(5L));
+        verify(statusManager, never()).applyActiveStatesEffectsToActor(eq(user), any());
+        // After consuming the bonus, counter is 0; enemy phase runs normally.
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.ENEMY), eq(99L));
+        assertEquals(0, user.getStats().getStat(StatType.TURNS));
+        assertEquals(6, combat.getTurnNumber());
+        assertFalse(result.isBonusActionPending());
+    }
+
+    @Test
+    public void executeTurn_userBonusOfTwo_chainsThreeCallsBeforeEnemyActs() {
+        // First call sets turns=+2 (two bonus actions queued); second & third are bonus calls;
+        // enemy only acts on the third call after all bonuses are consumed.
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+
+        when(skillsManager.executeSkill(any(), eq(CombatActorType.USER), eq(1002L)))
+                .thenAnswer(inv -> {
+                    user.getStats().setStat(StatType.TURNS, 2);
+                    return CombatActionDomain.builder()
+                            .actor(CombatActorType.USER)
+                            .actionType(CombatActionType.SKILL_USED)
+                            .build();
+                });
+
+        CombatTurnResultDomain r1 = engine.executeTurn(combat, 1002L);
+        assertTrue(r1.isBonusActionPending());
+        assertEquals(2, user.getStats().getStat(StatType.TURNS));
+
+        CombatTurnResultDomain r2 = engine.executeTurn(combat, 5L);
+        assertTrue(r2.isBonusActionPending());
+        assertEquals(1, user.getStats().getStat(StatType.TURNS));
+        verify(skillsManager, never()).executeSkill(any(), eq(CombatActorType.ENEMY), any());
+
+        CombatTurnResultDomain r3 = engine.executeTurn(combat, 5L);
+        assertFalse(r3.isBonusActionPending());
+        assertEquals(0, user.getStats().getStat(StatType.TURNS));
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.ENEMY), eq(99L));
+    }
+
+    @Test
+    public void executeTurn_enemyDebt_runsEnemyPhaseButSkipsSkillAndEmitsAction() {
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        enemy.getStats().setStat(StatType.TURNS, -1);
+        CombatDomain combat = combat(user, enemy);
+
+        engine.executeTurn(combat, 5L);
+
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.USER), eq(5L));
+        // Enemy phase plumbing runs (states tick) but no skill is executed.
+        verify(statusManager).applyActiveStatesEffectsToActor(eq(enemy), any());
+        verify(statusManager).reduceStatesTurnsToActor(eq(enemy), any());
+        verify(skillsManager, never()).executeSkill(any(), eq(CombatActorType.ENEMY), any());
+        verify(enemyAI, never()).chooseSkill(any());
+        assertEquals(0, enemy.getStats().getStat(StatType.TURNS));
+        // The skip event is in the action log for the mobile to render.
+        assertTrue(combat.getActions().stream().anyMatch(a ->
+                a.getActor() == CombatActorType.ENEMY
+                        && a.getActionType() == CombatActionType.ACTOR_SKIPPED_BY_TURNS));
+    }
+
+    @Test
+    public void executeTurn_userDebt_skipsUserAndEnemyActs() {
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        user.getStats().setStat(StatType.TURNS, -1);
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+
+        engine.executeTurn(combat, 5L);
+
+        verify(skillsManager, never()).executeSkill(any(), eq(CombatActorType.USER), any());
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.ENEMY), eq(99L));
+        assertEquals(0, user.getStats().getStat(StatType.TURNS));
+        assertTrue(combat.getActions().stream().anyMatch(a ->
+                a.getActor() == CombatActorType.USER
+                        && a.getActionType() == CombatActionType.ACTOR_SKIPPED_BY_TURNS));
+    }
+
+    @Test
+    public void executeTurn_enemyBonusRunsExtraAction() {
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        enemy.getStats().setStat(StatType.TURNS, 1);
+        CombatDomain combat = combat(user, enemy);
+
+        engine.executeTurn(combat, 5L);
+
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.USER), eq(5L));
+        verify(skillsManager, times(2)).executeSkill(any(), eq(CombatActorType.ENEMY), eq(99L));
+        verify(enemyAI, times(2)).chooseSkill(any());
+        assertEquals(0, enemy.getStats().getStat(StatType.TURNS));
+    }
+
+    @Test
+    public void executeTurn_extraEnemyActionsStillTickStatesOnce() {
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        enemy.getStats().setStat(StatType.TURNS, 1);
+        CombatDomain combat = combat(user, enemy);
+
+        engine.executeTurn(combat, 5L);
+
+        verify(skillsManager, times(2)).executeSkill(any(), eq(CombatActorType.ENEMY), any());
+        verify(statusManager).applyActiveStatesEffectsToActor(eq(enemy), any());
+        verify(statusManager).reduceStatesTurnsToActor(eq(enemy), any());
+    }
+
+    @Test
+    public void executeTurn_normalRoundWithZeroTurns_actsAsBefore() {
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats());
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+
+        CombatTurnResultDomain result = engine.executeTurn(combat, 5L);
+
+        assertFalse(result.isBonusActionPending());
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.USER), eq(5L));
+        verify(skillsManager).executeSkill(any(), eq(CombatActorType.ENEMY), eq(99L));
+    }
+
     @Test
     public void buildAbandonCombatTurnResult_emitsAbandonAction() {
         CombatActorDomain user = actor(CombatActorType.USER, defaultStats());

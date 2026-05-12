@@ -52,6 +52,7 @@ public class CombatProgressService {
             combat.setUserEva(user.getStats().getEva());
             combat.setUserLck(user.getStats().getLck());
             combat.setUserShield(user.getStats().getShield());
+            combat.setUserTurns(user.getStats().getTurns());
         }
 
         if(enemy != null) {
@@ -65,6 +66,7 @@ public class CombatProgressService {
             combat.setEnemyEva(enemy.getStats().getEva());
             combat.setEnemyLck(enemy.getStats().getLck());
             combat.setEnemyShield(enemy.getStats().getShield());
+            combat.setEnemyTurns(enemy.getStats().getTurns());
         }
 
         combat.setCombatStatus(combatDomain.getCombatStatus());

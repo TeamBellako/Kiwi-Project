@@ -8,7 +8,7 @@ public enum BuildType {
     // Element IDs: 1=Adaptability, 2=Control, 3=Empathy, 4=Focus, 5=Motivation, 6=Resilience
     BERSERKER(
             new BuildStats(140, 18, 6, 15, 8, 10, 6, 8),
-            List.of(1000L, 1001L /*, 3000L, 1070L*/), // TODO: Uncomment once all skills are place in the DB 
+            List.of(1000L, 1001L, 1002L, 1003L /*, 3000L, 1070L*/), // TODO: Uncomment once all skills are place in the DB
             List.of(
                     new ElementMultiplierConfig(1, 1.0f),  // Adaptability
                     new ElementMultiplierConfig(2, 1.0f),  // Control
@@ -21,7 +21,7 @@ public enum BuildType {
     ),
     SHAMAN(
             new BuildStats(95, 7, 18, 7, 14, 17, 15, 16),
-            List.of(1000L, 1001L /*, 5001L, 2000L, 5000L, 2080L*/), // TODO: Uncomment once all skills are place in the DB
+            List.of(1000L, 1001L, 1002L, 1003L /*, 5001L, 2000L, 5000L, 2080L*/), // TODO: Uncomment once all skills are place in the DB
             List.of(
                     new ElementMultiplierConfig(1, 0.5f),  // Adaptability
                     new ElementMultiplierConfig(2, 1.5f),  // Control
@@ -34,7 +34,7 @@ public enum BuildType {
     ),
     MONK(
             new BuildStats(115, 8, 15, 12, 18, 13, 10, 14),
-            List.of(1000L, 1001L /*, 4001L, 4000L, 6000L, 4030L*/), // TODO: Uncomment once all skills are place in the DB
+            List.of(1000L, 1001L, 1002L, 1003L /*, 4001L, 4000L, 6000L, 4030L*/), // TODO: Uncomment once all skills are place in the DB
             List.of(
                     new ElementMultiplierConfig(1, 1.5f),  // Adaptability
                     new ElementMultiplierConfig(2, 0.5f),  // Control

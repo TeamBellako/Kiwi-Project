@@ -95,6 +95,16 @@ public class EngineTestFactory {
                 .build();
     }
 
+    public static SkillEffectDomain modifyTurnsEffect(SkillEffectTargetType target, StatModificationType mod, float power) {
+        return SkillEffectDomain.builder()
+                .effectType(SkillEffectType.MODIFY_STAT)
+                .target(target)
+                .statAffected(StatType.TURNS)
+                .statModification(mod)
+                .power(power)
+                .build();
+    }
+
     public static SkillEffectDomain applyStatusEffect(Long stateId, int duration, float power) {
         return SkillEffectDomain.builder()
                 .effectType(SkillEffectType.APPLY_STATUS)

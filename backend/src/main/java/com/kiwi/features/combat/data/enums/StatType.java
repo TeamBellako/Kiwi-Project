@@ -11,4 +11,5 @@ public enum StatType {
     EVA,
     LCK,
     SHIELD,
+    TURNS,
 }

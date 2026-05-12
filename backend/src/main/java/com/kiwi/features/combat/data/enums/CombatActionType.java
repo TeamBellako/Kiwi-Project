@@ -11,6 +11,7 @@ public enum CombatActionType {
     SKIP,
     STATUS_TURN_REDUCED,
     STATUS_FINISHED,
+    ACTOR_SKIPPED_BY_TURNS,
     TIMEOUT,
     ABANDON,
 }

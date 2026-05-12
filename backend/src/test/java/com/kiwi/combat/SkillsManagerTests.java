@@ -367,6 +367,103 @@ public class SkillsManagerTests {
     }
 
     // ============================================================================================
+    // APPLY MODIFY STAT — TURNS
+    // ============================================================================================
+
+    @Test
+    public void applyModifyStat_turnsSumIncreasesCounterWithoutFloor() {
+        SkillCombatDomain s = skill(1L, "Inner Focus", 1L,
+                modifyTurnsEffect(com.kiwi.features.skills.data.enums.SkillEffectTargetType.SELF,
+                        StatModificationType.SUM, 1f));
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats(), Map.of(1L, s));
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+
+        CombatActionDomain action = skillsManager.executeSkill(combat, CombatActorType.USER, 1L);
+
+        assertEquals(1, user.getStats().getStat(StatType.TURNS));
+        SkillEffectResultDomain result = action.getSkillEffectsResults().get(0);
+        assertEquals(SkillEffectResultType.MODIFY_STAT, result.getTypeResult());
+        assertEquals(StatType.TURNS, result.getStatAffected());
+        assertEquals(CombatActorType.USER, result.getTarget());
+    }
+
+    @Test
+    public void applyModifyStat_turnsSubDecreasesCounterCanGoNegative() {
+        SkillCombatDomain s = skill(1L, "Mental Lock", 1L,
+                modifyTurnsEffect(com.kiwi.features.skills.data.enums.SkillEffectTargetType.OPPONENT,
+                        StatModificationType.SUB, 1f));
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats(), Map.of(1L, s));
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+
+        skillsManager.executeSkill(combat, CombatActorType.USER, 1L);
+
+        // no floor — counter goes negative
+        assertEquals(-1, enemy.getStats().getStat(StatType.TURNS));
+    }
+
+    @Test
+    public void applyModifyStat_turnsMulIsNoOp() {
+        // MUL on TURNS must be silently ignored — no result emitted, counter unchanged.
+        SkillCombatDomain s = skill(1L, "BadOp", 1L,
+                modifyTurnsEffect(com.kiwi.features.skills.data.enums.SkillEffectTargetType.SELF,
+                        StatModificationType.MUL, 5f));
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats(), Map.of(1L, s));
+        user.getStats().setStat(StatType.TURNS, 3);
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+
+        CombatActionDomain action = skillsManager.executeSkill(combat, CombatActorType.USER, 1L);
+
+        assertTrue(action.getSkillEffectsResults().isEmpty());
+        assertEquals(3, user.getStats().getStat(StatType.TURNS));
+    }
+
+    @Test
+    public void applyModifyStat_turnsDivIsNoOp() {
+        SkillCombatDomain s = skill(1L, "BadOp", 1L,
+                modifyTurnsEffect(com.kiwi.features.skills.data.enums.SkillEffectTargetType.SELF,
+                        StatModificationType.DIV, 2f));
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats(), Map.of(1L, s));
+        user.getStats().setStat(StatType.TURNS, 4);
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        CombatDomain combat = combat(user, enemy);
+
+        CombatActionDomain action = skillsManager.executeSkill(combat, CombatActorType.USER, 1L);
+
+        assertTrue(action.getSkillEffectsResults().isEmpty());
+        assertEquals(4, user.getStats().getStat(StatType.TURNS));
+    }
+
+    @Test
+    public void applyModifyStat_turnsIgnoresConsumeMultiplier() {
+        // Chain CONSUME_STATUS(turns=3) — drains 3 turns from a 5-turn status, builds consumeMultiplier=4 —
+        // followed by MODIFY_STAT(TURNS, SUM, 1). The TURNS gain must remain exactly +1 (multiplier bypassed).
+        CombatActiveStatusDomain status = activeStatus(7L, 5, 1f, StatType.PATK);
+
+        SkillCombatDomain s = SkillCombatDomain.builder()
+                .id(1L)
+                .name("EatAndFocus")
+                .elementId(1L)
+                .effects(List.of(
+                        consumeStatusEffect(3),
+                        modifyTurnsEffect(com.kiwi.features.skills.data.enums.SkillEffectTargetType.SELF,
+                                StatModificationType.SUM, 1f)
+                ))
+                .build();
+
+        CombatActorDomain user = actor(CombatActorType.USER, defaultStats(), Map.of(1L, s));
+        CombatActorDomain enemy = actor(CombatActorType.ENEMY, defaultStats());
+        enemy.getActiveStatuses().add(status);
+        CombatDomain combat = combat(user, enemy);
+
+        skillsManager.executeSkill(combat, CombatActorType.USER, 1L);
+
+        assertEquals(1, user.getStats().getStat(StatType.TURNS));
+    }
+
+    // ============================================================================================
     // APPLY STATUS
     // ============================================================================================
 

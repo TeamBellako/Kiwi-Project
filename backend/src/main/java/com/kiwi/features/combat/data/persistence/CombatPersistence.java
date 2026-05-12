@@ -59,6 +59,9 @@ public class CombatPersistence {
     @Column(name="user_lck", nullable = false)
     private Integer userLck;
 
+    @Column(name="user_turns", nullable = false)
+    private Integer userTurns;
+
     // ENEMY STATS SNAPSHOT
     @Column(name="enemy_hp", nullable = false)
     private Integer enemyHp;
@@ -89,6 +92,9 @@ public class CombatPersistence {
 
     @Column(name="enemy_lck", nullable = false)
     private Integer enemyLck;
+
+    @Column(name="enemy_turns", nullable = false)
+    private Integer enemyTurns;
 
     @Column(name="turn_number", nullable = false)
     private int turnNumber;

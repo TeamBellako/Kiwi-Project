@@ -121,6 +121,7 @@ public class CombatTestFactory {
                 .userAcc(stats.getAcc())
                 .userEva(stats.getEva())
                 .userLck(stats.getLck())
+                .userTurns(0)
 
                 .enemyHp(enemy.getMaxHp())
                 .enemyMaxHp(enemy.getMaxHp())
@@ -132,6 +133,7 @@ public class CombatTestFactory {
                 .enemyAcc(enemy.getAcc())
                 .enemyEva(enemy.getEva())
                 .enemyLck(enemy.getLck())
+                .enemyTurns(0)
 
                 .turnNumber(1)
                 .endsAt(Instant.now().plusSeconds(600))
