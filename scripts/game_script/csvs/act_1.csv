@@ -1,0 +1,1083 @@
+id,character,dialog,next_event_id,next_event,name,chapter
+1,VOZ FEMENINA,"Ever since the stars disappeared, no one looks for them...",2,CONVERSATION,EXT. PRADERA - NOCHE 1,EXT. PRADERA - NOCHE
+2,VOZ FEMENINA,Or maybe they left because no one was looking for them?,,END,EXT. PRADERA - NOCHE 2,EXT. PRADERA - NOCHE
+3,VOZ EN OFF,"Before your journey begins, the Divinity must reveal who you truly are.",4,CONVERSATION,INT. LIMBO - DÍA [MysticQuestioning] 1,INT. LIMBO - DÍA [MysticQuestioning]
+4,VOZ EN OFF,"You wake up... Good. But before the light touches your skin, the Divinity must see you.",5,CONVERSATION,INT. LIMBO - DÍA [MysticQuestioning] 2,INT. LIMBO - DÍA [MysticQuestioning]
+5,VOZ EN OFF,"Three gifts are offered to you. One hums with power, another oozes warmth, and the last one shines with thought. Which do you choose?",6,CONVERSATION,INT. LIMBO - DÍA [MysticQuestioning] 3,INT. LIMBO - DÍA [MysticQuestioning]
+6,VOZ EN OFF,"So it is written. Walk the path of the [TYPE], but keep your spirit of self-improvement, for only then will you be able to visit all the paths.",,END,INT. LIMBO - DÍA [MysticQuestioning] 4,INT. LIMBO - DÍA [MysticQuestioning]
+7,LIRIA,Huh...?,8,CONVERSATION,EXT. FUENTE - DÍA 1,EXT. FUENTE - DÍA
+8,LIRIA,"Hey! Easy, easy! Don't try to move yet!",9,CONVERSATION,EXT. FUENTE - DÍA 2,EXT. FUENTE - DÍA
+9,LIRIA,Looks like you're just about to Awaken...,10,CONVERSATION,EXT. FUENTE - DÍA 3,EXT. FUENTE - DÍA
+10,LIRIA,"Alright, follow my voice. Take a deep breath.",11,CONVERSATION,EXT. FUENTE - DÍA 4,EXT. FUENTE - DÍA
+11,LIRIA,Feel the noise and the silence. Feel what you pretend to be and what you really are.,12,CONVERSATION,EXT. FUENTE - DÍA 5,EXT. FUENTE - DÍA
+12,LIRIA,Think about everything that stands between those images.,13,CONVERSATION,EXT. FUENTE - DÍA 6,EXT. FUENTE - DÍA
+13,LIRIA,"Think about what hurt, and what you kept quiet. About the obstacles they put in your way, and all the times you yourself threw yourself into the void.",14,CONVERSATION,EXT. FUENTE - DÍA 7,EXT. FUENTE - DÍA
+14,LIRIA,Think about your actions and their consequences.,15,CONVERSATION,EXT. FUENTE - DÍA 8,EXT. FUENTE - DÍA
+15,LIRIA,And now... Wake up.,16,CONVERSATION,EXT. FUENTE - DÍA 9,EXT. FUENTE - DÍA
+16,LIRIA,Finally! For a moment I thought you wouldn't make it.,17,CONVERSATION,EXT. FUENTE - DÍA 10,EXT. FUENTE - DÍA
+17,JUGADOR,What happened?,18,CONVERSATION,EXT. FUENTE - DÍA 11,EXT. FUENTE - DÍA
+18,LIRIA,You just Awakened.,19,CONVERSATION,EXT. FUENTE - DÍA 12,EXT. FUENTE - DÍA
+19,LIRIA,"Long ago, in some past life, you were consumed by temptations that left you a hollow shell.",20,CONVERSATION,EXT. FUENTE - DÍA 13,EXT. FUENTE - DÍA
+20,LIRIA,"You wandered aimlessly for countless years, but at some point you rejected that shell and freed your soul.",21,CONVERSATION,EXT. FUENTE - DÍA 14,EXT. FUENTE - DÍA
+21,LIRIA,"Thanks to that, ""you dwell in the here and now."" You triumphed for the first time.",22,CONVERSATION,EXT. FUENTE - DÍA 15,EXT. FUENTE - DÍA
+22,LIRIA,"""I must congratulate you, for many are unable to achieve such a feat.""",23,CONVERSATION,EXT. FUENTE - DÍA 16,EXT. FUENTE - DÍA
+23,LIRIA,Though it's obvious that without the help of the great Liria you wouldn't have been able to do it.,38,CONVERSATION,EXT. FUENTE - DÍA 17,EXT. FUENTE - DÍA
+24,JUGADOR,Who are you?,25,CONVERSATION,EXT. FUENTE - DÍA 18,EXT. FUENTE - DÍA
+25,LIRIA,So impatient... I help you Awaken and the first thing you do is interrogate me?,26,CONVERSATION,EXT. FUENTE - DÍA 19,EXT. FUENTE - DÍA
+26,LIRIA,Ugh... Who have I helped?,27,CONVERSATION,EXT. FUENTE - DÍA 20,EXT. FUENTE - DÍA
+27,LIRIA,"I'm Liria, a guiding spirit.",28,CONVERSATION,EXT. FUENTE - DÍA 21,EXT. FUENTE - DÍA
+28,LIRIA,My mission is to guide here the souls of those who renounce their shells and shackles.,29,CONVERSATION,EXT. FUENTE - DÍA 22,EXT. FUENTE - DÍA
+29,LIRIA,"Without me, those souls would scatter through limbo and never find their way to this place.",30,CONVERSATION,EXT. FUENTE - DÍA 23,EXT. FUENTE - DÍA
+30,LIRIA,Though sometimes it's hard to get their attention... And you didn't make it easy.,31,CONVERSATION,EXT. FUENTE - DÍA 24,EXT. FUENTE - DÍA
+31,LIRIA,You were lucky to come across such a good guide.,38,CONVERSATION,EXT. FUENTE - DÍA 25,EXT. FUENTE - DÍA
+32,JUGADOR,Where am I?,33,CONVERSATION,EXT. FUENTE - DÍA 26,EXT. FUENTE - DÍA
+33,LIRIA,"You're at the Source, the place where souls like yours are reborn from their ashes. The origin of all creation.",34,CONVERSATION,EXT. FUENTE - DÍA 27,EXT. FUENTE - DÍA
+34,LIRIA,Beneath our feet lies a well of infinite souls that wander without direction.,35,CONVERSATION,EXT. FUENTE - DÍA 28,EXT. FUENTE - DÍA
+35,LIRIA,"Empty shells, just like you once were.",36,CONVERSATION,EXT. FUENTE - DÍA 29,EXT. FUENTE - DÍA
+36,LIRIA,"Luckily, you had the courage to renounce your armor and free your soul.",37,CONVERSATION,EXT. FUENTE - DÍA 30,EXT. FUENTE - DÍA
+37,LIRIA,"And the luck of meeting the great Liria, of course.",38,CONVERSATION,EXT. FUENTE - DÍA 31,EXT. FUENTE - DÍA
+38,LIRIA,"Anyway, I know you probably have many questions, but right now we need to move.",39,CONVERSATION,EXT. FUENTE - DÍA 32,EXT. FUENTE - DÍA
+39,LIRIA,"Just as we managed to bring your soul back here, other spirits and creatures could do the same.",40,CONVERSATION,EXT. FUENTE - DÍA 33,EXT. FUENTE - DÍA
+40,LIRIA,Let's head into that forest and find somewhere to rest before night falls.,41,CONVERSATION,EXT. FUENTE - DÍA 34,EXT. FUENTE - DÍA
+41,LIRIA,"After that, we'll have time to catch up.",42,CONVERSATION,EXT. FUENTE - DÍA 35,EXT. FUENTE - DÍA
+42,LIRIA,"Wow, you look awful...",43,CONVERSATION,EXT. FUENTE - DÍA 36,EXT. FUENTE - DÍA
+43,LIRIA,But we can't stay here.,44,CONVERSATION,EXT. FUENTE - DÍA 37,EXT. FUENTE - DÍA
+44,LIRIA,"Come on, let's go to the forest. This time I'll lend you my life energy.",45,CONVERSATION,EXT. FUENTE - DÍA 38,EXT. FUENTE - DÍA
+45,LIRIA,"But don't get used to it, okay?",,END,EXT. FUENTE - DÍA 39,EXT. FUENTE - DÍA
+46,LIRIA,"Alright, looks like we're safe here.",47,CONVERSATION,EXT. BOSQUE - ANOCHECER 1,EXT. BOSQUE - ANOCHECER
+47,LIRIA,"And you're getting some color back, too.",48,CONVERSATION,EXT. BOSQUE - ANOCHECER 2,EXT. BOSQUE - ANOCHECER
+48,LIRIA,Let's see...,49,CONVERSATION,EXT. BOSQUE - ANOCHECER 3,EXT. BOSQUE - ANOCHECER
+49,LIRIA,So your name is NAME...,50,CONVERSATION,EXT. BOSQUE - ANOCHECER 4,EXT. BOSQUE - ANOCHECER
+50,LIRIA,"I don't think we can stay around here much longer, but at least we can catch our breath.",51,CONVERSATION,EXT. BOSQUE - ANOCHECER 5,EXT. BOSQUE - ANOCHECER
+51,LIRIA,May I ask how you're feeling?,52,CONVERSATION,EXT. BOSQUE - ANOCHECER 6,EXT. BOSQUE - ANOCHECER
+52,JUGADOR,"I'm fine, thanks.",53,CONVERSATION,EXT. BOSQUE - ANOCHECER 7,EXT. BOSQUE - ANOCHECER
+53,LIRIA,I see. I'm glad I didn't rescue some lazybones.,54,CONVERSATION,EXT. BOSQUE - ANOCHECER 8,EXT. BOSQUE - ANOCHECER
+54,LIRIA,I've got quite the eye... Anyway...,64,CONVERSATION,EXT. BOSQUE - ANOCHECER 9,EXT. BOSQUE - ANOCHECER
+55,JUGADOR,"I've been better, I won't lie to you.",56,CONVERSATION,EXT. BOSQUE - ANOCHECER 10,EXT. BOSQUE - ANOCHECER
+56,LIRIA,"Oh! Please, accept my apologies for such haste.",57,CONVERSATION,EXT. BOSQUE - ANOCHECER 11,EXT. BOSQUE - ANOCHECER
+57,LIRIA,Sometimes I forget how soft you humans are...,58,CONVERSATION,EXT. BOSQUE - ANOCHECER 12,EXT. BOSQUE - ANOCHECER
+58,LIRIA,I mean... that I need to be more considerate!,59,CONVERSATION,EXT. BOSQUE - ANOCHECER 13,EXT. BOSQUE - ANOCHECER
+59,LIRIA,"Yes, that, that... Anyway...",64,CONVERSATION,EXT. BOSQUE - ANOCHECER 14,EXT. BOSQUE - ANOCHECER
+60,JUGADOR,I think all this movement makes me nauseous...,61,CONVERSATION,EXT. BOSQUE - ANOCHECER 15,EXT. BOSQUE - ANOCHECER
+61,LIRIA,Ugh! You didn't have to give me that many details!,62,CONVERSATION,EXT. BOSQUE - ANOCHECER 16,EXT. BOSQUE - ANOCHECER
+62,LIRIA,"Well, I'm sure a bit of rest will do you good. Sit down and take a deep breath, we're not in a rush.",63,CONVERSATION,EXT. BOSQUE - ANOCHECER 17,EXT. BOSQUE - ANOCHECER
+63,LIRIA,"Well, I'm sure a bit of rest will do you wonders.",64,CONVERSATION,EXT. BOSQUE - ANOCHECER 18,EXT. BOSQUE - ANOCHECER
+64,LIRIA,Do you have any questions I can answer?,65,CONVERSATION,EXT. BOSQUE - ANOCHECER 19,EXT. BOSQUE - ANOCHECER
+65,JUGADOR,What is this world?,66,CONVERSATION,EXT. BOSQUE - ANOCHECER 20,EXT. BOSQUE - ANOCHECER
+66,LIRIA,"Well... I don't think that question has a trivial answer, exactly.",67,CONVERSATION,EXT. BOSQUE - ANOCHECER 21,EXT. BOSQUE - ANOCHECER
+67,LIRIA,But I'll do what I can not to ramble too much!,68,CONVERSATION,EXT. BOSQUE - ANOCHECER 22,EXT. BOSQUE - ANOCHECER
+68,LIRIA,"You're in the Realms of Being, a harmonious land created by the Divinity so that we may heal and grow.",69,CONVERSATION,EXT. BOSQUE - ANOCHECER 23,EXT. BOSQUE - ANOCHECER
+69,LIRIA,"A land designed for joy, discipline, and care—both within and beyond oneself...",70,CONVERSATION,EXT. BOSQUE - ANOCHECER 24,EXT. BOSQUE - ANOCHECER
+70,LIRIA,...But which ended up being corrupted and fragmented by...,71,CONVERSATION,EXT. BOSQUE - ANOCHECER 25,EXT. BOSQUE - ANOCHECER
+71,JUGADOR,How did I get to this world?,72,CONVERSATION,EXT. BOSQUE - ANOCHECER 26,EXT. BOSQUE - ANOCHECER
+72,LIRIA,"Well, truthfully you've always been part of it.",73,CONVERSATION,EXT. BOSQUE - ANOCHECER 27,EXT. BOSQUE - ANOCHECER
+73,LIRIA,"Until a few moments ago, you were a soul; a shell.",74,CONVERSATION,EXT. BOSQUE - ANOCHECER 28,EXT. BOSQUE - ANOCHECER
+74,LIRIA,"Like all those who wander the depths, beneath this very ground.",75,CONVERSATION,EXT. BOSQUE - ANOCHECER 29,EXT. BOSQUE - ANOCHECER
+75,LIRIA,"However, you received the call. You followed it, and now you're part of the earthly plane of the Realms of Being.",76,CONVERSATION,EXT. BOSQUE - ANOCHECER 30,EXT. BOSQUE - ANOCHECER
+76,LIRIA,You were always here—just on a different plane.,77,CONVERSATION,EXT. BOSQUE - ANOCHECER 31,EXT. BOSQUE - ANOCHECER
+77,JUGADOR,Are there others like me?,78,CONVERSATION,EXT. BOSQUE - ANOCHECER 32,EXT. BOSQUE - ANOCHECER
+78,LIRIA,"Yes, definitely. You're not the first spirit to break its chains.",79,CONVERSATION,EXT. BOSQUE - ANOCHECER 33,EXT. BOSQUE - ANOCHECER
+79,LIRIA,Many before you did it for eons...,80,CONVERSATION,EXT. BOSQUE - ANOCHECER 34,EXT. BOSQUE - ANOCHECER
+80,LIRIA,"And thanks to the paths they built with their effort, today we can travel peacefully through the Realms of Being.",81,CONVERSATION,EXT. BOSQUE - ANOCHECER 35,EXT. BOSQUE - ANOCHECER
+81,LIRIA,"Or, well, at least we could if those wicked creatu—",82,CONVERSATION,EXT. BOSQUE - ANOCHECER 36,EXT. BOSQUE - ANOCHECER
+82,LIRIA,Huh?,83,CONVERSATION,EXT. BOSQUE - ANOCHECER 37,EXT. BOSQUE - ANOCHECER
+83,LIRIA,Wait...,84,CONVERSATION,EXT. BOSQUE - ANOCHECER 38,EXT. BOSQUE - ANOCHECER
+84,LIRIA,Do you hear that too?,85,CONVERSATION,EXT. BOSQUE - ANOCHECER 39,EXT. BOSQUE - ANOCHECER
+85,LIRIA,NAME! We're being ambushed!,86,CONVERSATION,EXT. BOSQUE - ANOCHECER 40,EXT. BOSQUE - ANOCHECER
+86,LIRIA,"Alright, let's stay calm... They caught us by surprise, but it's only a raven.",87,CONVERSATION,EXT. BOSQUE - ANOCHECER 41,EXT. BOSQUE - ANOCHECER
+87,LIRIA,"I've seen them before, and I've studied their modus operandi...",88,CONVERSATION,EXT. BOSQUE - ANOCHECER 42,EXT. BOSQUE - ANOCHECER
+88,LIRIA,"I'm sure we can do this, NAME!",89,CONVERSATION,EXT. BOSQUE - ANOCHECER 43,EXT. BOSQUE - ANOCHECER
+89,LIRIA,Do you know how to fight?,90,CONVERSATION,EXT. BOSQUE - ANOCHECER 44,EXT. BOSQUE - ANOCHECER
+90,JUGADOR,"Give me a hand, please!",91,CONVERSATION,EXT. BOSQUE - ANOCHECER 45,EXT. BOSQUE - ANOCHECER
+91,LIRIA,"Alright, fine... Take a deep breath and focus. Let's go!",92,CONVERSATION,EXT. BOSQUE - ANOCHECER 46,EXT. BOSQUE - ANOCHECER
+92,LIRIA,There are countless monsters roaming the Realms of Being.,93,CONVERSATION,EXT. BOSQUE - ANOCHECER 47,EXT. BOSQUE - ANOCHECER
+93,LIRIA,"Each one has a Type: its main element. It reflects its strengths, but also its weaknesses. Keep your eyes open!",94,CONVERSATION,EXT. BOSQUE - ANOCHECER 48,EXT. BOSQUE - ANOCHECER
+94,LIRIA,"Also, they all have a maximum health and a time limit to be defeated.",95,CONVERSATION,EXT. BOSQUE - ANOCHECER 49,EXT. BOSQUE - ANOCHECER
+95,LIRIA,"Your goal is to reduce its health to zero before the time limit runs out, to keep it from fleeing and continuing to wreak havoc.",96,CONVERSATION,EXT. BOSQUE - ANOCHECER 50,EXT. BOSQUE - ANOCHECER
+96,LIRIA,"Fortunately, the Divinity has granted you different skills to face them.",97,CONVERSATION,EXT. BOSQUE - ANOCHECER 51,EXT. BOSQUE - ANOCHECER
+97,LIRIA,"Use them by tapping on them, and press and hold to see their effects.",98,CONVERSATION,EXT. BOSQUE - ANOCHECER 52,EXT. BOSQUE - ANOCHECER
+98,LIRIA,But don't use them recklessly! You won't be able to use them again until they've recovered.,99,CONVERSATION,EXT. BOSQUE - ANOCHECER 53,EXT. BOSQUE - ANOCHECER
+99,LIRIA,Each one has its own recovery time and conditions. So play smart!,100,CONVERSATION,EXT. BOSQUE - ANOCHECER 54,EXT. BOSQUE - ANOCHECER
+100,LIRIA,"Oof, I think this raven is about to attack us any moment... Why don't we make sure we land the first hit?",101,CONVERSATION,EXT. BOSQUE - ANOCHECER 55,EXT. BOSQUE - ANOCHECER
+101,JUGADOR,I think I've got it under control.,102,CONVERSATION,EXT. BOSQUE - ANOCHECER 56,EXT. BOSQUE - ANOCHECER
+102,LIRIA,"Oh, alright! I'm counting on you, NAME!",105,CONVERSATION,EXT. BOSQUE - ANOCHECER 57,EXT. BOSQUE - ANOCHECER
+103,LIRIA,"Oh no! Are you alright, NAME?",104,CONVERSATION,EXT. BOSQUE - ANOCHECER 58,EXT. BOSQUE - ANOCHECER
+104,LIRIA,"Come on, one last push! You've almost got it!",105,CONVERSATION,EXT. BOSQUE - ANOCHECER 59,EXT. BOSQUE - ANOCHECER
+105,LIRIA,We did it! I knew we could.,106,CONVERSATION,EXT. BOSQUE - ANOCHECER 60,EXT. BOSQUE - ANOCHECER
+106,LIRIA,It's true it was only a raven...,107,CONVERSATION,EXT. BOSQUE - ANOCHECER 61,EXT. BOSQUE - ANOCHECER
+107,LIRIA,"Though, well, I don't know if I should call them that.",108,CONVERSATION,EXT. BOSQUE - ANOCHECER 62,EXT. BOSQUE - ANOCHECER
+108,LIRIA,"After all, they don't look much like ordinary ravens.",109,CONVERSATION,EXT. BOSQUE - ANOCHECER 63,EXT. BOSQUE - ANOCHECER
+109,LIRIA,It's as if they were under some kind of influence...,110,CONVERSATION,EXT. BOSQUE - ANOCHECER 64,EXT. BOSQUE - ANOCHECER
+110,LIRIA,"Either way, it was good we didn't underestimate it. We're still weak.",111,CONVERSATION,EXT. BOSQUE - ANOCHECER 65,EXT. BOSQUE - ANOCHECER
+111,LIRIA,I know a nearby city that might take us in.,112,CONVERSATION,EXT. BOSQUE - ANOCHECER 66,EXT. BOSQUE - ANOCHECER
+112,LIRIA,I'm sure they can give us shelter and protect us from ambushes...,113,CONVERSATION,EXT. BOSQUE - ANOCHECER 67,EXT. BOSQUE - ANOCHECER
+113,LIRIA,Though I don't know a completely safe route to get there.,114,CONVERSATION,EXT. BOSQUE - ANOCHECER 68,EXT. BOSQUE - ANOCHECER
+114,LIRIA,Do you feel like resting a bit and recharging your energy? Or would you rather keep going to the city?,115,CONVERSATION,EXT. BOSQUE - ANOCHECER 69,EXT. BOSQUE - ANOCHECER
+115,JUGADOR,Let's rest here. I need a breather.,116,CONVERSATION,EXT. BOSQUE - ANOCHECER 70,EXT. BOSQUE - ANOCHECER
+116,LIRIA,"I understand, that's fine. No need to push ourselves.",117,CONVERSATION,EXT. BOSQUE - ANOCHECER 71,EXT. BOSQUE - ANOCHECER
+117,LIRIA,"I'll stay on watch for a while, alright?",118,CONVERSATION,EXT. BOSQUE - ANOCHECER 72,EXT. BOSQUE - ANOCHECER
+118,LIRIA,"“Rest, then, in serenity, while your servant keeps watch.”",119,CONVERSATION,EXT. BOSQUE - ANOCHECER 73,EXT. BOSQUE - ANOCHECER
+119,LIRIA,I'll let you know at once if anything happens.,120,CONVERSATION,EXT. BOSQUE - ANOCHECER 74,EXT. BOSQUE - ANOCHECER
+120,LIRIA,Rest!,,END,EXT. BOSQUE - ANOCHECER 75,EXT. BOSQUE - ANOCHECER
+121,JUGADOR,I've still got strength left. Let's head to the city.,122,CONVERSATION,EXT. BOSQUE - ANOCHECER 76,EXT. BOSQUE - ANOCHECER
+122,LIRIA,Such determination! Then it's settled.,123,CONVERSATION,EXT. BOSQUE - ANOCHECER 77,EXT. BOSQUE - ANOCHECER
+123,LIRIA,"NAME, open the map. Let's set a course for the city!",124,CONVERSATION,EXT. BOSQUE - ANOCHECER 78,EXT. BOSQUE - ANOCHECER
+124,LIRIA,"Well, that motivation didn't last long...",125,CONVERSATION,EXT. BOSQUE - ANOCHECER 79,EXT. BOSQUE - ANOCHECER
+125,LIRIA,I don't think we're able to keep moving forward for now.,126,CONVERSATION,EXT. BOSQUE - ANOCHECER 80,EXT. BOSQUE - ANOCHECER
+126,LIRIA,The road is getting more and more challenging... We have to Progress to be up to the task.,127,CONVERSATION,EXT. BOSQUE - ANOCHECER 81,EXT. BOSQUE - ANOCHECER
+127,LIRIA,"Fortunately, I know a tactic to get Progress Points, and keep moving forward.",128,CONVERSATION,EXT. BOSQUE - ANOCHECER 82,EXT. BOSQUE - ANOCHECER
+128,LIRIA,"As you've probably noticed, we can Progress by fighting and freeing the Realms of Being from vile creatures.",129,CONVERSATION,EXT. BOSQUE - ANOCHECER 83,EXT. BOSQUE - ANOCHECER
+129,LIRIA,But we can also get them quickly by completing Daily Objectives.,130,CONVERSATION,EXT. BOSQUE - ANOCHECER 84,EXT. BOSQUE - ANOCHECER
+130,LIRIA,"If you swipe up, you can access a summary of our daily activity...",131,CONVERSATION,EXT. BOSQUE - ANOCHECER 85,EXT. BOSQUE - ANOCHECER
+131,LIRIA,"And at the bottom, you can see the Daily Objectives we've set for today.",132,CONVERSATION,EXT. BOSQUE - ANOCHECER 86,EXT. BOSQUE - ANOCHECER
+132,LIRIA,"Each time we complete one, we'll earn a Progress Point and be able to continue our journey.",133,CONVERSATION,EXT. BOSQUE - ANOCHECER 87,EXT. BOSQUE - ANOCHECER
+133,LIRIA,"If we don't miss a single one, we'll reach the city in the blink of an eye!",134,CONVERSATION,EXT. BOSQUE - ANOCHECER 88,EXT. BOSQUE - ANOCHECER
+134,LIRIA,"Let's get to it, NAME!",,END,EXT. BOSQUE - ANOCHECER 89,EXT. BOSQUE - ANOCHECER
+135,LIRIA,At last! Our weary wanderings have come to an end.,136,CONVERSATION,EXT. PUERTAS DE LA CIUDAD - ATARDECER 1,EXT. PUERTAS DE LA CIUDAD - ATARDECER
+136,LIRIA,We have reached the city gate.,137,CONVERSATION,EXT. PUERTAS DE LA CIUDAD - ATARDECER 2,EXT. PUERTAS DE LA CIUDAD - ATARDECER
+137,LIRIA,And we've been very lucky...,138,CONVERSATION,EXT. PUERTAS DE LA CIUDAD - ATARDECER 3,EXT. PUERTAS DE LA CIUDAD - ATARDECER
+138,LIRIA,It seems the drawbridge is down.,139,CONVERSATION,EXT. PUERTAS DE LA CIUDAD - ATARDECER 4,EXT. PUERTAS DE LA CIUDAD - ATARDECER
+139,LIRIA,We should be able to cross it without any trouble.,140,CONVERSATION,EXT. PUERTAS DE LA CIUDAD - ATARDECER 5,EXT. PUERTAS DE LA CIUDAD - ATARDECER
+140,LIRIA,I can't wait to enjoy all the delicacies at the inn... Let's hurry!,,END,EXT. PUERTAS DE LA CIUDAD - ATARDECER 6,EXT. PUERTAS DE LA CIUDAD - ATARDECER
+141,LIRIA,Mmm… How strange…,142,CONVERSATION,EXT. PLAZA DE LA CIUDAD - ATARDECER 1,EXT. PLAZA DE LA CIUDAD - ATARDECER
+142,LIRIA,"I don't see any merchants, and there's no one in the square…",143,CONVERSATION,EXT. PLAZA DE LA CIUDAD - ATARDECER 2,EXT. PLAZA DE LA CIUDAD - ATARDECER
+143,LIRIA,The road is getting more and more challenging… We have to keep Progressing to be up to it.,144,CONVERSATION,EXT. PLAZA DE LA CIUDAD - ATARDECER 3,EXT. PLAZA DE LA CIUDAD - ATARDECER
+144,LIRIA,Everything is much quieter than usual.,145,CONVERSATION,EXT. PLAZA DE LA CIUDAD - ATARDECER 4,EXT. PLAZA DE LA CIUDAD - ATARDECER
+145,LIRIA,Hello? Can anyone hear me?,146,CONVERSATION,EXT. PLAZA DE LA CIUDAD - ATARDECER 5,EXT. PLAZA DE LA CIUDAD - ATARDECER
+146,LIRIA,Nothing…,147,CONVERSATION,EXT. PLAZA DE LA CIUDAD - ATARDECER 6,EXT. PLAZA DE LA CIUDAD - ATARDECER
+147,LIRIA,"This is very suspicious, NAME…",148,CONVERSATION,EXT. PLAZA DE LA CIUDAD - ATARDECER 7,EXT. PLAZA DE LA CIUDAD - ATARDECER
+148,LIRIA,We'd better find out what's going on.,,END,EXT. PLAZA DE LA CIUDAD - ATARDECER 8,EXT. PLAZA DE LA CIUDAD - ATARDECER
+149,LIRIA,Uh... They left the door wide open...,150,CONVERSATION,INT. POSADA - ATARDECER 1,INT. POSADA - ATARDECER
+150,LIRIA,...Which is very strange for a refuge like this.,151,CONVERSATION,INT. POSADA - ATARDECER 2,INT. POSADA - ATARDECER
+151,LIRIA,Can you hear me? Is anyone there?,152,CONVERSATION,INT. POSADA - ATARDECER 3,INT. POSADA - ATARDECER
+152,LIRIA,This is empty too... Just our luck.,153,CONVERSATION,INT. POSADA - ATARDECER 4,INT. POSADA - ATARDECER
+153,LIRIA,I'm starting to get seriously worried.,154,CONVERSATION,INT. POSADA - ATARDECER 5,INT. POSADA - ATARDECER
+154,LIRIA,Where on earth is everyone?,155,CONVERSATION,INT. POSADA - ATARDECER 6,INT. POSADA - ATARDECER
+155,LIRIA,"Anyway, since we're here, we could look for something useful.",156,CONVERSATION,INT. POSADA - ATARDECER 7,INT. POSADA - ATARDECER
+156,LIRIA,How does that sound?,157,CONVERSATION,INT. POSADA - ATARDECER 8,INT. POSADA - ATARDECER
+157,JUGADOR,Let's search the rooms.,158,CONVERSATION,INT. POSADA - ATARDECER 9,INT. POSADA - ATARDECER
+158,LIRIA,Mmm... All right.,159,CONVERSATION,INT. POSADA - ATARDECER 10,INT. POSADA - ATARDECER
+159,LIRIA,Let's take a quick look and see what we find.,160,CONVERSATION,INT. POSADA - ATARDECER 11,INT. POSADA - ATARDECER
+160,LIRIA,"Look, NAME! I think I've found some interesting information.",,END,INT. POSADA - ATARDECER 12,INT. POSADA - ATARDECER
+161,JUGADOR,Let's loot the chests.,162,CONVERSATION,INT. POSADA - ATARDECER 13,INT. POSADA - ATARDECER
+162,LIRIA,Ugh... How 'pragmatic'.,163,CONVERSATION,INT. POSADA - ATARDECER 14,INT. POSADA - ATARDECER
+163,LIRIA,I see you don't miss even the tiniest chance to fill your pockets.,164,CONVERSATION,INT. POSADA - ATARDECER 15,INT. POSADA - ATARDECER
+164,LIRIA,We have no reason to think this inn is completely abandoned...,165,CONVERSATION,INT. POSADA - ATARDECER 16,INT. POSADA - ATARDECER
+165,LIRIA,"But if we're going to do it, I hope we're able to put it to good use afterward.",166,CONVERSATION,INT. POSADA - ATARDECER 17,INT. POSADA - ATARDECER
+166,LIRIA,"Come on, then. Just do it quickly, at least.",,END,INT. POSADA - ATARDECER 18,INT. POSADA - ATARDECER
+167,JUGADOR,Let's leave everything as it is.,168,CONVERSATION,INT. POSADA - ATARDECER 19,INT. POSADA - ATARDECER
+168,LIRIA,"Mmm... Okay, I also think that's the smartest thing.",169,CONVERSATION,INT. POSADA - ATARDECER 20,INT. POSADA - ATARDECER
+169,LIRIA,We don't know how long this inn has been abandoned...,170,CONVERSATION,INT. POSADA - ATARDECER 21,INT. POSADA - ATARDECER
+170,LIRIA,But it's likely many still intend to come back for their belongings...,171,CONVERSATION,INT. POSADA - ATARDECER 22,INT. POSADA - ATARDECER
+171,LIRIA,Especially if they have something of value.,172,CONVERSATION,INT. POSADA - ATARDECER 23,INT. POSADA - ATARDECER
+172,LIRIA,Let's get out of here and protect the city so no bandit can loot it.,,END,INT. POSADA - ATARDECER 24,INT. POSADA - ATARDECER
+173,LIRIA,Great... Another blockage.,174,CONVERSATION,INT. IGLESIA - ATARDECER 1,INT. IGLESIA - ATARDECER
+174,LIRIA,"The church is closed, and it doesn't seem to have any other entrances.",175,CONVERSATION,INT. IGLESIA - ATARDECER 2,INT. IGLESIA - ATARDECER
+175,LIRIA,Though the door does seem to have recent marks...,176,CONVERSATION,INT. IGLESIA - ATARDECER 3,INT. IGLESIA - ATARDECER
+176,LIRIA,"Whoa! Look at the ground, NAME!",177,CONVERSATION,INT. IGLESIA - ATARDECER 4,INT. IGLESIA - ATARDECER
+177,LIRIA,There's no doubt some tragedy happened here...,178,CONVERSATION,INT. IGLESIA - ATARDECER 5,INT. IGLESIA - ATARDECER
+178,LIRIA,"We have to try to get inside, somehow.",179,CONVERSATION,INT. IGLESIA - ATARDECER 6,INT. IGLESIA - ATARDECER
+179,JUGADOR,Let's knock on the door.,180,CONVERSATION,INT. IGLESIA - ATARDECER 7,INT. IGLESIA - ATARDECER
+180,LIRIA,I suppose that's the most civilized option.,181,CONVERSATION,INT. IGLESIA - ATARDECER 8,INT. IGLESIA - ATARDECER
+181,LIRIA,...Though I'll admit I don't blindly trust that it'll work.,182,CONVERSATION,INT. IGLESIA - ATARDECER 9,INT. IGLESIA - ATARDECER
+182,LIRIA,"Come on, knock!",183,CONVERSATION,INT. IGLESIA - ATARDECER 10,INT. IGLESIA - ATARDECER
+183,LIRIA,Well... It was worth a try.,,END,INT. IGLESIA - ATARDECER 11,INT. IGLESIA - ATARDECER
+184,JUGADOR,Let's knock the door down.,185,CONVERSATION,INT. IGLESIA - ATARDECER 12,INT. IGLESIA - ATARDECER
+185,LIRIA,Mmm... It doesn't look like a very sturdy door.,186,CONVERSATION,INT. IGLESIA - ATARDECER 13,INT. IGLESIA - ATARDECER
+186,LIRIA,"We could try to knock it down, yeah.",187,CONVERSATION,INT. IGLESIA - ATARDECER 14,INT. IGLESIA - ATARDECER
+187,LIRIA,Though it seems to be protected by some kind of magical barrier...,188,CONVERSATION,INT. IGLESIA - ATARDECER 15,INT. IGLESIA - ATARDECER
+188,LIRIA,Let's see if we can get around it.,,END,INT. IGLESIA - ATARDECER 16,INT. IGLESIA - ATARDECER
+189,JUGADOR,Let's force the door.,190,CONVERSATION,INT. IGLESIA - ATARDECER 17,INT. IGLESIA - ATARDECER
+190,LIRIA,"Wow... That was incredible, NAME!",191,CONVERSATION,INT. IGLESIA - ATARDECER 18,INT. IGLESIA - ATARDECER
+191,LIRIA,I had no idea you were capable of doing things like that.,192,CONVERSATION,INT. IGLESIA - ATARDECER 19,INT. IGLESIA - ATARDECER
+192,LIRIA,You're full of surprises...,193,CONVERSATION,INT. IGLESIA - ATARDECER 20,INT. IGLESIA - ATARDECER
+193,LIRIA,"With my brains and your skill, no obstacle will dare stand against us.",194,CONVERSATION,INT. IGLESIA - ATARDECER 21,INT. IGLESIA - ATARDECER
+194,LIRIA,Let's see what secrets the church is hiding.,,END,INT. IGLESIA - ATARDECER 22,INT. IGLESIA - ATARDECER
+195,LIRIA,Uh... It's so dark in here.,196,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 1,INT. ALTAR DE LA IGLESIA - ATARDECER
+196,LIRIA,It's even kind of creepy...,197,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 2,INT. ALTAR DE LA IGLESIA - ATARDECER
+197,LIRIA,Hello? Is anybo..?,198,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 3,INT. ALTAR DE LA IGLESIA - ATARDECER
+198,FIGURA MISTERIOSA,Aaahh!,199,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 4,INT. ALTAR DE LA IGLESIA - ATARDECER
+199,LIRIA,Aaaaahhhhh!,200,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 5,INT. ALTAR DE LA IGLESIA - ATARDECER
+200,FIGURA MISTERIOSA,"Back, filthy rats!",201,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 6,INT. ALTAR DE LA IGLESIA - ATARDECER
+201,FIGURA MISTERIOSA,"Back, I said!",202,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 7,INT. ALTAR DE LA IGLESIA - ATARDECER
+202,LIRIA,But what...?!,203,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 8,INT. ALTAR DE LA IGLESIA - ATARDECER
+203,FIGURA MISTERIOSA,Leave us alone!,204,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 9,INT. ALTAR DE LA IGLESIA - ATARDECER
+204,FIGURA MISTERIOSA,Leave us alone... please!,205,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 10,INT. ALTAR DE LA IGLESIA - ATARDECER
+205,LIRIA,Wait... Easy...,206,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 11,INT. ALTAR DE LA IGLESIA - ATARDECER
+206,LIRIA,We're allies. We don't want to hurt you.,207,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 12,INT. ALTAR DE LA IGLESIA - ATARDECER
+207,LIRIA,We just want to help and find out what's happened to your city.,208,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 13,INT. ALTAR DE LA IGLESIA - ATARDECER
+208,POSADERO,All...ies?,209,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 14,INT. ALTAR DE LA IGLESIA - ATARDECER
+209,POSADERO,"No, I don't believe it... It can't be true.",210,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 15,INT. ALTAR DE LA IGLESIA - ATARDECER
+210,POSADERO,Did you hear that?,211,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 16,INT. ALTAR DE LA IGLESIA - ATARDECER
+211,POSADERO,The Divinity has heard our prayers!,212,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 17,INT. ALTAR DE LA IGLESIA - ATARDECER
+212,POSADERO,"At last, it's sent someone to rescue us!",213,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 18,INT. ALTAR DE LA IGLESIA - ATARDECER
+213,LIRIA,Nothing would make us happier than to offer you our help.,214,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 19,INT. ALTAR DE LA IGLESIA - ATARDECER
+214,LIRIA,"But first, we need to know exactly what happened to you.",215,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 20,INT. ALTAR DE LA IGLESIA - ATARDECER
+215,LIRIA,Why are you all in here? What happened?,216,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 21,INT. ALTAR DE LA IGLESIA - ATARDECER
+216,POSADERO,Whew... All right. I'll tell you everything.,217,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 22,INT. ALTAR DE LA IGLESIA - ATARDECER
+217,POSADERO,Though it won't be exactly easy for me...,218,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 23,INT. ALTAR DE LA IGLESIA - ATARDECER
+218,POSADERO,My memories are a bit blurry about this whole thing.,219,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 24,INT. ALTAR DE LA IGLESIA - ATARDECER
+219,POSADERO,But I do remember clearly how our apocalypse began.,220,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 25,INT. ALTAR DE LA IGLESIA - ATARDECER
+220,POSADERO,"Two moons ago, an unknown evil descended upon our city.",221,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 26,INT. ALTAR DE LA IGLESIA - ATARDECER
+221,POSADERO,"We had never seen so many monsters, much less charging at us with such force.",222,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 27,INT. ALTAR DE LA IGLESIA - ATARDECER
+222,POSADERO,It was as if they could communicate; as if they shared a single goal...,223,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 28,INT. ALTAR DE LA IGLESIA - ATARDECER
+223,POSADERO,As if they were one great hive mind.,224,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 29,INT. ALTAR DE LA IGLESIA - ATARDECER
+224,POSADERO,"They caught our soldiers off guard. Honestly, they were distracted.",225,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 30,INT. ALTAR DE LA IGLESIA - ATARDECER
+225,POSADERO,"The recent lack of activity led many of them to spend most of their day chatting, smoking, and drinking.",226,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 31,INT. ALTAR DE LA IGLESIA - ATARDECER
+226,POSADERO,Some townsfolk say many of them didn't even go to work that day...,227,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 32,INT. ALTAR DE LA IGLESIA - ATARDECER
+227,POSADERO,"No one said a thing to them, or found their behavior dishonorable—just perfectly ordinary.",228,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 33,INT. ALTAR DE LA IGLESIA - ATARDECER
+228,POSADERO,"I guess, in part, we got what we deserved.",229,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 34,INT. ALTAR DE LA IGLESIA - ATARDECER
+229,LIRIA,I see...,230,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 35,INT. ALTAR DE LA IGLESIA - ATARDECER
+230,LIRIA,"It's truly a bleak outlook, don't you think, NAME?",231,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 36,INT. ALTAR DE LA IGLESIA - ATARDECER
+231,LIRIA,Though at least we have the chance to probe the mysteries of such a vast enigma.,232,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 37,INT. ALTAR DE LA IGLESIA - ATARDECER
+232,JUGADOR,How did you end up in the church?,233,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 38,INT. ALTAR DE LA IGLESIA - ATARDECER
+233,POSADERO,Well... let's just say it wasn't a premeditated decision.,234,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 39,INT. ALTAR DE LA IGLESIA - ATARDECER
+234,POSADERO,"When the first horde breached the barrier, many of us ran in terror, like headless chickens.",235,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 40,INT. ALTAR DE LA IGLESIA - ATARDECER
+235,POSADERO,Our priest opened the church doors and began conjuring a spell to keep us safe.,236,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 41,INT. ALTAR DE LA IGLESIA - ATARDECER
+236,POSADERO,Those of us lucky enough to hear his calls didn't hesitate for a second.,237,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 42,INT. ALTAR DE LA IGLESIA - ATARDECER
+237,POSADERO,"…Though truth be told, we didn't think about the lack of supplies.",238,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 43,INT. ALTAR DE LA IGLESIA - ATARDECER
+238,POSADERO,"There's practically nothing here, and going out is completely impossible.",239,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 44,INT. ALTAR DE LA IGLESIA - ATARDECER
+239,POSADERO,Every so often we hear footsteps and the monsters' screams; they've made our city a thoroughfare.,240,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 45,INT. ALTAR DE LA IGLESIA - ATARDECER
+240,JUGADOR,Do you know if there's anyone still out there?,241,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 46,INT. ALTAR DE LA IGLESIA - ATARDECER
+241,POSADERO,Well... I seriously doubt any of us are still alive in the city...,242,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 47,INT. ALTAR DE LA IGLESIA - ATARDECER
+242,POSADERO,And not just because the first assault was a real bloodbath.,243,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 48,INT. ALTAR DE LA IGLESIA - ATARDECER
+243,POSADERO,"Even if someone had managed to withstand it, the monsters have completely taken over the land.",244,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 49,INT. ALTAR DE LA IGLESIA - ATARDECER
+244,POSADERO,"Every few hours we hear their footsteps, their moans, their screams... true sounds of hell.",245,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 50,INT. ALTAR DE LA IGLESIA - ATARDECER
+245,POSADERO,Our city is now just a passageway for them.,246,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 51,INT. ALTAR DE LA IGLESIA - ATARDECER
+246,POSADERO,"And then there's hunger, of course.",247,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 52,INT. ALTAR DE LA IGLESIA - ATARDECER
+247,POSADERO,It's very hard to hold out this long without enough resources.,248,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 53,INT. ALTAR DE LA IGLESIA - ATARDECER
+248,JUGADOR,I don't need any more information. Let's leave.,249,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 54,INT. ALTAR DE LA IGLESIA - ATARDECER
+249,LIRIA,"Are you out of your mind, NAME?",250,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 55,INT. ALTAR DE LA IGLESIA - ATARDECER
+250,LIRIA,This man is one of the few people left who can shed light on what happened to the city.,251,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 56,INT. ALTAR DE LA IGLESIA - ATARDECER
+251,LIRIA,Any information he can give us will be worth its weight in gold if we know how to use it to our advantage.,252,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 57,INT. ALTAR DE LA IGLESIA - ATARDECER
+252,LIRIA,"Anyway, let's step outside for some air while you think it over...",253,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 58,INT. ALTAR DE LA IGLESIA - ATARDECER
+253,LIRIA,But I wouldn't stray too far from him.,,END,INT. ALTAR DE LA IGLESIA - ATARDECER 59,INT. ALTAR DE LA IGLESIA - ATARDECER
+254,POSADERO,"It comforts us to think that, with a bit of luck, our friends and companions are better supplied than we are.",255,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 60,INT. ALTAR DE LA IGLESIA - ATARDECER
+255,POSADERO,"We think there may be another shelter in the city, much better than this one.",256,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 61,INT. ALTAR DE LA IGLESIA - ATARDECER
+256,JUGADOR,The inn?,257,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 62,INT. ALTAR DE LA IGLESIA - ATARDECER
+257,POSADERO,"No, not at all... That dump would be nothing but dust and ash by now.",258,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 63,INT. ALTAR DE LA IGLESIA - ATARDECER
+258,POSADERO,I'm talking about the Castle.,259,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 64,INT. ALTAR DE LA IGLESIA - ATARDECER
+259,JUGADOR,The Castle?,260,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 65,INT. ALTAR DE LA IGLESIA - ATARDECER
+260,POSADERO,Exactly. The Castle.,261,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 66,INT. ALTAR DE LA IGLESIA - ATARDECER
+261,JUGADOR,The Walls?,262,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 67,INT. ALTAR DE LA IGLESIA - ATARDECER
+262,POSADERO,No... they'd be far more exposed there than anywhere else in the city.,263,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 68,INT. ALTAR DE LA IGLESIA - ATARDECER
+263,POSADERO,I mean the Castle.,264,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 69,INT. ALTAR DE LA IGLESIA - ATARDECER
+264,POSADERO,"We want to believe many of our loved ones are shut in there, along with the royal family.",265,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 70,INT. ALTAR DE LA IGLESIA - ATARDECER
+265,POSADERO,"Though knowing that royal lineage, it's possible they barred the doors just to save their own skin.",266,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 71,INT. ALTAR DE LA IGLESIA - ATARDECER
+266,POSADERO,"Be that as it may, if any provisions and defenses still endure anywhere in these lands, they'll surely be there.",267,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 72,INT. ALTAR DE LA IGLESIA - ATARDECER
+267,LIRIA,I understand...,268,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 73,INT. ALTAR DE LA IGLESIA - ATARDECER
+268,LIRIA,"I suppose that gives us a new thread to pull, NAME.",269,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 74,INT. ALTAR DE LA IGLESIA - ATARDECER
+269,LIRIA,We should investigate the situation at the Castle.,270,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 75,INT. ALTAR DE LA IGLESIA - ATARDECER
+270,LIRIA,"And while we're at it, learn something about their plans.",271,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 76,INT. ALTAR DE LA IGLESIA - ATARDECER
+271,LIRIA,"What do they intend, isolating themselves like that for so long?",272,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 77,INT. ALTAR DE LA IGLESIA - ATARDECER
+272,LIRIA,And why have they sheltered there indefinitely instead of taking in these poor people?,273,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 78,INT. ALTAR DE LA IGLESIA - ATARDECER
+273,LIRIA,If everything is as it seems... the royal family may have a lot of explaining to do.,274,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 79,INT. ALTAR DE LA IGLESIA - ATARDECER
+274,LIRIA,Let's get moving!,275,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 80,INT. ALTAR DE LA IGLESIA - ATARDECER
+275,LIRIA,Wait... I think I see silhouettes in the distance...,276,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 81,INT. ALTAR DE LA IGLESIA - ATARDECER
+276,LIRIA,Ah! They're monsters! I think they've seen us.,277,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 82,INT. ALTAR DE LA IGLESIA - ATARDECER
+277,LIRIA,And they're coming at full speed!,278,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 83,INT. ALTAR DE LA IGLESIA - ATARDECER
+278,LIRIA,"Get ready, NAME.",279,CONVERSATION,INT. ALTAR DE LA IGLESIA - ATARDECER 84,INT. ALTAR DE LA IGLESIA - ATARDECER
+279,LIRIA,We'll stand our ground and protect the Church.,,END,INT. ALTAR DE LA IGLESIA - ATARDECER 85,INT. ALTAR DE LA IGLESIA - ATARDECER
+280,POSADERO,"Well, what a surprise.",281,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 1,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+281,POSADERO,I confess I didn't expect to see you again so soon.,282,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 2,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+282,POSADERO,"Although I ought to be glad, at least, to see you in one piece.",283,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 3,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+283,POSADERO,Do we have any news regarding the Castle?,284,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 4,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+284,JUGADOR,"Not yet, though perhaps you could help us...",285,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 5,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+285,POSADERO,Um... Me?,286,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 6,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+286,POSADERO,"To be honest, I don't know how a mere servant could help you...",287,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 7,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+287,POSADERO,"I know nothing of the arts of war, and I don't even have any gear or provisions to offer you.",288,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 8,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+288,POSADERO,I could talk to the others to convince them to let you pass into the ossuary.,289,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 9,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+289,POSADERO,Perhaps you'll find something of value down there.,290,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 10,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+290,POSADERO,"Nevertheless, I'd rather leave that option as a last resort...",291,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 11,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+291,POSADERO,I don't think the rest of the group would take kindly to it.,292,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 12,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+292,POSADERO,"Come back to see me if you can't find other paths to take, and I'll do my best to help.",,END,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 13,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+293,JUGADOR,"Not yet, though perhaps you could help us...",294,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 14,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+294,POSADERO,Um... Me?,295,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 15,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+295,POSADERO,"To be honest, I don't know how a mere servant could help you...",296,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 16,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+296,POSADERO,"I know nothing of the arts of war, and I don't even have any gear or provisions to offer you.",297,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 17,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+297,POSADERO,Though perhaps there is something I can do...,298,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 18,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+298,POSADERO,I could talk to the others to convince them to let you pass into the ossuary.,299,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 19,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+299,POSADERO,It's on the lower floor of the Church.,300,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 20,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+300,POSADERO,We buried its entrance shortly after we settled here...,301,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 21,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+301,POSADERO,...Since we couldn't stop hearing noises coming from its depths.,302,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 22,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+302,POSADERO,We'll open the way for you again...,303,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 23,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+303,POSADERO,But I beg you to explore it with the utmost care.,,END,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 24,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+304,JUGADOR,We'd like to inspect your Church in search of clues.,305,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 25,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+305,POSADERO,I understand...,306,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 26,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+306,POSADERO,Let me bring it up with the others. I'd hate for them to feel unsafe about the decision.,307,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 27,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+307,POSADERO,I bring you good news. You may investigate the Church to your heart's content.,308,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 28,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+308,POSADERO,"As you can imagine, we've already looted everything edible within our reach...",309,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 29,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+309,POSADERO,Though who knows whether these walls still hold some information of value.,310,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 30,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+310,POSADERO,"That said, I ask that you not get too close to the group's stashes...",311,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 31,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+311,POSADERO,We want to be sure we can take to the grave the few belongings we have left.,,END,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 32,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+312,JUGADOR,That's right. We've managed to get in.,313,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 33,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+313,POSADERO,What?! That's impossible!,314,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 34,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+314,POSADERO,"I'll gather the whole troop. You must tell us everything, down to the last detail.",315,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 35,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+315,POSADERO,Please... Tell us that all of ours are unharmed.,316,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 36,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+316,LIRIA,But... what are you saying?,317,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 37,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+317,LIRIA,Are you out of your mind?,318,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 38,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+318,LIRIA,How can you toy with something so serious? Sheesh...,319,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 39,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+319,LIRIA,"Forgive him, good sir... I think NAME didn't choose the most appropriate words.",320,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 40,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+320,LIRIA,Perhaps he's a bit delirious from all the accumulated fatigue.,321,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 41,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+321,LIRIA,"I'm sure he meant to say that ""we're about to go in""...",322,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 42,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+322,LIRIA,Of course we'll bring you news about your families as soon as we have it.,323,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 43,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+323,LIRIA,I beg you to forgive this confusion.,324,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 44,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+324,POSADERO,"Oh, well... I understand...",325,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 45,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+325,POSADERO,Agh...,326,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 46,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+326,POSADERO,Don't pay it any mind.,327,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 47,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+327,POSADERO,"We're rather desperate, I admit.",328,CONVERSATION,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 48,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+328,POSADERO,But I have no doubt our fate will change very soon.,,END,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ] 49,INT. ALTAR DE LA IGLESIA [SEGUNDA VEZ]
+329,LIRIA,Well... so this is as far as we go.,330,CONVERSATION,INT. CASTILLO - ATARDECER 1,INT. CASTILLO - ATARDECER
+330,LIRIA,Looks like the Castle is locked up tight...,331,CONVERSATION,INT. CASTILLO - ATARDECER 2,INT. CASTILLO - ATARDECER
+331,LIRIA,"And the door doesn't look very fragile, either.",332,CONVERSATION,INT. CASTILLO - ATARDECER 3,INT. CASTILLO - ATARDECER
+332,LIRIA,What do you want to do?,333,CONVERSATION,INT. CASTILLO - ATARDECER 4,INT. CASTILLO - ATARDECER
+333,JUGADOR,Let's look for another entrance.,334,CONVERSATION,INT. CASTILLO - ATARDECER 5,INT. CASTILLO - ATARDECER
+334,LIRIA,"That's a really good idea, NAME!",335,CONVERSATION,INT. CASTILLO - ATARDECER 6,INT. CASTILLO - ATARDECER
+335,LIRIA,...Although I suppose it's easier said than done.,336,CONVERSATION,INT. CASTILLO - ATARDECER 7,INT. CASTILLO - ATARDECER
+336,LIRIA,Where can we start?,337,CONVERSATION,INT. CASTILLO - ATARDECER 8,INT. CASTILLO - ATARDECER
+337,LIRIA,Uhm...,338,CONVERSATION,INT. CASTILLO - ATARDECER 9,INT. CASTILLO - ATARDECER
+338,LIRIA,Let's take a walk around the area and inspect possible connections to the castle.,,END,INT. CASTILLO - ATARDECER 10,INT. CASTILLO - ATARDECER
+339,JUGADOR,Let's knock the door down.,340,CONVERSATION,INT. CASTILLO - ATARDECER 11,INT. CASTILLO - ATARDECER
+340,LIRIA,"Well... That's a very... ""orthodox"" way to solve the problem.",341,CONVERSATION,INT. CASTILLO - ATARDECER 12,INT. CASTILLO - ATARDECER
+341,LIRIA,...Though I won't deny it would save us quite a bit of time.,342,CONVERSATION,INT. CASTILLO - ATARDECER 13,INT. CASTILLO - ATARDECER
+342,LIRIA,"I guess there's nothing to lose by trying, right?",,END,INT. CASTILLO - ATARDECER 14,INT. CASTILLO - ATARDECER
+343,JUGADOR,There's nothing to see here... Let's forget the castle.,344,CONVERSATION,INT. CASTILLO - ATARDECER 15,INT. CASTILLO - ATARDECER
+344,LIRIA,Uhm... I'm not so sure...,345,CONVERSATION,INT. CASTILLO - ATARDECER 16,INT. CASTILLO - ATARDECER
+345,LIRIA,"It feels strange that the Castle is so well protected, considering the state of the city.",346,CONVERSATION,INT. CASTILLO - ATARDECER 17,INT. CASTILLO - ATARDECER
+346,LIRIA,"But if you think we shouldn't stop here, that's fine. I support your decision.",347,CONVERSATION,INT. CASTILLO - ATARDECER 18,INT. CASTILLO - ATARDECER
+347,LIRIA,We can always come back.,,END,INT. CASTILLO - ATARDECER 19,INT. CASTILLO - ATARDECER
+348,LIRIA,At last! Here we are!,349,CONVERSATION,INT. RECIBIDOR DEL CASTILLO - ATARDECER 1,INT. RECIBIDOR DEL CASTILLO - ATARDECER
+349,LIRIA,Can't say it was a piece of cake...,350,CONVERSATION,INT. RECIBIDOR DEL CASTILLO - ATARDECER 2,INT. RECIBIDOR DEL CASTILLO - ATARDECER
+350,LIRIA,But there's no doubt we did it in record time!,351,CONVERSATION,INT. RECIBIDOR DEL CASTILLO - ATARDECER 3,INT. RECIBIDOR DEL CASTILLO - ATARDECER
+351,LIRIA,What would you do without my efficient directions?,352,CONVERSATION,INT. RECIBIDOR DEL CASTILLO - ATARDECER 4,INT. RECIBIDOR DEL CASTILLO - ATARDECER
+352,LIRIA,"Anyway, don't bother thanking me... I'm your guide, after all.",353,CONVERSATION,INT. RECIBIDOR DEL CASTILLO - ATARDECER 5,INT. RECIBIDOR DEL CASTILLO - ATARDECER
+353,LIRIA,You'll thank me anyway once we manage to get to the bottom of this.,354,CONVERSATION,INT. RECIBIDOR DEL CASTILLO - ATARDECER 6,INT. RECIBIDOR DEL CASTILLO - ATARDECER
+354,LIRIA,Onward—no time to waste!,,END,INT. RECIBIDOR DEL CASTILLO - ATARDECER 7,INT. RECIBIDOR DEL CASTILLO - ATARDECER
+355,LIRIA,Wow… What a lot of information…,356,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 1,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+356,LIRIA,There must be centuries of knowledge gathered here.,357,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 2,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+357,LIRIA,We can't linger for long…,358,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 3,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+358,LIRIA,Though it would be a shame to waste all this material.,359,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 4,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+359,LIRIA,"They say ""knowledge takes up no space,"" right?",360,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 5,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+360,LIRIA,Do you want us to take a look at some of this?,361,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 6,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+361,JUGADOR,“Chronicles of the Cataclysm (Vol. I)”,362,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 7,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+362,ENCICLOPEDIA POLVORIENTA,The Realms of Being have sheltered an extremely varied array of beings.,363,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 8,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+363,ENCICLOPEDIA POLVORIENTA,"Fierce orcs, skillful elves, ingenious goblins.",364,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 9,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+364,ENCICLOPEDIA POLVORIENTA,"Yet, almost in their full entirety, they have always shared a very distinctive trait:",365,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 10,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+365,ENCICLOPEDIA POLVORIENTA,A fervent love for myths and fantasies.,366,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 11,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+366,ENCICLOPEDIA POLVORIENTA,Few of them will take interest in what is treasured within these pages.,367,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 12,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+367,ENCICLOPEDIA POLVORIENTA,"This is no ordinary legend, but a glimpse of history.",368,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 13,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+368,ENCICLOPEDIA POLVORIENTA,"Eons ago there existed, beneath our feet, a world utterly unrecognizable to us.",369,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 14,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+369,ENCICLOPEDIA POLVORIENTA,"A whole continent, unified. Harmonious.",370,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 15,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+370,ENCICLOPEDIA POLVORIENTA,"A reality, perhaps, too idyllic for our kind.",371,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 16,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+371,ENCICLOPEDIA POLVORIENTA,The sustained abuse our races inflicted upon our land…,372,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 17,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+372,ENCICLOPEDIA POLVORIENTA,"Slowly saturated it, giving rise to a nightmare in the deepest part of its fate.",373,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 18,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+373,ENCICLOPEDIA POLVORIENTA,"A creature of immeasurable power and indescribable appearance,",374,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 19,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+374,ENCICLOPEDIA POLVORIENTA,Capable of razing lands and parting seas.,375,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 20,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+375,ENCICLOPEDIA POLVORIENTA,They called it... Vor...,376,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 21,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+376,JUGADOR,“Letter to the Masters of the Focus”,377,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 22,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+377,MANUSCRITO DAÑADO,"Esteemed Masters of the Focus,",378,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 23,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+378,MANUSCRITO DAÑADO,To write these lines knowing they will end up in your keeping is…,379,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 24,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+379,MANUSCRITO DAÑADO,an indescribable honor for a servant.,380,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 25,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+380,MANUSCRITO DAÑADO,I hope my words find you in the fullest health.,381,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 26,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+381,MANUSCRITO DAÑADO,"I write with the vehemence of formally requesting training, in light of my recent progress.",382,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 27,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+382,MANUSCRITO DAÑADO,I have spent years cultivating my spirit..,383,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 28,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+383,MANUSCRITO DAÑADO,Pursuing the dream of crowning myself the fiercest archer in the Realms of Being.,384,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 29,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+384,MANUSCRITO DAÑADO,My skills are truly exceptional. I cannot wait for the moment to show them to you.,385,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 30,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+385,MANUSCRITO DAÑADO,"Yet as of today, few options, I feel, would bring me as close to that dream as training under your tutelage,",386,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 31,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+386,MANUSCRITO DAÑADO,Training hard beneath the Sun alongside the rest of your fortunate apprentices.,387,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 32,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+387,MANUSCRITO DAÑADO,The heroic stories I have heard throughout my life about the Cyclops and the Siren…,388,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 33,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+388,MANUSCRITO DAÑADO,…The strength and the prowess; the rigor and the indulgence…,389,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 34,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+389,MANUSCRITO DAÑADO,"They are what have brought me here, to this very moment.",390,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 35,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+390,MANUSCRITO DAÑADO,They are what have made me surpass limits I did not believe possible.,391,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 36,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+391,MANUSCRITO DAÑADO,I hope to soon delight in your severity,392,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 37,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+392,MANUSCRITO DAÑADO,I promise to be worthy.,393,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 38,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+393,MANUSCRITO DAÑADO,Signed…,394,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 39,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+394,JUGADOR,Let's go.,395,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 40,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+395,LIRIA,Understood!,396,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 41,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+396,LIRIA,But one day you have to bring me back…,397,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 42,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+397,LIRIA,I could spend weeks rummaging through this room.,398,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 43,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+398,LIRIA,Let's leave it for when there isn't an emerging horde terrifying any city.,399,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 44,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+399,LIRIA,"After all, the books aren't going to walk away…",400,CONVERSATION,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 45,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+400,LIRIA,…Right?,,END,INT. BIBLIOTECA DEL CASTILLO - ATARDECER 46,INT. BIBLIOTECA DEL CASTILLO - ATARDECER
+401,LIRIA,This must be the Chapel...,402,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 1,INT. CAPILLA DEL CASTILLO - ATARDECER
+402,LIRIA,It feels strange to be in a place like this all alone.,403,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 2,INT. CAPILLA DEL CASTILLO - ATARDECER
+403,LIRIA,"Well, I'm with you, but you know what I mean.",404,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 3,INT. CAPILLA DEL CASTILLO - ATARDECER
+404,LIRIA,Uhm...,405,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 4,INT. CAPILLA DEL CASTILLO - ATARDECER
+405,LIRIA,Don't you feel the atmosphere is kind of... off?,406,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 5,INT. CAPILLA DEL CASTILLO - ATARDECER
+406,LIRIA,I don't feel completely safe here...,407,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 6,INT. CAPILLA DEL CASTILLO - ATARDECER
+407,LIRIA,I think we should move on soon.,408,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 7,INT. CAPILLA DEL CASTILLO - ATARDECER
+408,JUGADOR,You call the shots. Let's move.,409,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 8,INT. CAPILLA DEL CASTILLO - ATARDECER
+409,LIRIA,"I really appreciate it, NAME.",410,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 9,INT. CAPILLA DEL CASTILLO - ATARDECER
+410,LIRIA,I feel like someone is watching us...,411,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 10,INT. CAPILLA DEL CASTILLO - ATARDECER
+411,LIRIA,Maybe it's better to come back another time.,,END,INT. CAPILLA DEL CASTILLO - ATARDECER 11,INT. CAPILLA DEL CASTILLO - ATARDECER
+412,JUGADOR,Let's look around a bit more.,413,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 12,INT. CAPILLA DEL CASTILLO - ATARDECER
+413,LIRIA,"Alright, alright...",414,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 13,INT. CAPILLA DEL CASTILLO - ATARDECER
+414,LIRIA,Let's get closer to the altar.,415,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 14,INT. CAPILLA DEL CASTILLO - ATARDECER
+415,LIRIA,Mmm...,416,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 15,INT. CAPILLA DEL CASTILLO - ATARDECER
+416,LIRIA,"Look, NAME, there's a book lying open wide.",417,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 16,INT. CAPILLA DEL CASTILLO - ATARDECER
+417,LIRIA,It looks like a Bible... And it has some phrases underlined on this page.,418,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 17,INT. CAPILLA DEL CASTILLO - ATARDECER
+418,LIRIA,Do you want us to read them?,419,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 18,INT. CAPILLA DEL CASTILLO - ATARDECER
+419,JUGADOR,Let's get to it.,420,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 19,INT. CAPILLA DEL CASTILLO - ATARDECER
+420,BIBLIA,"In the beginning there was nothing, save the Divinity.",421,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 20,INT. CAPILLA DEL CASTILLO - ATARDECER
+421,BIBLIA,"And from its breath matter was born. And from its word, light.",422,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 21,INT. CAPILLA DEL CASTILLO - ATARDECER
+422,BIBLIA,"With its own hands it traced the vault of the heavens, and with the echo of its voice it sowed the seas, the mountains, and the rivers.",423,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 22,INT. CAPILLA DEL CASTILLO - ATARDECER
+423,BIBLIA,"The world was one, perfect and whole, an unblemished reflection of its thought.",424,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 23,INT. CAPILLA DEL CASTILLO - ATARDECER
+424,BIBLIA,"But fullness was repudiated by its own creation, and its fabric was torn.",425,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 24,INT. CAPILLA DEL CASTILLO - ATARDECER
+425,BIBLIA,"What was one shattered into fragments. Each fragment, a glimmer of the origin.",426,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 25,INT. CAPILLA DEL CASTILLO - ATARDECER
+426,BIBLIA,"Since then, the lands remain divided.",427,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 26,INT. CAPILLA DEL CASTILLO - ATARDECER
+427,BIBLIA,"But the Divinity neither hides nor is extinguished, for in every spark of life its fire still burns.",428,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 27,INT. CAPILLA DEL CASTILLO - ATARDECER
+428,BIBLIA,"And it shall be on the appointed day, when the parts are gathered, that its face shall be revealed once more.",429,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 28,INT. CAPILLA DEL CASTILLO - ATARDECER
+429,BIBLIA,What is broken shall find redemption in the eternal.,430,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 29,INT. CAPILLA DEL CASTILLO - ATARDECER
+430,JUGADOR,That's enough. We can go.,431,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 30,INT. CAPILLA DEL CASTILLO - ATARDECER
+431,LIRIA,How you love making me feel awful for nothing...,432,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 31,INT. CAPILLA DEL CASTILLO - ATARDECER
+432,LIRIA,"But hey, if you want to leave this place, I won't complain either.",433,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 32,INT. CAPILLA DEL CASTILLO - ATARDECER
+433,LIRIA,"Honestly, I was hoping you'd say something like that.",434,CONVERSATION,INT. CAPILLA DEL CASTILLO - ATARDECER 33,INT. CAPILLA DEL CASTILLO - ATARDECER
+434,LIRIA,"Come on, let's go!",,END,INT. CAPILLA DEL CASTILLO - ATARDECER 34,INT. CAPILLA DEL CASTILLO - ATARDECER
+435,LIRIA,NAME... I think we've reached the Throne Room.,436,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 1,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+436,LIRIA,"However, it's as deserted as the rest of the castle.",437,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 2,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+437,LIRIA,"There are some signs of damage, but... There's no trace of any battle.",438,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 3,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+438,LIRIA,"I suppose that's reason to celebrate, but...",439,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 4,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+439,LIRIA,Don't you find it unsettling?,440,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 5,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+440,LIRIA,It certainly doesn't inspire much calm.,441,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 6,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+441,JUGADOR,Let's get closer to the Throne.,442,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 7,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+442,LIRIA,"Sure, let's take a closer look.",443,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 8,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+443,LIRIA,Maybe that way we'll find out where the king is.,444,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 9,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+444,LIRIA,Mmm...,445,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 10,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+445,LIRIA,"It doesn't seem damaged, although its position isn't the usual one.",446,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 11,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+446,LIRIA,"It's slightly rotated. As if someone had leaned on it, or given it some kind of blow...",447,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 12,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+447,JUGADOR,Let's inspect the damage.,448,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 13,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+448,LIRIA,"Good idea, NAME. Let's try to find out where everyone has gone.",449,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 14,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+449,LIRIA,Mmm... Look at these carpets.,450,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 15,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+450,LIRIA,They have creases. They're slightly rolled up.,451,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 16,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+451,LIRIA,As if someone had run over them in desperation.,452,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 17,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+452,LIRIA,Ouch...,453,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 18,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+453,LIRIA,I hope they're all okay...,454,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 19,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+454,???,Ughh...,455,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 20,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+455,LIRIA,"Oh, no...",456,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 21,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+456,???,UUUUGGHHH...,457,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 22,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+457,LIRIA,"No, no, no!",458,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 23,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+458,???,AAAHHGGG!,459,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 24,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+459,LIRIA,"Get ready, NAME!",460,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 25,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+460,LIRIA,Good heavens...,461,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 26,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+461,LIRIA,This castle doesn't give you a moment's rest!,462,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 27,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+462,LIRIA,Good thing we could take it down.,463,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 28,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+463,LIRIA,"I know we make a great team, but... I never underestimate the enemy.",464,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 29,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+464,LIRIA,"And this one in particular, you have to admit, was a tough one.",465,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 30,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+465,LIRIA,"Anyway, at least it seems it left us a nice present.",466,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 31,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+466,LIRIA,...Or didn't you see what it dropped when we defeated it?,467,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 32,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+467,LIRIA,It's a silver key... Although it's a bit rusty.,468,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 33,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+468,LIRIA,"If the enemy had it on it, it's very likely it took it from somewhere nearby.",469,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 34,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+469,LIRIA,It's very likely it won't be of infinite use later on.,470,CONVERSATION,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 35,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+470,LIRIA,Let's keep exploring the castle to find out!,,END,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER 36,INT. SALA DEL TRONO DEL CASTILLO – ATARDECER
+471,LIRIA,Mmm… Another blocked door.,472,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 1,INT. APOSENTOS DEL REY - ATARDECER
+472,LIRIA,And this one looks pretty sturdy…,473,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 2,INT. APOSENTOS DEL REY - ATARDECER
+473,LIRIA,This is… oak? It also has wrought-iron reinforcements.,474,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 3,INT. APOSENTOS DEL REY - ATARDECER
+474,LIRIA,"But, look!",475,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 4,INT. APOSENTOS DEL REY - ATARDECER
+475,LIRIA,It has a lock on the lower half…,476,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 5,INT. APOSENTOS DEL REY - ATARDECER
+476,LIRIA,Maybe we can open it easily with the right pick.,,END,INT. APOSENTOS DEL REY - ATARDECER 6,INT. APOSENTOS DEL REY - ATARDECER
+477,JUGADOR,Let's use a key.,478,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 7,INT. APOSENTOS DEL REY - ATARDECER
+478,LIRIA,Uhmm… That's right!,479,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 8,INT. APOSENTOS DEL REY - ATARDECER
+479,LIRIA,That Distraction Raven we fought in the baths dropped a key.,480,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 9,INT. APOSENTOS DEL REY - ATARDECER
+480,LIRIA,I think it could fit perfectly…,481,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 10,INT. APOSENTOS DEL REY - ATARDECER
+481,LIRIA,"Let's try it, NAME.",482,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 11,INT. APOSENTOS DEL REY - ATARDECER
+482,LIRIA,…,483,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 12,INT. APOSENTOS DEL REY - ATARDECER
+483,PUERTA,*CLACK*,484,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 13,INT. APOSENTOS DEL REY - ATARDECER
+484,LIRIA,Olé! It's open!,485,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 14,INT. APOSENTOS DEL REY - ATARDECER
+485,LIRIA,"Come on, let's see what they're hiding in here with such secrecy.",,END,INT. APOSENTOS DEL REY - ATARDECER 15,INT. APOSENTOS DEL REY - ATARDECER
+486,JUGADOR,Let's use a key.,487,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 16,INT. APOSENTOS DEL REY - ATARDECER
+487,LIRIA,"That would be an amazing idea, NAME…",488,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 17,INT. APOSENTOS DEL REY - ATARDECER
+488,LIRIA,"…if we had one, of course.",489,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 18,INT. APOSENTOS DEL REY - ATARDECER
+489,LIRIA,"So far, we haven't found any key that could fit a lock like this.",490,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 19,INT. APOSENTOS DEL REY - ATARDECER
+490,LIRIA,"But if we keep exploring the Castle, we might come across one.",491,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 20,INT. APOSENTOS DEL REY - ATARDECER
+491,LIRIA,Right now I'm dying to know what's in there…,492,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 21,INT. APOSENTOS DEL REY - ATARDECER
+492,LIRIA,"Let's not waste time, NAME. Let's go find it!",,END,INT. APOSENTOS DEL REY - ATARDECER 22,INT. APOSENTOS DEL REY - ATARDECER
+493,JUGADOR,"Step aside, Liria… Time to use force!",494,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 23,INT. APOSENTOS DEL REY - ATARDECER
+494,LIRIA,Aww… So much brutality.,495,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 24,INT. APOSENTOS DEL REY - ATARDECER
+495,LIRIA,Wouldn't it be easier to take a walk around the castle and look for the key?,496,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 25,INT. APOSENTOS DEL REY - ATARDECER
+496,LIRIA,It's not even that big! It can't be far.,497,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 26,INT. APOSENTOS DEL REY - ATARDECER
+497,LIRIA,Anyway… I don't know why I'm trying to convince you.,498,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 27,INT. APOSENTOS DEL REY - ATARDECER
+498,LIRIA,"Better step aside, yeah…",,END,INT. APOSENTOS DEL REY - ATARDECER 28,INT. APOSENTOS DEL REY - ATARDECER
+499,JUGADOR,Let's take a look around and search for the key.,500,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 29,INT. APOSENTOS DEL REY - ATARDECER
+500,LIRIA,"Mmm… Yeah, I guess we don't have many other options.",501,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 30,INT. APOSENTOS DEL REY - ATARDECER
+501,LIRIA,"The Castle isn't too big, so it shouldn't be an impossible mission.",502,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 31,INT. APOSENTOS DEL REY - ATARDECER
+502,LIRIA,Maybe one of the enemies roaming around has it?,503,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 32,INT. APOSENTOS DEL REY - ATARDECER
+503,LIRIA,Let's check the rest of the rooms and clear up our doubts.,504,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 33,INT. APOSENTOS DEL REY - ATARDECER
+504,LIRIA,"And… let's hurry up a bit, please…",505,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 34,INT. APOSENTOS DEL REY - ATARDECER
+505,LIRIA,I'm dying to know what's in there now!,,END,INT. APOSENTOS DEL REY - ATARDECER 35,INT. APOSENTOS DEL REY - ATARDECER
+506,LIRIA,Um… Hellooo?,507,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 36,INT. APOSENTOS DEL REY - ATARDECER
+507,LIRIA,Ugh… Another room where you can't hear a single sound.,508,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 37,INT. APOSENTOS DEL REY - ATARDECER
+508,LIRIA,And it's so cold…,509,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 38,INT. APOSENTOS DEL REY - ATARDECER
+509,LIRIA,Looks like it's been closed for quite a while.,510,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 39,INT. APOSENTOS DEL REY - ATARDECER
+510,LIRIA,"And yet, it's really messy…",511,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 40,INT. APOSENTOS DEL REY - ATARDECER
+511,LIRIA,You'd never say it belongs to royalty.,512,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 41,INT. APOSENTOS DEL REY - ATARDECER
+512,LIRIA,"I think we can get a lot of valuable information from here, NAME.",513,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 42,INT. APOSENTOS DEL REY - ATARDECER
+513,LIRIA,Where do we start?,,END,INT. APOSENTOS DEL REY - ATARDECER 43,INT. APOSENTOS DEL REY - ATARDECER
+514,JUGADOR,Let's go up to the bed.,515,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 44,INT. APOSENTOS DEL REY - ATARDECER
+515,LIRIA,Mmm… I find it curious that you noticed his bed.,516,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 45,INT. APOSENTOS DEL REY - ATARDECER
+516,LIRIA,Do you think it could be hiding something?,517,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 46,INT. APOSENTOS DEL REY - ATARDECER
+517,LIRIA,"Let's see, let's see…",518,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 47,INT. APOSENTOS DEL REY - ATARDECER
+518,LIRIA,Uhm… It's perfectly made. And very cold.,519,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 48,INT. APOSENTOS DEL REY - ATARDECER
+519,LIRIA,No doubt the sheets have been washed and folded with care.,520,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 49,INT. APOSENTOS DEL REY - ATARDECER
+520,LIRIA,It almost doesn't look like it's been used…,521,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 50,INT. APOSENTOS DEL REY - ATARDECER
+521,LIRIA,"But in that case, where does the King sleep?",,END,INT. APOSENTOS DEL REY - ATARDECER 51,INT. APOSENTOS DEL REY - ATARDECER
+522,JUGADOR,Let's open the wardrobes.,523,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 52,INT. APOSENTOS DEL REY - ATARDECER
+523,LIRIA,Alright… Let's snoop through his clothes!,524,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 53,INT. APOSENTOS DEL REY - ATARDECER
+524,LIRIA,…,525,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 54,INT. APOSENTOS DEL REY - ATARDECER
+525,LIRIA,Whoa!,526,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 55,INT. APOSENTOS DEL REY - ATARDECER
+526,LIRIA,Are those… peasant clothes?,527,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 56,INT. APOSENTOS DEL REY - ATARDECER
+527,LIRIA,"No, they're not clothes as such… They've been used very, very little.",528,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 57,INT. APOSENTOS DEL REY - ATARDECER
+528,LIRIA,They almost look like… costumes.,529,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 58,INT. APOSENTOS DEL REY - ATARDECER
+529,LIRIA,What are these kinds of outfits doing in a king's room?,,END,INT. APOSENTOS DEL REY - ATARDECER 59,INT. APOSENTOS DEL REY - ATARDECER
+530,JUGADOR,Let's snoop around the desk.,531,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 60,INT. APOSENTOS DEL REY - ATARDECER
+531,LIRIA,Uhm… Seems like the most obvious option.,532,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 61,INT. APOSENTOS DEL REY - ATARDECER
+532,LIRIA,"At first glance, it's a neat desk.",533,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 62,INT. APOSENTOS DEL REY - ATARDECER
+533,LIRIA,"It's tidy, and it doesn't show many signs of use.",534,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 63,INT. APOSENTOS DEL REY - ATARDECER
+534,LIRIA,Let's take a closer look at the details…,535,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 64,INT. APOSENTOS DEL REY - ATARDECER
+535,LIRIA,"You check the drawers, I'll inspect the surface.",536,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 65,INT. APOSENTOS DEL REY - ATARDECER
+536,LIRIA,Mmm…,537,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 66,INT. APOSENTOS DEL REY - ATARDECER
+537,LIRIA,Bingo!,538,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 67,INT. APOSENTOS DEL REY - ATARDECER
+538,LIRIA,"Look, NAME. I think this is interesting.",539,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 68,INT. APOSENTOS DEL REY - ATARDECER
+539,LIRIA,There are a series of grooves in the central area.,540,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 69,INT. APOSENTOS DEL REY - ATARDECER
+540,LIRIA,"As if someone had been writing compulsively, in a hurry…",541,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 70,INT. APOSENTOS DEL REY - ATARDECER
+541,LIRIA,"And pressing pretty hard, too.",542,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 71,INT. APOSENTOS DEL REY - ATARDECER
+542,LIRIA,Mmm…,543,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 72,INT. APOSENTOS DEL REY - ATARDECER
+543,LIRIA,Something doesn't add up.,544,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 73,INT. APOSENTOS DEL REY - ATARDECER
+544,LIRIA,Royalty have their own scribes…,545,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 74,INT. APOSENTOS DEL REY - ATARDECER
+545,LIRIA,"So what's the point of these marks, then?",,END,INT. APOSENTOS DEL REY - ATARDECER 75,INT. APOSENTOS DEL REY - ATARDECER
+546,JUGADOR,I'm freezing… Let's get out of here.,547,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 76,INT. APOSENTOS DEL REY - ATARDECER
+547,LIRIA,Ugh… I have to agree with you on that.,548,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 77,INT. APOSENTOS DEL REY - ATARDECER
+548,LIRIA,And it's not just freezing cold…,549,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 78,INT. APOSENTOS DEL REY - ATARDECER
+549,LIRIA,It's also starting to feel more and more eerie.,550,CONVERSATION,INT. APOSENTOS DEL REY - ATARDECER 79,INT. APOSENTOS DEL REY - ATARDECER
+550,LIRIA,Let's move. We can always come back if we need to.,,END,INT. APOSENTOS DEL REY - ATARDECER 80,INT. APOSENTOS DEL REY - ATARDECER
+551,LIRIA,Ugh... But what is this smell?!,552,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 1,INT. BAÑOS DEL CASTILLO - ATARDECER
+552,LIRIA,Why did you make me come in here?,553,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 2,INT. BAÑOS DEL CASTILLO - ATARDECER
+553,LIRIA,Looks like they haven't cleaned the baths in eons...,554,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 3,INT. BAÑOS DEL CASTILLO - ATARDECER
+554,LIRIA,If we don't get out of here soon... I think I'm going to faint...,555,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 4,INT. BAÑOS DEL CASTILLO - ATARDECER
+555,LIRIA,I hope you'll get me somewhere safe if that happens. You still owe me for the beach.,556,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 5,INT. BAÑOS DEL CASTILLO - ATARDECER
+556,LIRIA,Eugh... One moment...,557,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 6,INT. BAÑOS DEL CASTILLO - ATARDECER
+557,LIRIA,This smell is... terrible. It can't be coming from the sewers...,558,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 7,INT. BAÑOS DEL CASTILLO - ATARDECER
+558,LIRIA,*sniff sniff*,559,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 8,INT. BAÑOS DEL CASTILLO - ATARDECER
+559,LIRIA,But... what?!,560,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 9,INT. BAÑOS DEL CASTILLO - ATARDECER
+560,LIRIA,"Look out, NAME!",561,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 10,INT. BAÑOS DEL CASTILLO - ATARDECER
+561,LIRIA,Eugh... Looks like the smell is already fading.,562,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 11,INT. BAÑOS DEL CASTILLO - ATARDECER
+562,LIRIA,I don't know how I managed to get through the whole fight without...,563,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 12,INT. BAÑOS DEL CASTILLO - ATARDECER
+563,LIRIA,"Hey, what's that?",564,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 13,INT. BAÑOS DEL CASTILLO - ATARDECER
+564,LIRIA,Looks like it dropped something...,565,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 14,INT. BAÑOS DEL CASTILLO - ATARDECER
+565,LIRIA,It's... a key?,566,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 15,INT. BAÑOS DEL CASTILLO - ATARDECER
+566,LIRIA,"It's got a rather... ""peculiar"" shape...",567,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 16,INT. BAÑOS DEL CASTILLO - ATARDECER
+567,LIRIA,Mmm...,568,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 17,INT. BAÑOS DEL CASTILLO - ATARDECER
+568,LIRIA,"Okay, let's take it.",569,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 18,INT. BAÑOS DEL CASTILLO - ATARDECER
+569,LIRIA,"If that bug had it on it, I don't think anyone was missing it.",570,CONVERSATION,INT. BAÑOS DEL CASTILLO - ATARDECER 19,INT. BAÑOS DEL CASTILLO - ATARDECER
+570,LIRIA,It might be for one of the Castle doors.,,END,INT. BAÑOS DEL CASTILLO - ATARDECER 20,INT. BAÑOS DEL CASTILLO - ATARDECER
+571,LIRIA,Whoa... The king's troops sure have some weaponry.,572,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 1,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+572,LIRIA,And what a quantity of weapons... It's almost excessive.,573,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 2,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+573,LIRIA,I never would have imagined such a small city could harbor so much power.,574,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 3,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+574,LIRIA,Though it doesn't look like they're getting much use out of it right now...,575,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 4,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+575,LIRIA,Is there anything here that catches your eye?,576,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 5,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+576,JUGADOR,That sword is making eyes at me.,577,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 6,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+577,LIRIA,But... what!?,578,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 7,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+578,LIRIA,I hadn't even realized that was a sword!,579,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 8,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+579,LIRIA,It's huge!,580,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 9,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+580,LIRIA,It reminds me of the Dragonslayer.,581,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 10,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+581,LIRIA,Oh... You don't know it?,582,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 11,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+582,LIRIA,It's a legendary sword. Thousands of stories have been written about it.,583,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 12,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+583,LIRIA,"Apparently, its wielder had real guts...",584,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 13,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+584,LIRIA,Who knows if our paths will ever cross with theirs?,585,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 14,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+585,LIRIA,"When we get a breather, we should prepare a few questions, just in case it happens.",586,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 15,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+586,LIRIA,I'm sure they have incredibly valuable lessons to teach us!,587,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 16,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+587,JUGADOR,That bow has my name on it.,588,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 17,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+588,LIRIA,I was just looking at it!,589,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 18,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+589,LIRIA,In fact... I'm sure I saw it first!,590,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 19,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+590,LIRIA,"But okaaay... I guess if you ask me nicely, I could let you have it.",591,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 20,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+591,LIRIA,sniff sniff,592,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 21,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+592,LIRIA,It smells like... a ceiba tree?,593,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 22,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+593,LIRIA,"It really looks like a handcrafted piece, meant only for true champions.",594,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 23,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+594,LIRIA,"And of course, we are too!",595,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 24,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+595,JUGADOR,That shield looks pretty tempting.,596,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 25,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+596,LIRIA,You bet it does! It caught my eye when we came in... It's amazing.,597,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 26,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+597,LIRIA,It's very beautiful. I love that crimson pattern...,598,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 27,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+598,LIRIA,Is that a bird?,599,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 28,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+599,LIRIA,"It contrasts wonderfully with that golden emblem, and with that deep blue background.",600,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 29,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+600,LIRIA,"Also, this is... metal?",601,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 30,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+601,LIRIA,"It looks like a very, very sturdy piece.",602,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 31,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+602,LIRIA,I'm sure it can withstand even the most extreme temperatures!,603,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 32,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+603,LIRIA,A legendary shield deserves a legendary bearer...,604,CONVERSATION,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 33,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+604,LIRIA,Take good care of it!,,END,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER 34,INT. SALA DE ARMAS DEL CASTILLO - ATARDECER
+605,LIRIA,These look like the Royal Guard's quarters.,606,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 1,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+606,LIRIA,They're not particularly luxurious...,607,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 2,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+607,LIRIA,"And to be honest, they don't seem very well kept, either.",608,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 3,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+608,LIRIA,"The beds are unmade, the walls are scratched, and on the floor there's a murky trail that leads to...",609,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 4,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+609,LIRIA,...That thing on the wall...,610,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 5,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+610,LIRIA,Are those writings?,611,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 6,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+611,LIRIA,"Come on, NAME. Let's get closer and take a look.",612,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 7,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+612,LIRIA,...,613,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 8,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+613,MURAL,"""Days without sleep: IIIII IIIII I""",614,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 9,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+614,LIRIA,But... what?!,615,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 10,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+615,LIRIA,What do you mean eleven days without a wink of sleep?!,616,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 11,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+616,LIRIA,I hope this is a joke...,617,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 12,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+617,LIRIA,How can the king allow this?,618,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 13,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+618,LIRIA,Maybe this guard had some specific problem?,619,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 14,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+619,LIRIA,I refuse to think this is something widespread...,620,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 15,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+620,LIRIA,"Definitely, NAME, we have to do something about this.",621,CONVERSATION,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 16,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+621,LIRIA,There's no time to lose.,,END,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER 17,INT. ALCOBAS DE LA GUARDIA REAL - ATARDECER
+622,LIRIA,"Oh, may Divinity shelter us…",623,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 1,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+623,LIRIA,Can you tell me why you're dragging me to places like this?!,624,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 2,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+624,LIRIA,It's so dark… I can barely see you…,625,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 3,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+625,LIRIA,Let's see… At least give me your hand!,626,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 4,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+626,LIRIA,"Oh, yes… Much better now.",627,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 5,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+627,LIRIA,Uhhmm… Hey…,628,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 6,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+628,LIRIA,"Since when are you so… rough, NAME?",629,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 7,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+629,JUGADOR,Are you sure you're touching me?,630,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 8,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+630,LIRIA,Well… Of course.,631,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 9,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+631,LIRIA,"Honestly, the things you say.",632,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 10,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+632,LIRIA,"Look, I'm squeezing your hand a bit so you can feel me.",633,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 11,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+633,LIRIA,Who else would I be touchin…?,634,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 12,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+634,JUGADOR,"Hey, no need to be rude.",635,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 13,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+635,LIRIA,"Oh—sorry, sorry!",636,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 14,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+636,LIRIA,"I didn't mean to offend you, not at all.",637,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 15,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+637,LIRIA,It was just an… observation.,638,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 16,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+638,LIRIA,But… I don't remember you with these… spikes?,639,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 17,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+639,JUGADOR,You're the one who's rough!,640,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 18,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+640,LIRIA,"Well, honestly!",641,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 19,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+641,LIRIA,I didn't mean it in a bad way!,642,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 20,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+642,LIRIA,There… now you've made me raise my voice.,643,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 21,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+643,VOZ DESCONOCIDA,Aghh…,644,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 22,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+644,LIRIA,Huh?,645,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 23,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+645,LIRIA,NAME? Why are you making those… weird noises?,646,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 24,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+646,VOZ DESCONOCIDA,AAAGGGHHHH!,647,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 25,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+647,LIRIA,AHHH!,648,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 26,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+648,LIRIA,NAME! It's on top of us!,649,CONVERSATION,INT. CATACUMBAS DEL CASTILLO - ATARDECER 27,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+649,LIRIA,Get ready!,,END,INT. CATACUMBAS DEL CASTILLO - ATARDECER 28,INT. CATACUMBAS DEL CASTILLO - ATARDECER
+650,LIRIA,Alright. We've reached a new door...,651,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 1,INT. PRISIÓN DEL CASTILLO - ATARDECER
+651,LIRIA,"...And this one's locked too, for a change.",652,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 2,INT. PRISIÓN DEL CASTILLO - ATARDECER
+652,LIRIA,Although... It has an opening at the top.,653,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 3,INT. PRISIÓN DEL CASTILLO - ATARDECER
+653,LIRIA,We can look through!,654,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 4,INT. PRISIÓN DEL CASTILLO - ATARDECER
+654,LIRIA,Uh... Let's see...,655,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 5,INT. PRISIÓN DEL CASTILLO - ATARDECER
+655,LIRIA,Looks like it leads to...,656,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 6,INT. PRISIÓN DEL CASTILLO - ATARDECER
+656,LIRIA,The castle prison?,657,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 7,INT. PRISIÓN DEL CASTILLO - ATARDECER
+657,LIRIA,Ugh... This gives me the creeps...,658,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 8,INT. PRISIÓN DEL CASTILLO - ATARDECER
+658,JUGADOR,Let's open it with a key.,659,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 9,INT. PRISIÓN DEL CASTILLO - ATARDECER
+659,LIRIA,"""As you wish, Your Majesty""",660,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 10,INT. PRISIÓN DEL CASTILLO - ATARDECER
+660,LIRIA,"There, one down!",661,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 11,INT. PRISIÓN DEL CASTILLO - ATARDECER
+661,LIRIA,I wish everything were as simple as this...,662,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 12,INT. PRISIÓN DEL CASTILLO - ATARDECER
+662,LIRIA,"Come on, let's see if we can find something interesting.",700,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 13,INT. PRISIÓN DEL CASTILLO - ATARDECER
+663,JUGADOR,Let's open it with a key.,664,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 14,INT. PRISIÓN DEL CASTILLO - ATARDECER
+664,LIRIA,fasfafas,665,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 15,INT. PRISIÓN DEL CASTILLO - ATARDECER
+665,LIRIA,Mmm... Yeah...,666,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 16,INT. PRISIÓN DEL CASTILLO - ATARDECER
+666,LIRIA,...,667,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 17,INT. PRISIÓN DEL CASTILLO - ATARDECER
+667,LIRIA,And what do you want us to do?!,668,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 18,INT. PRISIÓN DEL CASTILLO - ATARDECER
+668,LIRIA,Paint it?!,669,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 19,INT. PRISIÓN DEL CASTILLO - ATARDECER
+669,LIRIA,...,670,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 20,INT. PRISIÓN DEL CASTILLO - ATARDECER
+670,LIRIA,Agh...,671,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 21,INT. PRISIÓN DEL CASTILLO - ATARDECER
+671,LIRIA,"Sorry, I went a bit too far...",672,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 22,INT. PRISIÓN DEL CASTILLO - ATARDECER
+672,LIRIA,We've been wandering around this castle for so long that I'm kind of losing it.,673,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 23,INT. PRISIÓN DEL CASTILLO - ATARDECER
+673,LIRIA,But if we want a key for this door...,674,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 24,INT. PRISIÓN DEL CASTILLO - ATARDECER
+674,LIRIA,I'm afraid we'll still have to take a few more laps.,,END,INT. PRISIÓN DEL CASTILLO - ATARDECER 25,INT. PRISIÓN DEL CASTILLO - ATARDECER
+675,JUGADOR,Time to use brute force.,676,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 26,INT. PRISIÓN DEL CASTILLO - ATARDECER
+676,LIRIA,But... Let's see...,677,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 27,INT. PRISIÓN DEL CASTILLO - ATARDECER
+677,LIRIA,Have you seen that door?!,678,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 28,INT. PRISIÓN DEL CASTILLO - ATARDECER
+678,LIRIA,It's a wrought-iron gate...,679,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 29,INT. PRISIÓN DEL CASTILLO - ATARDECER
+679,LIRIA,You'd almost take less time knocking the wall down.,680,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 30,INT. PRISIÓN DEL CASTILLO - ATARDECER
+680,LIRIA,Anyway... What can I tell you.,681,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 31,INT. PRISIÓN DEL CASTILLO - ATARDECER
+681,LIRIA,Go ahead... And let me know if you want us to look for a more... diligent solution.,,END,INT. PRISIÓN DEL CASTILLO - ATARDECER 32,INT. PRISIÓN DEL CASTILLO - ATARDECER
+682,JUGADOR,We can pick the lock.,683,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 33,INT. PRISIÓN DEL CASTILLO - ATARDECER
+683,LIRIA,Ah... We can?,684,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 34,INT. PRISIÓN DEL CASTILLO - ATARDECER
+684,LIRIA,"Mmm... I trust you, I trust you!",685,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 35,INT. PRISIÓN DEL CASTILLO - ATARDECER
+685,LIRIA,Better step aside a bit...,686,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 36,INT. PRISIÓN DEL CASTILLO - ATARDECER
+686,LIRIA,"All yours, NAME!",687,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 37,INT. PRISIÓN DEL CASTILLO - ATARDECER
+687,LIRIA,Whoa!,688,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 38,INT. PRISIÓN DEL CASTILLO - ATARDECER
+688,LIRIA,That's amazing!,689,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 39,INT. PRISIÓN DEL CASTILLO - ATARDECER
+689,LIRIA,These things never stop surprising me...,690,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 40,INT. PRISIÓN DEL CASTILLO - ATARDECER
+690,LIRIA,Those are skills that are beyond my repertoire.,691,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 41,INT. PRISIÓN DEL CASTILLO - ATARDECER
+691,LIRIA,"Anyway, let's save the compliments for another time...",692,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 42,INT. PRISIÓN DEL CASTILLO - ATARDECER
+692,LIRIA,Let's see if we can find something interesting.,700,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 43,INT. PRISIÓN DEL CASTILLO - ATARDECER
+693,JUGADOR,Let's come back another time.,694,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 44,INT. PRISIÓN DEL CASTILLO - ATARDECER
+694,LIRIA,Yeah... I think that will be for the best too.,695,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 45,INT. PRISIÓN DEL CASTILLO - ATARDECER
+695,LIRIA,There has to be an easy way to get through...,696,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 46,INT. PRISIÓN DEL CASTILLO - ATARDECER
+696,LIRIA,Did you see that huge lock?,697,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 47,INT. PRISIÓN DEL CASTILLO - ATARDECER
+697,LIRIA,Maybe the key is still somewhere in the castle.,698,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 48,INT. PRISIÓN DEL CASTILLO - ATARDECER
+698,LIRIA,Let's take a look around and come back as soon as we can...,699,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 49,INT. PRISIÓN DEL CASTILLO - ATARDECER
+699,LIRIA,I've got a feeling the prison is hiding something important.,,END,INT. PRISIÓN DEL CASTILLO - ATARDECER 50,INT. PRISIÓN DEL CASTILLO - ATARDECER
+700,LIRIA,"Alright, we're in!",701,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 51,INT. PRISIÓN DEL CASTILLO - ATARDECER
+701,LIRIA,Although... I don't think I'm as happy as I thought I'd be.,702,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 52,INT. PRISIÓN DEL CASTILLO - ATARDECER
+702,LIRIA,It's a... pretty decayed atmosphere.,703,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 53,INT. PRISIÓN DEL CASTILLO - ATARDECER
+703,LIRIA,"Besides... it must be kind of weird to sleep just a few meters away from your city's criminals, don't you think?",704,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 54,INT. PRISIÓN DEL CASTILLO - ATARDECER
+704,LIRIA,And even more so if you're the king...,705,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 55,INT. PRISIÓN DEL CASTILLO - ATARDECER
+705,LIRIA,"Anyway, I guess you get used to anything.",706,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 56,INT. PRISIÓN DEL CASTILLO - ATARDECER
+706,LIRIA,"Hey, NAME! Look at that.",707,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 57,INT. PRISIÓN DEL CASTILLO - ATARDECER
+707,LIRIA,It's a bunch of keys.,708,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 58,INT. PRISIÓN DEL CASTILLO - ATARDECER
+708,LIRIA,It's a bit dirty... Though some of the keys are in perfect condition.,709,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 59,INT. PRISIÓN DEL CASTILLO - ATARDECER
+709,LIRIA,What was it doing lying there?,710,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 60,INT. PRISIÓN DEL CASTILLO - ATARDECER
+710,LIRIA,It's as if someone had freed these prisoners...,711,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 61,INT. PRISIÓN DEL CASTILLO - ATARDECER
+711,LIRIA,"...And then tossed the keys into the air, without paying them much attention.",712,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 62,INT. PRISIÓN DEL CASTILLO - ATARDECER
+712,LIRIA,Uhm...,713,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 63,INT. PRISIÓN DEL CASTILLO - ATARDECER
+713,LIRIA,Given what we've seen... I'm sure they'll be safer with us.,714,CONVERSATION,INT. PRISIÓN DEL CASTILLO - ATARDECER 64,INT. PRISIÓN DEL CASTILLO - ATARDECER
+714,LIRIA,I promise I'll treat them with a bit more care.,,END,INT. PRISIÓN DEL CASTILLO - ATARDECER 65,INT. PRISIÓN DEL CASTILLO - ATARDECER
+715,LIRIA,"Wait a moment, NOMBRE…",716,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 1,INT. PASADIZO DEL CASTILLO - ATARDECER
+716,LIRIA,Look at the patterns on these walls…,717,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 2,INT. PASADIZO DEL CASTILLO - ATARDECER
+717,LIRIA,We're in… the Castle's catacombs?,718,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 3,INT. PASADIZO DEL CASTILLO - ATARDECER
+718,LIRIA,Wow… So the Church and the Castle have always been connected…,719,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 4,INT. PASADIZO DEL CASTILLO - ATARDECER
+719,LIRIA,I would never have imagined it.,720,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 5,INT. PASADIZO DEL CASTILLO - ATARDECER
+720,LIRIA,Why do you think this passage exists?,721,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 6,INT. PASADIZO DEL CASTILLO - ATARDECER
+721,JUGADOR,So the royal family could access the Church without mixing with the people.,722,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 7,INT. PASADIZO DEL CASTILLO - ATARDECER
+722,LIRIA,"Oh, that's a great theory, NOMBRE.",723,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 8,INT. PASADIZO DEL CASTILLO - ATARDECER
+723,LIRIA,If the rest of the city's inhabitants share the POSADERO's opinion…,724,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 9,INT. PASADIZO DEL CASTILLO - ATARDECER
+724,LIRIA,"I really doubt the royal family can afford to walk around their own city without drawing stares, judgments, and indiscretions.",725,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 10,INT. PASADIZO DEL CASTILLO - ATARDECER
+725,LIRIA,The tunnel could solve that problem partially…,726,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 11,INT. PASADIZO DEL CASTILLO - ATARDECER
+726,LIRIA,"Although, once they reached the church, they'd be seen and judged by the people again, wouldn't they?",727,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 12,INT. PASADIZO DEL CASTILLO - ATARDECER
+727,LIRIA,Mmm…,728,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 13,INT. PASADIZO DEL CASTILLO - ATARDECER
+728,JUGADOR,So the king's troops could easily watch and control the clergy.,729,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 14,INT. PASADIZO DEL CASTILLO - ATARDECER
+729,LIRIA,"That's a very sharp theory, yes…",730,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 15,INT. PASADIZO DEL CASTILLO - ATARDECER
+730,LIRIA,And it would make a lot of sense with what the POSADERO told us.,731,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 16,INT. PASADIZO DEL CASTILLO - ATARDECER
+731,LIRIA,"As he told us, the royal family's greed and thirst for power know no limits.",732,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 17,INT. PASADIZO DEL CASTILLO - ATARDECER
+732,LIRIA,"But, in that case, why would they need this tunnel?",733,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 18,INT. PASADIZO DEL CASTILLO - ATARDECER
+733,LIRIA,"They're the royal family, after all. They can do practically whatever they want with their clergy and their people.",734,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 19,INT. PASADIZO DEL CASTILLO - ATARDECER
+734,LIRIA,Why not embrace that tyranny and opt for more direct control?,735,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 20,INT. PASADIZO DEL CASTILLO - ATARDECER
+735,JUGADOR,To be able to escape quickly in case of a siege.,736,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 21,INT. PASADIZO DEL CASTILLO - ATARDECER
+736,LIRIA,"Mmm… That would make a lot of sense, yes…",737,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 22,INT. PASADIZO DEL CASTILLO - ATARDECER
+737,LIRIA,Although it doesn't look like this route has been used recently.,738,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 23,INT. PASADIZO DEL CASTILLO - ATARDECER
+738,LIRIA,"In that case, why didn't they use their escape route while they could?",739,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 24,INT. PASADIZO DEL CASTILLO - ATARDECER
+739,LIRIA,This whole affair just keeps getting stranger…,740,CONVERSATION,INT. PASADIZO DEL CASTILLO - ATARDECER 25,INT. PASADIZO DEL CASTILLO - ATARDECER
+740,LIRIA,"Come on, NOMBRE. We've got a Castle to break into.",,END,INT. PASADIZO DEL CASTILLO - ATARDECER 26,INT. PASADIZO DEL CASTILLO - ATARDECER
+741,LIRIA,Uhm...,742,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 1,INT. TORRE DEL CASTILLO - ATARDECER
+742,LIRIA,This door...,743,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 2,INT. TORRE DEL CASTILLO - ATARDECER
+743,LIRIA,It seems... different.,744,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 3,INT. TORRE DEL CASTILLO - ATARDECER
+744,LIRIA,"And for some reason, it gives off some kind of magical barrier.",745,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 4,INT. TORRE DEL CASTILLO - ATARDECER
+745,LIRIA,Why would they protect it like this?,746,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 5,INT. TORRE DEL CASTILLO - ATARDECER
+746,LIRIA,"Be that as it may, I really doubt we can knock it down by brute force...",747,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 6,INT. TORRE DEL CASTILLO - ATARDECER
+747,LIRIA,"But, of course, it's also locked up tight.",748,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 7,INT. TORRE DEL CASTILLO - ATARDECER
+748,LIRIA,Can you think of anything?,749,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 8,INT. TORRE DEL CASTILLO - ATARDECER
+749,JUGADOR,Let's use one of the keys we have.,750,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 9,INT. TORRE DEL CASTILLO - ATARDECER
+750,LIRIA,Alright... Let's see if one of the keyring's keys fits.,751,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 10,INT. TORRE DEL CASTILLO - ATARDECER
+751,LIRIA,"Hey, this one has a different outline. What if we try it?",752,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 11,INT. TORRE DEL CASTILLO - ATARDECER
+752,LIRIA,Yes! It worked!,753,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 12,INT. TORRE DEL CASTILLO - ATARDECER
+753,LIRIA,But... what's that sound?,754,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 13,INT. TORRE DEL CASTILLO - ATARDECER
+754,LIRIA,Is there someone here?,755,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 14,INT. TORRE DEL CASTILLO - ATARDECER
+755,LIRIA,"Or, worse... ""something""?",756,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 15,INT. TORRE DEL CASTILLO - ATARDECER
+756,LIRIA,"Ugh, it makes my hair stand on end just thinking about it...",757,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 16,INT. TORRE DEL CASTILLO - ATARDECER
+757,LIRIA,Though I think there's only one way to find out.,758,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 17,INT. TORRE DEL CASTILLO - ATARDECER
+758,LIRIA,"Don't stray too far, please.",786,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 18,INT. TORRE DEL CASTILLO - ATARDECER
+759,JUGADOR,Let's open it with a key.,760,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 19,INT. TORRE DEL CASTILLO - ATARDECER
+760,LIRIA,Alright... Let's see what we've got...,761,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 20,INT. TORRE DEL CASTILLO - ATARDECER
+761,LIRIA,Mmm... nothing...,762,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 21,INT. TORRE DEL CASTILLO - ATARDECER
+762,LIRIA,Nothing we have can open this door.,763,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 22,INT. TORRE DEL CASTILLO - ATARDECER
+763,LIRIA,"But if they've used a barrier to protect it, it's because something truly valuable must be waiting inside...",764,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 23,INT. TORRE DEL CASTILLO - ATARDECER
+764,LIRIA,Ugh... I'm starting to get desperate.,765,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 24,INT. TORRE DEL CASTILLO - ATARDECER
+765,LIRIA,Let's stay calm. At least for now.,766,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 25,INT. TORRE DEL CASTILLO - ATARDECER
+766,LIRIA,We still have rooms left to explore.,767,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 26,INT. TORRE DEL CASTILLO - ATARDECER
+767,LIRIA,Let's finish exploring the parts of the castle we still haven't seen before we consider other options.,,END,INT. TORRE DEL CASTILLO - ATARDECER 27,INT. TORRE DEL CASTILLO - ATARDECER
+768,JUGADOR,Step aside... I'm going to ram it.,769,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 28,INT. TORRE DEL CASTILLO - ATARDECER
+769,LIRIA,Uh...,770,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 29,INT. TORRE DEL CASTILLO - ATARDECER
+770,LIRIA,Are you even listening to me?!,771,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 30,INT. TORRE DEL CASTILLO - ATARDECER
+771,LIRIA,It has a magic barrier!,772,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 31,INT. TORRE DEL CASTILLO - ATARDECER
+772,LIRIA,How do you expect to bring down a gate like that in two hits?,773,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 32,INT. TORRE DEL CASTILLO - ATARDECER
+773,LIRIA,Ugh... I don't even know why I bother.,774,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 33,INT. TORRE DEL CASTILLO - ATARDECER
+774,LIRIA,"Go on, try it.",775,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 34,INT. TORRE DEL CASTILLO - ATARDECER
+775,LIRIA,Let me know when you get tired.,,END,INT. TORRE DEL CASTILLO - ATARDECER 35,INT. TORRE DEL CASTILLO - ATARDECER
+776,JUGADOR,We can disable the barrier.,777,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 36,INT. TORRE DEL CASTILLO - ATARDECER
+777,LIRIA,"In fact... no, I don't think we can.",778,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 37,INT. TORRE DEL CASTILLO - ATARDECER
+778,LIRIA,...,,END,INT. TORRE DEL CASTILLO - ATARDECER 38,INT. TORRE DEL CASTILLO - ATARDECER
+779,JUGADOR,Let's explore the rest of the castle first.,780,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 39,INT. TORRE DEL CASTILLO - ATARDECER
+780,LIRIA,You're right.,781,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 40,INT. TORRE DEL CASTILLO - ATARDECER
+781,LIRIA,"Maybe we're rushing things, judging by how imposing this door is.",782,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 41,INT. TORRE DEL CASTILLO - ATARDECER
+782,LIRIA,Maybe the key is still somewhere in the castle.,783,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 42,INT. TORRE DEL CASTILLO - ATARDECER
+783,LIRIA,Let's take a look and come back as soon as we can...,784,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 43,INT. TORRE DEL CASTILLO - ATARDECER
+784,LIRIA,I've got a feeling the prison is hiding something important.,,END,INT. TORRE DEL CASTILLO - ATARDECER 44,INT. TORRE DEL CASTILLO - ATARDECER
+785,LIRIA,Ah... We're getting closer and closer.,786,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 45,INT. TORRE DEL CASTILLO - ATARDECER
+786,LIRIA,"You hear them too, right?",787,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 46,INT. TORRE DEL CASTILLO - ATARDECER
+787,LIRIA,They're... human voices.,788,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 47,INT. TORRE DEL CASTILLO - ATARDECER
+788,LIRIA,"...Or screams, rather.",789,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 48,INT. TORRE DEL CASTILLO - ATARDECER
+789,LIRIA,Ugh... what in the world is going on here?,790,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 49,INT. TORRE DEL CASTILLO - ATARDECER
+790,LIRIA,But... what?!,791,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 50,INT. TORRE DEL CASTILLO - ATARDECER
+791,VOZ MISTERIOSA,"Come on, come on!",792,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 51,INT. TORRE DEL CASTILLO - ATARDECER
+792,VOZ MISTERIOSA,We're close now... Don't get distracted!,793,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 52,INT. TORRE DEL CASTILLO - ATARDECER
+793,LIRIA,NAME... he is... he is...,794,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 53,INT. TORRE DEL CASTILLO - ATARDECER
+794,LIRIA,"It's His Majesty, Holdric!",795,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 54,INT. TORRE DEL CASTILLO - ATARDECER
+795,VOZ MISTERIOSA,Uh... one moment! Stop the presses...,796,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 55,INT. TORRE DEL CASTILLO - ATARDECER
+796,VOZ MISTERIOSA,Am I hearing... my name?,797,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 56,INT. TORRE DEL CASTILLO - ATARDECER
+797,REY HOLDRIC,Huh...?,798,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 57,INT. TORRE DEL CASTILLO - ATARDECER
+798,REY HOLDRIC,Oh! It can't be!,799,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 58,INT. TORRE DEL CASTILLO - ATARDECER
+799,REY HOLDRIC,Praised be the Divinity!,800,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 59,INT. TORRE DEL CASTILLO - ATARDECER
+800,REY HOLDRIC,"In such dire times, it still has mercy on me...",801,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 60,INT. TORRE DEL CASTILLO - ATARDECER
+801,REY HOLDRIC,Praised be!,802,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 61,INT. TORRE DEL CASTILLO - ATARDECER
+802,REY HOLDRIC,"I can't believe that, in this very moment of need, it has gifted me not one... but two!",803,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 62,INT. TORRE DEL CASTILLO - ATARDECER
+803,REY HOLDRIC,Two new pieces with which to finish my work!,804,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 63,INT. TORRE DEL CASTILLO - ATARDECER
+804,LIRIA,Your Majesty...!,805,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 64,INT. TORRE DEL CASTILLO - ATARDECER
+805,LIRIA,What are you saying?!,806,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 65,INT. TORRE DEL CASTILLO - ATARDECER
+806,LIRIA,And what are you doing here with all these people?,807,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 66,INT. TORRE DEL CASTILLO - ATARDECER
+807,LIRIA,Could it be they're...?,808,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 67,INT. TORRE DEL CASTILLO - ATARDECER
+808,VOZ ENTRISTECIDA,Please... help us...,809,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 68,INT. TORRE DEL CASTILLO - ATARDECER
+809,REY HOLDRIC,SILENCE!,810,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 69,INT. TORRE DEL CASTILLO - ATARDECER
+810,REY HOLDRIC,Don't distract the people!,811,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 70,INT. TORRE DEL CASTILLO - ATARDECER
+811,REY HOLDRIC,They're... busy.,812,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 71,INT. TORRE DEL CASTILLO - ATARDECER
+812,JUGADOR,"""Busy""? Busy with what, exactly?",813,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 72,INT. TORRE DEL CASTILLO - ATARDECER
+813,REY HOLDRIC,"Busy, spending every minute of their life like they never had before.",814,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 73,INT. TORRE DEL CASTILLO - ATARDECER
+814,REY HOLDRIC,Busy creating the total work...,815,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 74,INT. TORRE DEL CASTILLO - ATARDECER
+815,JUGADOR,What are all these people doing here?,816,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 75,INT. TORRE DEL CASTILLO - ATARDECER
+816,REY HOLDRIC,They're doing the most beautiful thing a human being can do.,817,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 76,INT. TORRE DEL CASTILLO - ATARDECER
+817,REY HOLDRIC,They're... creating.,818,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 77,INT. TORRE DEL CASTILLO - ATARDECER
+818,REY HOLDRIC,Specifically...,819,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 78,INT. TORRE DEL CASTILLO - ATARDECER
+819,JUGADOR,"Don't you dare silence them, you scoundrel!",820,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 79,INT. TORRE DEL CASTILLO - ATARDECER
+820,REY HOLDRIC,"Ha! Who do you think you are, bastard?",821,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 80,INT. TORRE DEL CASTILLO - ATARDECER
+821,REY HOLDRIC,Who do you think you're talking to?,822,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 81,INT. TORRE DEL CASTILLO - ATARDECER
+822,REY HOLDRIC,"I only protect them, as every king must.",823,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 82,INT. TORRE DEL CASTILLO - ATARDECER
+823,REY HOLDRIC,I protect them from any distraction.,824,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 83,INT. TORRE DEL CASTILLO - ATARDECER
+824,REY HOLDRIC,From anything that pulls them even slightly away from our goal...,825,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 84,INT. TORRE DEL CASTILLO - ATARDECER
+825,REY HOLDRIC,The Gesamtkunstwerk!,826,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 85,INT. TORRE DEL CASTILLO - ATARDECER
+826,REY HOLDRIC,"Dancers, musicians, poets, writers...",827,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 86,INT. TORRE DEL CASTILLO - ATARDECER
+827,REY HOLDRIC,"Painters, sculptors, architects...",828,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 87,INT. TORRE DEL CASTILLO - ATARDECER
+828,REY HOLDRIC,And even my royal guard!,829,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 88,INT. TORRE DEL CASTILLO - ATARDECER
+829,REY HOLDRIC,"All together, under my sovereign direction, to create something unique and transcendental!",830,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 89,INT. TORRE DEL CASTILLO - ATARDECER
+830,REY HOLDRIC,Something that will make us eternal!,831,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 90,INT. TORRE DEL CASTILLO - ATARDECER
+831,REY HOLDRIC,And now you too can contribute your art to my work...,832,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 91,INT. TORRE DEL CASTILLO - ATARDECER
+832,REY HOLDRIC,"And your hands, of course.",833,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 92,INT. TORRE DEL CASTILLO - ATARDECER
+833,REY HOLDRIC,"Take paper from that pile, and... make yourselves comfortable.",834,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 93,INT. TORRE DEL CASTILLO - ATARDECER
+834,REY HOLDRIC,No one will leave this place until my creation is finished.,835,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 94,INT. TORRE DEL CASTILLO - ATARDECER
+835,JUGADOR,Over my dead body!,836,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 95,INT. TORRE DEL CASTILLO - ATARDECER
+836,LIRIA,"Well said, NAME!",837,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 96,INT. TORRE DEL CASTILLO - ATARDECER
+837,REY HOLDRIC,Ha!,838,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 97,INT. TORRE DEL CASTILLO - ATARDECER
+838,REY HOLDRIC,What a brave statement!,839,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 98,INT. TORRE DEL CASTILLO - ATARDECER
+839,REY HOLDRIC,You must be very powerful to utter such recklessness...,840,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 99,INT. TORRE DEL CASTILLO - ATARDECER
+840,REY HOLDRIC,...Or very foolish.,841,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 100,INT. TORRE DEL CASTILLO - ATARDECER
+841,REY HOLDRIC,"Either way, I won't let you steal one more second of my precious time.",842,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 101,INT. TORRE DEL CASTILLO - ATARDECER
+842,REY HOLDRIC,"En garde, ignoramuses!",843,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 102,INT. TORRE DEL CASTILLO - ATARDECER
+843,LIRIA,They say you fight fire with more fire...,844,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 103,INT. TORRE DEL CASTILLO - ATARDECER
+844,LIRIA,"This is our chance, NAME.",845,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 104,INT. TORRE DEL CASTILLO - ATARDECER
+845,LIRIA,Let's turn his work to ashes!,846,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 105,INT. TORRE DEL CASTILLO - ATARDECER
+846,JUGADOR,Free your people and no blood will be spilled.,847,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 106,INT. TORRE DEL CASTILLO - ATARDECER
+847,REY HOLDRIC,Ha!,848,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 107,INT. TORRE DEL CASTILLO - ATARDECER
+848,REY HOLDRIC,Is that a threat?,849,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 108,INT. TORRE DEL CASTILLO - ATARDECER
+849,REY HOLDRIC,Or are you so foolish you think you're in a position to negotiate?,850,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 109,INT. TORRE DEL CASTILLO - ATARDECER
+850,REY HOLDRIC,The only blood that will be spilled here...,851,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 110,INT. TORRE DEL CASTILLO - ATARDECER
+851,REY HOLDRIC,Will be yours!,852,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 111,INT. TORRE DEL CASTILLO - ATARDECER
+852,JUGADOR,Liria... we have to get out of here!,853,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 112,INT. TORRE DEL CASTILLO - ATARDECER
+853,LIRIA,But... what?!,854,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 113,INT. TORRE DEL CASTILLO - ATARDECER
+854,LIRIA,"What are you saying, NAME?!",855,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 114,INT. TORRE DEL CASTILLO - ATARDECER
+855,LIRIA,"We have to free all these people, no matter what!",856,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 115,INT. TORRE DEL CASTILLO - ATARDECER
+856,LIRIA,...,857,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 116,INT. TORRE DEL CASTILLO - ATARDECER
+857,LIRIA,Ah...,858,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 117,INT. TORRE DEL CASTILLO - ATARDECER
+858,LIRIA,Divinity... forgive me for this...,859,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 118,INT. TORRE DEL CASTILLO - ATARDECER
+859,LIRIA,"Come on, let's take advantage of the door still being open!",860,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 119,INT. TORRE DEL CASTILLO - ATARDECER
+860,LIRIA,Follow me!,861,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 120,INT. TORRE DEL CASTILLO - ATARDECER
+861,"HOLDRIC, THE UNRESTING",Your mind wanders... Mine does not.,862,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 121,INT. TORRE DEL CASTILLO - ATARDECER
+862,HOLDRIC,I don't understand...,863,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 122,INT. TORRE DEL CASTILLO - ATARDECER
+863,HOLDRIC,"*cough, cough*",864,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 123,INT. TORRE DEL CASTILLO - ATARDECER
+864,HOLDRIC,What are you doing?!,865,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 124,INT. TORRE DEL CASTILLO - ATARDECER
+865,HOLDRIC,Are you aware of what you're doing?!,866,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 125,INT. TORRE DEL CASTILLO - ATARDECER
+866,HOLDRIC,You could be part of something enormous...,867,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 126,INT. TORRE DEL CASTILLO - ATARDECER
+867,HOLDRIC,You could be history!,868,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 127,INT. TORRE DEL CASTILLO - ATARDECER
+868,HOLDRIC,Take part in the greatest work of art ever created by humanity!,869,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 128,INT. TORRE DEL CASTILLO - ATARDECER
+869,HOLDRIC,"I offered you my hand... the hand of a visionary, of a messiah.",870,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 129,INT. TORRE DEL CASTILLO - ATARDECER
+870,HOLDRIC,And you thank me... like this?!,871,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 130,INT. TORRE DEL CASTILLO - ATARDECER
+871,HOLDRIC,Like this?!,872,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 131,INT. TORRE DEL CASTILLO - ATARDECER
+872,HOLDRIC,Ahg!,873,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 132,INT. TORRE DEL CASTILLO - ATARDECER
+873,HOLDRIC,Who do you think you are?!,874,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 133,INT. TORRE DEL CASTILLO - ATARDECER
+874,HOLDRIC,"*cough, cough*",875,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 134,INT. TORRE DEL CASTILLO - ATARDECER
+875,HOLDRIC,Ough...,876,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 135,INT. TORRE DEL CASTILLO - ATARDECER
+876,LIRIA,Uh...,877,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 136,INT. TORRE DEL CASTILLO - ATARDECER
+877,LIRIA,He collapsed...,878,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 137,INT. TORRE DEL CASTILLO - ATARDECER
+878,LIRIA,"Looks like we won, NAME.",879,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 138,INT. TORRE DEL CASTILLO - ATARDECER
+879,LIRIA,But there's no doubt he was a tough opponent.,880,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 139,INT. TORRE DEL CASTILLO - ATARDECER
+880,LIRIA,Are you alright?,881,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 140,INT. TORRE DEL CASTILLO - ATARDECER
+881,JUGADOR,I've got a few scratches... but nothing to worry about.,882,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 141,INT. TORRE DEL CASTILLO - ATARDECER
+882,LIRIA,Let me take a look...,883,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 142,INT. TORRE DEL CASTILLO - ATARDECER
+883,LIRIA,Maybe I can help you heal.,884,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 143,INT. TORRE DEL CASTILLO - ATARDECER
+884,JUGADOR,Where's the main course?,885,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 144,INT. TORRE DEL CASTILLO - ATARDECER
+885,LIRIA,"Heh, heh!",886,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 145,INT. TORRE DEL CASTILLO - ATARDECER
+886,LIRIA,How can you have humor at a time like this?,887,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 146,INT. TORRE DEL CASTILLO - ATARDECER
+887,JUGADOR,I'm completely devastated.,888,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 147,INT. TORRE DEL CASTILLO - ATARDECER
+888,LIRIA,Well... you look just fine to me!,889,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 148,INT. TORRE DEL CASTILLO - ATARDECER
+889,LIRIA,Are you sure you're not exaggerating?,890,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 149,INT. TORRE DEL CASTILLO - ATARDECER
+890,LIRIA,"Jokes aside, I have to admit his tenacity in battle is totally on par with his psychopathy.",891,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 150,INT. TORRE DEL CASTILLO - ATARDECER
+891,LIRIA,"Let's get out of here quickly, and let me help you heal.",892,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 151,INT. TORRE DEL CASTILLO - ATARDECER
+892,LIRIA,You'll be as good as new in no time.,893,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 152,INT. TORRE DEL CASTILLO - ATARDECER
+893,VOZ ENTRISTECIDA,Ugh...,894,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 153,INT. TORRE DEL CASTILLO - ATARDECER
+894,LIRIA,Huh...?,895,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 154,INT. TORRE DEL CASTILLO - ATARDECER
+895,LIRIA,What is...?,896,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 155,INT. TORRE DEL CASTILLO - ATARDECER
+896,LIRIA,NAME! The prisoners!,897,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 156,INT. TORRE DEL CASTILLO - ATARDECER
+897,LIRIA,Let's go talk to them.,898,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 157,INT. TORRE DEL CASTILLO - ATARDECER
+898,LIRIA,"They're free from Holdric's claws, but...",899,CONVERSATION,INT. TORRE DEL CASTILLO - ATARDECER 158,INT. TORRE DEL CASTILLO - ATARDECER
+899,LIRIA,We still have to find out what happened!,,END,INT. TORRE DEL CASTILLO - ATARDECER 159,INT. TORRE DEL CASTILLO - ATARDECER
+900,REY HOLDRIC,…,901,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 1,INT. TORRE DEL CASTILLO - ANOCHECER
+901,REY HOLDRIC,Huh?,902,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 2,INT. TORRE DEL CASTILLO - ANOCHECER
+902,REY HOLDRIC,"HA, HA, HA, HA!",903,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 3,INT. TORRE DEL CASTILLO - ANOCHECER
+903,REY HOLDRIC,I can't believe it!,904,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 4,INT. TORRE DEL CASTILLO - ANOCHECER
+904,REY HOLDRIC,Are the rats coming back for their cheese?,905,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 5,INT. TORRE DEL CASTILLO - ANOCHECER
+905,REY HOLDRIC,"I see the Divinity has taken pity on you, and has insisted on granting us a fate utterly enviable.",906,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 6,INT. TORRE DEL CASTILLO - ANOCHECER
+906,REY HOLDRIC,"For some reason, it wants you to be part of my ""magnum opus"".",907,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 7,INT. TORRE DEL CASTILLO - ANOCHECER
+907,REY HOLDRIC,Uhm… All right…,908,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 8,INT. TORRE DEL CASTILLO - ANOCHECER
+908,REY HOLDRIC,"A good king must accept into his bosom even the most unfortunate, isn't that right?",909,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 9,INT. TORRE DEL CASTILLO - ANOCHECER
+909,REY HOLDRIC,Though this time we'll leave you the worst parts…,910,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 10,INT. TORRE DEL CASTILLO - ANOCHECER
+910,LIRIA,"Come on, move!",911,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 11,INT. TORRE DEL CASTILLO - ANOCHECER
+911,LIRIA,"Oh, we're going to move, all right…",912,CONVERSATION,INT. TORRE DEL CASTILLO - ANOCHECER 12,INT. TORRE DEL CASTILLO - ANOCHECER
+912,LIRIA,You don't want art? Well… let's dance!,,END,INT. TORRE DEL CASTILLO - ANOCHECER 13,INT. TORRE DEL CASTILLO - ANOCHECER
+913,LIRIA,NAME... Charge!,,END,1,
+914,GUARDA REAL,Ugh...,915,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 1,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+915,GUARDA REAL,You...,916,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 2,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+916,GUARDA REAL,Have you... have you dealt with Holdric?,917,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 3,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+917,JUGADOR,That's right. You're free!,918,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 4,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+918,GUARDA REAL,No... It can't be...,919,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 5,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+919,GUARDA REAL,Praise be to the Divine...,920,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 6,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+920,GUARDA REAL,How could we ever thank you for such a deed?,921,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 7,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+921,GUARDA REAL,And how did you make it to us?,922,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 8,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+922,GUARDA REAL,Ugh...,923,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 9,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+923,GUARDA REAL,Forgive my impertinence...,924,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 10,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+924,GUARDA REAL,I should introduce myself first.,925,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 11,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+925,JUGADOR,Yes... and you're next.,926,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 12,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+926,GUARDA REAL,What...?!,927,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 13,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+927,LIRIA,NAME!,928,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 14,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+928,LIRIA,What are you saying?!,929,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 15,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+929,LIRIA,This is one of your jokes... right?!,930,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 16,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+930,LIRIA,Ugh...,931,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 17,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+931,LIRIA,"Forgive us, sir... My companion was only trying to break the ice...",932,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 18,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+932,LIRIA,"We come in peace, truly.",933,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 19,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+933,LIRIA,"We have no intention of fighting you, nor anyone present.",934,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 20,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+934,LIRIA,Whom do we have the honor of speaking with?,935,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 21,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+935,GUARDA REAL,Oh... Thank goodness...,936,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 22,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+936,JUGADOR,I'm the one asking the questions here.,937,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 23,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+937,GUARDA REAL,"Uh, of course... Forgive me...",938,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 24,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+938,LIRIA,"Hey, NAME! Don't push him around!",939,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 25,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+939,LIRIA,Look at him closely...,940,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 26,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+940,LIRIA,"He's completely exhausted, along with the rest of the prisoners.",941,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 27,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+941,LIRIA,He's no threat.,942,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 28,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+942,LIRIA,"If anything, he seems quite the opposite...",943,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 29,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+943,LIRIA,I think all these people need support and understanding.,944,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 30,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+944,LIRIA,Ahem...,945,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 31,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+945,LIRIA,"Pardon me, sir... There's no doubt your garments don't match those of just any prisoner.",946,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 32,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+946,LIRIA,Could you identify yourself?,947,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 33,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+947,GUARDA REAL,Of course... Forgive the discourtesy.,948,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 34,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+948,GUARDA REAL,I am the Commander of the Royal Guard of the City of Vigilaris.,949,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 35,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+949,GUARDA REAL,"... Or, at least, that was my title.",950,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 36,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+950,GUARDA REAL,We've been locked up in this tower for weeks.,951,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 37,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+951,GUARDA REAL,Weeks that have felt like whole years.,952,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 38,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+952,GUARDA REAL,"Entire days without sleep, our supplies at the limit...",953,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 39,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+953,GUARDA REAL,And all our strength spent on that megalomaniacal creation...,954,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 40,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+954,GUARDA REAL,The whim of a tyrant.,955,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 41,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+955,GUARDA REAL,This situation is a disgrace to the title I bear...,956,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 42,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+956,GUARDA REAL,But no one could have foreseen this would happen.,957,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 43,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+957,JUGADOR,How did you end up here?,958,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 44,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+958,GUARDA REAL,Ugh...,959,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 45,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+959,GUARDA REAL,It's a rather long story...,960,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 46,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+960,GUARDA REAL,"I don't know if you've had the chance to walk through our city recently, but...",961,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 47,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+961,JUGADOR,What happened in the city?,962,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 48,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+962,GUARDA REAL,"Ugh, you see...",963,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 49,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+963,GUARDA REAL,"I don't know if you've visited it recently, but...",964,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 50,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+964,GUARDA REAL,It's been completely razed.,965,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 51,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+965,GUARDA REAL,I still don't quite understand how it could have happened...,966,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 52,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+966,GUARDA REAL,"Because until just a few days ago, calm reigned in our city.",967,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 53,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+967,GUARDA REAL,"Despite the bustle and trade, Vigilaris was, at its core, a quiet city.",968,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 54,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+968,GUARDA REAL,"But... one ordinary day, the first light of dawn brought the darkest fate.",969,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 55,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+969,GUARDA REAL,I'd never seen a siege like that... Never.,970,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 56,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+970,GUARDA REAL,"As Commander, I tried to devise a defense plan to stop their advance.",971,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 57,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+971,GUARDA REAL,"But before we could even sound our horns, the horde had already reached the city gates.",972,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 58,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+972,GUARDA REAL,We could only fall back to the castle.,973,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 59,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+973,JUGADOR,What happened to the civilians?,974,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 60,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+974,GUARDA REAL,We tried to gather as many as we could...,975,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 61,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+975,GUARDA REAL,And we hurried so much that some managed to get in at the last moment...,976,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 62,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+976,GUARDA REAL,But not alone.,977,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 63,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+977,GUARDA REAL,"The swiftest creatures managed to flank our defenses, chase the civilians, and...",978,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 64,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+978,GUARDA REAL,Sneak into the castle with them.,979,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 65,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+979,GUARDA REAL,"At that moment, the King ordered every entrance sealed...",980,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 66,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+980,GUARDA REAL,But it was already too late.,981,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 67,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+981,GUARDA REAL,"As for him, he devised his own evacuation plan.",982,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 68,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+982,JUGADOR,Where was the King?,983,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 69,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+983,GUARDA REAL,"The King was in his chambers, working on some details of his work.",984,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 70,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+984,GUARDA REAL,"When we brought him the first news, he didn't make the slightest comment about it...",985,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 71,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+985,GUARDA REAL,...But his nervousness was plain to see.,986,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 72,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+986,GUARDA REAL,The air grew so thick you could cut it with one of our pikes.,987,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 73,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+987,GUARDA REAL,He didn't want anyone to disturb him at that moment...,988,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 74,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+988,GUARDA REAL,"And even less for a ""distraction"" like that to stall his progress.",989,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 75,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+989,GUARDA REAL,The first thing he did was put what he was working on somewhere safe.,990,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 76,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+990,GUARDA REAL,"Once the creatures reached the castle, he ordered the bridges raised and the entrances blocked.",991,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 77,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+991,GUARDA REAL,"...And in the face of our disobedience, since there were still civilians waiting to be rescued...",992,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 78,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+992,GUARDA REAL,...He devised his own evacuation plan.,993,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 79,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+993,GUARDA REAL,"He gathered the royal family and his court in the Tower, and ordered its door barred.",994,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 80,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+994,GUARDA REAL,"Fortunately, some of us still made it in time, and we managed to get inside.",995,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 81,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+995,JUGADOR,What did the King intend by confining you here?,996,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 82,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+996,GUARDA REAL,"The Guard and the Royal Family wanted to believe he meant to protect us, at first...",997,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 83,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+997,GUARDA REAL,But nothing could be further from the truth.,998,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 84,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+998,GUARDA REAL,The King wasn't trying to defend us... only to safeguard his piece.,999,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 85,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+999,GUARDA REAL,"And since he had locked us in with him, and we couldn't carry out our duties...",1000,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 86,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1000,GUARDA REAL,It was clear he wasn't going to let the opportunity pass.,1001,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 87,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1001,GUARDA REAL,He thought of using us as slaves.,1002,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 88,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1002,GUARDA REAL,To wring us dry so that we could finish for him the work he was never able to complete.,1003,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 89,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1003,GUARDA REAL,"A work extremely ambitious, beyond all logic, that could only be achieved with blood, sweat, and tears...",1004,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 90,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1004,GUARDA REAL,"And he, far from abandoning it because of the siege...",1005,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 91,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1005,GUARDA REAL,Was willing to carry it through to its final consequences.,1006,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 92,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1006,JUGADOR,Why didn't you escape from here?,1007,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 93,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1007,GUARDA REAL,Well...,1008,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 94,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1008,GUARDA REAL,I must confess it's a thought I've tried to avoid at all costs.,1009,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 95,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1009,GUARDA REAL,And I'm sure I haven't been the only guard here who's entertained a similar idea.,1010,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 96,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1010,GUARDA REAL,But it wasn't only my knightly code that kept me from mutiny...,1011,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 97,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1011,GUARDA REAL,My empathy and sense of duty did as well.,1012,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 98,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1012,GUARDA REAL,Thinking that any move could bring grave consequences for the others.,1013,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 99,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1013,GUARDA REAL,"Forgive me, but... I think our people need a bit of fresh air...",1014,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 100,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1014,GUARDA REAL,And we have a lot of work to do.,1015,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 101,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1015,GUARDA REAL,Is there anything else I can help you with?,1016,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 102,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1016,JUGADOR,What happened to the horde?,1017,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 103,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1017,GUARDA REAL,That's a great question.,1018,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 104,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1018,GUARDA REAL,"A few days after we locked ourselves in the castle, the ceaseless noise of the attack... stopped.",1019,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 105,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1019,GUARDA REAL,The creatures left our city.,1020,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 106,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1020,JUGADOR,So... is the city safe again?,1021,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 107,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1021,GUARDA REAL,It will be as soon as we set foot outside this castle...,1022,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 108,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1022,GUARDA REAL,"...And find a worthy heir within the royal family, of course.",1023,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 109,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1023,GUARDA REAL,"As for the monsters, as you've seen, the horde has already left our city...",1024,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 110,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1024,GUARDA REAL,"And for our part, we'll work hard to make everything the way it was before.",1025,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 111,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1025,GUARDA REAL,"Still, it's worrying to know such a danger is roaming free.",1026,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 112,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1026,GUARDA REAL,Not only could it return at any moment... it could also strike civilizations even more defenseless than ours.,1027,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 113,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1027,LIRIA,Wait... Do you think there could be other cities in danger?,1028,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 114,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1028,GUARDA REAL,Yes... It's more than possible.,1029,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 115,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1029,GUARDA REAL,"Just a few leagues from here, to the west, lies Hushgrove Village.",1030,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 116,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1030,GUARDA REAL,"It's a rural village, with barely a couple dozen inhabitants...",1031,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 117,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1031,GUARDA REAL,They could never face something like that.,1032,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 118,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1032,GUARDA REAL,On occasion they've turned to us for defense...,1033,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 119,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1033,GUARDA REAL,...But right now our city is badly weakened.,1034,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 120,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1034,GUARDA REAL,We can't afford to sacrifice our scarce troops on a rescue mission.,1035,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 121,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1035,GUARDA REAL,"But as commander, I'll do everything in my power to establish communication with the village.",1036,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 122,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1036,GUARDA REAL,Just as I'll do whatever is necessary to provide security for my people.,1037,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 123,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1037,GUARDA REAL,"Now, if you'll excuse me, we need to get out of here.",1038,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 124,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1038,GUARDA REAL,I hope I've answered your most urgent questions...,1039,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 125,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1039,GUARDA REAL,"...And I beg you, please, accept this as a token of our gratitude.",1040,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 126,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1040,GUARDA REAL,Vigilaris will always be in your debt.,1041,CONVERSATION,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 127,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1041,GUARDA REAL,Praise be to the Divine!,,END,INT. CÚSPIDE DEL CASTILLO - ANOCHECER 128,INT. CÚSPIDE DEL CASTILLO - ANOCHECER
+1042,LIRIA,Ugh... What an experience.,1043,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 1,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1043,LIRIA,All of this feels kind of... surreal.,1044,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 2,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1044,LIRIA,Don't you think?,1045,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 3,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1045,LIRIA,It's only been a few days since you arrived in this kingdom...,1046,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 4,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1046,LIRIA,We didn't even know each other until then.,1047,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 5,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1047,LIRIA,"We made it to the city looking for shelter, a place to recover.",1048,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 6,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1048,LIRIA,"And, in the end, we were the ones who restored order to the city.",1049,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 7,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1049,LIRIA,Some even consider us heroes...,1050,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 8,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1050,LIRIA,"Who would have thought it, NAME?",1051,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 9,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1051,LIRIA,Even though nothing we do will let us undo the people's suffering...,1052,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 10,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1052,LIRIA,Or bring back those who are no longer here.,1053,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 11,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1053,LIRIA,Damn Hordric... How could he allow something like this?,1054,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 12,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1054,LIRIA,How could he be so blinded by his own obsession?,1055,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 13,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1055,JUGADOR,Was he always like that?,1056,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 14,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1056,LIRIA,"No... Or at least, I never got that impression.",1057,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 15,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1057,LIRIA,"In the past, Hordric was a respected king who earned the people's affection and acceptance.",1058,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 16,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1058,LIRIA,"Far from being a tyrant, he was a close, human king, with his own concerns.",1059,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 17,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1059,LIRIA,He would proudly speak of the great artists and craftsmen of his city.,1060,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 18,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1060,LIRIA,He valued their work and their art. You could almost say he revered them.,1061,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 19,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1061,LIRIA,"But one day, probably eaten away by envy or by the need to feel part of what he loved...",1062,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 20,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1062,LIRIA,He decided to begin his own masterpiece.,1063,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 21,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1063,LIRIA,I have no doubt that was the beginning of the end.,1064,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 22,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1064,LIRIA,Anyway... I suppose it's better not to think too much about things we can't change.,1065,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 23,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1065,LIRIA,Let's stay in the present.,1066,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 24,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1066,JUGADOR,Hordric is in the past,1067,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 25,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1067,LIRIA,"It's true, NAME...",1068,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 26,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1068,LIRIA,You're absolutely right.,1069,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 27,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1069,LIRIA,"For me it's almost inevitable, because I never imagined a once-respected king could end up like this.",1070,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 28,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1070,LIRIA,But we shouldn't keep devoting our time and energy to that corrupt man.,1071,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 29,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1071,LIRIA,Especially when there are people who need us far more than he does.,1072,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 30,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1072,LIRIA,Did you pay attention to what that royal guard said?,1073,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 31,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1073,LIRIA,About that little village... Hushgrove Village.,1074,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 32,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1074,LIRIA,It seems the horde might be headed there.,1075,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 33,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1075,LIRIA,Seeing the scourge it's been for the city...,1076,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 34,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1076,LIRIA,I don't even want to imagine what they could do to a village that size.,1077,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 35,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1077,LIRIA,Sheesh...,1078,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 36,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1078,LIRIA,"I'd love for us to take the night off, NAME.",1079,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 37,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1079,LIRIA,I can't wait for us to sit around a campfire and enjoy a good feast.,1080,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 38,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1080,LIRIA,But... I think duty is calling us.,1081,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 39,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1081,LIRIA,We must head west as soon as possible.,1082,CONVERSATION,EXT. AFUERAS DEL CASTILLO - ANOCHECER 40,EXT. AFUERAS DEL CASTILLO - ANOCHECER
+1082,LIRIA,Let's save Hushgrove Village!,,END,EXT. AFUERAS DEL CASTILLO - ANOCHECER 41,EXT. AFUERAS DEL CASTILLO - ANOCHECER

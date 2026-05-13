@@ -7,54 +7,52 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import retrofit2.HttpException
 import java.io.IOException
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
 
 open class BaseFakeViewModel : ViewModel() {
-
-    protected val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
+    private val _uiState = MutableStateFlow<UIState<Unit>>(UIState.Idle)
     val uiState: StateFlow<UIState<Unit>> = _uiState.asStateFlow()
 
-    protected val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    fun handleError(error: Throwable) {
-        _uiState.value = when (error) {
-            is HttpException -> {
-                if (error.code() >= 500) UIState.GeneralError
-                else UIState.Error("Server error: ${error.message()}")
-            }
-            is IOException -> UIState.GeneralError
-            else -> UIState.GeneralError
-        }
+    fun setIsLoading(inIsLoading: Boolean) {
+        _isLoading.value = inIsLoading
     }
 
-    fun setLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
-        _uiState.value = if (isLoading) UIState.Loading else UIState.Idle
-    }
-
-    fun handleSuccess() {
-        _uiState.value = UIState.Success(Unit)
-    }
-
-    fun <T> handleResult(result: Result<T>, successAction: () -> Unit): Result<Unit> {
-        return result.fold(
-            onSuccess = {
-                successAction()
-                Result.success(Unit)
-            },
-            onFailure = { throwable ->
-                handleError(throwable)
-                Result.failure(throwable)
-            }
-        )
+    fun setUiState(inUiState: UIState<Unit>) {
+        _uiState.value = inUiState
     }
 
     fun resetUiState() {
-        _uiState.value = UIState.Idle
+        setUiState(UIState.Idle)
     }
 
-    suspend fun <T> handleResultSuspend(result: Result<T>, successAction: suspend () -> Unit): Result<Unit> {
-        return result.fold(
+    fun handleError(error: Throwable) {
+        setUiState(
+            when (error) {
+                is HttpException -> {
+                    if (error.code() >= HTTP_INTERNAL_ERROR) {
+                        UIState.GeneralError
+                    } else {
+                        UIState.Error("Server error: ${error.message()}")
+                    }
+                }
+                is IOException -> UIState.GeneralError
+                else -> UIState.GeneralError
+            },
+        )
+    }
+
+    fun handleSuccess() {
+        setUiState(UIState.Success(Unit))
+    }
+
+    fun <T> handleResult(
+        result: Result<T>,
+        successAction: () -> Unit,
+    ): Result<Unit> =
+        result.fold(
             onSuccess = {
                 successAction()
                 Result.success(Unit)
@@ -62,18 +60,34 @@ open class BaseFakeViewModel : ViewModel() {
             onFailure = { throwable ->
                 handleError(throwable)
                 Result.failure(throwable)
-            }
+            },
         )
-    }
 
-    open fun mapExceptionToUIState(e: Throwable): UIState<Unit> {
-        return when (e) {
+    suspend fun <T> handleResultSuspend(
+        result: Result<T>,
+        successAction: suspend () -> Unit,
+    ): Result<Unit> =
+        result.fold(
+            onSuccess = {
+                successAction()
+                Result.success(Unit)
+            },
+            onFailure = { throwable ->
+                handleError(throwable)
+                Result.failure(throwable)
+            },
+        )
+
+    open fun mapExceptionToUIState(e: Throwable): UIState<Unit> =
+        when (e) {
             is HttpException -> {
-                if (e.code() >= 500) UIState.GeneralError
-                else UIState.Error("Server error: ${e.message()}")
+                if (e.code() >= HTTP_INTERNAL_ERROR) {
+                    UIState.GeneralError
+                } else {
+                    UIState.Error("Server error: ${e.message()}")
+                }
             }
             is IOException -> UIState.GeneralError
             else -> UIState.GeneralError
         }
-    }
 }

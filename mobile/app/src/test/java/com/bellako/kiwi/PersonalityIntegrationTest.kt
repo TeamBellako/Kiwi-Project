@@ -3,12 +3,12 @@ package com.bellako.kiwi
 import com.bellako.kiwi.features.personality.model.IPersonalityAPI
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.model.PersonalityRepository
+import com.bellako.kiwi.features.personality.model.PersonalityViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityBuildDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityKnightNameDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityRealNameDTO
-import com.bellako.kiwi.features.personality.model.PersonalityViewModel
-import com.bellako.kiwi.common.model.HealthApiService
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,59 +27,61 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class PersonalityIntegrationTest {
-
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var api: IPersonalityAPI
     private lateinit var repository: PersonalityRepository
     private lateinit var viewModel: IPersonalityViewModel
-    private lateinit var healthApi: HealthApiService
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
         api = mock(IPersonalityAPI::class.java)
-        healthApi = mock(HealthApiService::class.java)
-        repository = PersonalityRepository(api, healthApi)
+        repository = PersonalityRepository(api)
         viewModel = PersonalityViewModel(repository)
     }
 
     @Test
-    fun `load personality`() = runTest {
-        whenever(api.getPersonality()).thenReturn(validPersonalityDTO())
+    fun `load personality`() =
+        runTest {
+            whenever(api.getPersonality()).thenReturn(validPersonalityDTO())
 
-        viewModel.loadPersonality()
-        TestCase.assertEquals(viewModel.state.value?.realName, validPersonalityDTO().realName)
-        TestCase.assertEquals(viewModel.state.value?.knightName, validPersonalityDTO().knightName)
-        TestCase.assertEquals(viewModel.state.value?.build, validPersonalityDTO().build)
-    }
-
-    @Test
-    fun `update personality real name`() = runTest {
-        `when`(api.updateRealName(validPersonalityRealNameDTO())).thenReturn(Unit)
-
-        val result = repository.updateRealName(validPersonalityRealNameDTO())
-
-        Assert.assertTrue(result.isSuccess)
-    }
+            viewModel.loadPersonality()
+            TestCase.assertEquals(viewModel.state.value?.realName, validPersonalityDTO().realName)
+            TestCase.assertEquals(viewModel.state.value?.knightName, validPersonalityDTO().knightName)
+            TestCase.assertEquals(viewModel.state.value?.build, validPersonalityDTO().build)
+        }
 
     @Test
-    fun `update personality knight name`() = runTest {
-        `when`(api.updateKnightName(validPersonalityRealNameDTO())).thenReturn(Unit)
-
-        val result = repository.updateKnightName(validPersonalityKnightNameDTO())
-
-        Assert.assertTrue(result.isSuccess)
-    }
+    fun `update personality real name`() =
+        runTest {
+            `when`(api.updateRealName(validPersonalityRealNameDTO())).thenReturn(Unit)
+            val result = repository.updateRealName(validPersonalityRealNameDTO())
+            Assert.assertTrue(result.isSuccess)
+        }
 
     @Test
-    fun `update personality build`() = runTest {
-        `when`(api.updateBuild(validPersonalityBuildDTO())).thenReturn(Unit)
+    fun `update personality knight name`() =
+        runTest {
+            `when`(api.updateKnightName(validPersonalityRealNameDTO())).thenReturn(Unit)
+            val result = repository.updateKnightName(validPersonalityKnightNameDTO())
+            Assert.assertTrue(result.isSuccess)
+        }
 
-        val result = repository.updateBuild(validPersonalityBuildDTO())
+    @Test
+    fun `update personality build`() =
+        runTest {
+            `when`(api.updateBuild(validPersonalityBuildDTO())).thenReturn(Unit)
+            val result = repository.updateBuild(validPersonalityBuildDTO())
+            Assert.assertTrue(result.isSuccess)
+        }
 
-        Assert.assertTrue(result.isSuccess)
-    }
-
+    @Test
+    fun `update personality apps`() =
+        runTest {
+            `when`(api.updateApps(validPersonalityAppsDTO())).thenReturn(Unit)
+            val result = repository.updateApps(validPersonalityAppsDTO())
+            Assert.assertTrue(result.isSuccess)
+        }
 }

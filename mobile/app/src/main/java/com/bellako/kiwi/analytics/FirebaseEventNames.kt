@@ -1,19 +1,38 @@
 package com.bellako.kiwi.analytics
 
 object FirebaseEventNames {
-    const val ONBOARDING_STARTED = "onboarding_started"
-    const val ONBOARDING_COMPLETED = "onboarding_completed"
-    const val PERMISSION_GRANTED = "permission_granted"
-
-    const val COMBAT_STARTED = "combat_started" // TODO
-    const val COMBAT_COMPLETED = "combat_completed" // TODO
-
-    const val QUEST_STARTED = "quest_started" // TODO
-    const val QUEST_COMPLETED = "quest_completed" // TODO
+    // Pirate metrics
+    const val USER_ACQUIRED = "USER_ACQUIRED"
+    const val USER_ACTIVATED = "USER_ACTIVATED"
+    const val USER_RETAINED = "USER_RETAINED"
+    const val USER_REVENUE = "USER_REVENUE"
+    const val USER_REFERRED = "USER_REFERRED"
 
     // Retention
-    const val APP_OPENED = "app_opened"
+    const val APP_OPENED = "APP_OPENED"
+    const val PERMISSION_GRANTED = "PERMISSION_GRANTED"
 
-    // Target persona
-    const val TARGET_PERSONA_ASSIGNED = "target_persona_assigned" // TODO
+    // SignUp
+    const val SIGNUP_1_STARTED = "SIGNUP_1_STARTED"
+    const val SIGNUP_2_FORM_INVALID_PASSWORD = "SIGNUP_2_FORM_INVALID_PASSWORD"
+    const val SIGNUP_2_FORM_COMPLETED = "SIGNUP_2_FORM_COMPLETED"
+    const val SIGNUP_3_TEST_COMPLETED = "SIGNUP_3_TEST_COMPLETED"
+    const val SIGNUP_4_APPS_COMPLETED = "SIGNUP_4_APPS_COMPLETED"
+
+    // Dashboard
+    const val DASHBOARD_LAYOUT_ENGAGEMENT = "DASHBOARD_LAYOUT_ENGAGEMENT"
+    const val DASHBOARD_SEE_MONTH = "DASHBOARD_SEE_MONTH"
+    const val DASHBOARD_SEE_DAY = "DASHBOARD_SEE_DAY"
+
+    // Settings
+    const val SETTINGS_CLICK_ON_EMAIL = "SETTINGS_CLICK_ON_EMAIL"
+    const val SETTINGS_UPDATE_VOLUME = "SETTINGS_UPDATE_VOLUME"
+    const val SETTINGS_RESET_PROGRESS = "SETTINGS_RESET_PROGRESS"
+
+    // Nodes
+    const val NODES_REPLAY_COMPLETED_NODE = "NODES_REPLAY_COMPLETED_NODE"
+    const val NODES_CLICK_NON_UNLOCKABLE_NODE = "NODES_CLICK_NON_UNLOCKABLE_NODE"
+
+    // Personalization
+    const val PERSONALIZATION_QUESTION_ANSWERED = "PERSONALIZATION_QUESTION_ANSWERED"
 }

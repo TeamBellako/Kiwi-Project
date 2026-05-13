@@ -82,3 +82,5 @@ env.*
 
 */.kotlin
 docs
+
+.claude

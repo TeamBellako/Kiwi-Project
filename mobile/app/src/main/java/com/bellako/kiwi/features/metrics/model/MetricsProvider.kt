@@ -2,82 +2,58 @@ package com.bellako.kiwi.features.metrics.model
 
 import android.app.usage.UsageStatsManager
 import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.bellako.kiwi.features.metrics.data.Metrics
-import com.bellako.kiwi.features.metrics.data.MetricsDTO
-import com.bellako.kiwi.common.utils.Logger
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
+import com.bellako.kiwi.features.metrics.data.MetricsState
+import com.bellako.kiwi.features.personality.data.PersonalityState
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 object MetricsProvider {
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getMetrics(context: Context, localDate: LocalDate) : Metrics? {
-        val steps = getSteps(context)
-        val screenTimeSeconds = getScreenTimeInSeconds(context, localDate)
-
-        val metricsDTO = MetricsDTO(localDate.toString(), steps, screenTimeSeconds)
-        return MetricsMapper.toDomain(metricsDTO).getOrNull()
-    }
-
-    private fun getSteps(context: Context): Int {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-
-        var steps = 0
-        val latch = CountDownLatch(1)
-
-        val listener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent?) {
-                steps = event?.values?.get(0)?.toInt() ?: 0
-                sensorManager.unregisterListener(this)
-                latch.countDown()
-            }
-
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-        }
-
-        if (stepSensor != null) {
-            sensorManager.registerListener(listener, stepSensor, SensorManager.SENSOR_DELAY_FASTEST)
-            latch.await(100, TimeUnit.MILLISECONDS)
-            sensorManager.unregisterListener(listener)
-        }
-
-        return steps
+    fun getDeviceMetrics(
+        context: Context,
+        metricsState: MetricsState,
+        personalityState: PersonalityState,
+    ): MetricsState {
+        val date = stringToDate(metricsState.date)
+        val goodTimeSeconds = getUsageTimeForApps(context, date, personalityState.goodApps)
+        val badTimeSeconds = getUsageTimeForApps(context, date, personalityState.badApps)
+        return metricsState.copy(
+            date = metricsState.date,
+            currentGoodTimeSeconds = goodTimeSeconds,
+            currentBadTimeSeconds = badTimeSeconds,
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun getScreenTimeInSeconds(context: Context, localDate: LocalDate): Int {
-        val zoneId = ZoneId.systemDefault()
-
-        val startOfDayMillis = localDate.atStartOfDay(zoneId).toInstant().toEpochMilli()
-        val endOfDayMillis = localDate
-            .atTime(LocalTime.MAX)
-            .atZone(zoneId)
+    private fun getDayLocalTime(
+        date: LocalDate,
+        localTime: LocalTime,
+    ): Long =
+        date
+            .atTime(localTime)
+            .atZone(ZoneId.systemDefault())
             .toInstant()
             .toEpochMilli()
 
-        val usageStatsManager =
-            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-
-        val usageStatsList = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_DAILY,
-            startOfDayMillis,
-            endOfDayMillis
-        )
-
-        if (usageStatsList.isNullOrEmpty()) {
-            Logger.warn("No usage stats available. Permission may not be granted")
-            return -1
-        }
-
-        return ((usageStatsList.sumOf { it.totalTimeInForeground }) / 1000).toInt()
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getUsageTimeForApps(
+        context: Context,
+        date: LocalDate,
+        packageNames: List<String>,
+    ): Int {
+        val startTime = getDayLocalTime(date, LocalTime.MIN)
+        val endTime = getDayLocalTime(date, LocalTime.MAX)
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+        val sumMs =
+            usageStatsList
+                .filter { usageStats -> packageNames.contains(usageStats.packageName) }
+                .sumOf { it.totalTimeInForeground }
+        return TimeUnit.MILLISECONDS.toSeconds(sumMs).toInt()
     }
 }

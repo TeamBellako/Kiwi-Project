@@ -1,5 +1,5 @@
 package com.bellako.kiwi.features.personality.data
 
-val BERSERKER = "Berserker"
-val SHAMAN = "Shaman"
-val MONK = "Monk"
+const val BERSERKER = "Berserker"
+const val SHAMAN = "Shaman"
+const val MONK = "Monk"

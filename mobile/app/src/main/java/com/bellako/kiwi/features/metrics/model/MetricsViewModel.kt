@@ -2,75 +2,78 @@ package com.bellako.kiwi.features.metrics.model
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.bellako.kiwi.features.metrics.data.Metrics
-import com.bellako.kiwi.features.metrics.data.MetricsState
+import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
+import com.bellako.kiwi.common.utils.DateUtils.dateToString
+import com.bellako.kiwi.common.utils.DateUtils.stringToDate
+import com.bellako.kiwi.features.metrics.data.MetricsDataMapper
+import com.bellako.kiwi.features.metrics.data.MetricsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
-import java.time.format.DateTimeParseException
 
 @HiltViewModel
-class MetricsViewModel @Inject constructor(
-    private val repository: MetricsRepository
-) : BaseViewModel(), IMetricsViewModel {
-    private val _state = MutableStateFlow(MetricsState("", 0, 0))
-    override val state: StateFlow<MetricsState> = _state.asStateFlow()
+class MetricsViewModel
+    @Inject
+    constructor(
+        private val repository: MetricsRepository,
+    ) : BaseViewModel(),
+        IMetricsViewModel {
+        private val _state =
+            MutableStateFlow(
+                MetricsState(
+                    date = "",
+                    maxGoodTimeSeconds = 0,
+                    currentGoodTimeSeconds = 0,
+                    maxBadTimeSeconds = 0,
+                    currentBadTimeSeconds = 0,
+                ),
+            )
+        override val state: StateFlow<MetricsState> = _state.asStateFlow()
 
-    override suspend fun createMetrics(state: MetricsState): Result<Unit> {
-        val domain = validateAndMapToDomain(state) ?: return failureWithError(invalidDataMessage())
-
-        val exists = repository.getMetricsByDate(domain.date).getOrNull()
-        if (exists != null) return failureWithError("A metrics entry already exists with that user and date")
-
-        return handleResult(
-            repository.createMetrics(MetricsMapper.toDTO(domain))
-        ) {
-            _state.value = MetricsMapper.toState(domain)
-        }
-    }
-
-    override suspend fun updateMetrics(state: MetricsState): Result<Unit> {
-        val domain = validateAndMapToDomain(state) ?: return failureWithError(invalidDataMessage())
-
-        val existing = repository.getMetricsByDate(domain.date).getOrNull()
-        if (existing == null) return failureWithError("There is no metrics entry with that user and date")
-
-        return handleResult(
-            repository.updateMetrics(MetricsMapper.toDTO(domain))
-        ) {
-            _state.value = MetricsMapper.toState(domain)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun loadMetrics(date: String): Result<Unit> {
-        val parsedDate = try {
-            LocalDate.parse(date)
-        } catch (e: DateTimeParseException) {
-            return failureWithError(invalidDataMessage())
-        }
-        _state.value = MetricsState(date)
-
-        val result = repository.getMetricsByDate(parsedDate).getOrNull()
-        if (result == null) {
-            return Result.failure(Exception("No metrics found"))
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onDateChanged(newDate: LocalDate) {
+            _state.value = _state.value.copy(date = dateToString(newDate))
         }
 
-        _state.value = MetricsMapper.toState(result)
-        return Result.success(Unit)
-    }
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun createMetrics(state: MetricsState): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            val domain = MetricsDataMapper.toDomain(state).copy(currentGoodTimeSeconds = 0, currentBadTimeSeconds = 0)
+            val result = repository.createMetrics(MetricsDataMapper.toDTO(domain))
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+            return handleResult(result) {
+                _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
+            }
+        }
 
-    private fun validateAndMapToDomain(state: MetricsState): Metrics? {
-        return MetricsMapper.toDomain(state).getOrNull()
-    }
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun updateMetrics(state: MetricsState): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            val domain = MetricsDataMapper.toDomain(state)
+            val result = repository.updateMetrics(MetricsDataMapper.toDTO(domain))
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+            return handleResult(result) {
+                _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
+            }
+        }
 
-    private fun invalidDataMessage(): String = """
-        Invalid metrics. Metrics must:
-        - Have a positive number of steps
-        - Have a positive number of screenTimeSeconds
-    """.trimIndent()
-}
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun loadMetrics(date: String): Result<Unit> {
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            val result = repository.getMetricsByDate(stringToDate(date))
+            setIsLoading(false)
+            setUiState(UIState.Idle)
+            return handleResult(result) {
+                _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
+            }
+        }
+    }

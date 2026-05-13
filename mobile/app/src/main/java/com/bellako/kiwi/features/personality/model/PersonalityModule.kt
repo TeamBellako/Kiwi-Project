@@ -1,7 +1,6 @@
 package com.bellako.kiwi.features.personality.model
 
 import com.bellako.kiwi.BuildConfig
-import com.bellako.kiwi.common.model.HealthApiService
 import com.bellako.kiwi.features.users.model.JwtAuthInterceptor
 import dagger.Module
 import dagger.Provides
@@ -15,17 +14,17 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object PersonalityModule {
-
     @Provides
     @Singleton
-    fun providePersonalityApi(
-        jwtAuthInterceptor: JwtAuthInterceptor
-    ): IPersonalityAPI {
-        val client = OkHttpClient.Builder()
-            .addInterceptor(jwtAuthInterceptor)
-            .build()
+    fun providePersonalityApi(jwtAuthInterceptor: JwtAuthInterceptor): IPersonalityAPI {
+        val client =
+            OkHttpClient
+                .Builder()
+                .addInterceptor(jwtAuthInterceptor)
+                .build()
 
-        return Retrofit.Builder()
+        return Retrofit
+            .Builder()
             .baseUrl(BuildConfig.MOBILE_API_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
@@ -35,10 +34,5 @@ object PersonalityModule {
 
     @Provides
     @Singleton
-    fun providePersonalityRepository(
-        api: IPersonalityAPI,
-        healthApiService: HealthApiService
-    ): PersonalityRepository {
-        return PersonalityRepository(api, healthApiService)
-    }
+    fun providePersonalityRepository(api: IPersonalityAPI): IPersonalityRepository = PersonalityRepository(api)
 }

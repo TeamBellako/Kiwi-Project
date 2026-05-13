@@ -1,8 +1,13 @@
 package com.kiwi.users;
 
-import com.kiwi.features.users.*;
-import com.kiwi.types.Email;
-import com.kiwi.utils.GlobalExceptionHandler;
+import com.kiwi.features.users.controllers.CustomUserDetailsService;
+import com.kiwi.features.users.controllers.UsersController;
+import com.kiwi.features.users.controllers.UsersService;
+import com.kiwi.features.users.data.LoginDTO;
+import com.kiwi.features.users.data.UsersDomain;
+import com.kiwi.features.users.data.UsersDataMapper;
+import com.kiwi.common.types.Email;
+import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.config.WebSecurityConfig;
@@ -18,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
+import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +56,7 @@ public class UsersControllerTest {
     
     @Test
     public void validSignup() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/signup", loginDTO))
                 .andExpect(status().isCreated());
     }
@@ -60,11 +66,11 @@ public class UsersControllerTest {
         String mockToken = "myToken";
         when(jwtUtils.generateToken(anyString())).thenReturn(mockToken);
 
-        Users user = UsersMapper.toDomain(validUserDTO());
+        UsersDomain user = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
         when(usersService.getUserByEmail(any(Email.class)))
-                .thenReturn(Optional.of(UsersMapper.toPersistence(user, passwordEncoder.encode(validUserDTO().getPassword()))));
+                .thenReturn(Optional.of(UsersDataMapper.toPersistence(user, passwordEncoder.encode(validLoginDTO().getPassword()))));
 
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword());
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword());
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/login", loginDTO))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwt").value(mockToken));

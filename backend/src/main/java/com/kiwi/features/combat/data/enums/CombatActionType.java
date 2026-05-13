@@ -1,0 +1,17 @@
+package com.kiwi.features.combat.data.enums;
+
+public enum CombatActionType {
+    SKILL_USED,
+    ACTOR_BLOCKED_BY_STATE,          // FREEZE
+    SKILL_REPEAT_BY_STATE,    // CONFUSION/LOOP
+    ACTOR_DAMAGED_BY_STATE,
+    ACTOR_HEALED_BY_STATE,
+    BLOCKED_SKILLS_BY_STATE,
+    RELEASED_SKILLS_BY_STATE,
+    SKIP,
+    STATUS_TURN_REDUCED,
+    STATUS_FINISHED,
+    ACTOR_SKIPPED_BY_TURNS,
+    TIMEOUT,
+    ABANDON,
+}

@@ -2,8 +2,10 @@ package com.kiwi.users;
 
 import com.c4_soft.springaddons.security.oauth2.test.webmvc.AutoConfigureAddonsWebmvcResourceServerSecurity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kiwi.features.users.*;
-import com.kiwi.utils.GlobalExceptionHandler;
+import com.kiwi.features.nodes.controllers.NodesService;
+import com.kiwi.features.users.controllers.UsersRepository;
+import com.kiwi.features.users.data.*;
+import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.config.WebSecurityConfig;
 import org.junit.Test;
@@ -11,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,8 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static com.kiwi.users.UsersTestFactory.invalidUserDTO;
-import static com.kiwi.users.UsersTestFactory.validUserDTO;
+import static com.kiwi.users.UsersTestFactory.*;
 import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-@Sql(scripts = "/UsersTestSetUp.sql")
+@Sql(scripts = "/TestSetUp.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @AutoConfigureAddonsWebmvcResourceServerSecurity
@@ -45,8 +48,6 @@ public class UsersIntegrationTest {
 
     @Autowired
     private UsersRepository usersRepository;
-    @Autowired
-    private UsersService usersService;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -59,7 +60,7 @@ public class UsersIntegrationTest {
     @Test
     public void validSignup() throws Exception {
         UsersDTO userDTO = validUserDTO();
-        LoginDTO loginDTO = new LoginDTO(userDTO.getEmail(), userDTO.getPassword());
+        LoginDTO loginDTO = validLoginDTO();
 
         mockMvc.perform(getPostRequestBuilder(signupAPIUrl, loginDTO))
                 .andExpect(status().isCreated());
@@ -68,8 +69,8 @@ public class UsersIntegrationTest {
         assertTrue(savedUserOpt.isPresent());
         UsersPersistence savedUser = savedUserOpt.get();
 
-        assertTrue(passwordEncoder.matches(userDTO.getPassword(), savedUser.getPassword()));
-        assertEquals(userDTO.getEmail(), savedUser.getEmail().value());
+        assertTrue(passwordEncoder.matches(loginDTO.getPassword(), savedUser.getHashedPassword()));
+        assertEquals(userDTO.getEmail(), savedUser.getEmail());
     }
 
     @Test
@@ -80,8 +81,8 @@ public class UsersIntegrationTest {
 
     @Test
     public void duplicatedSignup() throws Exception {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validLoginDTO().getPassword()));
         
         mockMvc.perform(getPostRequestBuilder(signupAPIUrl, getValidLoginDTO()))
                 .andExpect(status().isConflict());
@@ -89,9 +90,9 @@ public class UsersIntegrationTest {
 
     @Test
     public void validLogin() throws Exception {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        String hashedPassword = passwordEncoder.encode(validUserDTO().getPassword());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, hashedPassword));
+        UsersDomain user = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        String hashedPassword = passwordEncoder.encode(validLoginDTO().getPassword());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, hashedPassword));
         
         MvcResult result = mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getValidLoginDTO()))
                 .andExpect(status().isOk())
@@ -108,19 +109,19 @@ public class UsersIntegrationTest {
     @Test
     public void invalidLogin() throws Exception {
         mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getinValidLoginDTO()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void nonExistingLogin() throws Exception {
         mockMvc.perform(getPostRequestBuilder(loginAPIUrl, getValidLoginDTO()))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void incorrectPasswordLogin() throws Exception {
-        Users user = UsersMapper.toDomain(validUserDTO());
-        usersRepository.saveAndFlush(UsersMapper.toPersistence(user, validUserDTO().getPassword()));
+        UsersDomain user = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
+        usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validLoginDTO().getPassword()));
         
         LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), "Marceline*Simon4Ever");
 
@@ -128,6 +129,18 @@ public class UsersIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
     
-    private LoginDTO getValidLoginDTO() { return new LoginDTO(validUserDTO().getEmail(), validUserDTO().getPassword()); }
-    private LoginDTO getinValidLoginDTO() { return new LoginDTO(invalidUserDTO().getEmail(), invalidUserDTO().getPassword()); }
+    private LoginDTO getValidLoginDTO() { return new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword()); }
+    private LoginDTO getinValidLoginDTO() { return new LoginDTO(invalidUserDTO().getEmail(), invalidLoginDTO().getPassword()); }
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public NodesService nodesService() {
+            return new NodesService(null, null, null, event -> {}) {
+                @Override
+                public void initializeUserProgress(Long userId) {
+                }
+            };
+        }
+    }
 }

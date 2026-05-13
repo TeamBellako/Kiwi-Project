@@ -5,28 +5,38 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.common.screens.ScreenRoutes
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
+import com.bellako.kiwi.features.map.model.MapViewModel
+import com.bellako.kiwi.features.map.screens.MapScreen
+import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
+import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
+import com.bellako.kiwi.features.personality.data.PersonalityState
+import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
+import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
+import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
+import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.screens.LogInScreen
+import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
+import com.bellako.kiwi.features.users.tests.UsersTestFactory.validUsersDTO
+import com.bellako.kiwi.features.users.tests.UsersTestTags
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.features.map.screens.MapScreen
-import com.bellako.kiwi.features.map.model.MapViewModel
-import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
-import com.bellako.kiwi.features.personality.data.PersonalityState
-import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
-import com.bellako.kiwi.features.users.data.UsersState
-import com.bellako.kiwi.features.users.tests.UsersTestTags
-import com.bellako.kiwi.features.users.screens.LogInScreen
-import com.bellako.kiwi.features.users.screens.SignUpTestScreen
+import java.net.HttpURLConnection.HTTP_INTERNAL_ERROR
+import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 
 @RunWith(AndroidJUnit4::class)
 class LoginScreenTest {
@@ -35,19 +45,36 @@ class LoginScreenTest {
 
     private lateinit var usersState: UsersState
     private lateinit var usersFakeViewModel: UsersFakeViewModel
-
+    private lateinit var mapviewModel: MapViewModel
+    private lateinit var questsFakeViewModel: QuestsFakeViewModel
+    private lateinit var nodesFakeViewModel: NodesFakeViewModel
+    private lateinit var goalsFakeViewModel: GoalsFakeViewModel
     private lateinit var personalityState: PersonalityState
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
+    private lateinit var skillsFakeViewModel: SkillsFakeViewModel
 
     @SuppressLint("ViewModelConstructorInComposable")
     @Before
     fun setUp() {
         AudioManager.setEnabled(false)
 
-        usersState = UsersState("finn@thehuman.com", "Math3matical!")
+        usersState = UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)
         usersFakeViewModel = UsersFakeViewModel(usersState)
+        nodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState())
+        questsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
+        goalsFakeViewModel = GoalsFakeViewModel()
+        skillsFakeViewModel = SkillsFakeViewModel()
+        mapviewModel = MapViewModel()
 
-        personalityState = PersonalityState(validPersonalityDTO().realName, validPersonalityDTO().knightName, validPersonalityDTO().build)
+        personalityState =
+            PersonalityState(
+                validPersonalityDTO().realName,
+                validPersonalityDTO().knightName,
+                validPersonalityDTO().build,
+                validPersonalityAppsDTO().goodApps,
+                validPersonalityAppsDTO().badApps,
+                validPersonalityAppsDTO().neutralApps,
+            )
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
         rule.setContent {
@@ -57,17 +84,23 @@ class LoginScreenTest {
                     LogInScreen(
                         usersViewModel = usersFakeViewModel,
                         personalityViewModel = personalityFakeViewModel,
-                        navController = navController
+                        navController = navController,
                     )
                 }
                 composable(ScreenRoutes.HOME) {
-                    MapScreen(viewModel = MapViewModel())
+                    MapScreen(
+                        nodesViewModel = nodesFakeViewModel,
+                        mapViewModel = mapviewModel,
+                        goalsViewModel = goalsFakeViewModel,
+                        usersViewModel = usersFakeViewModel,
+                    )
                 }
-                composable(ScreenRoutes.SIGNUP_TEST) {
-                    SignUpTestScreen(
+                composable(ScreenRoutes.SIGNUP3_TEST) {
+                    SignUpScreen3_Test(
                         usersViewModel = usersFakeViewModel,
                         personalityViewModel = personalityFakeViewModel,
-                        navController = navController
+                        skillsViewModel = skillsFakeViewModel,
+                        navController = navController,
                     )
                 }
             }
@@ -86,7 +119,7 @@ class LoginScreenTest {
     @Test
     fun invalidLogin() {
         usersFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(401)
+        usersFakeViewModel.fakeException = createFakeHttpException(HTTP_UNAUTHORIZED)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
@@ -95,7 +128,7 @@ class LoginScreenTest {
     @Test
     fun errorOnLogin() {
         usersFakeViewModel.fakeError = true
-        usersFakeViewModel.fakeException = createFakeHttpException(500)
+        usersFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
         rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()

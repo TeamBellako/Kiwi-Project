@@ -1,26 +1,41 @@
 package com.bellako.kiwi.features.users.tests
 
+import com.bellako.kiwi.features.users.data.LoggedDTO
+import com.bellako.kiwi.features.users.data.LoginDTO
 import com.bellako.kiwi.features.users.data.UsersDTO
 
 object UsersTestFactory {
-    fun validUsersDTO() : UsersDTO {
-        return UsersDTO(
+    fun validLoginDTO(): LoginDTO =
+        LoginDTO(
             email = "finn@thehuman.com",
-            password = "Math3matical!"
+            password = "Math3matic!",
         )
-    }
 
-    fun incorrectPasswordUsersDTO() : UsersDTO {
-        return UsersDTO(
-            email = "finn@thehuman.com",
-            password = "Math3maticalawdawdwad!"
+    fun invalidLoginDTO(): LoginDTO =
+        LoginDTO(
+            email = "football.com",
+            password = "kk",
         )
-    }
 
-    fun invalidUsersDTO() : UsersDTO {
-        return UsersDTO(
-            email = "bmolovesfootball.com",
-            password = "kk"
+    private const val DATE = "2025-01-01"
+
+    fun validLoggedDTO(): LoggedDTO =
+        LoggedDTO(
+            jwt = "test",
+            registerDate = DATE,
         )
-    }
+
+    fun validUsersDTO(): UsersDTO =
+        UsersDTO(
+            email = validLoginDTO().email,
+            password = validLoginDTO().password,
+            registerDate = DATE,
+        )
+
+    fun invalidUsersDTO(): UsersDTO =
+        UsersDTO(
+            email = invalidLoginDTO().email,
+            password = invalidLoginDTO().password,
+            registerDate = DATE,
+        )
 }

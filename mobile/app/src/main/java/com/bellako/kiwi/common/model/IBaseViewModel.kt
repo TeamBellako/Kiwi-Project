@@ -8,8 +8,21 @@ interface IBaseViewModel<T> {
     val isLoading: StateFlow<Boolean>
     val uiState: StateFlow<UIState<Unit>>
 
-    fun <T> handleResult(result: Result<T>, successAction: () -> Unit) : Result<Unit>
-    suspend fun <T> handleResultSuspend(result: Result<T>, successAction: suspend () -> Unit) : Result<Unit>
-    fun mapExceptionToUIState(e: Throwable): UIState<Unit>
+    fun setIsLoading(inIsLoading: Boolean)
+
+    fun setUiState(inUiState: UIState<Unit>)
+
     fun resetUiState()
+
+    fun <T> handleResult(
+        result: Result<T>,
+        successAction: () -> Unit,
+    ): Result<Unit>
+
+    suspend fun <T> handleResultSuspend(
+        result: Result<T>,
+        successAction: suspend () -> Unit,
+    ): Result<Unit>
+
+    fun mapExceptionToUIState(e: Throwable): UIState<Unit>
 }

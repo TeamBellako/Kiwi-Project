@@ -1,49 +1,27 @@
 package com.bellako.kiwi.features.metrics.model
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.features.metrics.data.MetricsDTO
-import retrofit2.HttpException
-import retrofit2.Response
 import java.time.LocalDate
 
-class MetricsRepository(private val api: IMetricsAPI) {
-    suspend fun createMetrics(dto: MetricsDTO): Result<Unit> {
-        return try {
-            val response = api.createMetrics(dto)
-
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                Result.failure(HttpException(response))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+class MetricsRepository(
+    private val api: IMetricsAPI,
+) {
+    suspend fun createMetrics(dto: MetricsDTO): Result<MetricsDTO> =
+        runCatching {
+            api.createMetrics(dto)
         }
-    }
 
-    suspend fun updateMetrics(dto: MetricsDTO): Result<Unit> {
-        return try {
-            val response = api.updateMetrics(dto)
-
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                Result.failure(HttpException(response))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun updateMetrics(dto: MetricsDTO): Result<MetricsDTO> =
+        runCatching {
+            api.updateMetrics(dto)
         }
-    }
 
-    suspend fun getMetricsByDate(date: LocalDate) : Result<MetricsDTO?> {
-        return try {
-            val response: Response<MetricsDTO> = api.getMetricsByDate(date.toString())
-            if (response.isSuccessful) {
-                Result.success(response.body())
-            } else {
-                Result.failure(HttpException(response))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun getMetricsByDate(date: LocalDate): Result<MetricsDTO?> =
+        runCatching {
+            api.getMetricsByDate(dateToString(date))
         }
-    }
 }

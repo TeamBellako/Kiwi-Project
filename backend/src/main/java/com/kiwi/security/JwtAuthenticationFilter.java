@@ -1,6 +1,6 @@
 package com.kiwi.security;
 
-import com.kiwi.features.users.CustomUserDetailsService;
+import com.kiwi.features.users.controllers.CustomUserDetailsService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,0 +1,40 @@
+name: Auto PR Description
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  describe:
+    if: github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are writing the description for PR #${{ github.event.pull_request.number }} in the Kiwi project.
+
+            Steps:
+            1. Read `.github/pull_request_template.md` — this is the required structure. Your output must match its sections and headings exactly.
+            2. Run `gh pr view ${{ github.event.pull_request.number }} --json title,body,baseRefName,headRefName` to see the current PR state.
+            3. Run `git diff origin/${{ github.event.pull_request.base.ref }}...HEAD` to see the changes. Use `git log origin/${{ github.event.pull_request.base.ref }}..HEAD` for commit context if useful.
+            4. Fill in every section of the template:
+               - **Summary** — one paragraph: what and why.
+               - **Changes** — populate the relevant sub-sections (Database / SQL, Dialog & Bark System, Skill System, Game Logic / Other). Omit a sub-section entirely if it has no changes, rather than leaving it empty.
+               - **Schema / Migration Notes** — always fill this in when SQL or schema is touched. Explicitly flag new/modified tables, `INSERT IGNORE` → upsert conversions, bulk skill updates, MySQL 8.0.20+ deprecations, and bilingual additions. If no schema work, write "No schema changes."
+               - **Testing** — how to verify, ideally against `kiwi_db_dev`.
+               - **Related** — leave the existing content if the author already linked issues; otherwise write "None."
+            5. Preserve the template's exact section headings (`## Summary`, `### Database / SQL`, etc.) so the structure stays consistent across PRs.
+            6. Strip the HTML guidance comments (`<!-- ... -->`) from the final output — those are author hints, not part of the description.
+            7. Update the PR body with `gh pr edit ${{ github.event.pull_request.number }} --body "<description>"`.
+
+            Keep it concise. Summarize the diff — don't restate it line by line.
+          claude_args: '--allowed-tools "Bash(gh pr view:*),Bash(gh pr edit:*),Bash(git diff:*),Bash(git log:*),Read"'

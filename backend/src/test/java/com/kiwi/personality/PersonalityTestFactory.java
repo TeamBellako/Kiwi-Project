@@ -1,18 +1,20 @@
 package com.kiwi.personality;
 
-import com.kiwi.features.personality.BuildDTO;
-import com.kiwi.features.personality.Personality;
-import com.kiwi.features.personality.PersonalityDTO;
-import com.kiwi.features.personality.UserNameDTO;
+import com.kiwi.features.personality.data.*;
+
+import java.util.List;
 
 public class PersonalityTestFactory {
 
-    public static Personality validPersonality() {
-        return new Personality("Finn", "Human", "BERSERKER");
-    }
-
-    public static PersonalityDTO validPersonalityDTO() {
-        return validPersonality().toDTO();
+    public static PersonalityDTO personalityDTO() {
+        return new PersonalityDTO(
+                userNameRealDTO().getName(),
+                userNameKnightDTO().getName(),
+                buildDTO().getBuild(),
+                appsDTO().getGoodApps(),
+                appsDTO().getBadApps(),
+                appsDTO().getNeutralApps()
+        );
     }
 
     public static UserNameDTO userNameRealDTO() {
@@ -25,5 +27,9 @@ public class PersonalityTestFactory {
 
     public static BuildDTO buildDTO() {
         return new BuildDTO("BERSERKER");
+    }
+
+    public static AppsDTO appsDTO() {
+        return new AppsDTO(List.of("GrowTale"), List.of("Settings"), List.of("X"));
     }
 }

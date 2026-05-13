@@ -13,10 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,113 +30,141 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
+import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import kotlinx.coroutines.launch
 
+private const val SNAP_VELOCITY_THRESHOLD = 400f
 
+/**
+ * @param content placed inside the bar, called with param @currentStateIndex when modified
+ * @param states list of (states) sizes the bar can have, passed as raw int (relativized internally)
+ * @param initialStateIndex index of the param list @states to set as initial state
+ * @param backgroundColor of the bar
+ */
 @Composable
 fun Kiwi_DraggableBar(
     modifier: Modifier = Modifier,
     content: @Composable (currentStateIndex: Int) -> Unit,
     states: List<Int>,
-    initialStateIndex: Int = 0,
-    backgroundColor: Color = MaterialTheme.colorScheme.background
+    backgroundColor: Color = LocalKiwiColors.current.color2,
+    currentStateIndex: Int,
+    onStateChange: ((Int) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
 
     // states
     val statesBottom: List<Float> = states.map { state -> getResponsiveSizeHeight(state).toFloat() }
-    fun closestState(value: Float): Float {
-        return statesBottom.minByOrNull { kotlin.math.abs(it - value) } ?: statesBottom.first()
-    }
+
+    fun closestState(value: Float): Float = statesBottom.minByOrNull { kotlin.math.abs(it - value) } ?: statesBottom.first()
 
     // offset
-    val animatableOffset = remember { Animatable(statesBottom[initialStateIndex]) }
-    var offsetY by remember { mutableFloatStateOf(statesBottom[initialStateIndex]) }
+    val animatableOffset = remember { Animatable(statesBottom[currentStateIndex]) }
+    var offsetY by remember { mutableFloatStateOf(statesBottom[currentStateIndex]) }
+
+    LaunchedEffect(currentStateIndex) {
+        animatableOffset.animateTo(statesBottom[currentStateIndex])
+        offsetY = statesBottom[currentStateIndex]
+    }
 
     // velocity
-    val velocityThreshold = 400f
     var lastPosition by remember { mutableFloatStateOf(animatableOffset.value) }
     var lastTime by remember { mutableLongStateOf(0L) }
     var dragVelocity by remember { mutableFloatStateOf(0f) }
 
     val offset = getScreenHeight(withoutInsetTop = true).dp - animatableOffset.value.dp
+
+    fun updateState(newIndex: Int) {
+        if (onStateChange != null) {
+            onStateChange(newIndex)
+        }
+    }
+
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(statesBottom.max().dp)
-            .offset(y = offset)
-            .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-            .background(backgroundColor)
-            .then(modifier)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(statesBottom.max().dp)
+                .offset(y = offset)
+                .clip(RoundedCornerShape(getResponsiveSizeHeight(50.dp), getResponsiveSizeHeight(50.dp)))
+                .background(backgroundColor)
+                .then(modifier),
     ) {
         // Drag area
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = {
-                            lastTime = System.currentTimeMillis()
-                            lastPosition = animatableOffset.value
-                        },
-                        onDrag = { change, dragAmount ->
-                            val dragAmountY = with(density) { dragAmount.y.toDp() }.value
-                            val now = System.currentTimeMillis()
-                            val elapsed = now - lastTime
-                            if (elapsed > 0) {
-                                val newPos = animatableOffset.value - dragAmountY
-                                dragVelocity = (newPos - lastPosition) / (elapsed / 1000f)
-                                lastPosition = newPos
-                                lastTime = now
-                            }
-                            val newOffset = (animatableOffset.value - dragAmountY)
-                                .coerceIn(
-                                    statesBottom.minOrNull() ?: 0f,
-                                    statesBottom.maxOrNull() ?: Float.MAX_VALUE
-                                )
-                            scope.launch {
-                                animatableOffset.snapTo(newOffset)
-                            }
-                            offsetY = newOffset
-                            change.consume()
-                        },
-                        onDragEnd = {
-                            scope.launch {
-                                val target = when {
-                                    dragVelocity > velocityThreshold -> {
-                                        // High velocity upwards, snap to next upper state
-                                        statesBottom.filter { it >= animatableOffset.value }.minOrNull() ?: statesBottom.last()
-                                    }
-                                    dragVelocity < -velocityThreshold -> {
-                                        // High velocity downwards, snap to next lower state
-                                        statesBottom.filter { it <= animatableOffset.value }.maxOrNull() ?: statesBottom.first()
-                                    }
-                                    else -> {
-                                        // Low velocity, snap to closest state
-                                        closestState(animatableOffset.value)
-                                    }
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = {
+                                lastTime = System.currentTimeMillis()
+                                lastPosition = animatableOffset.value
+                            },
+                            onDrag = { change, dragAmount ->
+                                val dragAmountY = dragAmount.y.toDp().value
+                                val now = System.currentTimeMillis()
+                                val elapsed = now - lastTime
+                                if (elapsed > 0) {
+                                    val newPos = animatableOffset.value - dragAmountY
+                                    dragVelocity = (newPos - lastPosition) / (elapsed / 1000f)
+                                    lastPosition = newPos
+                                    lastTime = now
                                 }
-                                animatableOffset.animateTo(target)
-                                offsetY = target
-                            }
-                        }
-                    )
-                }
+                                val newOffset =
+                                    (animatableOffset.value - dragAmountY)
+                                        .coerceIn(
+                                            statesBottom.minOrNull() ?: 0f,
+                                            statesBottom.maxOrNull() ?: Float.MAX_VALUE,
+                                        )
+                                scope.launch {
+                                    animatableOffset.snapTo(newOffset)
+                                }
+                                offsetY = newOffset
+                                change.consume()
+                            },
+                            onDragEnd = {
+                                scope.launch {
+                                    val target =
+                                        when {
+                                            dragVelocity > SNAP_VELOCITY_THRESHOLD -> {
+                                                // High velocity upwards, snap to next upper state
+                                                statesBottom.filter { it >= animatableOffset.value }.minOrNull() ?: statesBottom.last()
+                                            }
+                                            dragVelocity < -SNAP_VELOCITY_THRESHOLD -> {
+                                                // High velocity downwards, snap to next lower state
+                                                statesBottom.filter { it <= animatableOffset.value }.maxOrNull() ?: statesBottom.first()
+                                            }
+                                            else -> {
+                                                // Low velocity, snap to closest state
+                                                closestState(animatableOffset.value)
+                                            }
+                                        }
+
+                                    val newIndex = statesBottom.indexOf(target)
+                                    updateState(newIndex)
+
+                                    animatableOffset.animateTo(target)
+                                    offsetY = target
+                                }
+                            },
+                        )
+                    },
         ) {
             Kiwi_Spacer(Spacing.large)
             Kiwi_Spacer(Spacing.large)
         }
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = getResponsiveSizeHeight(Spacing.large + Spacing.large))
-                .pointerInput(Unit) { /* prevent inputs behind this */ }
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = getResponsiveSizeHeight(Spacing.large + Spacing.large))
+                    .pointerInput(Unit) { /* prevent inputs behind this */ },
         )
 
         val closestLargerIndex = statesBottom.indexOf(statesBottom.filter { it >= offsetY }.minOrNull())
@@ -150,8 +179,7 @@ fun Kiwi_DraggableBar(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_0(
-) {
+fun Kiwi_DraggableBar_Preview_0() {
     Kiwi_DraggableBar_Preview(0)
 }
 
@@ -160,8 +188,7 @@ private fun Kiwi_DraggableBar_Preview_0(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_1(
-) {
+fun Kiwi_DraggableBar_Preview_1() {
     Kiwi_DraggableBar_Preview(1)
 }
 
@@ -170,36 +197,41 @@ private fun Kiwi_DraggableBar_Preview_1(
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-private fun Kiwi_DraggableBar_Preview_2(
-) {
+fun Kiwi_DraggableBar_Preview_2() {
     Kiwi_DraggableBar_Preview(2)
 }
 
+private const val STATE_HEIGHT_0 = 150
+private const val STATE_HEIGHT_1 = 260
+private const val STATE_HEIGHT_2 = 650
+private val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun Kiwi_DraggableBar_Preview(
-    initialStateIndex: Int = 0,
-) {
-    KiwiTheme {
+fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
+    val draggableStateIndex = remember { mutableIntStateOf(initialStateIndex) }
+    Kiwi_Theme {
         Kiwi_DraggableBar(
+            currentStateIndex = draggableStateIndex.intValue,
+            onStateChange = { newIndex -> draggableStateIndex.intValue = newIndex },
             content = {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(getResponsiveSizeHeight(1600.dp)),
-                    contentAlignment = Alignment.TopCenter
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(getResponsiveSizeHeight(1600.dp)),
+                    contentAlignment = Alignment.TopCenter,
                 ) {
                     Kiwi_H3(
-                        Kiwi_TextArguments(
+                        KiwiTextArguments(
                             "Content",
                             TextAlign.Center,
-                            MaterialTheme.colorScheme.secondary
-                        )
+                            LocalKiwiColors.current.color6,
+                        ),
                     )
                 }
             },
-            states = listOf(0, 100, 600),
-            initialStateIndex = initialStateIndex
+            states = STATES,
         )
     }
 }

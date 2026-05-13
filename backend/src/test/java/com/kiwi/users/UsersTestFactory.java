@@ -1,27 +1,28 @@
 package com.kiwi.users;
 
-import com.kiwi.features.metrics.MetricsFactory;
-import com.kiwi.features.users.UsersDTO;
+import com.kiwi.features.users.data.LoginDTO;
+import com.kiwi.features.users.data.UsersDTO;
 
-import static com.kiwi.settings.SettingsTestFactory.invalidSettingsDTO;
-import static com.kiwi.settings.SettingsTestFactory.validSettingsDTO;
+import java.time.LocalDate;
+
+import static com.kiwi.common.utils.FormatUtils.formatDate;
 
 public class UsersTestFactory {
-    public static UsersDTO validUserDTO() {
-        return new UsersDTO(
-                "finn@thehuman.com",
-                "Math3matical!",
-                validSettingsDTO(),
-                MetricsFactory.generateRandomMetricsSet(3, true)
-        );
+    public static LoginDTO validLoginDTO() {
+        return new LoginDTO("finn@thehuman.com", "Math3matic!");
     }
-    
+
+    public static LoginDTO invalidLoginDTO() {
+        return new LoginDTO("football", "kk");
+    }
+
+    private static final String DATE = formatDate(LocalDate.of(2025, 1, 1));
+
+    public static UsersDTO validUserDTO() {
+        return new UsersDTO(validLoginDTO().getEmail(), DATE);
+    }
+
     public static UsersDTO invalidUserDTO() {
-        return new UsersDTO(
-                "bmolovesfootball",
-                "kk",
-                invalidSettingsDTO(),
-                MetricsFactory.generateRandomMetricsSet(3, false)
-        );
+        return new UsersDTO(invalidLoginDTO().getEmail(), DATE);
     }
 }

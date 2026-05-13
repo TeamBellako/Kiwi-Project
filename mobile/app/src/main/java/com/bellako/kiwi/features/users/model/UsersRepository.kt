@@ -1,33 +1,36 @@
 package com.bellako.kiwi.features.users.model
 
-import com.bellako.kiwi.features.users.data.UsersDTO
-import retrofit2.HttpException
+import com.bellako.kiwi.features.users.data.LoggedDTO
+import com.bellako.kiwi.features.users.data.LoginDTO
+import com.bellako.kiwi.features.users.data.UserPointsDTO
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-class UsersRepository(private val api: IUsersAPI) {
+class UsersRepository(
+    private val api: IUsersAPI,
+) {
+    private val _currentPoints = MutableStateFlow(0)
+    val currentPoints: StateFlow<Int> = _currentPoints.asStateFlow()
 
-    suspend fun signup(dto: UsersDTO): Result<Unit> {
-        return try {
-            val response = api.signup(dto)
-
-            if (response.isSuccessful) {
-                Result.success(Unit)
-            } else {
-                Result.failure(HttpException(response))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun login(dto: UsersDTO): Result<String> {
-        return try {
-            val result = api.login(dto)
-            val jwt = result["jwt"] ?: return Result.failure(
-                Exception("Missing JWT in response")
+    suspend fun signup(dto: LoginDTO): Result<String> =
+        runCatching {
+            api.signup(dto)["message"] ?: return Result.failure(
+                Exception(api.signup(dto)["error"]),
             )
-            Result.success(jwt)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
-    }
+
+    suspend fun login(dto: LoginDTO): Result<LoggedDTO> =
+        runCatching {
+            api.login(dto)
+        }
+
+    suspend fun getMyUserPoints(): Result<UserPointsDTO> =
+        runCatching {
+            api.getMyUserPoints()
+        }.also { result ->
+            result.onSuccess { points ->
+                _currentPoints.value = points.currentPoints
+            }
+        }
 }

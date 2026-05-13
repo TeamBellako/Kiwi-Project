@@ -17,13 +17,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.tests.CommonTestTags
-import com.bellako.kiwi.ui.KiwiTheme
+import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
 @Composable
 fun LoadingModal(
     color: Color = MaterialTheme.colorScheme.secondary,
-    trackColor: Color = Color.Transparent
+    trackColor: Color = Color.Transparent,
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Box(modifier = Modifier.size(getResponsiveSizeHeight(50.dp))) {
@@ -33,9 +33,9 @@ fun LoadingModal(
 }
 
 @Composable
-fun LoadingIcon(
+private fun LoadingIcon(
     color: Color = MaterialTheme.colorScheme.secondary,
-    trackColor: Color = Color.Transparent
+    trackColor: Color = Color.Transparent,
 ) {
     val isPreview = LocalInspectionMode.current
     if (isPreview) {
@@ -45,7 +45,7 @@ fun LoadingIcon(
                 color = color,
                 center = Offset(size.width / 2f, size.height / 2f),
                 radius = (size.minDimension - 11f) / 2f,
-                style = Stroke(width = 11f)
+                style = Stroke(width = 11f),
             )
         }
     } else {
@@ -53,19 +53,22 @@ fun LoadingIcon(
         CircularProgressIndicator(
             color = color,
             trackColor = trackColor,
-            modifier = Modifier
-                .fillMaxSize()
-                .testTag(CommonTestTags.LOADING_MODAL)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .testTag(CommonTestTags.LOADING_MODAL),
         )
     }
 }
+
+// -------------------------------------------------------------------------------------------------
 
 @Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
 @Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
-fun LoadingModalPreview() {
-    KiwiTheme {
+fun LoadingModal_Preview() {
+    Kiwi_Theme {
         LoadingModal()
     }
 }

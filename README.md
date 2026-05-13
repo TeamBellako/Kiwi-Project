@@ -1,16 +1,17 @@
-# Kiwi Project
+# Growtale
 
-Kiwi Project is a personal portfolio project developed by *Bellako Tech*. It is intended as a technical showcase, a learning exercise, and a possible product in the future, so it is not available for reuse or commercial purposes.
+Growtale is a side-project developed by *Bellako Tech*. It serves as a technical showcase, a learning experience, and a potential future product.
 
-Feel free to explore the code and get inspired by it — but please **do not copy, modify, distribute, or use it in any project or product** without our explicit permission.
+This repository is published only for demonstration and educational purposes. You are welcome to view the code and take inspiration from the project, but **you may not copy, modify, distribute, reuse, or incorporate any part of it into another project or product without explicit written permission**.
 
-## ⚠️ License
+## License Notice
 
-This project is **not open source**.
+**Growtale is not open source.**
 
-All rights reserved © 2025 Daniel Cano Robledo, Sergio Ruiz Pérez & Carlos Sánchez Fernández
+All rights reserved © 2026 Daniel Cano, Sergio Ruiz, Carlos Sánchez, Andrea Calvar, Roberto Diaz, Ignacio Martinez, Raquel Mas, David Muñoz, and Ismael Ruiz.
 
-This code is provided for **demonstration and educational purposes only**.  
-No part of this repository may be used, copied, modified, or redistributed without written permission.
+No license is granted to use, reproduce, modify, distribute, sublicense, or commercially exploit this codebase or any portion of it.
 
-For any inquiries, please contact: bellakotech@gmail.com
+Unauthorized use of this repository, in whole or in part, is strictly prohibited.
+
+For permissions or inquiries, please contact: bellakotech@gmail.com

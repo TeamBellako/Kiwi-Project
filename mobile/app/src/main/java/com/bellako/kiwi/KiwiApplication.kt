@@ -1,24 +1,27 @@
 package com.bellako.kiwi
 
 import android.app.Application
-import androidx.compose.ui.platform.LocalContext
-import com.bellako.kiwi.analytics.FirebaseEventLogger
+import androidx.core.content.edit
 import com.bellako.kiwi.analytics.FirebaseEventNames
-import com.google.firebase.Firebase
-import com.google.firebase.FirebaseApp
-import com.google.firebase.analytics.analytics
+import com.bellako.kiwi.analytics.firebaseInit
+import com.bellako.kiwi.analytics.firebaseLogEvent
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class KiwiApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        FirebaseApp.initializeApp(this)
 
-        FirebaseEventLogger.logEvent(FirebaseEventNames.APP_OPENED)
+        firebaseInit(this)
 
-        if (!BuildConfig.DEBUG) {
-            Firebase.analytics.setAnalyticsCollectionEnabled(true)
+        val prefs = getSharedPreferences("kiwi_prefs", MODE_PRIVATE)
+        val isFirstOpen = prefs.getBoolean("is_first_open", true)
+
+        if (isFirstOpen) {
+            firebaseLogEvent(FirebaseEventNames.USER_ACQUIRED)
+            prefs.edit { putBoolean("is_first_open", false) }
         }
+
+        firebaseLogEvent(FirebaseEventNames.APP_OPENED)
     }
 }
