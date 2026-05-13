@@ -4,17 +4,7 @@
 
 ## Changes
 
-### Database / SQL
-- 
-
-### Dialog & Bark System
-- 
-
-### Skill System
-- 
-
-### Game Logic / Other
-- 
+<!-- List of changes -->
 
 ## Schema / Migration Notes
 
