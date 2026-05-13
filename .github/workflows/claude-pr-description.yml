@@ -18,7 +18,10 @@ jobs:
 
       - uses: anthropics/claude-code-action@v1
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Primary: Claude Max subscription (free within quota).
+          # Fallback: comment the line above and uncomment the line below to use the API key instead.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
             You are writing the description for PR #${{ github.event.pull_request.number }} in the Kiwi project.
 
