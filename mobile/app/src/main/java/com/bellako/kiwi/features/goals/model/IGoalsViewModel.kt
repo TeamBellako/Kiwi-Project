@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.goals.model
 
+import com.bellako.kiwi.features.goals.data.AppUsageResult
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
@@ -31,4 +32,9 @@ interface IGoalsViewModel {
     suspend fun getDailyGoalsProgress(date: String): Float
 
     suspend fun invalidateGoalsInProgressCache()
+
+    suspend fun getAppsAverageUsage(
+        goodApps: List<String>,
+        badApps: List<String>,
+    ): Result<AppUsageResult>
 }

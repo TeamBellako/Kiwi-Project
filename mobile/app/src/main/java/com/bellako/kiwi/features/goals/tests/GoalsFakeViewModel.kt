@@ -1,6 +1,8 @@
 package com.bellako.kiwi.features.goals.tests
 
 import com.bellako.kiwi.common.model.BaseFakeViewModel
+import com.bellako.kiwi.features.goals.data.AppUsageResult
+import com.bellako.kiwi.features.goals.data.AppUsageStats
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
@@ -174,4 +176,15 @@ class GoalsFakeViewModel(
     }
 
     override suspend fun getDailyGoalsProgress(date: String): Float = 0.2F
+
+    override suspend fun getAppsAverageUsage(
+        goodApps: List<String>,
+        badApps: List<String>,
+    ): Result<AppUsageResult> =
+        Result.success(
+            AppUsageResult(
+                goodAppsUsage = goodApps.map { AppUsageStats(it, 0L) },
+                badAppsUsage = badApps.map { AppUsageStats(it, 0L) },
+            ),
+        )
 }

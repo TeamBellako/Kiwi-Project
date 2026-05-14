@@ -9,6 +9,7 @@ import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
+import com.bellako.kiwi.features.goals.data.AppUsageResult
 import com.bellako.kiwi.features.goals.data.GoalDataMapper
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalState
@@ -36,6 +37,7 @@ class GoalsViewModel
         private val repository: GoalsRepository,
         private val notificationManager: NotificationManager,
         private val usersRepository: UsersRepository,
+        private val appUsageProvider: AppUsageProvider,
     ) : BaseViewModel(),
         IGoalsViewModel {
         private val _state = MutableStateFlow(GoalsListState())
@@ -452,4 +454,20 @@ class GoalsViewModel
 
             return progress
         }
+
+        /**
+         * Returns the average daily usage (last 7 days) for each app in [goodApps] and [badApps].
+         * Requires PACKAGE_USAGE_STATS permission to have been granted by the user.
+         */
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
+        override suspend fun getAppsAverageUsage(
+            goodApps: List<String>,
+            badApps: List<String>,
+        ): Result<AppUsageResult> =
+            runCatching {
+                AppUsageResult(
+                    goodAppsUsage = appUsageProvider.getAverageWeeklyUsage(goodApps),
+                    badAppsUsage = appUsageProvider.getAverageWeeklyUsage(badApps),
+                )
+            }
     }
