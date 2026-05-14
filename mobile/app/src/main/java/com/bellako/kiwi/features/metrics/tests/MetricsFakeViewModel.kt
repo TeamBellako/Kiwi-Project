@@ -73,4 +73,14 @@ class MetricsFakeViewModel(
 
             Result.success(Unit)
         }
+
+    override suspend fun getAppUsageProgress(date: String): Float {
+        val dto =
+            if (stringToDate(date).isEqual(currentDate)) {
+                todayMetricsDTO
+            } else {
+                pastMetricsDTO
+            }
+        return MetricsDataMapper.toState(dto).getAppUsageProgress()
+    }
 }

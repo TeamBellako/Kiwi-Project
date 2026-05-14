@@ -4,13 +4,22 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -24,18 +33,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
@@ -58,7 +72,6 @@ import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
-import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -75,8 +88,10 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import java.time.LocalDate
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
+const val DAY_TRANSITION_ANIM_DURATION = 550
+const val LAYOUT_TRANSITION_ANIM_DURATION = 1200
 
-const val STATE_HEIGHT_0 = 140
+const val STATE_HEIGHT_0 = 150
 const val STATE_HEIGHT_1 = 270
 const val STATE_HEIGHT_2 = 680
 val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
@@ -143,33 +158,54 @@ fun DashboardScreen(
                         .testTag(CommonTestTags.DASHBOARD_MODAL),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Header()
+                Header(
+                    stateIndex = draggableStateIndex.intValue,
+                    statesCount = STATES.size,
+                    onStateChange = { newIndex -> draggableStateIndex.intValue = newIndex },
+                )
 
-                if (currentStateIndex == 0) {
-                    // TODO pedir de nuevo el dia actual
-                    DashboardScreen0_Hidden()
-                } else if (currentStateIndex <= 1) {
-                    DashboardScreen1_Collapsed(
-                        goalsViewModel = goalsViewModel,
-                        metricsState = metricsState!!,
-                        isLoading = isLoading,
-                        onCalendarViewClicked = {
-                            shouldShowCalendarView.value = true
-                            draggableStateIndex.intValue = 2
+                @OptIn(ExperimentalSharedTransitionApi::class)
+                SharedTransitionLayout(modifier = Modifier.fillMaxWidth()) {
+                    AnimatedContent(
+                        targetState = currentStateIndex,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION)) togetherWith
+                                fadeOut(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION))
                         },
-                    )
-                } else if (currentStateIndex <= 2) {
-                    DashboardScreen2_Expanded(
-                        context = context,
-                        coroutineScope = coroutineScope,
-                        usersViewModel = usersViewModel,
-                        metricsViewModel = metricsViewModel,
-                        metricsState = metricsState!!,
-                        personalityViewModel = personalityViewModel,
-                        goalsViewModel = goalsViewModel,
-                        shouldShowCalendarView = shouldShowCalendarView,
-                        isLoading = isLoading,
-                    )
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.TopCenter,
+                        label = "dashboardLayoutTransition",
+                    ) { stateIndex ->
+                        if (stateIndex == 0) {
+                            DashboardScreen0_Hidden()
+                        } else if (stateIndex <= 1) {
+                            DashboardScreen1_Collapsed(
+                                goalsViewModel = goalsViewModel,
+                                metricsState = metricsState!!,
+                                isLoading = isLoading,
+                                onCalendarViewClicked = {
+                                    shouldShowCalendarView.value = true
+                                    draggableStateIndex.intValue = 2
+                                },
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = this@AnimatedContent,
+                            )
+                        } else if (stateIndex <= 2) {
+                            DashboardScreen2_Expanded(
+                                context = context,
+                                coroutineScope = coroutineScope,
+                                usersViewModel = usersViewModel,
+                                metricsViewModel = metricsViewModel,
+                                metricsState = metricsState!!,
+                                personalityViewModel = personalityViewModel,
+                                goalsViewModel = goalsViewModel,
+                                shouldShowCalendarView = shouldShowCalendarView,
+                                isLoading = isLoading,
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = this@AnimatedContent,
+                            )
+                        }
+                    }
                 }
             }
 
@@ -212,17 +248,72 @@ fun ComposableEngagementMeasuring(layout: String) {
 }
 
 @Composable
-private fun Header() {
+private fun Header(
+    stateIndex: Int,
+    statesCount: Int,
+    onStateChange: (Int) -> Unit,
+) {
+    val canGoDown = stateIndex > 0
+    val canGoUp = stateIndex < statesCount - 1
+
     Kiwi_Spacer()
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Kiwi_H3(
-            KiwiTextArguments(
-                ":: Daily Progress ::",
-                TextAlign.Center,
-                LocalKiwiColors.current.color6,
-            ),
+        LayoutChevron(
+            rotationDegrees = 0f,
+            enabled = canGoDown,
+            onClick = { onStateChange(stateIndex - 1) },
+        )
+
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center,
+        ) {
+            Kiwi_H3(
+                KiwiTextArguments(
+                    ":: Daily Progress ::",
+                    TextAlign.Center,
+                    LocalKiwiColors.current.color6,
+                ),
+            )
+        }
+
+        LayoutChevron(
+            rotationDegrees = 180f,
+            enabled = canGoUp,
+            onClick = { onStateChange(stateIndex + 1) },
+        )
+    }
+}
+
+@Composable
+@Suppress("MagicNumber")
+private fun LayoutChevron(
+    rotationDegrees: Float,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val context = LocalContext.current
+    Box(
+        modifier =
+            Modifier
+                .size(getResponsiveSizeHeight(36.dp))
+                .clickable(enabled = enabled) {
+                    AudioManager.playSFX(context, R.raw.snd_ui_tap)
+                    onClick()
+                },
+        contentAlignment = Alignment.Center,
+    ) {
+        Kiwi_Image(
+            R.drawable.ic_dialogue_arrow,
+            "Layout chevron",
+            modifier =
+                Modifier
+                    .size(getResponsiveSizeHeight(14.dp))
+                    .rotate(rotationDegrees)
+                    .alpha(if (enabled) 1f else KIWI_DISABLED_ALPHA),
         )
     }
 }
@@ -268,6 +359,7 @@ fun SelectedMetricsTime(
     validMetrics: Boolean,
     expanded: Boolean,
     tag: String,
+    label: String = "",
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -275,7 +367,7 @@ fun SelectedMetricsTime(
         if (validMetrics) {
             DateUtils.parseTimeSeconds(currentSeconds)
         } else {
-            "No data"
+            DateUtils.parseTimeSeconds(0)
         }
 
     val maxString =
@@ -309,27 +401,39 @@ fun SelectedMetricsTime(
             ),
         )
     } else {
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Kiwi_Label2(
-                KiwiTextArguments(
-                    currentString,
-                    TextAlign.Left,
-                    color = kiwiColors.color9,
-                    modifier =
-                        Modifier
-                            .testTag(tag),
-                ),
-            )
+            if (label.isNotEmpty()) {
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        label,
+                        TextAlign.Left,
+                        color = kiwiColors.color7D,
+                    ),
+                )
+            }
 
-            Kiwi_Label2(
-                KiwiTextArguments(
-                    maxString,
-                    TextAlign.Left,
-                    color = kiwiColors.color7D,
-                ),
-            )
+            Row {
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        currentString,
+                        TextAlign.Left,
+                        color = kiwiColors.color9,
+                        modifier =
+                            Modifier
+                                .testTag(tag),
+                    ),
+                )
+
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        maxString,
+                        TextAlign.Left,
+                        color = kiwiColors.color7D,
+                    ),
+                )
+            }
         }
     }
 }
