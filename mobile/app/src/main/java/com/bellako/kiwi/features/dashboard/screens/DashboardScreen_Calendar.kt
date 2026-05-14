@@ -495,6 +495,7 @@ fun CalendarMonth(
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarDayView(
