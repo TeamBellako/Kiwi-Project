@@ -4,6 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,6 +81,7 @@ import java.time.LocalDate
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
 const val DAY_TRANSITION_ANIM_DURATION = 550
+const val LAYOUT_TRANSITION_ANIM_DURATION = 300
 
 const val STATE_HEIGHT_0 = 140
 const val STATE_HEIGHT_1 = 270
@@ -146,31 +152,41 @@ fun DashboardScreen(
             ) {
                 Header()
 
-                if (currentStateIndex == 0) {
-                    // TODO pedir de nuevo el dia actual
-                    DashboardScreen0_Hidden()
-                } else if (currentStateIndex <= 1) {
-                    DashboardScreen1_Collapsed(
-                        goalsViewModel = goalsViewModel,
-                        metricsState = metricsState!!,
-                        isLoading = isLoading,
-                        onCalendarViewClicked = {
-                            shouldShowCalendarView.value = true
-                            draggableStateIndex.intValue = 2
-                        },
-                    )
-                } else if (currentStateIndex <= 2) {
-                    DashboardScreen2_Expanded(
-                        context = context,
-                        coroutineScope = coroutineScope,
-                        usersViewModel = usersViewModel,
-                        metricsViewModel = metricsViewModel,
-                        metricsState = metricsState!!,
-                        personalityViewModel = personalityViewModel,
-                        goalsViewModel = goalsViewModel,
-                        shouldShowCalendarView = shouldShowCalendarView,
-                        isLoading = isLoading,
-                    )
+                AnimatedContent(
+                    targetState = currentStateIndex,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION)) togetherWith
+                            fadeOut(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.TopCenter,
+                    label = "dashboardLayoutTransition",
+                ) { stateIndex ->
+                    if (stateIndex == 0) {
+                        DashboardScreen0_Hidden()
+                    } else if (stateIndex <= 1) {
+                        DashboardScreen1_Collapsed(
+                            goalsViewModel = goalsViewModel,
+                            metricsState = metricsState!!,
+                            isLoading = isLoading,
+                            onCalendarViewClicked = {
+                                shouldShowCalendarView.value = true
+                                draggableStateIndex.intValue = 2
+                            },
+                        )
+                    } else if (stateIndex <= 2) {
+                        DashboardScreen2_Expanded(
+                            context = context,
+                            coroutineScope = coroutineScope,
+                            usersViewModel = usersViewModel,
+                            metricsViewModel = metricsViewModel,
+                            metricsState = metricsState!!,
+                            personalityViewModel = personalityViewModel,
+                            goalsViewModel = goalsViewModel,
+                            shouldShowCalendarView = shouldShowCalendarView,
+                            isLoading = isLoading,
+                        )
+                    }
                 }
             }
 

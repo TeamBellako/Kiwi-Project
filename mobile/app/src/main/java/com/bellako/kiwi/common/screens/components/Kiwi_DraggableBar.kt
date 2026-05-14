@@ -167,7 +167,8 @@ fun Kiwi_DraggableBar(
                     .pointerInput(Unit) { /* prevent inputs behind this */ },
         )
 
-        val closestLargerIndex = statesBottom.indexOf(statesBottom.filter { it >= offsetY }.minOrNull())
+        val closestLargerIndex =
+            statesBottom.indexOf(statesBottom.filter { it >= animatableOffset.value }.minOrNull())
         content(closestLargerIndex)
     }
 }
