@@ -2,6 +2,9 @@ package com.bellako.kiwi.features.dashboard.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -32,6 +35,7 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardScreen1_Collapsed(
@@ -39,6 +43,8 @@ fun DashboardScreen1_Collapsed(
     metricsState: MetricsState,
     isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     ComposableEngagementMeasuring("collapsed")
 
@@ -51,10 +57,13 @@ fun DashboardScreen1_Collapsed(
             metricsState = metricsState,
             isLoading = isLoading,
             onCalendarViewClicked = onCalendarViewClicked,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
         )
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun CollapsedSummaryCard(
@@ -62,6 +71,8 @@ private fun CollapsedSummaryCard(
     metricsState: MetricsState,
     isLoading: Boolean,
     onCalendarViewClicked: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -107,12 +118,19 @@ private fun CollapsedSummaryCard(
                 Modifier
                     .padding(start = getResponsiveSizeHeight(Spacing.medium)),
             ) {
-                @Suppress("MagicNumber")
-                CurrentDayIndicator(
-                    getResponsiveSizeHeight(100.dp),
-                    animatedDailyGoalProgress,
-                    animatedAppUsageProgress,
-                )
+                with(sharedTransitionScope) {
+                    @Suppress("MagicNumber")
+                    CurrentDayIndicator(
+                        size = getResponsiveSizeHeight(100.dp),
+                        dailyGoalsProgress = animatedDailyGoalProgress,
+                        appUsageProgress = animatedAppUsageProgress,
+                        modifier =
+                            Modifier.sharedElement(
+                                rememberSharedContentState(key = "currentDayHeart"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            ),
+                    )
+                }
             }
             Box(
                 Modifier
@@ -127,6 +145,7 @@ private fun CollapsedSummaryCard(
                         metricsState.currentGoodTimeSeconds > 0 || metricsState.currentBadTimeSeconds > 0,
                         false,
                         DashboardModalTestTags.GOOD_TIME,
+                        label = "Good Apps",
                     )
 
                     Kiwi_Spacer(Spacing.xSmall)
@@ -137,6 +156,7 @@ private fun CollapsedSummaryCard(
                         metricsState.currentGoodTimeSeconds > 0 || metricsState.currentBadTimeSeconds > 0,
                         false,
                         DashboardModalTestTags.BAD_TIME,
+                        label = "Evil Apps",
                     )
                 }
             }

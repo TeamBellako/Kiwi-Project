@@ -229,7 +229,19 @@ private fun AppScreen(
                         isCombatActive = activeCombat != null,
                     )
 
-                    if (showDashboard && !isConversationVisible && !isCombatVisible) {
+                    AnimatedVisibility(
+                        visible = showDashboard && !isConversationVisible && !isCombatVisible,
+                        enter =
+                            slideInVertically(
+                                initialOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        exit =
+                            slideOutVertically(
+                                targetOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                    ) {
                         DashboardScreen(
                             usersViewModel = usersViewModel,
                             metricsViewModel = metricsViewModel,

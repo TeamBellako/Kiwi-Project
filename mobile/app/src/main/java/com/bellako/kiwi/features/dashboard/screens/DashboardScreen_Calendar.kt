@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -86,9 +87,10 @@ fun CurrentDayIndicator(
     size: Dp,
     dailyGoalsProgress: Float,
     appUsageProgress: Float,
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = Modifier.size(size),
+        modifier = modifier.size(size),
     ) {
         Kiwi_Image(
             if (dailyGoalsProgress == 1f && appUsageProgress == 1f) {
@@ -216,6 +218,7 @@ fun CalendarWeekView(
     personalityViewModel: IPersonalityViewModel,
     isLoading: Boolean,
     goalsViewModel: IGoalsViewModel,
+    dayTransitionDirection: MutableIntState,
     onCalendarViewClicked: () -> Unit,
 ) {
     val date = stringToDate(metricsState.date)
@@ -251,8 +254,10 @@ fun CalendarWeekView(
                 val isSelected = selectedDayIndex == index
 
                 var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
-                LaunchedEffect(Unit) {
+                var appUsageProgress by remember { mutableFloatStateOf(0f) }
+                LaunchedEffect(day, metricsState) {
                     dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(day.toString())
+                    appUsageProgress = metricsViewModel.getAppUsageProgress(day.toString())
                 }
 
                 Box(modifier = Modifier.weight(1f)) {
@@ -264,18 +269,26 @@ fun CalendarWeekView(
                         onClicked = {
                             AudioManager.playSFX(context, R.raw.snd_ui_tap)
                             selectedDayIndex = index
+                            val newDay = startOfWeek.plusDays(index.toLong())
+                            val currentDay = stringToDate(metricsState.date)
+                            dayTransitionDirection.intValue =
+                                when {
+                                    newDay.isBefore(currentDay) -> 1
+                                    newDay.isAfter(currentDay) -> -1
+                                    else -> 0
+                                }
                             selectDay(
                                 coroutineScope,
                                 metricsViewModel,
                                 metricsState,
                                 personalityViewModel,
                                 context,
-                                startOfWeek.plusDays(index.toLong()),
+                                newDay,
                             )
                         },
                         testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
                         hasCompletedDailyGoals = dailyGoalProgress >= 1F,
-                        hasCompletedAppUsages = metricsState.getAppUsageProgress() >= 1F,
+                        hasCompletedAppUsages = appUsageProgress >= 1F,
                     )
                 }
             }
@@ -300,6 +313,7 @@ fun CalendarMonthView(
     modifier: Modifier = Modifier,
     shouldShowCalendarView: MutableState<Boolean>,
     goalsViewModel: IGoalsViewModel,
+    dayTransitionDirection: MutableIntState,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val selectedMonth = remember { mutableStateOf(YearMonth.from(stringToDate(metricsState.date))) }
@@ -392,6 +406,7 @@ fun CalendarMonthView(
                 month = month,
                 personalityViewModel = personalityViewModel,
                 goalsViewModel = goalsViewModel,
+                dayTransitionDirection = dayTransitionDirection,
             )
         }
     }
@@ -410,6 +425,7 @@ fun CalendarMonth(
     month: YearMonth,
     shouldShowCalendarView: MutableState<Boolean>,
     goalsViewModel: IGoalsViewModel,
+    dayTransitionDirection: MutableIntState,
 ) {
     val startOfMonth = month.atDay(1)
     val endOfMonth = month.atEndOfMonth()
@@ -436,8 +452,10 @@ fun CalendarMonth(
                     val dayDate = startOfMonth.plusDays(dayOffset.toLong())
 
                     var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
-                    LaunchedEffect(Unit) {
+                    var appUsageProgress by remember { mutableFloatStateOf(0f) }
+                    LaunchedEffect(dayDate, metricsState) {
                         dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(dayDate.toString())
+                        appUsageProgress = metricsViewModel.getAppUsageProgress(dayDate.toString())
                     }
 
                     Box(
@@ -452,6 +470,7 @@ fun CalendarMonth(
                                 isSelected = stringToDate(metricsState.date) == dayDate,
                                 onClicked = {
                                     AudioManager.playSFX(context, R.raw.snd_ui_tap)
+                                    dayTransitionDirection.intValue = 0
                                     selectDay(
                                         coroutineScope,
                                         metricsViewModel,
@@ -464,7 +483,7 @@ fun CalendarMonth(
                                 },
                                 testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
                                 hasCompletedDailyGoals = dailyGoalProgress >= 1F,
-                                hasCompletedAppUsages = metricsState.getAppUsageProgress() >= 1F,
+                                hasCompletedAppUsages = appUsageProgress >= 1F,
                             )
                         } else {
                             Kiwi_Spacer()
@@ -476,6 +495,7 @@ fun CalendarMonth(
     }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarDayView(
@@ -490,16 +510,25 @@ fun CalendarDayView(
     testTag: String,
 ) {
     val kiwiColors = LocalKiwiColors.current
+    val isToday = day == LocalDate.now()
     val isDayEnabled =
         !day.isAfter(LocalDate.now()) &&
             (canSelectBeforeRegisterDate || !day.isBefore(usersViewModel.getRegisterDate()))
 
+    @Suppress("MagicNumber")
+    val todayBackground = kiwiColors.colorF.copy(alpha = 0.3f)
     Box(
         modifier =
             Modifier
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-                .background(color = if (isSelected) kiwiColors.color9A else kiwiColors.color3A)
-                .border(
+                .background(
+                    color =
+                        when {
+                            isToday -> todayBackground
+                            isSelected -> kiwiColors.color9A
+                            else -> kiwiColors.color3A
+                        },
+                ).border(
                     width = if (isSelected) getResponsiveSizeHeight(2.dp) else 0.dp,
                     color = if (isSelected) kiwiColors.color9 else Color.Transparent,
                     shape = RoundedCornerShape(getResponsiveSizeHeight(20.dp)),
@@ -520,7 +549,12 @@ fun CalendarDayView(
             Kiwi_P2(
                 KiwiTextArguments(
                     day.dayOfMonth.toString(),
-                    color = if (isSelected) kiwiColors.color9 else kiwiColors.color4B,
+                    color =
+                        when {
+                            isToday -> kiwiColors.color0
+                            isSelected -> kiwiColors.color9
+                            else -> kiwiColors.color4B
+                        },
                 ),
             )
             Box(
