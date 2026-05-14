@@ -5,8 +5,11 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -88,6 +91,7 @@ private fun Modifier.featherHorizontalEdges(): Modifier =
             )
         }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardScreen2_Expanded(
@@ -100,6 +104,8 @@ fun DashboardScreen2_Expanded(
     goalsViewModel: IGoalsViewModel,
     shouldShowCalendarView: MutableState<Boolean>,
     isLoading: Boolean,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(metricsState) {
@@ -203,12 +209,19 @@ fun DashboardScreen2_Expanded(
                                 .featherHorizontalEdges(),
                         contentAlignment = Alignment.Center,
                     ) { _ ->
-                        @Suppress("MagicNumber")
-                        CurrentDayIndicator(
-                            getResponsiveSizeHeight(180.dp),
-                            animatedDailyGoalProgress,
-                            animatedAppUsageProgress,
-                        )
+                        with(sharedTransitionScope) {
+                            @Suppress("MagicNumber")
+                            CurrentDayIndicator(
+                                size = getResponsiveSizeHeight(180.dp),
+                                dailyGoalsProgress = animatedDailyGoalProgress,
+                                appUsageProgress = animatedAppUsageProgress,
+                                modifier =
+                                    Modifier.sharedElement(
+                                        rememberSharedContentState(key = "currentDayHeart"),
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                    ),
+                            )
+                        }
                     }
 
                     CalendarWeekView(

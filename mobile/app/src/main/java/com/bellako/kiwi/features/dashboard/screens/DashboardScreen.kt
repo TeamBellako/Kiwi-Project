@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -162,40 +164,47 @@ fun DashboardScreen(
                     onStateChange = { newIndex -> draggableStateIndex.intValue = newIndex },
                 )
 
-                AnimatedContent(
-                    targetState = currentStateIndex,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION)) togetherWith
-                            fadeOut(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.TopCenter,
-                    label = "dashboardLayoutTransition",
-                ) { stateIndex ->
-                    if (stateIndex == 0) {
-                        DashboardScreen0_Hidden()
-                    } else if (stateIndex <= 1) {
-                        DashboardScreen1_Collapsed(
-                            goalsViewModel = goalsViewModel,
-                            metricsState = metricsState!!,
-                            isLoading = isLoading,
-                            onCalendarViewClicked = {
-                                shouldShowCalendarView.value = true
-                                draggableStateIndex.intValue = 2
-                            },
-                        )
-                    } else if (stateIndex <= 2) {
-                        DashboardScreen2_Expanded(
-                            context = context,
-                            coroutineScope = coroutineScope,
-                            usersViewModel = usersViewModel,
-                            metricsViewModel = metricsViewModel,
-                            metricsState = metricsState!!,
-                            personalityViewModel = personalityViewModel,
-                            goalsViewModel = goalsViewModel,
-                            shouldShowCalendarView = shouldShowCalendarView,
-                            isLoading = isLoading,
-                        )
+                @OptIn(ExperimentalSharedTransitionApi::class)
+                SharedTransitionLayout(modifier = Modifier.fillMaxWidth()) {
+                    AnimatedContent(
+                        targetState = currentStateIndex,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION)) togetherWith
+                                fadeOut(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.TopCenter,
+                        label = "dashboardLayoutTransition",
+                    ) { stateIndex ->
+                        if (stateIndex == 0) {
+                            DashboardScreen0_Hidden()
+                        } else if (stateIndex <= 1) {
+                            DashboardScreen1_Collapsed(
+                                goalsViewModel = goalsViewModel,
+                                metricsState = metricsState!!,
+                                isLoading = isLoading,
+                                onCalendarViewClicked = {
+                                    shouldShowCalendarView.value = true
+                                    draggableStateIndex.intValue = 2
+                                },
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = this@AnimatedContent,
+                            )
+                        } else if (stateIndex <= 2) {
+                            DashboardScreen2_Expanded(
+                                context = context,
+                                coroutineScope = coroutineScope,
+                                usersViewModel = usersViewModel,
+                                metricsViewModel = metricsViewModel,
+                                metricsState = metricsState!!,
+                                personalityViewModel = personalityViewModel,
+                                goalsViewModel = goalsViewModel,
+                                shouldShowCalendarView = shouldShowCalendarView,
+                                isLoading = isLoading,
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedVisibilityScope = this@AnimatedContent,
+                            )
+                        }
                     }
                 }
             }

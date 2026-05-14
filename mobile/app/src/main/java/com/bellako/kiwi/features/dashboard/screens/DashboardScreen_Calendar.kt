@@ -87,9 +87,10 @@ fun CurrentDayIndicator(
     size: Dp,
     dailyGoalsProgress: Float,
     appUsageProgress: Float,
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = Modifier.size(size),
+        modifier = modifier.size(size),
     ) {
         Kiwi_Image(
             if (dailyGoalsProgress == 1f && appUsageProgress == 1f) {
