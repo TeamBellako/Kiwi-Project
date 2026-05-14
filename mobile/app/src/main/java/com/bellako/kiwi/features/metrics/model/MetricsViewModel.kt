@@ -76,4 +76,10 @@ class MetricsViewModel
                 _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
             }
         }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun getAppUsageProgress(date: String): Float {
+            val dto = repository.getMetricsByDate(stringToDate(date)).getOrNull() ?: return 0f
+            return MetricsDataMapper.toState(dto).getAppUsageProgress()
+        }
     }

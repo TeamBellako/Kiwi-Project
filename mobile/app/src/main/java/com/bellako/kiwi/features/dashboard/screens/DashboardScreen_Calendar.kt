@@ -253,8 +253,10 @@ fun CalendarWeekView(
                 val isSelected = selectedDayIndex == index
 
                 var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
-                LaunchedEffect(Unit) {
+                var appUsageProgress by remember { mutableFloatStateOf(0f) }
+                LaunchedEffect(day, metricsState) {
                     dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(day.toString())
+                    appUsageProgress = metricsViewModel.getAppUsageProgress(day.toString())
                 }
 
                 Box(modifier = Modifier.weight(1f)) {
@@ -285,7 +287,7 @@ fun CalendarWeekView(
                         },
                         testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
                         hasCompletedDailyGoals = dailyGoalProgress >= 1F,
-                        hasCompletedAppUsages = metricsState.getAppUsageProgress() >= 1F,
+                        hasCompletedAppUsages = appUsageProgress >= 1F,
                     )
                 }
             }
@@ -449,8 +451,10 @@ fun CalendarMonth(
                     val dayDate = startOfMonth.plusDays(dayOffset.toLong())
 
                     var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
-                    LaunchedEffect(Unit) {
+                    var appUsageProgress by remember { mutableFloatStateOf(0f) }
+                    LaunchedEffect(dayDate, metricsState) {
                         dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(dayDate.toString())
+                        appUsageProgress = metricsViewModel.getAppUsageProgress(dayDate.toString())
                     }
 
                     Box(
@@ -478,7 +482,7 @@ fun CalendarMonth(
                                 },
                                 testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + dayDate.dayOfMonth,
                                 hasCompletedDailyGoals = dailyGoalProgress >= 1F,
-                                hasCompletedAppUsages = metricsState.getAppUsageProgress() >= 1F,
+                                hasCompletedAppUsages = appUsageProgress >= 1F,
                             )
                         } else {
                             Kiwi_Spacer()

@@ -12,4 +12,6 @@ interface IMetricsViewModel : IBaseViewModel<MetricsState> {
     suspend fun updateMetrics(state: MetricsState): Result<Unit>
 
     suspend fun loadMetrics(date: String): Result<Unit>
+
+    suspend fun getAppUsageProgress(date: String): Float
 }
