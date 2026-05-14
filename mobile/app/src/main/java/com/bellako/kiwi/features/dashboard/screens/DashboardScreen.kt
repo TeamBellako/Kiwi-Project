@@ -75,6 +75,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import java.time.LocalDate
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
+const val DAY_TRANSITION_ANIM_DURATION = 550
 
 const val STATE_HEIGHT_0 = 140
 const val STATE_HEIGHT_1 = 270

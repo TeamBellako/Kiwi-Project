@@ -3,8 +3,17 @@ package com.bellako.kiwi.features.dashboard.screens
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +31,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -29,6 +39,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,6 +69,24 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.CoroutineScope
 
 val LocalGoalsViewModel = compositionLocalOf<IGoalsViewModel?> { null }
+
+@Suppress("MagicNumber")
+private fun Modifier.featherHorizontalEdges(): Modifier =
+    this
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            drawRect(
+                brush =
+                    Brush.horizontalGradient(
+                        0f to Color.Transparent,
+                        0.12f to Color.Black,
+                        0.88f to Color.Black,
+                        1f to Color.Transparent,
+                    ),
+                blendMode = BlendMode.DstIn,
+            )
+        }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -96,6 +130,29 @@ fun DashboardScreen2_Expanded(
         label = "appUsageProgress",
     )
 
+    val dayTransitionDirection = remember { mutableIntStateOf(0) }
+
+    val dayTransitionSpec: AnimatedContentTransitionScope<String>.() -> ContentTransform = {
+        val direction = dayTransitionDirection.intValue
+        if (direction == 0) {
+            fadeIn(animationSpec = tween(DAY_TRANSITION_ANIM_DURATION)) togetherWith
+                fadeOut(animationSpec = tween(DAY_TRANSITION_ANIM_DURATION))
+        } else {
+            (
+                slideInHorizontally(
+                    animationSpec = tween(DAY_TRANSITION_ANIM_DURATION),
+                    initialOffsetX = { fullWidth -> fullWidth * direction },
+                ) + fadeIn(animationSpec = tween(DAY_TRANSITION_ANIM_DURATION))
+            ) togetherWith
+                (
+                    slideOutHorizontally(
+                        animationSpec = tween(DAY_TRANSITION_ANIM_DURATION),
+                        targetOffsetX = { fullWidth -> -fullWidth * direction },
+                    ) + fadeOut(animationSpec = tween(DAY_TRANSITION_ANIM_DURATION))
+                )
+        }
+    }
+
     ComposableEngagementMeasuring("expanded")
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -103,44 +160,85 @@ fun DashboardScreen2_Expanded(
     ) {
         Kiwi_Spacer(Spacing.xSmall)
 
-        SelectedDayText(metricsState)
+        AnimatedContent(
+            targetState = metricsState.date,
+            transitionSpec = dayTransitionSpec,
+            label = "selectedDayText",
+        ) { _ ->
+            SelectedDayText(metricsState)
+        }
 
-        if (shouldShowCalendarView.value) {
-            CalendarMonthView(
-                context = context,
-                isLoading = isLoading,
-                coroutineScope = coroutineScope,
-                usersViewModel = usersViewModel,
-                metricsViewModel = metricsViewModel,
-                metricsState = metricsState,
-                shouldShowCalendarView = shouldShowCalendarView,
-                personalityViewModel = personalityViewModel,
-                goalsViewModel = goalsViewModel,
-            )
-        } else {
-            Kiwi_Spacer(Spacing.small)
+        Crossfade(
+            targetState = shouldShowCalendarView.value,
+            animationSpec = tween(DAY_TRANSITION_ANIM_DURATION),
+            label = "calendarWeekToggle",
+        ) { showCalendar ->
+            if (showCalendar) {
+                CalendarMonthView(
+                    context = context,
+                    isLoading = isLoading,
+                    coroutineScope = coroutineScope,
+                    usersViewModel = usersViewModel,
+                    metricsViewModel = metricsViewModel,
+                    metricsState = metricsState,
+                    shouldShowCalendarView = shouldShowCalendarView,
+                    personalityViewModel = personalityViewModel,
+                    goalsViewModel = goalsViewModel,
+                    dayTransitionDirection = dayTransitionDirection,
+                )
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Kiwi_Spacer(Spacing.small)
 
-            @Suppress("MagicNumber")
-            CurrentDayIndicator(
-                getResponsiveSizeHeight(180.dp),
-                animatedDailyGoalProgress,
-                animatedAppUsageProgress,
-            )
+                    AnimatedContent(
+                        targetState = metricsState.date,
+                        transitionSpec = dayTransitionSpec,
+                        label = "currentDayIndicator",
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .featherHorizontalEdges(),
+                        contentAlignment = Alignment.Center,
+                    ) { _ ->
+                        @Suppress("MagicNumber")
+                        CurrentDayIndicator(
+                            getResponsiveSizeHeight(180.dp),
+                            animatedDailyGoalProgress,
+                            animatedAppUsageProgress,
+                        )
+                    }
 
-            CalendarWeekView(
-                context = context,
-                coroutineScope = coroutineScope,
-                usersViewModel = usersViewModel,
-                metricsViewModel = metricsViewModel,
-                metricsState = metricsState,
-                personalityViewModel = personalityViewModel,
-                isLoading = isLoading,
-                goalsViewModel = goalsViewModel,
-            ) {
-                shouldShowCalendarView.value = true
+                    CalendarWeekView(
+                        context = context,
+                        coroutineScope = coroutineScope,
+                        usersViewModel = usersViewModel,
+                        metricsViewModel = metricsViewModel,
+                        metricsState = metricsState,
+                        personalityViewModel = personalityViewModel,
+                        isLoading = isLoading,
+                        goalsViewModel = goalsViewModel,
+                        dayTransitionDirection = dayTransitionDirection,
+                    ) {
+                        shouldShowCalendarView.value = true
+                    }
+
+                    AnimatedContent(
+                        targetState = metricsState.date,
+                        transitionSpec = dayTransitionSpec,
+                        label = "expandedProgressBox",
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .featherHorizontalEdges(),
+                        contentAlignment = Alignment.TopCenter,
+                    ) { _ ->
+                        ExpandedProgressBox(metricsState, goalsViewModel)
+                    }
+                }
             }
-
-            ExpandedProgressBox(metricsState, goalsViewModel)
         }
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -216,6 +217,7 @@ fun CalendarWeekView(
     personalityViewModel: IPersonalityViewModel,
     isLoading: Boolean,
     goalsViewModel: IGoalsViewModel,
+    dayTransitionDirection: MutableIntState,
     onCalendarViewClicked: () -> Unit,
 ) {
     val date = stringToDate(metricsState.date)
@@ -264,13 +266,21 @@ fun CalendarWeekView(
                         onClicked = {
                             AudioManager.playSFX(context, R.raw.snd_ui_tap)
                             selectedDayIndex = index
+                            val newDay = startOfWeek.plusDays(index.toLong())
+                            val currentDay = stringToDate(metricsState.date)
+                            dayTransitionDirection.intValue =
+                                when {
+                                    newDay.isBefore(currentDay) -> 1
+                                    newDay.isAfter(currentDay) -> -1
+                                    else -> 0
+                                }
                             selectDay(
                                 coroutineScope,
                                 metricsViewModel,
                                 metricsState,
                                 personalityViewModel,
                                 context,
-                                startOfWeek.plusDays(index.toLong()),
+                                newDay,
                             )
                         },
                         testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
@@ -300,6 +310,7 @@ fun CalendarMonthView(
     modifier: Modifier = Modifier,
     shouldShowCalendarView: MutableState<Boolean>,
     goalsViewModel: IGoalsViewModel,
+    dayTransitionDirection: MutableIntState,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val selectedMonth = remember { mutableStateOf(YearMonth.from(stringToDate(metricsState.date))) }
@@ -392,6 +403,7 @@ fun CalendarMonthView(
                 month = month,
                 personalityViewModel = personalityViewModel,
                 goalsViewModel = goalsViewModel,
+                dayTransitionDirection = dayTransitionDirection,
             )
         }
     }
@@ -410,6 +422,7 @@ fun CalendarMonth(
     month: YearMonth,
     shouldShowCalendarView: MutableState<Boolean>,
     goalsViewModel: IGoalsViewModel,
+    dayTransitionDirection: MutableIntState,
 ) {
     val startOfMonth = month.atDay(1)
     val endOfMonth = month.atEndOfMonth()
@@ -452,6 +465,7 @@ fun CalendarMonth(
                                 isSelected = stringToDate(metricsState.date) == dayDate,
                                 onClicked = {
                                     AudioManager.playSFX(context, R.raw.snd_ui_tap)
+                                    dayTransitionDirection.intValue = 0
                                     selectDay(
                                         coroutineScope,
                                         metricsViewModel,
