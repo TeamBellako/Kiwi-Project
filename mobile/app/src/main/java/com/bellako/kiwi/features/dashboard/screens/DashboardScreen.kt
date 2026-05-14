@@ -10,12 +10,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -29,18 +31,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
+import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_DraggableBar
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
@@ -63,7 +70,6 @@ import com.bellako.kiwi.features.metrics.model.IMetricsViewModel
 import com.bellako.kiwi.features.metrics.model.MetricsProvider
 import com.bellako.kiwi.features.metrics.tests.MetricsFakeViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
-import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -81,9 +87,9 @@ import java.time.LocalDate
 
 const val MONTH_SLIDE_ANIM_DURATION = 300
 const val DAY_TRANSITION_ANIM_DURATION = 550
-const val LAYOUT_TRANSITION_ANIM_DURATION = 300
+const val LAYOUT_TRANSITION_ANIM_DURATION = 1200
 
-const val STATE_HEIGHT_0 = 140
+const val STATE_HEIGHT_0 = 150
 const val STATE_HEIGHT_1 = 270
 const val STATE_HEIGHT_2 = 680
 val STATES = listOf(STATE_HEIGHT_0, STATE_HEIGHT_1, STATE_HEIGHT_2)
@@ -150,7 +156,11 @@ fun DashboardScreen(
                         .testTag(CommonTestTags.DASHBOARD_MODAL),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Header()
+                Header(
+                    stateIndex = draggableStateIndex.intValue,
+                    statesCount = STATES.size,
+                    onStateChange = { newIndex -> draggableStateIndex.intValue = newIndex },
+                )
 
                 AnimatedContent(
                     targetState = currentStateIndex,
@@ -229,17 +239,72 @@ fun ComposableEngagementMeasuring(layout: String) {
 }
 
 @Composable
-private fun Header() {
+private fun Header(
+    stateIndex: Int,
+    statesCount: Int,
+    onStateChange: (Int) -> Unit,
+) {
+    val canGoDown = stateIndex > 0
+    val canGoUp = stateIndex < statesCount - 1
+
     Kiwi_Spacer()
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Kiwi_H3(
-            KiwiTextArguments(
-                ":: Daily Progress ::",
-                TextAlign.Center,
-                LocalKiwiColors.current.color6,
-            ),
+        LayoutChevron(
+            rotationDegrees = 0f,
+            enabled = canGoDown,
+            onClick = { onStateChange(stateIndex - 1) },
+        )
+
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center,
+        ) {
+            Kiwi_H3(
+                KiwiTextArguments(
+                    ":: Daily Progress ::",
+                    TextAlign.Center,
+                    LocalKiwiColors.current.color6,
+                ),
+            )
+        }
+
+        LayoutChevron(
+            rotationDegrees = 180f,
+            enabled = canGoUp,
+            onClick = { onStateChange(stateIndex + 1) },
+        )
+    }
+}
+
+@Composable
+@Suppress("MagicNumber")
+private fun LayoutChevron(
+    rotationDegrees: Float,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val context = LocalContext.current
+    Box(
+        modifier =
+            Modifier
+                .size(getResponsiveSizeHeight(36.dp))
+                .clickable(enabled = enabled) {
+                    AudioManager.playSFX(context, R.raw.snd_ui_tap)
+                    onClick()
+                },
+        contentAlignment = Alignment.Center,
+    ) {
+        Kiwi_Image(
+            R.drawable.ic_dialogue_arrow,
+            "Layout chevron",
+            modifier =
+                Modifier
+                    .size(getResponsiveSizeHeight(14.dp))
+                    .rotate(rotationDegrees)
+                    .alpha(if (enabled) 1f else KIWI_DISABLED_ALPHA),
         )
     }
 }

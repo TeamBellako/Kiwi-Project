@@ -3,6 +3,8 @@ package com.bellako.kiwi.common.screens.components
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -38,6 +40,7 @@ import com.bellako.kiwi.ui.getScreenHeight
 import kotlinx.coroutines.launch
 
 private const val SNAP_VELOCITY_THRESHOLD = 400f
+const val BAR_TRAVEL_ANIM_DURATION = 600
 
 /**
  * @param content placed inside the bar, called with param @currentStateIndex when modified
@@ -66,7 +69,10 @@ fun Kiwi_DraggableBar(
     var offsetY by remember { mutableFloatStateOf(statesBottom[currentStateIndex]) }
 
     LaunchedEffect(currentStateIndex) {
-        animatableOffset.animateTo(statesBottom[currentStateIndex])
+        animatableOffset.animateTo(
+            statesBottom[currentStateIndex],
+            animationSpec = tween(durationMillis = BAR_TRAVEL_ANIM_DURATION, easing = EaseInOut),
+        )
         offsetY = statesBottom[currentStateIndex]
     }
 
@@ -148,7 +154,14 @@ fun Kiwi_DraggableBar(
                                     val newIndex = statesBottom.indexOf(target)
                                     updateState(newIndex)
 
-                                    animatableOffset.animateTo(target)
+                                    animatableOffset.animateTo(
+                                        target,
+                                        animationSpec =
+                                            tween(
+                                                durationMillis = BAR_TRAVEL_ANIM_DURATION,
+                                                easing = EaseInOut,
+                                            ),
+                                    )
                                     offsetY = target
                                 }
                             },
