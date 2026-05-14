@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -196,7 +197,7 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
     ) {
         Box(modifier = Modifier.weight(1f)) {
             Column {
-                ExpandedMetricProgressTitle("Good Apps Time")
+                ExpandedMetricProgressTitle("Good Apps")
                 SelectedMetricsTime(
                     state.maxGoodTimeSeconds,
                     state.currentGoodTimeSeconds,
@@ -208,7 +209,7 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
         }
         Box(modifier = Modifier.weight(1f)) {
             Column {
-                ExpandedMetricProgressTitle("Evil Apps Time")
+                ExpandedMetricProgressTitle("Evil Apps")
                 SelectedMetricsTime(
                     state.maxBadTimeSeconds,
                     state.currentBadTimeSeconds,
@@ -251,11 +252,34 @@ private fun ExpandedSummaryCard(
             ),
         )
 
-        goals.forEach { goal ->
-            key(goal.id) {
-                GoalComponent(goal, goalsViewModel)
+        if (goals.isEmpty()) {
+            Kiwi_Spacer(Spacing.small)
+
+            @Suppress("MagicNumber")
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(11555f / (2113f * 2f))
+                        .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
+                        .background(LocalKiwiColors.current.color2B),
+                contentAlignment = Alignment.Center,
+            ) {
+                Kiwi_P2(
+                    KiwiTextArguments(
+                        "No Daily Challenges",
+                        TextAlign.Center,
+                        LocalKiwiColors.current.color7D,
+                    ),
+                )
+            }
+        } else {
+            goals.forEach { goal ->
+                key(goal.id) {
+                    GoalComponent(goal, goalsViewModel)
 //                ExpandedGoalComponent(goal)
-                Kiwi_Spacer(Spacing.xSmall)
+                    Kiwi_Spacer(Spacing.xSmall)
+                }
             }
         }
     }

@@ -268,6 +268,7 @@ fun SelectedMetricsTime(
     validMetrics: Boolean,
     expanded: Boolean,
     tag: String,
+    label: String = "",
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -275,7 +276,7 @@ fun SelectedMetricsTime(
         if (validMetrics) {
             DateUtils.parseTimeSeconds(currentSeconds)
         } else {
-            "No data"
+            DateUtils.parseTimeSeconds(0)
         }
 
     val maxString =
@@ -309,27 +310,39 @@ fun SelectedMetricsTime(
             ),
         )
     } else {
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Kiwi_Label2(
-                KiwiTextArguments(
-                    currentString,
-                    TextAlign.Left,
-                    color = kiwiColors.color9,
-                    modifier =
-                        Modifier
-                            .testTag(tag),
-                ),
-            )
+            if (label.isNotEmpty()) {
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        label,
+                        TextAlign.Left,
+                        color = kiwiColors.color7D,
+                    ),
+                )
+            }
 
-            Kiwi_Label2(
-                KiwiTextArguments(
-                    maxString,
-                    TextAlign.Left,
-                    color = kiwiColors.color7D,
-                ),
-            )
+            Row {
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        currentString,
+                        TextAlign.Left,
+                        color = kiwiColors.color9,
+                        modifier =
+                            Modifier
+                                .testTag(tag),
+                    ),
+                )
+
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        maxString,
+                        TextAlign.Left,
+                        color = kiwiColors.color7D,
+                    ),
+                )
+            }
         }
     }
 }

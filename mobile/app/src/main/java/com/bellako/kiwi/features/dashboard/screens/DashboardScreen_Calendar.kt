@@ -490,16 +490,25 @@ fun CalendarDayView(
     testTag: String,
 ) {
     val kiwiColors = LocalKiwiColors.current
+    val isToday = day == LocalDate.now()
     val isDayEnabled =
         !day.isAfter(LocalDate.now()) &&
             (canSelectBeforeRegisterDate || !day.isBefore(usersViewModel.getRegisterDate()))
 
+    @Suppress("MagicNumber")
+    val todayBackground = kiwiColors.colorF.copy(alpha = 0.3f)
     Box(
         modifier =
             Modifier
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(20.dp)))
-                .background(color = if (isSelected) kiwiColors.color9A else kiwiColors.color3A)
-                .border(
+                .background(
+                    color =
+                        when {
+                            isToday -> todayBackground
+                            isSelected -> kiwiColors.color9A
+                            else -> kiwiColors.color3A
+                        },
+                ).border(
                     width = if (isSelected) getResponsiveSizeHeight(2.dp) else 0.dp,
                     color = if (isSelected) kiwiColors.color9 else Color.Transparent,
                     shape = RoundedCornerShape(getResponsiveSizeHeight(20.dp)),
@@ -520,7 +529,12 @@ fun CalendarDayView(
             Kiwi_P2(
                 KiwiTextArguments(
                     day.dayOfMonth.toString(),
-                    color = if (isSelected) kiwiColors.color9 else kiwiColors.color4B,
+                    color =
+                        when {
+                            isToday -> kiwiColors.color0
+                            isSelected -> kiwiColors.color9
+                            else -> kiwiColors.color4B
+                        },
                 ),
             )
             Box(
