@@ -64,9 +64,13 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
+import com.bellako.kiwi.common.screens.LOGIN_LOADING_ANIM_DURATION_MS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private const val LOGOUT_NAV_SETTLE_MS = 100L
 
 @Composable
 fun SettingsScreen(
@@ -316,10 +320,14 @@ private fun SettingsButtons(
                 color = kiwiColors.color5A,
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
+                        usersViewModel.setManualAuthOverlayActive(true)
+                        delay(LOGIN_LOADING_ANIM_DURATION_MS.toLong())
                         usersViewModel.logout(context)
                         navController.navigate(ScreenRoutes.LOGIN) {
                             popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                         }
+                        delay(LOGOUT_NAV_SETTLE_MS)
+                        usersViewModel.setManualAuthOverlayActive(false)
                     }
                 },
             )

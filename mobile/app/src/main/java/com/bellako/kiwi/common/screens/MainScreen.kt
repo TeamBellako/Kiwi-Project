@@ -22,9 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.zIndex
@@ -88,6 +91,14 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
+
+private const val INITIAL_LOADING_MIN_DISPLAY_MS = 1500L
+private const val INITIAL_LOADING_SETTLE_MS = 400L
+private const val INITIAL_LOADING_MAX_DISPLAY_MS = 15_000L
+private const val AUTH_CHECK_GRACE_MS = 200L
 
 @Suppress("LongParameterList")
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -183,6 +194,58 @@ private fun AppScreen(
     val skillsState by skillsViewModel.state.collectAsState()
 
     val isTipVisible by tipsViewModel.isVisible.collectAsState()
+
+    val usersIsLoading by usersViewModel.isLoading.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+    val settingsIsLoading by settingsViewModel.isLoading.collectAsState()
+    val skillsIsLoading by skillsViewModel.isLoading.collectAsState()
+    val combatIsLoading by combatViewModel.isLoading.collectAsState()
+    val goalsIsLoading by goalsViewModel.isLoading.collectAsState()
+    val questsIsLoading by questsViewModel.isLoading.collectAsState()
+    val metricsIsLoading by metricsViewModel.isLoading.collectAsState()
+    val nodesIsLoading by nodesViewModel.isLoading.collectAsState()
+    val anyFeatureLoading by remember {
+        derivedStateOf {
+            usersIsLoading || personalityIsLoading || settingsIsLoading ||
+                skillsIsLoading || combatIsLoading || goalsIsLoading ||
+                questsIsLoading || metricsIsLoading || nodesIsLoading
+        }
+    }
+
+    val initialAuthCheckPerformed by usersViewModel.initialAuthCheckPerformed.collectAsState()
+    val manualAuthOverlayActive by usersViewModel.manualAuthOverlayActive.collectAsState()
+    var showInitialLoading by remember { mutableStateOf(true) }
+    val overlayVisible by remember {
+        derivedStateOf { showInitialLoading || manualAuthOverlayActive }
+    }
+
+    LaunchedEffect(isLoginCompleted) {
+        if (!isLoginCompleted) return@LaunchedEffect
+        showInitialLoading = true
+        delay(INITIAL_LOADING_MIN_DISPLAY_MS)
+        withTimeoutOrNull(INITIAL_LOADING_MAX_DISPLAY_MS) {
+            while (true) {
+                snapshotFlow { anyFeatureLoading }.first { !it }
+                val resumed =
+                    withTimeoutOrNull(INITIAL_LOADING_SETTLE_MS) {
+                        snapshotFlow { anyFeatureLoading }.first { it }
+                    }
+                if (resumed == null) break
+            }
+        }
+        showInitialLoading = false
+    }
+
+    LaunchedEffect(initialAuthCheckPerformed) {
+        if (!initialAuthCheckPerformed) return@LaunchedEffect
+        val authStarted =
+            withTimeoutOrNull(AUTH_CHECK_GRACE_MS) {
+                snapshotFlow { isLoginCompleted || usersIsLoading }.first { it }
+            }
+        if (authStarted == null) {
+            showInitialLoading = false
+        }
+    }
 
     LaunchedEffect(notificationManager) {
         notificationManager.notifications.collect { event ->
@@ -372,6 +435,14 @@ private fun AppScreen(
                 }
             }
         }
+
+        LoginLoadingScreen(
+            visible = overlayVisible,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .zIndex(100f),
+        )
     }
 }
 
