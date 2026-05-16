@@ -162,8 +162,7 @@ private fun LoginLoadingContent(
     BoxWithConstraints(
         modifier =
             modifier
-                .fillMaxSize()
-                .background(Color.Black),
+                .fillMaxSize(),
     ) {
         val travelPx = constraints.maxHeight.toFloat()
 
