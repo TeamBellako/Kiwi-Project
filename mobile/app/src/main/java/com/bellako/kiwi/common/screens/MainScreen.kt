@@ -5,7 +5,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -99,6 +101,9 @@ private const val INITIAL_LOADING_MIN_DISPLAY_MS = 1500L
 private const val INITIAL_LOADING_SETTLE_MS = 400L
 private const val INITIAL_LOADING_MAX_DISPLAY_MS = 15_000L
 private const val AUTH_CHECK_GRACE_MS = 200L
+private const val PROGRESS_FILL_DURATION_MS = 4500
+private const val PROGRESS_HOLD_TARGET = 0.9f
+private const val PROGRESS_FINISH_DURATION_MS = 300
 
 @Suppress("LongParameterList")
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -244,6 +249,22 @@ private fun AppScreen(
             }
         if (authStarted == null) {
             showInitialLoading = false
+        }
+    }
+
+    val loadingProgress = remember { Animatable(0f) }
+    LaunchedEffect(overlayVisible) {
+        if (overlayVisible) {
+            loadingProgress.snapTo(0f)
+            loadingProgress.animateTo(
+                targetValue = PROGRESS_HOLD_TARGET,
+                animationSpec = tween(durationMillis = PROGRESS_FILL_DURATION_MS, easing = EaseOut),
+            )
+        } else if (loadingProgress.value > 0f && loadingProgress.value < 1f) {
+            loadingProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = PROGRESS_FINISH_DURATION_MS, easing = EaseInOut),
+            )
         }
     }
 
@@ -438,6 +459,7 @@ private fun AppScreen(
 
         LoginLoadingScreen(
             visible = overlayVisible,
+            progress = loadingProgress.value,
             modifier =
                 Modifier
                     .fillMaxSize()
