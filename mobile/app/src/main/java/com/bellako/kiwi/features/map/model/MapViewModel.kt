@@ -254,12 +254,45 @@ class MapViewModel
             nodeId: Long,
             nodeX: Float,
             nodeY: Float,
+            animate: Boolean = true,
         ) {
             if (_state.value.selectedNodeId == nodeId) {
                 return
             }
             _state.value = _state.value.copy(selectedNodeId = nodeId)
-            focusOnNodeAnimated(nodeX, nodeY)
+            if (animate) {
+                focusOnNodeAnimated(nodeX, nodeY)
+            } else {
+                focusOnNodeImmediate(nodeX, nodeY)
+            }
+        }
+
+        @Suppress("MagicNumber")
+        private fun focusOnNodeImmediate(
+            nodeX: Float,
+            nodeY: Float,
+        ) {
+            flingJob?.cancel()
+
+            val startState = _state.value
+            val targetScale = maxScale.coerceAtLeast(startState.scale)
+
+            val scaledMapWidth = startState.mapWidthPx * targetScale
+            val scaledMapHeight = startState.mapHeightPx * targetScale
+
+            val nodePosX = (nodeX - 0.5f) * scaledMapWidth
+            val nodePosY = (0.5f - nodeY) * scaledMapHeight
+            val desiredOffset = Offset(-nodePosX, -nodePosY)
+
+            val constrainedTargetOffset =
+                calculateConstrainedOffset(desiredOffset, startState.copy(scale = targetScale))
+
+            _state.value =
+                startState.copy(
+                    scale = targetScale,
+                    offset = constrainedTargetOffset,
+                    isFocusingNode = false,
+                )
         }
 
         fun unSelectNode() {

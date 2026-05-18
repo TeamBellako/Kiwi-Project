@@ -182,7 +182,7 @@ private fun loadNodes(
                 val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
 
                 selectedNode?.let { node ->
-                    mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+                    mapViewModel.selectNode(node.id, node.cordX, node.cordY, animate = false)
                     mapViewModel.setPlayerNode(node.id)
                 }
             }

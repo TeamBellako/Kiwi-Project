@@ -143,7 +143,14 @@ fun AppBarModalLayout(
                                 context,
                                 R.raw.snd_ui_navigationtransition,
                             )
-                            navController.navigate(item.route)
+                            // Returning to the map pops back to it so it renders
+                            // behind while the current screen slides down to reveal it.
+                            val poppedToMap =
+                                item.route == ScreenRoutes.HOME &&
+                                    navController.popBackStack(ScreenRoutes.HOME, inclusive = false)
+                            if (!poppedToMap) {
+                                navController.navigate(item.route)
+                            }
                         }
                     },
                     icon = {
