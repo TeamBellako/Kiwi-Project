@@ -2,7 +2,17 @@ package com.bellako.kiwi.features.appbar.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,19 +24,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -47,6 +62,12 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 
+private const val NAV_ICON_BG_FADE_MS = 250
+private const val NAV_ICON_POP_SCALE = 1.25f
+private const val NAV_ICON_POP_UP_MS = 110
+private const val NAV_ICON_PRESS_SCALE = 0.85f
+private const val NAV_ICON_PRESS_MS = 90
+
 // -------------------------------------------------------------------------------------------------
 
 @Composable
@@ -66,6 +87,7 @@ fun AppBarScreen(
 
 // -------------------------------------------------------------------------------------------------
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBarModalLayout(
     navController: NavController,
@@ -87,54 +109,60 @@ fun AppBarModalLayout(
         }
     }
 
-    NavigationBar(
-        modifier =
-            Modifier
-                .clip(
-                    RoundedCornerShape(
-                        getResponsiveSizeHeight(30.dp),
-                        getResponsiveSizeHeight(30.dp),
-                        0.dp,
-                        0.dp,
-                    ),
-                ).fillMaxWidth()
-                .navigationBarsPadding()
-                .height(getResponsiveSizeHeight(90.dp))
-                .testTag(CommonTestTags.BOTTOM_APPBAR),
-        containerColor = kiwiColors.color1,
-    ) {
-        Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
+    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+        NavigationBar(
+            modifier =
+                Modifier
+                    .clip(
+                        RoundedCornerShape(
+                            getResponsiveSizeHeight(30.dp),
+                            getResponsiveSizeHeight(30.dp),
+                            0.dp,
+                            0.dp,
+                        ),
+                    ).fillMaxWidth()
+                    .navigationBarsPadding()
+                    .height(getResponsiveSizeHeight(90.dp))
+                    .testTag(CommonTestTags.BOTTOM_APPBAR),
+            containerColor = kiwiColors.color1,
+        ) {
+            Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
 
-        state.items.forEach { item ->
-            val isSelected = currentRoute == item.route
+            state.items.forEach { item ->
+                val isSelected = currentRoute == item.route
+                val interactionSource = remember { MutableInteractionSource() }
+                val pressed by interactionSource.collectIsPressedAsState()
 
-            NavigationBarItem(
-                selected = isSelected,
-                enabled = true,
-                onClick = {
-                    if (item.route != currentRoute) {
-                        AudioManager.playSFX(
-                            context,
-                            R.raw.snd_ui_navigationtransition,
+                NavigationBarItem(
+                    selected = isSelected,
+                    enabled = true,
+                    interactionSource = interactionSource,
+                    onClick = {
+                        if (item.route != currentRoute) {
+                            AudioManager.playSFX(
+                                context,
+                                R.raw.snd_ui_navigationtransition,
+                            )
+                            navController.navigate(item.route)
+                        }
+                    },
+                    icon = {
+                        AppBarIcon(
+                            icon = item.icon,
+                            selected = isSelected,
+                            pressed = pressed,
+                            showBadge = item.hasNewContent,
                         )
-                        navController.navigate(item.route)
-                    }
-                },
-                icon = {
-                    AppBarIcon(
-                        icon = item.icon,
-                        selected = isSelected,
-                        showBadge = item.hasNewContent,
-                    )
-                },
-                colors =
-                    NavigationBarItemDefaults.colors(
-                        indicatorColor = Color.Transparent,
-                    ),
-            )
-        }
+                    },
+                    colors =
+                        NavigationBarItemDefaults.colors(
+                            indicatorColor = Color.Transparent,
+                        ),
+                )
+            }
 
-        Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
+            Spacer(modifier = Modifier.width(getResponsiveSizeHeight(Spacing.large)))
+        }
     }
 }
 
@@ -151,20 +179,43 @@ fun normalize(route: String?): String? =
 private fun AppBarIcon(
     icon: Int,
     selected: Boolean,
+    pressed: Boolean,
     showBadge: Boolean,
 ) {
     val kiwiColors = LocalKiwiColors.current
+
+    val pressScale by animateFloatAsState(
+        targetValue = if (pressed) NAV_ICON_PRESS_SCALE else 1f,
+        animationSpec = tween(NAV_ICON_PRESS_MS, easing = EaseOut),
+        label = "navIconPress",
+    )
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (selected) kiwiColors.color5A else kiwiColors.color5A.copy(alpha = 0f),
+        animationSpec = tween(NAV_ICON_BG_FADE_MS, easing = EaseInOut),
+        label = "navIconBackground",
+    )
+
+    val iconScale = remember { Animatable(1f) }
+    LaunchedEffect(selected) {
+        if (selected) {
+            iconScale.snapTo(1f)
+            iconScale.animateTo(NAV_ICON_POP_SCALE, tween(NAV_ICON_POP_UP_MS, easing = EaseOut))
+            iconScale.animateTo(
+                1f,
+                spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow,
+                ),
+            )
+        }
+    }
 
     Box(
         modifier =
             Modifier
                 .background(
-                    color =
-                        if (selected) {
-                            kiwiColors.color5A
-                        } else {
-                            Color.Transparent
-                        },
+                    color = backgroundColor,
                     shape = RoundedCornerShape(getResponsiveSizeHeight(10.dp)),
                 ).padding(getResponsiveSizeHeight(Spacing.xSmall)),
     ) {
@@ -173,7 +224,13 @@ private fun AppBarIcon(
                 painter = painterResource(icon),
                 contentDescription = null,
                 tint = kiwiColors.colorF,
-                modifier = Modifier.size(getResponsiveSizeHeight(50.dp)),
+                modifier =
+                    Modifier
+                        .size(getResponsiveSizeHeight(50.dp))
+                        .graphicsLayer {
+                            scaleX = iconScale.value * pressScale
+                            scaleY = iconScale.value * pressScale
+                        },
             )
 
             if (showBadge) {
