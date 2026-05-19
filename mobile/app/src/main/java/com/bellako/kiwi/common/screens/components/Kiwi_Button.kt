@@ -1,10 +1,15 @@
 package com.bellako.kiwi.common.screens.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -30,6 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -50,6 +57,11 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
+private const val KIWI_BUTTON_PRESSED_SCALE = 0.92f
+private const val KIWI_BUTTON_COLOR_DURATION_MS = 120
+private const val KIWI_BUTTON_PRESSED_DARKEN = 0.35f
+private const val KIWI_BUTTON_PRESSED_TEXT_LIGHTEN = 0.45f
+
 @Suppress("LongParameterList")
 @Composable
 private fun Kiwi_Button(
@@ -68,6 +80,42 @@ private fun Kiwi_Button(
     iconSpacer: Dp = Spacing.small,
 ) {
     val context = LocalContext.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+
+    // Pure composition-driven scale: pressed -> squish, released -> bouncy pop.
+    // animateFloatAsState (no Animatable/coroutine) keeps this race-free and
+    // deterministic under the Compose test clock.
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) KIWI_BUTTON_PRESSED_SCALE else 1f,
+        animationSpec =
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium,
+            ),
+        label = "buttonScale",
+    )
+
+    val animatedColor by animateColorAsState(
+        targetValue =
+            if (pressed) lerp(color, Color.Black, KIWI_BUTTON_PRESSED_DARKEN) else color,
+        animationSpec = tween(durationMillis = KIWI_BUTTON_COLOR_DURATION_MS),
+        label = "buttonColor",
+    )
+
+    val animatedTextColor by animateColorAsState(
+        targetValue =
+            if (pressed) {
+                lerp(textArguments.color, Color.White, KIWI_BUTTON_PRESSED_TEXT_LIGHTEN)
+            } else {
+                textArguments.color
+            },
+        animationSpec = tween(durationMillis = KIWI_BUTTON_COLOR_DURATION_MS),
+        label = "buttonTextColor",
+    )
+
+    val containerColor =
+        if (enabled) animatedColor else color.copy(alpha = KIWI_DISABLED_ALPHA)
 
     Box(modifier) {
         Button(
@@ -76,12 +124,13 @@ private fun Kiwi_Button(
                 onClick.invoke()
             },
             enabled = enabled,
+            interactionSource = interactionSource,
             colors =
                 ButtonDefaults.buttonColors(
-                    containerColor = color,
+                    containerColor = containerColor,
                     disabledContainerColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
-                    contentColor = color,
-                    disabledContentColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
+                    contentColor = animatedTextColor,
+                    disabledContentColor = textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA),
                 ),
             contentPadding =
                 PaddingValues(
@@ -91,6 +140,10 @@ private fun Kiwi_Button(
             modifier =
                 Modifier
                     .testTag(testTag)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
                     .then(
                         horizontalMargin?.let {
                             Modifier
@@ -107,7 +160,12 @@ private fun Kiwi_Button(
                     Icon(
                         painter = painterResource(iconRes),
                         contentDescription = null,
-                        tint = textArguments.color,
+                        tint =
+                            if (enabled) {
+                                animatedTextColor
+                            } else {
+                                textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA)
+                            },
                         modifier = Modifier.height(getResponsiveSizeHeight(iconSize)),
                     )
                     Kiwi_Spacer_Horizontal(iconSpacer)
@@ -115,7 +173,7 @@ private fun Kiwi_Button(
 
                 val actualTextArguments =
                     if (enabled) {
-                        textArguments
+                        textArguments.copy(color = animatedTextColor)
                     } else {
                         textArguments.copy(color = textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA))
                     }
@@ -367,7 +425,7 @@ fun Kiwi_Button_Preview() {
                         color = kiwiColors.colorF,
                         fontWeight = FontWeight.Bold,
                     ),
-                color = kiwiColors.color5,
+                color = kiwiColors.color5A,
                 onClick = {},
             )
 
