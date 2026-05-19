@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -326,6 +327,7 @@ private fun InteractiveMap(
                 isPlayerNode = node.id == mapState.playerNode,
                 isSelected = node.id == mapState.selectedNodeId,
                 revealScale = revealSchedule.nodeScale(node.id, revealClockMs),
+                nameAlpha = revealSchedule.labelAlpha(node.id, revealClockMs),
             )
         }
 
@@ -337,8 +339,12 @@ private fun InteractiveMap(
                     ?.let { selectedNode ->
                         AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
 
+                        // Same gating as the node's label: stay hidden until the
+                        // focused node's pop has finished, then fade in.
+                        val actionAlpha = revealSchedule.labelAlpha(selectedNodeId, revealClockMs)
+
                         Box(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().alpha(actionAlpha),
                             contentAlignment = Alignment.TopCenter,
                         ) {
                             val centerOffset =

@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
@@ -75,6 +76,7 @@ fun Node(
     mapScale: Float,
     displayName: String,
     revealScale: Float = 1f,
+    nameAlpha: Float = 1f,
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -133,6 +135,7 @@ fun Node(
             DisplayName(
                 text = displayName,
                 displayOffset = displayOffset,
+                alpha = nameAlpha,
             )
         }
     }
@@ -142,6 +145,7 @@ fun Node(
 fun DisplayName(
     text: String,
     displayOffset: Dp,
+    alpha: Float = 1f,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val shape = RoundedCornerShape(getResponsiveSizeHeight(60.dp))
@@ -158,6 +162,7 @@ fun DisplayName(
         modifier =
             Modifier
                 .offset(y = correctedOffset)
+                .alpha(alpha)
                 .onSizeChanged { heightPx = it.height }
                 .widthIn(max = getResponsiveSizeHeight(260.dp))
                 .background(
@@ -189,6 +194,7 @@ fun NodeOnMap(
     isPlayerNode: Boolean,
     isSelected: Boolean,
     revealScale: Float = 1f,
+    nameAlpha: Float = 1f,
 ) {
     val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2
     val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2
@@ -209,6 +215,7 @@ fun NodeOnMap(
             mapState.scale,
             node.displayName,
             revealScale,
+            nameAlpha,
         )
     }
 }
