@@ -1,7 +1,6 @@
 package com.bellako.kiwi.common.screens.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -9,16 +8,20 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +30,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +56,6 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 private const val KIWI_BUTTON_PRESSED_SCALE = 0.92f
 private const val KIWI_BUTTON_COLOR_DURATION_MS = 120
@@ -79,10 +80,21 @@ private fun Kiwi_Button(
     iconSpacer: Dp = Spacing.small,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
 
-    var pressed by remember { mutableStateOf(false) }
-    val scale = remember { Animatable(1f) }
+    // Pure composition-driven scale: pressed -> squish, released -> bouncy pop.
+    // animateFloatAsState (no Animatable/coroutine) keeps this race-free and
+    // deterministic under the Compose test clock.
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) KIWI_BUTTON_PRESSED_SCALE else 1f,
+        animationSpec =
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium,
+            ),
+        label = "buttonScale",
+    )
 
     val animatedColor by animateColorAsState(
         targetValue =
@@ -106,63 +118,40 @@ private fun Kiwi_Button(
         if (enabled) animatedColor else color.copy(alpha = KIWI_DISABLED_ALPHA)
 
     Box(modifier) {
-        Box(
+        Button(
+            onClick = {
+                AudioManager.playSFX(context, sound)
+                onClick.invoke()
+            },
+            enabled = enabled,
+            interactionSource = interactionSource,
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = containerColor,
+                    disabledContainerColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
+                    contentColor = animatedTextColor,
+                    disabledContentColor = textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA),
+                ),
+            contentPadding =
+                PaddingValues(
+                    getResponsiveSizeWidth(contentPaddingHorizontal),
+                    getResponsiveSizeWidth(contentPaddingVertical),
+                ),
             modifier =
                 Modifier
+                    .testTag(testTag)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
                     .then(
                         horizontalMargin?.let {
                             Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = getResponsiveSizeWidth(it))
                         } ?: Modifier,
-                    )
-                    .graphicsLayer {
-                        scaleX = scale.value
-                        scaleY = scale.value
-                    }
-                    .clip(RoundedCornerShape(getResponsiveSizeHeight(12.dp)))
-                    .background(containerColor)
-                    .testTag(testTag)
-                    .pointerInput(enabled) {
-                        if (!enabled) return@pointerInput
-                        detectTapGestures(
-                            onPress = {
-                                pressed = true
-                                scope.launch {
-                                    scale.animateTo(
-                                        targetValue = KIWI_BUTTON_PRESSED_SCALE,
-                                        animationSpec = spring(stiffness = Spring.StiffnessHigh),
-                                    )
-                                }
-                                val released = tryAwaitRelease()
-                                pressed = false
-                                if (released) {
-                                    AudioManager.playSFX(context, sound)
-                                    scale.animateTo(
-                                        targetValue = 1f,
-                                        animationSpec =
-                                            spring(
-                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                stiffness = Spring.StiffnessMedium,
-                                            ),
-                                    )
-                                    onClick.invoke()
-                                } else {
-                                    scope.launch {
-                                        scale.animateTo(
-                                            targetValue = 1f,
-                                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
-                                        )
-                                    }
-                                }
-                            },
-                        )
-                    }
-                    .padding(
-                        horizontal = getResponsiveSizeWidth(contentPaddingHorizontal),
-                        vertical = getResponsiveSizeWidth(contentPaddingVertical),
                     ),
-            contentAlignment = Alignment.Center,
+            shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp)),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
