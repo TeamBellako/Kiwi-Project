@@ -6,8 +6,12 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -67,6 +71,9 @@ private const val NAV_ICON_POP_SCALE = 1.25f
 private const val NAV_ICON_POP_UP_MS = 110
 private const val NAV_ICON_PRESS_SCALE = 0.85f
 private const val NAV_ICON_PRESS_MS = 90
+private const val NAV_BADGE_PULSE_MAX_SCALE = 1.45f
+private const val NAV_BADGE_PULSE_MIN_ALPHA = 0.45f
+private const val NAV_BADGE_PULSE_MS = 650
 
 // -------------------------------------------------------------------------------------------------
 
@@ -241,10 +248,37 @@ private fun AppBarIcon(
             )
 
             if (showBadge) {
+                val pulse = rememberInfiniteTransition(label = "badgePulse")
+                val badgeScale by pulse.animateFloat(
+                    initialValue = 1f,
+                    targetValue = NAV_BADGE_PULSE_MAX_SCALE,
+                    animationSpec =
+                        infiniteRepeatable(
+                            animation = tween(NAV_BADGE_PULSE_MS, easing = EaseInOut),
+                            repeatMode = RepeatMode.Reverse,
+                        ),
+                    label = "badgeScale",
+                )
+                val badgeAlpha by pulse.animateFloat(
+                    initialValue = 1f,
+                    targetValue = NAV_BADGE_PULSE_MIN_ALPHA,
+                    animationSpec =
+                        infiniteRepeatable(
+                            animation = tween(NAV_BADGE_PULSE_MS, easing = EaseInOut),
+                            repeatMode = RepeatMode.Reverse,
+                        ),
+                    label = "badgeAlpha",
+                )
+
                 Box(
                     modifier =
                         Modifier
                             .size(getResponsiveSizeHeight(8.dp))
+                            .graphicsLayer {
+                                scaleX = badgeScale
+                                scaleY = badgeScale
+                                alpha = badgeAlpha
+                            }
                             .background(kiwiColors.color8A, CircleShape)
                             .align(Alignment.TopEnd),
                 )
