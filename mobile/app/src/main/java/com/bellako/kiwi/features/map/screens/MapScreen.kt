@@ -17,6 +17,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -50,6 +53,7 @@ import com.bellako.kiwi.features.nodes.screens.NodeAction
 import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
+import com.bellako.kiwi.features.nodes.screens.rememberNodeReveal
 import com.bellako.kiwi.features.nodes.screens.screenToMap
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -87,6 +91,14 @@ fun MapScreen(
     val viewportHeightPx =
         with(density) { getScreenHeight().dp.toPx() } * 0.84f // approximate usable space
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
+
+    var revealStarted by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.MAP_REVEAL) {
+            revealStarted = true
+        }
+    }
 
     val mapState by mapViewModel.state.collectAsState()
     val imageBitmap = ImageBitmap.imageResource(id = mapState.mapInfo.mapResourceId)
@@ -156,6 +168,7 @@ fun MapScreen(
                 mapViewModel = mapViewModel,
                 nodesViewModel = nodesViewModel,
                 currentPoints = currentPoints,
+                revealStarted = revealStarted,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -197,11 +210,24 @@ private fun InteractiveMap(
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
     currentPoints: Int,
+    revealStarted: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val mapState by mapViewModel.state.collectAsState()
     val nodesState by nodesViewModel.state.collectAsState()
+    val revealConsumed by mapViewModel.revealConsumed.collectAsState()
+
+    val nodesMap = nodesState?.nodes.orEmpty()
+    val focusedNodeId = mapState.selectedNodeId ?: mapState.playerNode.takeIf { it != 0L }
+    val (revealSchedule, revealClockMs) =
+        rememberNodeReveal(
+            nodes = nodesMap,
+            rootNodeId = focusedNodeId,
+            started = revealStarted,
+            alreadyPlayed = revealConsumed,
+            onRevealConsumed = mapViewModel::markRevealConsumed,
+        )
 
     Box(
         modifier =
@@ -283,19 +309,23 @@ private fun InteractiveMap(
 
             // NODE CONNECTIONS
             NodeConnections(
-                nodes = nodesState?.nodes.orEmpty(),
+                nodes = nodesMap,
                 mapState = mapState,
                 modifier = Modifier.fillMaxSize(),
+                edgeReveal = { fromId, toId ->
+                    revealSchedule.edgeReveal(fromId, toId, revealClockMs)
+                },
             )
         }
 
         // NODES
-        nodesState?.nodes?.values?.forEach { node ->
+        nodesMap.values.forEach { node ->
             NodeOnMap(
                 node = node,
                 mapState = mapState,
                 isPlayerNode = node.id == mapState.playerNode,
                 isSelected = node.id == mapState.selectedNodeId,
+                revealScale = revealSchedule.nodeScale(node.id, revealClockMs),
             )
         }
 

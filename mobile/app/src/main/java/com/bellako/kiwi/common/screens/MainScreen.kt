@@ -32,6 +32,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -57,6 +58,9 @@ import com.bellako.kiwi.audio.Kiwi_Music_SignUp
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.combat.model.CombatViewModel
@@ -101,6 +105,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.ui.LocalKiwiColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 private const val INITIAL_LOADING_MIN_DISPLAY_MS = 1500L
@@ -298,6 +303,8 @@ private fun AppScreen(
 
     val goalsModalRequest = remember { mutableStateOf<Pair<GoalNotificationType, List<IGoal>>?>(null) }
 
+    val revealEventScope = rememberCoroutineScope()
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = LocalKiwiColors.current.color2,
@@ -474,6 +481,11 @@ private fun AppScreen(
                 Modifier
                     .fillMaxSize()
                     .zIndex(100f),
+            onExitComplete = {
+                revealEventScope.launch {
+                    EventBus.emitEvent(EventType.MAP_REVEAL, EventPayload.EmptyPayload())
+                }
+            },
         )
     }
 }

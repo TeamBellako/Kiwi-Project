@@ -74,6 +74,7 @@ fun Node(
     nodeIcon: Int,
     mapScale: Float,
     displayName: String,
+    revealScale: Float = 1f,
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -87,7 +88,7 @@ fun Node(
     Box(
         modifier =
             Modifier
-                .scale(mapScale * NODE_BASE_SCALE),
+                .scale(mapScale * NODE_BASE_SCALE * revealScale),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -187,6 +188,7 @@ fun NodeOnMap(
     mapState: MapState,
     isPlayerNode: Boolean,
     isSelected: Boolean,
+    revealScale: Float = 1f,
 ) {
     val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2
     val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2
@@ -206,6 +208,7 @@ fun NodeOnMap(
             node.icon,
             mapState.scale,
             node.displayName,
+            revealScale,
         )
     }
 }
@@ -215,6 +218,7 @@ fun NodeConnections(
     nodes: Map<Long, NodesDomain>,
     mapState: MapState,
     modifier: Modifier = Modifier,
+    edgeReveal: (fromId: Long, toId: Long) -> EdgeReveal = { _, _ -> EdgeReveal(1f, reversed = false) },
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -225,8 +229,21 @@ fun NodeConnections(
             from.connectedNodeIds.forEach { toId ->
                 val to = nodes[toId] ?: return@forEach
 
+                val reveal = edgeReveal(from.id, toId)
+                if (reveal.fraction <= 0f) return@forEach
+
                 val fromPos = nodeToScreen(from, mapState)
                 val toPos = nodeToScreen(to, mapState)
+
+                // The wave can reach an edge from either endpoint; grow the line
+                // from the origin endpoint toward the one being revealed.
+                val originPos = if (reveal.reversed) toPos else fromPos
+                val targetPos = if (reveal.reversed) fromPos else toPos
+                val endPos =
+                    Offset(
+                        originPos.x + (targetPos.x - originPos.x) * reveal.fraction,
+                        originPos.y + (targetPos.y - originPos.y) * reveal.fraction,
+                    )
 
                 val color =
                     when (to.status) {
@@ -237,8 +254,8 @@ fun NodeConnections(
 
                 drawLine(
                     color = color,
-                    start = fromPos,
-                    end = toPos,
+                    start = originPos,
+                    end = endPos,
                     strokeWidth = 2.0f,
                     cap = StrokeCap.Butt,
                 )

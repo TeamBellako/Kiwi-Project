@@ -41,6 +41,17 @@ class MapViewModel
         private val _state = kotlinx.coroutines.flow.MutableStateFlow(MapState(scale = initialScale))
         override val state: kotlinx.coroutines.flow.StateFlow<MapState> = _state.asStateFlow()
 
+        // Whether the node-reveal sequence has already run for this map session.
+        // Scoped to the HOME back-stack entry's ViewModel: it survives leaving the
+        // map and coming back (e.g. via Settings) but is recreated on a fresh
+        // login, so the reveal plays once per login and never again afterwards.
+        private val _revealConsumed = kotlinx.coroutines.flow.MutableStateFlow(false)
+        val revealConsumed: kotlinx.coroutines.flow.StateFlow<Boolean> = _revealConsumed.asStateFlow()
+
+        fun markRevealConsumed() {
+            _revealConsumed.value = true
+        }
+
         private var flingJob: Job? = null
         private var lastPointerPosition = Offset.Zero
         private var lastPointerTime = 0L

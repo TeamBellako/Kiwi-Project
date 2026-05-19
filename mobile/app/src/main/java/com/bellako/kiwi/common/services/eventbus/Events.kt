@@ -16,6 +16,7 @@ enum class EventType {
     START_TIP,
     DAILY_GOALS_UPDATED,
     QUESTS_UPDATED,
+    MAP_REVEAL,
 }
 
 sealed class EventPayload {
