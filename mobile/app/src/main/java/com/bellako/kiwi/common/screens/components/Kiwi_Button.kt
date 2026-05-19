@@ -1,22 +1,24 @@
 package com.bellako.kiwi.common.screens.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,11 +27,14 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -49,6 +54,12 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+
+private const val KIWI_BUTTON_PRESSED_SCALE = 0.92f
+private const val KIWI_BUTTON_COLOR_DURATION_MS = 120
+private const val KIWI_BUTTON_PRESSED_DARKEN = 0.35f
+private const val KIWI_BUTTON_PRESSED_TEXT_LIGHTEN = 0.45f
 
 @Suppress("LongParameterList")
 @Composable
@@ -68,37 +79,90 @@ private fun Kiwi_Button(
     iconSpacer: Dp = Spacing.small,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var pressed by remember { mutableStateOf(false) }
+    val scale = remember { Animatable(1f) }
+
+    val animatedColor by animateColorAsState(
+        targetValue =
+            if (pressed) lerp(color, Color.Black, KIWI_BUTTON_PRESSED_DARKEN) else color,
+        animationSpec = tween(durationMillis = KIWI_BUTTON_COLOR_DURATION_MS),
+        label = "buttonColor",
+    )
+
+    val animatedTextColor by animateColorAsState(
+        targetValue =
+            if (pressed) {
+                lerp(textArguments.color, Color.White, KIWI_BUTTON_PRESSED_TEXT_LIGHTEN)
+            } else {
+                textArguments.color
+            },
+        animationSpec = tween(durationMillis = KIWI_BUTTON_COLOR_DURATION_MS),
+        label = "buttonTextColor",
+    )
+
+    val containerColor =
+        if (enabled) animatedColor else color.copy(alpha = KIWI_DISABLED_ALPHA)
 
     Box(modifier) {
-        Button(
-            onClick = {
-                AudioManager.playSFX(context, sound)
-                onClick.invoke()
-            },
-            enabled = enabled,
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = color,
-                    disabledContainerColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
-                    contentColor = color,
-                    disabledContentColor = color.copy(alpha = KIWI_DISABLED_ALPHA),
-                ),
-            contentPadding =
-                PaddingValues(
-                    getResponsiveSizeWidth(contentPaddingHorizontal),
-                    getResponsiveSizeWidth(contentPaddingVertical),
-                ),
+        Box(
             modifier =
                 Modifier
-                    .testTag(testTag)
                     .then(
                         horizontalMargin?.let {
                             Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = getResponsiveSizeWidth(it))
                         } ?: Modifier,
+                    )
+                    .graphicsLayer {
+                        scaleX = scale.value
+                        scaleY = scale.value
+                    }
+                    .clip(RoundedCornerShape(getResponsiveSizeHeight(12.dp)))
+                    .background(containerColor)
+                    .testTag(testTag)
+                    .pointerInput(enabled) {
+                        if (!enabled) return@pointerInput
+                        detectTapGestures(
+                            onPress = {
+                                pressed = true
+                                scope.launch {
+                                    scale.animateTo(
+                                        targetValue = KIWI_BUTTON_PRESSED_SCALE,
+                                        animationSpec = spring(stiffness = Spring.StiffnessHigh),
+                                    )
+                                }
+                                val released = tryAwaitRelease()
+                                pressed = false
+                                if (released) {
+                                    AudioManager.playSFX(context, sound)
+                                    scale.animateTo(
+                                        targetValue = 1f,
+                                        animationSpec =
+                                            spring(
+                                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                stiffness = Spring.StiffnessMedium,
+                                            ),
+                                    )
+                                    onClick.invoke()
+                                } else {
+                                    scope.launch {
+                                        scale.animateTo(
+                                            targetValue = 1f,
+                                            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+                                        )
+                                    }
+                                }
+                            },
+                        )
+                    }
+                    .padding(
+                        horizontal = getResponsiveSizeWidth(contentPaddingHorizontal),
+                        vertical = getResponsiveSizeWidth(contentPaddingVertical),
                     ),
-            shape = RoundedCornerShape(getResponsiveSizeHeight(12.dp)),
+            contentAlignment = Alignment.Center,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -107,7 +171,12 @@ private fun Kiwi_Button(
                     Icon(
                         painter = painterResource(iconRes),
                         contentDescription = null,
-                        tint = textArguments.color,
+                        tint =
+                            if (enabled) {
+                                animatedTextColor
+                            } else {
+                                textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA)
+                            },
                         modifier = Modifier.height(getResponsiveSizeHeight(iconSize)),
                     )
                     Kiwi_Spacer_Horizontal(iconSpacer)
@@ -115,7 +184,7 @@ private fun Kiwi_Button(
 
                 val actualTextArguments =
                     if (enabled) {
-                        textArguments
+                        textArguments.copy(color = animatedTextColor)
                     } else {
                         textArguments.copy(color = textArguments.color.copy(alpha = KIWI_DISABLED_ALPHA))
                     }
@@ -367,7 +436,7 @@ fun Kiwi_Button_Preview() {
                         color = kiwiColors.colorF,
                         fontWeight = FontWeight.Bold,
                     ),
-                color = kiwiColors.color5,
+                color = kiwiColors.color5A,
                 onClick = {},
             )
 
