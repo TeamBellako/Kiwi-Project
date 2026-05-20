@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.utils.AssetResolver
@@ -58,11 +59,15 @@ private const val ENEMY_DEFEAT_FADE_MS = 800
 private const val LOG_DIM_ALPHA = 0.55f
 
 @Composable
+@Suppress("LongParameterList")
 internal fun ColumnScope.CombatBattleArea(
     combat: CombatDomain,
     isLogOpen: Boolean,
     onDismissLog: () -> Unit,
     logEntries: List<CombatLogEntry>,
+    enemyBarRevealProgress: Float = 1f,
+    enemyBarNumbersAlpha: Float = 1f,
+    timerIntroProgress: Float = 1f,
 ) {
     Box(
         modifier =
@@ -74,6 +79,9 @@ internal fun ColumnScope.CombatBattleArea(
             currentHp = combat.enemy.stats.currentHp,
             maxHp = combat.enemy.stats.maxHp,
             endsAt = combat.endsAt,
+            barRevealProgress = enemyBarRevealProgress,
+            barNumbersAlpha = enemyBarNumbersAlpha,
+            timerIntroProgress = timerIntroProgress,
         )
 
         if (isLogOpen) {
@@ -102,12 +110,14 @@ internal fun ColumnScope.CombatBattleArea(
 }
 
 @Composable
+@Suppress("LongParameterList")
 internal fun CombatEnemySprite(
     enemySprite: String,
     currentHp: Int,
     isEnemyDefeated: Boolean,
     context: Context,
     modifier: Modifier = Modifier,
+    introAlpha: Float = 1f,
 ) {
     var previousHp by remember { mutableIntStateOf(currentHp) }
     var damageTrigger by remember { mutableIntStateOf(0) }
@@ -160,7 +170,7 @@ internal fun CombatEnemySprite(
             modifier
                 .fillMaxSize()
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                .alpha(spriteAlpha.value),
+                .alpha(spriteAlpha.value * introAlpha),
         contentScale = ContentScale.Fit,
         colorFilter =
             if (redAlpha.value > 0f) {
@@ -175,10 +185,14 @@ internal fun CombatEnemySprite(
 }
 
 @Composable
+@Suppress("LongParameterList")
 private fun EnemyHud(
     currentHp: Int,
     maxHp: Int,
     endsAt: Long?,
+    barRevealProgress: Float = 1f,
+    barNumbersAlpha: Float = 1f,
+    timerIntroProgress: Float = 1f,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -190,13 +204,20 @@ private fun EnemyHud(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
         ) {
+            // zIndex on the health bar so the timer below can render behind it
+            // during the intro slide-down.
             CombatHealthBar(
                 currentHp = currentHp,
                 maxHp = maxHp,
-                modifier = Modifier.fillMaxWidth(HEALTH_BAR_WIDTH_FRACTION),
+                modifier = Modifier.fillMaxWidth(HEALTH_BAR_WIDTH_FRACTION).zIndex(1f),
+                barRevealProgress = barRevealProgress,
+                numbersAlpha = barNumbersAlpha,
             )
 
-            CombatTimer(endsAt = endsAt)
+            CombatTimer(
+                endsAt = endsAt,
+                introProgress = timerIntroProgress,
+            )
         }
     }
 }

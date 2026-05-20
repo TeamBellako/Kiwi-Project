@@ -50,12 +50,14 @@ private val TURN_GLOW_DAMAGE = Color(0xB3D63A2F)
 private val TURN_GLOW_STAT_MOD = Color(0xB330B0FF)
 
 @Composable
+@Suppress("LongParameterList")
 fun CombatTurnIndicator(
     message: AnnotatedString,
     isLogOpen: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     glowColor: Color? = null,
+    introAlpha: Float = 1f,
 ) {
     val colors = LocalKiwiColors.current
     val rotation by animateFloatAsState(
@@ -72,6 +74,7 @@ fun CombatTurnIndicator(
         modifier =
             modifier
                 .fillMaxWidth()
+                .alpha(introAlpha)
                 .combatPanel(
                     bgColor = colors.color3A,
                     borderColor = colors.color5C,

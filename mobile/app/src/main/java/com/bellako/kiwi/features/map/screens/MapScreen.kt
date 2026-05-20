@@ -17,8 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -46,10 +51,13 @@ import com.bellako.kiwi.features.map.data.MapsInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.nodes.screens.NodeAction
 import com.bellako.kiwi.features.nodes.screens.NodeConnections
+import com.bellako.kiwi.features.nodes.screens.NodeEntryTransitionController
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
+import com.bellako.kiwi.features.nodes.screens.rememberNodeReveal
 import com.bellako.kiwi.features.nodes.screens.screenToMap
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -58,9 +66,8 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getScreenHeight
 import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -87,6 +94,14 @@ fun MapScreen(
     val viewportHeightPx =
         with(density) { getScreenHeight().dp.toPx() } * 0.84f // approximate usable space
     val viewportWidthPx = with(density) { getScreenWidth().dp.toPx() }
+
+    var revealStarted by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.MAP_REVEAL) {
+            revealStarted = true
+        }
+    }
 
     val mapState by mapViewModel.state.collectAsState()
     val imageBitmap = ImageBitmap.imageResource(id = mapState.mapInfo.mapResourceId)
@@ -156,6 +171,7 @@ fun MapScreen(
                 mapViewModel = mapViewModel,
                 nodesViewModel = nodesViewModel,
                 currentPoints = currentPoints,
+                revealStarted = revealStarted,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -190,18 +206,33 @@ private fun loadNodes(
 }
 
 @Suppress("LongMethod")
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 private fun InteractiveMap(
     mapResourceId: Int,
     mapViewModel: MapViewModel,
     nodesViewModel: INodesViewModel,
     currentPoints: Int,
+    revealStarted: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val mapState by mapViewModel.state.collectAsState()
     val nodesState by nodesViewModel.state.collectAsState()
+    val revealConsumed by mapViewModel.revealConsumed.collectAsState()
+
+    val nodesMap = nodesState?.nodes.orEmpty()
+    val focusedNodeId = mapState.selectedNodeId ?: mapState.playerNode.takeIf { it != 0L }
+    val (revealSchedule, revealClockMs) =
+        rememberNodeReveal(
+            nodes = nodesMap,
+            rootNodeId = focusedNodeId,
+            started = revealStarted,
+            alreadyPlayed = revealConsumed,
+            onRevealConsumed = mapViewModel::markRevealConsumed,
+        )
+
+    val nodeEntry = LocalNodeEntryTransition.current
+    val nodeEntryScope = rememberCoroutineScope()
 
     Box(
         modifier =
@@ -283,19 +314,24 @@ private fun InteractiveMap(
 
             // NODE CONNECTIONS
             NodeConnections(
-                nodes = nodesState?.nodes.orEmpty(),
+                nodes = nodesMap,
                 mapState = mapState,
                 modifier = Modifier.fillMaxSize(),
+                edgeReveal = { fromId, toId ->
+                    revealSchedule.edgeReveal(fromId, toId, revealClockMs)
+                },
             )
         }
 
         // NODES
-        nodesState?.nodes?.values?.forEach { node ->
+        nodesMap.values.forEach { node ->
             NodeOnMap(
                 node = node,
                 mapState = mapState,
                 isPlayerNode = node.id == mapState.playerNode,
                 isSelected = node.id == mapState.selectedNodeId,
+                revealScale = revealSchedule.nodeScale(node.id, revealClockMs),
+                nameAlpha = revealSchedule.labelAlpha(node.id, revealClockMs),
             )
         }
 
@@ -307,8 +343,12 @@ private fun InteractiveMap(
                     ?.let { selectedNode ->
                         AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
 
+                        // Same gating as the node's label: stay hidden until the
+                        // focused node's pop has finished, then fade in.
+                        val actionAlpha = revealSchedule.labelAlpha(selectedNodeId, revealClockMs)
+
                         Box(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().alpha(actionAlpha),
                             contentAlignment = Alignment.TopCenter,
                         ) {
                             val centerOffset =
@@ -326,8 +366,11 @@ private fun InteractiveMap(
                                     nodesViewModel.completeNode(id)
                                     AudioManager.playSFX(context, R.raw.snd_node_completed)
 
-                                    if (selectedNode.onExecutionEvent != "_") {
-                                        GlobalScope.launch(Dispatchers.Main) {
+                                    runNodeEntry(
+                                        scope = nodeEntryScope,
+                                        nodeEntry = nodeEntry,
+                                    ) {
+                                        if (selectedNode.onExecutionEvent != "_") {
                                             EventBus.emitEvent(
                                                 EventType.valueOf(selectedNode.onExecutionEvent),
                                                 EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
@@ -336,8 +379,11 @@ private fun InteractiveMap(
                                     }
                                 },
                                 onRetryNode = { _ ->
-                                    if (selectedNode.onExecutionEvent != "_") {
-                                        GlobalScope.launch(Dispatchers.Main) {
+                                    runNodeEntry(
+                                        scope = nodeEntryScope,
+                                        nodeEntry = nodeEntry,
+                                    ) {
+                                        if (selectedNode.onExecutionEvent != "_") {
                                             EventBus.emitEvent(
                                                 EventType.valueOf(selectedNode.onExecutionEvent),
                                                 EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
@@ -368,4 +414,36 @@ fun Background(mapViewModel: MapViewModel) {
                 .fillMaxSize()
                 .background(mapState.value.mapInfo.backgroundColor),
     )
+}
+
+// Fallback hold before auto-dismissing the veil. The follow-up screen (e.g.
+// ConversationScreen) is expected to call fadeOut() itself once its own intro
+// is settled, so the player never glimpses the map behind a half-faded
+// reveal. This is just a safety net for follow-ups that don't self-dismiss.
+private const val FALLBACK_VEIL_HOLD_MS = 1_500L
+
+/**
+ * Plays the veil transition (fade in + brief hold), runs [onVeilReached]
+ * (typically emitting the event that mounts the next sequence), then
+ * schedules a fallback fade-out. The follow-up screen can dismiss the veil
+ * earlier by calling [NodeEntryTransitionController.fadeOut] itself —
+ * [NodeEntryTransitionController.fadeOut] is idempotent, so the fallback
+ * won't fight an earlier dismiss. If no controller is provided (preview/tests)
+ * the callback runs immediately.
+ */
+private fun runNodeEntry(
+    scope: CoroutineScope,
+    nodeEntry: NodeEntryTransitionController?,
+    onVeilReached: suspend () -> Unit,
+) {
+    if (nodeEntry == null) {
+        scope.launch { onVeilReached() }
+        return
+    }
+    scope.launch {
+        nodeEntry.enter()
+        onVeilReached()
+        delay(FALLBACK_VEIL_HOLD_MS)
+        nodeEntry.fadeOut()
+    }
 }

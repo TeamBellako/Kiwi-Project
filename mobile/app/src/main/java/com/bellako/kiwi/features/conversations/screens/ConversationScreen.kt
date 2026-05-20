@@ -3,7 +3,11 @@ package com.bellako.kiwi.features.conversations.screens
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -13,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,11 +27,15 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -34,6 +43,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -48,11 +59,21 @@ import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.data.NextEventType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
+
+private const val BG_FADE_MS = 700
+private const val CHARACTER_LERP_MS = 900
+private const val DIALOGUE_FADE_MS = 600
+private const val OPTION_POP_MS = 450
+private const val OPTION_STAGGER_MS = 140
+private const val STAGE_GAP_MS = 250L
+
+private const val PROTAGONIST_SPRITE_KEY = "liria"
 
 @Composable
 @Suppress("MagicNumber")
@@ -73,115 +94,201 @@ fun ConversationScreen(
         label = "arrow_offset",
     )
     val context = LocalContext.current
+    val backgroundRes = AssetResolver.drawable(context, conversation.background)
 
-    // Background image
-    Column(
-        verticalArrangement = Arrangement.Bottom,
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .clickable {},
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .height(getResponsiveSizeHeight(400.dp))
-                    .fillMaxWidth()
-                    .offset(
-                        x = getResponsiveSizeWidth(-50.dp),
-                        y = getResponsiveSizeHeight(100.dp),
-                    ),
-        ) {
-            // Sprite
+    // Liria enters from the bottom; everyone else slides in from the left.
+    // Sprite identifiers vary in case and can embed "liria" anywhere in the
+    // string (e.g. "character_liria_neutral"), so match case-insensitively
+    // anywhere in the name.
+    val isProtagonist = conversation.sprite.contains(PROTAGONIST_SPRITE_KEY, ignoreCase = true)
+
+    val bgAlpha = remember { Animatable(0f) }
+    val characterProgress = remember { Animatable(0f) }
+    val dialogueAlpha = remember { Animatable(0f) }
+    val optionsClockMs = remember { Animatable(0f) }
+
+    val optionsTotalMs =
+        OPTION_POP_MS + (conversation.options.size - 1).coerceAtLeast(0) * OPTION_STAGGER_MS
+
+    val nodeEntry = LocalNodeEntryTransition.current
+
+    LaunchedEffect(Unit) {
+        bgAlpha.animateTo(1f, tween(BG_FADE_MS, easing = LinearEasing))
+        // BG is fully opaque now, so it's safe to lift the node-entry veil —
+        // the player won't see the map through a half-faded BG. Launched in
+        // parallel so the character lerp doesn't wait for the veil to lift.
+        launch { nodeEntry?.fadeOut() }
+        delay(STAGE_GAP_MS)
+        characterProgress.animateTo(1f, tween(CHARACTER_LERP_MS, easing = FastOutSlowInEasing))
+        delay(STAGE_GAP_MS)
+        dialogueAlpha.animateTo(1f, tween(DIALOGUE_FADE_MS, easing = LinearEasing))
+        delay(STAGE_GAP_MS)
+        optionsClockMs.animateTo(
+            targetValue = optionsTotalMs.toFloat(),
+            animationSpec = tween(optionsTotalMs, easing = LinearEasing),
+        )
+    }
+
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val screenWidth = maxWidth
+        val screenHeight = maxHeight
+
+        if (backgroundRes != null) {
             Kiwi_Image(
-                painterResourceId =
-                    AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
-                alt = "Character Pose",
-            )
-        }
-        // Dialogue
-        Box(
-            modifier =
-                Modifier.fillMaxWidth().background(
-                    Brush.verticalGradient(
-                        -0.2f to Color.Transparent,
-                        0.5f to kiwiColor.color2,
-                        1f to kiwiColor.color2,
-                    ),
-                ),
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.padding(horizontal = Spacing.medium),
-            ) {
-                Kiwi_Image(
-                    painterResourceId = getAsset(conversation, R.drawable.dialogue_light_small, LocalContext.current),
-                    alt = "Conversation modal",
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Kiwi_P2(
-                    KiwiTextArguments(
-                        conversation.dialog,
-                        textAlign = TextAlign.Center,
-                        color = if (conversation.dark) kiwiColor.color6 else kiwiColor.color3,
-                        modifier =
-                            Modifier.padding(Spacing.medium, Spacing.medium),
-                    ),
-                )
-                Box(
-                    modifier =
-                        Modifier
-                            .matchParentSize()
-                            .offset(x = getResponsiveSizeWidth(25.dp)),
-                ) {
-                    CharacterName("Liria", conversation.dark, false)
-                }
-            }
-        }
-        // Options
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .background(kiwiColor.color2),
-        ) {
-            val optionHeight = getResponsiveSizeHeight(50.dp)
-            val maxVisible = 3
-            Kiwi_Spacer(Spacing.medium)
-            LazyColumn(
+                painterResourceId = backgroundRes,
+                alt = "Conversation background",
+                contentScale = ContentScale.Crop,
                 modifier =
                     Modifier
-                        .padding(horizontal = Spacing.medium)
-                        .heightIn(max = optionHeight * maxVisible + Spacing.small * 2),
+                        .fillMaxSize()
+                        .alpha(bgAlpha.value),
+            )
+        }
+
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clickable {},
+        ) {
+            val charExtraX =
+                if (isProtagonist) 0.dp else -screenWidth * (1f - characterProgress.value)
+            val charExtraY =
+                if (isProtagonist) screenHeight * (1f - characterProgress.value) else 0.dp
+
+            Box(
+                modifier =
+                    Modifier
+                        .height(getResponsiveSizeHeight(400.dp))
+                        .fillMaxWidth()
+                        .offset(
+                            x = getResponsiveSizeWidth(-50.dp) + charExtraX,
+                            y = getResponsiveSizeHeight(100.dp) + charExtraY,
+                        ),
             ) {
-                items(conversation.options) { option ->
-                    ConversationOption(option, onClick = {
-                        AudioManager.playSFX(context, R.raw.snd_fx_03_page)
-                        viewModel?.next(option)
-                    })
-                    Kiwi_Spacer(Spacing.small)
+                // Sprite
+                Kiwi_Image(
+                    painterResourceId =
+                        AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
+                    alt = "Character Pose",
+                )
+            }
+            // Dialogue
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .alpha(dialogueAlpha.value)
+                        .background(
+                            Brush.verticalGradient(
+                                -0.2f to Color.Transparent,
+                                0.5f to kiwiColor.color2,
+                                1f to kiwiColor.color2,
+                            ),
+                        ),
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.padding(horizontal = Spacing.medium),
+                ) {
+                    Kiwi_Image(
+                        painterResourceId = getAsset(conversation, R.drawable.dialogue_light_small, LocalContext.current),
+                        alt = "Conversation modal",
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Kiwi_P2(
+                        KiwiTextArguments(
+                            conversation.dialog,
+                            textAlign = TextAlign.Center,
+                            color = if (conversation.dark) kiwiColor.color6 else kiwiColor.color3,
+                            modifier =
+                                Modifier.padding(Spacing.medium, Spacing.medium),
+                        ),
+                    )
+                    Box(
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .offset(x = getResponsiveSizeWidth(25.dp)),
+                    ) {
+                        CharacterName("Liria", conversation.dark, false)
+                    }
                 }
             }
-            if (conversation.options.size == 0) {
-                Kiwi_Spacer(Spacing.medium)
-                Kiwi_Image(
-                    R.drawable.ic_dialogue_arrow,
-                    "Arrow",
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .size(getResponsiveSizeWidth(8.dp), getResponsiveSizeHeight(8.dp))
-                            .offset(y = getResponsiveSizeHeight(offsetY.dp))
-                            .clickable {
-                                AudioManager.playSFX(context, R.raw.snd_fx_03_page)
-                                viewModel?.next()
-                            },
-                )
-                Kiwi_Spacer(Spacing.large)
-            } else {
-                Kiwi_Spacer(Spacing.xLarge)
+            ConversationOptionsPanel(
+                options = conversation.options,
+                alpha = dialogueAlpha.value,
+                optionsClockMs = optionsClockMs.value,
+                arrowBounceOffsetY = offsetY,
+                onOptionClick = { option ->
+                    AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+                    viewModel?.next(option)
+                },
+                onAdvance = {
+                    AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+                    viewModel?.next()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+@Suppress("MagicNumber")
+private fun ConversationOptionsPanel(
+    options: List<ConversationOptionDomain>,
+    alpha: Float,
+    optionsClockMs: Float,
+    arrowBounceOffsetY: Float,
+    onOptionClick: (ConversationOptionDomain) -> Unit,
+    onAdvance: () -> Unit,
+) {
+    val kiwiColor = LocalKiwiColors.current
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .alpha(alpha)
+                .background(kiwiColor.color2),
+    ) {
+        val optionHeight = getResponsiveSizeHeight(50.dp)
+        val maxVisible = 3
+        Kiwi_Spacer(Spacing.medium)
+        LazyColumn(
+            modifier =
+                Modifier
+                    .padding(horizontal = Spacing.medium)
+                    .heightIn(max = optionHeight * maxVisible + Spacing.small * 2),
+        ) {
+            itemsIndexed(options) { index, option ->
+                val itemStart = index * OPTION_STAGGER_MS
+                val rawP =
+                    ((optionsClockMs - itemStart) / OPTION_POP_MS).coerceIn(0f, 1f)
+                val popScale =
+                    if (rawP <= 0f) 0f else EaseOutBack.transform(rawP).coerceAtLeast(0f)
+                Box(modifier = Modifier.scale(popScale)) {
+                    ConversationOption(option, onClick = { onOptionClick(option) })
+                }
+                Kiwi_Spacer(Spacing.small)
             }
+        }
+        if (options.isEmpty()) {
+            Kiwi_Spacer(Spacing.medium)
+            Kiwi_Image(
+                R.drawable.ic_dialogue_arrow,
+                "Arrow",
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .size(getResponsiveSizeWidth(8.dp), getResponsiveSizeHeight(8.dp))
+                        .offset(y = getResponsiveSizeHeight(arrowBounceOffsetY.dp))
+                        .clickable(onClick = onAdvance),
+            )
+            Kiwi_Spacer(Spacing.large)
+        } else {
+            Kiwi_Spacer(Spacing.xLarge)
         }
     }
 }

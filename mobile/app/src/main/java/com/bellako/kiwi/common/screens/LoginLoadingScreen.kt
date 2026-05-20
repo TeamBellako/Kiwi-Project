@@ -83,6 +83,7 @@ fun LoginLoadingScreen(
     visible: Boolean,
     progress: Float = 0f,
     modifier: Modifier = Modifier,
+    onExitComplete: () -> Unit = {},
 ) {
     var present by remember { mutableStateOf(false) }
     var dismissRequested by remember { mutableStateOf(false) }
@@ -131,6 +132,7 @@ fun LoginLoadingScreen(
         exitOffset.animateTo(1f, tween(LOGIN_LOADING_ANIM_DURATION_MS, easing = EaseInOut))
         entranceComplete = false
         present = false
+        onExitComplete()
     }
 
     if (!present) return

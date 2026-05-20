@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -22,13 +23,16 @@ private const val EDGE_FADE_TOP_END = 0.18f
 private const val EDGE_FADE_BOTTOM_START = 0.55f
 
 @Composable
-internal fun CombatBackground(background: String?) {
+internal fun CombatBackground(
+    background: String?,
+    alpha: Float = 1f,
+) {
     val colors = LocalKiwiColors.current
     val resId = AssetResolver.drawable(LocalContext.current, background) ?: return
     Kiwi_Image(
         painterResourceId = resId,
         alt = "Combat background",
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().alpha(alpha),
         contentScale = ContentScale.Crop,
         colorFilter =
             ColorFilter.colorMatrix(
@@ -39,6 +43,7 @@ internal fun CombatBackground(background: String?) {
         modifier =
             Modifier
                 .fillMaxSize()
+                .alpha(alpha)
                 .background(
                     Brush.verticalGradient(
                         0f to colors.color2.copy(alpha = EDGE_FADE_TOP_ALPHA),
