@@ -23,6 +23,20 @@ class UsersFakeViewModel(
     private val _state = MutableStateFlow<UsersState?>(initialState)
     override val state: StateFlow<UsersState?> = _state.asStateFlow()
 
+    private val _initialAuthCheckPerformed = MutableStateFlow(false)
+    override val initialAuthCheckPerformed: StateFlow<Boolean> = _initialAuthCheckPerformed.asStateFlow()
+
+    override fun markInitialAuthCheckPerformed() {
+        _initialAuthCheckPerformed.value = true
+    }
+
+    private val _manualAuthOverlayActive = MutableStateFlow(false)
+    override val manualAuthOverlayActive: StateFlow<Boolean> = _manualAuthOverlayActive.asStateFlow()
+
+    override fun setManualAuthOverlayActive(active: Boolean) {
+        _manualAuthOverlayActive.value = active
+    }
+
     var fakeError: Boolean = false
     var fakeException: Exception = Exception("Simulated error")
 

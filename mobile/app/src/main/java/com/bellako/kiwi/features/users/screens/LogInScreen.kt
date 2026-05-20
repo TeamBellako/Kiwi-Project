@@ -51,6 +51,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.LOGIN_LOADING_ANIM_DURATION_MS
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -68,6 +69,7 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -172,7 +174,10 @@ private fun LogInLayout(
         if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
             usersViewModel.onEmailChanged(username)
             usersViewModel.onPasswordChanged(password)
+            usersViewModel.markInitialAuthCheckPerformed()
             localLoading = performLogin(context, usersViewModel, personalityViewModel, navController)
+        } else {
+            usersViewModel.markInitialAuthCheckPerformed()
         }
     }
 
@@ -286,9 +291,13 @@ private fun LogInForm(
             color = kiwiColors.color5,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
-                    if (performLogin(context, usersViewModel, personalityViewModel, navController)) {
+                    usersViewModel.setManualAuthOverlayActive(true)
+                    delay(LOGIN_LOADING_ANIM_DURATION_MS.toLong())
+                    val success = performLogin(context, usersViewModel, personalityViewModel, navController)
+                    if (success) {
                         onLoginSuccess()
                     }
+                    usersViewModel.setManualAuthOverlayActive(false)
                 }
             },
             enabled = !isLoading,

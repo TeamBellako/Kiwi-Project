@@ -3,8 +3,11 @@ package com.bellako.kiwi
 import android.annotation.SuppressLint
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -112,7 +115,9 @@ class LoginScreenTest {
         usersFakeViewModel.fakeError = false
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
-        Thread.sleep(500)
+        rule.waitUntil(timeoutMillis = 5000) {
+            rule.onAllNodesWithTag(UsersTestTags.LOGIN_BUTTON).fetchSemanticsNodes().isEmpty()
+        }
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).assertDoesNotExist()
     }
 
@@ -122,6 +127,16 @@ class LoginScreenTest {
         usersFakeViewModel.fakeException = createFakeHttpException(HTTP_UNAUTHORIZED)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
+        rule.waitUntil(timeoutMillis = 5000) {
+            rule
+                .onAllNodesWithTag(UsersTestTags.ERROR_TEXT)
+                .fetchSemanticsNodes()
+                .any { node ->
+                    node.config
+                        .getOrNull(SemanticsProperties.Text)
+                        ?.any { it.text.isNotEmpty() } == true
+                }
+        }
         rule.onNodeWithTag(UsersTestTags.ERROR_TEXT).assertIsDisplayed()
     }
 
@@ -131,6 +146,9 @@ class LoginScreenTest {
         usersFakeViewModel.fakeException = createFakeHttpException(HTTP_INTERNAL_ERROR)
 
         rule.onNodeWithTag(UsersTestTags.LOGIN_BUTTON).performClick()
+        rule.waitUntil(timeoutMillis = 5000) {
+            rule.onAllNodesWithTag(CommonTestTags.ERROR_MODAL).fetchSemanticsNodes().isNotEmpty()
+        }
         rule.onNodeWithTag(CommonTestTags.ERROR_MODAL).assertIsDisplayed()
     }
 }

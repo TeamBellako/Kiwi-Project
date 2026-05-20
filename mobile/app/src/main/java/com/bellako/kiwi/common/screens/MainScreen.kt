@@ -5,13 +5,19 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,11 +28,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -88,6 +98,21 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen1_Welcome
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
+import com.bellako.kiwi.ui.LocalKiwiColors
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
+
+private const val INITIAL_LOADING_MIN_DISPLAY_MS = 1500L
+private const val INITIAL_LOADING_SETTLE_MS = 400L
+private const val INITIAL_LOADING_MAX_DISPLAY_MS = 15_000L
+private const val AUTH_CHECK_GRACE_MS = 200L
+private const val PROGRESS_FILL_DURATION_MS = 4500
+private const val PROGRESS_HOLD_TARGET = 0.9f
+private const val PROGRESS_FINISH_DURATION_MS = 300
+private const val SCREEN_TRANSITION_MS = 400
+private const val MAP_TRANSITION_MS = 550
+private const val MAP_REVEAL_MS = 800
 
 @Suppress("LongParameterList")
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -184,6 +209,74 @@ private fun AppScreen(
 
     val isTipVisible by tipsViewModel.isVisible.collectAsState()
 
+    val usersIsLoading by usersViewModel.isLoading.collectAsState()
+    val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
+    val settingsIsLoading by settingsViewModel.isLoading.collectAsState()
+    val skillsIsLoading by skillsViewModel.isLoading.collectAsState()
+    val combatIsLoading by combatViewModel.isLoading.collectAsState()
+    val goalsIsLoading by goalsViewModel.isLoading.collectAsState()
+    val questsIsLoading by questsViewModel.isLoading.collectAsState()
+    val metricsIsLoading by metricsViewModel.isLoading.collectAsState()
+    val nodesIsLoading by nodesViewModel.isLoading.collectAsState()
+    val anyFeatureLoading by remember {
+        derivedStateOf {
+            usersIsLoading || personalityIsLoading || settingsIsLoading ||
+                skillsIsLoading || combatIsLoading || goalsIsLoading ||
+                questsIsLoading || metricsIsLoading || nodesIsLoading
+        }
+    }
+
+    val initialAuthCheckPerformed by usersViewModel.initialAuthCheckPerformed.collectAsState()
+    val manualAuthOverlayActive by usersViewModel.manualAuthOverlayActive.collectAsState()
+    var showInitialLoading by remember { mutableStateOf(true) }
+    val overlayVisible by remember {
+        derivedStateOf { showInitialLoading || manualAuthOverlayActive }
+    }
+
+    LaunchedEffect(isLoginCompleted) {
+        if (!isLoginCompleted) return@LaunchedEffect
+        showInitialLoading = true
+        delay(INITIAL_LOADING_MIN_DISPLAY_MS)
+        withTimeoutOrNull(INITIAL_LOADING_MAX_DISPLAY_MS) {
+            while (true) {
+                snapshotFlow { anyFeatureLoading }.first { !it }
+                val resumed =
+                    withTimeoutOrNull(INITIAL_LOADING_SETTLE_MS) {
+                        snapshotFlow { anyFeatureLoading }.first { it }
+                    }
+                if (resumed == null) break
+            }
+        }
+        showInitialLoading = false
+    }
+
+    LaunchedEffect(initialAuthCheckPerformed) {
+        if (!initialAuthCheckPerformed) return@LaunchedEffect
+        val authStarted =
+            withTimeoutOrNull(AUTH_CHECK_GRACE_MS) {
+                snapshotFlow { isLoginCompleted || usersIsLoading }.first { it }
+            }
+        if (authStarted == null) {
+            showInitialLoading = false
+        }
+    }
+
+    val loadingProgress = remember { Animatable(0f) }
+    LaunchedEffect(overlayVisible) {
+        if (overlayVisible) {
+            loadingProgress.snapTo(0f)
+            loadingProgress.animateTo(
+                targetValue = PROGRESS_HOLD_TARGET,
+                animationSpec = tween(durationMillis = PROGRESS_FILL_DURATION_MS, easing = EaseOut),
+            )
+        } else if (loadingProgress.value > 0f && loadingProgress.value < 1f) {
+            loadingProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = PROGRESS_FINISH_DURATION_MS, easing = EaseInOut),
+            )
+        }
+    }
+
     LaunchedEffect(notificationManager) {
         notificationManager.notifications.collect { event ->
             when (event) {
@@ -207,6 +300,7 @@ private fun AppScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
+            containerColor = LocalKiwiColors.current.color2,
             bottomBar = {
                 if (!isLoginScreen && isLoginCompleted) {
                     AppBarScreen(
@@ -372,6 +466,15 @@ private fun AppScreen(
                 }
             }
         }
+
+        LoginLoadingScreen(
+            visible = overlayVisible,
+            progress = loadingProgress.value,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .zIndex(100f),
+        )
     }
 }
 
@@ -422,6 +525,82 @@ private fun isLoginScreen(route: String?): Boolean =
         route == ScreenRoutes.SIGNUP3_TEST ||
         route == ScreenRoutes.SIGNUP4_APPS
 
+// The Map (HOME) is the anchor screen: any transition to/from it is vertical —
+// the other screen rides up from / slides down to the bottom while the map holds
+// still behind it. Every other screen is a horizontal sibling, ordered by its
+// position in the bottom nav bar.
+private val NAVBAR_ORDER =
+    listOf(
+        ScreenRoutes.HOME,
+        ScreenRoutes.SKILLS,
+        ScreenRoutes.OBJECTIVES,
+        ScreenRoutes.WIP,
+        ScreenRoutes.SETTINGS,
+    )
+
+private fun isMapRoute(route: String?): Boolean = route == ScreenRoutes.HOME
+
+// Focus variants share their base screen's slot so deep links order correctly.
+private fun navIndex(route: String?): Int =
+    when (route) {
+        ScreenRoutes.SKILLS_FOCUS -> NAVBAR_ORDER.indexOf(ScreenRoutes.SKILLS)
+        ScreenRoutes.OBJECTIVES_FOCUS -> NAVBAR_ORDER.indexOf(ScreenRoutes.OBJECTIVES)
+        else -> NAVBAR_ORDER.indexOf(route)
+    }
+
+private fun screenOffsetSpec(durationMs: Int = SCREEN_TRANSITION_MS) =
+    tween<IntOffset>(durationMillis = durationMs, easing = EaseInOut)
+
+private fun screenFadeSpec(durationMs: Int = SCREEN_TRANSITION_MS) =
+    tween<Float>(durationMillis = durationMs, easing = EaseInOut)
+
+private fun screenEnter(
+    initial: String?,
+    target: String?,
+): EnterTransition {
+    val from = navIndex(initial)
+    val to = navIndex(target)
+    return when {
+        // Login / sign-up / any non-nav screen: keep a plain fade.
+        from < 0 || to < 0 -> fadeIn(animationSpec = screenFadeSpec())
+        // Going to the map: it is already rendered behind (this is a pop), so it
+        // just appears instantly while the leaving screen slides down to reveal it.
+        isMapRoute(target) -> EnterTransition.None
+        // Leaving the map: the new screen rises from the bottom at full opacity.
+        isMapRoute(initial) -> slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
+        // Horizontal siblings: enter from the side we are moving toward.
+        to > from ->
+            slideInHorizontally(animationSpec = screenOffsetSpec()) { it } +
+                fadeIn(animationSpec = screenFadeSpec())
+        else ->
+            slideInHorizontally(animationSpec = screenOffsetSpec()) { -it } +
+                fadeIn(animationSpec = screenFadeSpec())
+    }
+}
+
+private fun screenExit(
+    initial: String?,
+    target: String?,
+): ExitTransition {
+    val from = navIndex(initial)
+    val to = navIndex(target)
+    return when {
+        from < 0 || to < 0 -> fadeOut(animationSpec = screenFadeSpec())
+        // Going to the map: the leaving screen slides straight down at full opacity,
+        // slower so the reveal reads clearly.
+        isMapRoute(target) -> slideOutVertically(animationSpec = screenOffsetSpec(MAP_REVEAL_MS)) { it }
+        // Leaving the map: the map holds still while the new screen rises over it.
+        isMapRoute(initial) -> ExitTransition.None
+        // Horizontal siblings: leave toward the opposite side.
+        to > from ->
+            slideOutHorizontally(animationSpec = screenOffsetSpec()) { -it } +
+                fadeOut(animationSpec = screenFadeSpec())
+        else ->
+            slideOutHorizontally(animationSpec = screenOffsetSpec()) { it } +
+                fadeOut(animationSpec = screenFadeSpec())
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun AppNavHost(
@@ -438,6 +617,10 @@ fun AppNavHost(
     NavHost(
         navController = navController,
         startDestination = ScreenRoutes.LOGIN,
+        enterTransition = { screenEnter(initialState.destination.route, targetState.destination.route) },
+        exitTransition = { screenExit(initialState.destination.route, targetState.destination.route) },
+        popEnterTransition = { screenEnter(initialState.destination.route, targetState.destination.route) },
+        popExitTransition = { screenExit(initialState.destination.route, targetState.destination.route) },
     ) {
         composable(ScreenRoutes.LOGIN) {
             AppScreenWrapper {

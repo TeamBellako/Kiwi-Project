@@ -49,6 +49,20 @@ class UsersViewModel
         private val _isLoginCompleted = MutableStateFlow(false)
         val isLoginCompleted: StateFlow<Boolean> = _isLoginCompleted.asStateFlow()
 
+        private val _initialAuthCheckPerformed = MutableStateFlow(false)
+        override val initialAuthCheckPerformed: StateFlow<Boolean> = _initialAuthCheckPerformed.asStateFlow()
+
+        override fun markInitialAuthCheckPerformed() {
+            _initialAuthCheckPerformed.value = true
+        }
+
+        private val _manualAuthOverlayActive = MutableStateFlow(false)
+        override val manualAuthOverlayActive: StateFlow<Boolean> = _manualAuthOverlayActive.asStateFlow()
+
+        override fun setManualAuthOverlayActive(active: Boolean) {
+            _manualAuthOverlayActive.value = active
+        }
+
         init {
             repository.currentPoints
                 .onEach { points ->
@@ -121,6 +135,8 @@ class UsersViewModel
         override suspend fun logout(context: Context) {
             clearLocalCredentials(context)
             authRepository.setJwtToken("")
+            _isLoginCompleted.value = false
+            _initialAuthCheckPerformed.value = false
         }
 
         // -----------------------------------------------------------------------------------------
