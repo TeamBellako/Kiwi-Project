@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.BiasAlignment
@@ -45,6 +47,7 @@ import com.bellako.kiwi.features.combat.components.PlayerControls
 import com.bellako.kiwi.features.combat.components.PlayerDamageOverlays
 import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
 import com.bellako.kiwi.features.combat.components.combatTurnGlowColor
+import com.bellako.kiwi.features.combat.components.rememberCombatIntroController
 import com.bellako.kiwi.features.combat.components.rememberDeathSequenceVfx
 import com.bellako.kiwi.features.combat.components.rememberPlayerDamageVfx
 import com.bellako.kiwi.features.combat.components.userTurnMessage
@@ -56,7 +59,10 @@ import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
 import com.bellako.kiwi.features.combat.tests.CombatTestFactory
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.skills.data.SkillDomain
+import com.bellako.kiwi.features.skills.model.MAX_DECK_SLOTS
+import kotlinx.coroutines.launch
 import com.bellako.kiwi.features.skills.tests.SkillsTestFactory
 import com.bellako.kiwi.ui.KiwiColors
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -90,7 +96,13 @@ fun CombatScreen(
     var isLogOpen by rememberSaveable(combat.id) { mutableStateOf(false) }
     var selectedStatus by remember(combat.id) { mutableStateOf<CombatActiveStatusDomain?>(null) }
     var showAbandonConfirm by rememberSaveable(combat.id) { mutableStateOf(false) }
-    val isOverlayOpen = isLogOpen || selectedStatus != null || isTurnPlaying || activeBark != null
+
+    val intro = rememberCombatIntroController()
+    // Withhold any bark until the intro is fully over — barks pulling focus
+    // while the HUD is still introing makes the sequence read as cluttered.
+    val displayedBark = if (intro.isCompleted) activeBark else null
+    val isOverlayOpen =
+        isLogOpen || selectedStatus != null || isTurnPlaying || displayedBark != null
 
     val enemyName = combat.enemyName.ifBlank { DEFAULT_ENEMY_NAME }
     val turnMessage = currentTurnMessage(combat, enemyName)
@@ -106,6 +118,20 @@ fun CombatScreen(
 
     val playerVfx = rememberPlayerDamageVfx(combat.user.stats.currentHp, combat.id)
     val deathVignetteAlpha = rememberDeathSequenceVfx(combat.user.stats.currentHp == 0, combat.id)
+    val nodeEntry = LocalNodeEntryTransition.current
+    val nodeEntryScope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        intro.play(
+            skillSlotCount = MAX_DECK_SLOTS,
+            onBackgroundShown = {
+                // Background is now opaque, so the node-entry white veil can lift
+                // without the player glimpsing the map underneath.
+                nodeEntry?.let { controller ->
+                    nodeEntryScope.launch { controller.fadeOut() }
+                }
+            },
+        )
+    }
 
     Box(
         modifier =
@@ -119,13 +145,14 @@ fun CombatScreen(
                     .fillMaxSize()
                     .graphicsLayer { translationX = playerVfx.shakeOffsetX.value },
         ) {
-            CombatBackground(combat.background)
+            CombatBackground(combat.background, alpha = intro.backgroundAlpha)
 
             CombatEnemySprite(
                 enemySprite = combat.enemySprite,
                 currentHp = combat.enemy.stats.currentHp,
                 isEnemyDefeated = combat.combatStatus == CombatGeneralStatus.USER_WON,
                 context = context,
+                introAlpha = intro.enemyAlpha,
             )
 
             Column(modifier = Modifier.fillMaxSize().padding(top = Spacing.large)) {
@@ -147,6 +174,9 @@ fun CombatScreen(
                     isLogOpen = isLogOpen,
                     onDismissLog = { isLogOpen = false },
                     logEntries = logEntries,
+                    enemyBarRevealProgress = intro.enemyHealthMaskProgress,
+                    enemyBarNumbersAlpha = intro.enemyHealthNumbersAlpha,
+                    timerIntroProgress = intro.timerSlideProgress,
                 )
 
                 Box {
@@ -170,6 +200,7 @@ fun CombatScreen(
                             isLogOpen = isLogOpen,
                             onClick = { isLogOpen = !isLogOpen },
                             glowColor = combatTurnGlowColor(combat.log.lastOrNull()),
+                            introAlpha = intro.turnIndicatorAlpha,
                         )
 
                         Kiwi_Spacer(Spacing.medium)
@@ -185,6 +216,9 @@ fun CombatScreen(
                                 selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
                             },
                             onDismissPopup = { selectedStatus = null },
+                            skillSlotIntroScale = { slotIndex -> intro.skillSlotScale(slotIndex) },
+                            playerBarRevealProgress = intro.playerHealthMaskProgress,
+                            playerBarNumbersAlpha = intro.playerHealthNumbersAlpha,
                         )
 
                         Kiwi_Spacer(Spacing.large)
@@ -201,7 +235,7 @@ fun CombatScreen(
         }
 
         Crossfade(
-            targetState = activeBark,
+            targetState = displayedBark,
             animationSpec = tween(BARK_FADE_MS),
             label = "combat_bark",
         ) { bark ->
