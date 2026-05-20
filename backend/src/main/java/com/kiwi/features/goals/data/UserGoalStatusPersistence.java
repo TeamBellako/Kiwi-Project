@@ -39,4 +39,12 @@ public class UserGoalStatusPersistence {
 
     @Column(name = "value", nullable = false)
     private Integer value;
+
+    /**
+     * Per-instance target override for goals whose target is computed dynamically
+     * (e.g. APP_USAGE_GOOD / APP_USAGE_BAD). When null, the target from the goal
+     * template ({@link GoalPersistence#getTarget()}) is used instead.
+     */
+    @Column(name = "target_override")
+    private Integer targetOverride;
 }

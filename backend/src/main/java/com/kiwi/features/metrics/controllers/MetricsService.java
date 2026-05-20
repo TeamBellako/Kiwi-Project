@@ -1,5 +1,8 @@
 package com.kiwi.features.metrics.controllers;
 
+import com.kiwi.features.goals.controllers.UserGoalStatusRepository;
+import com.kiwi.features.goals.data.GoalType;
+import com.kiwi.features.goals.data.UserGoalStatusPersistence;
 import com.kiwi.features.metrics.data.MetricsDomain;
 import com.kiwi.features.metrics.data.MetricsDataMapper;
 import com.kiwi.features.metrics.exceptions.MetricsConflictException;
@@ -21,15 +24,24 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Optional;
 
+// Default targets used when the user has no AppUsage goal entries yet
+import static com.kiwi.features.goals.data.AppUsageGoalTargetCalculator.GOOD_MIN_MS;
+import static com.kiwi.features.goals.data.AppUsageGoalTargetCalculator.BAD_MAX_MS;
+
 @Service
 public class MetricsService {
     private final MetricsRepository metricsRepository;
     private final UsersService usersService;
-    
+    private final UserGoalStatusRepository userGoalStatusRepository;
+
     @Autowired
-    public MetricsService(MetricsRepository metricsRepository, UsersService usersService) {
+    public MetricsService(
+            MetricsRepository metricsRepository,
+            UsersService usersService,
+            UserGoalStatusRepository userGoalStatusRepository) {
         this.metricsRepository = metricsRepository;
         this.usersService = usersService;
+        this.userGoalStatusRepository = userGoalStatusRepository;
     }
 
     @Transactional
@@ -40,17 +52,18 @@ public class MetricsService {
         } catch (Exception e) {
             throw new MetricsInvalidException(e.getMessage());
         }
-        fillMetricInternalValues(metricsDomain);
 
         UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         if (metricsRepository.findByUserAndDate(targetUserPersistence, metricsDomain.getDate()).isPresent()) {
             throw new MetricsConflictException(email, metricsDomain.getDate());
         }
 
+        fillMetricInternalValues(metricsDomain, targetUserPersistence);
+
         MetricsPersistence savedMetrics = metricsRepository.saveAndFlush(MetricsDataMapper.toPersistence(targetUserPersistence, metricsDomain));
         return MetricsDataMapper.toDTO(savedMetrics);
     }
-    
+
     @Transactional
     public MetricsDTO updateMetric(@Valid @NotNull Email email, @Valid @NotNull MetricsDTO metricsDTO) {
         UsersPersistence userPersistence = getTargetUserPersistence(email);
@@ -74,7 +87,7 @@ public class MetricsService {
         MetricsPersistence savedMetrics = metricsRepository.saveAndFlush(updateMetricsPersistence);
         return MetricsDataMapper.toDTO(savedMetrics);
     }
-    
+
     public MetricsDTO getMetrics(@Valid @NotNull Email email, @NotNull LocalDate date) {
         UsersPersistence targetUserPersistence = getTargetUserPersistence(email);
         Optional<MetricsPersistence> metricsPersistence = metricsRepository.findByUserAndDate(targetUserPersistence, date);
@@ -83,16 +96,34 @@ public class MetricsService {
         }
         throw new MetricsNotFoundException(email, date);
     }
-    
+
     private UsersPersistence getTargetUserPersistence(Email email) {
         Optional<UsersPersistence> targetUserPersistence = usersService.getUserByEmail(email);
         if (targetUserPersistence.isEmpty()) throw new UsersNotFoundException(email.value());
         return targetUserPersistence.get();
     }
 
-    private void fillMetricInternalValues(MetricsDomain metricsDomain) {
-        // TODO calculate with formula depending on ? (personality, previous metrics, etc.)
-        metricsDomain.setMaxGoodTimeSeconds(new PositiveOrZeroInteger(Math.round(0.5f * 3600)));
-        metricsDomain.setMaxBadTimeSeconds(new PositiveOrZeroInteger(10 * 3600));
+    private void fillMetricInternalValues(MetricsDomain metricsDomain, UsersPersistence user) {
+        long goodTargetMs = resolveAppUsageTargetMs(user, GoalType.APP_USAGE_GOOD, GOOD_MIN_MS);
+        long badTargetMs  = resolveAppUsageTargetMs(user, GoalType.APP_USAGE_BAD,  BAD_MAX_MS);
+
+        int goodTargetSeconds = (int) (goodTargetMs / 1_000);
+        int badTargetSeconds  = (int) (badTargetMs  / 1_000);
+
+        metricsDomain.setMaxGoodTimeSeconds(new PositiveOrZeroInteger(goodTargetSeconds));
+        metricsDomain.setMaxBadTimeSeconds(new PositiveOrZeroInteger(badTargetSeconds));
+    }
+
+    /**
+     * Returns the most recent target_override (ms) for the given AppUsage goal type.
+     * Falls back to {@code defaultMs} if no entry exists yet.
+     */
+    private long resolveAppUsageTargetMs(UsersPersistence user, GoalType type, long defaultMs) {
+        Optional<UserGoalStatusPersistence> latest =
+                userGoalStatusRepository.findFirstByUserAndGoal_TypeOrderByDateDesc(user, type);
+        if (latest.isPresent() && latest.get().getTargetOverride() != null) {
+            return latest.get().getTargetOverride().longValue();
+        }
+        return defaultMs;
     }
 }
