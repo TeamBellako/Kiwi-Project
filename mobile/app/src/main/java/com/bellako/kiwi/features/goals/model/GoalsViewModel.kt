@@ -412,6 +412,9 @@ class GoalsViewModel
         override suspend fun checkAndNotifyGoals() {
             val today = dateToString(LocalDate.now())
 
+            // Silently auto-review yesterday's APP_USAGE goals before showing user-facing modals
+            autoReviewAppUsageGoals()
+
             val inProgressResult = getGoalsInProgress()
             val yesterdayGoals = inProgressResult.getOrNull()
 
@@ -485,5 +488,11 @@ class GoalsViewModel
                     avgBadDailyUsageMs = badAvgMs,
                 )
                 repository.saveAppUsageBaseline(dto).getOrThrow()
+            }
+
+        override suspend fun autoReviewAppUsageGoals(): Result<Unit> =
+            runCatching {
+                repository.autoReviewAppUsageGoals().getOrThrow()
+                Unit
             }
     }

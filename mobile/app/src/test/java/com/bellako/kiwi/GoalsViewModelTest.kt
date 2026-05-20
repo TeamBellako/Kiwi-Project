@@ -138,6 +138,8 @@ class GoalsViewModelTest {
 
                     override suspend fun saveAppUsageBaseline(dto: UserAppUsageDTO): UserAppUsageDTO =
                         throw UnsupportedOperationException("Not needed in tests")
+
+                    override suspend fun autoReviewAppUsageGoals(): List<UserGoalStatusDTO> = emptyList()
                 },
             )
 

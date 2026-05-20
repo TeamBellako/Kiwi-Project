@@ -108,5 +108,11 @@ public class GoalController {
         List<GoalDTO> definitions = goalService.getGoalDefinitions(authentication);
         return ResponseEntity.ok(definitions);
     }
+
+    @PostMapping("/app_usage/auto_review")
+    public ResponseEntity<List<UserGoalStatusDTO>> autoReviewAppUsageGoals(Authentication authentication) {
+        List<UserGoalStatusDTO> reviewed = goalService.autoReviewAppUsageGoals(authentication);
+        return ResponseEntity.ok(reviewed);
+    }
 }
 
