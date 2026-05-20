@@ -12,17 +12,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // Per-stage timings for the combat intro. Tweak here to adjust pacing.
-private const val BG_FADE_MS = 1_100
-private const val ENEMY_FADE_MS = 1_100
-private const val HEALTH_MASK_MS = 700
-private const val HEALTH_NUMBERS_FADE_MS = 500
-private const val TIMER_SLIDE_MS = 700
-private const val SKILL_POP_MS = 550
-private const val SKILL_STAGGER_MS = 220
-private const val TURN_INDICATOR_FADE_MS = 550
+private const val BG_FADE_MS = 800
+private const val ENEMY_FADE_MS = 700
+private const val HEALTH_MASK_MS = 500
+private const val HEALTH_NUMBERS_FADE_MS = 350
+private const val TIMER_SLIDE_MS = 500
+private const val SKILL_POP_MS = 400
+private const val SKILL_STAGGER_MS = 150
+private const val TURN_INDICATOR_FADE_MS = 400
 
 // Minimum scale a deck slot keeps before its pop starts. Kept above zero so
 // the slot retains positive boundsInWindow — UI tests that assert
@@ -31,10 +33,11 @@ private const val TURN_INDICATOR_FADE_MS = 550
 // visually invisible at intro-start.
 private const val SKILL_SLOT_MIN_SCALE = 0.5f
 
-// Breath between stages so the sequence reads as a series of beats rather than
-// one continuous slide.
-private const val STAGE_GAP_MS = 350L
-private const val SUB_STAGE_GAP_MS = 180L
+// Breath between intro groups so each phase reads as its own beat. The
+// sub-stage gap separates the bar reveal from the numbers fade within a
+// single health bar.
+private const val GROUP_GAP_MS = 200L
+private const val SUB_STAGE_GAP_MS = 100L
 
 /**
  * Centralised animation state for the combat intro. Each stage exposes a
@@ -43,9 +46,9 @@ private const val SUB_STAGE_GAP_MS = 180L
  * [play], and individual stages can be skipped instantly by calling [snapToEnd].
  *
  * Defaults at construction time are 0f, so until [play] runs, nothing is
- * visible — that's how the screen starts blank under the node-entry white
- * veil. After [play] completes everything sits at 1f / max clock and reads as
- * a fully-presented combat layout.
+ * visible — that's how the screen starts blank under the node-entry veil.
+ * After [play] completes everything sits at 1f / max clock and reads as a
+ * fully-presented combat layout.
  */
 @Stable
 class CombatIntroController internal constructor(
@@ -75,45 +78,70 @@ class CombatIntroController internal constructor(
         private set
 
     /**
-     * Plays the full intro sequence. Suspends until everything has settled.
+     * Plays the full intro sequence in three groups: (1) background alone,
+     * (2) enemy + its health bar + timer in parallel, (3) turn indicator +
+     * player skills + player health bar in parallel. Within a single health
+     * bar the mask reveal still precedes the numbers fade so the values don't
+     * pop in over a half-revealed bar.
+     *
      * [onBackgroundShown] fires the moment the background fade-in completes —
      * that's when the caller can safely dismiss any cover (e.g. the node-entry
-     * white veil) without the player glimpsing what's behind.
+     * veil) without the player glimpsing what's behind.
      */
     suspend fun play(
         skillSlotCount: Int,
         onBackgroundShown: () -> Unit = {},
     ) {
         isCompleted = false
+
+        // Group 1 — background fades in alone.
         backgroundAlphaAnim.animateTo(1f, tween(BG_FADE_MS, easing = LinearEasing))
         onBackgroundShown()
-        delay(STAGE_GAP_MS)
+        delay(GROUP_GAP_MS)
 
-        enemyAlphaAnim.animateTo(1f, tween(ENEMY_FADE_MS, easing = LinearEasing))
-        delay(STAGE_GAP_MS)
+        // Group 2 — enemy sprite, enemy health bar (mask → numbers), and timer
+        // slide all play together.
+        coroutineScope {
+            launch {
+                enemyAlphaAnim.animateTo(1f, tween(ENEMY_FADE_MS, easing = LinearEasing))
+            }
+            launch { animateHealthBarReveal(enemyHealthMaskAnim, enemyHealthNumbersAnim) }
+            launch {
+                timerSlideAnim.animateTo(1f, tween(TIMER_SLIDE_MS, easing = FastOutSlowInEasing))
+            }
+        }
+        delay(GROUP_GAP_MS)
 
-        enemyHealthMaskAnim.animateTo(1f, tween(HEALTH_MASK_MS, easing = FastOutSlowInEasing))
-        delay(SUB_STAGE_GAP_MS)
-        enemyHealthNumbersAnim.animateTo(1f, tween(HEALTH_NUMBERS_FADE_MS, easing = LinearEasing))
-        delay(STAGE_GAP_MS)
-
-        timerSlideAnim.animateTo(1f, tween(TIMER_SLIDE_MS, easing = FastOutSlowInEasing))
-        delay(STAGE_GAP_MS)
-
+        // Group 3 — turn indicator, skill stagger, and player health bar
+        // (mask → numbers) all play together.
         val skillTotalMs = skillStaggerTotalMs(skillSlotCount)
-        skillClockAnim.animateTo(
-            targetValue = skillTotalMs.toFloat(),
-            animationSpec = tween(skillTotalMs, easing = LinearEasing),
-        )
-        delay(STAGE_GAP_MS)
+        coroutineScope {
+            launch {
+                turnIndicatorAnim.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(TURN_INDICATOR_FADE_MS, easing = LinearEasing),
+                )
+            }
+            launch {
+                skillClockAnim.animateTo(
+                    targetValue = skillTotalMs.toFloat(),
+                    animationSpec = tween(skillTotalMs, easing = LinearEasing),
+                )
+            }
+            launch { animateHealthBarReveal(playerHealthMaskAnim, playerHealthNumbersAnim) }
+        }
 
-        playerHealthMaskAnim.animateTo(1f, tween(HEALTH_MASK_MS, easing = FastOutSlowInEasing))
-        delay(SUB_STAGE_GAP_MS)
-        playerHealthNumbersAnim.animateTo(1f, tween(HEALTH_NUMBERS_FADE_MS, easing = LinearEasing))
-        delay(STAGE_GAP_MS)
-
-        turnIndicatorAnim.animateTo(1f, tween(TURN_INDICATOR_FADE_MS, easing = LinearEasing))
         isCompleted = true
+    }
+
+    /** Mask the bar from the centre outward, hold briefly, then fade in the numbers. */
+    private suspend fun animateHealthBarReveal(
+        maskAnim: Animatable<Float, AnimationVector1D>,
+        numbersAnim: Animatable<Float, AnimationVector1D>,
+    ) {
+        maskAnim.animateTo(1f, tween(HEALTH_MASK_MS, easing = FastOutSlowInEasing))
+        delay(SUB_STAGE_GAP_MS)
+        numbersAnim.animateTo(1f, tween(HEALTH_NUMBERS_FADE_MS, easing = LinearEasing))
     }
 
     /** Snaps every stage to its final value, e.g. when previewing without animation. */

@@ -18,52 +18,54 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.delay
 
-private const val WHITE_FADE_IN_MS = 800
-private const val WHITE_FADE_OUT_MS = 500
-private const val WHITE_HOLD_MS = 450L
+private const val VEIL_FADE_IN_MS = 800
+private const val VEIL_FADE_OUT_MS = 500
+private const val VEIL_HOLD_MS = 450L
+
+private val VEIL_COLOR = Color.Black
 
 /**
- * Plays a fullscreen white-veil transition between leaving a node and starting
- * the next sequence (conversation, combat, future features). The veil fades in
- * slowly, sits at full white for a beat, and is then lifted by the caller once
- * the follow-up sequence is mounted.
+ * Plays a fullscreen veil transition between leaving a node and starting the
+ * next sequence (conversation, combat, future features). The veil fades in
+ * slowly, sits at full opacity for a beat, and is then lifted by the caller
+ * once the follow-up sequence is mounted.
  *
  * Decoupled by design — the controller knows nothing about what comes after
- * the whiteout. Wire it once at the app shell and any node-bearing screen can
+ * the veil. Wire it once at the app shell and any node-bearing screen can
  * trigger a transition without coupling to specific follow-up sequences.
  */
 @Stable
 class NodeEntryTransitionController internal constructor(
-    private val whiteAlphaAnim: Animatable<Float, AnimationVector1D>,
+    private val veilAlphaAnim: Animatable<Float, AnimationVector1D>,
 ) {
-    /** Alpha of the fullscreen white veil. 0f when idle. */
-    val whiteAlpha: Float get() = whiteAlphaAnim.value
+    /** Alpha of the fullscreen veil. 0f when idle. */
+    val veilAlpha: Float get() = veilAlphaAnim.value
 
     /**
-     * Fades the white veil in and holds it at full white briefly so the
+     * Fades the veil in and holds it at full opacity briefly so the
      * transition reads as a beat rather than a flicker. Returns once the hold
      * is done — at that point the caller should mount the follow-up sequence
      * and call [fadeOut] to lift the veil.
      */
     suspend fun enter() {
-        whiteAlphaAnim.snapTo(0f)
-        whiteAlphaAnim.animateTo(
+        veilAlphaAnim.snapTo(0f)
+        veilAlphaAnim.animateTo(
             targetValue = 1f,
-            animationSpec = tween(WHITE_FADE_IN_MS, easing = LinearEasing),
+            animationSpec = tween(VEIL_FADE_IN_MS, easing = LinearEasing),
         )
-        delay(WHITE_HOLD_MS)
+        delay(VEIL_HOLD_MS)
     }
 
     /**
-     * Fades the white veil back out. Idempotent — calling it while the veil
-     * is already gone is a no-op, so a follow-up screen can dismiss the veil
-     * on its own timing without racing the caller's fallback dismiss.
+     * Fades the veil back out. Idempotent — calling it while the veil is
+     * already gone is a no-op, so a follow-up screen can dismiss the veil on
+     * its own timing without racing the caller's fallback dismiss.
      */
     suspend fun fadeOut() {
-        if (whiteAlphaAnim.value <= 0f) return
-        whiteAlphaAnim.animateTo(
+        if (veilAlphaAnim.value <= 0f) return
+        veilAlphaAnim.animateTo(
             targetValue = 0f,
-            animationSpec = tween(WHITE_FADE_OUT_MS, easing = LinearEasing),
+            animationSpec = tween(VEIL_FADE_OUT_MS, easing = LinearEasing),
         )
     }
 }
@@ -83,16 +85,16 @@ val LocalNodeEntryTransition =
     compositionLocalOf<NodeEntryTransitionController?> { null }
 
 /**
- * Fullscreen white veil driven by [controller]. Renders nothing while idle so
- * it doesn't intercept input; once visible it swallows clicks so the user
- * can't tap through the transition.
+ * Fullscreen veil driven by [controller]. Renders nothing while idle so it
+ * doesn't intercept input; once visible it swallows clicks so the user can't
+ * tap through the transition.
  */
 @Composable
-fun NodeEntryWhiteoutOverlay(
+fun NodeEntryVeilOverlay(
     controller: NodeEntryTransitionController,
     modifier: Modifier = Modifier,
 ) {
-    val alpha = controller.whiteAlpha
+    val alpha = controller.veilAlpha
     if (alpha <= 0f) return
     val interactionSource = remember { MutableInteractionSource() }
     Box(
@@ -100,7 +102,7 @@ fun NodeEntryWhiteoutOverlay(
             modifier
                 .fillMaxSize()
                 .alpha(alpha)
-                .background(Color.White)
+                .background(VEIL_COLOR)
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,

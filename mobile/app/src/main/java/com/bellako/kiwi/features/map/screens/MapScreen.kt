@@ -416,34 +416,34 @@ fun Background(mapViewModel: MapViewModel) {
     )
 }
 
-// Fallback hold before auto-dismissing the white veil. The follow-up screen
-// (e.g. ConversationScreen) is expected to call fadeOut() itself once its own
-// intro is settled, so the player never glimpses the map behind a half-faded
+// Fallback hold before auto-dismissing the veil. The follow-up screen (e.g.
+// ConversationScreen) is expected to call fadeOut() itself once its own intro
+// is settled, so the player never glimpses the map behind a half-faded
 // reveal. This is just a safety net for follow-ups that don't self-dismiss.
-private const val FALLBACK_WHITEOUT_HOLD_MS = 1_500L
+private const val FALLBACK_VEIL_HOLD_MS = 1_500L
 
 /**
- * Plays the white-veil transition (fade in + brief hold), runs
- * [onWhiteoutReached] (typically emitting the event that mounts the next
- * sequence), then schedules a fallback fade-out. The follow-up screen can
- * dismiss the veil earlier by calling [NodeEntryTransitionController.fadeOut]
- * itself — [NodeEntryTransitionController.fadeOut] is idempotent, so the
- * fallback won't fight an earlier dismiss. If no controller is provided
- * (preview/tests) the callback runs immediately.
+ * Plays the veil transition (fade in + brief hold), runs [onVeilReached]
+ * (typically emitting the event that mounts the next sequence), then
+ * schedules a fallback fade-out. The follow-up screen can dismiss the veil
+ * earlier by calling [NodeEntryTransitionController.fadeOut] itself —
+ * [NodeEntryTransitionController.fadeOut] is idempotent, so the fallback
+ * won't fight an earlier dismiss. If no controller is provided (preview/tests)
+ * the callback runs immediately.
  */
 private fun runNodeEntry(
     scope: CoroutineScope,
     nodeEntry: NodeEntryTransitionController?,
-    onWhiteoutReached: suspend () -> Unit,
+    onVeilReached: suspend () -> Unit,
 ) {
     if (nodeEntry == null) {
-        scope.launch { onWhiteoutReached() }
+        scope.launch { onVeilReached() }
         return
     }
     scope.launch {
         nodeEntry.enter()
-        onWhiteoutReached()
-        delay(FALLBACK_WHITEOUT_HOLD_MS)
+        onVeilReached()
+        delay(FALLBACK_VEIL_HOLD_MS)
         nodeEntry.fadeOut()
     }
 }

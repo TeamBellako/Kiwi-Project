@@ -125,7 +125,7 @@ fun CombatScreen(
         intro.play(
             skillSlotCount = MAX_DECK_SLOTS,
             onBackgroundShown = {
-                // Background is now opaque, so the node-entry white veil can lift
+                // Background is now opaque, so the node-entry veil can lift
                 // without the player glimpsing the map underneath.
                 nodeEntry?.let { controller ->
                     nodeEntryScope.launch { controller.fadeOut() }

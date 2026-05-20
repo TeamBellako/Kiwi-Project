@@ -81,7 +81,7 @@ import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
 import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
-import com.bellako.kiwi.features.nodes.screens.NodeEntryWhiteoutOverlay
+import com.bellako.kiwi.features.nodes.screens.NodeEntryVeilOverlay
 import com.bellako.kiwi.features.nodes.screens.rememberNodeEntryTransitionController
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
@@ -437,11 +437,11 @@ private fun AppScreen(
 
                     TipModal(isTipVisible, tipsViewModel)
 
-                    // White veil for the node-entry transition. Lives inside
-                    // the Scaffold's content area on purpose so it covers the
-                    // map / conversation / combat but leaves the bottom nav
-                    // bar visible.
-                    NodeEntryWhiteoutOverlay(
+                    // Veil for the node-entry transition. Lives inside the
+                    // Scaffold's content area on purpose so it covers the map
+                    // / conversation / combat but leaves the bottom nav bar
+                    // visible.
+                    NodeEntryVeilOverlay(
                         controller = nodeEntryTransition,
                         modifier = Modifier.zIndex(50f),
                     )
