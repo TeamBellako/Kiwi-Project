@@ -1,6 +1,11 @@
 package com.bellako.kiwi.features.nodes.screens
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInBack
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,8 +23,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,6 +73,8 @@ import kotlin.math.roundToInt
 
 private const val NODE_SELECTED_SCALE = 1.6f
 private const val NODE_BASE_SCALE = 0.1f
+private const val ICON_SHRINK_MS = 180
+private const val ICON_POP_MS = 320
 
 @Composable
 fun Node(
@@ -86,6 +95,18 @@ fun Node(
 
     val indicatorOffset = getResponsiveSizeHeight(14.dp) + nodeHeight * nodeScale / 2
     val displayOffset = getResponsiveSizeHeight(10.dp) + nodeHeight * nodeScale / 2
+
+    // Shrink to 0, swap the drawable at the bottom of the pop, then pop back —
+    // so the locked→unlocked icon swap happens behind a scale of 0 instead of
+    // a hard cut.
+    var displayedStatus by remember { mutableStateOf(nodeStatus) }
+    val iconPopScale = remember { Animatable(1f) }
+    LaunchedEffect(nodeStatus) {
+        if (nodeStatus == displayedStatus) return@LaunchedEffect
+        iconPopScale.animateTo(0f, tween(durationMillis = ICON_SHRINK_MS, easing = EaseInBack))
+        displayedStatus = nodeStatus
+        iconPopScale.animateTo(1f, tween(durationMillis = ICON_POP_MS, easing = EaseOutBack))
+    }
 
     Box(
         modifier =
@@ -112,11 +133,12 @@ fun Node(
                     ),
         ) {
             Kiwi_Image(
-                nodeIcon(nodeStatus, nodeIcon),
+                nodeIcon(displayedStatus, nodeIcon),
                 "node icon",
                 modifier =
                     Modifier
-                        .size(nodeHeight),
+                        .size(nodeHeight)
+                        .scale(iconPopScale.value),
             )
         }
 
@@ -275,6 +297,7 @@ fun NodeConnections(
 
 private val SMALL_NODE_BUTTON = 240.dp
 private val BIG_NODE_BUTTON = 310.dp
+private const val NODE_ACTION_FADE_MS = 240
 
 @Composable
 fun NodeAction(
@@ -322,29 +345,35 @@ fun NodeAction(
                         ),
                     )
                 }
-                when (node.status) {
-                    NodeStatus.LOCKED -> {
-                        UnlockButton("Unlock", currentPoints >= node.price) {
-                            onUnlockNode(
-                                node.id,
-                            )
+                Crossfade(
+                    targetState = node.status,
+                    animationSpec = tween(durationMillis = NODE_ACTION_FADE_MS),
+                    label = "nodeActionButton",
+                ) { status ->
+                    when (status) {
+                        NodeStatus.LOCKED -> {
+                            UnlockButton("Unlock", currentPoints >= node.price) {
+                                onUnlockNode(
+                                    node.id,
+                                )
+                            }
                         }
-                    }
 
-                    NodeStatus.OPEN -> {
-                        PlayButton("Play") {
-                            onCompleteNode(node.id)
+                        NodeStatus.OPEN -> {
+                            PlayButton("Play") {
+                                onCompleteNode(node.id)
+                            }
                         }
-                    }
 
-                    NodeStatus.COMPLETED -> {
-                        PlayButton("Replay") {
-                            onRetryNode(node.id)
-                            replayFirebaseEvent(node.id)
+                        NodeStatus.COMPLETED -> {
+                            PlayButton("Replay") {
+                                onRetryNode(node.id)
+                                replayFirebaseEvent(node.id)
+                            }
                         }
-                    }
 
-                    else -> {}
+                        else -> {}
+                    }
                 }
             }
         }
