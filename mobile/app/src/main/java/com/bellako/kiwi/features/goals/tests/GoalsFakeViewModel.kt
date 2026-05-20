@@ -8,6 +8,7 @@ import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.data.UserAppUsageDTO
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -187,4 +188,10 @@ class GoalsFakeViewModel(
                 badAppsUsage = badApps.map { AppUsageStats(it, 0L) },
             ),
         )
+
+    override suspend fun saveBaselineAppUsage(
+        goodApps: List<String>,
+        badApps: List<String>,
+    ): Result<UserAppUsageDTO> =
+        Result.success(UserAppUsageDTO(avgGoodDailyUsageMs = 0L, avgBadDailyUsageMs = 0L))
 }

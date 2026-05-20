@@ -81,6 +81,8 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -148,10 +150,11 @@ private val BAD_APP_PACKAGES =
 @Composable
 fun SignUpScreen4_Apps(
     personalityViewModel: IPersonalityViewModel,
+    goalsViewModel: IGoalsViewModel,
     navController: NavController,
 ) {
     SignUpScreen {
-        AppClassification(personalityViewModel, navController)
+        AppClassification(personalityViewModel, navController, goalsViewModel)
     }
 }
 
@@ -165,6 +168,7 @@ data class AppInfo(
 fun AppClassification(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
+    goalsViewModel: IGoalsViewModel,
 ) {
     val context = LocalContext.current
     val packageManager = context.packageManager
@@ -285,6 +289,7 @@ fun AppClassification(
         AppClassificationColumns(
             isLoading = isLoading,
             personalityViewModel = personalityViewModel,
+            goalsViewModel = goalsViewModel,
             goodApps = goodApps,
             badApps = badApps,
             neutralApps = neutralApps,
@@ -328,6 +333,7 @@ private fun buildInitialAppBuckets(
 fun AppClassificationColumns(
     isLoading: Boolean,
     personalityViewModel: IPersonalityViewModel,
+    goalsViewModel: IGoalsViewModel,
     goodApps: SnapshotStateList<AppInfo>,
     badApps: SnapshotStateList<AppInfo>,
     neutralApps: SnapshotStateList<AppInfo>,
@@ -435,6 +441,10 @@ fun AppClassificationColumns(
                     )
                     if (personalityViewModel.updateApps().isSuccess) {
                         firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
+                        goalsViewModel.saveBaselineAppUsage(
+                            goodApps.map { it.packageName },
+                            badApps.map { it.packageName },
+                        )
                         navController.navigate(ScreenRoutes.HOME)
                         onUpdateSuccess()
                     }
@@ -866,6 +876,7 @@ fun SignUpScreen4_Apps_Preview() {
                     ),
                 ),
             navController = rememberNavController(),
+                goalsViewModel = GoalsFakeViewModel(),
         )
     }
 }

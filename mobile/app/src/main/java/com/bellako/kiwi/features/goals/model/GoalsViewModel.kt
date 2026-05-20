@@ -15,6 +15,7 @@ import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalState
 import com.bellako.kiwi.features.goals.data.GoalsListState
 import com.bellako.kiwi.features.goals.data.IGoal
+import com.bellako.kiwi.features.goals.data.UserAppUsageDTO
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDataMapper
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import com.bellako.kiwi.features.goals.screens.GoalNotificationType
@@ -469,5 +470,20 @@ class GoalsViewModel
                     goodAppsUsage = appUsageProvider.getAverageWeeklyUsage(goodApps),
                     badAppsUsage = appUsageProvider.getAverageWeeklyUsage(badApps),
                 )
+            }
+
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
+        override suspend fun saveBaselineAppUsage(
+            goodApps: List<String>,
+            badApps: List<String>,
+        ): Result<UserAppUsageDTO> =
+            runCatching {
+                val goodAvgMs = appUsageProvider.getAverageWeeklyUsage(goodApps).sumOf { it.averageDailyUsageMs }
+                val badAvgMs = appUsageProvider.getAverageWeeklyUsage(badApps).sumOf { it.averageDailyUsageMs }
+                val dto = UserAppUsageDTO(
+                    avgGoodDailyUsageMs = goodAvgMs,
+                    avgBadDailyUsageMs = badAvgMs,
+                )
+                repository.saveAppUsageBaseline(dto).getOrThrow()
             }
     }

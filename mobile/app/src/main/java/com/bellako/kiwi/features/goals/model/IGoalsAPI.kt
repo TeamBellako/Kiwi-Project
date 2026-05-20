@@ -1,6 +1,7 @@
 ﻿package com.bellako.kiwi.features.goals.model
 
 import com.bellako.kiwi.features.goals.data.GoalDTO
+import com.bellako.kiwi.features.goals.data.UserAppUsageDTO
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDTO
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -60,4 +61,9 @@ interface IGoalsAPI {
 
     @GET("api/user/goals/skill")
     suspend fun getSkillGoals(): List<UserGoalStatusDTO>
+
+    @POST("api/user/app-usage")
+    suspend fun saveAppUsageBaseline(
+        @Body dto: UserAppUsageDTO,
+    ): UserAppUsageDTO
 }

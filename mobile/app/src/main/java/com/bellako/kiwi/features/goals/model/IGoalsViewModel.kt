@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.goals.model
 import com.bellako.kiwi.features.goals.data.AppUsageResult
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalsListState
+import com.bellako.kiwi.features.goals.data.UserAppUsageDTO
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDomain
 import kotlinx.coroutines.flow.StateFlow
 
@@ -37,4 +38,9 @@ interface IGoalsViewModel {
         goodApps: List<String>,
         badApps: List<String>,
     ): Result<AppUsageResult>
+
+    suspend fun saveBaselineAppUsage(
+        goodApps: List<String>,
+        badApps: List<String>,
+    ): Result<UserAppUsageDTO>
 }
