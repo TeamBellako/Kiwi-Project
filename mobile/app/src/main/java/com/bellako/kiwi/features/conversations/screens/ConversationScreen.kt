@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -58,13 +59,14 @@ import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.data.NextEventType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
-private const val BG_LERP_MS = 900
+private const val BG_FADE_MS = 700
 private const val CHARACTER_LERP_MS = 900
 private const val DIALOGUE_FADE_MS = 600
 private const val OPTION_POP_MS = 450
@@ -100,7 +102,7 @@ fun ConversationScreen(
     // anywhere in the name.
     val isProtagonist = conversation.sprite.contains(PROTAGONIST_SPRITE_KEY, ignoreCase = true)
 
-    val bgProgress = remember { Animatable(0f) }
+    val bgAlpha = remember { Animatable(0f) }
     val characterProgress = remember { Animatable(0f) }
     val dialogueAlpha = remember { Animatable(0f) }
     val optionsClockMs = remember { Animatable(0f) }
@@ -108,8 +110,14 @@ fun ConversationScreen(
     val optionsTotalMs =
         OPTION_POP_MS + (conversation.options.size - 1).coerceAtLeast(0) * OPTION_STAGGER_MS
 
+    val nodeEntry = LocalNodeEntryTransition.current
+
     LaunchedEffect(Unit) {
-        bgProgress.animateTo(1f, tween(BG_LERP_MS, easing = FastOutSlowInEasing))
+        bgAlpha.animateTo(1f, tween(BG_FADE_MS, easing = LinearEasing))
+        // BG is fully opaque now, so it's safe to lift the node-entry veil —
+        // the player won't see the map through a half-faded BG. Launched in
+        // parallel so the character lerp doesn't wait for the veil to lift.
+        launch { nodeEntry?.fadeOut() }
         delay(STAGE_GAP_MS)
         characterProgress.animateTo(1f, tween(CHARACTER_LERP_MS, easing = FastOutSlowInEasing))
         delay(STAGE_GAP_MS)
@@ -133,7 +141,7 @@ fun ConversationScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .offset(y = screenHeight * (1f - bgProgress.value)),
+                        .alpha(bgAlpha.value),
             )
         }
 

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -79,6 +80,9 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
+import com.bellako.kiwi.features.nodes.screens.NodeEntryWhiteoutOverlay
+import com.bellako.kiwi.features.nodes.screens.rememberNodeEntryTransitionController
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
@@ -305,6 +309,9 @@ private fun AppScreen(
 
     val revealEventScope = rememberCoroutineScope()
 
+    val nodeEntryTransition = rememberNodeEntryTransitionController()
+
+    CompositionLocalProvider(LocalNodeEntryTransition provides nodeEntryTransition) {
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = LocalKiwiColors.current.color2,
@@ -429,6 +436,15 @@ private fun AppScreen(
                     }
 
                     TipModal(isTipVisible, tipsViewModel)
+
+                    // White veil for the node-entry transition. Lives inside
+                    // the Scaffold's content area on purpose so it covers the
+                    // map / conversation / combat but leaves the bottom nav
+                    // bar visible.
+                    NodeEntryWhiteoutOverlay(
+                        controller = nodeEntryTransition,
+                        modifier = Modifier.zIndex(50f),
+                    )
                 }
             },
         )
@@ -487,6 +503,7 @@ private fun AppScreen(
                 }
             },
         )
+    }
     }
 }
 
