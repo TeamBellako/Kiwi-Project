@@ -43,6 +43,7 @@ import com.bellako.kiwi.features.combat.components.CombatHeader
 import com.bellako.kiwi.features.combat.components.CombatTurnIndicator
 import com.bellako.kiwi.features.combat.components.DeathSequenceOverlay
 import com.bellako.kiwi.features.combat.components.LogDimOverlay
+import com.bellako.kiwi.features.combat.components.CombatIntroController
 import com.bellako.kiwi.features.combat.components.PlayerControls
 import com.bellako.kiwi.features.combat.components.PlayerDamageOverlays
 import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
@@ -179,58 +180,23 @@ fun CombatScreen(
                     timerIntroProgress = intro.timerSlideProgress,
                 )
 
-                Box {
-                    Column(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    Brush.verticalGradient(
-                                        BOTTOM_PANEL_GRADIENT_START to Color.Transparent,
-                                        BOTTOM_PANEL_GRADIENT_MID to colors.color2,
-                                        BOTTOM_PANEL_GRADIENT_END to colors.color2,
-                                    ),
-                                ).padding(
-                                    horizontal = getResponsiveSizeWidth(Spacing.medium),
-                                    vertical = getResponsiveSizeHeight(Spacing.small),
-                                ),
-                    ) {
-                        CombatTurnIndicator(
-                            message = turnMessage,
-                            isLogOpen = isLogOpen,
-                            onClick = { isLogOpen = !isLogOpen },
-                            glowColor = combatTurnGlowColor(combat.log.lastOrNull()),
-                            introAlpha = intro.turnIndicatorAlpha,
-                        )
-
-                        Kiwi_Spacer(Spacing.medium)
-
-                        PlayerControls(
-                            deckSkills = deckSkills,
-                            userActor = combat.user,
-                            isOverlayOpen = isOverlayOpen,
-                            selectedStatus = selectedStatus,
-                            onSkillClick = onSkillClick,
-                            onApplyGoalProgress = onApplyGoalProgress,
-                            onStatusClick = { status ->
-                                selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
-                            },
-                            onDismissPopup = { selectedStatus = null },
-                            skillSlotIntroScale = { slotIndex -> intro.skillSlotScale(slotIndex) },
-                            playerBarRevealProgress = intro.playerHealthMaskProgress,
-                            playerBarNumbersAlpha = intro.playerHealthNumbersAlpha,
-                        )
-
-                        Kiwi_Spacer(Spacing.large)
-                    }
-
-                    if (isLogOpen) {
-                        LogDimOverlay(
-                            modifier = Modifier.matchParentSize(),
-                            onDismiss = { isLogOpen = false },
-                        )
-                    }
-                }
+                CombatBottomPanel(
+                    combat = combat,
+                    deckSkills = deckSkills,
+                    turnMessage = turnMessage,
+                    isLogOpen = isLogOpen,
+                    isOverlayOpen = isOverlayOpen,
+                    selectedStatus = selectedStatus,
+                    intro = intro,
+                    onToggleLog = { isLogOpen = !isLogOpen },
+                    onCloseLog = { isLogOpen = false },
+                    onSkillClick = onSkillClick,
+                    onApplyGoalProgress = onApplyGoalProgress,
+                    onStatusClick = { status ->
+                        selectedStatus = if (selectedStatus?.stateId == status.stateId) null else status
+                    },
+                    onDismissPopup = { selectedStatus = null },
+                )
             }
         }
 
@@ -264,6 +230,78 @@ fun CombatScreen(
             },
             onCancel = { showAbandonConfirm = false },
         )
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+@Suppress("LongParameterList")
+private fun CombatBottomPanel(
+    combat: CombatDomain,
+    deckSkills: List<SkillDomain>,
+    turnMessage: AnnotatedString,
+    isLogOpen: Boolean,
+    isOverlayOpen: Boolean,
+    selectedStatus: CombatActiveStatusDomain?,
+    intro: CombatIntroController,
+    onToggleLog: () -> Unit,
+    onCloseLog: () -> Unit,
+    onSkillClick: (skillId: Long, skillName: String) -> Unit,
+    onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
+    onStatusClick: (CombatActiveStatusDomain) -> Unit,
+    onDismissPopup: () -> Unit,
+) {
+    val colors = LocalKiwiColors.current
+    Box {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.verticalGradient(
+                            BOTTOM_PANEL_GRADIENT_START to Color.Transparent,
+                            BOTTOM_PANEL_GRADIENT_MID to colors.color2,
+                            BOTTOM_PANEL_GRADIENT_END to colors.color2,
+                        ),
+                    ).padding(
+                        horizontal = getResponsiveSizeWidth(Spacing.medium),
+                        vertical = getResponsiveSizeHeight(Spacing.small),
+                    ),
+        ) {
+            CombatTurnIndicator(
+                message = turnMessage,
+                isLogOpen = isLogOpen,
+                onClick = onToggleLog,
+                glowColor = combatTurnGlowColor(combat.log.lastOrNull()),
+                introAlpha = intro.turnIndicatorAlpha,
+            )
+
+            Kiwi_Spacer(Spacing.medium)
+
+            PlayerControls(
+                deckSkills = deckSkills,
+                userActor = combat.user,
+                isOverlayOpen = isOverlayOpen,
+                selectedStatus = selectedStatus,
+                onSkillClick = onSkillClick,
+                onApplyGoalProgress = onApplyGoalProgress,
+                onStatusClick = onStatusClick,
+                onDismissPopup = onDismissPopup,
+                skillSlotIntroScale = { slotIndex -> intro.skillSlotScale(slotIndex) },
+                skillSlotIntroAlpha = { slotIndex -> intro.skillSlotAlpha(slotIndex) },
+                playerBarRevealProgress = intro.playerHealthMaskProgress,
+                playerBarNumbersAlpha = intro.playerHealthNumbersAlpha,
+            )
+
+            Kiwi_Spacer(Spacing.large)
+        }
+
+        if (isLogOpen) {
+            LogDimOverlay(
+                modifier = Modifier.matchParentSize(),
+                onDismiss = onCloseLog,
+            )
+        }
     }
 }
 

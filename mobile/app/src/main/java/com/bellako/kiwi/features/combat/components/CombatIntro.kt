@@ -24,6 +24,13 @@ private const val SKILL_POP_MS = 550
 private const val SKILL_STAGGER_MS = 220
 private const val TURN_INDICATOR_FADE_MS = 550
 
+// Minimum scale a deck slot keeps before its pop starts. Kept above zero so
+// the slot retains positive boundsInWindow — UI tests that assert
+// `isDisplayed` aren't blocked by a scale-0 graphicsLayer transform. The slot
+// is faded with `skillSlotAlpha` separately, so this tiny base scale is
+// visually invisible at intro-start.
+private const val SKILL_SLOT_MIN_SCALE = 0.5f
+
 // Breath between stages so the sequence reads as a series of beats rather than
 // one continuous slide.
 private const val STAGE_GAP_MS = 350L
@@ -123,11 +130,23 @@ class CombatIntroController internal constructor(
         isCompleted = true
     }
 
-    /** Pop scale for a deck slot (0-indexed), driven by [skillClockMs]. */
+    /**
+     * Pop scale for a deck slot (0-indexed), driven by [skillClockMs]. Stays
+     * at [SKILL_SLOT_MIN_SCALE] until the slot's stagger kicks in so the
+     * layout bounds are never collapsed to a point — pair with [skillSlotAlpha]
+     * for the actual visibility.
+     */
     fun skillSlotScale(slotIndex: Int): Float {
         val itemStart = slotIndex * SKILL_STAGGER_MS
         val rawP = ((skillClockMs - itemStart) / SKILL_POP_MS).coerceIn(0f, 1f)
-        return if (rawP <= 0f) 0f else EaseOutBack.transform(rawP).coerceAtLeast(0f)
+        val curve = if (rawP <= 0f) 0f else EaseOutBack.transform(rawP).coerceAtLeast(0f)
+        return SKILL_SLOT_MIN_SCALE + (1f - SKILL_SLOT_MIN_SCALE) * curve
+    }
+
+    /** Fade-in alpha for a deck slot (0-indexed), in lockstep with [skillSlotScale]. */
+    fun skillSlotAlpha(slotIndex: Int): Float {
+        val itemStart = slotIndex * SKILL_STAGGER_MS
+        return ((skillClockMs - itemStart) / SKILL_POP_MS).coerceIn(0f, 1f)
     }
 }
 

@@ -3,12 +3,12 @@ package com.bellako.kiwi.features.combat.components
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.tooling.preview.Preview
 import com.bellako.kiwi.R
@@ -33,9 +33,12 @@ fun CombatDeck(
     onSkillClick: (skillId: Long, skillName: String) -> Unit,
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
     modifier: Modifier = Modifier,
-    // Pop-scale per slot (0-indexed in slot order). Defaults to 1f so the deck
-    // renders unanimated outside the combat intro.
+    // Pop scale per slot (0-indexed). Stays > 0 even before the slot's pop
+    // starts so the slot's layout bounds remain positive — the matching
+    // `slotIntroAlpha` is what hides it visually.
     slotIntroScale: (slotIndex: Int) -> Float = { 1f },
+    // Fade-in alpha per slot (0-indexed). Defaults to 1f.
+    slotIntroAlpha: (slotIndex: Int) -> Float = { 1f },
 ) {
     val slotMap = deckSkills.associateBy { it.deckSlot }
 
@@ -47,25 +50,25 @@ fun CombatDeck(
             ) {
                 for (slot in rowStart..rowStart + 1) {
                     val skill = slotMap[slot]
-                    Box(
-                        modifier =
-                            Modifier
-                                .weight(SKILL_WEIGHT)
-                                .scale(slotIntroScale(slot - 1)),
-                    ) {
-                        if (skill != null) {
-                            SkillComponent(
-                                skill = skill,
-                                isDisabled = isDisabled || skill.isCooldown,
-                                onClick = { onSkillClick(skill.id, skill.name) },
-                                onApplyGoalProgress = onApplyGoalProgress,
-                            )
-                        } else {
-                            Kiwi_Image(
-                                R.drawable.skill_empty,
-                                "Empty skill slot",
-                            )
-                        }
+                    val slotMod =
+                        Modifier
+                            .weight(SKILL_WEIGHT)
+                            .scale(slotIntroScale(slot - 1))
+                            .alpha(slotIntroAlpha(slot - 1))
+                    if (skill != null) {
+                        SkillComponent(
+                            skill = skill,
+                            isDisabled = isDisabled || skill.isCooldown,
+                            onClick = { onSkillClick(skill.id, skill.name) },
+                            modifier = slotMod,
+                            onApplyGoalProgress = onApplyGoalProgress,
+                        )
+                    } else {
+                        Kiwi_Image(
+                            R.drawable.skill_empty,
+                            "Empty skill slot",
+                            modifier = slotMod,
+                        )
                     }
                 }
             }

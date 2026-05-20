@@ -217,58 +217,78 @@ fun ConversationScreen(
                     }
                 }
             }
-            // Options
-            Column(
+            ConversationOptionsPanel(
+                options = conversation.options,
+                alpha = dialogueAlpha.value,
+                optionsClockMs = optionsClockMs.value,
+                arrowBounceOffsetY = offsetY,
+                onOptionClick = { option ->
+                    AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+                    viewModel?.next(option)
+                },
+                onAdvance = {
+                    AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+                    viewModel?.next()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+@Suppress("MagicNumber")
+private fun ConversationOptionsPanel(
+    options: List<ConversationOptionDomain>,
+    alpha: Float,
+    optionsClockMs: Float,
+    arrowBounceOffsetY: Float,
+    onOptionClick: (ConversationOptionDomain) -> Unit,
+    onAdvance: () -> Unit,
+) {
+    val kiwiColor = LocalKiwiColors.current
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .alpha(alpha)
+                .background(kiwiColor.color2),
+    ) {
+        val optionHeight = getResponsiveSizeHeight(50.dp)
+        val maxVisible = 3
+        Kiwi_Spacer(Spacing.medium)
+        LazyColumn(
+            modifier =
+                Modifier
+                    .padding(horizontal = Spacing.medium)
+                    .heightIn(max = optionHeight * maxVisible + Spacing.small * 2),
+        ) {
+            itemsIndexed(options) { index, option ->
+                val itemStart = index * OPTION_STAGGER_MS
+                val rawP =
+                    ((optionsClockMs - itemStart) / OPTION_POP_MS).coerceIn(0f, 1f)
+                val popScale =
+                    if (rawP <= 0f) 0f else EaseOutBack.transform(rawP).coerceAtLeast(0f)
+                Box(modifier = Modifier.scale(popScale)) {
+                    ConversationOption(option, onClick = { onOptionClick(option) })
+                }
+                Kiwi_Spacer(Spacing.small)
+            }
+        }
+        if (options.isEmpty()) {
+            Kiwi_Spacer(Spacing.medium)
+            Kiwi_Image(
+                R.drawable.ic_dialogue_arrow,
+                "Arrow",
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .alpha(dialogueAlpha.value)
-                        .background(kiwiColor.color2),
-            ) {
-                val optionHeight = getResponsiveSizeHeight(50.dp)
-                val maxVisible = 3
-                Kiwi_Spacer(Spacing.medium)
-                LazyColumn(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = Spacing.medium)
-                            .heightIn(max = optionHeight * maxVisible + Spacing.small * 2),
-                ) {
-                    itemsIndexed(conversation.options) { index, option ->
-                        val itemStart = index * OPTION_STAGGER_MS
-                        val rawP =
-                            ((optionsClockMs.value - itemStart) / OPTION_POP_MS).coerceIn(0f, 1f)
-                        val popScale =
-                            if (rawP <= 0f) 0f else EaseOutBack.transform(rawP).coerceAtLeast(0f)
-                        Box(modifier = Modifier.scale(popScale)) {
-                            ConversationOption(option, onClick = {
-                                AudioManager.playSFX(context, R.raw.snd_fx_03_page)
-                                viewModel?.next(option)
-                            })
-                        }
-                        Kiwi_Spacer(Spacing.small)
-                    }
-                }
-                if (conversation.options.size == 0) {
-                    Kiwi_Spacer(Spacing.medium)
-                    Kiwi_Image(
-                        R.drawable.ic_dialogue_arrow,
-                        "Arrow",
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .size(getResponsiveSizeWidth(8.dp), getResponsiveSizeHeight(8.dp))
-                                .offset(y = getResponsiveSizeHeight(offsetY.dp))
-                                .clickable {
-                                    AudioManager.playSFX(context, R.raw.snd_fx_03_page)
-                                    viewModel?.next()
-                                },
-                    )
-                    Kiwi_Spacer(Spacing.large)
-                } else {
-                    Kiwi_Spacer(Spacing.xLarge)
-                }
-            }
+                        .size(getResponsiveSizeWidth(8.dp), getResponsiveSizeHeight(8.dp))
+                        .offset(y = getResponsiveSizeHeight(arrowBounceOffsetY.dp))
+                        .clickable(onClick = onAdvance),
+            )
+            Kiwi_Spacer(Spacing.large)
+        } else {
+            Kiwi_Spacer(Spacing.xLarge)
         }
     }
 }

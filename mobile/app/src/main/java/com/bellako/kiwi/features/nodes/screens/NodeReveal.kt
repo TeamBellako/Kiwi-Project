@@ -87,8 +87,25 @@ private fun buildNodeRevealSchedule(
 ): NodeRevealSchedule {
     if (nodes.isEmpty()) return NodeRevealSchedule(emptyMap(), 0f)
 
-    // Undirected adjacency so the wave can spread across a connection regardless
-    // of the direction it was declared in.
+    val adjacency = buildUndirectedAdjacency(nodes)
+    val root = pickRootNode(nodes, rootNodeId)
+    val popStart = cascadePopTimes(root, adjacency)
+
+    // Nodes in a disconnected component still appear with the first wave.
+    nodes.keys.forEach { id -> popStart.putIfAbsent(id, 0f) }
+
+    // Run the clock long enough for the last node's label to finish fading.
+    val total = (popStart.values.maxOrNull() ?: 0f) + NODE_POP_MS + LABEL_FADE_MS
+    return NodeRevealSchedule(popStart, total)
+}
+
+/**
+ * Undirected adjacency over [nodes]: the cascade should travel across a
+ * connection regardless of which endpoint declared it.
+ */
+private fun buildUndirectedAdjacency(
+    nodes: Map<Long, NodesDomain>,
+): Map<Long, Set<Long>> {
     val adjacency = HashMap<Long, MutableSet<Long>>()
     nodes.values.forEach { node ->
         node.connectedNodeIds.forEach { other ->
@@ -98,14 +115,36 @@ private fun buildNodeRevealSchedule(
             }
         }
     }
+    return adjacency
+}
 
-    val root =
-        rootNodeId?.takeIf { it in nodes }
-            ?: nodes.keys
-                .filter { id -> nodes.values.none { id in it.connectedNodeIds } }
-                .minOrNull()
-            ?: nodes.keys.min()
+/**
+ * Chooses where the reveal wave originates. Preference order: the explicit
+ * [rootNodeId] (when it still exists), then any node nothing else points at
+ * (i.e. a graph root), then the lowest id as a deterministic fallback.
+ */
+private fun pickRootNode(
+    nodes: Map<Long, NodesDomain>,
+    rootNodeId: Long?,
+): Long {
+    val explicit = rootNodeId?.takeIf { it in nodes }
+    if (explicit != null) return explicit
+    val unreferenced =
+        nodes.keys
+            .filter { id -> nodes.values.none { id in it.connectedNodeIds } }
+            .minOrNull()
+    return unreferenced ?: nodes.keys.min()
+}
 
+/**
+ * BFS over [adjacency] starting at [root]. Returns the earliest pop time for
+ * every reachable node — neighbours of node N pop one (NODE_POP_MS + EDGE_LERP_MS)
+ * later than N does, and re-visits are kept only when they would arrive sooner.
+ */
+private fun cascadePopTimes(
+    root: Long,
+    adjacency: Map<Long, Set<Long>>,
+): HashMap<Long, Float> {
     val popStart = HashMap<Long, Float>()
     val queue = ArrayDeque<Long>()
     popStart[root] = 0f
@@ -123,13 +162,7 @@ private fun buildNodeRevealSchedule(
             }
         }
     }
-
-    // Nodes in a disconnected component still appear with the first wave.
-    nodes.keys.forEach { id -> popStart.putIfAbsent(id, 0f) }
-
-    // Run the clock long enough for the last node's label to finish fading.
-    val total = (popStart.values.maxOrNull() ?: 0f) + NODE_POP_MS + LABEL_FADE_MS
-    return NodeRevealSchedule(popStart, total)
+    return popStart
 }
 
 /**

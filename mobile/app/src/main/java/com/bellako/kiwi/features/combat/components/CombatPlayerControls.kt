@@ -39,6 +39,7 @@ internal fun PlayerControls(
     onStatusClick: (CombatActiveStatusDomain) -> Unit,
     onDismissPopup: () -> Unit,
     skillSlotIntroScale: (slotIndex: Int) -> Float = { 1f },
+    skillSlotIntroAlpha: (slotIndex: Int) -> Float = { 1f },
     playerBarRevealProgress: Float = 1f,
     playerBarNumbersAlpha: Float = 1f,
 ) {
@@ -54,6 +55,7 @@ internal fun PlayerControls(
                 onApplyGoalProgress = onApplyGoalProgress,
                 modifier = Modifier.alpha(dimAlpha),
                 slotIntroScale = skillSlotIntroScale,
+                slotIntroAlpha = skillSlotIntroAlpha,
             )
 
             Kiwi_Spacer(Spacing.small)
