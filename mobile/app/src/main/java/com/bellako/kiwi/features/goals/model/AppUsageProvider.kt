@@ -13,10 +13,10 @@ private const val DAYS_IN_WEEK = 7L
 private const val MS_PER_DAY = 24 * 60 * 60 * 1000L
 
 @Singleton
-class AppUsageProvider
+open class AppUsageProvider
     @Inject
     constructor(
-        @ApplicationContext private val context: Context,
+        @ApplicationContext private val context: Context?,
     ) {
         /**
          * Queries the last 7 days of foreground usage for each given package and returns
@@ -25,11 +25,12 @@ class AppUsageProvider
          * Requires PACKAGE_USAGE_STATS permission granted by the user.
          */
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
-        fun getAverageWeeklyUsage(packageNames: List<String>): List<AppUsageStats> {
+        @Suppress("ReturnCount")
+        open fun getAverageWeeklyUsage(packageNames: List<String>): List<AppUsageStats> {
             if (packageNames.isEmpty()) return emptyList()
 
             val usageStatsManager =
-                context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+                context?.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
                     ?: return packageNames.map { AppUsageStats(it, 0L) }
 
             val endTime = System.currentTimeMillis()
