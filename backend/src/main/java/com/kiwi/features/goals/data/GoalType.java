@@ -6,4 +6,6 @@ public enum GoalType {
     MEDITATION,
     NUTRITION,
     PRODUCTIVITY,
+    APP_USAGE_GOOD,
+    APP_USAGE_BAD,
 }

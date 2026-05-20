@@ -1,5 +1,6 @@
 package com.kiwi.metrics;
 
+import com.kiwi.features.goals.controllers.UserGoalStatusRepository;
 import com.kiwi.features.metrics.data.MetricsDataMapper;
 import com.kiwi.features.metrics.controllers.MetricsService;
 import com.kiwi.features.metrics.data.MetricsDomain;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 public class MetricsServiceTests {
     private final UsersTestRepositoryInMemory usersTestRepositoryInMemory = new UsersTestRepositoryInMemory();
@@ -38,7 +40,8 @@ public class MetricsServiceTests {
     }, event -> {});
     
     private final MetricsTestRepositoryInMemory metricsTestRepositoryInMemory = new MetricsTestRepositoryInMemory();
-    private final MetricsService metricsService = new MetricsService(metricsTestRepositoryInMemory, usersService);
+    private final UserGoalStatusRepository userGoalStatusRepository = mock(UserGoalStatusRepository.class);
+    private final MetricsService metricsService = new MetricsService(metricsTestRepositoryInMemory, usersService, userGoalStatusRepository);
     
     private UsersPersistence validUsersPersistence;
     private final Email validEmail = new Email(validUserDTO().getEmail());

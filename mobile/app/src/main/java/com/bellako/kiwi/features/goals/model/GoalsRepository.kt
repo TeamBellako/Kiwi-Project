@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.utils.DateUtils.dateToString
 import com.bellako.kiwi.features.goals.data.GoalDTO
+import com.bellako.kiwi.features.goals.data.UserAppUsageDTO
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDTO
 import java.time.LocalDate
 
@@ -71,6 +72,11 @@ class GoalsRepository(
     suspend fun getSkillGoals(): Result<List<UserGoalStatusDTO>> =
         runCatching {
             api.getSkillGoals()
+        }
+
+    suspend fun saveAppUsageBaseline(dto: UserAppUsageDTO): Result<UserAppUsageDTO> =
+        runCatching {
+            api.saveAppUsageBaseline(dto)
         }
 
     // endregion

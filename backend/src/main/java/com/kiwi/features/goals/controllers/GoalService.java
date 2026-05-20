@@ -3,8 +3,10 @@ package com.kiwi.features.goals.controllers;
 import com.kiwi.features.goals.data.*;
 import com.kiwi.features.goals.exceptions.GoalNotFoundException;
 import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
+import com.kiwi.features.users.data.AppUsageType;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersRepository;
+import com.kiwi.features.users.controllers.UserAppUsageRepository;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.exceptions.UsersNotFoundException;
 import org.springframework.security.core.Authentication;
@@ -26,18 +28,21 @@ public class GoalService {
     private final GoalRepository goalRepository;
     private final UsersRepository usersRepository;
     private final UsersService usersService;
+    private final UserAppUsageRepository userAppUsageRepository;
 
     public GoalService(
             UserGoalStatusRepository userGoalStatusRepository,
             UserGoalProgressRepository userGoalProgressRepository,
             GoalRepository goalRepository,
             UsersRepository usersRepository,
-            UsersService usersService) {
+            UsersService usersService,
+            UserAppUsageRepository userAppUsageRepository) {
         this.userGoalStatusRepository = userGoalStatusRepository;
         this.userGoalProgressRepository = userGoalProgressRepository;
         this.goalRepository = goalRepository;
         this.usersRepository = usersRepository;
         this.usersService = usersService;
+        this.userAppUsageRepository = userAppUsageRepository;
     }
 
     private void updateUserGoalProgressAfterCompletion(UsersPersistence user, GoalPersistence goal) {
@@ -96,6 +101,31 @@ public class GoalService {
                 .orElseThrow(() -> new UsersNotFoundException(email));
     }
 
+    /**
+     * Computes the dynamic target (in ms) for AppUsage goal types, or null for
+     * standard goals whose target is read from the goal template.
+     */
+    private Integer resolveTargetOverride(UsersPersistence user, GoalPersistence goal) {
+        GoalType type = goal.getType();
+        if (type == GoalType.APP_USAGE_GOOD) {
+            long baseline = userAppUsageRepository.findByUserAndAppType(user, AppUsageType.GOOD)
+                    .map(u -> u.getAvgDailyUsageMs()).orElse(0L);
+            int difficulty = userGoalProgressRepository
+                    .findById(new UserGoalProgressKey(user.getId(), GoalType.APP_USAGE_GOOD.name()))
+                    .map(UserGoalProgressPersistence::getCurrentDifficulty).orElse(1);
+            return (int) AppUsageGoalTargetCalculator.computeGoodAppTarget(baseline, difficulty);
+        }
+        if (type == GoalType.APP_USAGE_BAD) {
+            long baseline = userAppUsageRepository.findByUserAndAppType(user, AppUsageType.BAD)
+                    .map(u -> u.getAvgDailyUsageMs()).orElse(0L);
+            int difficulty = userGoalProgressRepository
+                    .findById(new UserGoalProgressKey(user.getId(), GoalType.APP_USAGE_BAD.name()))
+                    .map(UserGoalProgressPersistence::getCurrentDifficulty).orElse(1);
+            return (int) AppUsageGoalTargetCalculator.computeBadAppTarget(baseline, difficulty);
+        }
+        return null;
+    }
+
     @Transactional
     public UserGoalStatusDTO updateGoalProgress(Long id, Authentication authentication) {
         UsersPersistence user = getUserFromAuthentication(authentication);
@@ -152,7 +182,8 @@ public class GoalService {
                     dto.setId(null);
                     GoalPersistence goal = goalRepository.findById(dto.getGoalId())
                             .orElseThrow(() -> new GoalNotFoundException(dto.getGoalId()));
-                    return UserGoalStatusDataMapper.toEntity(dto, user, goal, date);
+                    Integer targetOverride = resolveTargetOverride(user, goal);
+                    return UserGoalStatusDataMapper.toEntity(dto, user, goal, date, targetOverride);
                 })
                 .collect(Collectors.toList());
 

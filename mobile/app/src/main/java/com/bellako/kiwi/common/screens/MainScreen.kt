@@ -671,6 +671,7 @@ fun AppNavHost(
                 Kiwi_Music_SignUp()
                 SignUpScreen4_Apps(
                     personalityViewModel = personalityViewModel,
+                    goalsViewModel = goalsViewModel,
                     navController = navController,
                 )
             }
