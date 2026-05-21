@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.rememberBreathingModifier
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.ui.Spacing
@@ -132,6 +133,8 @@ internal fun CombatEnemySprite(
     val spriteAlpha = remember { Animatable(1f) }
     var isDamageAnimating by remember { mutableStateOf(false) }
 
+    val breathingModifier = rememberBreathingModifier()
+
     LaunchedEffect(damageTrigger) {
         if (damageTrigger == 0) return@LaunchedEffect
         isDamageAnimating = true
@@ -170,7 +173,8 @@ internal fun CombatEnemySprite(
             modifier
                 .fillMaxSize()
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                .alpha(spriteAlpha.value * introAlpha),
+                .alpha(spriteAlpha.value * introAlpha)
+                .then(breathingModifier),
         contentScale = ContentScale.Fit,
         colorFilter =
             if (redAlpha.value > 0f) {
