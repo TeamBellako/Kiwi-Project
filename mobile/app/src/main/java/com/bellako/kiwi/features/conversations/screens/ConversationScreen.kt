@@ -31,7 +31,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -47,13 +49,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.conversations.components.CharacterName
 import com.bellako.kiwi.features.conversations.components.ConversationOption
+import com.bellako.kiwi.features.conversations.components.Kiwi_TypewriterText
+import com.bellako.kiwi.features.conversations.components.rememberTypewriter
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
@@ -107,10 +109,20 @@ fun ConversationScreen(
     val dialogueAlpha = remember { Animatable(0f) }
     val optionsClockMs = remember { Animatable(0f) }
 
+    // Held back until the dialogue stage of the intro sequence so the text
+    // doesn't finish typing before the dialogue box has faded in.
+    var dialogueStageStarted by remember { mutableStateOf(false) }
+    val typewriter = rememberTypewriter(conversation.dialog, play = dialogueStageStarted)
+
     val optionsTotalMs =
         OPTION_POP_MS + (conversation.options.size - 1).coerceAtLeast(0) * OPTION_STAGGER_MS
 
     val nodeEntry = LocalNodeEntryTransition.current
+
+    val advance: () -> Unit = {
+        AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+        viewModel?.next()
+    }
 
     LaunchedEffect(Unit) {
         bgAlpha.animateTo(1f, tween(BG_FADE_MS, easing = LinearEasing))
@@ -121,6 +133,7 @@ fun ConversationScreen(
         delay(STAGE_GAP_MS)
         characterProgress.animateTo(1f, tween(CHARACTER_LERP_MS, easing = FastOutSlowInEasing))
         delay(STAGE_GAP_MS)
+        dialogueStageStarted = true
         dialogueAlpha.animateTo(1f, tween(DIALOGUE_FADE_MS, easing = LinearEasing))
         delay(STAGE_GAP_MS)
         optionsClockMs.animateTo(
@@ -150,7 +163,12 @@ fun ConversationScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .clickable {},
+                    .clickable {
+                        when {
+                            !typewriter.isComplete -> typewriter.skip()
+                            conversation.options.isEmpty() -> advance()
+                        }
+                    },
         ) {
             val charExtraX =
                 if (isProtagonist) 0.dp else -screenWidth * (1f - characterProgress.value)
@@ -198,14 +216,11 @@ fun ConversationScreen(
                         contentScale = ContentScale.FillWidth,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Kiwi_P2(
-                        KiwiTextArguments(
-                            conversation.dialog,
-                            textAlign = TextAlign.Center,
-                            color = if (conversation.dark) kiwiColor.color6 else kiwiColor.color3,
-                            modifier =
-                                Modifier.padding(Spacing.medium, Spacing.medium),
-                        ),
+                    Kiwi_TypewriterText(
+                        typewriter = typewriter,
+                        textAlign = TextAlign.Center,
+                        color = if (conversation.dark) kiwiColor.color6 else kiwiColor.color3,
+                        modifier = Modifier.padding(Spacing.medium, Spacing.medium),
                     )
                     Box(
                         modifier =
@@ -222,14 +237,12 @@ fun ConversationScreen(
                 alpha = dialogueAlpha.value,
                 optionsClockMs = optionsClockMs.value,
                 arrowBounceOffsetY = offsetY,
+                arrowVisible = typewriter.isComplete,
                 onOptionClick = { option ->
                     AudioManager.playSFX(context, R.raw.snd_fx_03_page)
                     viewModel?.next(option)
                 },
-                onAdvance = {
-                    AudioManager.playSFX(context, R.raw.snd_fx_03_page)
-                    viewModel?.next()
-                },
+                onAdvance = advance,
             )
         }
     }
@@ -242,6 +255,7 @@ private fun ConversationOptionsPanel(
     alpha: Float,
     optionsClockMs: Float,
     arrowBounceOffsetY: Float,
+    arrowVisible: Boolean,
     onOptionClick: (ConversationOptionDomain) -> Unit,
     onAdvance: () -> Unit,
 ) {
@@ -275,6 +289,8 @@ private fun ConversationOptionsPanel(
             }
         }
         if (options.isEmpty()) {
+            // Space stays reserved so the panel doesn't jump when the arrow
+            // fades in after the typewriter finishes.
             Kiwi_Spacer(Spacing.medium)
             Kiwi_Image(
                 R.drawable.ic_dialogue_arrow,
@@ -284,7 +300,8 @@ private fun ConversationOptionsPanel(
                         .fillMaxWidth()
                         .size(getResponsiveSizeWidth(8.dp), getResponsiveSizeHeight(8.dp))
                         .offset(y = getResponsiveSizeHeight(arrowBounceOffsetY.dp))
-                        .clickable(onClick = onAdvance),
+                        .alpha(if (arrowVisible) 1f else 0f)
+                        .then(if (arrowVisible) Modifier.clickable(onClick = onAdvance) else Modifier),
             )
             Kiwi_Spacer(Spacing.large)
         } else {

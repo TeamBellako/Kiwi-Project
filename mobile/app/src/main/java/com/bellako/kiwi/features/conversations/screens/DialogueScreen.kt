@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
@@ -35,12 +36,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer_Horizontal
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.conversations.components.CharacterName
+import com.bellako.kiwi.features.conversations.components.Kiwi_TypewriterText
+import com.bellako.kiwi.features.conversations.components.rememberTypewriter
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.data.NextEventType
@@ -74,12 +75,21 @@ fun DialogueScreen(
 
     val context = LocalContext.current
 
+    val typewriter = rememberTypewriter(conversation.dialog)
+
+    val advance: () -> Unit = {
+        AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+        viewModel?.next()
+    }
+
     Column(
         verticalArrangement = Arrangement.Bottom,
         modifier =
             Modifier
                 .fillMaxSize()
-                .clickable {},
+                .clickable {
+                    if (typewriter.isComplete) advance() else typewriter.skip()
+                },
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -132,13 +142,11 @@ fun DialogueScreen(
                     "Dialogue frame",
                     contentScale = ContentScale.FillWidth,
                 )
-                Kiwi_P2(
-                    KiwiTextArguments(
-                        conversation.dialog,
-                        textAlign = TextAlign.Center,
-                        color = kiwiColor.color6,
-                        modifier = Modifier.padding(Spacing.medium, Spacing.medium),
-                    ),
+                Kiwi_TypewriterText(
+                    typewriter = typewriter,
+                    textAlign = TextAlign.Center,
+                    color = kiwiColor.color6,
+                    modifier = Modifier.padding(Spacing.medium, Spacing.medium),
                 )
                 Kiwi_Image(
                     R.drawable.ic_dialogue_arrow,
@@ -149,10 +157,14 @@ fun DialogueScreen(
                             .align(Alignment.BottomCenter)
                             .size(getResponsiveSizeWidth(10.dp), getResponsiveSizeHeight(10.dp))
                             .offset(y = getResponsiveSizeHeight(offsetY.dp))
-                            .clickable {
-                                AudioManager.playSFX(context, R.raw.snd_fx_03_page)
-                                viewModel?.next()
-                            },
+                            .alpha(if (typewriter.isComplete) 1f else 0f)
+                            .then(
+                                if (typewriter.isComplete) {
+                                    Modifier.clickable(onClick = advance)
+                                } else {
+                                    Modifier
+                                },
+                            ),
                 )
             }
         }
