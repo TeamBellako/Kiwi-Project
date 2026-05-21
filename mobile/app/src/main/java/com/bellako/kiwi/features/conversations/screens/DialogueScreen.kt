@@ -2,12 +2,16 @@ package com.bellako.kiwi.features.conversations.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -40,6 +45,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer_Horizontal
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.conversations.components.CharacterName
+import com.bellako.kiwi.features.conversations.components.Kiwi_DialogueText
 import com.bellako.kiwi.features.conversations.components.Kiwi_TypewriterText
 import com.bellako.kiwi.features.conversations.components.rememberTypewriter
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
@@ -51,6 +57,8 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
+
+private const val DIALOGUE_ADVANCE_MS = 450
 
 @Composable
 @Suppress("MagicNumber")
@@ -142,12 +150,44 @@ fun DialogueScreen(
                     "Dialogue frame",
                     contentScale = ContentScale.FillWidth,
                 )
-                Kiwi_TypewriterText(
-                    typewriter = typewriter,
-                    textAlign = TextAlign.Center,
-                    color = kiwiColor.color6,
-                    modifier = Modifier.padding(Spacing.medium, Spacing.medium),
-                )
+                // Scroll-up advance: the current line slides up and out the
+                // top while the next line rises in from the bottom.
+                // clipToBounds keeps both inside the frame, off the BG.
+                AnimatedContent(
+                    targetState = conversation,
+                    transitionSpec = {
+                        slideInVertically(tween(DIALOGUE_ADVANCE_MS)) { it } togetherWith
+                            slideOutVertically(tween(DIALOGUE_ADVANCE_MS)) { -it }
+                    },
+                    contentKey = { it.id },
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.matchParentSize().clipToBounds(),
+                    label = "dialogue_advance",
+                ) { conv ->
+                    val textModifier = Modifier.padding(Spacing.medium, Spacing.medium)
+                    // Fill the frame so the slide travels the full frame height
+                    // and each line clears the masked region completely.
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        if (conv.id == conversation.id) {
+                            Kiwi_TypewriterText(
+                                typewriter = typewriter,
+                                textAlign = TextAlign.Center,
+                                color = kiwiColor.color6,
+                                modifier = textModifier,
+                            )
+                        } else {
+                            Kiwi_DialogueText(
+                                text = conv.dialog,
+                                textAlign = TextAlign.Center,
+                                color = kiwiColor.color6,
+                                modifier = textModifier,
+                            )
+                        }
+                    }
+                }
                 Kiwi_Image(
                     R.drawable.ic_dialogue_arrow,
                     "Arrow",

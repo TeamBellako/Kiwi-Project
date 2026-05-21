@@ -70,19 +70,49 @@ fun Kiwi_TypewriterText(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Left,
 ) {
+    DialogueText(
+        fullText = typewriter.fullText,
+        revealedChars = typewriter.visibleCharCount,
+        color = color,
+        modifier = modifier,
+        textAlign = textAlign,
+    )
+}
+
+/** Fully revealed dialogue line — used for the outgoing line while it slides away. */
+@Composable
+fun Kiwi_DialogueText(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Left,
+) {
+    DialogueText(
+        fullText = text,
+        revealedChars = text.length,
+        color = color,
+        modifier = modifier,
+        textAlign = textAlign,
+    )
+}
+
+@Composable
+private fun DialogueText(
+    fullText: String,
+    revealedChars: Int,
+    color: Color,
+    modifier: Modifier,
+    textAlign: TextAlign,
+) {
     val scale = rememberTextWidthScale()
     val bodyStyle = MaterialTheme.typography.bodyMedium
 
     val annotated =
-        remember(typewriter.fullText, typewriter.visibleCharCount, color) {
+        remember(fullText, revealedChars, color) {
             buildAnnotatedString {
-                append(typewriter.fullText)
-                addStyle(SpanStyle(color = color), 0, typewriter.visibleCharCount)
-                addStyle(
-                    SpanStyle(color = Color.Transparent),
-                    typewriter.visibleCharCount,
-                    typewriter.fullText.length,
-                )
+                append(fullText)
+                addStyle(SpanStyle(color = color), 0, revealedChars)
+                addStyle(SpanStyle(color = Color.Transparent), revealedChars, fullText.length)
             }
         }
 
