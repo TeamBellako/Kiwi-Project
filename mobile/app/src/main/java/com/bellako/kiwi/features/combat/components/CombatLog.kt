@@ -45,6 +45,7 @@ import androidx.compose.ui.text.AnnotatedString.Builder as AnnotatedStringBuilde
 private val LOG_RADIUS = 12.dp
 private val LOG_INNER_PADDING = 16.dp
 private const val USER_NAME_PLACEHOLDER = "You"
+private const val LOG_BG_ALPHA = 0.85f
 
 sealed class CombatLogEntry {
     data class Action(
@@ -80,7 +81,11 @@ fun CombatLog(
         modifier =
             modifier
                 .fillMaxWidth()
-                .combatPanel(bgColor = colors.color3A, borderColor = colors.color5C, radius = LOG_RADIUS),
+                .combatPanel(
+                    bgColor = colors.color3A.copy(alpha = LOG_BG_ALPHA),
+                    borderColor = colors.color5C,
+                    radius = LOG_RADIUS,
+                ),
     ) {
         LazyColumn(
             state = listState,

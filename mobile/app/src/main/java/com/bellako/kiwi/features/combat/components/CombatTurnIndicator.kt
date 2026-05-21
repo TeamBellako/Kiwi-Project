@@ -61,7 +61,7 @@ fun CombatTurnIndicator(
 ) {
     val colors = LocalKiwiColors.current
     val rotation by animateFloatAsState(
-        targetValue = if (isLogOpen) CHEVRON_CLOSED_ROTATION else CHEVRON_OPEN_ROTATION,
+        targetValue = if (isLogOpen) CHEVRON_OPEN_ROTATION else CHEVRON_CLOSED_ROTATION,
         label = "combat_turn_chevron",
     )
     val blinkAlpha = rememberBlinkAlpha()
