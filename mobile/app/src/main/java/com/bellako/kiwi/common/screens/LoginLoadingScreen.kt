@@ -42,6 +42,7 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.features.conversations.components.CharacterName
+import com.bellako.kiwi.features.conversations.components.rememberFloatingModifier
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -161,6 +162,9 @@ private fun LoginLoadingContent(
 
     val percent = (progress.coerceIn(0f, 1f) * PERCENT_MULTIPLIER).roundToInt()
 
+    // Liria floats here too — she's an airborne entity wherever she appears.
+    val floatingModifier = rememberFloatingModifier()
+
     BoxWithConstraints(
         modifier =
             modifier
@@ -216,6 +220,7 @@ private fun LoginLoadingContent(
                         Kiwi_Image(
                             R.drawable.character_liria_base,
                             "Liria",
+                            modifier = floatingModifier,
                         )
                     }
                 }

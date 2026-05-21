@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.conversations.screens
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOutBack
@@ -13,6 +14,9 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,10 +35,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -47,13 +54,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.conversations.components.CharacterName
 import com.bellako.kiwi.features.conversations.components.ConversationOption
+import com.bellako.kiwi.features.conversations.components.Kiwi_DialogueText
+import com.bellako.kiwi.features.conversations.components.Kiwi_TypewriterText
+import com.bellako.kiwi.features.conversations.components.TypewriterState
+import com.bellako.kiwi.features.conversations.components.rememberCharacterIdleModifier
+import com.bellako.kiwi.features.conversations.components.rememberTypewriter
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
@@ -72,6 +82,7 @@ private const val DIALOGUE_FADE_MS = 600
 private const val OPTION_POP_MS = 450
 private const val OPTION_STAGGER_MS = 140
 private const val STAGE_GAP_MS = 250L
+private const val DIALOGUE_ADVANCE_MS = 450
 
 private const val PROTAGONIST_SPRITE_KEY = "liria"
 
@@ -81,7 +92,6 @@ fun ConversationScreen(
     conversation: ConversationDomain,
     viewModel: ConversationViewModel? = null,
 ) {
-    val kiwiColor = LocalKiwiColors.current
     val infiniteTransition = rememberInfiniteTransition(label = "arrow_bounce")
     val offsetY by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -107,10 +117,22 @@ fun ConversationScreen(
     val dialogueAlpha = remember { Animatable(0f) }
     val optionsClockMs = remember { Animatable(0f) }
 
+    // Held back until the dialogue stage of the intro sequence so the text
+    // doesn't finish typing before the dialogue box has faded in.
+    var dialogueStageStarted by remember { mutableStateOf(false) }
+    val typewriter = rememberTypewriter(conversation.dialog, play = dialogueStageStarted)
+
+    val idleModifier = rememberCharacterIdleModifier(conversation.sprite)
+
     val optionsTotalMs =
         OPTION_POP_MS + (conversation.options.size - 1).coerceAtLeast(0) * OPTION_STAGGER_MS
 
     val nodeEntry = LocalNodeEntryTransition.current
+
+    val advance: () -> Unit = {
+        AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+        viewModel?.next()
+    }
 
     LaunchedEffect(Unit) {
         bgAlpha.animateTo(1f, tween(BG_FADE_MS, easing = LinearEasing))
@@ -121,6 +143,7 @@ fun ConversationScreen(
         delay(STAGE_GAP_MS)
         characterProgress.animateTo(1f, tween(CHARACTER_LERP_MS, easing = FastOutSlowInEasing))
         delay(STAGE_GAP_MS)
+        dialogueStageStarted = true
         dialogueAlpha.animateTo(1f, tween(DIALOGUE_FADE_MS, easing = LinearEasing))
         delay(STAGE_GAP_MS)
         optionsClockMs.animateTo(
@@ -150,7 +173,12 @@ fun ConversationScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .clickable {},
+                    .clickable {
+                        when {
+                            !typewriter.isComplete -> typewriter.skip()
+                            conversation.options.isEmpty() -> advance()
+                        }
+                    },
         ) {
             val charExtraX =
                 if (isProtagonist) 0.dp else -screenWidth * (1f - characterProgress.value)
@@ -172,65 +200,124 @@ fun ConversationScreen(
                     painterResourceId =
                         AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
                     alt = "Character Pose",
+                    modifier = idleModifier,
                 )
             }
-            // Dialogue
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .alpha(dialogueAlpha.value)
-                        .background(
-                            Brush.verticalGradient(
-                                -0.2f to Color.Transparent,
-                                0.5f to kiwiColor.color2,
-                                1f to kiwiColor.color2,
-                            ),
-                        ),
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(horizontal = Spacing.medium),
-                ) {
-                    Kiwi_Image(
-                        painterResourceId = getAsset(conversation, R.drawable.dialogue_light_small, LocalContext.current),
-                        alt = "Conversation modal",
-                        contentScale = ContentScale.FillWidth,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Kiwi_P2(
-                        KiwiTextArguments(
-                            conversation.dialog,
-                            textAlign = TextAlign.Center,
-                            color = if (conversation.dark) kiwiColor.color6 else kiwiColor.color3,
-                            modifier =
-                                Modifier.padding(Spacing.medium, Spacing.medium),
-                        ),
-                    )
-                    Box(
-                        modifier =
-                            Modifier
-                                .matchParentSize()
-                                .offset(x = getResponsiveSizeWidth(25.dp)),
-                    ) {
-                        CharacterName("Liria", conversation.dark, false)
-                    }
-                }
-            }
+            DialogueBox(
+                conversation = conversation,
+                typewriter = typewriter,
+                alpha = dialogueAlpha.value,
+            )
             ConversationOptionsPanel(
                 options = conversation.options,
                 alpha = dialogueAlpha.value,
                 optionsClockMs = optionsClockMs.value,
                 arrowBounceOffsetY = offsetY,
+                arrowVisible = typewriter.isComplete,
                 onOptionClick = { option ->
                     AudioManager.playSFX(context, R.raw.snd_fx_03_page)
                     viewModel?.next(option)
                 },
-                onAdvance = {
-                    AudioManager.playSFX(context, R.raw.snd_fx_03_page)
-                    viewModel?.next()
-                },
+                onAdvance = advance,
             )
+        }
+    }
+}
+
+@Composable
+@Suppress("MagicNumber")
+private fun DialogueBox(
+    conversation: ConversationDomain,
+    typewriter: TypewriterState,
+    alpha: Float,
+    modifier: Modifier = Modifier,
+) {
+    val kiwiColor = LocalKiwiColors.current
+    val context = LocalContext.current
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .alpha(alpha)
+                .background(
+                    Brush.verticalGradient(
+                        -0.2f to Color.Transparent,
+                        0.5f to kiwiColor.color2,
+                        1f to kiwiColor.color2,
+                    ),
+                ),
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(horizontal = Spacing.medium),
+        ) {
+            Kiwi_Image(
+                painterResourceId = getAsset(conversation, R.drawable.dialogue_light_small, context),
+                alt = "Conversation modal",
+                contentScale = ContentScale.FillWidth,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            AdvancingDialogueText(
+                conversation = conversation,
+                typewriter = typewriter,
+                modifier = Modifier.matchParentSize(),
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .matchParentSize()
+                        .offset(x = getResponsiveSizeWidth(25.dp)),
+            ) {
+                CharacterName("Liria", conversation.dark, false)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdvancingDialogueText(
+    conversation: ConversationDomain,
+    typewriter: TypewriterState,
+    modifier: Modifier = Modifier,
+) {
+    val kiwiColor = LocalKiwiColors.current
+    // Scroll-up advance: the current line slides up and out the top while the
+    // next line rises in from the bottom. clipToBounds keeps both inside the
+    // dialogue box so nothing shows over the background.
+    AnimatedContent(
+        targetState = conversation,
+        transitionSpec = {
+            slideInVertically(tween(DIALOGUE_ADVANCE_MS)) { it } togetherWith
+                slideOutVertically(tween(DIALOGUE_ADVANCE_MS)) { -it }
+        },
+        contentKey = { it.id },
+        contentAlignment = Alignment.Center,
+        modifier = modifier.clipToBounds(),
+        label = "dialogue_advance",
+    ) { conv ->
+        val textColor = if (conv.dark) kiwiColor.color6 else kiwiColor.color3
+        val textModifier = Modifier.padding(Spacing.medium, Spacing.medium)
+        // Fill the box so the slide travels the full box height and each line
+        // clears the masked region completely.
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            if (conv.id == conversation.id) {
+                Kiwi_TypewriterText(
+                    typewriter = typewriter,
+                    textAlign = TextAlign.Center,
+                    color = textColor,
+                    modifier = textModifier,
+                )
+            } else {
+                Kiwi_DialogueText(
+                    text = conv.dialog,
+                    textAlign = TextAlign.Center,
+                    color = textColor,
+                    modifier = textModifier,
+                )
+            }
         }
     }
 }
@@ -242,6 +329,7 @@ private fun ConversationOptionsPanel(
     alpha: Float,
     optionsClockMs: Float,
     arrowBounceOffsetY: Float,
+    arrowVisible: Boolean,
     onOptionClick: (ConversationOptionDomain) -> Unit,
     onAdvance: () -> Unit,
 ) {
@@ -275,6 +363,8 @@ private fun ConversationOptionsPanel(
             }
         }
         if (options.isEmpty()) {
+            // Space stays reserved so the panel doesn't jump when the arrow
+            // fades in after the typewriter finishes.
             Kiwi_Spacer(Spacing.medium)
             Kiwi_Image(
                 R.drawable.ic_dialogue_arrow,
@@ -284,7 +374,8 @@ private fun ConversationOptionsPanel(
                         .fillMaxWidth()
                         .size(getResponsiveSizeWidth(8.dp), getResponsiveSizeHeight(8.dp))
                         .offset(y = getResponsiveSizeHeight(arrowBounceOffsetY.dp))
-                        .clickable(onClick = onAdvance),
+                        .alpha(if (arrowVisible) 1f else 0f)
+                        .then(if (arrowVisible) Modifier.clickable(onClick = onAdvance) else Modifier),
             )
             Kiwi_Spacer(Spacing.large)
         } else {
