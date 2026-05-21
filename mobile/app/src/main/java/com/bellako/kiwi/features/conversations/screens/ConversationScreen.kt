@@ -62,6 +62,7 @@ import com.bellako.kiwi.features.conversations.components.ConversationOption
 import com.bellako.kiwi.features.conversations.components.Kiwi_DialogueText
 import com.bellako.kiwi.features.conversations.components.Kiwi_TypewriterText
 import com.bellako.kiwi.features.conversations.components.TypewriterState
+import com.bellako.kiwi.features.conversations.components.rememberCharacterIdleModifier
 import com.bellako.kiwi.features.conversations.components.rememberTypewriter
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
@@ -120,6 +121,8 @@ fun ConversationScreen(
     // doesn't finish typing before the dialogue box has faded in.
     var dialogueStageStarted by remember { mutableStateOf(false) }
     val typewriter = rememberTypewriter(conversation.dialog, play = dialogueStageStarted)
+
+    val idleModifier = rememberCharacterIdleModifier(conversation.sprite)
 
     val optionsTotalMs =
         OPTION_POP_MS + (conversation.options.size - 1).coerceAtLeast(0) * OPTION_STAGGER_MS
@@ -197,6 +200,7 @@ fun ConversationScreen(
                     painterResourceId =
                         AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
                     alt = "Character Pose",
+                    modifier = idleModifier,
                 )
             }
             DialogueBox(

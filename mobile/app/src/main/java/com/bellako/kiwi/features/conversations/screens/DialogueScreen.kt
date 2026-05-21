@@ -47,6 +47,7 @@ import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.conversations.components.CharacterName
 import com.bellako.kiwi.features.conversations.components.Kiwi_DialogueText
 import com.bellako.kiwi.features.conversations.components.Kiwi_TypewriterText
+import com.bellako.kiwi.features.conversations.components.rememberBreathingModifier
 import com.bellako.kiwi.features.conversations.components.rememberTypewriter
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
@@ -84,6 +85,10 @@ fun DialogueScreen(
     val context = LocalContext.current
 
     val typewriter = rememberTypewriter(conversation.dialog)
+
+    // The compact dialogue always breathes — even Liria — since the small
+    // circular portrait has no room to read a floating orbit.
+    val breathingModifier = rememberBreathingModifier()
 
     val advance: () -> Unit = {
         AudioManager.playSFX(context, R.raw.snd_fx_03_page)
@@ -126,7 +131,8 @@ fun DialogueScreen(
                             Modifier
                                 .matchParentSize()
                                 .scale(1.6f)
-                                .background(kiwiColor.color0),
+                                .background(kiwiColor.color0)
+                                .then(breathingModifier),
                     )
                 }
                 Kiwi_Image(
