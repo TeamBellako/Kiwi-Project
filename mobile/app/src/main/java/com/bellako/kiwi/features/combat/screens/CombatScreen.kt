@@ -107,6 +107,8 @@ fun CombatScreen(
 
     val enemyName = combat.enemyName.ifBlank { DEFAULT_ENEMY_NAME }
     val turnMessage = currentTurnMessage(combat, enemyName)
+    // The player can act when combat is live and no turn animation is mid-flight.
+    val isUserTurn = combat.combatStatus == CombatGeneralStatus.ONGOING && !isTurnPlaying
     val logEntries =
         remember(combat.log, combat.combatStatus, enemyName, colors) {
             buildCombatLogEntries(
@@ -174,6 +176,7 @@ fun CombatScreen(
                     combat = combat,
                     deckSkills = deckSkills,
                     turnMessage = turnMessage,
+                    isUserTurn = isUserTurn,
                     isLogOpen = isLogOpen,
                     isOverlayOpen = isOverlayOpen,
                     selectedStatus = selectedStatus,
@@ -235,6 +238,7 @@ private fun CombatBottomPanel(
     combat: CombatDomain,
     deckSkills: List<SkillDomain>,
     turnMessage: AnnotatedString,
+    isUserTurn: Boolean,
     isLogOpen: Boolean,
     isOverlayOpen: Boolean,
     selectedStatus: CombatActiveStatusDomain?,
@@ -268,6 +272,7 @@ private fun CombatBottomPanel(
             glowColor = combatTurnGlowColor(combat.log.lastOrNull()),
             introAlpha = intro.turnIndicatorAlpha,
             dimmed = isOverlayOpen,
+            isUserTurn = isUserTurn,
         )
 
         Kiwi_Spacer(Spacing.medium)

@@ -142,6 +142,6 @@ fun CombatTimer_Preview() {
 @Suppress("MagicNumber")
 fun CombatTimer_Urgent_Preview() {
     Kiwi_Theme {
-        CombatTimer(endsAt = System.currentTimeMillis() + SECONDS_PER_MINUTE * 12 * TIMER_TICK_MILLIS)
+        CombatTimer(endsAt = System.currentTimeMillis() + SECONDS_PER_MINUTE * 6 * TIMER_TICK_MILLIS)
     }
 }

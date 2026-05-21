@@ -60,6 +60,8 @@ fun CombatTurnIndicator(
     glowColor: Color? = null,
     introAlpha: Float = 1f,
     dimmed: Boolean = false,
+    // When true the indicator gently pulses to signal the player can act.
+    isUserTurn: Boolean = false,
 ) {
     val colors = LocalKiwiColors.current
     val rotation by animateFloatAsState(
@@ -72,6 +74,7 @@ fun CombatTurnIndicator(
         label = "combat_turn_dim",
     )
     val blinkAlpha = rememberBlinkAlpha()
+    val turnPulseAlpha = rememberTurnPulseAlpha(active = isUserTurn && !dimmed)
 
     LaunchedEffect(message.text) {
         blinkAlpha.blink()
@@ -95,7 +98,7 @@ fun CombatTurnIndicator(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.weight(1f).alpha(blinkAlpha.value),
+            modifier = Modifier.weight(1f).alpha(blinkAlpha.value * turnPulseAlpha),
             contentAlignment = Alignment.Center,
         ) {
             Kiwi_AnnotatedString_P2(
@@ -159,6 +162,7 @@ fun CombatTurnIndicator_Preview() {
             isLogOpen = false,
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
+            isUserTurn = true,
         )
     }
 }
