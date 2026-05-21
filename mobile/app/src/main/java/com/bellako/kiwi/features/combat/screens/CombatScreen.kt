@@ -77,7 +77,7 @@ private const val BOTTOM_PANEL_GRADIENT_START = -0.2f
 private const val BOTTOM_PANEL_GRADIENT_MID = 0.5f
 private const val BOTTOM_PANEL_GRADIENT_END = 1f
 private const val BARK_FADE_MS = 250
-private const val BARK_VERTICAL_BIAS = 0.15f
+private const val BARK_VERTICAL_BIAS = 0.25f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -267,6 +267,7 @@ private fun CombatBottomPanel(
             onClick = onToggleLog,
             glowColor = combatTurnGlowColor(combat.log.lastOrNull()),
             introAlpha = intro.turnIndicatorAlpha,
+            dimmed = isOverlayOpen,
         )
 
         Kiwi_Spacer(Spacing.medium)

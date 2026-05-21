@@ -31,6 +31,7 @@ import com.bellako.kiwi.features.combat.data.CombatActionDomain
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.SkillEffectResultType
+import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -58,11 +59,17 @@ fun CombatTurnIndicator(
     modifier: Modifier = Modifier,
     glowColor: Color? = null,
     introAlpha: Float = 1f,
+    dimmed: Boolean = false,
 ) {
     val colors = LocalKiwiColors.current
     val rotation by animateFloatAsState(
         targetValue = if (isLogOpen) CHEVRON_OPEN_ROTATION else CHEVRON_CLOSED_ROTATION,
         label = "combat_turn_chevron",
+    )
+    // Dimmed along with the rest of the HUD while an overlay (e.g. a bark) is up.
+    val dimAlpha by animateFloatAsState(
+        targetValue = if (dimmed) KIWI_DISABLED_ALPHA else 1f,
+        label = "combat_turn_dim",
     )
     val blinkAlpha = rememberBlinkAlpha()
 
@@ -74,7 +81,7 @@ fun CombatTurnIndicator(
         modifier =
             modifier
                 .fillMaxWidth()
-                .alpha(introAlpha)
+                .alpha(introAlpha * dimAlpha)
                 .combatPanel(
                     bgColor = colors.color3A,
                     borderColor = colors.color5C,
