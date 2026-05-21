@@ -140,13 +140,14 @@ fun CombatScreen(
                 .fillMaxSize()
                 .background(colors.color2),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .graphicsLayer { translationX = playerVfx.shakeOffsetX.value },
-        ) {
-            CombatBackground(combat.background, alpha = intro.backgroundAlpha)
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Only the background shakes on player damage — the enemy sprite and
+            // the HUD stay put so it doesn't read as a full-camera shake.
+            CombatBackground(
+                background = combat.background,
+                alpha = intro.backgroundAlpha,
+                shakeOffsetX = { playerVfx.shakeOffsetX.value },
+            )
 
             CombatEnemySprite(
                 enemySprite = combat.enemySprite,
