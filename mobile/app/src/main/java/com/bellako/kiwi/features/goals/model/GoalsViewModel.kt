@@ -434,6 +434,7 @@ class GoalsViewModel
             val goalDefinitions = goalDefinitionsResult.getOrNull()
 
             if (!goalDefinitions.isNullOrEmpty()) {
+                createGoalsFromDefinitions(goalDefinitions)
                 notifyNewGoals(goalDefinitions)
             }
         }
