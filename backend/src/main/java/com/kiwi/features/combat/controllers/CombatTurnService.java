@@ -16,6 +16,7 @@ import com.kiwi.features.skills.controllers.SkillService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Map;
 
 @Service
@@ -66,7 +67,7 @@ public class CombatTurnService {
 
         CombatTurnResultDomain result = combatEngine.executeTurn(combatDomain, skillId);
 
-        combatLogService.saveCombatActions(result.getActions(), combatPersistence.getId(), combatPersistence.getTurnNumber());
+        Instant createdAt = combatLogService.saveCombatActions(result.getActions(), combatPersistence.getId(), combatPersistence.getTurnNumber());
 
         lastSkillService.updateLastSkills(
                 combatPersistence.getId(),
@@ -87,7 +88,7 @@ public class CombatTurnService {
             skillService.removeCooldown(userId, resetCooldownId);
         }
 
-        return CombatTurnResultMapper.toDTO(result);
+        return CombatTurnResultMapper.toDTO(result, createdAt);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -112,7 +113,7 @@ public class CombatTurnService {
 
             combatProgressService.applyTurnResult(combatPersistence, combatDomain);
 
-            return CombatTurnResultMapper.toDTO(combatEngine.buildTimeoutCombatTurnResult(combatDomain));
+            return CombatTurnResultMapper.toDTO(combatEngine.buildTimeoutCombatTurnResult(combatDomain), Instant.now());
         }
 
         return new CombatTurnResultDTO();
@@ -133,7 +134,7 @@ public class CombatTurnService {
 
         combatProgressService.applyTurnResult(combatPersistence,combatDomain);
 
-        return CombatTurnResultMapper.toDTO(combatEngine.buildAbandonCombatTurnResult(combatDomain));
+        return CombatTurnResultMapper.toDTO(combatEngine.buildAbandonCombatTurnResult(combatDomain), Instant.now());
 
     }
 

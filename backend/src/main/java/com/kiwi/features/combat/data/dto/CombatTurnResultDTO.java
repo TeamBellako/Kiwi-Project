@@ -2,6 +2,7 @@ package com.kiwi.features.combat.data.dto;
 
 import lombok.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -23,5 +24,7 @@ public class CombatTurnResultDTO {
     private int onCompletedEntityId;
 
     private boolean bonusActionPending;
+
+    private Instant createdAt;
 
 }
