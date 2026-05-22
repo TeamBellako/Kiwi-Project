@@ -120,7 +120,7 @@ fun CombatScreen(
         }
 
     val playerVfx = rememberPlayerDamageVfx(combat.user.stats.currentHp, combat.id)
-    val deathVignetteAlpha = rememberDeathSequenceVfx(combat.user.stats.currentHp == 0, combat.id)
+    val deathCloseProgress = rememberDeathSequenceVfx(combat.user.stats.currentHp == 0, combat.id)
     val nodeEntry = LocalNodeEntryTransition.current
     val nodeEntryScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
@@ -211,7 +211,7 @@ fun CombatScreen(
         }
 
         PlayerDamageOverlays(playerVfx)
-        DeathSequenceOverlay(deathVignetteAlpha.value)
+        DeathSequenceOverlay(deathCloseProgress.value)
 
         CombatLogOverlay(
             isOpen = isLogOpen,
