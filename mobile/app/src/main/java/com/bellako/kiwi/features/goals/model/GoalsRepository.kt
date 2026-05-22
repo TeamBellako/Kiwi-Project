@@ -79,5 +79,10 @@ class GoalsRepository(
             api.saveAppUsageBaseline(dto)
         }
 
+    suspend fun autoReviewAppUsageGoals(): Result<List<UserGoalStatusDTO>> =
+        runCatching {
+            api.autoReviewAppUsageGoals()
+        }
+
     // endregion
 }

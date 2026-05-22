@@ -3,6 +3,8 @@ package com.kiwi.features.goals.controllers;
 import com.kiwi.features.goals.data.*;
 import com.kiwi.features.goals.exceptions.GoalNotFoundException;
 import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
+import com.kiwi.features.metrics.controllers.MetricsRepository;
+import com.kiwi.features.metrics.data.MetricsPersistence;
 import com.kiwi.features.users.data.AppUsageType;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersRepository;
@@ -29,6 +31,7 @@ public class GoalService {
     private final UsersRepository usersRepository;
     private final UsersService usersService;
     private final UserAppUsageRepository userAppUsageRepository;
+    private final MetricsRepository metricsRepository;
 
     public GoalService(
             UserGoalStatusRepository userGoalStatusRepository,
@@ -36,13 +39,15 @@ public class GoalService {
             GoalRepository goalRepository,
             UsersRepository usersRepository,
             UsersService usersService,
-            UserAppUsageRepository userAppUsageRepository) {
+            UserAppUsageRepository userAppUsageRepository,
+            MetricsRepository metricsRepository) {
         this.userGoalStatusRepository = userGoalStatusRepository;
         this.userGoalProgressRepository = userGoalProgressRepository;
         this.goalRepository = goalRepository;
         this.usersRepository = usersRepository;
         this.usersService = usersService;
         this.userAppUsageRepository = userAppUsageRepository;
+        this.metricsRepository = metricsRepository;
     }
 
     private void updateUserGoalProgressAfterCompletion(UsersPersistence user, GoalPersistence goal) {
@@ -324,6 +329,67 @@ public class GoalService {
                 .stream()
                 .map(GoalDataMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Silently reviews all in-progress APP_USAGE goals from previous days.
+     * Compares the stored daily metrics against each goal's target_override and
+     * marks the goal COMPLETED (with points) or NOT_COMPLETED accordingly.
+     * No user interaction is required.
+     */
+    @Transactional
+    public List<UserGoalStatusDTO> autoReviewAppUsageGoals(Authentication authentication) {
+        UsersPersistence user = getUserFromAuthentication(authentication);
+        LocalDate today = LocalDate.now();
+
+        List<UserGoalStatusPersistence> pending =
+                userGoalStatusRepository.findByUserAndStatusAndDateBeforeAndGoal_CategoryOrderByDateDesc(
+                        user, GoalStatus.IN_PROGRESS, today, GoalCategory.APP_USAGE);
+
+        List<UserGoalStatusDTO> results = new ArrayList<>();
+
+        for (UserGoalStatusPersistence entry : pending) {
+            Optional<MetricsPersistence> metricsOpt =
+                    metricsRepository.findByUserAndDate(user, entry.getDate());
+
+            if (metricsOpt.isEmpty()) {
+                // No metrics stored for that day — skip, cannot evaluate
+                continue;
+            }
+
+            MetricsPersistence metrics = metricsOpt.get();
+            Integer targetOverride = entry.getTargetOverride();
+            if (targetOverride == null || targetOverride <= 0) {
+                continue;
+            }
+
+            long actualUsageMs;
+            boolean achieved;
+
+            if (entry.getGoal().getType() == GoalType.APP_USAGE_GOOD) {
+                actualUsageMs = (long) metrics.getCurrentGoodTimeSeconds() * 1000L;
+                achieved = actualUsageMs >= targetOverride;
+            } else if (entry.getGoal().getType() == GoalType.APP_USAGE_BAD) {
+                actualUsageMs = (long) metrics.getCurrentBadTimeSeconds() * 1000L;
+                achieved = actualUsageMs <= targetOverride;
+            } else {
+                continue;
+            }
+
+            if (achieved) {
+                usersService.addPointsToUser(user.getId(), entry.getGoal().getReward());
+                updateUserGoalProgressAfterCompletion(user, entry.getGoal());
+                entry.setStatus(GoalStatus.COMPLETED);
+                entry.setValue((int) (actualUsageMs / 1000));
+            } else {
+                updateUserGoalProgressAfterFailure(user, entry.getGoal());
+                entry.setStatus(GoalStatus.NOT_COMPLETED);
+            }
+
+            results.add(UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.save(entry)));
+        }
+
+        return results;
     }
     // endregion
 }

@@ -66,4 +66,7 @@ interface IGoalsAPI {
     suspend fun saveAppUsageBaseline(
         @Body dto: UserAppUsageDTO,
     ): UserAppUsageDTO
+
+    @POST("api/user/goals/app_usage/auto_review")
+    suspend fun autoReviewAppUsageGoals(): List<UserGoalStatusDTO>
 }
