@@ -55,7 +55,6 @@ import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
-import com.bellako.kiwi.common.screens.LOGIN_LOADING_ANIM_DURATION_MS
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
@@ -83,7 +82,6 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // Time for the background to scroll by one full image width — i.e. one
@@ -248,10 +246,7 @@ private fun LogInLayout(
         if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
             usersViewModel.onEmailChanged(username)
             usersViewModel.onPasswordChanged(password)
-            usersViewModel.markInitialAuthCheckPerformed()
             localLoading = performLogin(context, usersViewModel, personalityViewModel, navController)
-        } else {
-            usersViewModel.markInitialAuthCheckPerformed()
         }
     }
 
@@ -365,13 +360,10 @@ private fun LogInForm(
             color = kiwiColors.color5,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
-                    usersViewModel.setManualAuthOverlayActive(true)
-                    delay(LOGIN_LOADING_ANIM_DURATION_MS.toLong())
                     val success = performLogin(context, usersViewModel, personalityViewModel, navController)
                     if (success) {
                         onLoginSuccess()
                     }
-                    usersViewModel.setManualAuthOverlayActive(false)
                 }
             },
             enabled = !isLoading,
@@ -453,31 +445,38 @@ private suspend fun performLogin(
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
 ): Boolean {
+    // Raise the map-entry loading curtain up front so it fully covers the
+    // login network call and the navigation. It is lowered again for any
+    // outcome that does NOT land on the map (an unfinished sign-up, a failure).
+    usersViewModel.setShowAppLoading(true)
     if (usersViewModel.login(context).isSuccess) {
         // check personality registered and configured
         // navigate to Home or to the corresponding personality test if anything missing
         personalityViewModel.loadPersonality().fold(
             onSuccess = {
-                if (personalityViewModel.state.value?.build == "") {
-                    navController.navigate(ScreenRoutes.SIGNUP3_TEST)
-                } else if (personalityViewModel.state.value
-                        ?.goodApps
-                        ?.isEmpty()!! &&
-                    personalityViewModel.state.value
-                        ?.badApps
-                        ?.isEmpty()!!
-                ) {
-                    navController.navigate(ScreenRoutes.SIGNUP4_APPS)
-                } else {
-                    navController.navigate(ScreenRoutes.HOME)
+                val personality = personalityViewModel.state.value
+                val needsApps =
+                    personality?.goodApps.isNullOrEmpty() && personality?.badApps.isNullOrEmpty()
+                when {
+                    personality?.build == "" -> {
+                        usersViewModel.setShowAppLoading(false)
+                        navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+                    }
+                    needsApps -> {
+                        usersViewModel.setShowAppLoading(false)
+                        navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                    }
+                    else -> navController.navigate(ScreenRoutes.HOME)
                 }
             },
             onFailure = {
+                usersViewModel.setShowAppLoading(false)
                 navController.navigate(ScreenRoutes.SIGNUP3_TEST)
             },
         )
         return true
     }
+    usersViewModel.setShowAppLoading(false)
     return false
 }
 
