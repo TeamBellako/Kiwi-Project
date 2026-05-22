@@ -83,6 +83,7 @@ object CombatTestFactory {
         actor: CombatActor = CombatActor.USER,
         skillName: String = "Fireball",
         damage: Float = 25f,
+        createdAt: Long? = null,
     ): CombatActionDomain =
         CombatActionDomain(
             actor = actor,
@@ -97,6 +98,7 @@ object CombatTestFactory {
                         critic = false,
                     ),
                 ),
+            createdAt = createdAt,
         )
 
     fun timeoutAction(): CombatActionDomain =
@@ -115,6 +117,7 @@ object CombatTestFactory {
         combatId: Long = 1L,
         turnNumber: Int = 1,
         actions: List<CombatActionDomain> = listOf(skillUsedAction()),
+        createdAt: Long? = null,
     ): CombatTurnResultDomain =
         CombatTurnResultDomain(
             combatId = combatId,
@@ -123,6 +126,7 @@ object CombatTestFactory {
             combatStatus = CombatGeneralStatus.ONGOING,
             onCompletedEvent = null,
             onCompletedEntityId = null,
+            createdAt = createdAt,
         )
 
     fun userWonTurnResult(

@@ -130,3 +130,6 @@ val KiwiColorR1 = Color(0xFF752723)
 
 @Suppress("MagicNumber")
 val KiwiColorOcean = Color(0xFF007DAD)
+
+@Suppress("MagicNumber")
+val KiwiColorPurple = Color(0xFF9B7EDE)

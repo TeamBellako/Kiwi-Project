@@ -1,6 +1,7 @@
 package com.bellako.kiwi.features.combat.data
 
 private const val NO_COMPLETION_EVENT_SENTINEL = "_"
+private const val MILLIS_PER_SECOND = 1000.0
 
 object CombatDataMapper {
     fun toDomain(dto: CombatDTO): CombatDomain =
@@ -42,6 +43,7 @@ object CombatDataMapper {
             onCompletedEvent = if (hasEvent) dto.onCompletedEvent else null,
             onCompletedEntityId = if (hasEvent) dto.onCompletedEntityId else null,
             bonusActionPending = dto.bonusActionPending,
+            createdAt = dto.createdAt?.let { epochSecondsToMillis(it) },
         )
     }
 
@@ -155,6 +157,7 @@ object CombatDataMapper {
             onCompletedEvent = domain.onCompletedEvent ?: NO_COMPLETION_EVENT_SENTINEL,
             onCompletedEntityId = domain.onCompletedEntityId ?: 0,
             bonusActionPending = domain.bonusActionPending,
+            createdAt = domain.createdAt?.let { epochMillisToSeconds(it) },
         )
 
     fun toDTO(domain: CombatActorDomain): CombatActorDTO =
@@ -228,4 +231,11 @@ object CombatDataMapper {
             critic = domain.critic,
             appliedStatus = domain.appliedStatus?.let { toDTO(it) },
         )
+
+    // The backend serialises createdAt as a Jackson numeric timestamp — epoch
+    // seconds with a fractional sub-second part, e.g. 1779442908.578937396.
+    // Sub-millisecond precision is dropped; the combat log only needs minutes.
+    private fun epochSecondsToMillis(epochSeconds: Double): Long = (epochSeconds * MILLIS_PER_SECOND).toLong()
+
+    private fun epochMillisToSeconds(epochMillis: Long): Double = epochMillis / MILLIS_PER_SECOND
 }

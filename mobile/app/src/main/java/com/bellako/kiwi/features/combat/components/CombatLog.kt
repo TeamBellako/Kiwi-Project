@@ -41,10 +41,16 @@ import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import androidx.compose.ui.text.AnnotatedString.Builder as AnnotatedStringBuilder
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 private val LOG_RADIUS = 12.dp
 private val LOG_INNER_PADDING = 16.dp
+// The player as the sentence subject ("You have used...") vs. as the object
+// ("...against you").
 private const val USER_NAME_PLACEHOLDER = "You"
+private const val USER_NAME_PLACEHOLDER_TARGET = "you"
 private const val LOG_BG_ALPHA = 0.85f
 
 sealed class CombatLogEntry {
@@ -52,8 +58,8 @@ sealed class CombatLogEntry {
         val text: AnnotatedString,
     ) : CombatLogEntry()
 
-    data class TurnSeparator(
-        val turnNumber: Int,
+    data class TimeSeparator(
+        val timestampMillis: Long,
     ) : CombatLogEntry()
 
     data class Intro(
@@ -124,17 +130,16 @@ fun CombatLog(
                             ),
                         )
 
-                    is CombatLogEntry.TurnSeparator -> {
-                        Kiwi_Spacer(Spacing.xSmall)
-                        Box(modifier = entryModifier) {
+                    is CombatLogEntry.TimeSeparator ->
+                        Column(modifier = Modifier.fillMaxWidth().then(entryModifier)) {
+                            Kiwi_Spacer(Spacing.xSmall)
                             Kiwi_HorizontalLine_Text(
-                                text = "Turn ${entry.turnNumber}",
+                                text = formatLogTime(entry.timestampMillis),
                                 color = colors.color5C,
                                 textColor = colors.color7A,
                             )
+                            Kiwi_Spacer(Spacing.xSmall)
                         }
-                        Kiwi_Spacer(Spacing.xSmall)
-                    }
                 }
             }
         }
@@ -161,7 +166,16 @@ fun buildCombatLogEntries(
             )
     }
 
+    // A timestamp separator opens each turn group — i.e. whenever the backend
+    // turn time changes. Actions with no timestamp (a combat's initial log)
+    // simply get no separator.
+    var lastTimestamp: Long? = null
     actions.forEach { action ->
+        val timestamp = action.createdAt
+        if (timestamp != null && timestamp != lastTimestamp) {
+            result += CombatLogEntry.TimeSeparator(timestamp)
+            lastTimestamp = timestamp
+        }
         result += CombatLogEntry.Action(formatAction(action, enemyName, colors))
     }
 
@@ -191,81 +205,86 @@ private fun formatAction(
     enemyName: String,
     colors: KiwiColorsData,
 ): AnnotatedString {
-    val actorName = if (action.actor == CombatActor.USER) USER_NAME_PLACEHOLDER else enemyName
+    val actorIsUser = action.actor == CombatActor.USER
+    val actorName = if (actorIsUser) USER_NAME_PLACEHOLDER else enemyName
+    val targetActor = if (actorIsUser) CombatActor.ENEMY else CombatActor.USER
+    val targetName = if (actorIsUser) enemyName else USER_NAME_PLACEHOLDER_TARGET
     return buildAnnotatedString {
         when (action.actionType) {
             CombatActionType.SKILL_USED -> {
-                appendActor(actorName, colors)
-                append(" used ")
-                action.skillName?.let { appendSkill(it, colors) }
-                append("!")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative(if (actorIsUser) " have used " else " has used ", colors)
+                action.skillName?.let { appendSkill(it, action.actor, colors) }
+                appendNarrative(" against ", colors)
+                appendActor(targetName, targetActor, colors)
+                appendNarrative(".", colors)
             }
 
             CombatActionType.ACTOR_BLOCKED_BY_STATE -> {
-                appendActor(actorName, colors)
-                append(" is blocked by ")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative(" is blocked by ", colors)
                 appendStatus(action.stateName, colors)
-                append(".")
+                appendNarrative(".", colors)
             }
 
             CombatActionType.SKILL_REPEAT_BY_STATE -> {
-                appendActor(actorName, colors)
-                append(" repeats ")
-                action.skillName?.let { appendSkill(it, colors) }
-                append(" because of ")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative(" repeats ", colors)
+                action.skillName?.let { appendSkill(it, action.actor, colors) }
+                appendNarrative(" because of ", colors)
                 appendStatus(action.stateName, colors)
-                append(".")
+                appendNarrative(".", colors)
             }
 
             CombatActionType.ACTOR_DAMAGED_BY_STATE -> {
-                appendActor(actorName, colors)
-                append(" suffers from ")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative(" suffers from ", colors)
                 appendStatus(action.stateName, colors)
-                append(".")
+                appendNarrative(".", colors)
             }
 
             CombatActionType.BLOCKED_SKILLS_BY_STATE -> {
-                appendActor(actorName, colors)
-                append("'s skills are blocked by ")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative("'s skills are blocked by ", colors)
                 appendStatus(action.stateName, colors)
-                append(".")
+                appendNarrative(".", colors)
             }
 
             CombatActionType.RELEASED_SKILLS_BY_STATE -> {
-                appendActor(actorName, colors)
-                append("'s skills are released from ")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative("'s skills are released from ", colors)
                 appendStatus(action.stateName, colors)
-                append(".")
+                appendNarrative(".", colors)
             }
 
             CombatActionType.SKIP -> {
-                appendActor(actorName, colors)
-                append(" skipped the turn.")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative(" skipped the turn.", colors)
             }
 
             CombatActionType.ACTOR_SKIPPED_BY_TURNS -> {
-                appendActor(actorName, colors)
-                append("'s turn was skipped!")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative("'s turn was skipped!", colors)
             }
 
             CombatActionType.STATUS_TURN_REDUCED -> {
                 appendStatus(action.stateName, colors)
-                append(" weakens on ")
-                appendActor(actorName, colors)
-                append(".")
+                appendNarrative(" weakens on ", colors)
+                appendActor(actorName, action.actor, colors)
+                appendNarrative(".", colors)
             }
 
             CombatActionType.STATUS_FINISHED -> {
                 appendStatus(action.stateName, colors)
-                append(" wears off on ")
-                appendActor(actorName, colors)
-                append(".")
+                appendNarrative(" wears off on ", colors)
+                appendActor(actorName, action.actor, colors)
+                appendNarrative(".", colors)
             }
 
-            CombatActionType.TIMEOUT -> append("The battle timed out.")
+            CombatActionType.TIMEOUT -> appendNarrative("The battle timed out.", colors)
             CombatActionType.ABANDON -> {
-                appendActor(actorName, colors)
-                append(" abandoned the battle.")
+                appendActor(actorName, action.actor, colors)
+                appendNarrative(" abandoned the battle.", colors)
             }
         }
     }
@@ -273,21 +292,40 @@ private fun formatAction(
 
 private fun AnnotatedStringBuilder.appendActor(
     name: String,
+    actor: CombatActor,
     colors: KiwiColorsData,
 ) {
-    withStyle(SpanStyle(color = colors.color7A, fontStyle = FontStyle.Italic)) {
+    val color = if (actor == CombatActor.ENEMY) colors.colorPurple else colors.color7A
+    withStyle(SpanStyle(color = color, fontStyle = FontStyle.Italic)) {
         append(name)
     }
 }
 
 private fun AnnotatedStringBuilder.appendSkill(
     name: String,
+    actor: CombatActor,
     colors: KiwiColorsData,
 ) {
-    withStyle(SpanStyle(color = colors.color8A, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)) {
+    val color = if (actor == CombatActor.ENEMY) colors.colorR else colors.color8A
+    withStyle(SpanStyle(color = color, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)) {
         append(name)
     }
 }
+
+// Connective, narrative glue — everything that isn't an actor, skill or
+// status. Uses the regular button text colour so it reads as plain prose.
+private fun AnnotatedStringBuilder.appendNarrative(
+    text: String,
+    colors: KiwiColorsData,
+) {
+    withStyle(SpanStyle(color = colors.colorF)) {
+        append(text)
+    }
+}
+
+// Wall-clock time a turn was resolved, e.g. "18:05h", for the log separators.
+private fun formatLogTime(timestampMillis: Long): String =
+    SimpleDateFormat("HH:mm'h'", Locale.getDefault()).format(Date(timestampMillis))
 
 private fun AnnotatedStringBuilder.appendStatus(
     name: String?,
@@ -307,12 +345,18 @@ fun CombatLog_Preview() {
         val colors = LocalKiwiColors.current
         val entries =
             remember {
+                val firstTurnTime = System.currentTimeMillis()
+                val secondTurnTime = firstTurnTime + 3_600_000L
                 buildCombatLogEntries(
                     actions =
                         listOf(
-                            CombatTestFactory.skillUsedAction(skillName = "Smite"),
-                            CombatTestFactory.skillUsedAction(actor = CombatActor.ENEMY, skillName = "Insomnia"),
-                            CombatTestFactory.skillUsedAction(skillName = "Wind"),
+                            CombatTestFactory.skillUsedAction(skillName = "Smite", createdAt = firstTurnTime),
+                            CombatTestFactory.skillUsedAction(
+                                actor = CombatActor.ENEMY,
+                                skillName = "Insomnia",
+                                createdAt = secondTurnTime,
+                            ),
+                            CombatTestFactory.skillUsedAction(skillName = "Wind", createdAt = secondTurnTime),
                         ),
                     enemyName = "Procrastinogre",
                     combatStatus = CombatGeneralStatus.ONGOING,
