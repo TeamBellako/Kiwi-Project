@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.combat.data
 private const val NO_COMPLETION_EVENT_SENTINEL = "_"
 private const val MILLIS_PER_SECOND = 1000.0
 
+@Suppress("TooManyFunctions")
 object CombatDataMapper {
     fun toDomain(dto: CombatDTO): CombatDomain =
         CombatDomain(
