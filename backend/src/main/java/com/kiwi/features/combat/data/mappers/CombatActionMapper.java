@@ -18,18 +18,19 @@ public class CombatActionMapper {
     public static List<CombatLogPersistence> toCombatLogPersistence(
             CombatActionDomain action,
             Long combatId,
-            int turnNumber
+            int turnNumber,
+            Instant createdAt
     ) {
 
         return switch (action.getActionType()) {
 
-            case SKILL_USED -> mapSkillUsed(action, combatId, turnNumber);
+            case SKILL_USED -> mapSkillUsed(action, combatId, turnNumber, createdAt);
 
             case ACTOR_BLOCKED_BY_STATE,
                  SKILL_REPEAT_BY_STATE,
                  STATUS_TURN_REDUCED,
                  STATUS_FINISHED -> List.of(
-                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber, createdAt)
                             .stateName(action.getState()  != null ? action.getState().getName() : null)
                             .stateId(action.getState()  != null ? action.getState().getStateId() : null)
                             .build()
@@ -37,7 +38,7 @@ public class CombatActionMapper {
 
             case ACTOR_HEALED_BY_STATE,
                  ACTOR_DAMAGED_BY_STATE -> List.of(
-                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber, createdAt)
                             .stateName(action.getState()  != null ? action.getState().getName() : null)
                             .stateId(action.getState()  != null ? action.getState().getStateId() : null)
                             .value(action.getStateEffectValue())
@@ -46,7 +47,7 @@ public class CombatActionMapper {
 
             case BLOCKED_SKILLS_BY_STATE,
                  RELEASED_SKILLS_BY_STATE -> List.of(
-                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber, createdAt)
                             .stateName(action.getState()  != null ? action.getState().getName() : null)
                             .stateId(action.getState()  != null ? action.getState().getStateId() : null)
                             .blockedSkills(
@@ -56,7 +57,7 @@ public class CombatActionMapper {
             );
 
             case SKIP, TIMEOUT, ABANDON, ACTOR_SKIPPED_BY_TURNS -> List.of(
-                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber).build()
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber, createdAt).build()
             );
         };
     }
@@ -66,12 +67,13 @@ public class CombatActionMapper {
     private static List<CombatLogPersistence> mapSkillUsed(
             CombatActionDomain action,
             Long combatId,
-            int turnNumber
+            int turnNumber,
+            Instant createdAt
     ) {
 
         if (action.getSkillEffectsResults() == null || action.getSkillEffectsResults().isEmpty()) {
             return List.of(
-                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
+                    baseCombatLogPersistenceBuilder(action, combatId, turnNumber, createdAt)
                             .skillName(action.getSkillName())
                             .build()
             );
@@ -80,7 +82,7 @@ public class CombatActionMapper {
         return action.getSkillEffectsResults().stream()
                 .map(effect -> {
                     CombatLogPersistence.CombatLogPersistenceBuilder builder =
-                            baseCombatLogPersistenceBuilder(action, combatId, turnNumber)
+                            baseCombatLogPersistenceBuilder(action, combatId, turnNumber, createdAt)
                                     .skillName(action.getSkillName())
                                     .effectType(effect.getTypeResult())
                                     .target(effect.getTarget())
@@ -111,14 +113,15 @@ public class CombatActionMapper {
     private static CombatLogPersistence.CombatLogPersistenceBuilder baseCombatLogPersistenceBuilder(
             CombatActionDomain action,
             Long combatId,
-            int turnNumber
+            int turnNumber,
+            Instant createdAt
     ) {
         return CombatLogPersistence.builder()
                 .combatId(combatId)
                 .turnNumber(turnNumber)
                 .actor(action.getActor() != null ? action.getActor() : null)
                 .combatActionType(action.getActionType() != null ? action.getActionType() : null)
-                .createdAt(Instant.now());
+                .createdAt(createdAt);
     }
 
     //------------------------------------------------------------------------------------------------------------------

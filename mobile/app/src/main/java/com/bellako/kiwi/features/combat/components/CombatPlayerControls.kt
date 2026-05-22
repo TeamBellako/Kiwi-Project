@@ -60,6 +60,8 @@ internal fun PlayerControls(
 
             Kiwi_Spacer(Spacing.small)
 
+            // The health bar is never dimmed by the overlay — the player must
+            // be able to read their HP clearly, especially while taking damage.
             CombatHealthBar(
                 currentHp = userActor.stats.currentHp,
                 maxHp = userActor.stats.maxHp,
@@ -68,8 +70,7 @@ internal fun PlayerControls(
                 modifier =
                     Modifier
                         .align(Alignment.CenterHorizontally)
-                        .fillMaxWidth(PLAYER_HEALTH_BAR_WIDTH_FRACTION)
-                        .alpha(dimAlpha),
+                        .fillMaxWidth(PLAYER_HEALTH_BAR_WIDTH_FRACTION),
                 barRevealProgress = playerBarRevealProgress,
                 numbersAlpha = playerBarNumbersAlpha,
             )

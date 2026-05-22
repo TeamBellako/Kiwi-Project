@@ -109,6 +109,13 @@ data class CombatActionDomain(
     val blockedSkills: List<Long>? = null,
     val skillName: String? = null,
     val skillEffectsResults: List<SkillEffectResultDomain> = emptyList(),
+    /**
+     * Wall-clock time (epoch millis) the owning turn was resolved by the
+     * backend, copied from [CombatTurnResultDomain.createdAt] as the turn's
+     * actions are merged into the log. Null for actions loaded with a combat's
+     * initial log. Drives the timestamp separators in the combat log.
+     */
+    val createdAt: Long? = null,
 )
 
 @Serializable
@@ -154,4 +161,6 @@ data class CombatTurnResultDomain(
      * extra user turns (e.g. Inner Focus).
      */
     val bonusActionPending: Boolean = false,
+    /** Wall-clock time (epoch millis) the backend resolved this turn. */
+    val createdAt: Long? = null,
 )

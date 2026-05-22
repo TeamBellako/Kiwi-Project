@@ -3,11 +3,8 @@ package com.bellako.kiwi.features.combat.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,7 +35,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
-import com.bellako.kiwi.features.combat.components.CombatLog
+import com.bellako.kiwi.features.combat.components.CombatLogOverlay
 import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatDomain
@@ -58,7 +55,6 @@ private const val EDGE_FADE_TOP_ALPHA = 0.85f
 private const val EDGE_FADE_BOTTOM_ALPHA = 0.95f
 private const val EDGE_FADE_TOP_END = 0.18f
 private const val EDGE_FADE_BOTTOM_START = 0.55f
-private const val LOG_HEIGHT_FRACTION = 0.7f
 private val CONTINUE_BUTTON_HORIZONTAL_MARGIN = 56.dp
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -120,32 +116,6 @@ fun CombatVictoryScreen(
 
                     SkillsUsedList(skillsUsed = skillsUsed)
                 }
-
-                if (isLogOpen) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.55f))
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = { isLogOpen = false },
-                                ),
-                    )
-                    CombatLog(
-                        entries = logEntries,
-                        modifier =
-                            Modifier
-                                .align(Alignment.Center)
-                                .fillMaxHeight(LOG_HEIGHT_FRACTION)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = {},
-                                ),
-                    )
-                }
             }
 
             Kiwi_Spacer(Spacing.medium)
@@ -167,6 +137,12 @@ fun CombatVictoryScreen(
 
             Kiwi_Spacer(Spacing.large)
         }
+
+        CombatLogOverlay(
+            isOpen = isLogOpen,
+            entries = logEntries,
+            onDismiss = { isLogOpen = false },
+        )
     }
 }
 

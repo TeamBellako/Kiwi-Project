@@ -41,8 +41,8 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
+import com.bellako.kiwi.common.screens.components.rememberFloatingModifier
 import com.bellako.kiwi.features.conversations.components.CharacterName
-import com.bellako.kiwi.features.conversations.components.rememberFloatingModifier
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing

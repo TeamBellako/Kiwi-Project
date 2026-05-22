@@ -1,6 +1,6 @@
 @file:Suppress("MagicNumber")
 
-package com.bellako.kiwi.features.conversations.components
+package com.bellako.kiwi.common.screens.components
 
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.LinearEasing

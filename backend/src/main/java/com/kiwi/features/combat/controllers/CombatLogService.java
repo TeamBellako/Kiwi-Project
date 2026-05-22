@@ -8,6 +8,7 @@ import com.kiwi.features.combat.repositories.CombatLogRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -76,12 +77,16 @@ public class CombatLogService {
     //------------------------------------------------------------------------------------------------------------------
 
     @Transactional
-    public void saveCombatActions(List<CombatActionDomain> actions, Long combatId, int turnNumber) {
+    public Instant saveCombatActions(List<CombatActionDomain> actions, Long combatId, int turnNumber) {
+        Instant createdAt = Instant.now();
+
         List<CombatLogPersistence> logs = actions.stream()
-                .flatMap(a -> CombatActionMapper.toCombatLogPersistence(a, combatId, turnNumber).stream())
+                .flatMap(a -> CombatActionMapper.toCombatLogPersistence(a, combatId, turnNumber, createdAt).stream())
                 .toList();
 
         combatLogRepository.saveAll(logs);
+
+        return createdAt;
     }
 
     //------------------------------------------------------------------------------------------------------------------

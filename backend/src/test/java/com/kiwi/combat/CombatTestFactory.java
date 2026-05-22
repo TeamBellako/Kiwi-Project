@@ -226,6 +226,7 @@ public class CombatTestFactory {
                 .turnNumber(1 + RANDOM.nextInt(10))
                 .actions(List.of())
                 .combatStatus(CombatGeneralStatus.ONGOING.name())
+                .createdAt(Instant.now())
                 .build();
     }
 }

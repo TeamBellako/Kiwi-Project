@@ -236,7 +236,7 @@ class CombatViewModel
                 current.copy(
                     turnNumber = result.turnNumber,
                     combatStatus = result.combatStatus,
-                    log = current.log + result.actions,
+                    log = current.log + result.actions.map { it.copy(createdAt = result.createdAt) },
                     onCompletedEvent = if (isTerminal) result.onCompletedEvent else null,
                     onCompletedEntityId = if (isTerminal) result.onCompletedEntityId else null,
                 )
@@ -261,6 +261,13 @@ class CombatViewModel
             ) {
                 val prev = state
                 state = applyActionEffects(state, actions.first())
+                // Stamp the optimistically-added player action (the last log
+                // entry) with the turn timestamp so it groups with the rest of
+                // the turn instead of opening a separate timestamp section.
+                state =
+                    state.copy(
+                        log = state.log.dropLast(1) + state.log.last().copy(createdAt = result.createdAt),
+                    )
                 _active.value = state
                 playActionSFX(actions.first())
                 playerSkillId?.let { barkController.onSkillUsed(CombatActor.USER, it) }
@@ -273,7 +280,7 @@ class CombatViewModel
             }
 
             for (i in startIndex until actions.size) {
-                val action = actions[i]
+                val action = actions[i].copy(createdAt = result.createdAt)
                 val prev = state
                 state = state.copy(log = state.log + action)
                 state = applyActionEffects(state, action)

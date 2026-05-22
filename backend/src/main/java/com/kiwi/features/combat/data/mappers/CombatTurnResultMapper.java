@@ -4,11 +4,12 @@ import com.kiwi.features.combat.data.domain.CombatTurnResultDomain;
 import com.kiwi.features.combat.data.dto.CombatActionDTO;
 import com.kiwi.features.combat.data.dto.CombatTurnResultDTO;
 
+import java.time.Instant;
 import java.util.List;
 
 public class CombatTurnResultMapper {
 
-    public static CombatTurnResultDTO toDTO (CombatTurnResultDomain domain){
+    public static CombatTurnResultDTO toDTO (CombatTurnResultDomain domain, Instant createdAt){
 
         List<CombatActionDTO> actionDTOList = CombatActionMapper.toDTOList(domain.getActions());
 
@@ -18,6 +19,7 @@ public class CombatTurnResultMapper {
                 .actions(actionDTOList)
                 .combatStatus(domain.getCombatStatus().name())
                 .bonusActionPending(domain.isBonusActionPending())
+                .createdAt(createdAt)
                 .build();
     }
 }

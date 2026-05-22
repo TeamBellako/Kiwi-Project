@@ -2,14 +2,23 @@ package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,11 +30,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -36,11 +49,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
+import com.bellako.kiwi.common.screens.LOGIN_LOADING_ANIM_DURATION_MS
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
@@ -51,7 +66,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
-import com.bellako.kiwi.common.screens.LOGIN_LOADING_ANIM_DURATION_MS
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -71,6 +85,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+// Time for the background to scroll by one full image width — i.e. one
+// seamless loop. Slow enough to read as an ambient drift, not obvious motion.
+private const val LOGIN_SCROLL_PERIOD_MS = 64000
 
 @Composable
 fun LogInScreen(
@@ -105,16 +123,7 @@ fun LogInScreen(
                 })
             }
             else -> {
-                Kiwi_Image(
-                    R.drawable.login_bg,
-                    "Login Background",
-                    modifier =
-                        Modifier
-                            .fillMaxHeight(imgPercentage)
-                            .align(Alignment.TopStart),
-                    contentScale = ContentScale.FillHeight,
-                    alignment = Alignment.TopStart,
-                )
+                ScrollingLoginBackground(imgPercentage)
 
                 Box(
                     modifier =
@@ -149,6 +158,71 @@ fun LogInScreen(
             }
         }
     }
+}
+
+/**
+ * The login background, scrolling endlessly to the right. Two copies of the
+ * image are laid edge to edge and shifted together by exactly one image width
+ * per loop, so a fresh copy always slides in from the left to replace the one
+ * leaving on the right — making the seam invisible. The shift is read only
+ * inside [graphicsLayer], so it runs on the draw phase without recomposition.
+ */
+@Composable
+private fun BoxScope.ScrollingLoginBackground(imgPercentage: Float) {
+    val painter = painterResource(R.drawable.login_bg)
+
+    BoxWithConstraints(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(imgPercentage)
+                .align(Alignment.TopStart)
+                .clipToBounds(),
+    ) {
+        // The image is scaled to fill the band's height, so its on-screen
+        // width follows from its aspect ratio — that width is one scroll loop.
+        val intrinsic = painter.intrinsicSize
+        val heightPx = with(LocalDensity.current) { maxHeight.toPx() }
+        val imageWidthPx = if (intrinsic.height > 0f) intrinsic.width * heightPx / intrinsic.height else 0f
+        val imageWidthDp = with(LocalDensity.current) { imageWidthPx.toDp() }
+
+        val transition = rememberInfiniteTransition(label = "login_scroll")
+        val progress by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec =
+                infiniteRepeatable(
+                    animation = tween(LOGIN_SCROLL_PERIOD_MS, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart,
+                ),
+            label = "login_scroll_progress",
+        )
+
+        // Trailing copy sits one width to the left; leading copy starts on
+        // screen. Both slide right by `shift`; at shift == imageWidth the
+        // trailing copy lands exactly where the leading one began.
+        val shift = progress * imageWidthPx
+        LoginBackgroundImage(imageWidthDp, translationXPx = shift - imageWidthPx)
+        LoginBackgroundImage(imageWidthDp, translationXPx = shift)
+    }
+}
+
+@Composable
+private fun LoginBackgroundImage(
+    width: Dp,
+    translationXPx: Float,
+) {
+    Kiwi_Image(
+        R.drawable.login_bg,
+        "Login Background",
+        modifier =
+            Modifier
+                .requiredWidth(width)
+                .fillMaxHeight()
+                .graphicsLayer { translationX = translationXPx },
+        contentScale = ContentScale.FillHeight,
+        alignment = Alignment.TopStart,
+    )
 }
 
 @Composable

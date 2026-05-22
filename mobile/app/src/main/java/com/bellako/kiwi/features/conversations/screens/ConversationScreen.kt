@@ -56,13 +56,13 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.rememberCharacterIdleModifier
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.conversations.components.CharacterName
 import com.bellako.kiwi.features.conversations.components.ConversationOption
 import com.bellako.kiwi.features.conversations.components.Kiwi_DialogueText
 import com.bellako.kiwi.features.conversations.components.Kiwi_TypewriterText
 import com.bellako.kiwi.features.conversations.components.TypewriterState
-import com.bellako.kiwi.features.conversations.components.rememberCharacterIdleModifier
 import com.bellako.kiwi.features.conversations.components.rememberTypewriter
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -34,11 +33,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.rememberBreathingModifier
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -46,7 +45,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 private const val HEALTH_BAR_WIDTH_FRACTION = 0.6f
-private const val LOG_HEIGHT_FRACTION = 0.85f
 private const val DAMAGE_WIGGLE_CYCLES = 4
 private const val DAMAGE_WIGGLE_AMPLITUDE_PX = 22f
 private const val DAMAGE_WIGGLE_STEP_MS = 50
@@ -59,12 +57,8 @@ private const val ENEMY_DEFEAT_FADE_MS = 800
 private const val LOG_DIM_ALPHA = 0.55f
 
 @Composable
-@Suppress("LongParameterList")
 internal fun ColumnScope.CombatBattleArea(
     combat: CombatDomain,
-    isLogOpen: Boolean,
-    onDismissLog: () -> Unit,
-    logEntries: List<CombatLogEntry>,
     enemyBarRevealProgress: Float = 1f,
     enemyBarNumbersAlpha: Float = 1f,
     timerIntroProgress: Float = 1f,
@@ -83,29 +77,6 @@ internal fun ColumnScope.CombatBattleArea(
             barNumbersAlpha = enemyBarNumbersAlpha,
             timerIntroProgress = timerIntroProgress,
         )
-
-        if (isLogOpen) {
-            LogDimOverlay(
-                modifier = Modifier.fillMaxSize(),
-                onDismiss = onDismissLog,
-            )
-
-            CombatLog(
-                entries = logEntries,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(
-                            horizontal = getResponsiveSizeWidth(Spacing.medium),
-                            vertical = getResponsiveSizeHeight(Spacing.small),
-                        ).fillMaxHeight(LOG_HEIGHT_FRACTION)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {},
-                        ),
-            )
-        }
     }
 }
 
@@ -131,6 +102,8 @@ internal fun CombatEnemySprite(
     val redAlpha = remember { Animatable(0f) }
     val spriteAlpha = remember { Animatable(1f) }
     var isDamageAnimating by remember { mutableStateOf(false) }
+
+    val breathingModifier = rememberBreathingModifier()
 
     LaunchedEffect(damageTrigger) {
         if (damageTrigger == 0) return@LaunchedEffect
@@ -170,7 +143,8 @@ internal fun CombatEnemySprite(
             modifier
                 .fillMaxSize()
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                .alpha(spriteAlpha.value * introAlpha),
+                .alpha(spriteAlpha.value * introAlpha)
+                .then(breathingModifier),
         contentScale = ContentScale.Fit,
         colorFilter =
             if (redAlpha.value > 0f) {
