@@ -32,6 +32,7 @@ import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 
 @HiltViewModel
+@Suppress("TooManyFunctions")
 class GoalsViewModel
     @Inject
     constructor(
