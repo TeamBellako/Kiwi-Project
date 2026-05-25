@@ -309,6 +309,11 @@ private fun AppScreen(
                 }
             },
             content = { paddingValues ->
+                // Screens are sized to the area above the bar so their layouts
+                // stay centered. The bar's rounded corners reveal the Scaffold's
+                // containerColor (color2) underneath, which matches the screen
+                // backgrounds — so the overlay still reads as one continuous
+                // surface bleeding under the bar.
                 Box(Modifier.padding(paddingValues)) {
                     AppNavHost(
                         navController = navController,

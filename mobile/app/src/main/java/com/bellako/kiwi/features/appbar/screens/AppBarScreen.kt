@@ -82,12 +82,9 @@ fun AppBarScreen(
     navController: NavController,
     appBarViewModel: AppBarViewModel = hiltViewModel(),
 ) {
-    Box(
-        modifier =
-            Modifier
-                .wrapContentSize()
-                .background(LocalKiwiColors.current.color2),
-    ) {
+    // No background here: the rounded NavigationBar must let the screen behind
+    // it show through its top corners instead of a solid rectangle.
+    Box(modifier = Modifier.wrapContentSize()) {
         AppBarModalLayout(navController, appBarViewModel)
     }
 }
