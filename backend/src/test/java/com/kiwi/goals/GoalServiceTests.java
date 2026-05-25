@@ -250,8 +250,62 @@ public class GoalServiceTests {
     }
 
     // ============================================================================================
+    // UPDATE GOAL PROGRESS / UPDATE GOAL — must NEVER auto-complete
+    // ============================================================================================
+
+    @Test
+    public void updateGoalProgress_incrementCrossesTarget_statusStaysInProgressAndNoPoints() {
+        LocalDate date = LocalDate.now();
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        Integer target = entry.getGoal().getTarget();
+        entry.setValue(target - 1);
+        userGoalStatusRepository.save(entry);
+
+        UserGoalStatusDTO result = goalService.updateGoalProgress(1L, authentication);
+
+        assertEquals("IN_PROGRESS", result.getStatus());
+        assertEquals(target.intValue(), result.getValue().intValue());
+        verify(usersService, never()).addPointsToUser(any(), any());
+        verify(userGoalProgressRepository, never()).save(any());
+    }
+
+    @Test
+    public void updateGoal_setsValueEqualToTarget_statusStaysInProgressAndNoPoints() {
+        LocalDate date = LocalDate.now();
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        userGoalStatusRepository.save(entry);
+
+        UserGoalStatusDTO dto = inProgressGoalDTO(1L);
+        dto.setValue(entry.getGoal().getTarget());
+
+        UserGoalStatusDTO result = goalService.updateGoal(1L, dto, authentication);
+
+        assertEquals("IN_PROGRESS", result.getStatus());
+        assertEquals(entry.getGoal().getTarget().intValue(), result.getValue().intValue());
+        verify(usersService, never()).addPointsToUser(any(), any());
+        verify(userGoalProgressRepository, never()).save(any());
+    }
+
+    // ============================================================================================
     // COMPLETE GOAL
     // ============================================================================================
+
+    @Test
+    public void completeGoal_calledTwice_awardsPointsExactlyOnce() {
+        LocalDate date = LocalDate.now().minusDays(1);
+        UserGoalStatusPersistence entry = inProgressGoalPersistence(1L, date, testUser);
+        entry.setValue(entry.getGoal().getTarget());
+        userGoalStatusRepository.save(entry);
+        when(userGoalProgressRepository.findById(any())).thenReturn(Optional.empty());
+
+        UserGoalStatusDTO first = goalService.completeGoal(1L, authentication);
+        UserGoalStatusDTO second = goalService.completeGoal(1L, authentication);
+
+        assertEquals("COMPLETED", first.getStatus());
+        assertEquals("COMPLETED", second.getStatus());
+        verify(usersService, times(1))
+                .addPointsToUser(testUser.getId(), entry.getGoal().getReward());
+    }
 
     @Test
     public void completeGoal_valid_changesStatusAndAddsPoints() {

@@ -4,7 +4,11 @@ package com.bellako.kiwi.features.goals.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -71,7 +75,7 @@ fun GoalComponent(
 ) {
     var currentGoal by remember(goal.id) { mutableStateOf<IGoal>(goal) }
     var showModal by remember { mutableStateOf(false) }
-    var rewardForModal by remember { mutableStateOf<Int?>(null) }
+    var showConfirmCompletion by remember { mutableStateOf(false) }
 
     val goalDomain = currentGoal as? UserGoalStatusDomain
     val status = goalDomain?.status ?: GoalStatus.IN_PROGRESS
@@ -101,7 +105,7 @@ fun GoalComponent(
         modifier =
             modifier
                 .height(IntrinsicSize.Min)
-                .clickable { showModal = true },
+                .clickable(enabled = status != GoalStatus.COMPLETED) { showModal = true },
     ) {
         Kiwi_Image(
             R.drawable.daily_challenges_bg,
@@ -190,20 +194,15 @@ fun GoalComponent(
 
                             AudioManager.playSFX(context, R.raw.snd_ui_check)
 
-                            val previousValue = goalDomain?.value ?: 0
-                            coroutineScope.launch {
-                                val result = goalsViewModel.updateGoalProgress(currentGoal.id)
-                                result.onSuccess { updatedGoal ->
-                                    currentGoal = updatedGoal
-                                    val justReachedTarget =
-                                        previousValue < updatedGoal.target &&
-                                            updatedGoal.value >= updatedGoal.target
-                                    if (justReachedTarget) {
-                                        rewardForModal = updatedGoal.reward
-                                        EventBus.emitEvent(
-                                            EventType.MAP_CONTENT_AVAILABLE,
-                                            EventPayload.EmptyPayload(),
-                                        )
+                            val atTarget =
+                                goalDomain != null && goalDomain.value >= goalDomain.target
+                            if (atTarget) {
+                                showConfirmCompletion = true
+                            } else {
+                                coroutineScope.launch {
+                                    val result = goalsViewModel.updateGoalProgress(currentGoal.id)
+                                    result.onSuccess { updatedGoal ->
+                                        currentGoal = updatedGoal
                                     }
                                 }
                             }
@@ -211,14 +210,48 @@ fun GoalComponent(
                 contentAlignment = Alignment.Center,
             ) {
                 if (plus && status == GoalStatus.IN_PROGRESS) {
+                    val isTick = goalDomain?.value == goalDomain?.target
+                    val iconModifier =
+                        if (isTick) {
+                            val transition = rememberInfiniteTransition(label = "tickPulse")
+                            val scale by transition.animateFloat(
+                                initialValue = 1f,
+                                targetValue = 1.2f,
+                                animationSpec =
+                                    infiniteRepeatable(
+                                        animation = tween(650, easing = EaseInOut),
+                                        repeatMode = RepeatMode.Reverse,
+                                    ),
+                                label = "tickScale",
+                            )
+                            val glowAlpha by transition.animateFloat(
+                                initialValue = 0.55f,
+                                targetValue = 1f,
+                                animationSpec =
+                                    infiniteRepeatable(
+                                        animation = tween(650, easing = EaseInOut),
+                                        repeatMode = RepeatMode.Reverse,
+                                    ),
+                                label = "tickAlpha",
+                            )
+                            Modifier
+                                .padding(getResponsiveSizeHeight(8.dp))
+                                .graphicsLayer {
+                                    scaleX = scale
+                                    scaleY = scale
+                                    alpha = glowAlpha
+                                }
+                        } else {
+                            Modifier.padding(getResponsiveSizeHeight(8.dp))
+                        }
                     Kiwi_Image(
-                        if (goalDomain?.value == goalDomain?.target) {
+                        if (isTick) {
                             R.drawable.ic_daily_challenges_tick
                         } else {
                             R.drawable.ic_daily_challenges_plus
                         },
                         "Quest Indicator For: ${currentGoal.target}",
-                        Modifier.padding(getResponsiveSizeHeight(8.dp)),
+                        iconModifier,
                     )
                 }
             }
@@ -236,10 +269,24 @@ fun GoalComponent(
         )
     }
 
-    rewardForModal?.let { points ->
-        GoalRewardModal(
-            rewardPoints = points,
-            onDismiss = { rewardForModal = null },
+    if (showConfirmCompletion && goalDomain != null) {
+        GoalConfirmCompletionModal(
+            rewardPoints = goalDomain.reward,
+            onDismiss = { showConfirmCompletion = false },
+            onConfirm = {
+                showConfirmCompletion = false
+                val goalToComplete = goalDomain
+                coroutineScope.launch {
+                    val result = goalsViewModel.completeGoal(goalToComplete.id)
+                    result.onSuccess {
+                        currentGoal = goalToComplete.copy(status = GoalStatus.COMPLETED)
+                        EventBus.emitEvent(
+                            EventType.MAP_CONTENT_AVAILABLE,
+                            EventPayload.EmptyPayload(),
+                        )
+                    }
+                }
+            },
         )
     }
 }

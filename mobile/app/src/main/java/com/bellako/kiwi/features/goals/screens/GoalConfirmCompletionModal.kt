@@ -23,7 +23,6 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -33,10 +32,10 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
 @Composable
-fun GoalRewardModal(
+fun GoalConfirmCompletionModal(
     rewardPoints: Int,
+    onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    title: String = "Goal Completed!",
 ) {
     val kiwiColor = LocalKiwiColors.current
     Dialog(
@@ -72,7 +71,7 @@ fun GoalRewardModal(
             ) {
                 Kiwi_Image(
                     R.drawable.dialogue_small_bg,
-                    "Reward frame",
+                    "Confirm completion frame",
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -90,7 +89,7 @@ fun GoalRewardModal(
                 ) {
                     Kiwi_H1(
                         KiwiTextArguments(
-                            title,
+                            "Goal Reached!",
                             TextAlign.Center,
                             color = kiwiColor.color6,
                             fontWeight = FontWeight.Bold,
@@ -99,18 +98,9 @@ fun GoalRewardModal(
                     )
                     Kiwi_P1(
                         KiwiTextArguments(
-                            "You earned",
+                            "Confirm to complete this goal and earn +$rewardPoints points.",
                             TextAlign.Center,
                             color = kiwiColor.color6,
-                            modifier = Modifier.fillMaxWidth(),
-                        ),
-                    )
-                    Kiwi_H2(
-                        KiwiTextArguments(
-                            "+$rewardPoints points",
-                            TextAlign.Center,
-                            color = kiwiColor.color8A,
-                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.fillMaxWidth(),
                         ),
                     )
@@ -118,12 +108,12 @@ fun GoalRewardModal(
                         horizontalMargin = Spacing.xLarge,
                         textArguments =
                             KiwiTextArguments(
-                                "AWESOME!",
+                                "CONFIRM",
                                 color = kiwiColor.color6,
                                 fontWeight = FontWeight.Bold,
                             ),
                         color = kiwiColor.color5A,
-                        onClick = onDismiss,
+                        onClick = onConfirm,
                     )
                 }
             }
@@ -136,10 +126,11 @@ fun GoalRewardModal(
 @Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
 @Composable
 @Suppress("MagicNumber")
-fun GoalRewardModal_Preview() {
+fun GoalConfirmCompletionModal_Preview() {
     Kiwi_Theme {
-        GoalRewardModal(
+        GoalConfirmCompletionModal(
             rewardPoints = 150,
+            onConfirm = {},
             onDismiss = {},
         )
     }

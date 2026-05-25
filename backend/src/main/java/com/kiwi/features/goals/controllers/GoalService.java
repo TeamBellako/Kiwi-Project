@@ -151,8 +151,6 @@ public class GoalService {
         Integer newValue = Math.min(existing.getValue() + increment, target);
         existing.setValue(newValue);
 
-        completeIfTargetReached(existing, user);
-
         return UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.save(existing));
     }
 
@@ -169,22 +167,7 @@ public class GoalService {
 
         existing.setValue(dto.getValue());
 
-        completeIfTargetReached(existing, user);
-
         return UserGoalStatusDataMapper.toDTO(userGoalStatusRepository.save(existing));
-    }
-
-    private void completeIfTargetReached(UserGoalStatusPersistence entry, UsersPersistence user) {
-        if (entry.getStatus() != GoalStatus.IN_PROGRESS) return;
-
-        Integer target = entry.getGoal().getTarget();
-        if (target == null || entry.getValue() < target) return;
-
-        usersService.addPointsToUser(user.getId(), entry.getGoal().getReward());
-        updateUserGoalProgressAfterCompletion(user, entry.getGoal());
-
-        entry.setStatus(GoalStatus.COMPLETED);
-        entry.setValue(target);
     }
 
     @Transactional

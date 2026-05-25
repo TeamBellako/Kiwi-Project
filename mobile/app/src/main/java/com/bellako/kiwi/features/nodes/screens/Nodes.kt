@@ -460,55 +460,65 @@ fun NodeAction(
             }
         }
         if (node.status == NodeStatus.LOCKED) {
-            Box(
+            NodeCostBubble(currentPoints = currentPoints, price = node.price)
+        }
+    }
+}
+
+@Composable
+private fun NodeCostBubble(
+    currentPoints: Int,
+    price: Int,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Box(
+        modifier =
+            Modifier
+                .offset(y = -getResponsiveSizeHeight(2.dp))
+                .clip(
+                    RoundedCornerShape(
+                        0.dp,
+                        0.dp,
+                        getResponsiveSizeHeight(22.dp),
+                        getResponsiveSizeHeight(22.dp),
+                    ),
+                ).background(kiwiColors.colorF),
+        contentAlignment = Alignment.Center,
+    ) {
+        val annotatedString =
+            buildAnnotatedString {
+                withStyle(
+                    style =
+                        SpanStyle(
+                            color = kiwiColors.color1B,
+                        ),
+                ) {
+                    append("Cost: ")
+                }
+                withStyle(
+                    style =
+                        SpanStyle(
+                            color = kiwiColors.color1B,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                ) {
+                    append("$currentPoints/$price")
+                }
+            }
+
+        Kiwi_AnnotatedString_P2(
+            KiwiAnnotatedStringArguments(
+                annotatedString,
+                TextAlign.Center,
                 modifier =
                     Modifier
-                        .offset(y = -getResponsiveSizeHeight(2.dp))
-                        .clip(
-                            RoundedCornerShape(
-                                0.dp,
-                                0.dp,
-                                getResponsiveSizeHeight(22.dp),
-                                getResponsiveSizeHeight(22.dp),
-                            ),
-                        ).background(kiwiColors.colorF),
-                contentAlignment = Alignment.Center,
-            ) {
-                val annotatedString =
-                    buildAnnotatedString {
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = kiwiColors.color1B,
-                                ),
-                        ) {
-                            append("Cost: ")
-                        }
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = kiwiColors.color1B,
-                                    fontWeight = FontWeight.Bold,
-                                ),
-                        ) {
-                            append("$currentPoints/${node.price}")
-                        }
-                    }
-
-                Kiwi_AnnotatedString_P2(
-                    KiwiAnnotatedStringArguments(
-                        annotatedString,
-                        TextAlign.Center,
-                        modifier =
-                            Modifier
-                                .padding(
-                                    vertical = getResponsiveSizeHeight(Spacing.xSmall),
-                                    horizontal = getResponsiveSizeHeight(Spacing.large),
-                                ),
-                    ),
-                )
-            }
-        }
+                        .padding(
+                            vertical = getResponsiveSizeHeight(Spacing.xSmall),
+                            horizontal = getResponsiveSizeHeight(Spacing.large),
+                        ),
+            ),
+        )
     }
 }
 

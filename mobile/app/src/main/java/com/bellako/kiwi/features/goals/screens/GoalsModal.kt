@@ -58,7 +58,6 @@ fun GoalsModal(
     onDismiss: () -> Unit = {},
 ) {
     var showWorkInProgressPopup by remember { mutableStateOf(false) }
-    var rewardForModal by remember { mutableStateOf<Int?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     val header =
@@ -171,31 +170,27 @@ fun GoalsModal(
                             .weight(buttonPercentage),
                     onClick = {
                         coroutineScope.launch {
-                            var totalReward = 0
+                            var anyCompleted = false
                             if (goalModalType == GoalNotificationType.YESTERDAY) {
                                 for (goal in goals) {
                                     if (goal is UserGoalStatusDomain) {
                                         if (goal.value == goal.target) {
                                             goalsViewModel.completeGoal(goalId = goal.id)
-                                            totalReward += goal.reward
+                                            anyCompleted = true
                                         } else {
                                             goalsViewModel.uncompleteGoal(goalId = goal.id)
                                         }
                                     }
                                 }
                                 goalsViewModel.invalidateGoalsInProgressCache()
-                                if (totalReward > 0) {
+                                if (anyCompleted) {
                                     EventBus.emitEvent(
                                         EventType.MAP_CONTENT_AVAILABLE,
                                         EventPayload.EmptyPayload(),
                                     )
                                 }
                             }
-                            if (totalReward > 0) {
-                                rewardForModal = totalReward
-                            } else {
-                                onDismiss()
-                            }
+                            onDismiss()
                         }
                     },
                 )
@@ -206,17 +201,6 @@ fun GoalsModal(
     // Popup de "Work in progress"
     if (showWorkInProgressPopup) {
         WIPPopUpScreen(onDismiss = { showWorkInProgressPopup = false })
-    }
-
-    rewardForModal?.let { points ->
-        GoalRewardModal(
-            rewardPoints = points,
-            onDismiss = {
-                rewardForModal = null
-                onDismiss()
-            },
-            title = "Daily Goals Completed!",
-        )
     }
 }
 
