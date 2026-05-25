@@ -241,7 +241,7 @@ class UsersViewModel
             }
         }
 
-        suspend fun getMyUserPoints() {
+        override suspend fun getMyUserPoints() {
             setIsLoading(true)
             val result = repository.getMyUserPoints()
             setIsLoading(false)

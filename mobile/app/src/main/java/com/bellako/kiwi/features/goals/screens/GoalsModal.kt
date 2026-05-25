@@ -31,6 +31,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.modals.WIPPopUpScreen
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
@@ -55,6 +58,7 @@ fun GoalsModal(
     onDismiss: () -> Unit = {},
 ) {
     var showWorkInProgressPopup by remember { mutableStateOf(false) }
+    var rewardForModal by remember { mutableStateOf<Int?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     val header =
@@ -167,19 +171,31 @@ fun GoalsModal(
                             .weight(buttonPercentage),
                     onClick = {
                         coroutineScope.launch {
+                            var totalReward = 0
                             if (goalModalType == GoalNotificationType.YESTERDAY) {
                                 for (goal in goals) {
                                     if (goal is UserGoalStatusDomain) {
                                         if (goal.value == goal.target) {
                                             goalsViewModel.completeGoal(goalId = goal.id)
+                                            totalReward += goal.reward
                                         } else {
                                             goalsViewModel.uncompleteGoal(goalId = goal.id)
                                         }
                                     }
                                 }
                                 goalsViewModel.invalidateGoalsInProgressCache()
+                                if (totalReward > 0) {
+                                    EventBus.emitEvent(
+                                        EventType.MAP_CONTENT_AVAILABLE,
+                                        EventPayload.EmptyPayload(),
+                                    )
+                                }
                             }
-                            onDismiss()
+                            if (totalReward > 0) {
+                                rewardForModal = totalReward
+                            } else {
+                                onDismiss()
+                            }
                         }
                     },
                 )
@@ -190,6 +206,17 @@ fun GoalsModal(
     // Popup de "Work in progress"
     if (showWorkInProgressPopup) {
         WIPPopUpScreen(onDismiss = { showWorkInProgressPopup = false })
+    }
+
+    rewardForModal?.let { points ->
+        GoalRewardModal(
+            rewardPoints = points,
+            onDismiss = {
+                rewardForModal = null
+                onDismiss()
+            },
+            title = "Daily Goals Completed!",
+        )
     }
 }
 

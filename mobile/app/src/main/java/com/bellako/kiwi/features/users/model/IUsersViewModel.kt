@@ -35,6 +35,8 @@ interface IUsersViewModel : IBaseViewModel<UsersState> {
 
     suspend fun logout(context: Context)
 
+    suspend fun getMyUserPoints()
+
     // ---------------------------------------------------------------------------------------------
 
     suspend fun saveLocalCredentials(context: Context)

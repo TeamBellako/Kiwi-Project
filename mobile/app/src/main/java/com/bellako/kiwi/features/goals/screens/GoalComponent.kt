@@ -44,6 +44,9 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label3
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
@@ -58,7 +61,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.launch
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun GoalComponent(
     goal: IGoal,
@@ -68,6 +71,7 @@ fun GoalComponent(
 ) {
     var currentGoal by remember(goal.id) { mutableStateOf<IGoal>(goal) }
     var showModal by remember { mutableStateOf(false) }
+    var rewardForModal by remember { mutableStateOf<Int?>(null) }
 
     val goalDomain = currentGoal as? UserGoalStatusDomain
     val status = goalDomain?.status ?: GoalStatus.IN_PROGRESS
@@ -186,10 +190,21 @@ fun GoalComponent(
 
                             AudioManager.playSFX(context, R.raw.snd_ui_check)
 
+                            val previousValue = goalDomain?.value ?: 0
                             coroutineScope.launch {
                                 val result = goalsViewModel.updateGoalProgress(currentGoal.id)
                                 result.onSuccess { updatedGoal ->
                                     currentGoal = updatedGoal
+                                    val justReachedTarget =
+                                        previousValue < updatedGoal.target &&
+                                            updatedGoal.value >= updatedGoal.target
+                                    if (justReachedTarget) {
+                                        rewardForModal = updatedGoal.reward
+                                        EventBus.emitEvent(
+                                            EventType.MAP_CONTENT_AVAILABLE,
+                                            EventPayload.EmptyPayload(),
+                                        )
+                                    }
                                 }
                             }
                         },
@@ -218,6 +233,13 @@ fun GoalComponent(
             onGoalUpdated = { updatedGoal ->
                 currentGoal = updatedGoal
             },
+        )
+    }
+
+    rewardForModal?.let { points ->
+        GoalRewardModal(
+            rewardPoints = points,
+            onDismiss = { rewardForModal = null },
         )
     }
 }

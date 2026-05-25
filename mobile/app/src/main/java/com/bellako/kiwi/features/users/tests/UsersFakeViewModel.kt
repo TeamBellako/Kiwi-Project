@@ -88,6 +88,8 @@ class UsersFakeViewModel(
 
     override suspend fun logout(context: Context) {}
 
+    override suspend fun getMyUserPoints() {}
+
     // ---------------------------------------------------------------------------------------------
 
     override suspend fun saveLocalCredentials(context: Context) {}
