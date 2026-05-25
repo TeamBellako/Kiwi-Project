@@ -378,6 +378,8 @@ fun AppClassificationColumns(
     Column(
         modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
+        Kiwi_Spacer(Spacing.large)
+
         Kiwi_P2(
             KiwiTextArguments(
                 text = "Hold and drag to move apps",

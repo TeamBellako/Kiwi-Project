@@ -160,8 +160,12 @@ fun MapScreen(
                 KiwiTextArguments(
                     mapState.mapInfo.mapTitle,
                     color = kiwiColors.colorF,
+                    // offset (not padding) so the title's measured size in the
+                    // Column stays unchanged — keeps the map viewport, and so
+                    // the centered play-button anchor, at their original Y.
                     modifier =
                         Modifier
+                            .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
                             .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
                             .zIndex(1f),
                 ),

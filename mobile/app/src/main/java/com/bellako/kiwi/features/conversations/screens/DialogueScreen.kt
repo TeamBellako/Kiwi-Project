@@ -95,6 +95,11 @@ fun DialogueScreen(
         viewModel?.next()
     }
 
+    // Only show the advance chevron when tapping it would lead to more
+    // dialogue. If the next event ends the conversation, hide it — the screen
+    // is still tap-anywhere-to-dismiss via the outer Column clickable.
+    val showAdvanceChevron = typewriter.isComplete && conversation.nextEvent != NextEventType.END
+
     Column(
         verticalArrangement = Arrangement.Bottom,
         modifier =
@@ -203,9 +208,9 @@ fun DialogueScreen(
                             .align(Alignment.BottomCenter)
                             .size(getResponsiveSizeWidth(10.dp), getResponsiveSizeHeight(10.dp))
                             .offset(y = getResponsiveSizeHeight((offsetY - 12f).dp))
-                            .alpha(if (typewriter.isComplete) 1f else 0f)
+                            .alpha(if (showAdvanceChevron) 1f else 0f)
                             .then(
-                                if (typewriter.isComplete) {
+                                if (showAdvanceChevron) {
                                     Modifier.clickable(onClick = advance)
                                 } else {
                                     Modifier

@@ -285,8 +285,12 @@ private fun LoginLoadingContent(
                         .align(Alignment.TopCenter)
                         .fillMaxWidth()
                         .then(linkedEntry)
-                        .padding(getResponsiveSizeHeight(Spacing.medium))
-                        .background(
+                        .padding(
+                            start = getResponsiveSizeHeight(Spacing.medium),
+                            end = getResponsiveSizeHeight(Spacing.medium),
+                            top = getResponsiveSizeHeight(Spacing.xLarge),
+                            bottom = getResponsiveSizeHeight(Spacing.large),
+                        ).background(
                             color = kiwiColors.color2.copy(alpha = PROGRESS_BG_ALPHA),
                             shape = RoundedCornerShape(getResponsiveSizeHeight(Spacing.small)),
                         ).padding(
