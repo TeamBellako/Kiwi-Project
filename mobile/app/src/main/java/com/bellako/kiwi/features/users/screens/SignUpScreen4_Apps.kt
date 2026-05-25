@@ -83,6 +83,9 @@ import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -149,12 +152,13 @@ private val BAD_APP_PACKAGES =
 
 @Composable
 fun SignUpScreen4_Apps(
+    usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
     goalsViewModel: IGoalsViewModel,
     navController: NavController,
 ) {
     SignUpScreen {
-        AppClassification(personalityViewModel, navController, goalsViewModel)
+        AppClassification(usersViewModel, personalityViewModel, navController, goalsViewModel)
     }
 }
 
@@ -166,6 +170,7 @@ data class AppInfo(
 
 @Composable
 fun AppClassification(
+    usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
     goalsViewModel: IGoalsViewModel,
@@ -288,6 +293,7 @@ fun AppClassification(
     } else {
         AppClassificationColumns(
             isLoading = isLoading,
+            usersViewModel = usersViewModel,
             personalityViewModel = personalityViewModel,
             goalsViewModel = goalsViewModel,
             goodApps = goodApps,
@@ -332,6 +338,7 @@ private fun buildInitialAppBuckets(
 @Composable
 fun AppClassificationColumns(
     isLoading: Boolean,
+    usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
     goalsViewModel: IGoalsViewModel,
     goodApps: SnapshotStateList<AppInfo>,
@@ -371,6 +378,8 @@ fun AppClassificationColumns(
     Column(
         modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
+        Kiwi_Spacer(Spacing.large)
+
         Kiwi_P2(
             KiwiTextArguments(
                 text = "Hold and drag to move apps",
@@ -434,6 +443,10 @@ fun AppClassificationColumns(
             color = kiwiColors.color5A,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
+                    // App selection is the final sign-up step — raise the
+                    // map-entry loading curtain now so it covers the save and
+                    // the navigation into the map.
+                    usersViewModel.setShowAppLoading(true)
                     personalityViewModel.onAppsChanged(
                         goodApps.map { it.packageName },
                         badApps.map { it.packageName },
@@ -447,6 +460,8 @@ fun AppClassificationColumns(
                         )
                         navController.navigate(ScreenRoutes.HOME)
                         onUpdateSuccess()
+                    } else {
+                        usersViewModel.setShowAppLoading(false)
                     }
                 }
             },
@@ -864,6 +879,7 @@ data class ColumnRects(
 fun SignUpScreen4_Apps_Preview() {
     Kiwi_Theme {
         SignUpScreen4_Apps(
+            usersViewModel = UsersFakeViewModel(UsersState("", "", "")),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(
@@ -876,7 +892,7 @@ fun SignUpScreen4_Apps_Preview() {
                     ),
                 ),
             navController = rememberNavController(),
-                goalsViewModel = GoalsFakeViewModel(),
+            goalsViewModel = GoalsFakeViewModel(),
         )
     }
 }

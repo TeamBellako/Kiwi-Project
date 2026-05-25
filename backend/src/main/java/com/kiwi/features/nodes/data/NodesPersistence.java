@@ -48,6 +48,10 @@ public class NodesPersistence {
     @Column(name = "on_execution_entity_id")
     private int onExecutionEntityId = 0;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "transition_style", nullable = false)
+    private NodeTransitionStyle transitionStyle = NodeTransitionStyle.VEIL;
+
     @OneToMany(mappedBy = "fromNode", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NodeEdgePersistence> outgoingEdges = new ArrayList<>();
 

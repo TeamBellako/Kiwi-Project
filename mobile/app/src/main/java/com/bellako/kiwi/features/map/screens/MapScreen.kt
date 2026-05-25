@@ -2,17 +2,26 @@ package com.bellako.kiwi.features.map.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -39,6 +49,7 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
@@ -50,6 +61,7 @@ import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.map.data.MapsInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
+import com.bellako.kiwi.features.nodes.data.NodeTransitionStyle
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.nodes.screens.NodeAction
@@ -133,6 +145,14 @@ fun MapScreen(
         goalsViewModel.checkAndNotifyGoals()
     }
 
+    // Refresh the player's points whenever the map is shown so the indicator
+    // is in sync with the server — login already fetches once, but a stale
+    // map re-entry (or a sign-up flow that bypassed the login refresh) would
+    // otherwise show 0 until a node unlock / goal completion triggers a sync.
+    LaunchedEffect(Unit) {
+        usersViewModel.getMyUserPoints()
+    }
+
     LaunchedEffect(Unit) {
         mapViewModel.setBackgroundColor(kiwiColors.colorOcean)
 
@@ -159,8 +179,12 @@ fun MapScreen(
                 KiwiTextArguments(
                     mapState.mapInfo.mapTitle,
                     color = kiwiColors.colorF,
+                    // offset (not padding) so the title's measured size in the
+                    // Column stays unchanged — keeps the map viewport, and so
+                    // the centered play-button anchor, at their original Y.
                     modifier =
                         Modifier
+                            .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
                             .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
                             .zIndex(1f),
                 ),
@@ -175,8 +199,90 @@ fun MapScreen(
                 modifier = Modifier.fillMaxSize(),
             )
         }
+
+        PointsIndicator(
+            currentPoints = currentPoints,
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    // Match the title's vertical placement so the indicator
+                    // sits on the same line as the map name. The pill's own
+                    // border + inner padding contributes the small lead the
+                    // title gets from its Spacing.small padding, so no extra
+                    // outer top padding is needed here.
+                    .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
+                    .padding(end = getResponsiveSizeHeight(Spacing.medium))
+                    .zIndex(1f),
+        )
     }
 }
+
+private const val POINTS_ANIM_MS = 350
+
+@Composable
+private fun PointsIndicator(
+    currentPoints: Int,
+    modifier: Modifier = Modifier,
+) {
+    val kiwiColors = LocalKiwiColors.current
+    val shape = RoundedCornerShape(percent = 50)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            modifier
+                .background(
+                    color = kiwiColors.color2.copy(alpha = POINTS_BG_ALPHA),
+                    shape = shape,
+                )
+                .border(
+                    width = 1.dp,
+                    color = kiwiColors.color6,
+                    shape = shape,
+                )
+                .padding(
+                    horizontal = getResponsiveSizeHeight(Spacing.medium),
+                    vertical = getResponsiveSizeHeight(Spacing.small),
+                ),
+    ) {
+        // The number itself rides AnimatedContent. clipToBounds masks the
+        // incoming/outgoing values to the slot's bounds, so the slide is
+        // hidden behind the pill background — increases scroll down, decreases
+        // scroll up.
+        AnimatedContent(
+            targetState = currentPoints,
+            transitionSpec = {
+                val increased = targetState > initialState
+                if (increased) {
+                    slideInVertically(
+                        animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
+                    ) { -it } togetherWith
+                        slideOutVertically(
+                            animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
+                        ) { it }
+                } else {
+                    slideInVertically(
+                        animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
+                    ) { it } togetherWith
+                        slideOutVertically(
+                            animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
+                        ) { -it }
+                }
+            },
+            modifier = Modifier.clipToBounds(),
+            label = "points_change",
+        ) { points ->
+            Kiwi_P1(
+                KiwiTextArguments(
+                    "%,d".format(points),
+                    color = kiwiColors.colorF,
+                ),
+            )
+        }
+    }
+}
+
+private const val POINTS_BG_ALPHA = 0.7f
 
 private fun loadNodes(
     mapViewModel: MapViewModel,
@@ -369,6 +475,7 @@ private fun InteractiveMap(
                                     runNodeEntry(
                                         scope = nodeEntryScope,
                                         nodeEntry = nodeEntry,
+                                        style = selectedNode.transitionStyle,
                                     ) {
                                         if (selectedNode.onExecutionEvent != "_") {
                                             EventBus.emitEvent(
@@ -382,6 +489,7 @@ private fun InteractiveMap(
                                     runNodeEntry(
                                         scope = nodeEntryScope,
                                         nodeEntry = nodeEntry,
+                                        style = selectedNode.transitionStyle,
                                     ) {
                                         if (selectedNode.onExecutionEvent != "_") {
                                             EventBus.emitEvent(
@@ -434,9 +542,10 @@ private const val FALLBACK_VEIL_HOLD_MS = 1_500L
 private fun runNodeEntry(
     scope: CoroutineScope,
     nodeEntry: NodeEntryTransitionController?,
+    style: NodeTransitionStyle,
     onVeilReached: suspend () -> Unit,
 ) {
-    if (nodeEntry == null) {
+    if (nodeEntry == null || style == NodeTransitionStyle.IMMEDIATE) {
         scope.launch { onVeilReached() }
         return
     }

@@ -27,7 +27,8 @@ public class NodesDomainFactory {
                 node.getMapId(),
                 node.isFirstNodeOfMap(),
                 node.getOnExecutionAction() + '_' + node.getOnExecutionEntity(),
-                node.getOnExecutionEntityId()
+                node.getOnExecutionEntityId(),
+                node.getTransitionStyle()
         );
     }
 }

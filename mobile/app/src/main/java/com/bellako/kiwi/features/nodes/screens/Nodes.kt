@@ -4,7 +4,12 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInBack
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -35,6 +40,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -75,6 +82,19 @@ private const val NODE_SELECTED_SCALE = 1.6f
 private const val NODE_BASE_SCALE = 0.1f
 private const val ICON_SHRINK_MS = 180
 private const val ICON_POP_MS = 320
+
+// Idle animation knobs — kept gentle so the map still reads as "alive but
+// calm" rather than busy; pulling these any higher quickly looks distracting.
+private const val INDICATOR_BOB_AMPLITUDE_DP = 4f
+private const val INDICATOR_BOB_DURATION_MS = 850
+private const val PLAY_WIGGLE_MIN_SCALE = 1.0f
+private const val PLAY_WIGGLE_MAX_SCALE = 1.04f
+private const val PLAY_WIGGLE_DURATION_MS = 900
+private const val PLAY_GLOW_MIN_ALPHA = 0.1f
+private const val PLAY_GLOW_MAX_ALPHA = 0.35f
+private const val PLAY_GLOW_DURATION_MS = 1600
+private const val PLAY_GLOW_SCALE = 1.12f
+private const val UNLOCK_HOLD_DURATION_MS = 1000L
 
 @Composable
 fun Node(
@@ -143,13 +163,26 @@ fun Node(
         }
 
         if (isPlayerNode) {
+            // Gentle idle bob so the indicator reads as alive while the map is
+            // sitting still — keeps the screen from feeling frozen on first open.
+            val indicatorTransition = rememberInfiniteTransition(label = "player_indicator_idle")
+            val bobDp by indicatorTransition.animateFloat(
+                initialValue = -INDICATOR_BOB_AMPLITUDE_DP,
+                targetValue = INDICATOR_BOB_AMPLITUDE_DP,
+                animationSpec =
+                    infiniteRepeatable(
+                        animation = tween(durationMillis = INDICATOR_BOB_DURATION_MS, easing = EaseInOut),
+                        repeatMode = RepeatMode.Reverse,
+                    ),
+                label = "player_indicator_bob",
+            )
             Kiwi_Image(
                 R.drawable.ic_player_indicator,
                 "player indicator",
                 modifier =
                     Modifier
                         .size(getResponsiveSizeHeight(18.dp))
-                        .offset(y = -indicatorOffset),
+                        .offset(y = -indicatorOffset + bobDp.dp),
             )
         }
 
@@ -314,6 +347,32 @@ fun NodeAction(
     val isBlankNode = node.onExecutionEvent == "_"
     if (isBlankNode && node.status != NodeStatus.LOCKED) return
 
+    val showsPlayButton = node.status == NodeStatus.OPEN || node.status == NodeStatus.COMPLETED
+    val idleTransition = rememberInfiniteTransition(label = "node_action_idle")
+    val glowAlpha by idleTransition.animateFloat(
+        initialValue = PLAY_GLOW_MIN_ALPHA,
+        targetValue = PLAY_GLOW_MAX_ALPHA,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = PLAY_GLOW_DURATION_MS, easing = EaseInOut),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "play_container_glow",
+    )
+    // Wiggle lives at NodeAction level so it covers every action button
+    // (Unlock / Play / Replay) without each button caring about it.
+    val wiggleTransition = rememberInfiniteTransition(label = "node_action_wiggle_idle")
+    val wiggleScale by wiggleTransition.animateFloat(
+        initialValue = PLAY_WIGGLE_MIN_SCALE,
+        targetValue = PLAY_WIGGLE_MAX_SCALE,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = PLAY_WIGGLE_DURATION_MS, easing = EaseInOut),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "node_action_wiggle",
+    )
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -324,6 +383,28 @@ fun NodeAction(
                     .width(IntrinsicSize.Min),
             contentAlignment = Alignment.Center,
         ) {
+            // Soft halo behind the container — scaled past the image bounds so
+            // the glow bleeds slightly outside the card outline. Only shown when
+            // the play button is actually present.
+            if (showsPlayButton) {
+                Box(
+                    modifier =
+                        Modifier
+                            .matchParentSize()
+                            .scale(PLAY_GLOW_SCALE)
+                            .background(
+                                brush =
+                                    Brush.radialGradient(
+                                        colors =
+                                            listOf(
+                                                kiwiColors.color7C.copy(alpha = glowAlpha),
+                                                Color.Transparent,
+                                            ),
+                                    ),
+                            ),
+                )
+            }
+
             Kiwi_Image(
                 if (hasName) R.drawable.node_button_big else R.drawable.node_button_small,
                 "Node action background",
@@ -347,6 +428,7 @@ fun NodeAction(
                 }
                 Crossfade(
                     targetState = node.status,
+                    modifier = Modifier.scale(wiggleScale),
                     animationSpec = tween(durationMillis = NODE_ACTION_FADE_MS),
                     label = "nodeActionButton",
                 ) { status ->
@@ -378,55 +460,65 @@ fun NodeAction(
             }
         }
         if (node.status == NodeStatus.LOCKED) {
-            Box(
+            NodeCostBubble(currentPoints = currentPoints, price = node.price)
+        }
+    }
+}
+
+@Composable
+private fun NodeCostBubble(
+    currentPoints: Int,
+    price: Int,
+) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Box(
+        modifier =
+            Modifier
+                .offset(y = -getResponsiveSizeHeight(2.dp))
+                .clip(
+                    RoundedCornerShape(
+                        0.dp,
+                        0.dp,
+                        getResponsiveSizeHeight(22.dp),
+                        getResponsiveSizeHeight(22.dp),
+                    ),
+                ).background(kiwiColors.colorF),
+        contentAlignment = Alignment.Center,
+    ) {
+        val annotatedString =
+            buildAnnotatedString {
+                withStyle(
+                    style =
+                        SpanStyle(
+                            color = kiwiColors.color1B,
+                        ),
+                ) {
+                    append("Cost: ")
+                }
+                withStyle(
+                    style =
+                        SpanStyle(
+                            color = kiwiColors.color1B,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                ) {
+                    append("$currentPoints/$price")
+                }
+            }
+
+        Kiwi_AnnotatedString_P2(
+            KiwiAnnotatedStringArguments(
+                annotatedString,
+                TextAlign.Center,
                 modifier =
                     Modifier
-                        .offset(y = -getResponsiveSizeHeight(2.dp))
-                        .clip(
-                            RoundedCornerShape(
-                                0.dp,
-                                0.dp,
-                                getResponsiveSizeHeight(22.dp),
-                                getResponsiveSizeHeight(22.dp),
-                            ),
-                        ).background(kiwiColors.colorF),
-                contentAlignment = Alignment.Center,
-            ) {
-                val annotatedString =
-                    buildAnnotatedString {
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = kiwiColors.color1B,
-                                ),
-                        ) {
-                            append("Cost: ")
-                        }
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = kiwiColors.color1B,
-                                    fontWeight = FontWeight.Bold,
-                                ),
-                        ) {
-                            append("$currentPoints/${node.price}")
-                        }
-                    }
-
-                Kiwi_AnnotatedString_P2(
-                    KiwiAnnotatedStringArguments(
-                        annotatedString,
-                        TextAlign.Center,
-                        modifier =
-                            Modifier
-                                .padding(
-                                    vertical = getResponsiveSizeHeight(Spacing.xSmall),
-                                    horizontal = getResponsiveSizeHeight(Spacing.large),
-                                ),
-                    ),
-                )
-            }
-        }
+                        .padding(
+                            vertical = getResponsiveSizeHeight(Spacing.xSmall),
+                            horizontal = getResponsiveSizeHeight(Spacing.large),
+                        ),
+            ),
+        )
     }
 }
 
@@ -440,6 +532,7 @@ fun UnlockButton(
 
     Kiwi_HoldButton(
         enabled = hasEnoughPoints,
+        holdDurationMillis = UNLOCK_HOLD_DURATION_MS,
         textArguments =
             KiwiTextArguments(
                 text,

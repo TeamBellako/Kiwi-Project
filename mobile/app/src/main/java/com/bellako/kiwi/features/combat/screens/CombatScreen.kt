@@ -312,11 +312,11 @@ private fun currentTurnMessage(
         withStyle(SpanStyle(color = colors.color7A, fontStyle = FontStyle.Italic)) {
             append(actorName)
         }
-        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(" used ") }
+        withStyle(SpanStyle(color = colors.color6, fontStyle = FontStyle.Italic)) { append(" used ") }
         withStyle(SpanStyle(color = colors.color8A, fontStyle = FontStyle.Italic)) {
             append(skillName)
         }
-        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append("!") }
+        withStyle(SpanStyle(color = colors.color6, fontStyle = FontStyle.Italic)) { append("!") }
     }
 }
 

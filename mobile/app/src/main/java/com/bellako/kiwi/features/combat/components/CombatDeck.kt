@@ -62,6 +62,7 @@ fun CombatDeck(
                             onClick = { onSkillClick(skill.id, skill.name) },
                             modifier = slotMod,
                             onApplyGoalProgress = onApplyGoalProgress,
+                            canOpenDetails = !isDisabled,
                         )
                     } else {
                         Kiwi_Image(

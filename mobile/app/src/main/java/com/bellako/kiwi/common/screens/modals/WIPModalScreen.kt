@@ -182,7 +182,7 @@ private fun WIPModalLayout(
                 color = kiwiColors.color5A,
                 onClick = {
                     if (onButtonClick != null) {
-                        onButtonClick
+                        onButtonClick()
                     } else {
                         navController.navigateUp()
                     }

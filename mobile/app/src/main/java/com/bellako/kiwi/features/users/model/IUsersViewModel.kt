@@ -7,13 +7,15 @@ import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 
 interface IUsersViewModel : IBaseViewModel<UsersState> {
-    val initialAuthCheckPerformed: StateFlow<Boolean>
+    /**
+     * Drives the full-screen map-entry loading curtain. Raised the moment a
+     * map-bound action begins (manual log in, auto log in once stored
+     * credentials are found, the app-selection Confirm) and lowered by
+     * [com.bellako.kiwi.common.screens.MainScreen] once the map's data is ready.
+     */
+    val showAppLoading: StateFlow<Boolean>
 
-    val manualAuthOverlayActive: StateFlow<Boolean>
-
-    fun markInitialAuthCheckPerformed()
-
-    fun setManualAuthOverlayActive(active: Boolean)
+    fun setShowAppLoading(active: Boolean)
 
     fun onEmailChanged(email: String)
 
@@ -32,6 +34,8 @@ interface IUsersViewModel : IBaseViewModel<UsersState> {
     suspend fun login(context: Context): Result<Unit>
 
     suspend fun logout(context: Context)
+
+    suspend fun getMyUserPoints()
 
     // ---------------------------------------------------------------------------------------------
 

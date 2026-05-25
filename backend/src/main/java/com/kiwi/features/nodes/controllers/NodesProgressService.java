@@ -21,7 +21,8 @@ public class NodesProgressService {
                     node.getMapId(),
                     node.isFirstNodeOfMap(),
                     node.getOnExecutionEvent(),
-                    node.getOnExecutionEntityId());
+                    node.getOnExecutionEntityId(),
+                    node.getTransitionStyle());
             
         }
         return node;
@@ -43,7 +44,8 @@ public class NodesProgressService {
                 node.getMapId(),
                 node.isFirstNodeOfMap(),
                 node.getOnExecutionEvent(),
-                node.getOnExecutionEntityId());
+                node.getOnExecutionEntityId(),
+                node.getTransitionStyle());
     }
 
     public NodesDomain complete(NodesDomain node) {
@@ -62,6 +64,7 @@ public class NodesProgressService {
                 node.getMapId(),
                 node.isFirstNodeOfMap(),
                 node.getOnExecutionEvent(),
-                node.getOnExecutionEntityId());
+                node.getOnExecutionEntityId(),
+                node.getTransitionStyle());
     }
 }

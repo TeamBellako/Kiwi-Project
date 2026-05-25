@@ -75,6 +75,7 @@ fun SkillComponent(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
+    canOpenDetails: Boolean = true,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val context = LocalContext.current
@@ -87,13 +88,13 @@ fun SkillComponent(
             modifier
                 .testTag("skill-${skill.id}")
                 .alpha(if (isDisabled) KIWI_DISABLED_ALPHA else 1.0f)
-                .pointerInput(isDisabled) {
+                .pointerInput(isDisabled, canOpenDetails) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
 
                         if (isDisabled) {
                             val release = waitForUpOrCancellation()
-                            if (release != null) {
+                            if (canOpenDetails && release != null) {
                                 val pressDurationMs = release.uptimeMillis - down.uptimeMillis
                                 if (pressDurationMs < TAP_THRESHOLD_MS) {
                                     showModal = true
@@ -123,7 +124,7 @@ fun SkillComponent(
                             }
                         }
 
-                        if (!actionTriggered && release != null) {
+                        if (!actionTriggered && canOpenDetails && release != null) {
                             val pressDurationMs = release.uptimeMillis - down.uptimeMillis
                             if (pressDurationMs < TAP_THRESHOLD_MS) {
                                 showModal = true

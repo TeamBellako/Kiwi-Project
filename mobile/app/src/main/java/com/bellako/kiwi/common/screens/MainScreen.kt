@@ -34,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -115,7 +114,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 private const val INITIAL_LOADING_MIN_DISPLAY_MS = 1500L
 private const val INITIAL_LOADING_SETTLE_MS = 400L
 private const val INITIAL_LOADING_MAX_DISPLAY_MS = 15_000L
-private const val AUTH_CHECK_GRACE_MS = 200L
 private const val PROGRESS_FILL_DURATION_MS = 4500
 private const val PROGRESS_HOLD_TARGET = 0.9f
 private const val PROGRESS_FINISH_DURATION_MS = 300
@@ -235,16 +233,14 @@ private fun AppScreen(
         }
     }
 
-    val initialAuthCheckPerformed by usersViewModel.initialAuthCheckPerformed.collectAsState()
-    val manualAuthOverlayActive by usersViewModel.manualAuthOverlayActive.collectAsState()
-    var showInitialLoading by remember { mutableStateOf(true) }
-    val overlayVisible by remember {
-        derivedStateOf { showInitialLoading || manualAuthOverlayActive }
-    }
+    // Raised by the auth / sign-up screens the instant a map-bound action
+    // begins (manual log in, auto log in once stored credentials are found,
+    // the app-selection Confirm) — never at app launch or during sign-up
+    // steps. Lowered here once the map's data has finished loading.
+    val showAppLoading by usersViewModel.showAppLoading.collectAsState()
 
-    LaunchedEffect(isLoginCompleted) {
-        if (!isLoginCompleted) return@LaunchedEffect
-        showInitialLoading = true
+    LaunchedEffect(showAppLoading) {
+        if (!showAppLoading) return@LaunchedEffect
         delay(INITIAL_LOADING_MIN_DISPLAY_MS)
         withTimeoutOrNull(INITIAL_LOADING_MAX_DISPLAY_MS) {
             while (true) {
@@ -256,23 +252,12 @@ private fun AppScreen(
                 if (resumed == null) break
             }
         }
-        showInitialLoading = false
-    }
-
-    LaunchedEffect(initialAuthCheckPerformed) {
-        if (!initialAuthCheckPerformed) return@LaunchedEffect
-        val authStarted =
-            withTimeoutOrNull(AUTH_CHECK_GRACE_MS) {
-                snapshotFlow { isLoginCompleted || usersIsLoading }.first { it }
-            }
-        if (authStarted == null) {
-            showInitialLoading = false
-        }
+        usersViewModel.setShowAppLoading(false)
     }
 
     val loadingProgress = remember { Animatable(0f) }
-    LaunchedEffect(overlayVisible) {
-        if (overlayVisible) {
+    LaunchedEffect(showAppLoading) {
+        if (showAppLoading) {
             loadingProgress.snapTo(0f)
             loadingProgress.animateTo(
                 targetValue = PROGRESS_HOLD_TARGET,
@@ -324,6 +309,11 @@ private fun AppScreen(
                 }
             },
             content = { paddingValues ->
+                // Screens are sized to the area above the bar so their layouts
+                // stay centered. The bar's rounded corners reveal the Scaffold's
+                // containerColor (color2) underneath, which matches the screen
+                // backgrounds — so the overlay still reads as one continuous
+                // surface bleeding under the bar.
                 Box(Modifier.padding(paddingValues)) {
                     AppNavHost(
                         navController = navController,
@@ -491,7 +481,7 @@ private fun AppScreen(
         }
 
         LoginLoadingScreen(
-            visible = overlayVisible,
+            visible = showAppLoading,
             progress = loadingProgress.value,
             modifier =
                 Modifier
@@ -699,6 +689,7 @@ fun AppNavHost(
             AppScreenWrapper {
                 Kiwi_Music_SignUp()
                 SignUpScreen4_Apps(
+                    usersViewModel = usersViewModel,
                     personalityViewModel = personalityViewModel,
                     goalsViewModel = goalsViewModel,
                     navController = navController,
