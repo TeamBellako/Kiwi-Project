@@ -61,8 +61,8 @@ public class NodesControllerTests {
 
         when(nodesService.getNodesForUser(1L))
                 .thenReturn(List.of(
-                        new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, "node1", "Node 1", List.of(2L), 0, true, "", 0),
-                        new NodesDTO(2L, NodeStatus.LOCKED.name(), 0, 120, 0.7f, 0.25f, "node2", "Node 2", List.of(), 0, false, "", 0)
+                        new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, "node1", "Node 1", List.of(2L), 0, true, "", 0, "VEIL"),
+                        new NodesDTO(2L, NodeStatus.LOCKED.name(), 0, 120, 0.7f, 0.25f, "node2", "Node 2", List.of(), 0, false, "", 0, "VEIL")
                 ));
 
         mockMvc.perform(get(baseAPIUrl)
@@ -80,7 +80,7 @@ public class NodesControllerTests {
                 }}));
         
         List<NodesDTO> mockResult = new ArrayList<>();
-        mockResult.add(new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, "node1", "Node 1", List.of(2L), 0, true, "", 0));
+        mockResult.add(new NodesDTO(1L, NodeStatus.OPEN.name(), 0, 100, 0.5f, 0.5f, "node1", "Node 1", List.of(2L), 0, true, "", 0, "VEIL"));
         when(nodesService.unlockNode(1L, 1L))
                 .thenReturn(mockResult);
 
@@ -99,7 +99,7 @@ public class NodesControllerTests {
                 }}));
 
         when(nodesService.completeNode(1L, 2L))
-                .thenReturn(List.of(new NodesDTO(3L, NodeStatus.LOCKED.name(), 0, 150, 0.8f, 0.4f, "node3", "Node 3", List.of(),0, false, "", 0)));
+                .thenReturn(List.of(new NodesDTO(3L, NodeStatus.LOCKED.name(), 0, 150, 0.8f, 0.4f, "node3", "Node 3", List.of(),0, false, "", 0, "VEIL")));
 
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/2/complete", null)
                         .contentType(MediaType.APPLICATION_JSON))

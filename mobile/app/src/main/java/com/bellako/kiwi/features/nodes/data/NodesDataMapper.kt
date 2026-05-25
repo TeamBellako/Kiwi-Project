@@ -15,6 +15,7 @@ object NodesDataMapper {
             mapId = dto.mapId,
             onExecutionEvent = dto.onExecutionEvent,
             onExecutionEntityId = dto.onExecutionEntityId,
+            transitionStyle = NodeTransitionStyle.valueOf(dto.transitionStyle),
         )
 
     fun toDTO(domain: NodesDomain): NodesDTO =
@@ -31,5 +32,6 @@ object NodesDataMapper {
             mapId = domain.mapId,
             onExecutionEvent = domain.onExecutionEvent,
             onExecutionEntityId = domain.onExecutionEntityId,
+            transitionStyle = domain.transitionStyle.name,
         )
 }

@@ -202,7 +202,7 @@ fun DialogueScreen(
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter)
                             .size(getResponsiveSizeWidth(10.dp), getResponsiveSizeHeight(10.dp))
-                            .offset(y = getResponsiveSizeHeight(offsetY.dp))
+                            .offset(y = getResponsiveSizeHeight((offsetY - 12f).dp))
                             .alpha(if (typewriter.isComplete) 1f else 0f)
                             .then(
                                 if (typewriter.isComplete) {

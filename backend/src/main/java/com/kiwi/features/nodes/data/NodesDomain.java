@@ -26,4 +26,5 @@ public class NodesDomain {
     private boolean isFirstNodeOfMap;
     private String onExecutionEvent;
     private int onExecutionEntityId;
+    private NodeTransitionStyle transitionStyle;
 }

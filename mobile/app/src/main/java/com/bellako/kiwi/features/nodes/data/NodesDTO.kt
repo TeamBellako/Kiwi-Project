@@ -13,4 +13,5 @@ data class NodesDTO(
     val mapId: Int,
     val onExecutionEvent: String,
     val onExecutionEntityId: Int,
+    val transitionStyle: String = "VEIL",
 )

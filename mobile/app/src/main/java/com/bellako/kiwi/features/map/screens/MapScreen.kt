@@ -50,6 +50,7 @@ import com.bellako.kiwi.features.goals.model.IGoalsViewModel
 import com.bellako.kiwi.features.map.data.MapsInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
+import com.bellako.kiwi.features.nodes.data.NodeTransitionStyle
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.nodes.screens.NodeAction
@@ -369,6 +370,7 @@ private fun InteractiveMap(
                                     runNodeEntry(
                                         scope = nodeEntryScope,
                                         nodeEntry = nodeEntry,
+                                        style = selectedNode.transitionStyle,
                                     ) {
                                         if (selectedNode.onExecutionEvent != "_") {
                                             EventBus.emitEvent(
@@ -382,6 +384,7 @@ private fun InteractiveMap(
                                     runNodeEntry(
                                         scope = nodeEntryScope,
                                         nodeEntry = nodeEntry,
+                                        style = selectedNode.transitionStyle,
                                     ) {
                                         if (selectedNode.onExecutionEvent != "_") {
                                             EventBus.emitEvent(
@@ -434,9 +437,10 @@ private const val FALLBACK_VEIL_HOLD_MS = 1_500L
 private fun runNodeEntry(
     scope: CoroutineScope,
     nodeEntry: NodeEntryTransitionController?,
+    style: NodeTransitionStyle,
     onVeilReached: suspend () -> Unit,
 ) {
-    if (nodeEntry == null) {
+    if (nodeEntry == null || style == NodeTransitionStyle.IMMEDIATE) {
         scope.launch { onVeilReached() }
         return
     }

@@ -19,4 +19,5 @@ public class NodesDTO {
     private boolean isFirstNodeOfMap;
     private String onExecutionEvent;
     private int onExecutionEntityId;
+    private String transitionStyle;
 }

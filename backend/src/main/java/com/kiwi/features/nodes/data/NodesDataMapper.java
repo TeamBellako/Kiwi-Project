@@ -23,7 +23,8 @@ public class NodesDataMapper {
                 node.getMapId(),
                 node.isFirstNodeOfMap(),
                 node.getOnExecutionEvent(),
-                node.getOnExecutionEntityId()
+                node.getOnExecutionEntityId(),
+                node.getTransitionStyle().name()
         );
     }
 
@@ -46,7 +47,8 @@ public class NodesDataMapper {
                 node.getMapId(),
                 node.isFirstNodeOfMap(),
                 node.getOnExecutionAction() + '_' + node.getOnExecutionEntity(),
-                node.getOnExecutionEntityId()
+                node.getOnExecutionEntityId(),
+                node.getTransitionStyle().name()
         );
     }
 
