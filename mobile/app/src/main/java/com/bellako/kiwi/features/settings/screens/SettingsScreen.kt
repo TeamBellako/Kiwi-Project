@@ -316,6 +316,7 @@ private fun SettingsButtons(
                 color = kiwiColors.color5A,
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
+                        usersViewModel.setShowAppLoading(true)
                         usersViewModel.logout(context)
                         navController.navigate(ScreenRoutes.LOGIN) {
                             popUpTo(ScreenRoutes.LOGIN) { inclusive = true }

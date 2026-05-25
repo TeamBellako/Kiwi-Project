@@ -129,7 +129,6 @@ class UsersViewModel
             clearLocalCredentials(context)
             authRepository.setJwtToken("")
             _isLoginCompleted.value = false
-            _showAppLoading.value = false
         }
 
         // -----------------------------------------------------------------------------------------

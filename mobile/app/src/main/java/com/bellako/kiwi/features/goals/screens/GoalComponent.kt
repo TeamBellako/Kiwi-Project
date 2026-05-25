@@ -43,7 +43,7 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_Label2
+import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
@@ -165,7 +165,7 @@ fun GoalComponent(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.weight(0.6f),
             ) {
-                Kiwi_Label2(
+                Kiwi_Label3(
                     KiwiTextArguments(
                         currentGoal.resolveAction(),
                         TextAlign.Center,
