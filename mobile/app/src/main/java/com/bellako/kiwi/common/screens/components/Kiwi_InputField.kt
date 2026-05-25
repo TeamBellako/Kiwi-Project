@@ -1,6 +1,7 @@
 package com.bellako.kiwi.common.screens.components
 
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -120,14 +120,11 @@ private fun ShowPasswordTrailingIcon(shouldShowPasswordState: MutableState<Boole
         modifier =
             Modifier
                 .size(24.dp)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = {
-                            shouldShowPasswordState.value = true
-                            tryAwaitRelease()
-                            shouldShowPasswordState.value = false
-                        },
-                    )
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) {
+                    shouldShowPasswordState.value = !shouldShowPasswordState.value
                 },
     )
 }

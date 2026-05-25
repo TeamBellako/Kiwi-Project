@@ -372,10 +372,6 @@ private fun LogInForm(
 
         Kiwi_Spacer()
 
-        ForgotPassword { navController.navigate(ScreenRoutes.WIP) }
-
-        Kiwi_Spacer()
-
         LogInErrorMessage(usersUiState)
     }
 }
@@ -478,43 +474,6 @@ private suspend fun performLogin(
     }
     usersViewModel.setShowAppLoading(false)
     return false
-}
-
-@Composable
-private fun ForgotPassword(onForgotPass: () -> Unit) {
-    val kiwiColors = LocalKiwiColors.current
-
-    val annotatedString =
-        buildAnnotatedString {
-            withLink(
-                link =
-                    LinkAnnotation.Clickable(
-                        tag = "FORGOTPASS",
-                        linkInteractionListener = {
-                            onForgotPass()
-                        },
-                    ),
-            ) {
-                withStyle(
-                    style =
-                        SpanStyle(
-                            color = kiwiColors.color7B,
-                        ),
-                ) {
-                    append("Forgot Password?")
-                }
-            }
-        }
-
-    Kiwi_AnnotatedString_P1(
-        KiwiAnnotatedStringArguments(
-            annotatedString,
-            TextAlign.Center,
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
-        ),
-    )
 }
 
 @Composable

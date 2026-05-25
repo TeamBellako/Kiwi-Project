@@ -81,7 +81,7 @@ fun GoalsModal(
             Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.6f)),
-        contentAlignment = Alignment.TopCenter,
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -91,7 +91,6 @@ fun GoalsModal(
                 contentAlignment = Alignment.TopCenter,
                 modifier =
                     Modifier
-                        .padding(top = getResponsiveSizeHeight(24.dp))
                         .padding(horizontal = getResponsiveSizeHeight(24.dp)),
             ) {
                 Image(
