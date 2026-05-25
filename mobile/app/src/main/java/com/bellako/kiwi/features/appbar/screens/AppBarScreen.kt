@@ -43,7 +43,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -117,14 +116,7 @@ fun AppBarModalLayout(
         NavigationBar(
             modifier =
                 Modifier
-                    .clip(
-                        RoundedCornerShape(
-                            getResponsiveSizeHeight(30.dp),
-                            getResponsiveSizeHeight(30.dp),
-                            0.dp,
-                            0.dp,
-                        ),
-                    ).fillMaxWidth()
+                    .fillMaxWidth()
                     .navigationBarsPadding()
                     .height(getResponsiveSizeHeight(90.dp))
                     .testTag(CommonTestTags.BOTTOM_APPBAR),
