@@ -168,10 +168,7 @@ fun GoalsModal(
                             .weight(buttonPercentage),
                     onClick = {
                         coroutineScope.launch {
-                            if (goalModalType == GoalNotificationType.NEW) {
-                                val goalDefinitions = goals.filterIsInstance<GoalDomain>()
-                                goalsViewModel.createGoalsFromDefinitions(goalDefinitions)
-                            } else {
+                            if (goalModalType == GoalNotificationType.YESTERDAY) {
                                 for (goal in goals) {
                                     if (goal is UserGoalStatusDomain) {
                                         if (goal.value == goal.target) {

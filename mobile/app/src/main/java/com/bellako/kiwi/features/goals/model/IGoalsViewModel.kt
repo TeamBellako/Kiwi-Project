@@ -43,4 +43,6 @@ interface IGoalsViewModel {
         goodApps: List<String>,
         badApps: List<String>,
     ): Result<UserAppUsageDTO>
+
+    suspend fun autoReviewAppUsageGoals(): Result<Unit>
 }

@@ -194,4 +194,6 @@ class GoalsFakeViewModel(
         badApps: List<String>,
     ): Result<UserAppUsageDTO> =
         Result.success(UserAppUsageDTO(avgGoodDailyUsageMs = 0L, avgBadDailyUsageMs = 0L))
+
+    override suspend fun autoReviewAppUsageGoals(): Result<Unit> = Result.success(Unit)
 }

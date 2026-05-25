@@ -5,6 +5,7 @@ import com.kiwi.features.goals.controllers.UserGoalProgressRepository;
 import com.kiwi.features.goals.data.*;
 import com.kiwi.features.goals.exceptions.GoalNotFoundException;
 import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
+import com.kiwi.features.metrics.controllers.MetricsRepository;
 import com.kiwi.features.users.controllers.UserAppUsageRepository;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersPersistence;
@@ -28,6 +29,7 @@ public class GoalServiceTests {
     private UsersTestRepositoryInMemory usersRepository;
     private UserGoalProgressRepository userGoalProgressRepository;
     private UserAppUsageRepository userAppUsageRepository;
+    private MetricsRepository metricsRepository;
     private UsersService usersService;
     private GoalService goalService;
 
@@ -41,6 +43,7 @@ public class GoalServiceTests {
         usersRepository = new UsersTestRepositoryInMemory();
         userGoalProgressRepository = mock(UserGoalProgressRepository.class);
         userAppUsageRepository = mock(UserAppUsageRepository.class);
+        metricsRepository = mock(MetricsRepository.class);
         usersService = mock(UsersService.class);
         goalService = new GoalService(
             userGoalStatusRepository,
@@ -48,7 +51,8 @@ public class GoalServiceTests {
             goalDefinitionRepository,
             usersRepository,
             usersService,
-            userAppUsageRepository);
+            userAppUsageRepository,
+            metricsRepository);
 
         testUser = new UsersPersistence();
         testUser.setId(1L);

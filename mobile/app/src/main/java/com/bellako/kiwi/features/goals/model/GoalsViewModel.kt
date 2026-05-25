@@ -32,6 +32,7 @@ import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 
 @HiltViewModel
+@Suppress("TooManyFunctions")
 class GoalsViewModel
     @Inject
     constructor(
@@ -412,6 +413,9 @@ class GoalsViewModel
         override suspend fun checkAndNotifyGoals() {
             val today = dateToString(LocalDate.now())
 
+            // Silently auto-review yesterday's APP_USAGE goals before showing user-facing modals
+            autoReviewAppUsageGoals()
+
             val inProgressResult = getGoalsInProgress()
             val yesterdayGoals = inProgressResult.getOrNull()
 
@@ -431,6 +435,7 @@ class GoalsViewModel
             val goalDefinitions = goalDefinitionsResult.getOrNull()
 
             if (!goalDefinitions.isNullOrEmpty()) {
+                createGoalsFromDefinitions(goalDefinitions)
                 notifyNewGoals(goalDefinitions)
             }
         }
@@ -485,5 +490,11 @@ class GoalsViewModel
                     avgBadDailyUsageMs = badAvgMs,
                 )
                 repository.saveAppUsageBaseline(dto).getOrThrow()
+            }
+
+        override suspend fun autoReviewAppUsageGoals(): Result<Unit> =
+            runCatching {
+                repository.autoReviewAppUsageGoals().getOrThrow()
+                Unit
             }
     }
