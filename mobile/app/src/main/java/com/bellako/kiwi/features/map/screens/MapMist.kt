@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -55,6 +56,14 @@ import kotlinx.coroutines.launch
 // topInsetPx lets the caller position the canvas full-screen (so mist covers
 // the title/points-indicator area too) while still aligning holes with the
 // InteractiveMap content center, which sits below that inset.
+
+// CompositionLocal that gates all map VFX (mist + cloud sprites). Defaults to
+// true in production. Compose UI tests provide `false` at the top of the tree
+// to skip the VFX entirely — those layers run rememberInfiniteTransition /
+// withFrameNanos animation loops which keep the test runtime perpetually
+// non-idle, so fetchSemanticsNodes() inside waitUntil cannot settle and tests
+// that navigate to MapScreen time out.
+val LocalMapVfxEnabled = staticCompositionLocalOf { true }
 
 private const val REVEAL_ANIM_MS = 700
 private const val DRIFT_PERIOD_A_MS = 24_000
@@ -116,6 +125,8 @@ fun MapMist(
     topInsetPx: Float = 0f,
     mistColor: Color = DEFAULT_MIST_COLOR,
 ) {
+    if (!LocalMapVfxEnabled.current) return
+
     val density = LocalDensity.current
     val baseRevealPx = with(density) { BASE_REVEAL_RADIUS_DP.toPx() }
     val zoomRevealPx = with(density) { ZOOM_REVEAL_RADIUS_DP.toPx() }

@@ -1,6 +1,7 @@
 package com.bellako.kiwi
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -18,6 +19,7 @@ import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
 import com.bellako.kiwi.features.map.model.MapViewModel
+import com.bellako.kiwi.features.map.screens.LocalMapVfxEnabled
 import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
@@ -81,30 +83,37 @@ class LoginScreenTest {
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
         rule.setContent {
-            val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
-                composable(ScreenRoutes.LOGIN) {
-                    LogInScreen(
-                        usersViewModel = usersFakeViewModel,
-                        personalityViewModel = personalityFakeViewModel,
-                        navController = navController,
-                    )
-                }
-                composable(ScreenRoutes.HOME) {
-                    MapScreen(
-                        nodesViewModel = nodesFakeViewModel,
-                        mapViewModel = mapviewModel,
-                        goalsViewModel = goalsFakeViewModel,
-                        usersViewModel = usersFakeViewModel,
-                    )
-                }
-                composable(ScreenRoutes.SIGNUP3_TEST) {
-                    SignUpScreen3_Test(
-                        usersViewModel = usersFakeViewModel,
-                        personalityViewModel = personalityFakeViewModel,
-                        skillsViewModel = skillsFakeViewModel,
-                        navController = navController,
-                    )
+            // Disable map VFX (mist + cloud sprites) for this test. Their
+            // rememberInfiniteTransition / withFrameNanos animation loops
+            // keep the Compose test runtime perpetually non-idle, which
+            // causes fetchSemanticsNodes() inside waitUntil to hang and the
+            // navigation-to-HOME assertion to time out.
+            CompositionLocalProvider(LocalMapVfxEnabled provides false) {
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
+                    composable(ScreenRoutes.LOGIN) {
+                        LogInScreen(
+                            usersViewModel = usersFakeViewModel,
+                            personalityViewModel = personalityFakeViewModel,
+                            navController = navController,
+                        )
+                    }
+                    composable(ScreenRoutes.HOME) {
+                        MapScreen(
+                            nodesViewModel = nodesFakeViewModel,
+                            mapViewModel = mapviewModel,
+                            goalsViewModel = goalsFakeViewModel,
+                            usersViewModel = usersFakeViewModel,
+                        )
+                    }
+                    composable(ScreenRoutes.SIGNUP3_TEST) {
+                        SignUpScreen3_Test(
+                            usersViewModel = usersFakeViewModel,
+                            personalityViewModel = personalityFakeViewModel,
+                            skillsViewModel = skillsFakeViewModel,
+                            navController = navController,
+                        )
+                    }
                 }
             }
         }

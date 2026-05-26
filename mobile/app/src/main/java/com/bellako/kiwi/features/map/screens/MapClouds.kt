@@ -200,12 +200,15 @@ private data class RevealedGeometry(
     val segments: List<Pair<Offset, Offset>>,
 )
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MapClouds(
     nodes: Map<Long, NodesDomain>,
     mapState: MapState,
     modifier: Modifier = Modifier,
 ) {
+    if (!LocalMapVfxEnabled.current) return
+
     val density = LocalDensity.current
     val clouds = remember { buildClouds() }
     val baseWidthPx = with(density) { CLOUD_BASE_WIDTH_DP.toPx() }
