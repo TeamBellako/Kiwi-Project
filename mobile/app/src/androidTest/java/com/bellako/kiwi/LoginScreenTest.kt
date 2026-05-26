@@ -1,7 +1,6 @@
 package com.bellako.kiwi
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -17,18 +16,10 @@ import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
-import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
-import com.bellako.kiwi.features.map.model.MapViewModel
-import com.bellako.kiwi.features.map.screens.LocalMapVfxEnabled
-import com.bellako.kiwi.features.map.screens.MapScreen
-import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
-import com.bellako.kiwi.features.nodes.tests.NodesTestFactory
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityAppsDTO
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
-import com.bellako.kiwi.features.quests.tests.QuestsFakeViewModel
-import com.bellako.kiwi.features.quests.tests.QuestsTestFactory
 import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.screens.LogInScreen
@@ -50,10 +41,6 @@ class LoginScreenTest {
 
     private lateinit var usersState: UsersState
     private lateinit var usersFakeViewModel: UsersFakeViewModel
-    private lateinit var mapviewModel: MapViewModel
-    private lateinit var questsFakeViewModel: QuestsFakeViewModel
-    private lateinit var nodesFakeViewModel: NodesFakeViewModel
-    private lateinit var goalsFakeViewModel: GoalsFakeViewModel
     private lateinit var personalityState: PersonalityState
     private lateinit var personalityFakeViewModel: PersonalityFakeViewModel
     private lateinit var skillsFakeViewModel: SkillsFakeViewModel
@@ -65,11 +52,7 @@ class LoginScreenTest {
 
         usersState = UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)
         usersFakeViewModel = UsersFakeViewModel(usersState)
-        nodesFakeViewModel = NodesFakeViewModel(NodesTestFactory.validNodesState())
-        questsFakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
-        goalsFakeViewModel = GoalsFakeViewModel()
         skillsFakeViewModel = SkillsFakeViewModel()
-        mapviewModel = MapViewModel()
 
         personalityState =
             PersonalityState(
@@ -83,37 +66,31 @@ class LoginScreenTest {
         personalityFakeViewModel = PersonalityFakeViewModel(personalityState)
 
         rule.setContent {
-            // Disable map VFX (mist + cloud sprites) for this test. Their
-            // rememberInfiniteTransition / withFrameNanos animation loops
-            // keep the Compose test runtime perpetually non-idle, which
-            // causes fetchSemanticsNodes() inside waitUntil to hang and the
-            // navigation-to-HOME assertion to time out.
-            CompositionLocalProvider(LocalMapVfxEnabled provides false) {
-                val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
-                    composable(ScreenRoutes.LOGIN) {
-                        LogInScreen(
-                            usersViewModel = usersFakeViewModel,
-                            personalityViewModel = personalityFakeViewModel,
-                            navController = navController,
-                        )
-                    }
-                    composable(ScreenRoutes.HOME) {
-                        MapScreen(
-                            nodesViewModel = nodesFakeViewModel,
-                            mapViewModel = mapviewModel,
-                            goalsViewModel = goalsFakeViewModel,
-                            usersViewModel = usersFakeViewModel,
-                        )
-                    }
-                    composable(ScreenRoutes.SIGNUP3_TEST) {
-                        SignUpScreen3_Test(
-                            usersViewModel = usersFakeViewModel,
-                            personalityViewModel = personalityFakeViewModel,
-                            skillsViewModel = skillsFakeViewModel,
-                            navController = navController,
-                        )
-                    }
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = ScreenRoutes.LOGIN) {
+                composable(ScreenRoutes.LOGIN) {
+                    LogInScreen(
+                        usersViewModel = usersFakeViewModel,
+                        personalityViewModel = personalityFakeViewModel,
+                        navController = navController,
+                    )
+                }
+                composable(ScreenRoutes.HOME) {
+                    // Stub destination. The real MapScreen runs perpetual
+                    // animations (mist, cloud sprites, player-node bob,
+                    // selected-node wiggle / glow) that keep the Compose
+                    // test runtime non-idle, hanging fetchSemanticsNodes()
+                    // inside waitUntil. This test only asserts that login
+                    // navigation succeeded — it doesn't validate MapScreen
+                    // content — so a no-op destination is sufficient.
+                }
+                composable(ScreenRoutes.SIGNUP3_TEST) {
+                    SignUpScreen3_Test(
+                        usersViewModel = usersFakeViewModel,
+                        personalityViewModel = personalityFakeViewModel,
+                        skillsViewModel = skillsFakeViewModel,
+                        navController = navController,
+                    )
                 }
             }
         }
