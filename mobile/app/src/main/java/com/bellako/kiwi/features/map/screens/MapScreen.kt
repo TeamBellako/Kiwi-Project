@@ -196,12 +196,12 @@ fun MapScreen(
         // Mist covers the FULL screen, including behind the title and the
         // points indicator. zIndex sits between the map content (default 0)
         // and the top-bar UI (zIndex 1).
-        MapMist(
-            nodes = nodesMap,
-            mapState = mapState,
-            topInsetPx = topInsetPx.toFloat(),
-            modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
-        )
+//        MapMist(
+//            nodes = nodesMap,
+//            mapState = mapState,
+//            topInsetPx = topInsetPx.toFloat(),
+//            modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
+//        )
 
         Kiwi_H2(
             KiwiTextArguments(
@@ -256,13 +256,11 @@ private fun PointsIndicator(
                 .background(
                     color = kiwiColors.color2.copy(alpha = POINTS_BG_ALPHA),
                     shape = shape,
-                )
-                .border(
+                ).border(
                     width = 1.dp,
                     color = kiwiColors.color6,
                     shape = shape,
-                )
-                .padding(
+                ).padding(
                     horizontal = getResponsiveSizeHeight(Spacing.medium),
                     vertical = getResponsiveSizeHeight(Spacing.small),
                 ),
@@ -440,6 +438,16 @@ private fun InteractiveMap(
                         },
             )
 
+            // WATER VFX — shader overlay gated to water regions by a
+            // runtime-generated mask. Sits inside the same transformed Box as
+            // the map image so pan/zoom is inherited. Renders above the map
+            // and below the node connections so nodes stay visible on top.
+            // On API <33 this emits nothing and the map looks unchanged.
+            MapWaterOverlay(
+                maskResourceId = R.drawable.mindveil_4k_watermask,
+                modifier = Modifier.fillMaxSize(),
+            )
+
             // NODE CONNECTIONS
             NodeConnections(
                 nodes = nodesMap,
@@ -469,17 +477,17 @@ private fun InteractiveMap(
         // InteractiveMap Box uses so they pan and zoom with the map. Rendered
         // above the nodes so they read as overhead sky. The top-level MapMist
         // still covers everything in fog-of-war regions.
-        MapClouds(
-            modifier =
-                Modifier
-                    .size(width = imageWidthDp, height = imageHeightDp)
-                    .graphicsLayer(
-                        scaleX = mapState.scale,
-                        scaleY = mapState.scale,
-                        translationX = mapState.offset.x,
-                        translationY = mapState.offset.y,
-                    ),
-        )
+//        MapClouds(
+//            modifier =
+//                Modifier
+//                    .size(width = imageWidthDp, height = imageHeightDp)
+//                    .graphicsLayer(
+//                        scaleX = mapState.scale,
+//                        scaleY = mapState.scale,
+//                        translationX = mapState.offset.x,
+//                        translationY = mapState.offset.y,
+//                    ),
+//        )
 
         // NODE ACTION BUTTON
         if (!mapState.isFocusingNode) {
