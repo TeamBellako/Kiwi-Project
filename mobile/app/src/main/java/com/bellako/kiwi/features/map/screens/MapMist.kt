@@ -67,9 +67,10 @@ private const val WISPY_ALPHA_MIN = 0.04f
 private const val WISPY_ALPHA_MAX = 0.14f
 
 // Inner fraction of the hole that is fully transparent; the outer 1 - this
-// is a soft feather so the edge does not read as a hard circle. Lower values
-// give a smoother, more gradual fade up to the mist's full opacity.
-private const val HOLE_FEATHER_INNER = 0.25f
+// is a soft feather so the edge does not read as a hard circle. Very low
+// value here = almost the entire hole is a smooth gradient with only a tiny
+// fully-clear core, giving a very gradual fade up to full mist opacity.
+private const val HOLE_FEATHER_INNER = 0.05f
 
 // Per-layer alpha multipliers for the two drifting wispy layers.
 private const val LAYER_A_ALPHA = 1.0f
@@ -85,24 +86,26 @@ private const val DRIFT_B_AMPLITUDE_Y = 1.6f
 // so the texture stays seamless without a visible tiling pattern.
 private const val BLOB_SPACING_FACTOR = 1.2f
 
-// Hole radius = BASE + ZOOM * mapState.scale. Bigger base + per-scale term
-// give a more generous cleared area around each node while still keeping the
-// mist visible on the map outside the cleared circle at every zoom level.
-private val BASE_REVEAL_RADIUS_DP = 50.dp
-private val ZOOM_REVEAL_RADIUS_DP = 22.dp
+// Hole radius = BASE + ZOOM * mapState.scale. Wider cleared area around each
+// node, with a generous per-scale term so the reveal stays satisfying as the
+// player zooms in.
+private val BASE_REVEAL_RADIUS_DP = 80.dp
+private val ZOOM_REVEAL_RADIUS_DP = 30.dp
 
 // Soft cloud-blob radius for the drifting wispy texture.
 private val MIST_BLOB_RADIUS_DP = 240.dp
 
-// Default mist tint — dark blue, slightly translucent (0xE6 alpha ≈ 90%) so
-// the map silhouette underneath barely reads through. Override via the
-// mistColor parameter if a future map wants a different biome look.
+// Default mist tint — light cyan-blue, fully opaque. Reads as a cool
+// atmospheric haze (think sky-blue fog) without going dark/moody. Override
+// via the mistColor parameter if a future map wants a different biome look.
 @Suppress("MagicNumber")
-private val DEFAULT_MIST_COLOR = Color(0xE61F2D4D)
+private val DEFAULT_MIST_COLOR = Color(0xFF9DC8DC)
 
-// Pale tint for the drifting wispy texture that sits on top of the solid
-// base. White at very low alpha reads as soft fog without affecting opacity.
-private val WISPY_COLOR = Color.White
+// Drifting wispy texture sits on top of the solid base — needs to contrast
+// against the base so the drift remains visible. A deeper blue-grey shows
+// clearly as shifting wisps over the lighter cyan mist.
+@Suppress("MagicNumber")
+private val WISPY_COLOR = Color(0xFF5C7888)
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
