@@ -13,9 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -26,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,6 +37,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -116,6 +116,9 @@ fun MapScreen(
     }
 
     val mapState by mapViewModel.state.collectAsState()
+    val nodesState by nodesViewModel.state.collectAsState()
+    val nodesMap = nodesState?.nodes.orEmpty()
+
     val imageBitmap = ImageBitmap.imageResource(id = mapState.mapInfo.mapResourceId)
     val imageW = imageBitmap.width.toFloat()
     val imageH = imageBitmap.height.toFloat()
@@ -165,40 +168,58 @@ fun MapScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(kiwiColors.color2)
-                    .testTag(CommonTestTags.HOME_SCREEN),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Kiwi_H2(
-                KiwiTextArguments(
-                    mapState.mapInfo.mapTitle,
-                    color = kiwiColors.colorF,
-                    // offset (not padding) so the title's measured size in the
-                    // Column stays unchanged — keeps the map viewport, and so
-                    // the centered play-button anchor, at their original Y.
-                    modifier =
-                        Modifier
-                            .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
-                            .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
-                            .zIndex(1f),
-                ),
-            )
+    // Measured height of the title overlay. Drives:
+    //   (a) the top padding on InteractiveMap, so the map content stays where
+    //       the Column-based layout used to put it (the play-button anchor
+    //       depends on this offset);
+    //   (b) the y-offset MapMist uses to align its holes with the
+    //       InteractiveMap content center, since MapMist now draws full-screen.
+    var topInsetPx by remember { mutableIntStateOf(0) }
+    val topInsetDp = with(density) { topInsetPx.toDp() }
 
-            InteractiveMap(
-                mapResourceId = mapState.mapInfo.mapResourceId,
-                mapViewModel = mapViewModel,
-                nodesViewModel = nodesViewModel,
-                currentPoints = currentPoints,
-                revealStarted = revealStarted,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(kiwiColors.color2)
+                .testTag(CommonTestTags.HOME_SCREEN),
+    ) {
+        InteractiveMap(
+            mapResourceId = mapState.mapInfo.mapResourceId,
+            mapViewModel = mapViewModel,
+            nodesViewModel = nodesViewModel,
+            currentPoints = currentPoints,
+            revealStarted = revealStarted,
+            modifier = Modifier.fillMaxSize().padding(top = topInsetDp),
+        )
+
+        // Mist covers the FULL screen, including behind the title and the
+        // points indicator. zIndex sits between the map content (default 0)
+        // and the top-bar UI (zIndex 1).
+        MapMist(
+            nodes = nodesMap,
+            mapState = mapState,
+            topInsetPx = topInsetPx.toFloat(),
+            modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
+        )
+
+        Kiwi_H2(
+            KiwiTextArguments(
+                mapState.mapInfo.mapTitle,
+                color = kiwiColors.colorF,
+                // offset (not padding) so the title's measured size stays the
+                // pure text-plus-padding box — that's what feeds topInsetPx,
+                // and feeding the xLarge visual offset into the inset would
+                // push InteractiveMap down past where it used to sit.
+                modifier =
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
+                        .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
+                        .zIndex(1f)
+                        .onSizeChanged { topInsetPx = it.height },
+            ),
+        )
 
         PointsIndicator(
             currentPoints = currentPoints,
@@ -217,6 +238,7 @@ fun MapScreen(
     }
 }
 
+private const val MIST_Z_INDEX = 0.5f
 private const val POINTS_ANIM_MS = 350
 
 @Composable
