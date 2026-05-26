@@ -463,6 +463,24 @@ private fun InteractiveMap(
             )
         }
 
+        // CLOUDS — atmospheric drift anchored to the map. Sized to the map
+        // image dimensions (not the screen) so clouds populate the whole map
+        // world, and transformed with the same scale/translate the inner
+        // InteractiveMap Box uses so they pan and zoom with the map. Rendered
+        // above the nodes so they read as overhead sky. The top-level MapMist
+        // still covers everything in fog-of-war regions.
+        MapClouds(
+            modifier =
+                Modifier
+                    .size(width = imageWidthDp, height = imageHeightDp)
+                    .graphicsLayer(
+                        scaleX = mapState.scale,
+                        scaleY = mapState.scale,
+                        translationX = mapState.offset.x,
+                        translationY = mapState.offset.y,
+                    ),
+        )
+
         // NODE ACTION BUTTON
         if (!mapState.isFocusingNode) {
             mapState.selectedNodeId?.let { selectedNodeId ->
