@@ -44,12 +44,14 @@ import com.bellako.kiwi.features.combat.components.CombatTurnIndicator
 import com.bellako.kiwi.features.combat.components.DeathSequenceOverlay
 import com.bellako.kiwi.features.combat.components.CombatLogOverlay
 import com.bellako.kiwi.features.combat.components.CombatIntroController
+import com.bellako.kiwi.features.combat.components.FocusTarget
 import com.bellako.kiwi.features.combat.components.PlayerControls
 import com.bellako.kiwi.features.combat.components.PlayerDamageOverlays
 import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
 import com.bellako.kiwi.features.combat.components.combatTurnGlowColor
 import com.bellako.kiwi.features.combat.components.rememberCombatIntroController
 import com.bellako.kiwi.features.combat.components.rememberDeathSequenceVfx
+import com.bellako.kiwi.features.combat.components.rememberFocusBlurVfx
 import com.bellako.kiwi.features.combat.components.rememberPlayerDamageVfx
 import com.bellako.kiwi.features.combat.components.userTurnMessage
 import com.bellako.kiwi.features.combat.data.ActiveBarkDomain
@@ -121,6 +123,17 @@ fun CombatScreen(
 
     val playerVfx = rememberPlayerDamageVfx(combat.user.stats.currentHp, combat.id)
     val deathCloseProgress = rememberDeathSequenceVfx(combat.user.stats.currentHp == 0, combat.id)
+    // Ambient depth-of-field pulses, plus a cinematic focus-on-enemy pull when
+    // a bark is on screen. Paused during intro and after either side hits 0 HP.
+    val isAlive = combat.user.stats.currentHp > 0 && combat.enemy.stats.currentHp > 0
+    val focusBlur = rememberFocusBlurVfx(
+        key = combat.id,
+        enabled = intro.isCompleted && isAlive,
+    )
+    LaunchedEffect(displayedBark?.triggerId) {
+        focusBlur.overrideTarget.value =
+            if (displayedBark != null) FocusTarget.ENEMY else null
+    }
     val nodeEntry = LocalNodeEntryTransition.current
     val nodeEntryScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
@@ -149,6 +162,7 @@ fun CombatScreen(
                 background = combat.background,
                 alpha = intro.backgroundAlpha,
                 shakeOffsetX = { playerVfx.shakeOffsetX.value },
+                blurRadiusDp = { focusBlur.backgroundBlurRadius.value },
             )
 
             CombatEnemySprite(
@@ -157,6 +171,7 @@ fun CombatScreen(
                 isEnemyDefeated = combat.combatStatus == CombatGeneralStatus.USER_WON,
                 context = context,
                 introAlpha = intro.enemyAlpha,
+                blurRadiusDp = { focusBlur.enemyBlurRadius.value },
             )
 
             Column(modifier = Modifier.fillMaxSize().padding(top = Spacing.large)) {

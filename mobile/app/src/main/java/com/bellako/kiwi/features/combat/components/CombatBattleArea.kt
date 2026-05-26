@@ -28,12 +28,15 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.rememberBreathingModifier
+import com.bellako.kiwi.common.screens.components.rememberBreathingScale
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.ui.Spacing
@@ -55,6 +58,9 @@ private const val DAMAGE_FLASH_DIM_ALPHA = 0.4f
 private const val ENEMY_DEFEAT_POST_DAMAGE_PAUSE_MS = 250L
 private const val ENEMY_DEFEAT_FADE_MS = 800
 private const val LOG_DIM_ALPHA = 0.55f
+// Breathing origin: bottom-center, so the sprite "grows upward" while its feet stay planted.
+private const val ENEMY_BREATHING_ORIGIN_X = 0.5f
+private const val ENEMY_BREATHING_ORIGIN_Y = 1f
 
 @Composable
 internal fun ColumnScope.CombatBattleArea(
@@ -89,6 +95,7 @@ internal fun CombatEnemySprite(
     context: Context,
     modifier: Modifier = Modifier,
     introAlpha: Float = 1f,
+    blurRadiusDp: () -> Float = { 0f },
 ) {
     var previousHp by remember { mutableIntStateOf(currentHp) }
     var damageTrigger by remember { mutableIntStateOf(0) }
@@ -103,7 +110,7 @@ internal fun CombatEnemySprite(
     val spriteAlpha = remember { Animatable(1f) }
     var isDamageAnimating by remember { mutableStateOf(false) }
 
-    val breathingModifier = rememberBreathingModifier()
+    val breathingScale = rememberBreathingScale()
 
     LaunchedEffect(damageTrigger) {
         if (damageTrigger == 0) return@LaunchedEffect
@@ -144,7 +151,17 @@ internal fun CombatEnemySprite(
                 .fillMaxSize()
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
                 .alpha(spriteAlpha.value * introAlpha)
-                .then(breathingModifier),
+                // Single graphicsLayer carries the breathing scale and the
+                // focus blur — both read at draw phase, blur pipeline skipped
+                // when the radius is below the threshold.
+                .graphicsLayer {
+                    val scale = breathingScale.value
+                    scaleX = scale
+                    scaleY = scale
+                    transformOrigin =
+                        TransformOrigin(ENEMY_BREATHING_ORIGIN_X, ENEMY_BREATHING_ORIGIN_Y)
+                    renderEffect = blurRenderEffectOrNull(blurRadiusDp().dp.toPx())
+                },
         contentScale = ContentScale.Fit,
         colorFilter =
             if (redAlpha.value > 0f) {
