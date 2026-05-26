@@ -4,16 +4,21 @@ package com.bellako.kiwi.features.map.screens
 // constant (not a raw resource) so syntax errors surface at hot-reload time and
 // constants from the rest of the codebase can be interpolated in later phases.
 //
-// Phase 3: two-octave Voronoi cellular noise with foam derived from the F2-F1
-// border distance trick (Inigo Quilez). Cell seeds are animated by iTime so
-// the pattern slowly drifts. The result is composited only where the water
-// mask says water — land regions stay fully transparent so the underlying map
-// shows through unchanged.
+// Pattern: contour-band shading over a 4-octave FBM noise field. Foam lines
+// are smooth bands sampled at multiple noise isolines — naturally wiggly,
+// varying in thickness, with the occasional pinched-off white dot.
 //
-// Coordinates: the shader runs in layer-local pixel space, which equals
-// map-space here because the overlay sits inside the same transformed Box as
-// the map image. Voronoi sampled in fragCoord stays anchored to water bodies
-// under pan/zoom — no extra transform uniforms required.
+// The noise scale is modulated per-fragment by a "width score": for each
+// fragment we sample the mask at eight points around a ring and count how
+// many landed in water. Narrow rivers land few hits → blend toward a fine,
+// dense noise scale. Open seas land all hits → blend toward a coarse, sparser
+// noise scale. The result is that foam shapes shrink in tight channels and
+// grow in open water, suggesting flow rate and surface scale at once.
+//
+// Everything is domain-warped by a second, lower-frequency FBM and flow-
+// translated from an upper-middle source toward the bottom (mountains →
+// rivers feel). Mask gates the effect to water-only regions; the shader
+// inherits pan/zoom by sitting inside the same transformed Box as the map.
 
 internal const val WATER_SHADER_SRC = """
 uniform float2 iResolution;
@@ -21,73 +26,105 @@ uniform float2 maskResolution;
 uniform float iTime;
 
 // Layer content input — required by RenderEffect.createRuntimeShaderEffect's
-// second argument. Not sampled: we composite via alpha and let Compose blend
-// our output over the sibling Kiwi_Image below us.
+// second argument. Not sampled.
 uniform shader content;
 
-// Water mask, white = water, black = land. Sampled per fragment to gate the
-// effect. BitmapShader takes pixel coords, so we scale the normalized uv by
-// the mask's pixel dimensions (passed in maskResolution).
+// Water mask, white = water, black = land.
 uniform shader mask;
 
-// Cell sizes are in layer-local pixels. With the layer roughly the displayed
-// map size (~1000 px wide on phone), 80 px ≈ a dozen cells across the map.
-const float CELL_SIZE_A = 80.0;
-const float CELL_SIZE_B = 40.0;
+// Noise wavelength endpoints, in layer-local pixels. The actual scale used at
+// each fragment is blended between these by the width score. Smaller =
+// denser foam web; larger = bigger blobs between foam lines.
+const float NOISE_SCALE_NARROW = 35.0;
+const float NOISE_SCALE_WIDE = 110.0;
 
-// Foam thickness as a fraction of cell-distance. Larger = thicker foam ring.
-const float FOAM_WIDTH_A = 0.10;
-const float FOAM_WIDTH_B = 0.07;
+// Width probe: ring radius in layer-local pixels, and how many directions to
+// sample. A larger radius differentiates wider channels but smooths out fine
+// structure. 8 samples on an octagon is a decent balance.
+const float WIDTH_PROBE_RADIUS = 55.0;
+const int WIDTH_SAMPLES = 8;
 
-// Water palette anchored on the Kiwi theme's colorOcean = #007DAD. Deep cells
-// sit a few steps darker (#005A85), shallow cells a few steps lighter and
-// more saturated (#2CA8D6), foam stays pure white for maximum contrast.
-const half3 DEEP_BLUE = half3(0.000, 0.353, 0.522);     // #005A85
-const half3 SHALLOW_BLUE = half3(0.173, 0.659, 0.839);  // #2CA8D6
-const half3 FOAM_COLOR = half3(1.000, 1.000, 1.000);    // #FFFFFF
+// Domain warp.
+const float WARP_SCALE = 280.0;
+const float WARP_AMOUNT = 95.0;
 
-// Standard 2D hash → 2D point in [0, 1)^2. Used to seed each cell.
-float2 hash22(float2 p) {
-    p = float2(
-        dot(p, float2(127.1, 311.7)),
-        dot(p, float2(269.5, 183.3))
-    );
-    return fract(sin(p) * 43758.5453);
-}
+// Flow.
+const float FLOW_SPEED = 20.0;
+const float2 FLOW_SOURCE = float2(0.50, 0.15);
+const float RADIAL_BLEND = 0.55;
 
-// Same hash collapsed to a single float — used to pick a per-cell color mix.
+// Foam isolines. Three different noise levels, each with its own band width.
+// Multiple isolines give the foam network varied thickness and produces the
+// small isolated white dots seen in the reference.
+const float FOAM_LEVEL_A = 0.50;
+const float FOAM_WIDTH_A = 0.040;
+const float FOAM_LEVEL_B = 0.32;
+const float FOAM_WIDTH_B = 0.022;
+const float FOAM_LEVEL_C = 0.66;
+const float FOAM_WIDTH_C = 0.022;
+
+// Dark-blue patch threshold.
+const float DARK_PATCH_MAX = 0.30;
+const float DARK_PATCH_MIN = 0.18;
+
+// Palette anchored on the Kiwi theme's colorOcean = #007DAD.
+const half3 DEEP_BLUE = half3(0.050, 0.450, 0.620);
+const half3 SHALLOW_BLUE = half3(0.130, 0.570, 0.750);
+const half3 FOAM_COLOR = half3(0.950, 0.985, 1.000);
+
+// Overall dampening so the JPEG's water color blends through.
+const float FOAM_OPACITY = 0.75;
+const float EFFECT_OPACITY = 0.55;
+
 float hash21(float2 p) {
     return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
 }
 
-// Returns (F1, F2, cellHash). F1 is the distance to the nearest cell center,
-// F2 the second nearest — F2 − F1 collapses to 0 right on a cell border, which
-// is what we use to draw foam. cellHash identifies the closest cell so we can
-// tint each cell differently.
-float3 voronoiCell(float2 x, float timePhase) {
-    float2 n = floor(x);
-    float2 f = fract(x);
-    float f1 = 9.0;
-    float f2 = 9.0;
-    float2 closestCell = float2(0.0);
-    for (int j = -1; j <= 1; j++) {
-        for (int i = -1; i <= 1; i++) {
-            float2 g = float2(float(i), float(j));
-            float2 o = hash22(n + g);
-            // Animate the cell seed inside its tile so cells "breathe".
-            o = 0.5 + 0.5 * sin(timePhase + 6.2831853 * o);
-            float2 r = g + o - f;
-            float d = dot(r, r);
-            if (d < f1) {
-                f2 = f1;
-                f1 = d;
-                closestCell = n + g;
-            } else if (d < f2) {
-                f2 = d;
-            }
-        }
+float valueNoise(float2 p) {
+    float2 n = floor(p);
+    float2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash21(n);
+    float b = hash21(n + float2(1.0, 0.0));
+    float c = hash21(n + float2(0.0, 1.0));
+    float d = hash21(n + float2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm4(float2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    float total = 0.0;
+    for (int i = 0; i < 4; i++) {
+        v += a * valueNoise(p);
+        total += a;
+        p = p * 2.03;
+        a *= 0.5;
     }
-    return float3(sqrt(f1), sqrt(f2), hash21(closestCell));
+    return v / total;
+}
+
+float fbm2(float2 p) {
+    return 0.5 * valueNoise(p) + 0.25 * valueNoise(p * 2.03);
+}
+
+float band(float v, float center, float halfWidth) {
+    return 1.0 - smoothstep(0.0, halfWidth, abs(v - center));
+}
+
+// Returns 0..1: fraction of probe directions whose neighborhood pixel is
+// water. Used to differentiate narrow channels (low score) from open seas
+// (high score) so we can pick a per-fragment noise scale.
+float widthScore(float2 fragCoord) {
+    float count = 0.0;
+    for (int i = 0; i < WIDTH_SAMPLES; i++) {
+        float angle = float(i) * (6.2831853 / float(WIDTH_SAMPLES));
+        float2 dir = float2(cos(angle), sin(angle));
+        float2 probeFrag = fragCoord + dir * WIDTH_PROBE_RADIUS;
+        float2 probeMaskCoord = (probeFrag / iResolution) * maskResolution;
+        count += step(0.5, mask.eval(probeMaskCoord).r);
+    }
+    return count / float(WIDTH_SAMPLES);
 }
 
 half4 main(float2 fragCoord) {
@@ -95,32 +132,50 @@ half4 main(float2 fragCoord) {
     float2 maskCoord = uv * maskResolution;
     half waterness = mask.eval(maskCoord).r;
 
-    // Land — fully transparent so the map shows through unchanged.
     if (waterness < 0.01) {
         return half4(0.0);
     }
 
-    // Slow drift. Different multipliers per octave keep the two layers from
-    // beating against each other.
-    float t = iTime * 0.30;
+    // Flow direction at this fragment.
+    float2 sourcePix = FLOW_SOURCE * iResolution;
+    float2 toFrag = fragCoord - sourcePix;
+    float toFragLen = length(toFrag);
+    float2 radialDir = (toFragLen > 0.0001) ? toFrag / toFragLen : float2(0.0, 1.0);
+    float2 flowDir = normalize(mix(float2(0.0, 1.0), radialDir, RADIAL_BLEND));
+    float2 scrollOffset = flowDir * iTime * FLOW_SPEED;
 
-    float3 v1 = voronoiCell(fragCoord / CELL_SIZE_A, t);
-    float3 v2 = voronoiCell(fragCoord / CELL_SIZE_B + 17.0, t * 1.4);
+    float2 base = fragCoord - scrollOffset;
 
-    // Cell tint from the large-octave hash so adjacent cells differ visibly.
-    half cellMix = half(v1.z);
-    half3 baseWater = mix(DEEP_BLUE, SHALLOW_BLUE, cellMix);
+    // Domain warp.
+    float2 warpUv = base / WARP_SCALE + iTime * 0.03;
+    float2 warpVec = float2(
+        fbm2(warpUv),
+        fbm2(warpUv + float2(31.0, 17.3))
+    ) - 0.5;
+    float2 warped = base + warpVec * WARP_AMOUNT;
 
-    // Foam ring at cell borders, from both octaves combined.
-    float foamA = smoothstep(FOAM_WIDTH_A, 0.0, v1.y - v1.x);
-    float foamB = smoothstep(FOAM_WIDTH_B, 0.0, v2.y - v2.x);
-    half foam = half(clamp(foamA + foamB * 0.6, 0.0, 1.0));
+    // Width score from probing the mask. Sample two noise fields at fixed
+    // scales and blend by score: each fragment sees its own effective scale
+    // without the discontinuities that come from feeding a varying scale into
+    // a single noise lookup.
+    float width = widthScore(fragCoord);
+    float nNarrow = fbm4(warped / NOISE_SCALE_NARROW);
+    float nWide = fbm4(warped / NOISE_SCALE_WIDE);
+    float n = mix(nNarrow, nWide, width);
+
+    // Dark patches in noise dips.
+    half darkPatch = half(smoothstep(DARK_PATCH_MAX, DARK_PATCH_MIN, n));
+    half3 baseWater = mix(SHALLOW_BLUE, DEEP_BLUE, darkPatch);
+
+    // Foam from three isolines combined.
+    float foamA = band(n, FOAM_LEVEL_A, FOAM_WIDTH_A);
+    float foamB = band(n, FOAM_LEVEL_B, FOAM_WIDTH_B);
+    float foamC = band(n, FOAM_LEVEL_C, FOAM_WIDTH_C);
+    half foam = half(clamp(foamA + foamB * 0.7 + foamC * 0.7, 0.0, 1.0)) * half(FOAM_OPACITY);
 
     half3 waterRgb = mix(baseWater, FOAM_COLOR, foam);
 
-    // Premultiplied alpha output. waterness fades the effect out across
-    // shorelines (assumes the mask has soft edges from the Gaussian blur in
-    // Photoshop). On land waterness is 0 → output is transparent.
-    return half4(waterRgb * waterness, waterness);
+    half alpha = waterness * half(EFFECT_OPACITY);
+    return half4(waterRgb * alpha, alpha);
 }
 """
