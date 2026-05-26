@@ -3,6 +3,10 @@ package com.bellako.kiwi.features.combat.components
 import android.os.Build
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -12,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -65,22 +70,28 @@ private const val DEATH_VIGNETTE_OPEN_HEADROOM = 1.08f
 // Slight overdraw so the squashed cover rect leaves no hairline gap at the edges.
 private const val DEATH_VIGNETTE_COVER_OVERDRAW = 1.05f
 
-// Focus blur — ambient pulses one surface out of focus at a time; an override
-// flag (e.g. a bark) cinematic-focuses one surface and blurs the other.
-// The background sits at a small standing blur even at rest, so when focus
-// shifts the change reads more clearly than coming from 0.
+// Focus blur — at rest the background sits at a small standing blur with a
+// slow oscillation so the scene reads as "alive"; the enemy is fully sharp.
+// Occasionally a fast cross-fade pulse fires: enemy quickly blurs while the
+// background sharpens, then both snap back. An override (e.g. a bark) locks
+// focus on the enemy for the bark's duration.
 private const val FOCUS_BLUR_ENEMY_REST_DP = 0f
 private const val FOCUS_BLUR_BACKGROUND_REST_DP = 1.5f
-private const val FOCUS_BLUR_PEAK_MIN_DP = 2.5f
-private const val FOCUS_BLUR_PEAK_MAX_DP = 4f
-private const val FOCUS_BLUR_RAMP_IN_MIN_MS = 800
-private const val FOCUS_BLUR_RAMP_IN_MAX_MS = 1500
-private const val FOCUS_BLUR_HOLD_MIN_MS = 200L
-private const val FOCUS_BLUR_HOLD_MAX_MS = 500L
-private const val FOCUS_BLUR_RAMP_OUT_MIN_MS = 900
-private const val FOCUS_BLUR_RAMP_OUT_MAX_MS = 1700
-private const val FOCUS_BLUR_IDLE_MIN_MS = 800L
-private const val FOCUS_BLUR_IDLE_MAX_MS = 2500L
+// Slow ±amplitude oscillation added on top of the background's resting value.
+private const val FOCUS_BLUR_BACKGROUND_OSCILLATION_DP = 0.4f
+private const val FOCUS_BLUR_BACKGROUND_OSCILLATION_HALF_PERIOD_MS = 900
+// Pulse peak — the enemy's blur at the apex of the cross-fade. Random within range.
+private const val FOCUS_BLUR_PULSE_PEAK_MIN_DP = 3f
+private const val FOCUS_BLUR_PULSE_PEAK_MAX_DP = 5f
+// Pulse ramps are intentionally fast: total ramp-in + hold + ramp-out lands
+// in roughly 500-900 ms.
+private const val FOCUS_BLUR_PULSE_RAMP_MIN_MS = 200
+private const val FOCUS_BLUR_PULSE_RAMP_MAX_MS = 350
+private const val FOCUS_BLUR_PULSE_HOLD_MIN_MS = 100L
+private const val FOCUS_BLUR_PULSE_HOLD_MAX_MS = 200L
+private const val FOCUS_BLUR_IDLE_MIN_MS = 1000L
+private const val FOCUS_BLUR_IDLE_MAX_MS = 3000L
+private const val FOCUS_BLUR_OVERRIDE_PEAK_DP = 4f
 private const val FOCUS_BLUR_OVERRIDE_RAMP_MS = 350
 private const val FOCUS_BLUR_OVERRIDE_RELEASE_MS = 600
 private const val FOCUS_BLUR_REQUEST_DEFAULT_HOLD_MS = 1200L
@@ -265,6 +276,7 @@ internal fun blurRenderEffectOrNull(radiusPx: Float): RenderEffect? =
 internal class FocusBlurVfx(
     val enemyBlurRadius: Animatable<Float, *>,
     val backgroundBlurRadius: Animatable<Float, *>,
+    val backgroundOscillation: State<Float>,
     internal val overrideTarget: MutableState<FocusTarget?>,
 ) {
     suspend fun requestFocus(
@@ -288,8 +300,9 @@ internal fun rememberFocusBlurVfx(
     val enemyBlurRadius = remember(key) { Animatable(FOCUS_BLUR_ENEMY_REST_DP) }
     val backgroundBlurRadius = remember(key) { Animatable(FOCUS_BLUR_BACKGROUND_REST_DP) }
     val overrideTarget = remember(key) { mutableStateOf<FocusTarget?>(null) }
+    val backgroundOscillation = rememberBackgroundOscillation()
     val vfx = remember(key) {
-        FocusBlurVfx(enemyBlurRadius, backgroundBlurRadius, overrideTarget)
+        FocusBlurVfx(enemyBlurRadius, backgroundBlurRadius, backgroundOscillation, overrideTarget)
     }
 
     LaunchedEffect(key, enabled) {
@@ -304,12 +317,28 @@ internal fun rememberFocusBlurVfx(
     return vfx
 }
 
+@Composable
+private fun rememberBackgroundOscillation(): State<Float> {
+    val transition = rememberInfiniteTransition(label = "focus_blur_bg_oscillation")
+    return transition.animateFloat(
+        initialValue = -FOCUS_BLUR_BACKGROUND_OSCILLATION_DP,
+        targetValue = FOCUS_BLUR_BACKGROUND_OSCILLATION_DP,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                FOCUS_BLUR_BACKGROUND_OSCILLATION_HALF_PERIOD_MS,
+                easing = EaseInOut,
+            ),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "focus_blur_bg_oscillation_value",
+    )
+}
+
 private suspend fun runFocusBlurLoop(
     enemyBlurRadius: Animatable<Float, *>,
     backgroundBlurRadius: Animatable<Float, *>,
     overrideTarget: MutableState<FocusTarget?>,
 ) {
-    var lastPulsed = FocusTarget.BACKGROUND
     while (true) {
         val override = overrideTarget.value
         if (override != null) {
@@ -320,12 +349,7 @@ private suspend fun runFocusBlurLoop(
                 overrideTarget,
             )
         } else {
-            lastPulsed = runFocusBlurAmbient(
-                lastPulsed,
-                enemyBlurRadius,
-                backgroundBlurRadius,
-                overrideTarget,
-            )
+            runFocusBlurPulse(enemyBlurRadius, backgroundBlurRadius, overrideTarget)
         }
     }
 }
@@ -351,7 +375,7 @@ private suspend fun runFocusBlurOverride(
         }
         launch {
             toBlur.animateTo(
-                FOCUS_BLUR_PEAK_MAX_DP,
+                FOCUS_BLUR_OVERRIDE_PEAK_DP,
                 tween(FOCUS_BLUR_OVERRIDE_RAMP_MS, easing = EaseInOut),
             )
         }
@@ -363,32 +387,50 @@ private suspend fun runFocusBlurOverride(
     )
 }
 
-private suspend fun runFocusBlurAmbient(
-    lastPulsed: FocusTarget,
+private suspend fun runFocusBlurPulse(
     enemyBlurRadius: Animatable<Float, *>,
     backgroundBlurRadius: Animatable<Float, *>,
     overrideTarget: MutableState<FocusTarget?>,
-): FocusTarget {
+) {
     val idleMs = Random.nextLong(FOCUS_BLUR_IDLE_MIN_MS, FOCUS_BLUR_IDLE_MAX_MS)
     val overrideAppeared = withTimeoutOrNull(idleMs) {
         snapshotFlow { overrideTarget.value }.first { it != null }
     }
-    if (overrideAppeared != null) return lastPulsed
+    if (overrideAppeared != null) return
 
-    val target = if (lastPulsed == FocusTarget.ENEMY) FocusTarget.BACKGROUND else FocusTarget.ENEMY
-    val animatable = if (target == FocusTarget.ENEMY) enemyBlurRadius else backgroundBlurRadius
-    val rest = restDpFor(target)
-    val peak = FOCUS_BLUR_PEAK_MIN_DP +
-        Random.nextFloat() * (FOCUS_BLUR_PEAK_MAX_DP - FOCUS_BLUR_PEAK_MIN_DP)
-    val rampInMs = Random.nextInt(FOCUS_BLUR_RAMP_IN_MIN_MS, FOCUS_BLUR_RAMP_IN_MAX_MS)
-    val holdMs = Random.nextLong(FOCUS_BLUR_HOLD_MIN_MS, FOCUS_BLUR_HOLD_MAX_MS)
-    val rampOutMs = Random.nextInt(FOCUS_BLUR_RAMP_OUT_MIN_MS, FOCUS_BLUR_RAMP_OUT_MAX_MS)
+    val enemyPeak = FOCUS_BLUR_PULSE_PEAK_MIN_DP +
+        Random.nextFloat() * (FOCUS_BLUR_PULSE_PEAK_MAX_DP - FOCUS_BLUR_PULSE_PEAK_MIN_DP)
+    val rampInMs = Random.nextInt(FOCUS_BLUR_PULSE_RAMP_MIN_MS, FOCUS_BLUR_PULSE_RAMP_MAX_MS)
+    val holdMs = Random.nextLong(FOCUS_BLUR_PULSE_HOLD_MIN_MS, FOCUS_BLUR_PULSE_HOLD_MAX_MS)
+    val rampOutMs = Random.nextInt(FOCUS_BLUR_PULSE_RAMP_MIN_MS, FOCUS_BLUR_PULSE_RAMP_MAX_MS)
 
     coroutineScope {
         val pulse = launch {
-            animatable.animateTo(peak, tween(rampInMs, easing = EaseInOut))
+            // Cross-fade in: enemy blurs while background sharpens.
+            coroutineScope {
+                launch {
+                    enemyBlurRadius.animateTo(enemyPeak, tween(rampInMs, easing = EaseInOut))
+                }
+                launch {
+                    backgroundBlurRadius.animateTo(0f, tween(rampInMs, easing = EaseInOut))
+                }
+            }
             delay(holdMs)
-            animatable.animateTo(rest, tween(rampOutMs, easing = EaseInOut))
+            // Cross-fade out: enemy sharpens while background returns to baseline.
+            coroutineScope {
+                launch {
+                    enemyBlurRadius.animateTo(
+                        FOCUS_BLUR_ENEMY_REST_DP,
+                        tween(rampOutMs, easing = EaseInOut),
+                    )
+                }
+                launch {
+                    backgroundBlurRadius.animateTo(
+                        FOCUS_BLUR_BACKGROUND_REST_DP,
+                        tween(rampOutMs, easing = EaseInOut),
+                    )
+                }
+            }
         }
         val watcher = launch {
             snapshotFlow { overrideTarget.value }.first { it != null }
@@ -397,5 +439,4 @@ private suspend fun runFocusBlurAmbient(
         pulse.join()
         watcher.cancel()
     }
-    return target
 }

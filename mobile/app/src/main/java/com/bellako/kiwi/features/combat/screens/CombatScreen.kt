@@ -162,7 +162,11 @@ fun CombatScreen(
                 background = combat.background,
                 alpha = intro.backgroundAlpha,
                 shakeOffsetX = { playerVfx.shakeOffsetX.value },
-                blurRadiusDp = { focusBlur.backgroundBlurRadius.value },
+                blurRadiusDp = {
+                    (focusBlur.backgroundBlurRadius.value +
+                        focusBlur.backgroundOscillation.value)
+                        .coerceAtLeast(0f)
+                },
             )
 
             CombatEnemySprite(
