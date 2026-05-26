@@ -7,7 +7,10 @@ import com.bellako.kiwi.R
 data class MapInfo(
     val mapTitle: String = "MINDVEIL",
     val mapResourceId: Int = R.drawable.mindveil_4k,
-    val maxZoom: Float = 8f,
+    // Absolute scale limits. Pinching beyond either limit elastically
+    // overshoots and then bounces back to the limit on gesture end.
+    val minZoom: Float = 0.5f,
+    val maxZoom: Float = 2f,
     val backgroundColor: Color = Color.White,
     val mapId: Int = 0,
 )

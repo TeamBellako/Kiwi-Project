@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.features.map.data.MapInfo
 import com.bellako.kiwi.features.map.data.MapState
+import com.bellako.kiwi.features.map.data.MapsInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -20,11 +21,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
 
 private const val FLING_FRICTION = 0.7f // friction per frame (closer to 1 -> slower braking)
 private const val FLING_MIN_VELOCITY = 10f // px/s threshold to stop the fling
 private const val FRAME_MILLIS = 16L
+
+// How much of a pinch beyond minZoom/maxZoom is honored before the bounce
+// snaps back. 0 = hard clamp, 1 = no resistance. 0.35 ≈ rubber-band feel.
+private const val ZOOM_OVERSHOOT_FACTOR = 0.35f
+
+// Animation duration for the bounce-back when the user releases a pinch
+// outside the [minScale, maxScale] range.
+private const val SCALE_SETTLE_MS = 240
+
+// Small epsilon for comparing scales when deciding whether a settle is needed.
+private const val SCALE_SETTLE_EPSILON = 0.001f
 
 @HiltViewModel
 class MapViewModel
@@ -38,7 +49,14 @@ class MapViewModel
         private var mapMarginFactor: Float = 0f
         private var elasticityFactor = 0f
 
-        private val _state = kotlinx.coroutines.flow.MutableStateFlow(MapState(scale = initialScale))
+        // Initial map info has to be a concrete entry from MapsInfo (not the
+        // bare MapInfo() default) so the zoom limits configured in MapsInfo
+        // take effect on first app load — SWITCH_MAP is only ever sent when
+        // the user later changes maps, never at startup.
+        private val _state =
+            kotlinx.coroutines.flow.MutableStateFlow(
+                MapState(scale = initialScale, mapInfo = MapsInfo.MindVeil),
+            )
         override val state: kotlinx.coroutines.flow.StateFlow<MapState> = _state.asStateFlow()
 
         // Whether the node-reveal sequence has already run for this map session.
@@ -53,6 +71,7 @@ class MapViewModel
         }
 
         private var flingJob: Job? = null
+        private var scaleSettleJob: Job? = null
         private var lastPointerPosition = Offset.Zero
         private var lastPointerTime = 0L
         private var velocityPxPerSec = Offset.Zero
@@ -60,6 +79,7 @@ class MapViewModel
         // ---------------------------------------------------------------------------------------------
 
         fun setParameters(
+            minScale: Float,
             maxScale: Float,
             mapWidthPx: Float,
             mapHeightPx: Float,
@@ -68,17 +88,23 @@ class MapViewModel
             mapMarginFactor: Float,
             elasticityFactor: Float,
         ) {
+            this.minScale = minScale
             this.maxScale = maxScale
             this.mapMarginFactor = mapMarginFactor
             this.elasticityFactor = elasticityFactor
 
-            val scaleX = (viewportWidthPx - 2 * mapWidthPx * mapMarginFactor) / mapWidthPx
-            val scaleY = (viewportHeightPx - 2 * mapHeightPx * mapMarginFactor) / mapHeightPx
-            minScale = min(scaleX, scaleY).coerceAtMost(maxScale)
-            initialScale = minScale
+            // Absolute zoom: scale = 1.0 means "map exactly fits the viewport"
+            // (because the layout box is sized to displayWidthPx/displayHeightPx
+            // out in MapScreen — i.e. the image's fit-to-screen size). The
+            // viewmodel doesn't need image dimensions to interpret zoom limits
+            // anymore; minZoom/maxZoom are pure multipliers on the fit size.
+            //
+            // We start at scale = 1.0 (exact fit) unless minScale forces us
+            // higher (e.g. a map that's configured to start zoomed-in).
+            initialScale = maxOf(1f, minScale)
 
             _state.value =
-                MapState(
+                _state.value.copy(
                     scale = initialScale,
                     offset = Offset(0f, 0f),
                     viewportWidthPx = viewportWidthPx,
@@ -114,12 +140,51 @@ class MapViewModel
             scaleFactor: Float,
             centroid: Offset,
         ) {
+            // Cancel any in-progress bounce-back so the new gesture is
+            // responsive immediately.
+            scaleSettleJob?.cancel()
+
             val state = _state.value
-            val newScale = (state.scale * scaleFactor).coerceIn(minScale, maxScale)
+            val rawScale = state.scale * scaleFactor
+            // Elastic clamp to [minScale, maxScale]: values past either limit
+            // are honored at a fraction of their overshoot, so the user feels
+            // resistance but the gesture isn't blocked. settleScale() (called
+            // on gesture end) animates back to the nearest limit.
+            val newScale =
+                when {
+                    rawScale < minScale -> minScale + (rawScale - minScale) * ZOOM_OVERSHOOT_FACTOR
+                    rawScale > maxScale -> maxScale + (rawScale - maxScale) * ZOOM_OVERSHOOT_FACTOR
+                    else -> rawScale
+                }
             val newOffset = calculateOffsetForZoom(state, newScale, centroid)
             setScale(newScale)
             setOffset(newOffset)
             unSelectNode()
+        }
+
+        /**
+         * If the current scale is outside the configured [minScale, maxScale]
+         * range (because the user pinched past a limit), animate it back to
+         * the nearest limit. Re-clamps the offset each frame since the
+         * allowed offset range depends on scale.
+         */
+        fun settleScale() {
+            scaleSettleJob?.cancel()
+            val currentScale = _state.value.scale
+            val targetScale = currentScale.coerceIn(minScale, maxScale)
+            if (abs(currentScale - targetScale) < SCALE_SETTLE_EPSILON) return
+
+            scaleSettleJob =
+                viewModelScope.launch(AndroidUiDispatcher.Main) {
+                    val anim = Animatable(currentScale)
+                    anim.animateTo(targetScale, tween(SCALE_SETTLE_MS, easing = FastOutSlowInEasing)) {
+                        val s = _state.value
+                        val nextScale = this.value
+                        val nextOffset =
+                            calculateConstrainedOffset(s.offset, s.copy(scale = nextScale))
+                        _state.value = s.copy(scale = nextScale, offset = nextOffset)
+                    }
+                }
         }
 
         override fun updateOffset(delta: Offset) {
@@ -284,6 +349,7 @@ class MapViewModel
             nodeY: Float,
         ) {
             flingJob?.cancel()
+            scaleSettleJob?.cancel()
 
             val startState = _state.value
             val targetScale = maxScale.coerceAtLeast(startState.scale)
@@ -320,6 +386,7 @@ class MapViewModel
             nodeY: Float,
         ) {
             flingJob?.cancel()
+            scaleSettleJob?.cancel()
 
             viewModelScope.launch(AndroidUiDispatcher.Main) {
                 _state.value = _state.value.copy(isFocusingNode = true)
@@ -371,5 +438,6 @@ class MapViewModel
         override fun onCleared() {
             super.onCleared()
             flingJob?.cancel()
+            scaleSettleJob?.cancel()
         }
     }

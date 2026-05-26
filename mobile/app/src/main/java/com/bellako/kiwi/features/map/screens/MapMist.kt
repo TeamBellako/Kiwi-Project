@@ -302,7 +302,7 @@ private fun DrawScope.drawDriftingMist(
     }
 }
 
-private fun computeRevealedIds(nodes: Map<Long, NodesDomain>): Set<Long> {
+internal fun computeRevealedIds(nodes: Map<Long, NodesDomain>): Set<Long> {
     if (nodes.isEmpty()) return emptySet()
     val openOrCompleted =
         nodes.values.filter { it.status == NodeStatus.OPEN || it.status == NodeStatus.COMPLETED }

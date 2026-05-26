@@ -88,7 +88,6 @@ import kotlin.math.min
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MapScreen(
-    maxZoom: Float = 8f,
     mapMarginFactor: Float = 0.08f,
     elasticityFactor: Float = 1.4f,
     mapViewModel: MapViewModel,
@@ -127,10 +126,20 @@ fun MapScreen(
 
     val displayWidthPx = imageW * fitScale
     val displayHeightPx = imageH * fitScale
+    val mapDisplayWidthDp = with(density) { displayWidthPx.toDp() }
+    val mapDisplayHeightDp = with(density) { displayHeightPx.toDp() }
 
-    LaunchedEffect(maxZoom, displayWidthPx, displayHeightPx, viewportWidthPx, viewportHeightPx) {
+    LaunchedEffect(
+        mapState.mapInfo.minZoom,
+        mapState.mapInfo.maxZoom,
+        displayWidthPx,
+        displayHeightPx,
+        viewportWidthPx,
+        viewportHeightPx,
+    ) {
         mapViewModel.setParameters(
-            maxScale = maxZoom,
+            minScale = mapState.mapInfo.minZoom,
+            maxScale = mapState.mapInfo.maxZoom,
             mapWidthPx = displayWidthPx,
             mapHeightPx = displayHeightPx,
             viewportWidthPx = viewportWidthPx,
@@ -196,12 +205,41 @@ fun MapScreen(
         // Mist covers the FULL screen, including behind the title and the
         // points indicator. zIndex sits between the map content (default 0)
         // and the top-bar UI (zIndex 1).
-//        MapMist(
-//            nodes = nodesMap,
-//            mapState = mapState,
-//            topInsetPx = topInsetPx.toFloat(),
-//            modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
-//        )
+        MapMist(
+            nodes = nodesMap,
+            mapState = mapState,
+            topInsetPx = topInsetPx.toFloat(),
+            modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
+        )
+
+        // Clouds sit above the mist (so they read as overhead sky reinforcing
+        // the mist cover) but below the top-bar UI. The wrapper Box mirrors
+        // InteractiveMap's positioning — top inset + center alignment — so the
+        // graphicsLayer transform places the cloud canvas exactly over the
+        // map content. The Canvas itself has no pointer modifier, so map
+        // gestures continue to land on InteractiveMap below.
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = topInsetDp)
+                    .zIndex(CLOUDS_Z_INDEX),
+            contentAlignment = Alignment.Center,
+        ) {
+            MapClouds(
+                nodes = nodesMap,
+                mapState = mapState,
+                modifier =
+                    Modifier
+                        .size(width = mapDisplayWidthDp, height = mapDisplayHeightDp)
+                        .graphicsLayer(
+                            scaleX = mapState.scale,
+                            scaleY = mapState.scale,
+                            translationX = mapState.offset.x,
+                            translationY = mapState.offset.y,
+                        ),
+            )
+        }
 
         Kiwi_H2(
             KiwiTextArguments(
@@ -239,6 +277,7 @@ fun MapScreen(
 }
 
 private const val MIST_Z_INDEX = 0.5f
+private const val CLOUDS_Z_INDEX = 0.7f
 private const val POINTS_ANIM_MS = 350
 
 @Composable
@@ -371,6 +410,7 @@ private fun InteractiveMap(
                         },
                         onGestureEnd = {
                             mapViewModel.startFling()
+                            mapViewModel.settleScale()
                         },
                     )
                 },
@@ -470,24 +510,6 @@ private fun InteractiveMap(
                 nameAlpha = revealSchedule.labelAlpha(node.id, revealClockMs),
             )
         }
-
-        // CLOUDS — atmospheric drift anchored to the map. Sized to the map
-        // image dimensions (not the screen) so clouds populate the whole map
-        // world, and transformed with the same scale/translate the inner
-        // InteractiveMap Box uses so they pan and zoom with the map. Rendered
-        // above the nodes so they read as overhead sky. The top-level MapMist
-        // still covers everything in fog-of-war regions.
-//        MapClouds(
-//            modifier =
-//                Modifier
-//                    .size(width = imageWidthDp, height = imageHeightDp)
-//                    .graphicsLayer(
-//                        scaleX = mapState.scale,
-//                        scaleY = mapState.scale,
-//                        translationX = mapState.offset.x,
-//                        translationY = mapState.offset.y,
-//                    ),
-//        )
 
         // NODE ACTION BUTTON
         if (!mapState.isFocusingNode) {
