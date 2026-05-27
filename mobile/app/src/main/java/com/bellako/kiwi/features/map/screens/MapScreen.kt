@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInBack
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.EaseOutBack
@@ -113,6 +114,7 @@ fun MapScreen(
     nodesViewModel: INodesViewModel,
     goalsViewModel: IGoalsViewModel,
     usersViewModel: IUsersViewModel,
+    isDialogueOverlaid: Boolean = false,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val density = LocalDensity.current
@@ -243,6 +245,7 @@ fun MapScreen(
                 nodesViewModel = nodesViewModel,
                 currentPoints = currentPoints,
                 revealStarted = revealStarted,
+                isDialogueOverlaid = isDialogueOverlaid,
                 modifier = Modifier.fillMaxSize().padding(top = topInsetDp),
             )
 
@@ -325,6 +328,12 @@ fun MapScreen(
 private const val MIST_Z_INDEX = 0.5f
 private const val CLOUDS_Z_INDEX = 0.7f
 private const val POINTS_ANIM_MS = 350
+
+// Timing for the node action card's scale-out while a dialogue covers the
+// bottom of the map. EaseInBack matches the locked→unlocked icon shrink so
+// the two animations read as part of the same vocabulary.
+private const val NODE_ACTION_DIALOGUE_HIDE_MS = 220
+private const val NODE_ACTION_DIALOGUE_SHOW_MS = 320
 
 // Hold the indicator at its mounting value until the map's entry focus
 // animation has played, so the player can take in the zoom-in before the
@@ -551,6 +560,7 @@ private fun InteractiveMap(
     nodesViewModel: INodesViewModel,
     currentPoints: Int,
     revealStarted: Boolean,
+    isDialogueOverlaid: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -589,6 +599,24 @@ private fun InteractiveMap(
                 }
             },
         )
+
+    // Scale-out the selected-node action card while a no-background dialogue
+    // is overlaid on the map. The card is normally visible above the dialogue
+    // box; popping it would feel abrupt, so we shrink it into the map.
+    val dialogueHideScale = remember { Animatable(1f) }
+    LaunchedEffect(isDialogueOverlaid) {
+        if (isDialogueOverlaid) {
+            dialogueHideScale.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(NODE_ACTION_DIALOGUE_HIDE_MS, easing = EaseInBack),
+            )
+        } else {
+            dialogueHideScale.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(NODE_ACTION_DIALOGUE_SHOW_MS, easing = EaseOutBack),
+            )
+        }
+    }
 
     Box(
         modifier =
@@ -692,6 +720,11 @@ private fun InteractiveMap(
         }
 
         // NODES
+        // Node status flips (e.g. a completion event) land while the
+        // node-entry veil is fully opaque. Gate Node's iconPopScale so the
+        // shrink-and-pop only plays once the veil has cleared — otherwise
+        // the user sees the new icon already settled in place.
+        val iconAnimationReady = (nodeEntry?.veilAlpha ?: 0f) <= 0f
         nodesMap.values.forEach { node ->
             NodeOnMap(
                 node = node,
@@ -704,6 +737,7 @@ private fun InteractiveMap(
                 nameAlpha =
                     unlockReveal.labelAlpha(node.id)
                         ?: revealSchedule.labelAlpha(node.id, revealClockMs),
+                iconAnimationReady = iconAnimationReady,
             )
         }
 
@@ -778,9 +812,10 @@ private fun InteractiveMap(
                                     }
                                 },
                                 modifier =
-                                    Modifier.offset(
-                                        y = centerOffset + getResponsiveSizeHeight(26.dp),
-                                    ),
+                                    Modifier
+                                        .offset(
+                                            y = centerOffset + getResponsiveSizeHeight(26.dp),
+                                        ).scale(dialogueHideScale.value),
                                 currentPoints = currentPoints,
                             )
                         }

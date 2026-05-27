@@ -210,6 +210,16 @@ private fun AppScreen(
     val activeConversation by conversationViewModel.active.collectAsState()
     val isConversationVisible by conversationViewModel.isVisible.collectAsState()
 
+    // A no-background conversation sits over the map as a dialogue overlay
+    // (Small dialogues, and the rare FULL conversation that ships without a
+    // background). The map stays visible behind, so any selected-node action
+    // button is also visible — MapScreen hides it while this is true.
+    val isDialogueOverlaid by remember {
+        derivedStateOf {
+            isConversationVisible && activeConversation?.background.isNullOrBlank()
+        }
+    }
+
     val activeCombat by combatViewModel.active.collectAsState()
     val isCombatVisible by combatViewModel.isVisible.collectAsState()
     val isCombatTurnPlaying by combatViewModel.isTurnPlaying.collectAsState()
@@ -380,6 +390,7 @@ private fun AppScreen(
                         skillsViewModel = skillsViewModel,
                         isCombatActive = activeCombat != null,
                         shouldPlayMapMusic = shouldPlayMapMusic,
+                        isDialogueOverlaid = isDialogueOverlaid,
                     )
 
                     AnimatedVisibility(
@@ -726,6 +737,7 @@ fun AppNavHost(
     skillsViewModel: ISkillsViewModel,
     isCombatActive: Boolean = false,
     shouldPlayMapMusic: Boolean = true,
+    isDialogueOverlaid: Boolean = false,
 ) {
     NavHost(
         navController = navController,
@@ -805,6 +817,7 @@ fun AppNavHost(
                     goalsViewModel = goalsViewModel,
                     mapViewModel = hiltViewModel(),
                     usersViewModel = usersViewModel,
+                    isDialogueOverlaid = isDialogueOverlaid,
                 )
             }
         }

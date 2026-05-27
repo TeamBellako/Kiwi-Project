@@ -23,13 +23,21 @@ private const val UNLOCK_NODE_POP_MS = 300f
 private const val UNLOCK_EDGE_LERP_MS = 240f
 private const val UNLOCK_LABEL_FADE_MS = 220f
 
+// Leading phase: gives the source's own icon-swap animation (shrink-to-zero,
+// drawable swap, pop-back) time to read on screen before the edge starts
+// lerping toward the newly-unlocked neighbours. Matches Node's local
+// ICON_SHRINK_MS + ICON_POP_MS so the two animations finish together.
+private const val UNLOCK_SOURCE_POP_TOTAL_MS = 500f
+
 /**
  * One in-flight "node was just played, neighbours unlocked" cascade.
  *
- * The completed source is intentionally NOT in this cascade's scope — it was
- * already visible (and just confirmed completed) so re-popping it would feel
- * wrong. Only the edges from the source and the newly-reachable neighbours
- * animate, mirroring the initial-reveal pop on those neighbours.
+ * The cascade plays in three visible phases:
+ *   1. Source pop — the just-completed node swaps to its COMPLETED icon with
+ *      its own scale animation. Owned by Node's local iconPopScale; the
+ *      cascade just reserves the time so the next phase doesn't race it.
+ *   2. Edge lerp from the source toward each newly-unlocked neighbour.
+ *   3. Neighbour pop + label fade, in sync with the lerp reaching each one.
  *
  * Multiple cascades can run in parallel (each has its own clock) when two
  * completions land back-to-back.
@@ -39,15 +47,16 @@ internal class UnlockCascade(
     val unlockedIds: Set<Long>,
     val clock: Animatable<Float, *>,
 ) {
-    // Edge lerps first (from the already-visible source), then each
-    // newly-unlocked neighbour pops in sync with the lerp reaching it.
+    // Neighbours start their own pop when the lerp reaches them — i.e. after
+    // the source-pop phase AND the edge lerp have both finished.
     private val popStart: Map<Long, Float> =
-        unlockedIds.associateWith { UNLOCK_EDGE_LERP_MS }
+        unlockedIds.associateWith { UNLOCK_SOURCE_POP_TOTAL_MS + UNLOCK_EDGE_LERP_MS }
 
     val totalDurationMs: Float =
-        UNLOCK_EDGE_LERP_MS + UNLOCK_NODE_POP_MS + UNLOCK_LABEL_FADE_MS
+        UNLOCK_SOURCE_POP_TOTAL_MS + UNLOCK_EDGE_LERP_MS + UNLOCK_NODE_POP_MS + UNLOCK_LABEL_FADE_MS
 
-    // Source is unaffected — the steady-state schedule keeps it at scale 1.
+    // Source's visible scale is owned by its own iconPopScale, not by this
+    // cascade — so the steady-state schedule keeps it at scale 1 throughout.
     fun affectsNode(id: Long): Boolean = id in unlockedIds
 
     fun affectsEdge(
@@ -86,9 +95,10 @@ internal class UnlockCascade(
                 toId == sourceId && fromId in unlockedIds -> true
                 else -> return null
             }
-        // The source doesn't pop, so the edge starts lerping the instant the
-        // cascade clock starts.
-        val fraction = (clock.value / UNLOCK_EDGE_LERP_MS).coerceIn(0f, 1f)
+        // Edge holds at 0 for the source-pop phase so the just-completed
+        // node's icon swap finishes before the wave starts crawling outward.
+        val fraction =
+            ((clock.value - UNLOCK_SOURCE_POP_TOTAL_MS) / UNLOCK_EDGE_LERP_MS).coerceIn(0f, 1f)
         return EdgeReveal(fraction, reversed)
     }
 }

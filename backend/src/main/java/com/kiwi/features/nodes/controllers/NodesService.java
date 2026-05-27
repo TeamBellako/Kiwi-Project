@@ -127,6 +127,11 @@ public class NodesService {
                 .orElseThrow(() -> new NodeInaccessibleException(nodeId));
 
         NodesDomain domain = NodesDataMapper.toDomain(node, current);
+
+        if (domain.getStatus() == NodeStatus.COMPLETED) {
+            return new ArrayList<>();
+        }
+
         NodesDomain completed = progressService.complete(domain);
 
         UserNodeStatusPersistence completedPersistence =

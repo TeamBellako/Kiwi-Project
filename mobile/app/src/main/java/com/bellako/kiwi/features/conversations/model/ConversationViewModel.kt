@@ -174,7 +174,12 @@ class ConversationViewModel
                 }
 
                 val runner = exitVeilRunner
-                if (runner != null) {
+                // Conversations with no background sit over the map as a
+                // dialogue overlay — the map stays visible behind them, so the
+                // veil exit reads as an unnecessary blackout. Slide them
+                // straight down instead, same as the no-runner fallback.
+                val hasBackground = !_active.value?.background.isNullOrBlank()
+                if (runner != null && hasBackground) {
                     // The runner plays the veil enter, calls the finalize block
                     // while the veil is fully opaque (so the swap is invisible),
                     // then plays the veil fade-out to reveal the map (or a
