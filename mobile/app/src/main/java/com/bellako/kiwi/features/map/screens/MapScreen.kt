@@ -13,6 +13,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -23,6 +24,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,6 +60,7 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_P1
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer_Horizontal
 import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
@@ -313,6 +318,8 @@ private const val POINTS_POP_SCALE = 1.22f
 private const val POINTS_GLOW_FADE_MS = 750
 private const val POINTS_GLOW_PEAK_ALPHA = 0.75f
 private const val POINTS_GLOW_SCALE = 2.6f
+private val POINTS_INFO_BUTTON_SIZE = 24.dp
+private val POINTS_INFO_ICON_SIZE = 16.dp
 
 @Composable
 private fun PointsIndicator(
@@ -322,6 +329,8 @@ private fun PointsIndicator(
 ) {
     val kiwiColors = LocalKiwiColors.current
     val shape = RoundedCornerShape(percent = 50)
+
+    var showInfoModal by remember { mutableStateOf(false) }
 
     // displayPoints lags currentPoints until the entry focus animation
     // finishes, so the zoom-in plays before the number starts moving.
@@ -431,7 +440,28 @@ private fun PointsIndicator(
                     ),
                 )
             }
+
+            Kiwi_Spacer_Horizontal(Spacing.xSmall)
+
+            Box(
+                modifier =
+                    Modifier
+                        .size(getResponsiveSizeHeight(POINTS_INFO_BUTTON_SIZE))
+                        .clickable { showInfoModal = true },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Info,
+                    contentDescription = "About points",
+                    tint = kiwiColors.color6,
+                    modifier = Modifier.size(getResponsiveSizeHeight(POINTS_INFO_ICON_SIZE)),
+                )
+            }
         }
+    }
+
+    if (showInfoModal) {
+        PointsInfoModal(onDismiss = { showInfoModal = false })
     }
 }
 
