@@ -212,6 +212,7 @@ private fun AppScreen(
     val isCombatVisible by combatViewModel.isVisible.collectAsState()
     val isCombatTurnPlaying by combatViewModel.isTurnPlaying.collectAsState()
     val activeBark by combatViewModel.activeBark.collectAsState()
+    val hasResolvedCombatOnStartup by combatViewModel.hasResolvedCombatOnStartup.collectAsState()
     val skillsState by skillsViewModel.state.collectAsState()
 
     val isTipVisible by tipsViewModel.isVisible.collectAsState()
@@ -233,6 +234,25 @@ private fun AppScreen(
         }
     }
 
+    // Curtain stays up not just until feature data settles, but until the
+    // combat-resume question has been answered — otherwise on a cold start
+    // with an active combat the curtain drops while the map is still showing
+    // and combat overlay/music are still racing to mount.
+    val isStartupSettled by remember {
+        derivedStateOf {
+            !anyFeatureLoading && hasResolvedCombatOnStartup
+        }
+    }
+
+    // Map music must NOT play while we're still figuring out whether to
+    // resume a combat. Once that's resolved: if combat is visible, combat
+    // music plays via CombatFlowScreen; otherwise map music starts here.
+    val shouldPlayMapMusic by remember {
+        derivedStateOf {
+            hasResolvedCombatOnStartup && !isCombatVisible
+        }
+    }
+
     // Raised by the auth / sign-up screens the instant a map-bound action
     // begins (manual log in, auto log in once stored credentials are found,
     // the app-selection Confirm) — never at app launch or during sign-up
@@ -244,10 +264,10 @@ private fun AppScreen(
         delay(INITIAL_LOADING_MIN_DISPLAY_MS)
         withTimeoutOrNull(INITIAL_LOADING_MAX_DISPLAY_MS) {
             while (true) {
-                snapshotFlow { anyFeatureLoading }.first { !it }
+                snapshotFlow { isStartupSettled }.first { it }
                 val resumed =
                     withTimeoutOrNull(INITIAL_LOADING_SETTLE_MS) {
-                        snapshotFlow { anyFeatureLoading }.first { it }
+                        snapshotFlow { isStartupSettled }.first { !it }
                     }
                 if (resumed == null) break
             }
@@ -325,6 +345,7 @@ private fun AppScreen(
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
                         isCombatActive = activeCombat != null,
+                        shouldPlayMapMusic = shouldPlayMapMusic,
                     )
 
                     AnimatedVisibility(
@@ -439,8 +460,11 @@ private fun AppScreen(
             },
         )
 
-        // Overlay global de notificaciones — único colector, siempre activo
-        if (!isLoginScreen && isLoginCompleted) {
+        // Overlay global de notificaciones — único colector, siempre activo.
+        // Suppressed while the loading curtain is up so a cold-start (combat
+        // resume or otherwise) doesn't surface a queue of pop-ups before the
+        // user has actually landed on a screen.
+        if (!isLoginScreen && isLoginCompleted && !showAppLoading) {
             NotificationOverlay(
                 notificationManager = notificationManager,
                 onGoalClick = { type, goals ->
@@ -559,6 +583,17 @@ private val NAVBAR_ORDER =
 
 private fun isMapRoute(route: String?): Boolean = route == ScreenRoutes.HOME
 
+// The apps screen is reused as a "change apps" settings sub-screen. When it is
+// reached from Settings (and popped back to it), we want the same rise-from-
+// bottom / slide-down feel as the map transitions, distinct from the plain
+// fade used during the sign-up flow.
+private fun isSettingsAppsTransition(
+    initial: String?,
+    target: String?,
+): Boolean =
+    (initial == ScreenRoutes.SETTINGS && target == ScreenRoutes.SIGNUP4_APPS) ||
+        (initial == ScreenRoutes.SIGNUP4_APPS && target == ScreenRoutes.SETTINGS)
+
 // Focus variants share their base screen's slot so deep links order correctly.
 private fun navIndex(route: String?): Int =
     when (route) {
@@ -580,6 +615,14 @@ private fun screenEnter(
     val from = navIndex(initial)
     val to = navIndex(target)
     return when {
+        // Settings → Change Apps rises from the bottom; popping back reveals
+        // Settings underneath instantly while the apps screen slides down.
+        isSettingsAppsTransition(initial, target) ->
+            if (target == ScreenRoutes.SIGNUP4_APPS) {
+                slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
+            } else {
+                EnterTransition.None
+            }
         // Login / sign-up / any non-nav screen: keep a plain fade.
         from < 0 || to < 0 -> fadeIn(animationSpec = screenFadeSpec())
         // Going to the map: it is already rendered behind (this is a pop), so it
@@ -604,6 +647,14 @@ private fun screenExit(
     val from = navIndex(initial)
     val to = navIndex(target)
     return when {
+        // Settings → Change Apps: Settings holds still while the apps screen rises
+        // over it; on the way back the apps screen slides down to reveal Settings.
+        isSettingsAppsTransition(initial, target) ->
+            if (initial == ScreenRoutes.SIGNUP4_APPS) {
+                slideOutVertically(animationSpec = screenOffsetSpec(MAP_REVEAL_MS)) { it }
+            } else {
+                ExitTransition.None
+            }
         from < 0 || to < 0 -> fadeOut(animationSpec = screenFadeSpec())
         // Going to the map: the leaving screen slides straight down at full opacity,
         // slower so the reveal reads clearly.
@@ -632,6 +683,7 @@ fun AppNavHost(
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
     isCombatActive: Boolean = false,
+    shouldPlayMapMusic: Boolean = true,
 ) {
     NavHost(
         navController = navController,
@@ -699,7 +751,11 @@ fun AppNavHost(
 
         composable(ScreenRoutes.HOME) {
             AppScreenWrapper {
-                Kiwi_Music_Home()
+                // Gated so a cold-start combat resume doesn't flash map music
+                // before CombatFlowScreen takes over the audio.
+                if (shouldPlayMapMusic) {
+                    Kiwi_Music_Home()
+                }
                 MapScreen(
                     nodesViewModel = nodesViewModel,
                     goalsViewModel = goalsViewModel,
