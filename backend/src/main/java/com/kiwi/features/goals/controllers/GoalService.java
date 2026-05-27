@@ -142,10 +142,6 @@ public class GoalService {
             throw new GoalUnauthorizedException("You are not authorized to update this goal");
         }
 
-        if (existing.getStatus() != GoalStatus.IN_PROGRESS) {
-            throw new GoalUnauthorizedException("Only goals with IN_PROGRESS status can be updated");
-        }
-
         Integer target = existing.getGoal().getTarget();
         Integer increment = Math.max(1, target / 10);
         Integer newValue = Math.min(existing.getValue() + increment, target);

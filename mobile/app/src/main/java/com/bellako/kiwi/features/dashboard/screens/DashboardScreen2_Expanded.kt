@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.services.eventbus.EventType
@@ -351,7 +352,7 @@ private fun ExpandedSummaryCard(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(horizontal = getResponsiveSizeWidth(Spacing.medium)),
     ) {
-        Kiwi_P2(
+        Kiwi_P1(
             KiwiTextArguments(
                 "Challenges",
                 TextAlign.Center,

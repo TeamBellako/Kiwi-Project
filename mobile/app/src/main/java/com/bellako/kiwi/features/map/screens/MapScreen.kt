@@ -3,7 +3,10 @@ package com.bellako.kiwi.features.map.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -33,7 +36,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -58,6 +64,7 @@ import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.common.utils.detectTransformGesturesAndEnd
 import com.bellako.kiwi.features.dashboard.screens.DashboardLayout
 import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.map.data.MapState
 import com.bellako.kiwi.features.map.data.MapsInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
@@ -80,10 +87,12 @@ import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -272,6 +281,7 @@ fun MapScreen(
 
         PointsIndicator(
             currentPoints = currentPoints,
+            mapStateFlow = mapViewModel.state,
             modifier =
                 Modifier
                     .align(Alignment.TopEnd)
@@ -291,63 +301,136 @@ private const val MIST_Z_INDEX = 0.5f
 private const val CLOUDS_Z_INDEX = 0.7f
 private const val POINTS_ANIM_MS = 350
 
+// Hold the indicator at its mounting value until the map's entry focus
+// animation has played, so the player can take in the zoom-in before the
+// points start changing on screen. The timeout covers cases where the focus
+// never starts (e.g., no nodes are available to focus on).
+private const val POINTS_AFTER_FOCUS_DELAY_MS = 1000L
+private const val POINTS_MAX_ENTRY_WAIT_MS = 3000L
+private const val POINTS_POP_UP_MS = 180
+private const val POINTS_POP_DOWN_MS = 360
+private const val POINTS_POP_SCALE = 1.22f
+private const val POINTS_GLOW_FADE_MS = 750
+private const val POINTS_GLOW_PEAK_ALPHA = 0.75f
+private const val POINTS_GLOW_SCALE = 2.6f
+
 @Composable
 private fun PointsIndicator(
     currentPoints: Int,
+    mapStateFlow: StateFlow<MapState>,
     modifier: Modifier = Modifier,
 ) {
     val kiwiColors = LocalKiwiColors.current
     val shape = RoundedCornerShape(percent = 50)
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier =
-            modifier
-                .background(
-                    color = kiwiColors.color2.copy(alpha = POINTS_BG_ALPHA),
-                    shape = shape,
-                ).border(
-                    width = 1.dp,
-                    color = kiwiColors.color6,
-                    shape = shape,
-                ).padding(
-                    horizontal = getResponsiveSizeHeight(Spacing.medium),
-                    vertical = getResponsiveSizeHeight(Spacing.small),
-                ),
+    // displayPoints lags currentPoints until the entry focus animation
+    // finishes, so the zoom-in plays before the number starts moving.
+    var displayPoints by remember { mutableIntStateOf(currentPoints) }
+    var entrySettled by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        withTimeoutOrNull(POINTS_MAX_ENTRY_WAIT_MS) {
+            mapStateFlow.first { it.isFocusingNode }
+            mapStateFlow.first { !it.isFocusingNode }
+        }
+        delay(POINTS_AFTER_FOCUS_DELAY_MS)
+        entrySettled = true
+    }
+    LaunchedEffect(currentPoints, entrySettled) {
+        if (entrySettled) displayPoints = currentPoints
+    }
+
+    // Pop + halo: scale the pill briefly and flash a radial halo around it
+    // every time the visible value changes. Skipped on initial composition.
+    val popScale = remember { Animatable(1f) }
+    val glowAlpha = remember { Animatable(0f) }
+    var previousPoints by remember { mutableIntStateOf(displayPoints) }
+    LaunchedEffect(displayPoints) {
+        if (displayPoints == previousPoints) return@LaunchedEffect
+        previousPoints = displayPoints
+        launch {
+            popScale.animateTo(POINTS_POP_SCALE, tween(POINTS_POP_UP_MS, easing = EaseInOut))
+            popScale.animateTo(1f, tween(POINTS_POP_DOWN_MS, easing = EaseOutBack))
+        }
+        launch {
+            glowAlpha.snapTo(POINTS_GLOW_PEAK_ALPHA)
+            glowAlpha.animateTo(0f, tween(POINTS_GLOW_FADE_MS, easing = EaseOut))
+        }
+    }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
     ) {
-        // The number itself rides AnimatedContent. clipToBounds masks the
-        // incoming/outgoing values to the slot's bounds, so the slide is
-        // hidden behind the pill background — increases scroll down, decreases
-        // scroll up.
-        AnimatedContent(
-            targetState = currentPoints,
-            transitionSpec = {
-                val increased = targetState > initialState
-                if (increased) {
-                    slideInVertically(
-                        animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
-                    ) { -it } togetherWith
-                        slideOutVertically(
+        // Halo: an expanded radial gradient that pulses out from the pill on
+        // every change. Sits behind the pill (drawn first in the Box).
+        Box(
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .scale(POINTS_GLOW_SCALE)
+                    .background(
+                        brush =
+                            Brush.radialGradient(
+                                colors =
+                                    listOf(
+                                        kiwiColors.color7C.copy(alpha = glowAlpha.value),
+                                        Color.Transparent,
+                                    ),
+                            ),
+                    ),
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .scale(popScale.value)
+                    .background(
+                        color = kiwiColors.color2.copy(alpha = POINTS_BG_ALPHA),
+                        shape = shape,
+                    ).border(
+                        width = 1.dp,
+                        color = kiwiColors.color6,
+                        shape = shape,
+                    ).padding(
+                        horizontal = getResponsiveSizeHeight(Spacing.medium),
+                        vertical = getResponsiveSizeHeight(Spacing.small),
+                    ),
+        ) {
+            // The number itself rides AnimatedContent. clipToBounds masks the
+            // incoming/outgoing values to the slot's bounds, so the slide is
+            // hidden behind the pill background — increases scroll down,
+            // decreases scroll up.
+            AnimatedContent(
+                targetState = displayPoints,
+                transitionSpec = {
+                    val increased = targetState > initialState
+                    if (increased) {
+                        slideInVertically(
                             animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
-                        ) { it }
-                } else {
-                    slideInVertically(
-                        animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
-                    ) { it } togetherWith
-                        slideOutVertically(
+                        ) { -it } togetherWith
+                            slideOutVertically(
+                                animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
+                            ) { it }
+                    } else {
+                        slideInVertically(
                             animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
-                        ) { -it }
-                }
-            },
-            modifier = Modifier.clipToBounds(),
-            label = "points_change",
-        ) { points ->
-            Kiwi_P1(
-                KiwiTextArguments(
-                    "%,d".format(points),
-                    color = kiwiColors.colorF,
-                ),
-            )
+                        ) { it } togetherWith
+                            slideOutVertically(
+                                animationSpec = tween(POINTS_ANIM_MS, easing = EaseInOut),
+                            ) { -it }
+                    }
+                },
+                modifier = Modifier.clipToBounds(),
+                label = "points_change",
+            ) { points ->
+                Kiwi_P1(
+                    KiwiTextArguments(
+                        "%,d".format(points),
+                        color = kiwiColors.colorF,
+                    ),
+                )
+            }
         }
     }
 }
@@ -374,7 +457,11 @@ private fun loadNodes(
                 val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
 
                 selectedNode?.let { node ->
-                    mapViewModel.selectNode(node.id, node.cordX, node.cordY, animate = false)
+                    // Force the focus animation to play on every map entry by
+                    // clearing the selection first — selectNode() short-circuits
+                    // if the target is already selected.
+                    mapViewModel.unSelectNode()
+                    mapViewModel.selectNode(node.id, node.cordX, node.cordY, animate = true)
                     mapViewModel.setPlayerNode(node.id)
                 }
             }
