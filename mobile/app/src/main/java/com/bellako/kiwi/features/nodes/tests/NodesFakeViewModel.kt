@@ -100,4 +100,8 @@ class NodesFakeViewModel(
         handleSuccess()
         setUiState(UIState.Success(Unit))
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    override suspend fun autoExecuteFirstNode(mapId: Int): NodesDomain? = null
 }

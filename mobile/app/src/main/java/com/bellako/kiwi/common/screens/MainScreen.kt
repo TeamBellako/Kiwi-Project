@@ -744,6 +744,7 @@ fun AppNavHost(
                     usersViewModel = usersViewModel,
                     personalityViewModel = personalityViewModel,
                     goalsViewModel = goalsViewModel,
+                    nodesViewModel = nodesViewModel,
                     navController = navController,
                 )
             }

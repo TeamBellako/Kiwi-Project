@@ -9,6 +9,7 @@ import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.utils.Logger.warn
+import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.data.NodesDomain
 import com.bellako.kiwi.features.nodes.data.NodesState
 import com.bellako.kiwi.features.users.model.UsersRepository
@@ -83,6 +84,41 @@ class NodesViewModel
 
             updateNodesSafe {
                 repository.completeNode(nodeId)
+            }
+        }
+
+        override suspend fun autoExecuteFirstNode(mapId: Int): NodesDomain? {
+            setIsLoading(true)
+            return try {
+                val nodes = repository.getNodesByMapId(mapId)
+                if (nodes.isEmpty()) return null
+
+                _state.value = NodesState(nodes = nodes.associateBy { it.id })
+
+                // Already has progress on this map — leave the user where they are.
+                if (nodes.any { it.status == NodeStatus.OPEN || it.status == NodeStatus.COMPLETED }) {
+                    return null
+                }
+
+                val firstNode = nodes.first()
+                val afterUnlock = repository.unlockNode(firstNode.id)
+                usersRepository.getMyUserPoints()
+                val afterComplete = repository.completeNode(firstNode.id)
+
+                val merged = _state.value.nodes.toMutableMap()
+                afterUnlock.forEach { merged[it.id] = it }
+                afterComplete.forEach { merged[it.id] = it }
+                _state.value = NodesState(nodes = merged)
+
+                merged[firstNode.id]
+            } catch (e: Exception) {
+                // Swallow on purpose: the sign-up flow needs to keep moving and
+                // land the user on the map regardless. If this fails, the map's
+                // own LaunchedEffect retries on next mount.
+                warn("autoExecuteFirstNode failed: ${e.message}")
+                null
+            } finally {
+                setIsLoading(false)
             }
         }
 
