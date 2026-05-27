@@ -54,6 +54,14 @@ class CombatIntegrationTest {
         viewModel = CombatViewModel(repository, barkController, RuntimeEnvironment.getApplication())
     }
 
+    private companion object {
+        // VFX infrastructure events the CombatViewModel always emits around
+        // start/dismiss so the MapScreen can pause its per-frame effects.
+        // Tests asserting "no follow-up event" should ignore these — they're
+        // not the events under test.
+        val MAP_VISIBILITY_EVENTS = setOf(EventType.MAP_COVERED, EventType.MAP_UNCOVERED)
+    }
+
     // -------------------------------------------------------------------------
     // start
     // -------------------------------------------------------------------------
@@ -199,7 +207,9 @@ class CombatIntegrationTest {
             var receivedEvent: Pair<EventType, EventPayload>? = null
             val collectorJob =
                 launch {
-                    EventBus.eventFlow.collect { receivedEvent = it }
+                    EventBus.eventFlow.collect { event ->
+                        if (event.first !in MAP_VISIBILITY_EVENTS) receivedEvent = event
+                    }
                 }
 
             viewModel.dismiss()
@@ -230,7 +240,9 @@ class CombatIntegrationTest {
             var receivedEvent: Pair<EventType, EventPayload>? = null
             val collectorJob =
                 launch {
-                    EventBus.eventFlow.collect { receivedEvent = it }
+                    EventBus.eventFlow.collect { event ->
+                        if (event.first !in MAP_VISIBILITY_EVENTS) receivedEvent = event
+                    }
                 }
 
             viewModel.onVictoryContinue()

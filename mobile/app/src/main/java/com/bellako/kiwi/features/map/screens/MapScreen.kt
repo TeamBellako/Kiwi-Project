@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -84,6 +85,8 @@ import com.bellako.kiwi.features.nodes.screens.NodeAction
 import com.bellako.kiwi.features.nodes.screens.NodeConnections
 import com.bellako.kiwi.features.nodes.screens.NodeEntryTransitionController
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
+import com.bellako.kiwi.features.nodes.screens.NodeRevealSchedule
+import com.bellako.kiwi.features.nodes.screens.UnlockRevealOverlay
 import com.bellako.kiwi.features.nodes.screens.distance
 import com.bellako.kiwi.features.nodes.screens.rememberNodeReveal
 import com.bellako.kiwi.features.nodes.screens.rememberUnlockRevealOverlay
@@ -184,15 +187,13 @@ fun MapScreen(
         runAutoExecuteFirstNodeIfNeeded(nodesViewModel, mapViewModel)
     }
 
+    // Notify pending goals + refresh the player's points whenever the map is
+    // shown so the indicator is in sync with the server. Login already fetches
+    // points once, but a stale map re-entry (or a sign-up flow that bypassed
+    // the login refresh) would otherwise show 0 until a node unlock / goal
+    // completion triggers a sync.
     LaunchedEffect(Unit) {
         goalsViewModel.checkAndNotifyGoals()
-    }
-
-    // Refresh the player's points whenever the map is shown so the indicator
-    // is in sync with the server — login already fetches once, but a stale
-    // map re-entry (or a sign-up flow that bypassed the login refresh) would
-    // otherwise show 0 until a node unlock / goal completion triggers a sync.
-    LaunchedEffect(Unit) {
         usersViewModel.getMyUserPoints()
     }
 
@@ -217,19 +218,7 @@ fun MapScreen(
     var topInsetPx by remember { mutableIntStateOf(0) }
     val topInsetDp = with(density) { topInsetPx.toDp() }
 
-    // Full-screen conversations and combats emit MAP_COVERED / MAP_UNCOVERED
-    // so we can shut off the per-frame VFX loops (mist drift, cloud frame
-    // ticker, water shader) while the map is fully hidden. AND-ed with the
-    // outer LocalMapVfxEnabled so tests that disable VFX globally still win.
-    var mapCovered by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        listenToEvent(EventType.MAP_COVERED) { mapCovered = true }
-    }
-    LaunchedEffect(Unit) {
-        listenToEvent(EventType.MAP_UNCOVERED) { mapCovered = false }
-    }
-    val baseVfxEnabled = LocalMapVfxEnabled.current
-    val vfxEnabled = baseVfxEnabled && !mapCovered
+    val vfxEnabled = rememberMapVfxEnabled()
 
     CompositionLocalProvider(LocalMapVfxEnabled provides vfxEnabled) {
         Box(
@@ -600,23 +589,7 @@ private fun InteractiveMap(
             },
         )
 
-    // Scale-out the selected-node action card while a no-background dialogue
-    // is overlaid on the map. The card is normally visible above the dialogue
-    // box; popping it would feel abrupt, so we shrink it into the map.
-    val dialogueHideScale = remember { Animatable(1f) }
-    LaunchedEffect(isDialogueOverlaid) {
-        if (isDialogueOverlaid) {
-            dialogueHideScale.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(NODE_ACTION_DIALOGUE_HIDE_MS, easing = EaseInBack),
-            )
-        } else {
-            dialogueHideScale.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(NODE_ACTION_DIALOGUE_SHOW_MS, easing = EaseOutBack),
-            )
-        }
-    }
+    val dialogueHideScale = rememberDialogueHideScale(isDialogueOverlaid)
 
     Box(
         modifier =
@@ -660,38 +633,16 @@ private fun InteractiveMap(
                     Modifier
                         .fillMaxSize()
                         .pointerInput(Unit) {
-                            awaitEachGesture {
-                                awaitFirstDown(requireUnconsumed = false)
-                                val up = waitForUpOrCancellation()
-
-                                if (up != null) {
-                                    val tap = up.position
-
-                                    val nodes = nodesState?.nodes?.values.orEmpty()
-                                    if (nodes.isEmpty()) return@awaitEachGesture
-
-                                    @Suppress("MagicNumber")
-                                    val clickRadius = 50f / mapState.mapWidthPx
-                                    val normalizedTap = screenToMap(tap, mapState)
-
-                                    val clickedNode =
-                                        nodes
-                                            .minByOrNull {
-                                                distance(Offset(it.cordX, it.cordY), normalizedTap)
-                                            }?.takeIf {
-                                                distance(Offset(it.cordX, it.cordY), normalizedTap) < clickRadius
-                                            }
-
-                                    clickedNode?.let { node ->
-                                        mapViewModel.selectNode(node.id, node.cordX, node.cordY)
-
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            EventBus.emitEvent(
-                                                EventType.CHANGE_DASHBOARD_LAYOUT,
-                                                EventPayload.ChangeDashboardLayoutPayload(DashboardLayout.HIDDEN),
-                                            )
-                                        }
-                                    }
+                            detectNodeTap(
+                                mapState = mapState,
+                                nodes = nodesState?.nodes?.values.orEmpty(),
+                            ) { node ->
+                                mapViewModel.selectNode(node.id, node.cordX, node.cordY)
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    EventBus.emitEvent(
+                                        EventType.CHANGE_DASHBOARD_LAYOUT,
+                                        EventPayload.ChangeDashboardLayoutPayload(DashboardLayout.HIDDEN),
+                                    )
                                 }
                             }
                         },
@@ -741,87 +692,93 @@ private fun InteractiveMap(
             )
         }
 
-        // NODE ACTION BUTTON
-        if (!mapState.isFocusingNode) {
-            mapState.selectedNodeId?.let { selectedNodeId ->
-                nodesState
-                    ?.nodes[selectedNodeId]
-                    ?.let { selectedNode ->
-                        AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
+        SelectedNodeActionLayer(
+            mapState = mapState,
+            selectedNode = mapState.selectedNodeId?.let { nodesState?.nodes?.get(it) },
+            revealSchedule = revealSchedule,
+            revealClockMs = revealClockMs,
+            unlockReveal = unlockReveal,
+            currentPoints = currentPoints,
+            dialogueHideScale = dialogueHideScale,
+            nodeEntry = nodeEntry,
+            nodeEntryScope = nodeEntryScope,
+            onUnlockNode = { id ->
+                nodesViewModel.unlockNode(id)
+                mapViewModel.setPlayerNode(id)
+            },
+        )
+    }
+}
 
-                        // Same gating as the node's label: stay hidden until the
-                        // focused node's pop has finished, then fade in. Routed
-                        // through the unlock overlay too so the button doesn't
-                        // sit visible above a node that's mid re-pop.
-                        val actionAlpha =
-                            unlockReveal.labelAlpha(selectedNodeId)
-                                ?: revealSchedule.labelAlpha(selectedNodeId, revealClockMs)
+@Suppress("LongParameterList")
+@Composable
+private fun SelectedNodeActionLayer(
+    mapState: MapState,
+    selectedNode: NodesDomain?,
+    revealSchedule: NodeRevealSchedule,
+    revealClockMs: Float,
+    unlockReveal: UnlockRevealOverlay,
+    currentPoints: Int,
+    dialogueHideScale: Float,
+    nodeEntry: NodeEntryTransitionController?,
+    nodeEntryScope: CoroutineScope,
+    onUnlockNode: (Long) -> Unit,
+) {
+    if (mapState.isFocusingNode || selectedNode == null) return
+    val context = LocalContext.current
 
-                        Box(
-                            modifier = Modifier.fillMaxSize().alpha(actionAlpha),
-                            contentAlignment = Alignment.TopCenter,
-                        ) {
-                            val centerOffset =
-                                with(LocalDensity.current) {
-                                    (mapState.viewportHeightPx / 2f).toDp()
-                                }
+    AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
 
-                            NodeAction(
-                                node = selectedNode,
-                                onUnlockNode = { id ->
-                                    nodesViewModel.unlockNode(id)
-                                    mapViewModel.setPlayerNode(id)
-                                },
-                                onCompleteNode = { _ ->
-                                    AudioManager.playSFX(context, R.raw.snd_node_completed)
+    // Same gating as the node's label: stay hidden until the focused node's
+    // pop has finished, then fade in. Routed through the unlock overlay too
+    // so the button doesn't sit visible above a node that's mid re-pop.
+    val actionAlpha =
+        unlockReveal.labelAlpha(selectedNode.id)
+            ?: revealSchedule.labelAlpha(selectedNode.id, revealClockMs)
 
-                                    // No inline completeNode — the node is now
-                                    // completed by the COMPLETE_NODE event the
-                                    // linked conversation/combat emits on
-                                    // resolve. Just fire the start event.
-                                    //
-                                    // Nodes whose start event IS already
-                                    // COMPLETE_NODE (self-completing, no
-                                    // follow-up screen) skip the entry veil —
-                                    // there's nothing for it to transition to.
-                                    runNodeEntry(
-                                        scope = nodeEntryScope,
-                                        nodeEntry = nodeEntry,
-                                        style = effectiveTransitionStyle(selectedNode),
-                                    ) {
-                                        if (selectedNode.onExecutionEvent != "_") {
-                                            EventBus.emitEvent(
-                                                EventType.valueOf(selectedNode.onExecutionEvent),
-                                                EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
-                                            )
-                                        }
-                                    }
-                                },
-                                onRetryNode = { _ ->
-                                    runNodeEntry(
-                                        scope = nodeEntryScope,
-                                        nodeEntry = nodeEntry,
-                                        style = effectiveTransitionStyle(selectedNode),
-                                    ) {
-                                        if (selectedNode.onExecutionEvent != "_") {
-                                            EventBus.emitEvent(
-                                                EventType.valueOf(selectedNode.onExecutionEvent),
-                                                EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
-                                            )
-                                        }
-                                    }
-                                },
-                                modifier =
-                                    Modifier
-                                        .offset(
-                                            y = centerOffset + getResponsiveSizeHeight(26.dp),
-                                        ).scale(dialogueHideScale.value),
-                                currentPoints = currentPoints,
-                            )
-                        }
-                    }
+    val fireExecutionEvent: () -> Unit = {
+        runNodeEntry(
+            scope = nodeEntryScope,
+            nodeEntry = nodeEntry,
+            style = effectiveTransitionStyle(selectedNode),
+        ) {
+            if (selectedNode.onExecutionEvent != "_") {
+                EventBus.emitEvent(
+                    EventType.valueOf(selectedNode.onExecutionEvent),
+                    EventPayload.EntityIdPayload(selectedNode.onExecutionEntityId),
+                )
             }
         }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize().alpha(actionAlpha),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        val centerOffset =
+            with(LocalDensity.current) {
+                (mapState.viewportHeightPx / 2f).toDp()
+            }
+
+        NodeAction(
+            node = selectedNode,
+            onUnlockNode = onUnlockNode,
+            // No inline completeNode — the node is now completed by the
+            // COMPLETE_NODE event the linked conversation/combat emits on
+            // resolve. Just fire the start event. Nodes whose start event IS
+            // already COMPLETE_NODE (self-completing, no follow-up screen)
+            // skip the entry veil — there's nothing for it to transition to.
+            onCompleteNode = { _ ->
+                AudioManager.playSFX(context, R.raw.snd_node_completed)
+                fireExecutionEvent()
+            },
+            onRetryNode = { _ -> fireExecutionEvent() },
+            modifier =
+                Modifier
+                    .offset(y = centerOffset + getResponsiveSizeHeight(26.dp))
+                    .scale(dialogueHideScale),
+            currentPoints = currentPoints,
+        )
     }
 }
 
@@ -880,5 +837,61 @@ private fun runNodeEntry(
         onVeilReached()
         delay(FALLBACK_VEIL_HOLD_MS)
         nodeEntry.fadeOut()
+    }
+}
+
+// Full-screen conversations and combats emit MAP_COVERED / MAP_UNCOVERED so we
+// can shut off the per-frame VFX loops (mist drift, cloud frame ticker, water
+// shader) while the map is fully hidden. AND-ed with the outer
+// LocalMapVfxEnabled so tests that disable VFX globally still win.
+@Composable
+private fun rememberMapVfxEnabled(): Boolean {
+    var mapCovered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.MAP_COVERED) { mapCovered = true }
+    }
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.MAP_UNCOVERED) { mapCovered = false }
+    }
+    return LocalMapVfxEnabled.current && !mapCovered
+}
+
+// Scale-out the selected-node action card while a no-background dialogue is
+// overlaid on the map. The card is normally visible above the dialogue box;
+// popping it would feel abrupt, so we shrink it into the map.
+@Composable
+private fun rememberDialogueHideScale(isDialogueOverlaid: Boolean): Float {
+    val anim = remember { Animatable(1f) }
+    LaunchedEffect(isDialogueOverlaid) {
+        val target = if (isDialogueOverlaid) 0f else 1f
+        val durationMs = if (isDialogueOverlaid) NODE_ACTION_DIALOGUE_HIDE_MS else NODE_ACTION_DIALOGUE_SHOW_MS
+        val easing = if (isDialogueOverlaid) EaseInBack else EaseOutBack
+        anim.animateTo(target, tween(durationMs, easing = easing))
+    }
+    return anim.value
+}
+
+// Tap detection on the map: hit-test against every loaded node and invoke
+// [onNodeSelected] for the closest one within the click radius.
+private suspend fun PointerInputScope.detectNodeTap(
+    mapState: MapState,
+    nodes: Collection<NodesDomain>,
+    onNodeSelected: (NodesDomain) -> Unit,
+) {
+    awaitEachGesture {
+        awaitFirstDown(requireUnconsumed = false)
+        val up = waitForUpOrCancellation() ?: return@awaitEachGesture
+        if (nodes.isEmpty()) return@awaitEachGesture
+
+        @Suppress("MagicNumber")
+        val clickRadius = 50f / mapState.mapWidthPx
+        val normalizedTap = screenToMap(up.position, mapState)
+
+        val clicked =
+            nodes
+                .minByOrNull { distance(Offset(it.cordX, it.cordY), normalizedTap) }
+                ?.takeIf { distance(Offset(it.cordX, it.cordY), normalizedTap) < clickRadius }
+
+        clicked?.let(onNodeSelected)
     }
 }

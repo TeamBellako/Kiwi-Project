@@ -47,17 +47,11 @@ internal class CompletionCascade(
     val schedule: NodeRevealSchedule,
     val clock: Animatable<Float, *>,
 ) {
-    fun nodeScale(id: Long): Float? {
-        if (id == sourceId) return null
-        if (id !in schedule.coveredNodes) return null
-        return schedule.nodeScale(id, clock.value)
-    }
+    fun nodeScale(id: Long): Float? =
+        if (id != sourceId && id in schedule.coveredNodes) schedule.nodeScale(id, clock.value) else null
 
-    fun labelAlpha(id: Long): Float? {
-        if (id == sourceId) return null
-        if (id !in schedule.coveredNodes) return null
-        return schedule.labelAlpha(id, clock.value)
-    }
+    fun labelAlpha(id: Long): Float? =
+        if (id != sourceId && id in schedule.coveredNodes) schedule.labelAlpha(id, clock.value) else null
 
     fun edgeReveal(
         fromId: Long,
