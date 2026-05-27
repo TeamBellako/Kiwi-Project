@@ -443,24 +443,35 @@ fun AppClassificationColumns(
             color = kiwiColors.color5A,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
-                    // App selection is the final sign-up step — raise the
-                    // map-entry loading curtain now so it covers the save and
-                    // the navigation into the map.
-                    usersViewModel.setShowAppLoading(true)
+                    // Settings re-uses this screen for "change apps". In that mode
+                    // we save and slide back down to Settings — no map-entry curtain,
+                    // no baseline reset (the baseline is fixed at signup).
+                    val fromSettings =
+                        navController.previousBackStackEntry?.destination?.route == ScreenRoutes.SETTINGS
+                    if (!fromSettings) {
+                        // App selection is the final sign-up step — raise the
+                        // map-entry loading curtain now so it covers the save and
+                        // the navigation into the map.
+                        usersViewModel.setShowAppLoading(true)
+                    }
                     personalityViewModel.onAppsChanged(
                         goodApps.map { it.packageName },
                         badApps.map { it.packageName },
                         neutralApps.map { it.packageName },
                     )
                     if (personalityViewModel.updateApps().isSuccess) {
-                        firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
-                        goalsViewModel.saveBaselineAppUsage(
-                            goodApps.map { it.packageName },
-                            badApps.map { it.packageName },
-                        )
-                        navController.navigate(ScreenRoutes.HOME)
-                        onUpdateSuccess()
-                    } else {
+                        if (fromSettings) {
+                            navController.popBackStack()
+                        } else {
+                            firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
+                            goalsViewModel.saveBaselineAppUsage(
+                                goodApps.map { it.packageName },
+                                badApps.map { it.packageName },
+                            )
+                            navController.navigate(ScreenRoutes.HOME)
+                            onUpdateSuccess()
+                        }
+                    } else if (!fromSettings) {
                         usersViewModel.setShowAppLoading(false)
                     }
                 }
