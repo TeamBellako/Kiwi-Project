@@ -116,7 +116,7 @@ private fun Welcome(
 }
 
 @Composable
-private fun GoToLogIn(onSignUp: () -> Unit) {
+internal fun GoToLogIn(onSignUp: () -> Unit) {
     val kiwiColors = LocalKiwiColors.current
     val annotatedString =
         buildAnnotatedString {
