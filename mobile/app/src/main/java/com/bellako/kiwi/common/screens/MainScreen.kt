@@ -51,6 +51,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.audio.Kiwi_Music_Conversation
 import com.bellako.kiwi.audio.Kiwi_Music_Home
 import com.bellako.kiwi.audio.Kiwi_Music_Login
 import com.bellako.kiwi.audio.Kiwi_Music_Settings
@@ -246,10 +247,12 @@ private fun AppScreen(
 
     // Map music must NOT play while we're still figuring out whether to
     // resume a combat. Once that's resolved: if combat is visible, combat
-    // music plays via CombatFlowScreen; otherwise map music starts here.
+    // music plays via CombatFlowScreen; if a conversation is visible, the
+    // overlay fades the music out via Kiwi_Music_Conversation; otherwise
+    // map music starts here.
     val shouldPlayMapMusic by remember {
         derivedStateOf {
-            hasResolvedCombatOnStartup && !isCombatVisible
+            hasResolvedCombatOnStartup && !isCombatVisible && !isConversationVisible
         }
     }
 
@@ -398,6 +401,7 @@ private fun AppScreen(
                     ) {
                         activeConversation?.let { conversation ->
                             Box(modifier = Modifier.matchParentSize()) {
+                                Kiwi_Music_Conversation()
                                 if (conversation.type == ConversationType.SMALL) {
                                     DialogueScreen(
                                         conversation = conversation,

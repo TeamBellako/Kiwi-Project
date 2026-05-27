@@ -56,6 +56,17 @@ class UsersViewModel
             _showAppLoading.value = active
         }
 
+        // Latches once on the first LogInScreen mount in this app session;
+        // never reset (logout / manual nav back to LOGIN should NOT re-arm
+        // the auto-redirect to sign-up).
+        private var autoLoginAttempted: Boolean = false
+
+        override fun hasAttemptedAutoLogin(): Boolean = autoLoginAttempted
+
+        override fun markAutoLoginAttempted() {
+            autoLoginAttempted = true
+        }
+
         init {
             repository.currentPoints
                 .onEach { points ->
