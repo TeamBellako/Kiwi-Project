@@ -101,8 +101,21 @@ fun LoginLoadingScreen(
 
     LaunchedEffect(visible) {
         if (visible) {
-            present = true
+            // Reset stale state from the previous cycle BEFORE flipping
+            // `present = true`. Because this coroutine runs between "visible
+            // became true" and the recomposition triggered by `present = true`,
+            // all writes here are visible on the very first frame the content
+            // is drawn. Without this, the first frame of the second (or third,
+            // …) show would render the previous cycle's *final* state for one
+            // frame before LaunchedEffect(present) below got a chance to snap
+            // things back to the pre-entrance position.
+            enterOffset.snapTo(1f)
+            exitOffset.snapTo(0f)
+            spriteVisible = false
+            dialogueVisible = false
+            entranceComplete = false
             dismissRequested = false
+            present = true
         } else {
             dismissRequested = true
         }
@@ -112,11 +125,6 @@ fun LoginLoadingScreen(
     // cannot cancel the entrance — it always plays in full.
     LaunchedEffect(present) {
         if (!present) return@LaunchedEffect
-        entranceComplete = false
-        spriteVisible = false
-        dialogueVisible = false
-        enterOffset.snapTo(1f)
-        exitOffset.snapTo(0f)
         enterOffset.animateTo(0f, tween(LOGIN_LOADING_ANIM_DURATION_MS, easing = EaseInOut))
         spriteVisible = true
         delay(ELEMENT_ENTER_MS.toLong())
