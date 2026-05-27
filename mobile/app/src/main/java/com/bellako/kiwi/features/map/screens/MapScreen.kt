@@ -13,9 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -26,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,6 +37,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -88,7 +88,6 @@ import kotlin.math.min
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MapScreen(
-    maxZoom: Float = 8f,
     mapMarginFactor: Float = 0.08f,
     elasticityFactor: Float = 1.4f,
     mapViewModel: MapViewModel,
@@ -116,6 +115,9 @@ fun MapScreen(
     }
 
     val mapState by mapViewModel.state.collectAsState()
+    val nodesState by nodesViewModel.state.collectAsState()
+    val nodesMap = nodesState?.nodes.orEmpty()
+
     val imageBitmap = ImageBitmap.imageResource(id = mapState.mapInfo.mapResourceId)
     val imageW = imageBitmap.width.toFloat()
     val imageH = imageBitmap.height.toFloat()
@@ -124,10 +126,20 @@ fun MapScreen(
 
     val displayWidthPx = imageW * fitScale
     val displayHeightPx = imageH * fitScale
+    val mapDisplayWidthDp = with(density) { displayWidthPx.toDp() }
+    val mapDisplayHeightDp = with(density) { displayHeightPx.toDp() }
 
-    LaunchedEffect(maxZoom, displayWidthPx, displayHeightPx, viewportWidthPx, viewportHeightPx) {
+    LaunchedEffect(
+        mapState.mapInfo.minZoom,
+        mapState.mapInfo.maxZoom,
+        displayWidthPx,
+        displayHeightPx,
+        viewportWidthPx,
+        viewportHeightPx,
+    ) {
         mapViewModel.setParameters(
-            maxScale = maxZoom,
+            minScale = mapState.mapInfo.minZoom,
+            maxScale = mapState.mapInfo.maxZoom,
             mapWidthPx = displayWidthPx,
             mapHeightPx = displayHeightPx,
             viewportWidthPx = viewportWidthPx,
@@ -165,40 +177,87 @@ fun MapScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
+    // Measured height of the title overlay. Drives:
+    //   (a) the top padding on InteractiveMap, so the map content stays where
+    //       the Column-based layout used to put it (the play-button anchor
+    //       depends on this offset);
+    //   (b) the y-offset MapMist uses to align its holes with the
+    //       InteractiveMap content center, since MapMist now draws full-screen.
+    var topInsetPx by remember { mutableIntStateOf(0) }
+    val topInsetDp = with(density) { topInsetPx.toDp() }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(kiwiColors.color2)
+                .testTag(CommonTestTags.HOME_SCREEN),
+    ) {
+        InteractiveMap(
+            mapResourceId = mapState.mapInfo.mapResourceId,
+            mapViewModel = mapViewModel,
+            nodesViewModel = nodesViewModel,
+            currentPoints = currentPoints,
+            revealStarted = revealStarted,
+            modifier = Modifier.fillMaxSize().padding(top = topInsetDp),
+        )
+
+        // Mist covers the FULL screen, including behind the title and the
+        // points indicator. zIndex sits between the map content (default 0)
+        // and the top-bar UI (zIndex 1).
+        MapMist(
+            nodes = nodesMap,
+            mapState = mapState,
+            topInsetPx = topInsetPx.toFloat(),
+            modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
+        )
+
+        // Clouds sit above the mist (so they read as overhead sky reinforcing
+        // the mist cover) but below the top-bar UI. The wrapper Box mirrors
+        // InteractiveMap's positioning — top inset + center alignment — so the
+        // graphicsLayer transform places the cloud canvas exactly over the
+        // map content. The Canvas itself has no pointer modifier, so map
+        // gestures continue to land on InteractiveMap below.
+        Box(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(kiwiColors.color2)
-                    .testTag(CommonTestTags.HOME_SCREEN),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally,
+                    .padding(top = topInsetDp)
+                    .zIndex(CLOUDS_Z_INDEX),
+            contentAlignment = Alignment.Center,
         ) {
-            Kiwi_H2(
-                KiwiTextArguments(
-                    mapState.mapInfo.mapTitle,
-                    color = kiwiColors.colorF,
-                    // offset (not padding) so the title's measured size in the
-                    // Column stays unchanged — keeps the map viewport, and so
-                    // the centered play-button anchor, at their original Y.
-                    modifier =
-                        Modifier
-                            .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
-                            .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
-                            .zIndex(1f),
-                ),
-            )
-
-            InteractiveMap(
-                mapResourceId = mapState.mapInfo.mapResourceId,
-                mapViewModel = mapViewModel,
-                nodesViewModel = nodesViewModel,
-                currentPoints = currentPoints,
-                revealStarted = revealStarted,
-                modifier = Modifier.fillMaxSize(),
+            MapClouds(
+                nodes = nodesMap,
+                mapState = mapState,
+                modifier =
+                    Modifier
+                        .size(width = mapDisplayWidthDp, height = mapDisplayHeightDp)
+                        .graphicsLayer(
+                            scaleX = mapState.scale,
+                            scaleY = mapState.scale,
+                            translationX = mapState.offset.x,
+                            translationY = mapState.offset.y,
+                        ),
             )
         }
+
+        Kiwi_H2(
+            KiwiTextArguments(
+                mapState.mapInfo.mapTitle,
+                color = kiwiColors.colorF,
+                // offset (not padding) so the title's measured size stays the
+                // pure text-plus-padding box — that's what feeds topInsetPx,
+                // and feeding the xLarge visual offset into the inset would
+                // push InteractiveMap down past where it used to sit.
+                modifier =
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
+                        .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
+                        .zIndex(1f)
+                        .onSizeChanged { topInsetPx = it.height },
+            ),
+        )
 
         PointsIndicator(
             currentPoints = currentPoints,
@@ -217,6 +276,8 @@ fun MapScreen(
     }
 }
 
+private const val MIST_Z_INDEX = 0.5f
+private const val CLOUDS_Z_INDEX = 0.7f
 private const val POINTS_ANIM_MS = 350
 
 @Composable
@@ -234,13 +295,11 @@ private fun PointsIndicator(
                 .background(
                     color = kiwiColors.color2.copy(alpha = POINTS_BG_ALPHA),
                     shape = shape,
-                )
-                .border(
+                ).border(
                     width = 1.dp,
                     color = kiwiColors.color6,
                     shape = shape,
-                )
-                .padding(
+                ).padding(
                     horizontal = getResponsiveSizeHeight(Spacing.medium),
                     vertical = getResponsiveSizeHeight(Spacing.small),
                 ),
@@ -351,6 +410,7 @@ private fun InteractiveMap(
                         },
                         onGestureEnd = {
                             mapViewModel.startFling()
+                            mapViewModel.settleScale()
                         },
                     )
                 },
@@ -416,6 +476,16 @@ private fun InteractiveMap(
                                 }
                             }
                         },
+            )
+
+            // WATER VFX — shader overlay gated to water regions by a
+            // runtime-generated mask. Sits inside the same transformed Box as
+            // the map image so pan/zoom is inherited. Renders above the map
+            // and below the node connections so nodes stay visible on top.
+            // On API <33 this emits nothing and the map looks unchanged.
+            MapWaterOverlay(
+                maskResourceId = R.drawable.mindveil_4k_watermask,
+                modifier = Modifier.fillMaxSize(),
             )
 
             // NODE CONNECTIONS

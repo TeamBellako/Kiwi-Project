@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -35,6 +36,7 @@ internal fun CombatBackground(
     background: String?,
     alpha: Float = 1f,
     shakeOffsetX: () -> Float = { 0f },
+    blurRadiusDp: () -> Float = { 0f },
 ) {
     val colors = LocalKiwiColors.current
     val resId = AssetResolver.drawable(LocalContext.current, background) ?: return
@@ -55,9 +57,12 @@ internal fun CombatBackground(
                         maxWidth * BACKGROUND_OVERSCAN_SCALE,
                         maxHeight * BACKGROUND_OVERSCAN_SCALE,
                     ).align(Alignment.Center)
-                    // Read inside graphicsLayer so the shake runs on the draw
-                    // phase without recomposing.
-                    .graphicsLayer { translationX = shakeOffsetX() }
+                    // Read inside graphicsLayer so the shake and focus blur
+                    // run on the draw phase without recomposing.
+                    .graphicsLayer {
+                        translationX = shakeOffsetX()
+                        renderEffect = blurRenderEffectOrNull(blurRadiusDp().dp.toPx())
+                    }
                     .alpha(alpha),
             contentScale = ContentScale.Crop,
             colorFilter =

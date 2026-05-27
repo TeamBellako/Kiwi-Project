@@ -10,6 +10,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -51,8 +52,23 @@ fun rememberCharacterIdleModifier(sprite: String): Modifier =
  */
 @Composable
 fun rememberBreathingModifier(): Modifier {
+    val scale = rememberBreathingScale()
+    return Modifier.graphicsLayer {
+        scaleX = scale.value
+        scaleY = scale.value
+        transformOrigin = TransformOrigin(0.5f, 1f)
+    }
+}
+
+/**
+ * The breathing scale value driving [rememberBreathingModifier], exposed for
+ * callers that want to fold the breathing scale into their own graphicsLayer
+ * (e.g. alongside a renderEffect) instead of stacking two layers.
+ */
+@Composable
+fun rememberBreathingScale(): State<Float> {
     val transition = rememberInfiniteTransition(label = "breathing")
-    val scale by transition.animateFloat(
+    return transition.animateFloat(
         initialValue = BREATHING_MIN_SCALE,
         targetValue = BREATHING_MAX_SCALE,
         animationSpec =
@@ -62,11 +78,6 @@ fun rememberBreathingModifier(): Modifier {
             ),
         label = "breathing_scale",
     )
-    return Modifier.graphicsLayer {
-        scaleX = scale
-        scaleY = scale
-        transformOrigin = TransformOrigin(0.5f, 1f)
-    }
 }
 
 /**

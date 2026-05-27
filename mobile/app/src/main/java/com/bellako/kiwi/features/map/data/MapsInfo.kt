@@ -8,6 +8,7 @@ object MapsInfo {
         MapInfo(
             mapTitle = "MINDVEIL",
             mapResourceId = R.drawable.mindveil_4k,
+            minZoom = 4f,
             maxZoom = 8f,
             backgroundColor = Color.White,
             mapId = 0,

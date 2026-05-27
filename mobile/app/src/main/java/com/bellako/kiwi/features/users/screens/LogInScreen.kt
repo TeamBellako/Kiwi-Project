@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -87,6 +88,11 @@ import kotlinx.coroutines.launch
 // Time for the background to scroll by one full image width — i.e. one
 // seamless loop. Slow enough to read as an ambient drift, not obvious motion.
 private const val LOGIN_SCROLL_PERIOD_MS = 64000
+
+// Instrumentation tests provide `false` so the infinite scroll transition
+// doesn't keep the Compose runtime permanently non-idle (which hangs
+// performClick / waitForIdle on CI).
+internal val LocalLoginBackgroundAnimated = staticCompositionLocalOf { true }
 
 @Composable
 fun LogInScreen(
@@ -184,22 +190,27 @@ private fun BoxScope.ScrollingLoginBackground(imgPercentage: Float) {
         val imageWidthPx = if (intrinsic.height > 0f) intrinsic.width * heightPx / intrinsic.height else 0f
         val imageWidthDp = with(LocalDensity.current) { imageWidthPx.toDp() }
 
-        val transition = rememberInfiniteTransition(label = "login_scroll")
-        val progress by transition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec =
-                infiniteRepeatable(
-                    animation = tween(LOGIN_SCROLL_PERIOD_MS, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart,
-                ),
-            label = "login_scroll_progress",
-        )
+        val shift =
+            if (LocalLoginBackgroundAnimated.current) {
+                val transition = rememberInfiniteTransition(label = "login_scroll")
+                val progress by transition.animateFloat(
+                    initialValue = 0f,
+                    targetValue = 1f,
+                    animationSpec =
+                        infiniteRepeatable(
+                            animation = tween(LOGIN_SCROLL_PERIOD_MS, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart,
+                        ),
+                    label = "login_scroll_progress",
+                )
+                progress * imageWidthPx
+            } else {
+                0f
+            }
 
         // Trailing copy sits one width to the left; leading copy starts on
         // screen. Both slide right by `shift`; at shift == imageWidth the
         // trailing copy lands exactly where the leading one began.
-        val shift = progress * imageWidthPx
         LoginBackgroundImage(imageWidthDp, translationXPx = shift - imageWidthPx)
         LoginBackgroundImage(imageWidthDp, translationXPx = shift)
     }

@@ -251,15 +251,12 @@ fun NodeOnMap(
     revealScale: Float = 1f,
     nameAlpha: Float = 1f,
 ) {
-    val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2
-    val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2
-    val scaledX = (mapX * mapState.scale) + mapState.offset.x
-    val scaledY = (mapY * mapState.scale) + mapState.offset.y
+    val centered = nodeViewportOffset(node, mapState)
 
     Box(
         modifier =
             Modifier
-                .offset { IntOffset(scaledX.roundToInt(), scaledY.roundToInt()) },
+                .offset { IntOffset(centered.x.roundToInt(), centered.y.roundToInt()) },
         contentAlignment = Alignment.Center,
     ) {
         Node(
@@ -607,6 +604,21 @@ fun nodeToScreen(
     val x = node.cordX * mapState.mapWidthPx
     val y = (1f - node.cordY) * mapState.mapHeightPx
     return Offset(x, y)
+}
+
+// Where a node sits in the viewport, expressed as an offset from the centered
+// outer Box (matches the math NodeOnMap applies to position itself). Reused
+// by MapMist so the fog-of-war holes line up exactly with the node icons.
+fun nodeViewportOffset(
+    node: NodesDomain,
+    mapState: MapState,
+): Offset {
+    val mapX = node.cordX * mapState.mapWidthPx - mapState.mapWidthPx / 2f
+    val mapY = (1f - node.cordY) * mapState.mapHeightPx - mapState.mapHeightPx / 2f
+    return Offset(
+        x = (mapX * mapState.scale) + mapState.offset.x,
+        y = (mapY * mapState.scale) + mapState.offset.y,
+    )
 }
 
 fun screenToMap(
