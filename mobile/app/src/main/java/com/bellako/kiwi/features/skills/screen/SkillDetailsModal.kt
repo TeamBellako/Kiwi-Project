@@ -231,7 +231,7 @@ fun SkillDetails(
                                     goalProgress,
                                     skill.goalData.target,
                                     onProgressChange = { goalProgress = it },
-                                    enabled = !skill.isCooldown,
+                                    enabled = skill.isCooldown,
                                     kiwiColors,
                                 )
                             }

@@ -80,6 +80,7 @@ import com.bellako.kiwi.ui.getScreenWidth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -151,6 +152,16 @@ fun MapScreen(
 
     LaunchedEffect(Unit) {
         loadNodes(mapViewModel, nodesViewModel, 0)
+    }
+
+    // Fresh-account safety net: after a brand-new sign-up the user can land
+    // here with every node still INACCESSIBLE/LOCKED — all hidden under the
+    // mist — so the map reads as empty. If no node has been touched yet, the
+    // helper auto-unlocks and auto-executes the first one so the opening beat
+    // fires. Sign-up normally drives this explicitly under the loading
+    // curtain; this catches the case where that round-trip failed.
+    LaunchedEffect(Unit) {
+        runAutoExecuteFirstNodeIfNeeded(nodesViewModel, mapViewModel)
     }
 
     LaunchedEffect(Unit) {
@@ -368,6 +379,31 @@ private fun loadNodes(
                 }
             }
         }.launchIn(CoroutineScope(Dispatchers.Main))
+}
+
+private suspend fun runAutoExecuteFirstNodeIfNeeded(
+    nodesViewModel: INodesViewModel,
+    mapViewModel: MapViewModel,
+) {
+    val loaded = nodesViewModel.state.first { (it?.nodes?.isNotEmpty()) == true } ?: return
+    val initialNodes = loaded.nodes.values.toList()
+    if (initialNodes.any { it.status == NodeStatus.OPEN || it.status == NodeStatus.COMPLETED }) return
+
+    val firstNode = initialNodes.first()
+
+    nodesViewModel.unlockNode(firstNode.id)
+    nodesViewModel.state.first { it?.nodes?.get(firstNode.id)?.status == NodeStatus.OPEN }
+    mapViewModel.setPlayerNode(firstNode.id)
+
+    nodesViewModel.completeNode(firstNode.id)
+    nodesViewModel.state.first { it?.nodes?.get(firstNode.id)?.status == NodeStatus.COMPLETED }
+
+    if (firstNode.onExecutionEvent.isNotBlank() && firstNode.onExecutionEvent != "_") {
+        EventBus.emitEvent(
+            EventType.valueOf(firstNode.onExecutionEvent),
+            EventPayload.EntityIdPayload(firstNode.onExecutionEntityId),
+        )
+    }
 }
 
 @Suppress("LongMethod")

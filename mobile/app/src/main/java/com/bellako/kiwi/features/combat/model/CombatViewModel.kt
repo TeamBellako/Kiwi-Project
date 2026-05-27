@@ -64,6 +64,14 @@ class CombatViewModel
         private val _isTurnPlaying = MutableStateFlow(false)
         val isTurnPlaying: StateFlow<Boolean> = _isTurnPlaying.asStateFlow()
 
+        // Flips true once tryResumeActive has finished its first run — whether
+        // or not it found a combat. MainScreen reads this to (a) keep the
+        // initial loading curtain up until the resume question is answered,
+        // and (b) suppress map music during that window, so a cold-start
+        // resume goes straight to combat music with no map-music flash.
+        private val _hasResolvedCombatOnStartup = MutableStateFlow(false)
+        val hasResolvedCombatOnStartup: StateFlow<Boolean> = _hasResolvedCombatOnStartup.asStateFlow()
+
         init {
             GlobalScope.launch(Dispatchers.Main) {
                 listenToEvent(EventType.START_COMBAT) { payload ->
@@ -104,7 +112,10 @@ class CombatViewModel
         }
 
         fun tryResumeActive() {
-            if (_active.value != null) return
+            if (_active.value != null) {
+                _hasResolvedCombatOnStartup.value = true
+                return
+            }
             viewModelScope.launch {
                 try {
                     val combat = repository.getActiveCombat() ?: return@launch
@@ -115,6 +126,11 @@ class CombatViewModel
                     barkController.onCombatStarted(combat)
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
+                } finally {
+                    // Flip AFTER _isVisible so any observer that reacts to the
+                    // flag (curtain wait, map-music gate) sees the combat
+                    // already in place when it unblocks.
+                    _hasResolvedCombatOnStartup.value = true
                 }
             }
         }
