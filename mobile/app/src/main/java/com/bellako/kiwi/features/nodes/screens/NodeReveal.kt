@@ -13,9 +13,9 @@ import androidx.compose.runtime.setValue
 import com.bellako.kiwi.features.nodes.data.NodesDomain
 import kotlin.math.roundToInt
 
-private const val NODE_POP_MS = 300f
-private const val EDGE_LERP_MS = 240f
-private const val LABEL_FADE_MS = 220f
+internal const val NODE_POP_MS = 300f
+internal const val EDGE_LERP_MS = 240f
+internal const val LABEL_FADE_MS = 220f
 
 // A clock value large enough that every node/edge reads as fully revealed for
 // any schedule. Used when the reveal has already played this session, so the
@@ -41,6 +41,9 @@ class NodeRevealSchedule(
     private val nodePopStartMs: Map<Long, Float>,
     val totalDurationMs: Float,
 ) {
+    /** The set of nodes this schedule has explicit pop times for. */
+    val coveredNodes: Set<Long> get() = nodePopStartMs.keys
+
     fun nodeScale(
         id: Long,
         clockMs: Float,
@@ -81,7 +84,7 @@ class NodeRevealSchedule(
     }
 }
 
-private fun buildNodeRevealSchedule(
+internal fun buildNodeRevealSchedule(
     nodes: Map<Long, NodesDomain>,
     rootNodeId: Long?,
 ): NodeRevealSchedule {
