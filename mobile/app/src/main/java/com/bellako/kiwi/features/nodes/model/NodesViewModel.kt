@@ -41,6 +41,17 @@ class NodesViewModel
                     unlockNode(payload.targetEntityId.toLong())
                 }
             }
+            // Completion is now data-driven: a node "starts" something via its
+            // onExecutionEvent (START_CNV / START_COMBAT / …) and the started
+            // thing emits COMPLETE_NODE on resolve, carrying the originating
+            // node id in the payload. Mirrors the start-side dispatch so the
+            // node lifecycle is uniformly event-shaped.
+            viewModelScope.launch {
+                listenToEvent(EventType.COMPLETE_NODE) { eventPayload ->
+                    val payload = eventPayload as EventPayload.EntityIdPayload
+                    completeNode(payload.targetEntityId.toLong())
+                }
+            }
         }
 
         // -----------------------------------------------------------------------------------------
@@ -120,14 +131,17 @@ class NodesViewModel
         private suspend fun performAutoExecuteFirstNode(nodes: List<NodesDomain>): NodesDomain? {
             _state.value = NodesState(nodes = nodes.associateBy { it.id })
 
+            // Unlock only; completion is deferred to whichever event the node's
+            // onExecutionEvent triggers (its conversation/combat will emit
+            // COMPLETE_NODE when it resolves). The first-node arrives at the
+            // map as OPEN and finalizes after the auto-emitted first beat
+            // plays out.
             val firstNode = nodes.first()
             val afterUnlock = repository.unlockNode(firstNode.id)
             usersRepository.getMyUserPoints()
-            val afterComplete = repository.completeNode(firstNode.id)
 
             val merged = _state.value.nodes.toMutableMap()
             afterUnlock.forEach { merged[it.id] = it }
-            afterComplete.forEach { merged[it.id] = it }
             _state.value = NodesState(nodes = merged)
 
             return merged[firstNode.id]

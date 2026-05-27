@@ -58,6 +58,17 @@ class CombatViewModel
         private val _isVisible = MutableStateFlow(false)
         val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
+        // Optional exit-veil hook used on a victory continue. When set, the
+        // dismissal waits for the veil to cover the screen before clearing
+        // state and emitting the follow-up event, so the user sees the same
+        // veil transition as a node entry instead of the combat lerping off.
+        // Abandon / defeat keep the original slide-out.
+        private var exitVeilRunner: (suspend (finalize: suspend () -> Unit) -> Unit)? = null
+
+        fun setExitVeilRunner(runner: (suspend (finalize: suspend () -> Unit) -> Unit)?) {
+            exitVeilRunner = runner
+        }
+
         private val _lastTurnActions = MutableStateFlow<List<CombatActionDomain>>(emptyList())
         val lastTurnActions: StateFlow<List<CombatActionDomain>> = _lastTurnActions.asStateFlow()
 
@@ -104,6 +115,7 @@ class CombatViewModel
                     _active.value = combat
                     _lastTurnActions.value = combat.log
                     _isVisible.value = true
+                    EventBus.emitEvent(EventType.MAP_COVERED, EventPayload.EmptyPayload())
                     barkController.onCombatStarted(combat)
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
@@ -123,6 +135,7 @@ class CombatViewModel
                     _active.value = combat
                     _lastTurnActions.value = combat.log
                     _isVisible.value = true
+                    EventBus.emitEvent(EventType.MAP_COVERED, EventPayload.EmptyPayload())
                     barkController.onCombatStarted(combat)
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
@@ -217,6 +230,7 @@ class CombatViewModel
             if (_active.value == null) return
             viewModelScope.launch {
                 _isVisible.value = false
+                EventBus.emitEvent(EventType.MAP_UNCOVERED, EventPayload.EmptyPayload())
                 delay(DISMISS_ANIMATION_DURATION_MS)
                 _active.value = null
                 _lastTurnActions.value = emptyList()
@@ -230,18 +244,32 @@ class CombatViewModel
                 val event = current.onCompletedEvent
                 val entityId = current.onCompletedEntityId
 
-                _isVisible.value = false
-                delay(DISMISS_ANIMATION_DURATION_MS)
-
-                if (event != null && entityId != null) {
-                    EventBus.emitEvent(
-                        EventType.valueOf(event),
-                        EventPayload.EntityIdPayload(entityId),
-                    )
+                val clearAndEmit: suspend () -> Unit = {
+                    // Uncover first so any chained follow-up's MAP_COVERED wins
+                    // the final state when both events fire in sequence.
+                    EventBus.emitEvent(EventType.MAP_UNCOVERED, EventPayload.EmptyPayload())
+                    if (event != null && entityId != null) {
+                        EventBus.emitEvent(
+                            EventType.valueOf(event),
+                            EventPayload.EntityIdPayload(entityId),
+                        )
+                    }
+                    _active.value = null
+                    _lastTurnActions.value = emptyList()
+                    barkController.onCombatEnded()
                 }
-                _active.value = null
-                _lastTurnActions.value = emptyList()
-                barkController.onCombatEnded()
+
+                val runner = exitVeilRunner
+                if (runner != null) {
+                    runner {
+                        _isVisible.value = false
+                        clearAndEmit()
+                    }
+                } else {
+                    _isVisible.value = false
+                    delay(DISMISS_ANIMATION_DURATION_MS)
+                    clearAndEmit()
+                }
             }
         }
 

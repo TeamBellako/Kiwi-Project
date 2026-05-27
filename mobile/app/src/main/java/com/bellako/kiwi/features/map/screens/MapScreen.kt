@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -74,6 +76,7 @@ import com.bellako.kiwi.features.map.data.MapsInfo
 import com.bellako.kiwi.features.map.model.MapViewModel
 import com.bellako.kiwi.features.nodes.data.NodeStatus
 import com.bellako.kiwi.features.nodes.data.NodeTransitionStyle
+import com.bellako.kiwi.features.nodes.data.NodesDomain
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.nodes.screens.NodeAction
@@ -82,6 +85,7 @@ import com.bellako.kiwi.features.nodes.screens.NodeEntryTransitionController
 import com.bellako.kiwi.features.nodes.screens.NodeOnMap
 import com.bellako.kiwi.features.nodes.screens.distance
 import com.bellako.kiwi.features.nodes.screens.rememberNodeReveal
+import com.bellako.kiwi.features.nodes.screens.rememberUnlockRevealOverlay
 import com.bellako.kiwi.features.nodes.screens.screenToMap
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -211,94 +215,110 @@ fun MapScreen(
     var topInsetPx by remember { mutableIntStateOf(0) }
     val topInsetDp = with(density) { topInsetPx.toDp() }
 
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(kiwiColors.color2)
-                .testTag(CommonTestTags.HOME_SCREEN),
-    ) {
-        InteractiveMap(
-            mapResourceId = mapState.mapInfo.mapResourceId,
-            mapViewModel = mapViewModel,
-            nodesViewModel = nodesViewModel,
-            currentPoints = currentPoints,
-            revealStarted = revealStarted,
-            modifier = Modifier.fillMaxSize().padding(top = topInsetDp),
-        )
+    // Full-screen conversations and combats emit MAP_COVERED / MAP_UNCOVERED
+    // so we can shut off the per-frame VFX loops (mist drift, cloud frame
+    // ticker, water shader) while the map is fully hidden. AND-ed with the
+    // outer LocalMapVfxEnabled so tests that disable VFX globally still win.
+    var mapCovered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.MAP_COVERED) { mapCovered = true }
+    }
+    LaunchedEffect(Unit) {
+        listenToEvent(EventType.MAP_UNCOVERED) { mapCovered = false }
+    }
+    val baseVfxEnabled = LocalMapVfxEnabled.current
+    val vfxEnabled = baseVfxEnabled && !mapCovered
 
-        // Mist covers the FULL screen, including behind the title and the
-        // points indicator. zIndex sits between the map content (default 0)
-        // and the top-bar UI (zIndex 1).
-        MapMist(
-            nodes = nodesMap,
-            mapState = mapState,
-            topInsetPx = topInsetPx.toFloat(),
-            modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
-        )
-
-        // Clouds sit above the mist (so they read as overhead sky reinforcing
-        // the mist cover) but below the top-bar UI. The wrapper Box mirrors
-        // InteractiveMap's positioning — top inset + center alignment — so the
-        // graphicsLayer transform places the cloud canvas exactly over the
-        // map content. The Canvas itself has no pointer modifier, so map
-        // gestures continue to land on InteractiveMap below.
+    CompositionLocalProvider(LocalMapVfxEnabled provides vfxEnabled) {
         Box(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(top = topInsetDp)
-                    .zIndex(CLOUDS_Z_INDEX),
-            contentAlignment = Alignment.Center,
+                    .background(kiwiColors.color2)
+                    .testTag(CommonTestTags.HOME_SCREEN),
         ) {
-            MapClouds(
+            InteractiveMap(
+                mapResourceId = mapState.mapInfo.mapResourceId,
+                mapViewModel = mapViewModel,
+                nodesViewModel = nodesViewModel,
+                currentPoints = currentPoints,
+                revealStarted = revealStarted,
+                modifier = Modifier.fillMaxSize().padding(top = topInsetDp),
+            )
+
+            // Mist covers the FULL screen, including behind the title and the
+            // points indicator. zIndex sits between the map content (default 0)
+            // and the top-bar UI (zIndex 1).
+            MapMist(
                 nodes = nodesMap,
                 mapState = mapState,
+                topInsetPx = topInsetPx.toFloat(),
+                modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
+            )
+
+            // Clouds sit above the mist (so they read as overhead sky reinforcing
+            // the mist cover) but below the top-bar UI. The wrapper Box mirrors
+            // InteractiveMap's positioning — top inset + center alignment — so the
+            // graphicsLayer transform places the cloud canvas exactly over the
+            // map content. The Canvas itself has no pointer modifier, so map
+            // gestures continue to land on InteractiveMap below.
+            Box(
                 modifier =
                     Modifier
-                        .size(width = mapDisplayWidthDp, height = mapDisplayHeightDp)
-                        .graphicsLayer(
-                            scaleX = mapState.scale,
-                            scaleY = mapState.scale,
-                            translationX = mapState.offset.x,
-                            translationY = mapState.offset.y,
-                        ),
+                        .fillMaxSize()
+                        .padding(top = topInsetDp)
+                        .zIndex(CLOUDS_Z_INDEX),
+                contentAlignment = Alignment.Center,
+            ) {
+                MapClouds(
+                    nodes = nodesMap,
+                    mapState = mapState,
+                    modifier =
+                        Modifier
+                            .size(width = mapDisplayWidthDp, height = mapDisplayHeightDp)
+                            .graphicsLayer(
+                                scaleX = mapState.scale,
+                                scaleY = mapState.scale,
+                                translationX = mapState.offset.x,
+                                translationY = mapState.offset.y,
+                            ),
+                )
+            }
+
+            Kiwi_H2(
+                KiwiTextArguments(
+                    mapState.mapInfo.mapTitle,
+                    color = kiwiColors.colorF,
+                    // offset (not padding) so the title's measured size stays the
+                    // pure text-plus-padding box — that's what feeds topInsetPx,
+                    // and feeding the xLarge visual offset into the inset would
+                    // push InteractiveMap down past where it used to sit.
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
+                            .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
+                            .zIndex(1f)
+                            .onSizeChanged { topInsetPx = it.height },
+                ),
+            )
+
+            PointsIndicator(
+                currentPoints = currentPoints,
+                mapStateFlow = mapViewModel.state,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        // Match the title's vertical placement so the indicator
+                        // sits on the same line as the map name. The pill's own
+                        // border + inner padding contributes the small lead the
+                        // title gets from its Spacing.small padding, so no extra
+                        // outer top padding is needed here.
+                        .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
+                        .padding(end = getResponsiveSizeHeight(Spacing.medium))
+                        .zIndex(1f),
             )
         }
-
-        Kiwi_H2(
-            KiwiTextArguments(
-                mapState.mapInfo.mapTitle,
-                color = kiwiColors.colorF,
-                // offset (not padding) so the title's measured size stays the
-                // pure text-plus-padding box — that's what feeds topInsetPx,
-                // and feeding the xLarge visual offset into the inset would
-                // push InteractiveMap down past where it used to sit.
-                modifier =
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
-                        .padding(0.dp, getResponsiveSizeHeight(Spacing.small))
-                        .zIndex(1f)
-                        .onSizeChanged { topInsetPx = it.height },
-            ),
-        )
-
-        PointsIndicator(
-            currentPoints = currentPoints,
-            mapStateFlow = mapViewModel.state,
-            modifier =
-                Modifier
-                    .align(Alignment.TopEnd)
-                    // Match the title's vertical placement so the indicator
-                    // sits on the same line as the map name. The pill's own
-                    // border + inner padding contributes the small lead the
-                    // title gets from its Spacing.small padding, so no extra
-                    // outer top padding is needed here.
-                    .offset(y = getResponsiveSizeHeight(Spacing.xLarge))
-                    .padding(end = getResponsiveSizeHeight(Spacing.medium))
-                    .zIndex(1f),
-        )
     }
 }
 
@@ -512,9 +532,9 @@ private suspend fun runAutoExecuteFirstNodeIfNeeded(
     nodesViewModel.state.first { it?.nodes?.get(firstNode.id)?.status == NodeStatus.OPEN }
     mapViewModel.setPlayerNode(firstNode.id)
 
-    nodesViewModel.completeNode(firstNode.id)
-    nodesViewModel.state.first { it?.nodes?.get(firstNode.id)?.status == NodeStatus.COMPLETED }
-
+    // Completion is deferred: emitting the start event triggers the linked
+    // conversation/combat, which fires COMPLETE_NODE on resolve. The node
+    // sits OPEN until then.
     if (firstNode.onExecutionEvent.isNotBlank() && firstNode.onExecutionEvent != "_") {
         EventBus.emitEvent(
             EventType.valueOf(firstNode.onExecutionEvent),
@@ -551,6 +571,24 @@ private fun InteractiveMap(
 
     val nodeEntry = LocalNodeEntryTransition.current
     val nodeEntryScope = rememberCoroutineScope()
+
+    // Mini-cascade fired every time a node is played and unlocks neighbours.
+    // Gated to start only after the initial reveal has handed over, so the
+    // first auto-completion under the loading curtain doesn't collide with it.
+    // Each cascade also waits for the node-entry veil to be fully lifted —
+    // state updates (icon flip to tick, neighbours becoming OPEN) land while
+    // the screen is covered, and the visible pop/lerp/pop only plays once
+    // the user is looking at the map again.
+    val unlockReveal =
+        rememberUnlockRevealOverlay(
+            nodes = nodesMap,
+            enabled = revealConsumed,
+            awaitReady = {
+                if (nodeEntry != null) {
+                    snapshotFlow { nodeEntry.veilAlpha }.first { it <= 0f }
+                }
+            },
+        )
 
     Box(
         modifier =
@@ -647,7 +685,8 @@ private fun InteractiveMap(
                 mapState = mapState,
                 modifier = Modifier.fillMaxSize(),
                 edgeReveal = { fromId, toId ->
-                    revealSchedule.edgeReveal(fromId, toId, revealClockMs)
+                    unlockReveal.edgeReveal(fromId, toId)
+                        ?: revealSchedule.edgeReveal(fromId, toId, revealClockMs)
                 },
             )
         }
@@ -659,8 +698,12 @@ private fun InteractiveMap(
                 mapState = mapState,
                 isPlayerNode = node.id == mapState.playerNode,
                 isSelected = node.id == mapState.selectedNodeId,
-                revealScale = revealSchedule.nodeScale(node.id, revealClockMs),
-                nameAlpha = revealSchedule.labelAlpha(node.id, revealClockMs),
+                revealScale =
+                    unlockReveal.nodeScale(node.id)
+                        ?: revealSchedule.nodeScale(node.id, revealClockMs),
+                nameAlpha =
+                    unlockReveal.labelAlpha(node.id)
+                        ?: revealSchedule.labelAlpha(node.id, revealClockMs),
             )
         }
 
@@ -673,8 +716,12 @@ private fun InteractiveMap(
                         AudioManager.playSFX(context, R.raw.snd_fx_04_seleccion)
 
                         // Same gating as the node's label: stay hidden until the
-                        // focused node's pop has finished, then fade in.
-                        val actionAlpha = revealSchedule.labelAlpha(selectedNodeId, revealClockMs)
+                        // focused node's pop has finished, then fade in. Routed
+                        // through the unlock overlay too so the button doesn't
+                        // sit visible above a node that's mid re-pop.
+                        val actionAlpha =
+                            unlockReveal.labelAlpha(selectedNodeId)
+                                ?: revealSchedule.labelAlpha(selectedNodeId, revealClockMs)
 
                         Box(
                             modifier = Modifier.fillMaxSize().alpha(actionAlpha),
@@ -691,14 +738,22 @@ private fun InteractiveMap(
                                     nodesViewModel.unlockNode(id)
                                     mapViewModel.setPlayerNode(id)
                                 },
-                                onCompleteNode = { id ->
-                                    nodesViewModel.completeNode(id)
+                                onCompleteNode = { _ ->
                                     AudioManager.playSFX(context, R.raw.snd_node_completed)
 
+                                    // No inline completeNode — the node is now
+                                    // completed by the COMPLETE_NODE event the
+                                    // linked conversation/combat emits on
+                                    // resolve. Just fire the start event.
+                                    //
+                                    // Nodes whose start event IS already
+                                    // COMPLETE_NODE (self-completing, no
+                                    // follow-up screen) skip the entry veil —
+                                    // there's nothing for it to transition to.
                                     runNodeEntry(
                                         scope = nodeEntryScope,
                                         nodeEntry = nodeEntry,
-                                        style = selectedNode.transitionStyle,
+                                        style = effectiveTransitionStyle(selectedNode),
                                     ) {
                                         if (selectedNode.onExecutionEvent != "_") {
                                             EventBus.emitEvent(
@@ -712,7 +767,7 @@ private fun InteractiveMap(
                                     runNodeEntry(
                                         scope = nodeEntryScope,
                                         nodeEntry = nodeEntry,
-                                        style = selectedNode.transitionStyle,
+                                        style = effectiveTransitionStyle(selectedNode),
                                     ) {
                                         if (selectedNode.onExecutionEvent != "_") {
                                             EventBus.emitEvent(
@@ -750,8 +805,21 @@ fun Background(mapViewModel: MapViewModel) {
 // Fallback hold before auto-dismissing the veil. The follow-up screen (e.g.
 // ConversationScreen) is expected to call fadeOut() itself once its own intro
 // is settled, so the player never glimpses the map behind a half-faded
-// reveal. This is just a safety net for follow-ups that don't self-dismiss.
-private const val FALLBACK_VEIL_HOLD_MS = 1_500L
+// reveal. This is just a safety net for follow-ups that don't self-dismiss —
+// generous enough to outlast a slow server load plus the conversation's
+// slide-in, so it never wins the race against the conversation's own dismiss.
+private const val FALLBACK_VEIL_HOLD_MS = 6_000L
+
+// A node whose start event IS the completion event has no follow-up screen
+// to fade up under the veil — running the veil over an instant state change
+// only flashes the user with darkness for no reason. Treat those as
+// IMMEDIATE regardless of how content authoring set the style.
+private fun effectiveTransitionStyle(node: NodesDomain): NodeTransitionStyle =
+    if (node.onExecutionEvent == EventType.COMPLETE_NODE.name) {
+        NodeTransitionStyle.IMMEDIATE
+    } else {
+        node.transitionStyle
+    }
 
 /**
  * Plays the veil transition (fade in + brief hold), runs [onVeilReached]
