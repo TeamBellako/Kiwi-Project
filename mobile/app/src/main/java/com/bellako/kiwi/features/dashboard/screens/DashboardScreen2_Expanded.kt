@@ -285,12 +285,16 @@ private fun ExpandedProgressBox(
 }
 
 @Composable
-private fun ExpandedMetricProgressTitle(title: String) {
+private fun ExpandedMetricProgressTitle(
+    title: String,
+    isComplete: Boolean,
+) {
+    val kiwiColors = LocalKiwiColors.current
     Kiwi_P2(
         KiwiTextArguments(
             title,
             TextAlign.Center,
-            LocalKiwiColors.current.color9,
+            if (isComplete) kiwiColors.color8A else kiwiColors.color6,
             modifier =
                 Modifier
                     .fillMaxWidth(),
@@ -300,6 +304,10 @@ private fun ExpandedMetricProgressTitle(title: String) {
 
 @Composable
 private fun ExpandedMetricsProgress(state: MetricsState) {
+    val validMetrics = state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0
+    val goodComplete = validMetrics && state.currentGoodTimeSeconds >= state.maxGoodTimeSeconds
+    val badComplete = validMetrics && state.currentBadTimeSeconds >= state.maxBadTimeSeconds
+
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier =
@@ -309,11 +317,11 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
     ) {
         Box(modifier = Modifier.weight(1f)) {
             Column {
-                ExpandedMetricProgressTitle("Good Apps")
+                ExpandedMetricProgressTitle("Good Apps", isComplete = goodComplete)
                 SelectedMetricsTime(
                     state.maxGoodTimeSeconds,
                     state.currentGoodTimeSeconds,
-                    state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                    validMetrics,
                     true,
                     DashboardModalTestTags.GOOD_TIME,
                 )
@@ -321,11 +329,11 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
         }
         Box(modifier = Modifier.weight(1f)) {
             Column {
-                ExpandedMetricProgressTitle("Evil Apps")
+                ExpandedMetricProgressTitle("Evil Apps", isComplete = badComplete)
                 SelectedMetricsTime(
                     state.maxBadTimeSeconds,
                     state.currentBadTimeSeconds,
-                    state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                    validMetrics,
                     true,
                     DashboardModalTestTags.BAD_TIME,
                 )

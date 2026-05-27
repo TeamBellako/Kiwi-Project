@@ -273,8 +273,8 @@ fun CalendarWeekView(
                             val currentDay = stringToDate(metricsState.date)
                             dayTransitionDirection.intValue =
                                 when {
-                                    newDay.isBefore(currentDay) -> 1
-                                    newDay.isAfter(currentDay) -> -1
+                                    newDay.isBefore(currentDay) -> -1
+                                    newDay.isAfter(currentDay) -> 1
                                     else -> 0
                                 }
                             selectDay(

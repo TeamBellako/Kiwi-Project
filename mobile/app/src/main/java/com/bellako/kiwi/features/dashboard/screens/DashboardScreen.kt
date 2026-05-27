@@ -377,12 +377,20 @@ fun SelectedMetricsTime(
             ""
         }
 
+    // The whole metric block (label + current + slash/max) turns gold once
+    // the user has hit the target for this category. Below target each text
+    // keeps its semantic color (label = neutral, current = green, max = teal).
+    val isComplete = validMetrics && currentSeconds >= maxSeconds
+    val currentColor = if (isComplete) kiwiColors.color8A else kiwiColors.color9
+    val maxColor = if (isComplete) kiwiColors.color8A else kiwiColors.color7D
+    val labelColor = if (isComplete) kiwiColors.color8A else kiwiColors.color6
+
     if (expanded) {
         Kiwi_H1(
             KiwiTextArguments(
                 text = currentString,
                 TextAlign.Center,
-                color = kiwiColors.color9,
+                color = currentColor,
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -394,7 +402,7 @@ fun SelectedMetricsTime(
             KiwiTextArguments(
                 maxString,
                 TextAlign.Center,
-                color = kiwiColors.color7D,
+                color = maxColor,
                 modifier =
                     Modifier
                         .fillMaxWidth(),
@@ -409,7 +417,7 @@ fun SelectedMetricsTime(
                     KiwiTextArguments(
                         label,
                         TextAlign.Left,
-                        color = kiwiColors.color7D,
+                        color = labelColor,
                     ),
                 )
             }
@@ -419,7 +427,7 @@ fun SelectedMetricsTime(
                     KiwiTextArguments(
                         currentString,
                         TextAlign.Left,
-                        color = kiwiColors.color9,
+                        color = currentColor,
                         modifier =
                             Modifier
                                 .testTag(tag),
@@ -430,7 +438,7 @@ fun SelectedMetricsTime(
                     KiwiTextArguments(
                         maxString,
                         TextAlign.Left,
-                        color = kiwiColors.color7D,
+                        color = maxColor,
                     ),
                 )
             }

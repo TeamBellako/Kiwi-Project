@@ -4,22 +4,33 @@ import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
@@ -28,6 +39,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Display1
 import com.bellako.kiwi.common.screens.components.Kiwi_HorizontalLine
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.Kiwi_Spacer_Horizontal
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.skills.data.SkillDomain
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
@@ -41,6 +53,9 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 const val DECK_SKILLS_SECTION_INDEX = 1
 const val ALL_SKILLS_SECTION_INDEX = 4
 
+private val DECK_INFO_BUTTON_SIZE = 32.dp
+private val DECK_INFO_ICON_SIZE = 22.dp
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SkillsScreen(
@@ -53,6 +68,8 @@ fun SkillsScreen(
     val listState = rememberLazyListState()
 
     val context = LocalContext.current
+
+    var showDeckInfoModal by remember { mutableStateOf(false) }
 
     LaunchedEffect(skillsState, focusedSkillId) {
         if (focusedSkillId == null) return@LaunchedEffect
@@ -89,14 +106,39 @@ fun SkillsScreen(
     ) {
         // DECK
         item {
-            Kiwi_Display1(
-                arguments =
-                    KiwiTextArguments(
-                        text = "Current Deck",
-                        color = kiwiColors.colorF,
-                        modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.small), vertical = Spacing.medium),
-                    ),
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    Modifier
+                        .padding(
+                            horizontal = getResponsiveSizeHeight(Spacing.small),
+                            vertical = Spacing.medium,
+                        ),
+            ) {
+                Kiwi_Display1(
+                    arguments =
+                        KiwiTextArguments(
+                            text = "Current Deck",
+                            color = kiwiColors.colorF,
+                        ),
+                )
+                Kiwi_Spacer_Horizontal(Spacing.small)
+                Box(
+                    modifier =
+                        Modifier
+                            .size(getResponsiveSizeHeight(DECK_INFO_BUTTON_SIZE))
+                            .background(color = kiwiColors.color3, shape = CircleShape)
+                            .clickable { showDeckInfoModal = true },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = "How the deck works",
+                        tint = kiwiColors.colorF,
+                        modifier = Modifier.size(getResponsiveSizeHeight(DECK_INFO_ICON_SIZE)),
+                    )
+                }
+            }
         }
 
         // DECK SKILLS
@@ -157,6 +199,10 @@ fun SkillsScreen(
                 )
             }
         }
+    }
+
+    if (showDeckInfoModal) {
+        SkillsInfoModal(onDismiss = { showDeckInfoModal = false })
     }
 }
 

@@ -75,6 +75,8 @@ import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
+import com.bellako.kiwi.features.skills.model.ISkillsViewModel
+import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -161,10 +163,18 @@ fun SignUpScreen4_Apps(
     personalityViewModel: IPersonalityViewModel,
     goalsViewModel: IGoalsViewModel,
     nodesViewModel: INodesViewModel,
+    skillsViewModel: ISkillsViewModel,
     navController: NavController,
 ) {
     SignUpScreen {
-        AppClassification(usersViewModel, personalityViewModel, navController, goalsViewModel, nodesViewModel)
+        AppClassification(
+            usersViewModel,
+            personalityViewModel,
+            navController,
+            goalsViewModel,
+            nodesViewModel,
+            skillsViewModel,
+        )
     }
 }
 
@@ -181,6 +191,7 @@ fun AppClassification(
     navController: NavController,
     goalsViewModel: IGoalsViewModel,
     nodesViewModel: INodesViewModel,
+    skillsViewModel: ISkillsViewModel,
 ) {
     val context = LocalContext.current
     val packageManager = context.packageManager
@@ -304,6 +315,7 @@ fun AppClassification(
             personalityViewModel = personalityViewModel,
             goalsViewModel = goalsViewModel,
             nodesViewModel = nodesViewModel,
+            skillsViewModel = skillsViewModel,
             goodApps = goodApps,
             badApps = badApps,
             neutralApps = neutralApps,
@@ -350,6 +362,7 @@ fun AppClassificationColumns(
     personalityViewModel: IPersonalityViewModel,
     goalsViewModel: IGoalsViewModel,
     nodesViewModel: INodesViewModel,
+    skillsViewModel: ISkillsViewModel,
     goodApps: SnapshotStateList<AppInfo>,
     badApps: SnapshotStateList<AppInfo>,
     neutralApps: SnapshotStateList<AppInfo>,
@@ -483,6 +496,11 @@ fun AppClassificationColumns(
                             // path — by awaiting the round-trip before navigating,
                             // the map mounts with the first node already COMPLETED.
                             val executedNode = nodesViewModel.autoExecuteFirstNode(0)
+                            // Auto-place one starter skill on the deck so the
+                            // fresh account has something playable in combat on
+                            // their very first map session. Awaited so the
+                            // backend round-trip lands before HOME mounts.
+                            skillsViewModel.equipStarterIfNeeded()
                             navController.navigate(ScreenRoutes.HOME)
                             onUpdateSuccess()
                             executedNode?.let { node ->
@@ -928,6 +946,7 @@ fun SignUpScreen4_Apps_Preview() {
             navController = rememberNavController(),
             goalsViewModel = GoalsFakeViewModel(),
             nodesViewModel = NodesFakeViewModel(),
+            skillsViewModel = SkillsFakeViewModel(),
         )
     }
 }

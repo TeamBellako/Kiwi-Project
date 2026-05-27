@@ -257,28 +257,30 @@ class SkillsViewModel
 
         // EQUIP
         override fun equipSkill(skillId: Long) {
+            viewModelScope.launch { equipSkillSuspending(skillId) }
+        }
+
+        private suspend fun equipSkillSuspending(skillId: Long) {
             val deckSlot = emptySlot() ?: return
             val dto = EquipSkillDTO(deckSlot)
 
-            viewModelScope.launch {
-                setIsLoading(true)
-                setUiState(UIState.Loading)
-                try {
-                    val skill = _state.value.skills[skillId] ?: return@launch
-                    val response = skillsRepository.equipSkill(skillId, dto)
+            setIsLoading(true)
+            setUiState(UIState.Loading)
+            try {
+                val skill = _state.value.skills[skillId] ?: return
+                val response = skillsRepository.equipSkill(skillId, dto)
 
-                    updateSkill(updateDeckSlot(skill, response.deckSlot))
+                updateSkill(updateDeckSlot(skill, response.deckSlot))
 
-                    setUiState(UIState.Success(Unit))
-                } catch (e: HttpException) {
-                    warn("HTTP error equipping skill: ${e.message}")
-                    setUiState(mapExceptionToUIState(e))
-                } catch (e: IOException) {
-                    warn("IO error equipping skill: ${e.message}")
-                    setUiState(UIState.GeneralError)
-                } finally {
-                    setIsLoading(false)
-                }
+                setUiState(UIState.Success(Unit))
+            } catch (e: HttpException) {
+                warn("HTTP error equipping skill: ${e.message}")
+                setUiState(mapExceptionToUIState(e))
+            } catch (e: IOException) {
+                warn("IO error equipping skill: ${e.message}")
+                setUiState(UIState.GeneralError)
+            } finally {
+                setIsLoading(false)
             }
         }
 
@@ -361,6 +363,18 @@ class SkillsViewModel
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun loadSkills(): Result<Unit> = runCatching { loadAllSkills() }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun equipStarterIfNeeded(): Result<Unit> =
+            runCatching {
+                // Already has something equipped — nothing to do.
+                if (_state.value.skills.values.any { it.deckSlot > 0 }) return@runCatching
+                // Skills load runs async via onUserLoggedIn; if signup completed
+                // before that finished, make sure they're loaded before picking.
+                if (_state.value.skills.isEmpty()) loadAllSkills()
+                val first = _state.value.skills.values.firstOrNull() ?: return@runCatching
+                equipSkillSuspending(first.id)
+            }
 
         fun onUserLoggedIn() {
             viewModelScope.launch {
