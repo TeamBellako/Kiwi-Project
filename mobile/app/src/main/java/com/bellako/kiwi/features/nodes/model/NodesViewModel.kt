@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import java.io.IOException
 import java.security.GeneralSecurityException
 import javax.inject.Inject
@@ -89,37 +90,47 @@ class NodesViewModel
 
         override suspend fun autoExecuteFirstNode(mapId: Int): NodesDomain? {
             setIsLoading(true)
+            // Swallow network failures on purpose: the sign-up flow needs to keep
+            // moving and land the user on the map regardless. If this fails, the
+            // map's own LaunchedEffect retries on next mount.
             return try {
                 val nodes = repository.getNodesByMapId(mapId)
-                if (nodes.isEmpty()) return null
-
-                _state.value = NodesState(nodes = nodes.associateBy { it.id })
-
-                // Already has progress on this map — leave the user where they are.
-                if (nodes.any { it.status == NodeStatus.OPEN || it.status == NodeStatus.COMPLETED }) {
-                    return null
+                when {
+                    nodes.isEmpty() -> null
+                    nodes.any { it.status == NodeStatus.OPEN || it.status == NodeStatus.COMPLETED } -> {
+                        _state.value = NodesState(nodes = nodes.associateBy { it.id })
+                        null
+                    }
+                    else -> performAutoExecuteFirstNode(nodes)
                 }
-
-                val firstNode = nodes.first()
-                val afterUnlock = repository.unlockNode(firstNode.id)
-                usersRepository.getMyUserPoints()
-                val afterComplete = repository.completeNode(firstNode.id)
-
-                val merged = _state.value.nodes.toMutableMap()
-                afterUnlock.forEach { merged[it.id] = it }
-                afterComplete.forEach { merged[it.id] = it }
-                _state.value = NodesState(nodes = merged)
-
-                merged[firstNode.id]
-            } catch (e: Exception) {
-                // Swallow on purpose: the sign-up flow needs to keep moving and
-                // land the user on the map regardless. If this fails, the map's
-                // own LaunchedEffect retries on next mount.
-                warn("autoExecuteFirstNode failed: ${e.message}")
+            } catch (e: HttpException) {
+                warn("autoExecuteFirstNode HTTP error: ${e.message}")
+                null
+            } catch (e: IOException) {
+                warn("autoExecuteFirstNode network error: ${e.message}")
+                null
+            } catch (e: GeneralSecurityException) {
+                warn("autoExecuteFirstNode encryption error: ${e.message}")
                 null
             } finally {
                 setIsLoading(false)
             }
+        }
+
+        private suspend fun performAutoExecuteFirstNode(nodes: List<NodesDomain>): NodesDomain? {
+            _state.value = NodesState(nodes = nodes.associateBy { it.id })
+
+            val firstNode = nodes.first()
+            val afterUnlock = repository.unlockNode(firstNode.id)
+            usersRepository.getMyUserPoints()
+            val afterComplete = repository.completeNode(firstNode.id)
+
+            val merged = _state.value.nodes.toMutableMap()
+            afterUnlock.forEach { merged[it.id] = it }
+            afterComplete.forEach { merged[it.id] = it }
+            _state.value = NodesState(nodes = merged)
+
+            return merged[firstNode.id]
         }
 
         // -----------------------------------------------------------------------------------------

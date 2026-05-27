@@ -154,33 +154,14 @@ fun MapScreen(
         loadNodes(mapViewModel, nodesViewModel, 0)
     }
 
-    // Fresh-account safety net: after a brand-new sign-up the user lands here
-    // with every node still INACCESSIBLE/LOCKED — all hidden under the mist —
-    // so the map reads as empty. Once the load settles, if no node has been
-    // touched yet, auto-unlock and auto-execute the first one so the opening
-    // beat fires and there is something on screen to engage with.
+    // Fresh-account safety net: after a brand-new sign-up the user can land
+    // here with every node still INACCESSIBLE/LOCKED — all hidden under the
+    // mist — so the map reads as empty. If no node has been touched yet, the
+    // helper auto-unlocks and auto-executes the first one so the opening beat
+    // fires. Sign-up normally drives this explicitly under the loading
+    // curtain; this catches the case where that round-trip failed.
     LaunchedEffect(Unit) {
-        val loaded = nodesViewModel.state.first { (it?.nodes?.isNotEmpty()) == true } ?: return@LaunchedEffect
-        val initialNodes = loaded.nodes.values.toList()
-        if (initialNodes.any { it.status == NodeStatus.OPEN || it.status == NodeStatus.COMPLETED }) {
-            return@LaunchedEffect
-        }
-
-        val firstNode = initialNodes.first()
-
-        nodesViewModel.unlockNode(firstNode.id)
-        nodesViewModel.state.first { it?.nodes?.get(firstNode.id)?.status == NodeStatus.OPEN }
-        mapViewModel.setPlayerNode(firstNode.id)
-
-        nodesViewModel.completeNode(firstNode.id)
-        nodesViewModel.state.first { it?.nodes?.get(firstNode.id)?.status == NodeStatus.COMPLETED }
-
-        if (firstNode.onExecutionEvent.isNotBlank() && firstNode.onExecutionEvent != "_") {
-            EventBus.emitEvent(
-                EventType.valueOf(firstNode.onExecutionEvent),
-                EventPayload.EntityIdPayload(firstNode.onExecutionEntityId),
-            )
-        }
+        runAutoExecuteFirstNodeIfNeeded(nodesViewModel, mapViewModel)
     }
 
     LaunchedEffect(Unit) {
@@ -398,6 +379,31 @@ private fun loadNodes(
                 }
             }
         }.launchIn(CoroutineScope(Dispatchers.Main))
+}
+
+private suspend fun runAutoExecuteFirstNodeIfNeeded(
+    nodesViewModel: INodesViewModel,
+    mapViewModel: MapViewModel,
+) {
+    val loaded = nodesViewModel.state.first { (it?.nodes?.isNotEmpty()) == true } ?: return
+    val initialNodes = loaded.nodes.values.toList()
+    if (initialNodes.any { it.status == NodeStatus.OPEN || it.status == NodeStatus.COMPLETED }) return
+
+    val firstNode = initialNodes.first()
+
+    nodesViewModel.unlockNode(firstNode.id)
+    nodesViewModel.state.first { it?.nodes?.get(firstNode.id)?.status == NodeStatus.OPEN }
+    mapViewModel.setPlayerNode(firstNode.id)
+
+    nodesViewModel.completeNode(firstNode.id)
+    nodesViewModel.state.first { it?.nodes?.get(firstNode.id)?.status == NodeStatus.COMPLETED }
+
+    if (firstNode.onExecutionEvent.isNotBlank() && firstNode.onExecutionEvent != "_") {
+        EventBus.emitEvent(
+            EventType.valueOf(firstNode.onExecutionEvent),
+            EventPayload.EntityIdPayload(firstNode.onExecutionEntityId),
+        )
+    }
 }
 
 @Suppress("LongMethod")
