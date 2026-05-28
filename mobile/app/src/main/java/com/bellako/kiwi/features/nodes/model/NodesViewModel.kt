@@ -167,6 +167,7 @@ class NodesViewModel
                         )
 
                     setUiState(UIState.Success(Unit))
+                    autoCompletePassThroughNodes(updatedNodes)
                 } catch (e: GeneralSecurityException) {
                     warn("Encryption error: ${e.message}")
                 } catch (e: IOException) {
@@ -175,5 +176,15 @@ class NodesViewModel
                     setIsLoading(false)
                 }
             }
+        }
+
+        // Nodes whose onExecutionEvent is the default "_" have no follow-up
+        // screen to navigate to — they exist purely to gate progression.
+        // Finalize them as soon as they open so the cascade unlocks the next
+        // neighbours without forcing the user to tap a no-op action.
+        private fun autoCompletePassThroughNodes(nodes: List<NodesDomain>) {
+            nodes
+                .filter { it.status == NodeStatus.OPEN && it.onExecutionEvent == "_" }
+                .forEach { completeNode(it.id) }
         }
     }

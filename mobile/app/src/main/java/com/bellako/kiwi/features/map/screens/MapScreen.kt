@@ -632,10 +632,10 @@ private fun InteractiveMap(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .pointerInput(Unit) {
+                        .pointerInput(nodesMap) {
                             detectNodeTap(
                                 mapState = mapState,
-                                nodes = nodesState?.nodes?.values.orEmpty(),
+                                nodes = nodesMap.values,
                             ) { node ->
                                 mapViewModel.selectNode(node.id, node.cordX, node.cordY)
                                 CoroutineScope(Dispatchers.Main).launch {
