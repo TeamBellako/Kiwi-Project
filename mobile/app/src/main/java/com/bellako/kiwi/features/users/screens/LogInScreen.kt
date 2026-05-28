@@ -9,6 +9,9 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -24,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -175,13 +179,31 @@ fun LogInScreen(
 private fun BoxScope.ScrollingLoginBackground(imgPercentage: Float) {
     val painter = painterResource(R.drawable.login_bg)
 
+    // User-driven horizontal pan, accumulated freely. The background loops,
+    // so we never clamp — any value wraps via the modulo below. Drag delta
+    // is added directly: dragging the finger right shifts the image right
+    // (revealing what was off-screen on the left).
+    var userScrollPx by remember { mutableFloatStateOf(0f) }
+    val scrollState =
+        rememberScrollableState { delta ->
+            userScrollPx += delta
+            delta
+        }
+
     BoxWithConstraints(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(imgPercentage)
                 .align(Alignment.TopStart)
-                .clipToBounds(),
+                .clipToBounds()
+                // Pan via touch (and fling) on top of the ambient parallax.
+                // Scoped to this band so it can't steal drags from the form
+                // underneath.
+                .scrollable(
+                    state = scrollState,
+                    orientation = Orientation.Horizontal,
+                ),
     ) {
         // The image is scaled to fill the band's height, so its on-screen
         // width follows from its aspect ratio — that width is one scroll loop.
@@ -190,7 +212,7 @@ private fun BoxScope.ScrollingLoginBackground(imgPercentage: Float) {
         val imageWidthPx = if (intrinsic.height > 0f) intrinsic.width * heightPx / intrinsic.height else 0f
         val imageWidthDp = with(LocalDensity.current) { imageWidthPx.toDp() }
 
-        val shift =
+        val animatedShift =
             if (LocalLoginBackgroundAnimated.current) {
                 val transition = rememberInfiniteTransition(label = "login_scroll")
                 val progress by transition.animateFloat(
@@ -208,11 +230,24 @@ private fun BoxScope.ScrollingLoginBackground(imgPercentage: Float) {
                 0f
             }
 
+        // Combined offset wrapped into [0, imageWidthPx) so the two-image
+        // trick keeps hiding the seam regardless of how far the user has
+        // dragged in either direction. Positive `% ` results aren't enough
+        // — Kotlin's `%` keeps the sign of the dividend, so we lift any
+        // negative remainder back into range.
+        val totalShift =
+            if (imageWidthPx > 0f) {
+                val raw = (animatedShift + userScrollPx) % imageWidthPx
+                if (raw < 0f) raw + imageWidthPx else raw
+            } else {
+                0f
+            }
+
         // Trailing copy sits one width to the left; leading copy starts on
-        // screen. Both slide right by `shift`; at shift == imageWidth the
-        // trailing copy lands exactly where the leading one began.
-        LoginBackgroundImage(imageWidthDp, translationXPx = shift - imageWidthPx)
-        LoginBackgroundImage(imageWidthDp, translationXPx = shift)
+        // screen. Both slide right by `totalShift`; at totalShift == imageWidth
+        // the trailing copy lands exactly where the leading one began.
+        LoginBackgroundImage(imageWidthDp, translationXPx = totalShift - imageWidthPx)
+        LoginBackgroundImage(imageWidthDp, translationXPx = totalShift)
     }
 }
 
@@ -253,11 +288,23 @@ private fun LogInLayout(
     // check stored credentials for auto login
     LaunchedEffect(Unit) {
         initializing = false
+        val isColdStart = !usersViewModel.hasAttemptedAutoLogin()
+        usersViewModel.markAutoLoginAttempted()
+
         val (username, password) = usersViewModel.getLocalCredentials(context)
         if (!username.isNullOrBlank() && !password.isNullOrBlank()) {
             usersViewModel.onEmailChanged(username)
             usersViewModel.onPasswordChanged(password)
             localLoading = performLogin(context, usersViewModel, personalityViewModel, navController)
+        } else if (isColdStart && !isPreview) {
+            // Cold-start with no stored credentials — drop the user into the
+            // sign-up welcome instead of the bare login form. Logout and
+            // manual back-nav from sign-up don't trigger this (the flag is
+            // already set), so those still land on the login form. The
+            // preview is excluded so it can render the login form.
+            navController.navigate(ScreenRoutes.SIGNUP1_WELCOME) {
+                popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
+            }
         }
     }
 

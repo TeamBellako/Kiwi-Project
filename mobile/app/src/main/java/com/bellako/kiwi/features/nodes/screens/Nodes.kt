@@ -33,7 +33,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -106,6 +109,7 @@ fun Node(
     displayName: String,
     revealScale: Float = 1f,
     nameAlpha: Float = 1f,
+    iconAnimationReady: Boolean = true,
 ) {
     val kiwiColors = LocalKiwiColors.current
 
@@ -121,8 +125,15 @@ fun Node(
     // a hard cut.
     var displayedStatus by remember { mutableStateOf(nodeStatus) }
     val iconPopScale = remember { Animatable(1f) }
+    // Status changes triggered by a completion event land while the entry
+    // veil is fully opaque, so without a gate the icon shrink-and-pop would
+    // play under the veil and the user would only see the new icon already
+    // settled in place. Wait until the veil has cleared before starting the
+    // animation so the swap reads on screen.
+    val iconAnimationReadyState = rememberUpdatedState(iconAnimationReady)
     LaunchedEffect(nodeStatus) {
         if (nodeStatus == displayedStatus) return@LaunchedEffect
+        snapshotFlow { iconAnimationReadyState.value }.first { it }
         iconPopScale.animateTo(0f, tween(durationMillis = ICON_SHRINK_MS, easing = EaseInBack))
         displayedStatus = nodeStatus
         iconPopScale.animateTo(1f, tween(durationMillis = ICON_POP_MS, easing = EaseOutBack))
@@ -250,6 +261,7 @@ fun NodeOnMap(
     isSelected: Boolean,
     revealScale: Float = 1f,
     nameAlpha: Float = 1f,
+    iconAnimationReady: Boolean = true,
 ) {
     val centered = nodeViewportOffset(node, mapState)
 
@@ -268,6 +280,7 @@ fun NodeOnMap(
             node.displayName,
             revealScale,
             nameAlpha,
+            iconAnimationReady,
         )
     }
 }

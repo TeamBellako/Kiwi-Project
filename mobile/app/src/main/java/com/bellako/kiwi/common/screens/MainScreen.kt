@@ -51,6 +51,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.audio.Kiwi_Music_Conversation
 import com.bellako.kiwi.audio.Kiwi_Music_Home
 import com.bellako.kiwi.audio.Kiwi_Music_Login
 import com.bellako.kiwi.audio.Kiwi_Music_Settings
@@ -108,6 +109,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.ui.LocalKiwiColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -208,6 +210,16 @@ private fun AppScreen(
     val activeConversation by conversationViewModel.active.collectAsState()
     val isConversationVisible by conversationViewModel.isVisible.collectAsState()
 
+    // A no-background conversation sits over the map as a dialogue overlay
+    // (Small dialogues, and the rare FULL conversation that ships without a
+    // background). The map stays visible behind, so any selected-node action
+    // button is also visible — MapScreen hides it while this is true.
+    val isDialogueOverlaid by remember {
+        derivedStateOf {
+            isConversationVisible && activeConversation?.background.isNullOrBlank()
+        }
+    }
+
     val activeCombat by combatViewModel.active.collectAsState()
     val isCombatVisible by combatViewModel.isVisible.collectAsState()
     val isCombatTurnPlaying by combatViewModel.isTurnPlaying.collectAsState()
@@ -246,10 +258,12 @@ private fun AppScreen(
 
     // Map music must NOT play while we're still figuring out whether to
     // resume a combat. Once that's resolved: if combat is visible, combat
-    // music plays via CombatFlowScreen; otherwise map music starts here.
+    // music plays via CombatFlowScreen; if a conversation is visible, the
+    // overlay fades the music out via Kiwi_Music_Conversation; otherwise
+    // map music starts here.
     val shouldPlayMapMusic by remember {
         derivedStateOf {
-            hasResolvedCombatOnStartup && !isCombatVisible
+            hasResolvedCombatOnStartup && !isCombatVisible && !isConversationVisible
         }
     }
 
@@ -315,6 +329,36 @@ private fun AppScreen(
     val revealEventScope = rememberCoroutineScope()
 
     val nodeEntryTransition = rememberNodeEntryTransitionController()
+    // The viewmodels invoke the veil runner from viewModelScope, which has no
+    // MonotonicFrameClock — calling Animatable.animateTo from there throws.
+    // Bridge through a Compose-aware scope (backed by AndroidUiDispatcher) so
+    // the animation work runs in a context that supplies the frame clock.
+    val veilAnimationScope = rememberCoroutineScope()
+
+    // Wire the same veil controller as the exit animation for conversation
+    // and combat completion: when the user finishes a conversation or wins a
+    // combat, the screen is dismissed under the veil rather than lerping off.
+    // Set once on first composition (the controller is a stable remembered
+    // instance, so the runner closure does not need to be re-installed).
+    LaunchedEffect(nodeEntryTransition) {
+        val veilRunner: suspend (suspend () -> Unit) -> Unit = { finalize ->
+            veilAnimationScope
+                .async {
+                    nodeEntryTransition.enter()
+                    finalize()
+                    nodeEntryTransition.fadeOut()
+                }.await()
+        }
+        conversationViewModel.setExitVeilRunner(veilRunner)
+        combatViewModel.setExitVeilRunner(veilRunner)
+    }
+
+    DisposableEffect(nodeEntryTransition) {
+        onDispose {
+            conversationViewModel.setExitVeilRunner(null)
+            combatViewModel.setExitVeilRunner(null)
+        }
+    }
 
     CompositionLocalProvider(LocalNodeEntryTransition provides nodeEntryTransition) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -346,6 +390,7 @@ private fun AppScreen(
                         skillsViewModel = skillsViewModel,
                         isCombatActive = activeCombat != null,
                         shouldPlayMapMusic = shouldPlayMapMusic,
+                        isDialogueOverlaid = isDialogueOverlaid,
                     )
 
                     AnimatedVisibility(
@@ -390,6 +435,10 @@ private fun AppScreen(
                                 initialOffsetY = { fullHeight -> fullHeight },
                                 animationSpec = tween(durationMillis = 400, easing = EaseInOut),
                             ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        // The completion path runs the veil first via the runner,
+                        // so this slide-out plays under a fully-opaque veil and
+                        // is invisible to the user. It is kept as a fallback for
+                        // the no-runner case (previews / tests).
                         exit =
                             slideOutVertically(
                                 targetOffsetY = { fullHeight -> fullHeight },
@@ -398,6 +447,7 @@ private fun AppScreen(
                     ) {
                         activeConversation?.let { conversation ->
                             Box(modifier = Modifier.matchParentSize()) {
+                                Kiwi_Music_Conversation()
                                 if (conversation.type == ConversationType.SMALL) {
                                     DialogueScreen(
                                         conversation = conversation,
@@ -420,6 +470,9 @@ private fun AppScreen(
                                 initialOffsetY = { fullHeight -> fullHeight },
                                 animationSpec = tween(durationMillis = 400, easing = EaseInOut),
                             ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        // Victory routes through the veil runner — this slide-out
+                        // is hidden under the opaque veil. Abandon / defeat keep
+                        // the slide-out visible (they don't set the runner).
                         exit =
                             slideOutVertically(
                                 targetOffsetY = { fullHeight -> fullHeight },
@@ -684,6 +737,7 @@ fun AppNavHost(
     skillsViewModel: ISkillsViewModel,
     isCombatActive: Boolean = false,
     shouldPlayMapMusic: Boolean = true,
+    isDialogueOverlaid: Boolean = false,
 ) {
     NavHost(
         navController = navController,
@@ -745,6 +799,7 @@ fun AppNavHost(
                     personalityViewModel = personalityViewModel,
                     goalsViewModel = goalsViewModel,
                     nodesViewModel = nodesViewModel,
+                    skillsViewModel = skillsViewModel,
                     navController = navController,
                 )
             }
@@ -762,6 +817,7 @@ fun AppNavHost(
                     goalsViewModel = goalsViewModel,
                     mapViewModel = hiltViewModel(),
                     usersViewModel = usersViewModel,
+                    isDialogueOverlaid = isDialogueOverlaid,
                 )
             }
         }

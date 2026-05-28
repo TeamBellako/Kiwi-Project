@@ -84,6 +84,12 @@ private const val OPTION_STAGGER_MS = 140
 private const val STAGE_GAP_MS = 250L
 private const val DIALOGUE_ADVANCE_MS = 450
 
+// The MainScreen AnimatedVisibility slides the conversation up over 400ms.
+// When we entered behind the veil we need to wait for that slide to fully
+// settle before lifting the veil — otherwise the top of the screen still
+// shows the map peeking around the sliding conversation as the veil clears.
+private const val CONVERSATION_SLIDE_IN_MS = 400L
+
 private const val PROTAGONIST_SPRITE_KEY = "liria"
 
 @Composable
@@ -135,10 +141,24 @@ fun ConversationScreen(
     }
 
     LaunchedEffect(Unit) {
-        bgAlpha.animateTo(1f, tween(BG_FADE_MS, easing = LinearEasing))
-        // BG is fully opaque now, so it's safe to lift the node-entry veil —
-        // the player won't see the map through a half-faded BG. Launched in
-        // parallel so the character lerp doesn't wait for the veil to lift.
+        // When entered behind the node-entry veil, the bg can be snapped
+        // straight to opaque — the veil already hides the swap. Then we
+        // give the AnimatedVisibility slide-in time to settle so the
+        // conversation is fully in place before we ask the veil to clear
+        // (the user would otherwise see the map at the top of the screen
+        // around the still-sliding conversation as the veil thins out).
+        // Without a veil (e.g. the auto-emitted first conversation on a
+        // brand-new account) we keep the original alpha ramp so the slide
+        // doesn't read as a hard cut.
+        val veilUp = (nodeEntry?.veilAlpha ?: 0f) > 0f
+        if (veilUp) {
+            bgAlpha.snapTo(1f)
+            delay(CONVERSATION_SLIDE_IN_MS)
+        } else {
+            bgAlpha.animateTo(1f, tween(BG_FADE_MS, easing = LinearEasing))
+        }
+        // Launched in parallel so the character lerp doesn't wait for the
+        // veil to lift.
         launch { nodeEntry?.fadeOut() }
         delay(STAGE_GAP_MS)
         characterProgress.animateTo(1f, tween(CHARACTER_LERP_MS, easing = FastOutSlowInEasing))

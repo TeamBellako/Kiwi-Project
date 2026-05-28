@@ -64,8 +64,11 @@ import kotlinx.coroutines.launch
 
 private const val HOLD_DURATION_MS = 600
 private const val HOLD_RESET_DURATION_MS = 150
+private const val HOLD_GLOW_DURATION_MS = 100
+private const val HOLD_FADE_DURATION_MS = 300
 private const val TAP_THRESHOLD_MS = 250L
 private const val HOLD_FILL_ALPHA = 0.35f
+private const val HOLD_FILL_GLOW_ALPHA = 0.85f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -81,6 +84,8 @@ fun SkillComponent(
     val context = LocalContext.current
     var showModal by remember { mutableStateOf(false) }
     val holdProgress = remember { Animatable(0f) }
+    val holdFillAlpha = remember { Animatable(HOLD_FILL_ALPHA) }
+    var isHolding by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     Box(
@@ -105,20 +110,28 @@ fun SkillComponent(
 
                         AudioManager.playSFX(context, R.raw.snd_fx_skill_hold, looping = true)
 
+                        isHolding = true
+
                         var actionTriggered = false
                         val animationJob =
                             coroutineScope.launch {
+                                holdFillAlpha.snapTo(HOLD_FILL_ALPHA)
                                 holdProgress.animateTo(1f, tween(HOLD_DURATION_MS))
                                 actionTriggered = true
                                 AudioManager.stopSFX(R.raw.snd_fx_skill_hold)
+                                isHolding = false
                                 onClick()
-                                holdProgress.animateTo(0f, tween(HOLD_RESET_DURATION_MS))
+                                holdFillAlpha.animateTo(HOLD_FILL_GLOW_ALPHA, tween(HOLD_GLOW_DURATION_MS))
+                                holdFillAlpha.animateTo(0f, tween(HOLD_FADE_DURATION_MS))
+                                holdProgress.snapTo(0f)
+                                holdFillAlpha.snapTo(HOLD_FILL_ALPHA)
                             }
 
                         val release = waitForUpOrCancellation()
                         if (!actionTriggered) {
                             animationJob.cancel()
                             AudioManager.stopSFX(R.raw.snd_fx_skill_hold)
+                            isHolding = false
                             coroutineScope.launch {
                                 holdProgress.animateTo(0f, tween(HOLD_RESET_DURATION_MS))
                             }
@@ -133,7 +146,7 @@ fun SkillComponent(
                     }
                 },
     ) {
-        SkillBackground(skill, holdProgress.value)
+        SkillBackground(skill, holdProgress.value, holdFillAlpha.value, isHolding)
 
         Row(
             modifier =
@@ -209,6 +222,8 @@ fun SkillComponent(
 fun SkillBackground(
     skill: SkillDomain,
     holdProgress: Float,
+    holdFillAlpha: Float = HOLD_FILL_ALPHA,
+    isHolding: Boolean = false,
 ) {
     Box {
         Kiwi_Image(
@@ -259,25 +274,28 @@ fun SkillBackground(
         }
 
         if (holdProgress > 0f) {
-            HoldProgressFill(holdProgress)
+            HoldProgressFill(holdProgress, holdFillAlpha)
         }
 
         Kiwi_Image(
-            skillDecoration(holdProgress > 0f, skill.isCooldown),
+            skillDecoration(isHolding, skill.isCooldown),
             "Skill background decoration",
         )
     }
 }
 
 @Composable
-private fun HoldProgressFill(holdProgress: Float) {
+private fun HoldProgressFill(
+    holdProgress: Float,
+    holdFillAlpha: Float,
+) {
     Kiwi_Image(
         R.drawable.skill_cooldown_fill,
         "Skill hold progress",
         colorFilter = ColorFilter.tint(Color.White),
         modifier =
             Modifier
-                .alpha(HOLD_FILL_ALPHA)
+                .alpha(holdFillAlpha)
                 .graphicsLayer {
                     clip = true
                     shape =

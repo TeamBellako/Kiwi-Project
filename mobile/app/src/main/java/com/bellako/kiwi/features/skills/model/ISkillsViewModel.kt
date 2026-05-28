@@ -50,4 +50,9 @@ interface ISkillsViewModel : IBaseViewModel<SkillsState> {
     )
 
     suspend fun loadSkills(): Result<Unit>
+
+    // Called once at the end of signup. If the user has no skills equipped
+    // yet, picks one of the starter skills and places it on the deck so a
+    // fresh account walks into the map with something playable in combat.
+    suspend fun equipStarterIfNeeded(): Result<Unit>
 }

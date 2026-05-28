@@ -54,6 +54,9 @@ class LoginScreenTest {
 
         usersState = UsersState(validUsersDTO().email, validUsersDTO().password, validUsersDTO().registerDate)
         usersFakeViewModel = UsersFakeViewModel(usersState)
+        // Skip the cold-start auto-redirect to sign-up; this test exercises
+        // the manual login form, which only ever shows on a non-cold-start.
+        usersFakeViewModel.markAutoLoginAttempted()
         skillsFakeViewModel = SkillsFakeViewModel()
 
         personalityState =

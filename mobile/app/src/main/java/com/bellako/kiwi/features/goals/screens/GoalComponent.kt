@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.goals.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -100,12 +101,23 @@ fun GoalComponent(
         label = "progressAnimation",
     )
 
+    // Color flips to the "completed" palette only after the user has
+    // confirmed the goal — hitting the target does not turn the bar/icon
+    // gold by itself. Confirmed goals stay gold even if they're later
+    // edited further.
+    val isConfirmedComplete = status == GoalStatus.COMPLETED
+
+    // One-shot press animation on the plus icon. The Animatables are owned
+    // by the parent so the increment click handler can drive them.
+    val pressScale = remember(goal.id) { Animatable(1f) }
+    val pressRotation = remember(goal.id) { Animatable(0f) }
+
     Box(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
                 .height(IntrinsicSize.Min)
-                .clickable(enabled = status != GoalStatus.COMPLETED) { showModal = true },
+                .clickable { showModal = true },
     ) {
         Kiwi_Image(
             R.drawable.daily_challenges_bg,
@@ -114,7 +126,7 @@ fun GoalComponent(
         )
 
         Kiwi_Image(
-            if (goalDomain != null && goalDomain.value == goalDomain.target) {
+            if (isConfirmedComplete) {
                 R.drawable.daily_challenges_completed
             } else {
                 R.drawable.daily_challenges_fill
@@ -160,10 +172,10 @@ fun GoalComponent(
                     Modifier.padding(vertical = getResponsiveSizeWidth(13.dp)),
                     colorFilter =
                         ColorFilter.tint(
-                            if (goalDomain?.value != goalDomain?.target) {
-                                kiwiColors.colorF1
-                            } else {
+                            if (isConfirmedComplete) {
                                 kiwiColors.color8C
+                            } else {
+                                kiwiColors.colorF1
                             },
                         ),
                 )
@@ -188,29 +200,61 @@ fun GoalComponent(
                         .weight(0.10f)
                         .fillMaxHeight()
                         .clickable {
-                            if (status != GoalStatus.IN_PROGRESS) {
+                            // IN_PROGRESS goals confirm at target; COMPLETED goals
+                            // are post-confirmation edits — bump value but never
+                            // re-trigger backend completion.
+                            if (status != GoalStatus.IN_PROGRESS && status != GoalStatus.COMPLETED) {
                                 return@clickable
                             }
 
                             AudioManager.playSFX(context, R.raw.snd_ui_check)
 
+                            // Press feedback: a quick squish + wiggle so the tap
+                            // reads even when the value doesn't visibly change
+                            // (e.g. already past target on a COMPLETED goal).
+                            coroutineScope.launch {
+                                pressScale.snapTo(1f)
+                                pressScale.animateTo(0.82f, tween(70, easing = EaseInOut))
+                                pressScale.animateTo(1f, tween(130, easing = EaseInOut))
+                            }
+                            coroutineScope.launch {
+                                pressRotation.snapTo(0f)
+                                pressRotation.animateTo(-12f, tween(60, easing = EaseInOut))
+                                pressRotation.animateTo(12f, tween(80, easing = EaseInOut))
+                                pressRotation.animateTo(0f, tween(60, easing = EaseInOut))
+                            }
+
                             val atTarget =
                                 goalDomain != null && goalDomain.value >= goalDomain.target
-                            if (atTarget) {
+                            if (status == GoalStatus.IN_PROGRESS && atTarget) {
                                 showConfirmCompletion = true
                             } else {
                                 coroutineScope.launch {
                                     val result = goalsViewModel.updateGoalProgress(currentGoal.id)
                                     result.onSuccess { updatedGoal ->
-                                        currentGoal = updatedGoal
+                                        // Preserve the confirmed status locally so
+                                        // the bar/icon stay gold and we don't
+                                        // accidentally route back through the
+                                        // confirm-completion flow.
+                                        currentGoal =
+                                            if (status == GoalStatus.COMPLETED &&
+                                                updatedGoal is UserGoalStatusDomain
+                                            ) {
+                                                updatedGoal.copy(status = GoalStatus.COMPLETED)
+                                            } else {
+                                                updatedGoal
+                                            }
                                     }
                                 }
                             }
                         },
                 contentAlignment = Alignment.Center,
             ) {
-                if (plus && status == GoalStatus.IN_PROGRESS) {
-                    val isTick = goalDomain?.value == goalDomain?.target
+                if (plus && (status == GoalStatus.IN_PROGRESS || status == GoalStatus.COMPLETED)) {
+                    // The pulsing tick is only the "ready to confirm" cue for
+                    // an unconfirmed goal that's hit its target. Once confirmed,
+                    // the icon goes back to a plus so further edits read as edits.
+                    val isTick = status == GoalStatus.IN_PROGRESS && goalDomain?.value == goalDomain?.target
                     val iconModifier =
                         if (isTick) {
                             val transition = rememberInfiniteTransition(label = "tickPulse")
@@ -237,12 +281,19 @@ fun GoalComponent(
                             Modifier
                                 .padding(getResponsiveSizeHeight(8.dp))
                                 .graphicsLayer {
-                                    scaleX = scale
-                                    scaleY = scale
+                                    scaleX = scale * pressScale.value
+                                    scaleY = scale * pressScale.value
+                                    rotationZ = pressRotation.value
                                     alpha = glowAlpha
                                 }
                         } else {
-                            Modifier.padding(getResponsiveSizeHeight(8.dp))
+                            Modifier
+                                .padding(getResponsiveSizeHeight(8.dp))
+                                .graphicsLayer {
+                                    scaleX = pressScale.value
+                                    scaleY = pressScale.value
+                                    rotationZ = pressRotation.value
+                                }
                         }
                     Kiwi_Image(
                         if (isTick) {

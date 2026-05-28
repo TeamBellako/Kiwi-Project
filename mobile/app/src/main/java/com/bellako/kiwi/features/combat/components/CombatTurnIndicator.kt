@@ -62,6 +62,9 @@ fun CombatTurnIndicator(
     dimmed: Boolean = false,
     // When true the indicator gently pulses to signal the player can act.
     isUserTurn: Boolean = false,
+    // When false, taps on the indicator are swallowed — used while a bark is
+    // up so the log toggle doesn't fire underneath the dialogue overlay.
+    clickEnabled: Boolean = true,
 ) {
     val colors = LocalKiwiColors.current
     val rotation by animateFloatAsState(
@@ -90,7 +93,7 @@ fun CombatTurnIndicator(
                     borderColor = colors.color5C,
                     radius = INDICATOR_RADIUS,
                     innerGlowColor = glowColor,
-                ).clickable(onClick = onClick)
+                ).clickable(enabled = clickEnabled, onClick = onClick)
                 .padding(
                     horizontal = getResponsiveSizeWidth(Spacing.medium),
                     vertical = getResponsiveSizeHeight(Spacing.medium),

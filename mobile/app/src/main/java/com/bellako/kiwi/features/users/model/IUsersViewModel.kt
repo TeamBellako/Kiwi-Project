@@ -17,6 +17,17 @@ interface IUsersViewModel : IBaseViewModel<UsersState> {
 
     fun setShowAppLoading(active: Boolean)
 
+    /**
+     * Tracks whether the LogInScreen has already run its initial credential
+     * check this app session. Lets the screen distinguish a cold start (where
+     * we want to redirect to sign-up if no credentials are stored) from
+     * later visits (e.g. after a logout, or the user navigating back here
+     * from the sign-up screen), where the user should stay on the login form.
+     */
+    fun hasAttemptedAutoLogin(): Boolean
+
+    fun markAutoLoginAttempted()
+
     fun onEmailChanged(email: String)
 
     fun onPasswordChanged(password: String)

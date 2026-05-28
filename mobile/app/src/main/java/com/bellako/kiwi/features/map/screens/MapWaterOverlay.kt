@@ -49,6 +49,10 @@ fun MapWaterOverlay(
     @DrawableRes maskResourceId: Int,
     modifier: Modifier = Modifier,
 ) {
+    // Same gate as MapMist / MapClouds: when the map is fully covered
+    // (full-screen conversation, combat) or VFX are disabled for tests, skip
+    // the shader entirely so its per-frame loop and GPU work go away.
+    if (!LocalMapVfxEnabled.current) return
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         WaterShaderOverlay(maskResourceId = maskResourceId, modifier = modifier)
     }

@@ -190,6 +190,14 @@ class SkillsFakeViewModel
 
         override suspend fun loadSkills(): Result<Unit> = if (fakeError) Result.failure(fakeException) else Result.success(Unit)
 
+        override suspend fun equipStarterIfNeeded(): Result<Unit> {
+            if (fakeError) return Result.failure(fakeException)
+            if (_state.value.skills.values.none { it.deckSlot > 0 }) {
+                _state.value.skills.values.firstOrNull()?.let { equipSkill(it.id) }
+            }
+            return Result.success(Unit)
+        }
+
         // INTERNAL
         private fun updateSkill(
             skill: SkillDomain,

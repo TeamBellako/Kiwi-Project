@@ -76,6 +76,7 @@ fun Kiwi_Music_Combat(music: String?) {
         AudioManager.playMusic(
             context,
             listOf(AudioLayer(resolved, 0.35f, true)),
+            fadeOutFirst = true,
         )
         onDispose {
             AudioManager.playMusic(
@@ -84,7 +85,15 @@ fun Kiwi_Music_Combat(music: String?) {
                     AudioLayer(R.raw.growtale_maintheme, 0.35f, true),
                     AudioLayer(R.raw.growtale_maintheme_chiptunesynth, 0.35f, false),
                 ),
+                fadeOutFirst = true,
             )
         }
+    }
+}
+
+@Composable
+fun Kiwi_Music_Conversation() {
+    LaunchedEffect(Unit) {
+        AudioManager.fadeOutMusic()
     }
 }

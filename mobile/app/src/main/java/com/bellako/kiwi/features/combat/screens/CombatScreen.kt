@@ -198,6 +198,7 @@ fun CombatScreen(
                     isUserTurn = isUserTurn,
                     isLogOpen = isLogOpen,
                     isOverlayOpen = isOverlayOpen,
+                    isBarkActive = displayedBark != null,
                     selectedStatus = selectedStatus,
                     intro = intro,
                     onToggleLog = { isLogOpen = !isLogOpen },
@@ -260,6 +261,7 @@ private fun CombatBottomPanel(
     isUserTurn: Boolean,
     isLogOpen: Boolean,
     isOverlayOpen: Boolean,
+    isBarkActive: Boolean,
     selectedStatus: CombatActiveStatusDomain?,
     intro: CombatIntroController,
     onToggleLog: () -> Unit,
@@ -292,6 +294,7 @@ private fun CombatBottomPanel(
             introAlpha = intro.turnIndicatorAlpha,
             dimmed = isOverlayOpen,
             isUserTurn = isUserTurn,
+            clickEnabled = !isBarkActive,
         )
 
         Kiwi_Spacer(Spacing.medium)

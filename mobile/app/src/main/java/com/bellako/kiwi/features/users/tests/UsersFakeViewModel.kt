@@ -30,6 +30,14 @@ class UsersFakeViewModel(
         _showAppLoading.value = active
     }
 
+    private var autoLoginAttempted: Boolean = false
+
+    override fun hasAttemptedAutoLogin(): Boolean = autoLoginAttempted
+
+    override fun markAutoLoginAttempted() {
+        autoLoginAttempted = true
+    }
+
     var fakeError: Boolean = false
     var fakeException: Exception = Exception("Simulated error")
 
