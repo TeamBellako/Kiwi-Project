@@ -4,12 +4,15 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,6 +26,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -36,8 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -107,6 +113,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.ui.LocalKiwiColors
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.async
@@ -724,6 +731,26 @@ private fun screenExit(
     }
 }
 
+@Composable
+private fun AnimatedContentScope.MapTransitionTopRadius(content: @Composable () -> Unit) {
+    val cornerRadius = getResponsiveSizeHeight(50.dp)
+    val radius by transition.animateDp(
+        transitionSpec = { tween(durationMillis = MAP_TRANSITION_MS, easing = EaseInOut) },
+        label = "screenTopRadius",
+    ) { state ->
+        if (state == EnterExitState.Visible) 0.dp else cornerRadius
+    }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(topStart = radius, topEnd = radius)),
+    ) {
+        content()
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun AppNavHost(
@@ -823,11 +850,13 @@ fun AppNavHost(
         }
 
         composable(ScreenRoutes.OBJECTIVES) {
-            AppScreenWrapper {
-                ObjectivesScreen(
-                    questsViewModel = questsViewModel,
-                    goalsViewModel = goalsViewModel,
-                )
+            MapTransitionTopRadius {
+                AppScreenWrapper {
+                    ObjectivesScreen(
+                        questsViewModel = questsViewModel,
+                        goalsViewModel = goalsViewModel,
+                    )
+                }
             }
         }
 
@@ -837,19 +866,23 @@ fun AppNavHost(
         ) { backStackEntry ->
             val questId = backStackEntry.arguments?.getInt("questId")
 
-            ObjectivesScreen(
-                questsViewModel = questsViewModel,
-                focusedQuestId = questId,
-                goalsViewModel = goalsViewModel,
-            )
+            MapTransitionTopRadius {
+                ObjectivesScreen(
+                    questsViewModel = questsViewModel,
+                    focusedQuestId = questId,
+                    goalsViewModel = goalsViewModel,
+                )
+            }
         }
 
         composable(ScreenRoutes.SKILLS) {
-            AppScreenWrapper {
-                SkillsScreen(
-                    skillsViewModel = skillsViewModel,
-                    isDeckLocked = isCombatActive,
-                )
+            MapTransitionTopRadius {
+                AppScreenWrapper {
+                    SkillsScreen(
+                        skillsViewModel = skillsViewModel,
+                        isDeckLocked = isCombatActive,
+                    )
+                }
             }
         }
 
@@ -859,11 +892,13 @@ fun AppNavHost(
         ) { backStackEntry ->
             val questId = backStackEntry.arguments?.getLong("skillId")
 
-            SkillsScreen(
-                skillsViewModel = skillsViewModel,
-                focusedSkillId = questId,
-                isDeckLocked = isCombatActive,
-            )
+            MapTransitionTopRadius {
+                SkillsScreen(
+                    skillsViewModel = skillsViewModel,
+                    focusedSkillId = questId,
+                    isDeckLocked = isCombatActive,
+                )
+            }
         }
 
         composable(ScreenRoutes.SETTINGS) {
