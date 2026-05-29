@@ -377,6 +377,7 @@ private fun AppScreen(
                                     DialogueScreen(
                                         conversation = conversation,
                                         viewModel = conversationViewModel,
+                                        isConversationVisible,
                                     )
                                 } else {
                                     ConversationScreen(
@@ -548,11 +549,9 @@ private fun navIndex(route: String?): Int =
         else -> NAVBAR_ORDER.indexOf(route)
     }
 
-private fun screenOffsetSpec(durationMs: Int = SCREEN_TRANSITION_MS) =
-    tween<IntOffset>(durationMillis = durationMs, easing = EaseInOut)
+private fun screenOffsetSpec(durationMs: Int = SCREEN_TRANSITION_MS) = tween<IntOffset>(durationMillis = durationMs, easing = EaseInOut)
 
-private fun screenFadeSpec(durationMs: Int = SCREEN_TRANSITION_MS) =
-    tween<Float>(durationMillis = durationMs, easing = EaseInOut)
+private fun screenFadeSpec(durationMs: Int = SCREEN_TRANSITION_MS) = tween<Float>(durationMillis = durationMs, easing = EaseInOut)
 
 private fun screenEnter(
     initial: String?,

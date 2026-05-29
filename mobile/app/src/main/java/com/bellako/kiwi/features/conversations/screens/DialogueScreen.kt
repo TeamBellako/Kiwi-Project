@@ -2,9 +2,11 @@ package com.bellako.kiwi.features.conversations.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -21,7 +23,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,13 +54,16 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
+import kotlinx.coroutines.delay
 
 @Composable
 @Suppress("MagicNumber")
 fun DialogueScreen(
     conversation: ConversationDomain,
     viewModel: ConversationViewModel? = null,
+    visible: Boolean = true,
 ) {
+    val context = LocalContext.current
     val kiwiColor = LocalKiwiColors.current
 
     val infiniteTransition = rememberInfiniteTransition(label = "arrow_bounce")
@@ -72,88 +79,125 @@ fun DialogueScreen(
         label = "arrow_offset",
     )
 
-    val context = LocalContext.current
+    val backgroundAlpha = remember { Animatable(0f) }
 
-    Column(
-        verticalArrangement = Arrangement.Bottom,
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .clickable {},
+    LaunchedEffect(visible) {
+        if (visible) {
+            delay(300)
+            backgroundAlpha.animateTo(
+                targetValue = 0.8f,
+                animationSpec = tween(200),
+            )
+        } else {
+            backgroundAlpha.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(200),
+            )
+        }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        Box(
             modifier =
                 Modifier
-                    .background(
-                        Brush.verticalGradient(
-                            -0f to Color.Transparent,
-                            0.3f to kiwiColor.color2.copy(alpha = 0.6f),
-                            0.5f to kiwiColor.color2.copy(alpha = 0.8f),
-                        ),
-                    ).padding(Spacing.medium, Spacing.large),
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = backgroundAlpha.value)),
+        )
+
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clickable {},
         ) {
-            Box(modifier = Modifier.weight(0.35f)) {
-                Box(
-                    modifier =
-                        Modifier
-                            .matchParentSize()
-                            .clip(CircleShape),
-                ) {
-                    Kiwi_Image(
-                        AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
-                        "Character image",
-                        contentScale = ContentScale.Crop,
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier =
+                    Modifier
+                        .background(
+                            Brush.verticalGradient(
+                                -0f to Color.Transparent,
+                                0.3f to kiwiColor.color2.copy(alpha = 0.6f),
+                                0.5f to kiwiColor.color2.copy(alpha = 0.8f),
+                            ),
+                        ).padding(Spacing.medium, Spacing.large),
+            ) {
+                Box(modifier = Modifier.weight(0.35f)) {
+                    Box(
                         modifier =
                             Modifier
                                 .matchParentSize()
-                                .scale(1.6f)
-                                .background(kiwiColor.color0),
+                                .clip(CircleShape),
+                    ) {
+                        Kiwi_Image(
+                            AssetResolver.drawableOr(
+                                context,
+                                conversation.sprite,
+                                R.drawable.character_liria_base,
+                            ),
+                            "Character image",
+                            contentScale = ContentScale.Crop,
+                            modifier =
+                                Modifier
+                                    .matchParentSize()
+                                    .scale(1.6f)
+                                    .background(kiwiColor.color0),
+                        )
+                    }
+                    Kiwi_Image(
+                        R.drawable.dialogue_small_frame,
+                        "Character frame",
+                    )
+                    Box(
+                        contentAlignment = Alignment.BottomCenter,
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .offset(x = 0.dp, y = getResponsiveSizeHeight(25.dp)),
+                    ) {
+                        CharacterName(
+                            "Liria",
+                            conversation.dark,
+                            conversation.type == ConversationType.SMALL,
+                        )
+                    }
+                }
+                Kiwi_Spacer_Horizontal()
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.weight(0.65f),
+                ) {
+                    Kiwi_Image(
+                        R.drawable.dialogue_small_bg,
+                        "Dialogue frame",
+                        contentScale = ContentScale.FillWidth,
+                    )
+                    Kiwi_P2(
+                        KiwiTextArguments(
+                            conversation.dialog,
+                            textAlign = TextAlign.Center,
+                            color = kiwiColor.color6,
+                            modifier = Modifier.padding(Spacing.medium, Spacing.medium),
+                        ),
+                    )
+                    Kiwi_Image(
+                        R.drawable.ic_dialogue_arrow,
+                        "Arrow",
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.BottomCenter)
+                                .size(getResponsiveSizeWidth(10.dp), getResponsiveSizeHeight(10.dp))
+                                .offset(y = getResponsiveSizeHeight(offsetY.dp))
+                                .clickable {
+                                    AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+                                    viewModel?.next()
+                                },
                     )
                 }
-                Kiwi_Image(
-                    R.drawable.dialogue_small_frame,
-                    "Character frame",
-                )
-                Box(
-                    contentAlignment = Alignment.BottomCenter,
-                    modifier = Modifier.matchParentSize().offset(x = 0.dp, y = getResponsiveSizeHeight(25.dp)),
-                ) {
-                    CharacterName("Liria", conversation.dark, conversation.type == ConversationType.SMALL)
-                }
-            }
-            Kiwi_Spacer_Horizontal()
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.weight(0.65f),
-            ) {
-                Kiwi_Image(
-                    R.drawable.dialogue_small_bg,
-                    "Dialogue frame",
-                    contentScale = ContentScale.FillWidth,
-                )
-                Kiwi_P2(
-                    KiwiTextArguments(
-                        conversation.dialog,
-                        textAlign = TextAlign.Center,
-                        color = kiwiColor.color6,
-                        modifier = Modifier.padding(Spacing.medium, Spacing.medium),
-                    ),
-                )
-                Kiwi_Image(
-                    R.drawable.ic_dialogue_arrow,
-                    "Arrow",
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter)
-                            .size(getResponsiveSizeWidth(10.dp), getResponsiveSizeHeight(10.dp))
-                            .offset(y = getResponsiveSizeHeight(offsetY.dp))
-                            .clickable {
-                                AudioManager.playSFX(context, R.raw.snd_fx_03_page)
-                                viewModel?.next()
-                            },
-                )
             }
         }
     }

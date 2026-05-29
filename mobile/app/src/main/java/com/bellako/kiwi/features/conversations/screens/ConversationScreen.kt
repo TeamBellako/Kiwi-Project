@@ -1,6 +1,5 @@
 package com.bellako.kiwi.features.conversations.screens
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.EaseInOut
@@ -88,7 +87,7 @@ fun ConversationScreen(
                     .height(getResponsiveSizeHeight(400.dp))
                     .fillMaxWidth()
                     .offset(
-                        x = getResponsiveSizeWidth(-50.dp),
+                        x = getResponsiveSizeWidth((-50).dp),
                         y = getResponsiveSizeHeight(100.dp),
                     ),
         ) {
@@ -115,7 +114,7 @@ fun ConversationScreen(
                 modifier = Modifier.padding(horizontal = Spacing.medium),
             ) {
                 Kiwi_Image(
-                    painterResourceId = getAsset(conversation, R.drawable.dialogue_light_small, LocalContext.current),
+                    painterResourceId = getAsset(conversation),
                     alt = "Conversation modal",
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth(),
@@ -163,7 +162,7 @@ fun ConversationScreen(
                     Kiwi_Spacer(Spacing.small)
                 }
             }
-            if (conversation.options.size == 0) {
+            if (conversation.options.isEmpty()) {
                 Kiwi_Spacer(Spacing.medium)
                 Kiwi_Image(
                     R.drawable.ic_dialogue_arrow,
@@ -194,23 +193,17 @@ private fun estimateLineCount(
     return (text.length + charsPerLine - 1) / charsPerLine
 }
 
-private fun getAsset(
-    conversation: ConversationDomain,
-    painterResourceId: Int,
-    context: Context,
-): Int {
-    val baseName = context.resources.getResourceEntryName(painterResourceId)
-    var resourceName = baseName
+private fun getAsset(conversation: ConversationDomain): Int {
     val lineCount = estimateLineCount(conversation.dialog)
-    val size =
-        when {
-            lineCount <= 1 -> "small"
-            lineCount <= 2 -> "medium"
-            else -> "big"
-        }
-    val color = if (conversation.dark) "dark" else "light"
-    resourceName = "dialogue_${color}_$size"
-    return context.resources.getIdentifier(resourceName, "drawable", context.packageName)
+
+    return when {
+        conversation.dark && lineCount <= 1 -> R.drawable.dialogue_dark_small
+        conversation.dark && lineCount <= 2 -> R.drawable.dialogue_dark_medium
+        conversation.dark && lineCount > 2 -> R.drawable.dialogue_dark_big
+        !conversation.dark && lineCount <= 1 -> R.drawable.dialogue_light_small
+        !conversation.dark && lineCount <= 2 -> R.drawable.dialogue_light_medium
+        else -> R.drawable.dialogue_light_big
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
