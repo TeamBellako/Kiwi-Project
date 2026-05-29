@@ -152,7 +152,8 @@ fun SkillComponent(
                     "Skill Icon",
                     modifier =
                         Modifier
-                            .size(getResponsiveSizeHeight(40.dp)),
+                            .size(getResponsiveSizeHeight(40.dp))
+                            .alpha(if (isDisabled) 0.7f else 1.0f),
                 )
             }
 
