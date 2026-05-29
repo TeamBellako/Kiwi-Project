@@ -86,7 +86,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.ceil
-import kotlin.math.min
+import kotlin.math.hypot
 
 @Composable
 fun CurrentDayIndicator(
@@ -132,7 +132,11 @@ fun CurrentDayIndicator(
                                 ): Outline {
                                     val progress = dailyGoalsProgress.coerceIn(0f, 1f)
 
-                                    val radius = min(size.width, size.height) / 2f
+                                    // Half the diagonal, so the wedge arc reaches past the
+                                    // heart's outline (out to the corners) instead of stopping at
+                                    // the inscribed circle — otherwise the fill falls short of the
+                                    // outer edge near the wide top lobes (most visible ~60-80%).
+                                    val radius = hypot(size.width, size.height) / 2f
                                     val center = Offset(size.width / 2f, size.height / 2f)
 
                                     val rect =

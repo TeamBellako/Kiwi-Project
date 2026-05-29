@@ -13,6 +13,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -199,7 +200,12 @@ fun GoalComponent(
                     Modifier
                         .weight(0.10f)
                         .fillMaxHeight()
-                        .clickable {
+                        // No ripple — the plus has its own squish + wiggle press
+                        // feedback, so the default dark overlay is redundant.
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
                             // IN_PROGRESS goals confirm at target; COMPLETED goals
                             // are post-confirmation edits — bump value but never
                             // re-trigger backend completion.
