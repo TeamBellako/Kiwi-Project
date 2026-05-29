@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -210,6 +211,7 @@ fun SkillBackground(
     skill: SkillDomain,
     holdProgress: Float,
 ) {
+    val skillHoldPadding = getResponsiveSizeHeight(4.dp)
     Box {
         Kiwi_Image(
             if (skill.isCooldown) {
@@ -218,6 +220,7 @@ fun SkillBackground(
                 R.drawable.skill_bg
             },
             "Skill background",
+            Modifier.padding(if (holdProgress > 0f) 0.dp else skillHoldPadding),
         )
 
         if (skill.isCooldown) {
@@ -254,7 +257,7 @@ fun SkillBackground(
                                         return Outline.Rectangle(Rect(0f, 0f, w, size.height))
                                     }
                                 }
-                        },
+                        }.padding(if (holdProgress > 0f) 0.dp else skillHoldPadding),
             )
         }
 
@@ -265,6 +268,7 @@ fun SkillBackground(
         Kiwi_Image(
             skillDecoration(holdProgress > 0f, skill.isCooldown),
             "Skill background decoration",
+            Modifier.padding(if (holdProgress > 0f) 0.dp else skillHoldPadding),
         )
     }
 }

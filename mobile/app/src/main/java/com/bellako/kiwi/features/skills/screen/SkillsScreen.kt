@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
@@ -170,6 +171,7 @@ fun DeckGrid(
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
     isLocked: Boolean = false,
 ) {
+    val skillHoldPadding = getResponsiveSizeHeight(4.dp);
     val slotMap = skills.associateBy { it.deckSlot }
 
     for (rowStart in 1..MAX_DECK_SLOTS step 2) {
@@ -191,7 +193,9 @@ fun DeckGrid(
                     Kiwi_Image(
                         R.drawable.skill_empty,
                         "Empty skill slot",
-                        modifier = Modifier.weight(SKILL_WEIGHT),
+                        modifier = Modifier
+                                    .weight(SKILL_WEIGHT)
+                                    .padding( skillHoldPadding),
                     )
                 }
             }
