@@ -5,17 +5,21 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,11 +46,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -175,31 +181,32 @@ fun DashboardScreen2_Expanded(
             SelectedDayText(metricsState)
         }
 
-        Crossfade(
-            targetState = shouldShowCalendarView.value,
-            animationSpec = tween(DAY_TRANSITION_ANIM_DURATION),
-            label = "calendarWeekToggle",
-        ) { showCalendar ->
-            if (showCalendar) {
-                CalendarMonthView(
-                    context = context,
-                    isLoading = isLoading,
-                    coroutineScope = coroutineScope,
-                    usersViewModel = usersViewModel,
-                    metricsViewModel = metricsViewModel,
-                    metricsState = metricsState,
-                    shouldShowCalendarView = shouldShowCalendarView,
-                    personalityViewModel = personalityViewModel,
-                    goalsViewModel = goalsViewModel,
-                    dayTransitionDirection = dayTransitionDirection,
-                )
-            } else {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Kiwi_Spacer(Spacing.small)
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clipToBounds(),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Kiwi_Spacer(Spacing.small)
 
+                AnimatedVisibility(
+                    visible = !shouldShowCalendarView.value,
+                    enter =
+                        slideInVertically(
+                            animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                            initialOffsetY = { -it },
+                        ) + fadeIn(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                    exit =
+                        slideOutVertically(
+                            animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                            targetOffsetY = { -it },
+                        ) + fadeOut(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                ) {
                     AnimatedContent(
                         targetState = metricsState.date,
                         transitionSpec = dayTransitionSpec,
@@ -224,7 +231,13 @@ fun DashboardScreen2_Expanded(
                             )
                         }
                     }
+                }
 
+                AnimatedVisibility(
+                    visible = !shouldShowCalendarView.value,
+                    enter = fadeIn(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                    exit = fadeOut(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                ) {
                     CalendarWeekView(
                         context = context,
                         coroutineScope = coroutineScope,
@@ -235,10 +248,26 @@ fun DashboardScreen2_Expanded(
                         isLoading = isLoading,
                         goalsViewModel = goalsViewModel,
                         dayTransitionDirection = dayTransitionDirection,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
                     ) {
                         shouldShowCalendarView.value = true
                     }
+                }
 
+                AnimatedVisibility(
+                    visible = !shouldShowCalendarView.value,
+                    enter =
+                        slideInVertically(
+                            animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                            initialOffsetY = { it },
+                        ) + fadeIn(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                    exit =
+                        slideOutVertically(
+                            animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                            targetOffsetY = { it },
+                        ) + fadeOut(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                ) {
                     AnimatedContent(
                         targetState = metricsState.date,
                         transitionSpec = dayTransitionSpec,
@@ -253,7 +282,51 @@ fun DashboardScreen2_Expanded(
                     }
                 }
             }
+
+            CalendarOpenFromCenter(
+                visible = shouldShowCalendarView.value,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                CalendarMonthView(
+                    context = context,
+                    isLoading = isLoading,
+                    coroutineScope = coroutineScope,
+                    usersViewModel = usersViewModel,
+                    metricsViewModel = metricsViewModel,
+                    metricsState = metricsState,
+                    shouldShowCalendarView = shouldShowCalendarView,
+                    personalityViewModel = personalityViewModel,
+                    goalsViewModel = goalsViewModel,
+                    dayTransitionDirection = dayTransitionDirection,
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun CalendarOpenFromCenter(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter =
+            scaleIn(
+                animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                initialScale = 0f,
+                transformOrigin = TransformOrigin.Center,
+            ) + fadeIn(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+        exit =
+            scaleOut(
+                animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                targetScale = 0f,
+                transformOrigin = TransformOrigin.Center,
+            ) + fadeOut(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+        modifier = modifier,
+    ) {
+        content()
     }
 }
 

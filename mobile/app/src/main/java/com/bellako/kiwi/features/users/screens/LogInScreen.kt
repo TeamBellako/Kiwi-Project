@@ -225,7 +225,10 @@ private fun BoxScope.ScrollingLoginBackground(imgPercentage: Float) {
                         ),
                     label = "login_scroll_progress",
                 )
-                progress * imageWidthPx
+                // Negative so the ambient parallax drifts left instead of
+                // right; the modulo wrap below normalises the sign so the
+                // two-image seam trick is unaffected.
+                -progress * imageWidthPx
             } else {
                 0f
             }
