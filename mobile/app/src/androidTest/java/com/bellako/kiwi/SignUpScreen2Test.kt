@@ -1,6 +1,7 @@
 package com.bellako.kiwi
 
 import android.annotation.SuppressLint
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -19,6 +20,7 @@ import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validP
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.screens.LocalSignupVfxEnabled
 import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
@@ -64,22 +66,28 @@ class SignUpScreen2Test {
         skillsFakeViewModel = SkillsFakeViewModel()
 
         rule.setContent {
-            val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP2_FORM) {
-                composable(ScreenRoutes.SIGNUP2_FORM) {
-                    SignUpScreen2_Form(
-                        usersViewModel = usersFakeViewModel,
-                        personalityViewModel = personalityFakeViewModel,
-                        navController = navController,
-                    )
-                }
-                composable(ScreenRoutes.SIGNUP3_TEST) {
-                    SignUpScreen3_Test(
-                        usersViewModel = usersFakeViewModel,
-                        personalityViewModel = personalityFakeViewModel,
-                        skillsViewModel = skillsFakeViewModel,
-                        navController = navController,
-                    )
+            // Freeze the signup smoke VFX: its per-frame withFrameNanos loop would
+            // otherwise keep the Compose runtime non-idle forever and hang
+            // waitForIdle (same precedent as LocalLoginBackgroundAnimated in
+            // LoginScreenTest). The animation itself is exercised by previews.
+            CompositionLocalProvider(LocalSignupVfxEnabled provides false) {
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = ScreenRoutes.SIGNUP2_FORM) {
+                    composable(ScreenRoutes.SIGNUP2_FORM) {
+                        SignUpScreen2_Form(
+                            usersViewModel = usersFakeViewModel,
+                            personalityViewModel = personalityFakeViewModel,
+                            navController = navController,
+                        )
+                    }
+                    composable(ScreenRoutes.SIGNUP3_TEST) {
+                        SignUpScreen3_Test(
+                            usersViewModel = usersFakeViewModel,
+                            personalityViewModel = personalityFakeViewModel,
+                            skillsViewModel = skillsFakeViewModel,
+                            navController = navController,
+                        )
+                    }
                 }
             }
         }
