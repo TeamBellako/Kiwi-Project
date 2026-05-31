@@ -62,7 +62,7 @@ import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
-import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P1
+import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -573,7 +573,7 @@ private fun SignUp(onSignUp: () -> Unit) {
             }
         }
 
-    Kiwi_AnnotatedString_P1(
+    Kiwi_AnnotatedString_P2(
         KiwiAnnotatedStringArguments(
             annotatedString,
             TextAlign.Center,

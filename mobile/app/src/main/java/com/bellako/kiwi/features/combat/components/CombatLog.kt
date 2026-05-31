@@ -71,6 +71,10 @@ sealed class CombatLogEntry {
 fun CombatLog(
     entries: List<CombatLogEntry>,
     modifier: Modifier = Modifier,
+    // Alpha applied to the log entries only — the panel chrome stays solid.
+    // Lets the morph-open animation grow the empty container first, then fade
+    // the text in once there's room for it.
+    contentAlpha: Float = 1f,
 ) {
     val colors = LocalKiwiColors.current
     val listState = rememberLazyListState()
@@ -98,6 +102,7 @@ fun CombatLog(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .alpha(contentAlpha)
                     .padding(
                         horizontal = getResponsiveSizeWidth(LOG_INNER_PADDING),
                         vertical = getResponsiveSizeHeight(LOG_INNER_PADDING),

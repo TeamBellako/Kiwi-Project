@@ -257,12 +257,14 @@ fun GoalComponent(
                 contentAlignment = Alignment.Center,
             ) {
                 if (plus && (status == GoalStatus.IN_PROGRESS || status == GoalStatus.COMPLETED)) {
-                    // The pulsing tick is only the "ready to confirm" cue for
-                    // an unconfirmed goal that's hit its target. Once confirmed,
-                    // the icon goes back to a plus so further edits read as edits.
-                    val isTick = status == GoalStatus.IN_PROGRESS && goalDomain?.value == goalDomain?.target
+                    // A confirmed (completed) goal shows a static tick. An
+                    // unconfirmed goal that's just hit its target shows the same
+                    // tick but pulsing, as a "ready to confirm" cue.
+                    val isReadyToConfirm =
+                        status == GoalStatus.IN_PROGRESS && goalDomain?.value == goalDomain?.target
+                    val showTick = isReadyToConfirm || isConfirmedComplete
                     val iconModifier =
-                        if (isTick) {
+                        if (isReadyToConfirm) {
                             val transition = rememberInfiniteTransition(label = "tickPulse")
                             val scale by transition.animateFloat(
                                 initialValue = 1f,
@@ -302,7 +304,7 @@ fun GoalComponent(
                                 }
                         }
                     Kiwi_Image(
-                        if (isTick) {
+                        if (showTick) {
                             R.drawable.ic_daily_challenges_tick
                         } else {
                             R.drawable.ic_daily_challenges_plus

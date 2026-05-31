@@ -21,9 +21,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -48,8 +52,10 @@ import com.bellako.kiwi.features.combat.components.FocusTarget
 import com.bellako.kiwi.features.combat.components.PlayerControls
 import com.bellako.kiwi.features.combat.components.PlayerDamageOverlays
 import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
+import com.bellako.kiwi.features.combat.components.combatLogControlAlpha
 import com.bellako.kiwi.features.combat.components.combatTurnGlowColor
 import com.bellako.kiwi.features.combat.components.rememberCombatIntroController
+import com.bellako.kiwi.features.combat.components.rememberCombatLogProgress
 import com.bellako.kiwi.features.combat.components.rememberDeathSequenceVfx
 import com.bellako.kiwi.features.combat.components.rememberFocusBlurVfx
 import com.bellako.kiwi.features.combat.components.rememberPlayerDamageVfx
@@ -97,6 +103,9 @@ fun CombatScreen(
     val colors = LocalKiwiColors.current
     val context = LocalContext.current
     var isLogOpen by rememberSaveable(combat.id) { mutableStateOf(false) }
+    // Root-space bounds of the turn indicator: the log panel morphs out of here.
+    var turnIndicatorBounds by remember(combat.id) { mutableStateOf<Rect?>(null) }
+    val logProgress = rememberCombatLogProgress(isLogOpen)
     var selectedStatus by remember(combat.id) { mutableStateOf<CombatActiveStatusDomain?>(null) }
     var showAbandonConfirm by rememberSaveable(combat.id) { mutableStateOf(false) }
 
@@ -201,6 +210,8 @@ fun CombatScreen(
                     isBarkActive = displayedBark != null,
                     selectedStatus = selectedStatus,
                     intro = intro,
+                    logProgress = logProgress,
+                    onTurnIndicatorBounds = { turnIndicatorBounds = it },
                     onToggleLog = { isLogOpen = !isLogOpen },
                     onSkillClick = onSkillClick,
                     onApplyGoalProgress = onApplyGoalProgress,
@@ -234,8 +245,9 @@ fun CombatScreen(
         DeathSequenceOverlay(deathCloseProgress.value)
 
         CombatLogOverlay(
-            isOpen = isLogOpen,
+            progress = logProgress,
             entries = logEntries,
+            sourceBounds = turnIndicatorBounds,
             onDismiss = { isLogOpen = false },
         )
     }
@@ -264,6 +276,8 @@ private fun CombatBottomPanel(
     isBarkActive: Boolean,
     selectedStatus: CombatActiveStatusDomain?,
     intro: CombatIntroController,
+    logProgress: Float,
+    onTurnIndicatorBounds: (Rect) -> Unit,
     onToggleLog: () -> Unit,
     onSkillClick: (skillId: Long, skillName: String) -> Unit,
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
@@ -290,6 +304,12 @@ private fun CombatBottomPanel(
             message = turnMessage,
             isLogOpen = isLogOpen,
             onClick = onToggleLog,
+            // Report the indicator's footprint so the log can grow out of it,
+            // and fade the indicator as the morphing panel takes its place.
+            modifier =
+                Modifier
+                    .onGloballyPositioned { onTurnIndicatorBounds(it.boundsInRoot()) }
+                    .alpha(combatLogControlAlpha(logProgress)),
             glowColor = combatTurnGlowColor(combat.log.lastOrNull()),
             introAlpha = intro.turnIndicatorAlpha,
             dimmed = isOverlayOpen,

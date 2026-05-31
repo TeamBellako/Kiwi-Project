@@ -16,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -155,7 +156,7 @@ fun DashboardScreen(
                             bottom = getResponsiveSizeHeight(Spacing.medium),
                             start = getResponsiveSizeHeight(Spacing.medium),
                             end = getResponsiveSizeHeight(Spacing.medium),
-                        ).fillMaxWidth()
+                        ).fillMaxSize()
                         .testTag(CommonTestTags.DASHBOARD_MODAL),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -166,14 +167,14 @@ fun DashboardScreen(
                 )
 
                 @OptIn(ExperimentalSharedTransitionApi::class)
-                SharedTransitionLayout(modifier = Modifier.fillMaxWidth()) {
+                SharedTransitionLayout(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     AnimatedContent(
                         targetState = currentStateIndex,
                         transitionSpec = {
                             fadeIn(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION)) togetherWith
                                 fadeOut(animationSpec = tween(LAYOUT_TRANSITION_ANIM_DURATION))
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.TopCenter,
                         label = "dashboardLayoutTransition",
                     ) { stateIndex ->

@@ -25,7 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,6 +39,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P3
+import com.bellako.kiwi.features.combat.components.combatLogControlAlpha
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatDomain
@@ -90,6 +95,8 @@ private fun goalEquivalentText(
 internal fun SkillsUsedHeader(
     isLogOpen: Boolean,
     onToggleLog: () -> Unit,
+    logProgress: Float,
+    onLogButtonBounds: (Rect) -> Unit,
 ) {
     val colors = LocalKiwiColors.current
     val chevronRotation by animateFloatAsState(
@@ -111,6 +118,10 @@ internal fun SkillsUsedHeader(
         Row(
             modifier =
                 Modifier
+                    // Report the button's footprint so the log can grow out of
+                    // it, and fade the button as the morphing panel takes over.
+                    .onGloballyPositioned { onLogButtonBounds(it.boundsInRoot()) }
+                    .alpha(combatLogControlAlpha(logProgress))
                     .background(
                         color = colors.color3A,
                         shape = RoundedCornerShape(getResponsiveSizeHeight(LOG_TOGGLE_RADIUS)),

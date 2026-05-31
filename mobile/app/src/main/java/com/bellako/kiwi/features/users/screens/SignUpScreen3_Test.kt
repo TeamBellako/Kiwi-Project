@@ -238,9 +238,22 @@ private fun BuildModal(
     var skillsVisible by remember { mutableStateOf(false) }
     var buttonVisible by remember { mutableStateOf(false) }
 
+    // Settings re-uses this screen to let the user retake the personality
+    // test. In that mode we stop after the build is shown — no apps step.
+    val fromSettings =
+        remember {
+            navController.previousBackStackEntry?.destination?.route == ScreenRoutes.SETTINGS
+        }
+
     LaunchedEffect(Unit) {
         if (personalityViewModel.updateBuild().isSuccess) {
             firebaseLogEvent(FirebaseEventNames.SIGNUP_3_TEST_COMPLETED)
+            // Re-fetching personality is the trigger for the backend to
+            // reconcile the user's skills against the new build (drops the
+            // old build's starter set, grants the new build's, keeps the
+            // rest). Has to happen before loadSkills() so the skills GET
+            // returns the post-reconciliation state.
+            personalityViewModel.loadPersonality()
             skillsViewModel.loadSkills()
         }
     }
@@ -352,7 +365,11 @@ private fun BuildModal(
                     color = kiwiColors.color3A,
                     enabled = !personalityIsLoading && !skillsIsLoading,
                     onClick = {
-                        navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                        if (fromSettings) {
+                            navController.popBackStack()
+                        } else {
+                            navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                        }
                     },
                 )
             }

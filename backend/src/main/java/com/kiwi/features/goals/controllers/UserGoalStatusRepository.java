@@ -44,4 +44,6 @@ public interface UserGoalStatusRepository extends JpaRepository<UserGoalStatusPe
             UsersPersistence user,
             GoalType type
     );
+
+    void deleteByUser_IdAndGoal_Id(Long userId, Long goalId);
 }

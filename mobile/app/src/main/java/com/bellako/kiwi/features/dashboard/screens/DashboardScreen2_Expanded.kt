@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -168,7 +169,7 @@ fun DashboardScreen2_Expanded(
 
     ComposableEngagementMeasuring("expanded")
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Kiwi_Spacer(Spacing.xSmall)
@@ -185,6 +186,7 @@ fun DashboardScreen2_Expanded(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .weight(1f)
                     .clipToBounds(),
             contentAlignment = Alignment.TopCenter,
         ) {
@@ -285,20 +287,35 @@ fun DashboardScreen2_Expanded(
 
             CalendarOpenFromCenter(
                 visible = shouldShowCalendarView.value,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize(),
             ) {
-                CalendarMonthView(
-                    context = context,
-                    isLoading = isLoading,
-                    coroutineScope = coroutineScope,
-                    usersViewModel = usersViewModel,
-                    metricsViewModel = metricsViewModel,
-                    metricsState = metricsState,
-                    shouldShowCalendarView = shouldShowCalendarView,
-                    personalityViewModel = personalityViewModel,
-                    goalsViewModel = goalsViewModel,
-                    dayTransitionDirection = dayTransitionDirection,
-                )
+                // Center the month grid in the available space between the day
+                // header above and the bottom of the sheet, rather than pinning
+                // it to the top. The bottom ~100dp of the sheet sits behind the
+                // bottom nav bar (same offset DashboardScreen uses for its
+                // loading overlay), so reserve it here — otherwise centering
+                // against the full sheet height drops the grid below the visible
+                // middle.
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(bottom = getResponsiveSizeHeight(100.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CalendarMonthView(
+                        context = context,
+                        isLoading = isLoading,
+                        coroutineScope = coroutineScope,
+                        usersViewModel = usersViewModel,
+                        metricsViewModel = metricsViewModel,
+                        metricsState = metricsState,
+                        shouldShowCalendarView = shouldShowCalendarView,
+                        personalityViewModel = personalityViewModel,
+                        goalsViewModel = goalsViewModel,
+                        dayTransitionDirection = dayTransitionDirection,
+                    )
+                }
             }
         }
     }

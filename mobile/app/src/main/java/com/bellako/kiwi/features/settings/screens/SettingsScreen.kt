@@ -298,6 +298,20 @@ private fun SettingsButtons(
                 horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
+                        "RETAKE PERSONALITY TEST",
+                        color = kiwiColors.color6,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { navController.navigate(ScreenRoutes.SIGNUP3_TEST) },
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
+                textArguments =
+                    KiwiTextArguments(
                         "CONTACT US",
                         color = kiwiColors.color6,
                         fontWeight = FontWeight.Bold,

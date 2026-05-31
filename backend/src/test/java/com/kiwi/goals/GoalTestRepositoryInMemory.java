@@ -99,6 +99,12 @@ public class GoalTestRepositoryInMemory implements UserGoalStatusRepository {
     }
 
     @Override
+    public void deleteByUser_IdAndGoal_Id(Long userId, Long goalId) {
+        store.values().removeIf(g ->
+                g.getUser().getId().equals(userId) && g.getGoal().getId().equals(goalId));
+    }
+
+    @Override
     public List<UserGoalStatusPersistence> findAll() {
         return new ArrayList<>(store.values());
     }

@@ -16,7 +16,10 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.ui.Kiwi_Theme
 
 @Composable
-fun SignUpScreen(content: @Composable () -> Unit) {
+fun SignUpScreen(
+    showSmoke: Boolean = true,
+    content: @Composable () -> Unit,
+) {
     Box(
         modifier =
             Modifier
@@ -33,6 +36,12 @@ fun SignUpScreen(content: @Composable () -> Unit) {
                     .align(Alignment.TopCenter),
             contentScale = ContentScale.Crop,
         )
+
+        // Ambient "smoke limbo" haze over the backdrop but under the UI. Opt-out
+        // for the app-selection step (SignUpScreen4_Apps), which passes false.
+        if (showSmoke) {
+            SmokeLimboOverlay(modifier = Modifier.fillMaxSize())
+        }
 
         Box(
             modifier =
