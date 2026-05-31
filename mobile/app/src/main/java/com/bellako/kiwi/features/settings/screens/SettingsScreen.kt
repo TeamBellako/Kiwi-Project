@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -196,6 +197,7 @@ private fun SettingsEditFields(
     settingsViewModel: ISettingsViewModel,
 ) {
     val kiwiColors = LocalKiwiColors.current
+    val coroutineScope = rememberCoroutineScope()
 
     settingsState?.let { currentSettingsState ->
         var soundSliderPosition by remember {
@@ -217,7 +219,10 @@ private fun SettingsEditFields(
             value = soundSliderPosition,
             onValueChange = { newValue ->
                 soundSliderPosition = newValue
-                CoroutineScope(Dispatchers.Main).launch {
+                // Dispatch on Main.immediate so the live volume update runs inline on this
+                // gesture callback instead of being queued behind the drag's frame work, which
+                // otherwise delayed audible changes until the slider was released.
+                coroutineScope.launch(Dispatchers.Main.immediate) {
                     settingsViewModel.updateSettings(currentSettingsState.copy(soundVolume = newValue))
                 }
             },
@@ -240,7 +245,7 @@ private fun SettingsEditFields(
             value = musicSliderPosition,
             onValueChange = { newValue ->
                 musicSliderPosition = newValue
-                CoroutineScope(Dispatchers.Main).launch {
+                coroutineScope.launch(Dispatchers.Main.immediate) {
                     settingsViewModel.updateSettings(currentSettingsState.copy(musicVolume = newValue))
                 }
             },
@@ -293,6 +298,20 @@ private fun SettingsButtons(
                 horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
+                        "RETAKE PERSONALITY TEST",
+                        color = kiwiColors.color6,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { navController.navigate(ScreenRoutes.SIGNUP3_TEST) },
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
+                textArguments =
+                    KiwiTextArguments(
                         "CONTACT US",
                         color = kiwiColors.color6,
                         fontWeight = FontWeight.Bold,
@@ -326,7 +345,8 @@ private fun SettingsButtons(
                 color = kiwiColors.color5A,
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        usersViewModel.setShowAppLoading(true)
+                        // No loading curtain on logout — the login screen lerps
+                        // up from the bottom over the app instead.
                         usersViewModel.logout(context)
                         navController.navigate(ScreenRoutes.LOGIN) {
                             popUpTo(ScreenRoutes.LOGIN) { inclusive = true }

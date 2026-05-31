@@ -4,12 +4,15 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,6 +26,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -36,8 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -107,6 +113,7 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.ui.LocalKiwiColors
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.async
@@ -647,6 +654,30 @@ private fun isSettingsAppsTransition(
     (initial == ScreenRoutes.SETTINGS && target == ScreenRoutes.SIGNUP4_APPS) ||
         (initial == ScreenRoutes.SIGNUP4_APPS && target == ScreenRoutes.SETTINGS)
 
+// The login screen rides up from / slides down to the bottom over the app — the
+// same vertical language as the map, but as a foreground curtain. This only
+// covers login <-> a real nav-bar screen (logging in to HOME, logging out to
+// LOGIN from Settings); transitions between login and the sign-up flow keep
+// their plain fade. The full loading curtain still covers a cold-start login, so
+// this lerp is only ever seen for an in-session log in / out.
+private fun isLoginAppTransition(
+    initial: String?,
+    target: String?,
+): Boolean =
+    (initial == ScreenRoutes.LOGIN && navIndex(target) >= 0) ||
+        (target == ScreenRoutes.LOGIN && navIndex(initial) >= 0)
+
+// The sign-up welcome → account-form step slides sideways (and slides back on
+// pop), distinct from the plain fade the rest of the sign-up flow uses. Both
+// routes sit outside NAVBAR_ORDER, so direction is read from the route pair
+// rather than nav indices.
+private fun isWelcomeFormTransition(
+    initial: String?,
+    target: String?,
+): Boolean =
+    (initial == ScreenRoutes.SIGNUP1_WELCOME && target == ScreenRoutes.SIGNUP2_FORM) ||
+        (initial == ScreenRoutes.SIGNUP2_FORM && target == ScreenRoutes.SIGNUP1_WELCOME)
+
 // Focus variants share their base screen's slot so deep links order correctly.
 private fun navIndex(route: String?): Int =
     when (route) {
@@ -676,6 +707,20 @@ private fun screenEnter(
             } else {
                 EnterTransition.None
             }
+        // Sign-up welcome ↔ account form: slide toward the form going forward,
+        // back toward welcome on pop.
+        isWelcomeFormTransition(initial, target) ->
+            if (target == ScreenRoutes.SIGNUP2_FORM) {
+                slideInHorizontally(animationSpec = screenOffsetSpec()) { it } +
+                    fadeIn(animationSpec = screenFadeSpec())
+            } else {
+                slideInHorizontally(animationSpec = screenOffsetSpec()) { -it } +
+                    fadeIn(animationSpec = screenFadeSpec())
+            }
+        // Login curtain: the entering screen (login on logout, the app on an
+        // in-session login) lifts up from the bottom over the one it replaces.
+        isLoginAppTransition(initial, target) ->
+            slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
         // Login / sign-up / any non-nav screen: keep a plain fade.
         from < 0 || to < 0 -> fadeIn(animationSpec = screenFadeSpec())
         // Going to the map: it is already rendered behind (this is a pop), so it
@@ -708,6 +753,19 @@ private fun screenExit(
             } else {
                 ExitTransition.None
             }
+        // Sign-up welcome ↔ account form: the leaving screen slides off toward
+        // the side the new one enters from.
+        isWelcomeFormTransition(initial, target) ->
+            if (initial == ScreenRoutes.SIGNUP1_WELCOME) {
+                slideOutHorizontally(animationSpec = screenOffsetSpec()) { -it } +
+                    fadeOut(animationSpec = screenFadeSpec())
+            } else {
+                slideOutHorizontally(animationSpec = screenOffsetSpec()) { it } +
+                    fadeOut(animationSpec = screenFadeSpec())
+            }
+        // The screen being covered by the rising login curtain (or the app it
+        // reveals) holds still underneath while the other screen lerps over it.
+        isLoginAppTransition(initial, target) -> ExitTransition.None
         from < 0 || to < 0 -> fadeOut(animationSpec = screenFadeSpec())
         // Going to the map: the leaving screen slides straight down at full opacity,
         // slower so the reveal reads clearly.
@@ -724,8 +782,29 @@ private fun screenExit(
     }
 }
 
+@Composable
+private fun AnimatedContentScope.MapTransitionTopRadius(content: @Composable () -> Unit) {
+    val cornerRadius = getResponsiveSizeHeight(50.dp)
+    val radius by transition.animateDp(
+        transitionSpec = { tween(durationMillis = MAP_TRANSITION_MS, easing = EaseInOut) },
+        label = "screenTopRadius",
+    ) { state ->
+        if (state == EnterExitState.Visible) 0.dp else cornerRadius
+    }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(topStart = radius, topEnd = radius)),
+    ) {
+        content()
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
+@Suppress("LongMethod")
 fun AppNavHost(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
@@ -823,11 +902,13 @@ fun AppNavHost(
         }
 
         composable(ScreenRoutes.OBJECTIVES) {
-            AppScreenWrapper {
-                ObjectivesScreen(
-                    questsViewModel = questsViewModel,
-                    goalsViewModel = goalsViewModel,
-                )
+            MapTransitionTopRadius {
+                AppScreenWrapper {
+                    ObjectivesScreen(
+                        questsViewModel = questsViewModel,
+                        goalsViewModel = goalsViewModel,
+                    )
+                }
             }
         }
 
@@ -837,19 +918,23 @@ fun AppNavHost(
         ) { backStackEntry ->
             val questId = backStackEntry.arguments?.getInt("questId")
 
-            ObjectivesScreen(
-                questsViewModel = questsViewModel,
-                focusedQuestId = questId,
-                goalsViewModel = goalsViewModel,
-            )
+            MapTransitionTopRadius {
+                ObjectivesScreen(
+                    questsViewModel = questsViewModel,
+                    focusedQuestId = questId,
+                    goalsViewModel = goalsViewModel,
+                )
+            }
         }
 
         composable(ScreenRoutes.SKILLS) {
-            AppScreenWrapper {
-                SkillsScreen(
-                    skillsViewModel = skillsViewModel,
-                    isDeckLocked = isCombatActive,
-                )
+            MapTransitionTopRadius {
+                AppScreenWrapper {
+                    SkillsScreen(
+                        skillsViewModel = skillsViewModel,
+                        isDeckLocked = isCombatActive,
+                    )
+                }
             }
         }
 
@@ -859,11 +944,13 @@ fun AppNavHost(
         ) { backStackEntry ->
             val questId = backStackEntry.arguments?.getLong("skillId")
 
-            SkillsScreen(
-                skillsViewModel = skillsViewModel,
-                focusedSkillId = questId,
-                isDeckLocked = isCombatActive,
-            )
+            MapTransitionTopRadius {
+                SkillsScreen(
+                    skillsViewModel = skillsViewModel,
+                    focusedSkillId = questId,
+                    isDeckLocked = isCombatActive,
+                )
+            }
         }
 
         composable(ScreenRoutes.SETTINGS) {

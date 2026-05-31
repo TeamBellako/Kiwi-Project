@@ -52,6 +52,7 @@ fun CombatAbandonConfirmModal(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true,
                 usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false,
             ),
     ) {
         val colors = LocalKiwiColors.current

@@ -30,8 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
@@ -60,12 +58,16 @@ private const val SPRITE_RISE_DIVISOR = 4
 private const val SPRITE_HEIGHT_DP = 400
 private const val SPRITE_OFFSET_X_DP = -50
 private const val SPRITE_OFFSET_Y_DP = 100
-private const val DIALOGUE_GRADIENT_START_STOP = -0.2f
-private const val DIALOGUE_GRADIENT_MID_STOP = 0.5f
-private const val DIALOGUE_GRADIENT_END_STOP = 1f
 private const val PERCENT_MULTIPLIER = 100
 private const val PROGRESS_TRACK_ALPHA = 0.25f
 private const val PROGRESS_BG_ALPHA = 0.7f
+
+// The conversation screen reserves a solid color2 bar at the bottom for the
+// options panel (see ConversationScreen.ConversationOptionsPanel). Mirroring
+// its height here lifts Liria and the dialogue bubble to the exact position
+// they hold in a conversation showing options, so the hand-off is seamless.
+private const val OPTIONS_PANEL_VISIBLE_ROWS = 3
+private const val OPTIONS_ROW_HEIGHT_DP = 50
 
 /** Current animation state, snapshotted from the driving [Animatable]s each frame. */
 private data class LoadingAnim(
@@ -170,6 +172,14 @@ private fun LoginLoadingContent(
 
     val percent = (progress.coerceIn(0f, 1f) * PERCENT_MULTIPLIER).roundToInt()
 
+    // Same vertical extent the conversation options panel occupies for 3 rows:
+    // medium spacer + (rowHeight * rows capped with small * 2) + xLarge spacer.
+    val reservedOptionsHeight =
+        getResponsiveSizeHeight(Spacing.medium) +
+            getResponsiveSizeHeight(OPTIONS_ROW_HEIGHT_DP.dp) * OPTIONS_PANEL_VISIBLE_ROWS +
+            Spacing.small * 2 +
+            getResponsiveSizeHeight(Spacing.xLarge)
+
     // Liria floats here too — she's an airborne entity wherever she appears.
     val floatingModifier = rememberFloatingModifier()
 
@@ -238,49 +248,46 @@ private fun LoginLoadingContent(
                     enter = enterFrom { fullHeight -> fullHeight },
                     exit = ExitTransition.None,
                 ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    Brush.verticalGradient(
-                                        DIALOGUE_GRADIENT_START_STOP to Color.Transparent,
-                                        DIALOGUE_GRADIENT_MID_STOP to kiwiColors.color2,
-                                        DIALOGUE_GRADIENT_END_STOP to kiwiColors.color2,
-                                    ),
-                                ),
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier =
-                                Modifier.padding(
-                                    horizontal = Spacing.medium,
-                                    vertical = getResponsiveSizeHeight(Spacing.large),
-                                ),
-                        ) {
-                            Kiwi_Image(
-                                R.drawable.dialogue_light_medium,
-                                "Dialogue frame",
-                                contentScale = ContentScale.FillWidth,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            Kiwi_P2(
-                                KiwiTextArguments(
-                                    "We are loading your adventure, please stay put.",
-                                    textAlign = TextAlign.Center,
-                                    color = kiwiColors.color3,
-                                    modifier = Modifier.padding(Spacing.medium, Spacing.medium),
-                                ),
-                            )
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
                             Box(
-                                modifier =
-                                    Modifier
-                                        .matchParentSize()
-                                        .offset(x = getResponsiveSizeWidth(25.dp)),
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.padding(horizontal = Spacing.medium),
                             ) {
-                                CharacterName("Liria", dark = false, small = false)
+                                Kiwi_Image(
+                                    R.drawable.dialogue_light_medium,
+                                    "Dialogue frame",
+                                    contentScale = ContentScale.FillWidth,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                                Kiwi_P2(
+                                    KiwiTextArguments(
+                                        "We are loading your adventure, please stay put.",
+                                        textAlign = TextAlign.Center,
+                                        color = kiwiColors.color3,
+                                        modifier = Modifier.padding(Spacing.medium, Spacing.medium),
+                                    ),
+                                )
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .matchParentSize()
+                                            .offset(x = getResponsiveSizeWidth(25.dp)),
+                                ) {
+                                    CharacterName("Liria", dark = false, small = false)
+                                }
                             }
                         }
+                        // Reserve the conversation options panel's footprint so the
+                        // bubble and Liria rest at the same height as in-conversation.
+                        // No fill here — the loading screen has no options, so the
+                        // background shows through instead of a solid panel.
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(reservedOptionsHeight),
+                        )
                     }
                 }
             }

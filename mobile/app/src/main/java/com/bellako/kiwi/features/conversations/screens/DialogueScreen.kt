@@ -14,6 +14,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -62,7 +64,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 private const val DIALOGUE_ADVANCE_MS = 450
 
 @Composable
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 fun DialogueScreen(
     conversation: ConversationDomain,
     viewModel: ConversationViewModel? = null,
@@ -95,6 +97,10 @@ fun DialogueScreen(
         viewModel?.next()
     }
 
+    val onTap: () -> Unit = {
+        if (typewriter.isComplete) advance() else typewriter.skip()
+    }
+
     // Only show the advance chevron when tapping it would lead to more
     // dialogue. If the next event ends the conversation, hide it — the screen
     // is still tap-anywhere-to-dismiss via the outer Column clickable.
@@ -105,14 +111,20 @@ fun DialogueScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .clickable {
-                    if (typewriter.isComplete) advance() else typewriter.skip()
-                },
+                // Tap anywhere advances/skips, but with no indication — the
+                // ripple lives on the dialogue container below, so the dark
+                // overlay never spreads across the whole screen.
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onTap,
+                ),
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier =
                 Modifier
+                    .clickable(onClick = onTap)
                     .background(
                         Brush.verticalGradient(
                             -0f to Color.Transparent,

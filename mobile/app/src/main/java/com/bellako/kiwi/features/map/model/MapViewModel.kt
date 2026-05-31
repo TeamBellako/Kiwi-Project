@@ -38,6 +38,7 @@ private const val SCALE_SETTLE_MS = 240
 private const val SCALE_SETTLE_EPSILON = 0.001f
 
 @HiltViewModel
+@Suppress("TooManyFunctions")
 class MapViewModel
     @Inject
     constructor() :
@@ -116,6 +117,23 @@ class MapViewModel
             velocityPxPerSec = Offset.Zero
             lastPointerPosition = Offset.Zero
             lastPointerTime = 0L
+        }
+
+        /**
+         * Update the maximum zoom-out limit (i.e. minScale — the smallest scale
+         * the user may pinch to) without touching the current pan/zoom or
+         * recentering the map. Unlike [setParameters] this is safe to call
+         * mid-session: it's driven by how high the player has climbed (the
+         * highest unlocked node's cordY, see MapScreen), which loosens the limit
+         * as higher nodes unlock.
+         *
+         * Progress only ever loosens the limit (minScale decreases), so the live
+         * scale stays in range. If a tighter limit ever does arrive while the
+         * user is zoomed further out than it allows, [settleScale] / the next
+         * gesture re-clamps to it.
+         */
+        fun setZoomOutLimit(minScale: Float) {
+            this.minScale = minScale
         }
 
         private fun setScale(newScale: Float) {

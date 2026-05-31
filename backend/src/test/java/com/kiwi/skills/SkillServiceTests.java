@@ -2,6 +2,7 @@ package com.kiwi.skills;
 
 import com.kiwi.features.skills.controllers.SkillService;
 import com.kiwi.features.skills.controllers.SkillProgressService;
+import com.kiwi.goals.GoalTestRepositoryInMemory;
 import com.kiwi.features.skills.data.DTO.SkillDTO;
 import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 import com.kiwi.features.skills.exceptions.DeckSlotAlreadyOccupiedException;
@@ -35,8 +36,11 @@ public class SkillServiceTests {
     private final EnemySkillTestRepositoryInMemory enemySkillRepo =
             new EnemySkillTestRepositoryInMemory();
 
+    private final GoalTestRepositoryInMemory userGoalStatusRepo =
+            new GoalTestRepositoryInMemory();
+
     private final SkillService service =
-            new SkillService(skillRepo, elementRepo, userSkillStatusRepo, skillProgress,  skillEffectRepo, enemySkillRepo, event -> {});
+            new SkillService(skillRepo, elementRepo, userSkillStatusRepo, skillProgress,  skillEffectRepo, enemySkillRepo, userGoalStatusRepo, event -> {});
 
     private final Long userId = 1L;
 

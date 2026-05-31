@@ -4,6 +4,9 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -20,6 +23,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,9 +83,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.ceil
-import kotlin.math.min
+import kotlin.math.hypot
 
 @Composable
 fun CurrentDayIndicator(
@@ -126,7 +132,11 @@ fun CurrentDayIndicator(
                                 ): Outline {
                                     val progress = dailyGoalsProgress.coerceIn(0f, 1f)
 
-                                    val radius = min(size.width, size.height) / 2f
+                                    // Half the diagonal, so the wedge arc reaches past the
+                                    // heart's outline (out to the corners) instead of stopping at
+                                    // the inscribed circle — otherwise the fill falls short of the
+                                    // outer edge near the wide top lobes (most visible ~60-80%).
+                                    val radius = hypot(size.width, size.height) / 2f
                                     val center = Offset(size.width / 2f, size.height / 2f)
 
                                     val rect =
@@ -207,8 +217,10 @@ fun CurrentDayIndicator(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongParameterList")
 fun CalendarWeekView(
     context: Context,
     coroutineScope: CoroutineScope,
@@ -219,12 +231,36 @@ fun CalendarWeekView(
     isLoading: Boolean,
     goalsViewModel: IGoalsViewModel,
     dayTransitionDirection: MutableIntState,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onCalendarViewClicked: () -> Unit,
 ) {
-    val date = stringToDate(metricsState.date)
-    val currentDayOfWeek = date.dayOfWeek.value % DAYS_IN_WEEK
-    var selectedDayIndex = currentDayOfWeek
-    val startOfWeek = date.minusDays(currentDayOfWeek.toLong())
+    val selectedDate = stringToDate(metricsState.date)
+    val anchorStartOfWeek =
+        remember {
+            val today = LocalDate.now()
+            today.minusDays((today.dayOfWeek.value % DAYS_IN_WEEK).toLong())
+        }
+    val pagerAnchorPage = remember { Int.MAX_VALUE / 2 }
+
+    fun pageForDate(date: LocalDate): Int {
+        val startOfWeek = date.minusDays((date.dayOfWeek.value % DAYS_IN_WEEK).toLong())
+        val weeksOffset = ChronoUnit.WEEKS.between(anchorStartOfWeek, startOfWeek).toInt()
+        return pagerAnchorPage + weeksOffset
+    }
+
+    val pagerState =
+        rememberPagerState(
+            initialPage = pageForDate(selectedDate),
+            pageCount = { Int.MAX_VALUE },
+        )
+
+    LaunchedEffect(metricsState.date) {
+        val targetPage = pageForDate(stringToDate(metricsState.date))
+        if (pagerState.currentPage != targetPage) {
+            pagerState.animateScrollToPage(targetPage)
+        }
+    }
 
     Column(
         modifier =
@@ -247,55 +283,75 @@ fun CalendarWeekView(
                     .background(color = LocalKiwiColors.current.color2B)
                     .padding(getResponsiveSizeHeight(Spacing.small), getResponsiveSizeHeight(Spacing.small)),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
         ) {
-            for (index in 0 until DAYS_IN_WEEK) {
-                val day = startOfWeek.plusDays(index.toLong())
-                val isSelected = selectedDayIndex == index
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+            ) { page ->
+                val weekOffset = page - pagerAnchorPage
+                val pageStartOfWeek = anchorStartOfWeek.plusDays(weekOffset * DAYS_IN_WEEK.toLong())
 
-                var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
-                var appUsageProgress by remember { mutableFloatStateOf(0f) }
-                LaunchedEffect(day, metricsState) {
-                    dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(day.toString())
-                    appUsageProgress = metricsViewModel.getAppUsageProgress(day.toString())
-                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    for (index in 0 until DAYS_IN_WEEK) {
+                        val day = pageStartOfWeek.plusDays(index.toLong())
+                        val isSelected = day == selectedDate
 
-                Box(modifier = Modifier.weight(1f)) {
-                    CalendarDayView(
-                        usersViewModel = usersViewModel,
-                        isLoading = isLoading,
-                        day = day,
-                        isSelected = isSelected,
-                        onClicked = {
-                            AudioManager.playSFX(context, R.raw.snd_ui_tap)
-                            selectedDayIndex = index
-                            val newDay = startOfWeek.plusDays(index.toLong())
-                            val currentDay = stringToDate(metricsState.date)
-                            dayTransitionDirection.intValue =
-                                when {
-                                    newDay.isBefore(currentDay) -> -1
-                                    newDay.isAfter(currentDay) -> 1
-                                    else -> 0
-                                }
-                            selectDay(
-                                coroutineScope,
-                                metricsViewModel,
-                                metricsState,
-                                personalityViewModel,
-                                context,
-                                newDay,
+                        var dailyGoalProgress by remember { mutableFloatStateOf(0f) }
+                        var appUsageProgress by remember { mutableFloatStateOf(0f) }
+                        LaunchedEffect(day, metricsState) {
+                            dailyGoalProgress = goalsViewModel.getDailyGoalsProgress(day.toString())
+                            appUsageProgress = metricsViewModel.getAppUsageProgress(day.toString())
+                        }
+
+                        Box(modifier = Modifier.weight(1f)) {
+                            CalendarDayView(
+                                usersViewModel = usersViewModel,
+                                isLoading = isLoading,
+                                day = day,
+                                isSelected = isSelected,
+                                onClicked = {
+                                    AudioManager.playSFX(context, R.raw.snd_ui_tap)
+                                    val currentDay = stringToDate(metricsState.date)
+                                    dayTransitionDirection.intValue =
+                                        when {
+                                            day.isBefore(currentDay) -> -1
+                                            day.isAfter(currentDay) -> 1
+                                            else -> 0
+                                        }
+                                    selectDay(
+                                        coroutineScope,
+                                        metricsViewModel,
+                                        metricsState,
+                                        personalityViewModel,
+                                        context,
+                                        day,
+                                    )
+                                },
+                                testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
+                                hasCompletedDailyGoals = dailyGoalProgress >= 1F,
+                                hasCompletedAppUsages = appUsageProgress >= 1F,
                             )
-                        },
-                        testTag = DashboardModalTestTags.DAY_INDICATOR_PREFIX + index,
-                        hasCompletedDailyGoals = dailyGoalProgress >= 1F,
-                        hasCompletedAppUsages = appUsageProgress >= 1F,
-                    )
+                        }
+                    }
                 }
             }
-            ShowCalendarButton(
-                isLoading = isLoading,
-                onCalendarViewClicked = onCalendarViewClicked,
-            )
+            with(sharedTransitionScope) {
+                ShowCalendarButton(
+                    isLoading = isLoading,
+                    modifier =
+                        Modifier.sharedElement(
+                            rememberSharedContentState(key = "calendarViewButton"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                        ),
+                    onCalendarViewClicked = onCalendarViewClicked,
+                )
+            }
         }
     }
 }
@@ -643,12 +699,13 @@ fun selectYearMonth(
 @Composable
 fun ShowCalendarButton(
     isLoading: Boolean,
+    modifier: Modifier = Modifier,
     onCalendarViewClicked: () -> Unit,
 ) {
     val context = LocalContext.current
     Box(
         modifier =
-            Modifier
+            modifier
                 .size(getResponsiveSizeHeight(34.dp))
                 .clip(RoundedCornerShape(getResponsiveSizeHeight(10.dp)))
                 .background(color = LocalKiwiColors.current.color4)

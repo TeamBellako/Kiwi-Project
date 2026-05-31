@@ -1,7 +1,7 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
-import android.content.pm.ApplicationInfo
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -74,6 +74,7 @@ import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
 import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
@@ -102,6 +103,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val APP_CARD_WIDTH = 96.dp
@@ -115,6 +117,10 @@ private const val DRAG_ALPHA = 1.0f
 private const val DRAG_SCALE_X = 1.0f
 private const val DRAG_SCALE_Y = 1.0f
 private const val NEUTRAL_APPS_GRID_SIZE = 3
+
+// Small settle before lifting the build→apps step veil, so the apps layout has
+// composed under the veil and the reveal lands on a finished screen.
+private const val SIGNUP_APPS_VEIL_LIFT_DELAY_MS = 150L
 
 private val GOOD_APP_PACKAGES =
     setOf(
@@ -166,7 +172,7 @@ fun SignUpScreen4_Apps(
     skillsViewModel: ISkillsViewModel,
     navController: NavController,
 ) {
-    SignUpScreen {
+    SignUpScreen(showSmoke = false) {
         AppClassification(
             usersViewModel,
             personalityViewModel,
@@ -198,54 +204,59 @@ fun AppClassification(
     val myPackageName = context.packageName
     val isPreview = LocalInspectionMode.current
 
+    // Lift the step veil raised by the build-confirm transition once the app
+    // step is mounted. No-op when reached without a veil (Settings "change
+    // apps", or resuming sign-up from login).
+    val nodeEntry = LocalNodeEntryTransition.current
+    LaunchedEffect(Unit) {
+        delay(SIGNUP_APPS_VEIL_LIFT_DELAY_MS)
+        nodeEntry?.fadeOut()
+    }
+
     val personalityUiState by personalityViewModel.uiState.collectAsState()
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
 
     var localLoading by remember { mutableStateOf(false) }
     val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
 
-    val excludedPackages =
-        remember {
-            listOf(
-                "com.google.android.webview",
-                "com.android.calendar",
-                "com.android.deskclock",
-                "com.android.contacts",
-                "com.google.android.apps.wellbeing",
-                "com.google.android.apps.docs",
-                "com.google.android.inputmethod.latin",
-                "com.google.android.setupwizard",
-                "com.google.android.gms",
-                "com.google.android.apps.maps",
-                "com.google.android.projection.gearhead",
-                "com.google.android.apps.fitness",
-                "com.google.android.apps.nbu.files",
-                "com.google.android.apps.photos",
-                "com.google.android.apps.safetyhub",
-                "com.google.android.apps.privatecompute",
-                "com.google.speechrecognition",
-                "com.google.android.speech",
-            )
-        }
-
     val apps =
         remember(packageManager, myPackageName) {
             val realApps =
                 try {
-                    packageManager
-                        .getInstalledApplications(PackageManager.GET_META_DATA)
-                        .filter {
-                            val isSystemApp = (it.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                            val isUpdatedSystemApp =
-                                (it.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-                            val isExcludedPackage = excludedPackages.contains(it.packageName)
+                    // The user-visible app set = anything with a launcher
+                    // activity. This covers preinstalled apps with a drawer
+                    // icon and any Play Store install, and excludes pure OS
+                    // framework packages (no launcher, no Play presence).
+                    val launcherIntent =
+                        Intent(Intent.ACTION_MAIN).apply {
+                            addCategory(Intent.CATEGORY_LAUNCHER)
+                        }
+                    val launchable =
+                        packageManager
+                            .queryIntentActivities(launcherIntent, 0)
+                            .associateBy { it.activityInfo.packageName }
+                            .values
+                            .map { resolveInfo ->
+                                val applicationInfo = resolveInfo.activityInfo.applicationInfo
+                                val name = packageManager.getApplicationLabel(applicationInfo).toString()
+                                val icon = packageManager.getApplicationIcon(applicationInfo)
+                                AppInfo(applicationInfo.packageName, name, icon)
+                            }
 
-                            (!isSystemApp || isUpdatedSystemApp) && !isExcludedPackage
-                        }.map {
-                            val name = packageManager.getApplicationLabel(it).toString()
-                            val icon = packageManager.getApplicationIcon(it)
-                            AppInfo(it.packageName, name, icon)
-                        }.sortedBy { it.name.lowercase() }
+                    // GrowTale must always appear in the picker — re-add it
+                    // if the launcher query didn't return it for any reason.
+                    val withGrowTale =
+                        if (launchable.any { it.packageName == myPackageName }) {
+                            launchable
+                        } else {
+                            launchable +
+                                AppInfo(
+                                    packageName = myPackageName,
+                                    name = "GrowTale",
+                                    icon = ContextCompat.getDrawable(context, R.mipmap.ic_launcher_round)!!,
+                                )
+                        }
+                    withGrowTale.sortedBy { it.name.lowercase() }
                 } catch (_: Exception) {
                     emptyList()
                 }
