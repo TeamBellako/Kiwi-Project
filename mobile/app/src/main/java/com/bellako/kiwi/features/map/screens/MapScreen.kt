@@ -110,6 +110,7 @@ import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongMethod")
 fun MapScreen(
     mapMarginFactor: Float = 0.08f,
     elasticityFactor: Float = 1.4f,

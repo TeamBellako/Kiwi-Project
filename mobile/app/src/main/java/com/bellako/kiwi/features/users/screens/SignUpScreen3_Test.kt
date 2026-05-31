@@ -94,6 +94,7 @@ private const val OPTION_STAGGER_MS = 140
 // rounded pill.
 private const val PROGRESS_TRACK_ALPHA = 0.25f
 private const val PROGRESS_BG_ALPHA = 0.7f
+private const val PROGRESS_PERCENT_SCALE = 100
 
 // Fixed slots so the question and answers keep their positions no matter how
 // many lines each text wraps to — the content is centered within these, so a
@@ -336,7 +337,7 @@ private fun QuestionnaireProgressBar(progress: Float) {
         )
         Kiwi_P2(
             KiwiTextArguments(
-                "${(progress * 100).roundToInt()}%",
+                "${(progress * PROGRESS_PERCENT_SCALE).roundToInt()}%",
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
                 modifier = Modifier.padding(start = Spacing.medium),

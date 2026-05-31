@@ -64,7 +64,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 private const val DIALOGUE_ADVANCE_MS = 450
 
 @Composable
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 fun DialogueScreen(
     conversation: ConversationDomain,
     viewModel: ConversationViewModel? = null,

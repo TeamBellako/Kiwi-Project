@@ -38,6 +38,7 @@ private const val SCALE_SETTLE_MS = 240
 private const val SCALE_SETTLE_EPSILON = 0.001f
 
 @HiltViewModel
+@Suppress("TooManyFunctions")
 class MapViewModel
     @Inject
     constructor() :

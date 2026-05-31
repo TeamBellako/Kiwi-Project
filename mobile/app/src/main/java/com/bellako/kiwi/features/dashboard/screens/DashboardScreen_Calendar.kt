@@ -220,6 +220,7 @@ fun CurrentDayIndicator(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongParameterList")
 fun CalendarWeekView(
     context: Context,
     coroutineScope: CoroutineScope,

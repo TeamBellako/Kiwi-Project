@@ -89,7 +89,7 @@ private const val BARK_VERTICAL_BIAS = 0.25f
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LongMethod")
 fun CombatScreen(
     combat: CombatDomain,
     deckSkills: List<SkillDomain>,

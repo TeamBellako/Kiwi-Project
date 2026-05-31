@@ -74,6 +74,11 @@ private const val MASK_DECODE_SAMPLE_SIZE = 16
 private const val MASK_PIXEL_STRIDE = 2
 private const val MASK_WHITE_THRESHOLD = 200
 
+// ARGB channel extraction from a packed pixel int.
+private const val COLOR_CHANNEL_MASK = 0xFF
+private const val RED_CHANNEL_SHIFT = 16
+private const val GREEN_CHANNEL_SHIFT = 8
+
 private const val NANOS_PER_SECOND = 1_000_000_000f
 private const val WAVE_SEED = 0x0CEA_17L
 
@@ -158,9 +163,9 @@ private suspend fun loadOceanPoints(
             var x = 0
             while (x < width) {
                 val px = pixels[y * width + x]
-                val r = (px ushr 16) and 0xFF
-                val g = (px ushr 8) and 0xFF
-                val b = px and 0xFF
+                val r = (px ushr RED_CHANNEL_SHIFT) and COLOR_CHANNEL_MASK
+                val g = (px ushr GREEN_CHANNEL_SHIFT) and COLOR_CHANNEL_MASK
+                val b = px and COLOR_CHANNEL_MASK
                 if (r >= MASK_WHITE_THRESHOLD && g >= MASK_WHITE_THRESHOLD && b >= MASK_WHITE_THRESHOLD) {
                     points.add(Offset(x / (width - 1f), y / (height - 1f)))
                 }

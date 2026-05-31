@@ -102,6 +102,7 @@ private fun Modifier.featherHorizontalEdges(): Modifier =
 @OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongMethod")
 fun DashboardScreen2_Expanded(
     context: Context,
     coroutineScope: CoroutineScope,

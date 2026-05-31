@@ -804,6 +804,7 @@ private fun AnimatedContentScope.MapTransitionTopRadius(content: @Composable () 
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
+@Suppress("LongMethod")
 fun AppNavHost(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
