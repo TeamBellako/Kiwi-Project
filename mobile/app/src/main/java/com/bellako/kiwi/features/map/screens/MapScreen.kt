@@ -271,48 +271,44 @@ fun MapScreen(
                 modifier = Modifier.fillMaxSize().padding(top = topInsetDp),
             )
 
-            // --- TEMPORARILY COMMENTED OUT for water VFX review ---
-            // Mist + clouds are hidden so the map's water reads clearly while
-            // the water VFX is being reworked. Uncomment both blocks to restore.
-            //
-            // // Mist covers the FULL screen, including behind the title and the
-            // // points indicator. zIndex sits between the map content (default 0)
-            // // and the top-bar UI (zIndex 1).
-            // MapMist(
-            //     nodes = nodesMap,
-            //     mapState = mapState,
-            //     topInsetPx = topInsetPx.toFloat(),
-            //     modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
-            // )
-            //
-            // // Clouds sit above the mist (so they read as overhead sky reinforcing
-            // // the mist cover) but below the top-bar UI. The wrapper Box mirrors
-            // // InteractiveMap's positioning — top inset + center alignment — so the
-            // // graphicsLayer transform places the cloud canvas exactly over the
-            // // map content. The Canvas itself has no pointer modifier, so map
-            // // gestures continue to land on InteractiveMap below.
-            // Box(
-            //     modifier =
-            //         Modifier
-            //             .fillMaxSize()
-            //             .padding(top = topInsetDp)
-            //             .zIndex(CLOUDS_Z_INDEX),
-            //     contentAlignment = Alignment.Center,
-            // ) {
-            //     MapClouds(
-            //         nodes = nodesMap,
-            //         mapState = mapState,
-            //         modifier =
-            //             Modifier
-            //                 .size(width = mapDisplayWidthDp, height = mapDisplayHeightDp)
-            //                 .graphicsLayer(
-            //                     scaleX = mapState.scale,
-            //                     scaleY = mapState.scale,
-            //                     translationX = mapState.offset.x,
-            //                     translationY = mapState.offset.y,
-            //                 ),
-            //     )
-            // }
+            // Mist covers the FULL screen, including behind the title and the
+            // points indicator. zIndex sits between the map content (default 0)
+            // and the top-bar UI (zIndex 1).
+            MapMist(
+                nodes = nodesMap,
+                mapState = mapState,
+                topInsetPx = topInsetPx.toFloat(),
+                modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
+            )
+
+            // Clouds sit above the mist (so they read as overhead sky reinforcing
+            // the mist cover) but below the top-bar UI. The wrapper Box mirrors
+            // InteractiveMap's positioning — top inset + center alignment — so the
+            // graphicsLayer transform places the cloud canvas exactly over the
+            // map content. The Canvas itself has no pointer modifier, so map
+            // gestures continue to land on InteractiveMap below.
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(top = topInsetDp)
+                        .zIndex(CLOUDS_Z_INDEX),
+                contentAlignment = Alignment.Center,
+            ) {
+                MapClouds(
+                    nodes = nodesMap,
+                    mapState = mapState,
+                    modifier =
+                        Modifier
+                            .size(width = mapDisplayWidthDp, height = mapDisplayHeightDp)
+                            .graphicsLayer(
+                                scaleX = mapState.scale,
+                                scaleY = mapState.scale,
+                                translationX = mapState.offset.x,
+                                translationY = mapState.offset.y,
+                            ),
+                )
+            }
 
             Kiwi_H2(
                 KiwiTextArguments(
@@ -683,6 +679,21 @@ private fun InteractiveMap(
                                 }
                             }
                         },
+            )
+
+            // WATER FOAM — three river-foam frames cycled at random (sudden
+            // swaps, eased opacity) on top of the map. Sits in the same
+            // transformed Box as the map image so it pans/zooms with it, and
+            // below the node connections so nodes stay visible on top.
+            MapWaterFoam(modifier = Modifier.fillMaxSize())
+
+            // OCEAN WAVES — wave sprites that spawn on the ocean (per the water
+            // mask), fade in, drift slightly, then fade out. Same transformed
+            // Box as the map so they pan/zoom with it; below the node
+            // connections so nodes stay visible on top.
+            MapOceanWaves(
+                maskResourceId = R.drawable.mindveil_4k_watermask,
+                modifier = Modifier.fillMaxSize(),
             )
 
             // NODE CONNECTIONS

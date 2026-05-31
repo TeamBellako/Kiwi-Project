@@ -3,12 +3,10 @@ package com.bellako.kiwi.features.users.screens
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -105,6 +104,21 @@ private val OPTION_SLOT_HEIGHT = 72.dp
 
 // Pushes the progress bar down from the very top of the screen.
 private val PROGRESS_BAR_TOP_INSET = 24.dp
+
+// Build-reveal animation (BuildModal). Text elements fade in; the skills pop
+// with a scaled EaseOutBack overshoot, staggered like the combat deck intro
+// (SKILL_* mirror CombatIntro's values). The reveal is held until the skills
+// have loaded so the final layout is already in place — every element then
+// fades/pops in from its final position without anything shifting.
+private const val BUILD_FADE_MS = 700
+private const val BUILD_TITLE_GAP_MS = 150L
+private const val SKILLS_SETTLE_MS = 80L
+private const val SKILLS_BEFORE_POP_MS = 250L
+private const val SKILL_POP_MS = 400
+private const val SKILL_STAGGER_MS = 150
+private const val SKILL_MIN_SCALE = 0.5f
+private const val BUILD_BUTTON_GAP_MS = 300L
+private const val BUILD_BUTTON_FADE_MS = 600
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Suppress("MagicNumber")
@@ -349,9 +363,12 @@ private fun BuildModal(
     val nodeEntry = LocalNodeEntryTransition.current
     val veilScope = rememberCoroutineScope()
 
-    var buildVisible by remember { mutableStateOf(false) }
-    var skillsVisible by remember { mutableStateOf(false) }
-    var buttonVisible by remember { mutableStateOf(false) }
+    // Reveal drivers. Held at 0 (invisible) until the skills load so the layout
+    // is final before anything animates; then text fades and skills pop in.
+    val titleAlpha = remember { Animatable(0f) }
+    val buildAlpha = remember { Animatable(0f) }
+    val skillClock = remember { Animatable(0f) }
+    val buttonAlpha = remember { Animatable(0f) }
 
     // Settings re-uses this screen to let the user retake the personality
     // test. In that mode we stop after the build is shown — no apps step.
@@ -373,17 +390,21 @@ private fun BuildModal(
         }
     }
 
-    LaunchedEffect(Unit) {
-        delay(100)
-        buildVisible = true
-    }
-
+    // Orchestrate the whole reveal once the skills are in (loadSkills runs after
+    // loadPersonality above, so by now the build name is set too). Waiting means
+    // the skill rows are already laid out — the reveal plays over a fixed layout
+    // so nothing reflows as elements appear.
     LaunchedEffect(skills.isNotEmpty()) {
         if (skills.isEmpty()) return@LaunchedEffect
-        delay(900)
-        skillsVisible = true
-        delay(600)
-        buttonVisible = true
+        delay(SKILLS_SETTLE_MS)
+        titleAlpha.animateTo(1f, tween(BUILD_FADE_MS, easing = LinearEasing))
+        delay(BUILD_TITLE_GAP_MS)
+        buildAlpha.animateTo(1f, tween(BUILD_FADE_MS, easing = LinearEasing))
+        delay(SKILLS_BEFORE_POP_MS)
+        val total = SKILL_POP_MS + (skills.size - 1).coerceAtLeast(0) * SKILL_STAGGER_MS
+        skillClock.animateTo(total.toFloat(), tween(total, easing = LinearEasing))
+        delay(BUILD_BUTTON_GAP_MS)
+        buttonAlpha.animateTo(1f, tween(BUILD_BUTTON_FADE_MS, easing = LinearEasing))
     }
 
     Column(
@@ -401,45 +422,45 @@ private fun BuildModal(
                 "Your initial build is...",
                 TextAlign.Center,
                 modifier =
-                    Modifier.padding(
-                        top = getResponsiveSizeHeight(Spacing.medium),
-                        bottom = getResponsiveSizeHeight(Spacing.small),
-                    ),
+                    Modifier
+                        .alpha(titleAlpha.value)
+                        .padding(
+                            top = getResponsiveSizeHeight(Spacing.medium),
+                            bottom = getResponsiveSizeHeight(Spacing.small),
+                        ),
             ),
         )
 
-        AnimatedVisibility(
-            visible = buildVisible,
-            enter = fadeIn(animationSpec = tween(700)),
+        Column(
+            modifier = Modifier.alpha(buildAlpha.value),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Kiwi_H2(
-                    KiwiTextArguments(
-                        personalityState?.build ?: "",
-                        TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        modifier =
-                            Modifier.padding(
-                                top = getResponsiveSizeHeight(Spacing.medium),
-                                bottom = getResponsiveSizeHeight(Spacing.small),
-                            ),
-                    ),
-                )
+            Kiwi_H2(
+                KiwiTextArguments(
+                    personalityState?.build ?: "",
+                    TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                        Modifier.padding(
+                            top = getResponsiveSizeHeight(Spacing.medium),
+                            bottom = getResponsiveSizeHeight(Spacing.small),
+                        ),
+                ),
+            )
 
-                Kiwi_Spacer()
+            Kiwi_Spacer()
 
-                Kiwi_P1(
-                    KiwiTextArguments(
-                        text = "And these are your initial skills:",
-                        TextAlign.Center,
-                        modifier =
-                            Modifier.padding(
-                                top = getResponsiveSizeHeight(Spacing.medium),
-                                bottom = getResponsiveSizeHeight(Spacing.small),
-                            ),
-                    ),
-                )
-            }
+            Kiwi_P1(
+                KiwiTextArguments(
+                    text = "And these are your initial skills:",
+                    TextAlign.Center,
+                    modifier =
+                        Modifier.padding(
+                            top = getResponsiveSizeHeight(Spacing.medium),
+                            bottom = getResponsiveSizeHeight(Spacing.small),
+                        ),
+                ),
+            )
         }
 
         skills.chunked(2).forEachIndexed { rowIndex, rowSkills ->
@@ -447,11 +468,22 @@ private fun BuildModal(
                 horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                rowSkills.forEach { skill ->
-                    AnimatedVisibility(
-                        visible = skillsVisible,
-                        enter = fadeIn(animationSpec = tween(600)),
-                        modifier = Modifier.weight(1f),
+                rowSkills.forEachIndexed { colIndex, skill ->
+                    // Flat index across the 2-wide grid drives the stagger.
+                    val flatIndex = rowIndex * 2 + colIndex
+                    val itemStart = flatIndex * SKILL_STAGGER_MS
+                    val rawP = ((skillClock.value - itemStart) / SKILL_POP_MS).coerceIn(0f, 1f)
+                    val curve = if (rawP <= 0f) 0f else EaseOutBack.transform(rawP).coerceAtLeast(0f)
+                    // Scale never collapses past SKILL_MIN_SCALE so the slot's
+                    // layout bounds stay put; alpha (rawP) does the hiding.
+                    val popScale = SKILL_MIN_SCALE + (1f - SKILL_MIN_SCALE) * curve
+
+                    Box(
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .scale(popScale)
+                                .alpha(rawP),
                     ) {
                         OnboardingSkillItem(skill)
                     }
@@ -463,32 +495,33 @@ private fun BuildModal(
             Kiwi_Spacer(Spacing.small)
         }
 
-        AnimatedVisibility(
-            visible = buttonVisible,
-            enter = fadeIn(animationSpec = tween(600)),
+        Column(
+            modifier = Modifier.alpha(buttonAlpha.value),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Kiwi_Spacer()
-                Kiwi_FixedSizeButton(
-                    textArguments =
-                        KiwiTextArguments(
-                            "Get Started",
-                            color = kiwiColors.color6,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(8.dp),
-                        ),
-                    color = kiwiColors.color3A,
-                    enabled = !personalityIsLoading && !skillsIsLoading,
-                    onClick = {
-                        if (fromSettings) {
-                            navController.popBackStack()
-                        } else {
-                            // Veil the build → app-selection step change.
-                            signupVeilNavigate(nodeEntry, veilScope, navController, ScreenRoutes.SIGNUP4_APPS)
-                        }
-                    },
-                )
-            }
+            Kiwi_Spacer()
+            Kiwi_FixedSizeButton(
+                textArguments =
+                    KiwiTextArguments(
+                        "Get Started",
+                        color = kiwiColors.color6,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(8.dp),
+                    ),
+                color = kiwiColors.color3A,
+                // Gate taps until the button has actually faded in — it occupies
+                // its slot from the start (alpha 0), so without this the user
+                // could blind-tap it early.
+                enabled = !personalityIsLoading && !skillsIsLoading && buttonAlpha.value > 0.99f,
+                onClick = {
+                    if (fromSettings) {
+                        navController.popBackStack()
+                    } else {
+                        // Veil the build → app-selection step change.
+                        signupVeilNavigate(nodeEntry, veilScope, navController, ScreenRoutes.SIGNUP4_APPS)
+                    }
+                },
+            )
         }
     }
 }
