@@ -4,16 +4,22 @@ import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
@@ -24,9 +30,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -47,10 +56,12 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label1
 import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.common.screens.components.Kiwi_P1
+import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.common.tests.CommonTestTags
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
@@ -70,6 +81,30 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlin.math.roundToInt
+
+// Staggered scale-pop for the questionnaire options, mirroring the conversation
+// options panel (ConversationScreen): each option scales up with an EaseOutBack
+// overshoot, OPTION_STAGGER_MS apart.
+private const val OPTION_POP_MS = 450
+private const val OPTION_STAGGER_MS = 140
+
+// Progress-bar styling, matched to the login loading bar (LoginLoadingScreen)
+// for a consistent look: color6 bar over a faint track, inside a translucent
+// rounded pill.
+private const val PROGRESS_TRACK_ALPHA = 0.25f
+private const val PROGRESS_BG_ALPHA = 0.7f
+
+// Fixed slots so the question and answers keep their positions no matter how
+// many lines each text wraps to — the content is centered within these, so a
+// 1-line and a 3-line question occupy the same space and the answers below
+// never shift between questions. Bump these if a longer question/answer clips.
+private val QUESTION_AREA_HEIGHT = 120.dp
+private val OPTION_SLOT_HEIGHT = 72.dp
+
+// Pushes the progress bar down from the very top of the screen.
+private val PROGRESS_BAR_TOP_INSET = 24.dp
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Suppress("MagicNumber")
@@ -138,76 +173,113 @@ private fun Options(
     if (shouldShowBuildModal) {
         BuildModal(personalityViewModel, skillsViewModel, navController)
     } else {
+        val kiwiColors = LocalKiwiColors.current
+        val nodeEntry = LocalNodeEntryTransition.current
+        var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
+
+        val totalQuestions = currentPersonalityState.questions.size
+        val progress by remember(currentQuestion, totalQuestions) {
+            derivedStateOf { (currentQuestion + 1).toFloat() / totalQuestions.toFloat() }
+        }
+
+        val options = currentPersonalityState.questions[currentQuestion].options
+
+        // Lift the step veil once we've arrived on the questionnaire (no-op when
+        // we got here without one — e.g. resuming sign-up from login).
+        LaunchedEffect(Unit) { nodeEntry?.fadeOut() }
+
+        // Drives the staggered scale-pop of the options. Restarts whenever the
+        // question changes so each new set pops in; on the first question we
+        // hold until the entry veil has lifted so the pops aren't wasted behind
+        // it.
+        val optionsClock = remember { Animatable(0f) }
+        LaunchedEffect(currentQuestion) {
+            optionsClock.snapTo(0f)
+            if (nodeEntry != null) {
+                snapshotFlow { nodeEntry.veilAlpha }.first { it <= 0f }
+            }
+            val total = OPTION_POP_MS + (options.size - 1).coerceAtLeast(0) * OPTION_STAGGER_MS
+            optionsClock.animateTo(total.toFloat(), tween(total, easing = LinearEasing))
+        }
+
         Column(
             modifier =
                 Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
+                    .fillMaxSize()
                     .padding(getResponsiveSizeHeight(Spacing.medium))
                     .testTag(CommonTestTags.USERS_SCREEN),
-            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val kiwiColors = LocalKiwiColors.current
-            var currentQuestion by remember { mutableIntStateOf(currentPersonalityState.currentQuestion) }
+            // (2) Progress bar near the top, nudged down a little from the edge.
+            Kiwi_Spacer(PROGRESS_BAR_TOP_INSET)
+            QuestionnaireProgressBar(progress = progress)
 
-            val totalQuestions = currentPersonalityState.questions.size
-            val progress by remember(currentQuestion, totalQuestions) {
-                derivedStateOf { (currentQuestion + 1).toFloat() / totalQuestions.toFloat() }
-            }
+            Kiwi_Spacer(Spacing.xLarge)
 
-            LinearProgressIndicator(
-                progress = { progress },
+            // (3) Fixed-height slots keep the question and answers in place no
+            // matter how many lines their text wraps to, so nothing shifts as
+            // the player moves between questions.
+            Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(bottom = getResponsiveSizeHeight(Spacing.medium))
-                        .testTag("questionnaire_progress_bar"),
-                color = kiwiColors.color3A,
-                trackColor = kiwiColors.color3A.copy(alpha = 0.25f),
-                strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-            )
-
-            Kiwi_H2(
-                KiwiTextArguments(
-                    currentPersonalityState.questions[currentQuestion].question,
-                    textAlign = TextAlign.Center,
-                    color = kiwiColors.color6,
-                ),
-            )
+                        .height(getResponsiveSizeHeight(QUESTION_AREA_HEIGHT)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Kiwi_H2(
+                    KiwiTextArguments(
+                        currentPersonalityState.questions[currentQuestion].question,
+                        textAlign = TextAlign.Center,
+                        color = kiwiColors.color6,
+                    ),
+                )
+            }
 
             Kiwi_Spacer(Spacing.large)
 
-            currentPersonalityState.questions[currentQuestion].options.forEachIndexed { index, option ->
+            options.forEachIndexed { index, option ->
+                val itemStart = index * OPTION_STAGGER_MS
+                val rawP = ((optionsClock.value - itemStart) / OPTION_POP_MS).coerceIn(0f, 1f)
+                val popScale = if (rawP <= 0f) 0f else EaseOutBack.transform(rawP).coerceAtLeast(0f)
 
-                Kiwi_FixedSizeButton(
-                    textArguments =
-                        KiwiTextArguments(
-                            option,
-                            color = kiwiColors.color6,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(8.dp),
-                        ),
-                    color = kiwiColors.color3A,
-                    onClick = {
-                        currentPersonalityState.answers[currentQuestion] = index
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(getResponsiveSizeHeight(OPTION_SLOT_HEIGHT)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(modifier = Modifier.scale(popScale)) {
+                        Kiwi_FixedSizeButton(
+                            textArguments =
+                                KiwiTextArguments(
+                                    option,
+                                    color = kiwiColors.color6,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(8.dp),
+                                ),
+                            color = kiwiColors.color3A,
+                            onClick = {
+                                currentPersonalityState.answers[currentQuestion] = index
 
-                        firebaseLogEvent(
-                            FirebaseEventNames.PERSONALIZATION_QUESTION_ANSWERED,
-                            mapOf(
-                                "question" to currentPersonalityState.questions[currentQuestion].question,
-                                "answer" to currentPersonalityState.questions[currentQuestion].options[index],
-                            ),
+                                firebaseLogEvent(
+                                    FirebaseEventNames.PERSONALIZATION_QUESTION_ANSWERED,
+                                    mapOf(
+                                        "question" to currentPersonalityState.questions[currentQuestion].question,
+                                        "answer" to currentPersonalityState.questions[currentQuestion].options[index],
+                                    ),
+                                )
+
+                                if (currentQuestion + 1 < currentPersonalityState.questions.size) {
+                                    ++currentQuestion
+                                } else {
+                                    shouldShowBuildModal = true
+                                }
+                            },
+                            enabled = !isLoading,
                         )
-
-                        if (currentQuestion + 1 < currentPersonalityState.questions.size) {
-                            ++currentQuestion
-                        } else {
-                            shouldShowBuildModal = true
-                        }
-                    },
-                    enabled = !isLoading,
-                )
+                    }
+                }
 
                 Kiwi_Spacer()
             }
@@ -216,6 +288,46 @@ private fun Options(
         if (isLoading || isPreview) {
             LoadingModal()
         }
+    }
+}
+
+// Progress bar styled to match the login loading bar (LoginLoadingScreen): a
+// color6 indicator over a faint track with a percentage readout, inside a
+// translucent rounded pill.
+@Composable
+private fun QuestionnaireProgressBar(progress: Float) {
+    val kiwiColors = LocalKiwiColors.current
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    color = kiwiColors.color2.copy(alpha = PROGRESS_BG_ALPHA),
+                    shape = RoundedCornerShape(getResponsiveSizeHeight(Spacing.small)),
+                ).padding(
+                    horizontal = getResponsiveSizeHeight(Spacing.medium),
+                    vertical = getResponsiveSizeHeight(Spacing.small),
+                ),
+    ) {
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .testTag("questionnaire_progress_bar"),
+            color = kiwiColors.color6,
+            trackColor = kiwiColors.color6.copy(alpha = PROGRESS_TRACK_ALPHA),
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+        )
+        Kiwi_P2(
+            KiwiTextArguments(
+                "${(progress * 100).roundToInt()}%",
+                textAlign = TextAlign.Center,
+                color = kiwiColors.color6,
+                modifier = Modifier.padding(start = Spacing.medium),
+            ),
+        )
     }
 }
 
@@ -233,6 +345,9 @@ private fun BuildModal(
     val skillsIsLoading by skillsViewModel.isLoading.collectAsState()
 
     val skills = skillsState?.allSkills ?: emptyList()
+
+    val nodeEntry = LocalNodeEntryTransition.current
+    val veilScope = rememberCoroutineScope()
 
     var buildVisible by remember { mutableStateOf(false) }
     var skillsVisible by remember { mutableStateOf(false) }
@@ -368,7 +483,8 @@ private fun BuildModal(
                         if (fromSettings) {
                             navController.popBackStack()
                         } else {
-                            navController.navigate(ScreenRoutes.SIGNUP4_APPS)
+                            // Veil the build → app-selection step change.
+                            signupVeilNavigate(nodeEntry, veilScope, navController, ScreenRoutes.SIGNUP4_APPS)
                         }
                     },
                 )

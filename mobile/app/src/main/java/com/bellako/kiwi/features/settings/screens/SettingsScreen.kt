@@ -345,7 +345,8 @@ private fun SettingsButtons(
                 color = kiwiColors.color5A,
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        usersViewModel.setShowAppLoading(true)
+                        // No loading curtain on logout — the login screen lerps
+                        // up from the bottom over the app instead.
                         usersViewModel.logout(context)
                         navController.navigate(ScreenRoutes.LOGIN) {
                             popUpTo(ScreenRoutes.LOGIN) { inclusive = true }

@@ -15,6 +15,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
@@ -217,6 +219,12 @@ private fun SignUpForm(
 ) {
     val kiwiColors = LocalKiwiColors.current
 
+    // Veil the step change into the questionnaire. rememberCoroutineScope (not
+    // the detached CoroutineScope used for the async signup below) so the veil
+    // Animatable has a frame clock.
+    val nodeEntry = LocalNodeEntryTransition.current
+    val veilScope = rememberCoroutineScope()
+
     SignUpForm_Personality(
         isLoading = isLoading,
         personalityViewModel = personalityViewModel,
@@ -256,7 +264,7 @@ private fun SignUpForm(
                                 ) {
                                     firebaseLogEvent(FirebaseEventNames.SIGNUP_2_FORM_COMPLETED)
 
-                                    navController.navigate(ScreenRoutes.SIGNUP3_TEST)
+                                    signupVeilNavigate(nodeEntry, veilScope, navController, ScreenRoutes.SIGNUP3_TEST)
                                     onSignUpSuccess()
                                 }
                             }

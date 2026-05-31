@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +57,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
@@ -441,17 +444,26 @@ private fun LogInForm(
 private fun WelcomeText() {
     val kiwiColors = LocalKiwiColors.current
 
-    Kiwi_H1(
-        KiwiTextArguments(
-            "Welcome Back,\nKnight",
-            TextAlign.Center,
-            color = kiwiColors.colorF,
-            fontWeight = FontWeight.Bold,
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
-        ),
-    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Kiwi_H1(
+            KiwiTextArguments(
+                "Welcome Back,\nKnight",
+                TextAlign.Center,
+                color = kiwiColors.colorF,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+            ),
+        )
+
+        Kiwi_Image(
+            R.drawable.growtale_icon,
+            "GrowTale icon",
+            modifier = Modifier.size(getResponsiveSizeHeight(64.dp)),
+        )
+    }
 }
 
 @Composable
@@ -503,8 +515,9 @@ private suspend fun performLogin(
     navController: NavController,
 ): Boolean {
     // Raise the map-entry loading curtain up front so it fully covers the
-    // login network call and the navigation. It is lowered again for any
-    // outcome that does NOT land on the map (an unfinished sign-up, a failure).
+    // login network call and the navigation — every login (auto, manual) earns
+    // it. It is lowered again for any outcome that does NOT land on the map (an
+    // unfinished sign-up, a failure).
     usersViewModel.setShowAppLoading(true)
     if (usersViewModel.login(context).isSuccess) {
         // check personality registered and configured

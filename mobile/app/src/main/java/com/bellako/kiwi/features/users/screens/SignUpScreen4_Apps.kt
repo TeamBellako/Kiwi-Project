@@ -74,6 +74,7 @@ import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
 import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
@@ -102,6 +103,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val APP_CARD_WIDTH = 96.dp
@@ -115,6 +117,10 @@ private const val DRAG_ALPHA = 1.0f
 private const val DRAG_SCALE_X = 1.0f
 private const val DRAG_SCALE_Y = 1.0f
 private const val NEUTRAL_APPS_GRID_SIZE = 3
+
+// Small settle before lifting the build→apps step veil, so the apps layout has
+// composed under the veil and the reveal lands on a finished screen.
+private const val SIGNUP_APPS_VEIL_LIFT_DELAY_MS = 150L
 
 private val GOOD_APP_PACKAGES =
     setOf(
@@ -197,6 +203,15 @@ fun AppClassification(
     val packageManager = context.packageManager
     val myPackageName = context.packageName
     val isPreview = LocalInspectionMode.current
+
+    // Lift the step veil raised by the build-confirm transition once the app
+    // step is mounted. No-op when reached without a veil (Settings "change
+    // apps", or resuming sign-up from login).
+    val nodeEntry = LocalNodeEntryTransition.current
+    LaunchedEffect(Unit) {
+        delay(SIGNUP_APPS_VEIL_LIFT_DELAY_MS)
+        nodeEntry?.fadeOut()
+    }
 
     val personalityUiState by personalityViewModel.uiState.collectAsState()
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()

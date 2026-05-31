@@ -153,6 +153,27 @@ fun MapScreen(
     val mapDisplayWidthDp = with(density) { displayWidthPx.toDp() }
     val mapDisplayHeightDp = with(density) { displayHeightPx.toDp() }
 
+    // Dynamic max zoom-out: the higher the player has climbed, the further they
+    // may pinch out. We take the highest unlocked node (largest cordY, 0..1
+    // bottom→top, counting only nodes the player has actually reached — OPEN or
+    // COMPLETED) and map it linearly onto the zoom-out limit:
+    //   cordY = 1 → minZoom  (the map's designed "see everything" zoom-out)
+    //   cordY = 0 → maxZoom  (no zoom-out — view stays pinned on the unlocked
+    //                         region instead of revealing the empty map above)
+    // So early on the camera can't pull back past what's been unlocked, and the
+    // ceiling lifts toward the full minZoom as progress climbs.
+    val highestUnlockedY =
+        nodesMap.values
+            .filter { it.status == NodeStatus.OPEN || it.status == NodeStatus.COMPLETED }
+            .maxOfOrNull { it.cordY } ?: 0f
+
+    val effectiveMaxZoomOut =
+        run {
+            val minZoom = mapState.mapInfo.minZoom
+            val maxZoom = mapState.mapInfo.maxZoom
+            (maxZoom + (minZoom - maxZoom) * highestUnlockedY).coerceIn(minZoom, maxZoom)
+        }
+
     LaunchedEffect(
         mapState.mapInfo.minZoom,
         mapState.mapInfo.maxZoom,
@@ -162,7 +183,12 @@ fun MapScreen(
         viewportHeightPx,
     ) {
         mapViewModel.setParameters(
-            minScale = mapState.mapInfo.minZoom,
+            // Seed the limit with the current progress-based value. Keyed only on
+            // the map/layout (not effectiveMaxZoomOut) because setParameters
+            // recenters and re-zooms the map — fine on a map switch, jarring on a
+            // node unlock. Progress-driven changes are applied below without the
+            // reset.
+            minScale = effectiveMaxZoomOut,
             maxScale = mapState.mapInfo.maxZoom,
             mapWidthPx = displayWidthPx,
             mapHeightPx = displayHeightPx,
@@ -171,6 +197,13 @@ fun MapScreen(
             mapMarginFactor = mapMarginFactor,
             elasticityFactor = elasticityFactor,
         )
+    }
+
+    // Re-apply the zoom-out limit whenever the player's highest unlocked node
+    // changes (e.g. after unlocking a higher one), without the setParameters
+    // reset that would recenter and re-zoom the map mid-session.
+    LaunchedEffect(effectiveMaxZoomOut) {
+        mapViewModel.setZoomOutLimit(effectiveMaxZoomOut)
     }
 
     LaunchedEffect(Unit) {
@@ -238,44 +271,48 @@ fun MapScreen(
                 modifier = Modifier.fillMaxSize().padding(top = topInsetDp),
             )
 
-            // Mist covers the FULL screen, including behind the title and the
-            // points indicator. zIndex sits between the map content (default 0)
-            // and the top-bar UI (zIndex 1).
-            MapMist(
-                nodes = nodesMap,
-                mapState = mapState,
-                topInsetPx = topInsetPx.toFloat(),
-                modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
-            )
-
-            // Clouds sit above the mist (so they read as overhead sky reinforcing
-            // the mist cover) but below the top-bar UI. The wrapper Box mirrors
-            // InteractiveMap's positioning — top inset + center alignment — so the
-            // graphicsLayer transform places the cloud canvas exactly over the
-            // map content. The Canvas itself has no pointer modifier, so map
-            // gestures continue to land on InteractiveMap below.
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(top = topInsetDp)
-                        .zIndex(CLOUDS_Z_INDEX),
-                contentAlignment = Alignment.Center,
-            ) {
-                MapClouds(
-                    nodes = nodesMap,
-                    mapState = mapState,
-                    modifier =
-                        Modifier
-                            .size(width = mapDisplayWidthDp, height = mapDisplayHeightDp)
-                            .graphicsLayer(
-                                scaleX = mapState.scale,
-                                scaleY = mapState.scale,
-                                translationX = mapState.offset.x,
-                                translationY = mapState.offset.y,
-                            ),
-                )
-            }
+            // --- TEMPORARILY COMMENTED OUT for water VFX review ---
+            // Mist + clouds are hidden so the map's water reads clearly while
+            // the water VFX is being reworked. Uncomment both blocks to restore.
+            //
+            // // Mist covers the FULL screen, including behind the title and the
+            // // points indicator. zIndex sits between the map content (default 0)
+            // // and the top-bar UI (zIndex 1).
+            // MapMist(
+            //     nodes = nodesMap,
+            //     mapState = mapState,
+            //     topInsetPx = topInsetPx.toFloat(),
+            //     modifier = Modifier.fillMaxSize().zIndex(MIST_Z_INDEX),
+            // )
+            //
+            // // Clouds sit above the mist (so they read as overhead sky reinforcing
+            // // the mist cover) but below the top-bar UI. The wrapper Box mirrors
+            // // InteractiveMap's positioning — top inset + center alignment — so the
+            // // graphicsLayer transform places the cloud canvas exactly over the
+            // // map content. The Canvas itself has no pointer modifier, so map
+            // // gestures continue to land on InteractiveMap below.
+            // Box(
+            //     modifier =
+            //         Modifier
+            //             .fillMaxSize()
+            //             .padding(top = topInsetDp)
+            //             .zIndex(CLOUDS_Z_INDEX),
+            //     contentAlignment = Alignment.Center,
+            // ) {
+            //     MapClouds(
+            //         nodes = nodesMap,
+            //         mapState = mapState,
+            //         modifier =
+            //             Modifier
+            //                 .size(width = mapDisplayWidthDp, height = mapDisplayHeightDp)
+            //                 .graphicsLayer(
+            //                     scaleX = mapState.scale,
+            //                     scaleY = mapState.scale,
+            //                     translationX = mapState.offset.x,
+            //                     translationY = mapState.offset.y,
+            //                 ),
+            //     )
+            // }
 
             Kiwi_H2(
                 KiwiTextArguments(
@@ -646,16 +683,6 @@ private fun InteractiveMap(
                                 }
                             }
                         },
-            )
-
-            // WATER VFX — shader overlay gated to water regions by a
-            // runtime-generated mask. Sits inside the same transformed Box as
-            // the map image so pan/zoom is inherited. Renders above the map
-            // and below the node connections so nodes stay visible on top.
-            // On API <33 this emits nothing and the map looks unchanged.
-            MapWaterOverlay(
-                maskResourceId = R.drawable.mindveil_4k_watermask,
-                modifier = Modifier.fillMaxSize(),
             )
 
             // NODE CONNECTIONS
