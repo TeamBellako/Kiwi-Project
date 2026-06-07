@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
@@ -32,6 +34,7 @@ fun CombatDeck(
     modifier: Modifier = Modifier,
 ) {
     val slotMap = deckSkills.associateBy { it.deckSlot }
+    val skillHoldPadding = getResponsiveSizeHeight(4.dp)
 
     Column(modifier = modifier.fillMaxWidth()) {
         for (rowStart in 1..MAX_DECK_SLOTS step 2) {
@@ -53,7 +56,10 @@ fun CombatDeck(
                         Kiwi_Image(
                             R.drawable.skill_empty,
                             "Empty skill slot",
-                            modifier = Modifier.weight(SKILL_WEIGHT),
+                            modifier =
+                                Modifier
+                                    .weight(SKILL_WEIGHT)
+                                    .padding(skillHoldPadding),
                         )
                     }
                 }
