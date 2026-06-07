@@ -200,6 +200,7 @@ private fun AppScreen(
 
     val activeConversation by conversationViewModel.active.collectAsState()
     val isConversationVisible by conversationViewModel.isVisible.collectAsState()
+    val isTutorial by conversationViewModel.isTutorial.collectAsState()
 
     val activeCombat by combatViewModel.active.collectAsState()
     val isCombatVisible by combatViewModel.isVisible.collectAsState()
@@ -359,7 +360,7 @@ private fun AppScreen(
                     }
 
                     AnimatedVisibility(
-                        visible = isConversationVisible,
+                        visible = isConversationVisible && (showDashboard || isTutorial),
                         enter =
                             slideInVertically(
                                 initialOffsetY = { fullHeight -> fullHeight },
