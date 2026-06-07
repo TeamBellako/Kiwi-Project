@@ -133,11 +133,7 @@ fun DialogueScreen(
                                 .clip(CircleShape),
                     ) {
                         Kiwi_Image(
-                            AssetResolver.drawableOr(
-                                context,
-                                conversation.sprite,
-                                R.drawable.character_liria_base,
-                            ),
+                            AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
                             "Character image",
                             contentScale = ContentScale.Crop,
                             modifier =
