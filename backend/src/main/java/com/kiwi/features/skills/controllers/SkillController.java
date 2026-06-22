@@ -126,5 +126,22 @@ public class SkillController {
         return ResponseEntity.ok(skillService.unequipSkill(userId, skillId));
     }
 
+    // ============================================================================================
+    // REMOVE
+    // ============================================================================================
+
+    @DeleteMapping("/{skillId}")
+    public ResponseEntity<Void> removeSkill(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable long skillId
+    ) {
+        Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
+                .orElseThrow()
+                .getId();
+
+        skillService.removeSkillFromUser(userId, skillId);
+
+        return ResponseEntity.noContent().build();
+    }
 
 }

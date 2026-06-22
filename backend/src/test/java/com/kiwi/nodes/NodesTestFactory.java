@@ -71,7 +71,8 @@ public class NodesTestFactory {
                 0,
                 true,
                 "",
-                0
+                0,
+                NodeTransitionStyle.VEIL.name()
         );
     }
 }

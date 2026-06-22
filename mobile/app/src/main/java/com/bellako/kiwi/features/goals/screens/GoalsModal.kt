@@ -31,6 +31,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.screens.modals.WIPPopUpScreen
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.goals.data.GoalCategory
 import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
@@ -81,7 +84,7 @@ fun GoalsModal(
             Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.6f)),
-        contentAlignment = Alignment.TopCenter,
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -91,7 +94,6 @@ fun GoalsModal(
                 contentAlignment = Alignment.TopCenter,
                 modifier =
                     Modifier
-                        .padding(top = getResponsiveSizeHeight(24.dp))
                         .padding(horizontal = getResponsiveSizeHeight(24.dp)),
             ) {
                 Image(
@@ -168,20 +170,25 @@ fun GoalsModal(
                             .weight(buttonPercentage),
                     onClick = {
                         coroutineScope.launch {
-                            if (goalModalType == GoalNotificationType.NEW) {
-                                val goalDefinitions = goals.filterIsInstance<GoalDomain>()
-                                goalsViewModel.createGoalsFromDefinitions(goalDefinitions)
-                            } else {
+                            var anyCompleted = false
+                            if (goalModalType == GoalNotificationType.YESTERDAY) {
                                 for (goal in goals) {
                                     if (goal is UserGoalStatusDomain) {
                                         if (goal.value == goal.target) {
                                             goalsViewModel.completeGoal(goalId = goal.id)
+                                            anyCompleted = true
                                         } else {
                                             goalsViewModel.uncompleteGoal(goalId = goal.id)
                                         }
                                     }
                                 }
                                 goalsViewModel.invalidateGoalsInProgressCache()
+                                if (anyCompleted) {
+                                    EventBus.emitEvent(
+                                        EventType.MAP_CONTENT_AVAILABLE,
+                                        EventPayload.EmptyPayload(),
+                                    )
+                                }
                             }
                             onDismiss()
                         }

@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.combat.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -18,8 +19,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -39,6 +42,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.delay
 
 private const val DEFAULT_AUTO_DISMISS_MS = 3000L
+private const val BARK_APPEAR_FADE_MS = 220
 private const val ARROW_BOUNCE_MS = 600
 private const val ARROW_BOUNCE_TARGET = -10f
 private val BARK_MIN_WIDTH = 180.dp
@@ -56,6 +60,14 @@ fun CombatBarkBubble(
     val colors = LocalKiwiColors.current
     val context = LocalContext.current
     val isAuto = bark.dismissMode == BarkDismissMode.AUTO
+
+    // Every bark fades in when it appears. Keyed on triggerId so a back-to-back
+    // bark still plays the fade from scratch.
+    val appearAlpha = remember { Animatable(0f) }
+    LaunchedEffect(bark.triggerId) {
+        appearAlpha.snapTo(0f)
+        appearAlpha.animateTo(1f, tween(BARK_APPEAR_FADE_MS))
+    }
 
     if (isAuto) {
         LaunchedEffect(bark.triggerId) {
@@ -82,6 +94,7 @@ fun CombatBarkBubble(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier =
             modifier
+                .alpha(appearAlpha.value)
                 .widthIn(
                     min = getResponsiveSizeWidth(BARK_MIN_WIDTH),
                     max = getResponsiveSizeWidth(BARK_MAX_WIDTH),

@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -39,7 +41,7 @@ import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
-import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_Display1
 import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
@@ -64,13 +66,9 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
-import com.bellako.kiwi.common.screens.LOGIN_LOADING_ANIM_DURATION_MS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-private const val LOGOUT_NAV_SETTLE_MS = 100L
 
 @Composable
 fun SettingsScreen(
@@ -148,11 +146,20 @@ private fun SettingsInfoFields(usersState: UsersState?) {
     val kiwiColors = LocalKiwiColors.current
     usersState?.let { currentUsersState ->
 
-        Kiwi_H2(
-            KiwiTextArguments(
-                "SETTINGS",
-                fontWeight = FontWeight.Bold,
-            ),
+        Kiwi_Display1(
+            arguments =
+                KiwiTextArguments(
+                    text = "Settings",
+                    color = kiwiColors.colorF,
+                    textAlign = TextAlign.Start,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = getResponsiveSizeHeight(Spacing.small),
+                                vertical = Spacing.medium,
+                            ),
+                ),
         )
 
         Kiwi_Spacer()
@@ -190,6 +197,7 @@ private fun SettingsEditFields(
     settingsViewModel: ISettingsViewModel,
 ) {
     val kiwiColors = LocalKiwiColors.current
+    val coroutineScope = rememberCoroutineScope()
 
     settingsState?.let { currentSettingsState ->
         var soundSliderPosition by remember {
@@ -211,7 +219,10 @@ private fun SettingsEditFields(
             value = soundSliderPosition,
             onValueChange = { newValue ->
                 soundSliderPosition = newValue
-                CoroutineScope(Dispatchers.Main).launch {
+                // Dispatch on Main.immediate so the live volume update runs inline on this
+                // gesture callback instead of being queued behind the drag's frame work, which
+                // otherwise delayed audible changes until the slider was released.
+                coroutineScope.launch(Dispatchers.Main.immediate) {
                     settingsViewModel.updateSettings(currentSettingsState.copy(soundVolume = newValue))
                 }
             },
@@ -234,7 +245,7 @@ private fun SettingsEditFields(
             value = musicSliderPosition,
             onValueChange = { newValue ->
                 musicSliderPosition = newValue
-                CoroutineScope(Dispatchers.Main).launch {
+                coroutineScope.launch(Dispatchers.Main.immediate) {
                     settingsViewModel.updateSettings(currentSettingsState.copy(musicVolume = newValue))
                 }
             },
@@ -287,6 +298,20 @@ private fun SettingsButtons(
                 horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
+                        "RETAKE PERSONALITY TEST",
+                        color = kiwiColors.color6,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                color = kiwiColors.color5A,
+                onClick = { navController.navigate(ScreenRoutes.SIGNUP3_TEST) },
+            )
+
+            Kiwi_Spacer()
+
+            Kiwi_FixedSizeButton(
+                horizontalMargin = Spacing.xLarge,
+                textArguments =
+                    KiwiTextArguments(
                         "CONTACT US",
                         color = kiwiColors.color6,
                         fontWeight = FontWeight.Bold,
@@ -320,14 +345,12 @@ private fun SettingsButtons(
                 color = kiwiColors.color5A,
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        usersViewModel.setManualAuthOverlayActive(true)
-                        delay(LOGIN_LOADING_ANIM_DURATION_MS.toLong())
+                        // No loading curtain on logout — the login screen lerps
+                        // up from the bottom over the app instead.
                         usersViewModel.logout(context)
                         navController.navigate(ScreenRoutes.LOGIN) {
                             popUpTo(ScreenRoutes.LOGIN) { inclusive = true }
                         }
-                        delay(LOGOUT_NAV_SETTLE_MS)
-                        usersViewModel.setManualAuthOverlayActive(false)
                     }
                 },
             )

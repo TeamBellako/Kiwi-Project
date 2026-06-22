@@ -1,22 +1,43 @@
 package com.bellako.kiwi.features.combat.components
 
+import android.os.Build
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.graphics.drawscope.scale
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.math.hypot
+import kotlin.random.Random
 
 private const val PLAYER_SHAKE_CYCLES = 4
 private const val PLAYER_SHAKE_AMPLITUDE_PX = 28f
@@ -27,15 +48,55 @@ private const val PLAYER_FLASH_ALPHA = 0.15f
 private const val PLAYER_VIGNETTE_PEAK_ALPHA = 0.3f
 private const val PLAYER_VIGNETTE_RISE_MS = 120
 private const val PLAYER_VIGNETTE_FALL_MS = 500
-private const val DEATH_PAUSE_MS = 400L
+// The death sequence is driven by a 0..1 "eyelids closed" progress: a few
+// flutters, then a slow full close. 0 = eyes open, 1 = eyes fully shut (black).
+// Total run time gates the defeat-screen transition — see DEFEAT_TRANSITION_DELAY_MS.
+private const val DEATH_PAUSE_MS = 500L
 private const val DEATH_BLINK_CYCLES = 3
-private const val DEATH_BLINK_RISE_MS = 180
-private const val DEATH_BLINK_FALL_MS = 220
-private const val DEATH_BLINK_PEAK_ALPHA = 0.55f
-private const val DEATH_BLINK_TROUGH_ALPHA = 0.15f
-private const val DEATH_HOLD_RISE_MS = 200
-private const val DEATH_HOLD_ALPHA = 0.6f
-private const val DEATH_VIGNETTE_INNER_ALPHA_FACTOR = 0.4f
+private const val DEATH_BLINK_RISE_MS = 260
+private const val DEATH_BLINK_FALL_MS = 320
+// How far the eyelids drop on each pre-close flutter, and how far they reopen between flutters.
+private const val DEATH_BLINK_PEAK = 0.5f
+private const val DEATH_BLINK_TROUGH = 0.08f
+private const val DEATH_CLOSE_MS = 700
+
+// Shape of the clear "eye" opening: a wide horizontal ellipse, so its height is
+// a small fraction of its width.
+private const val DEATH_VIGNETTE_EYE_ASPECT = 0.4f
+// Fraction of the opening's radius spent fading from clear to solid black.
+private const val DEATH_VIGNETTE_FEATHER = 0.55f
+// Headroom so the screen is still fully clear when the close has only just begun.
+private const val DEATH_VIGNETTE_OPEN_HEADROOM = 1.08f
+// Slight overdraw so the squashed cover rect leaves no hairline gap at the edges.
+private const val DEATH_VIGNETTE_COVER_OVERDRAW = 1.05f
+
+// Focus blur — at rest the background sits at a small standing blur with a
+// slow oscillation so the scene reads as "alive"; the enemy is fully sharp.
+// Occasionally a fast cross-fade pulse fires: enemy quickly blurs while the
+// background sharpens, then both snap back. An override (e.g. a bark) locks
+// focus on the enemy for the bark's duration.
+private const val FOCUS_BLUR_ENEMY_REST_DP = 0f
+private const val FOCUS_BLUR_BACKGROUND_REST_DP = 1.5f
+// Slow ±amplitude oscillation added on top of the background's resting value.
+private const val FOCUS_BLUR_BACKGROUND_OSCILLATION_DP = 0.4f
+private const val FOCUS_BLUR_BACKGROUND_OSCILLATION_HALF_PERIOD_MS = 900
+// Pulse peak — the enemy's blur at the apex of the cross-fade. Random within range.
+private const val FOCUS_BLUR_PULSE_PEAK_MIN_DP = 3f
+private const val FOCUS_BLUR_PULSE_PEAK_MAX_DP = 5f
+// Pulse ramps are intentionally fast: total ramp-in + hold + ramp-out lands
+// in roughly 500-900 ms.
+private const val FOCUS_BLUR_PULSE_RAMP_MIN_MS = 200
+private const val FOCUS_BLUR_PULSE_RAMP_MAX_MS = 350
+private const val FOCUS_BLUR_PULSE_HOLD_MIN_MS = 100L
+private const val FOCUS_BLUR_PULSE_HOLD_MAX_MS = 200L
+private const val FOCUS_BLUR_IDLE_MIN_MS = 1000L
+private const val FOCUS_BLUR_IDLE_MAX_MS = 3000L
+private const val FOCUS_BLUR_OVERRIDE_PEAK_DP = 4f
+private const val FOCUS_BLUR_OVERRIDE_RAMP_MS = 350
+private const val FOCUS_BLUR_OVERRIDE_RELEASE_MS = 600
+private const val FOCUS_BLUR_REQUEST_DEFAULT_HOLD_MS = 1200L
+// Below this px radius the blur pipeline is skipped entirely (renderEffect = null).
+private const val FOCUS_BLUR_PIPELINE_THRESHOLD_PX = 0.5f
 
 internal class PlayerDamageVfx(
     val shakeOffsetX: Animatable<Float, *>,
@@ -87,20 +148,21 @@ internal fun rememberDeathSequenceVfx(
     isPlayerDefeated: Boolean,
     key: Any,
 ): Animatable<Float, *> {
-    val alpha = remember(key) { Animatable(0f) }
+    val closeProgress = remember(key) { Animatable(0f) }
     LaunchedEffect(isPlayerDefeated, key) {
         if (!isPlayerDefeated) {
-            alpha.snapTo(0f)
+            closeProgress.snapTo(0f)
             return@LaunchedEffect
         }
         delay(DEATH_PAUSE_MS)
+        // A few eyelid flutters, then the eyes shut for good.
         repeat(DEATH_BLINK_CYCLES) {
-            alpha.animateTo(DEATH_BLINK_PEAK_ALPHA, tween(DEATH_BLINK_RISE_MS))
-            alpha.animateTo(DEATH_BLINK_TROUGH_ALPHA, tween(DEATH_BLINK_FALL_MS))
+            closeProgress.animateTo(DEATH_BLINK_PEAK, tween(DEATH_BLINK_RISE_MS))
+            closeProgress.animateTo(DEATH_BLINK_TROUGH, tween(DEATH_BLINK_FALL_MS))
         }
-        alpha.animateTo(DEATH_HOLD_ALPHA, tween(DEATH_HOLD_RISE_MS))
+        closeProgress.animateTo(1f, tween(DEATH_CLOSE_MS))
     }
-    return alpha
+    return closeProgress
 }
 
 @Composable
@@ -131,21 +193,250 @@ internal fun PlayerDamageOverlays(vfx: PlayerDamageVfx) {
     }
 }
 
+/**
+ * Black "closing eyes" vignette for the death sequence. [closeProgress] runs
+ * 0 (eyes open, fully clear) to 1 (eyes shut, fully black); the clear opening
+ * is a horizontal ellipse that shrinks from outside in as it rises.
+ */
 @Composable
-internal fun DeathSequenceOverlay(alpha: Float) {
-    if (alpha <= 0f) return
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.radialGradient(
-                        colors =
-                            listOf(
-                                Color.Red.copy(alpha = alpha * DEATH_VIGNETTE_INNER_ALPHA_FACTOR),
-                                Color.Red.copy(alpha = alpha),
-                            ),
+internal fun DeathSequenceOverlay(closeProgress: Float) {
+    val progress = closeProgress.coerceIn(0f, 1f)
+    if (progress <= 0f) return
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        // Eyes fully shut: a solid black cover, with no sub-pixel opening left.
+        if (progress >= 1f) {
+            drawRect(Color.Black)
+            return@Canvas
+        }
+        val center = Offset(size.width / 2f, size.height / 2f)
+        // Distance to a screen corner in the vertically-squashed space the
+        // gradient is drawn in — the opening must clear this to leave the
+        // screen fully visible at the start of the close.
+        val cornerRadius =
+            hypot(size.width / 2f, size.height / 2f / DEATH_VIGNETTE_EYE_ASPECT)
+        val fullyOpenRadius =
+            cornerRadius / (1f - DEATH_VIGNETTE_FEATHER) * DEATH_VIGNETTE_OPEN_HEADROOM
+        val openRadius = (fullyOpenRadius * (1f - progress)).coerceAtLeast(1f)
+
+        val brush =
+            Brush.radialGradient(
+                colorStops =
+                    arrayOf(
+                        0f to Color.Transparent,
+                        (1f - DEATH_VIGNETTE_FEATHER) to Color.Transparent,
+                        1f to Color.Black,
                     ),
-                ),
+                center = center,
+                radius = openRadius,
+            )
+        // Squash the y-axis so the circular gradient reads as a wide,
+        // eye-shaped ellipse. The cover rect is scaled up by 1/aspect first so
+        // that, once squashed, it still spans the whole screen — leaving solid
+        // clamped black everywhere outside the elliptical opening.
+        val coverWidth = size.width * DEATH_VIGNETTE_COVER_OVERDRAW
+        val coverHeight = size.height / DEATH_VIGNETTE_EYE_ASPECT * DEATH_VIGNETTE_COVER_OVERDRAW
+        scale(scaleX = 1f, scaleY = DEATH_VIGNETTE_EYE_ASPECT, pivot = center) {
+            drawRect(
+                brush = brush,
+                topLeft = Offset(center.x - coverWidth / 2f, center.y - coverHeight / 2f),
+                size = Size(coverWidth, coverHeight),
+            )
+        }
+    }
+}
+
+internal enum class FocusTarget { ENEMY, BACKGROUND }
+
+private fun restDpFor(target: FocusTarget): Float = when (target) {
+    FocusTarget.ENEMY -> FOCUS_BLUR_ENEMY_REST_DP
+    FocusTarget.BACKGROUND -> FOCUS_BLUR_BACKGROUND_REST_DP
+}
+
+/**
+ * Returns a [BlurEffect] when blur is supported and the radius is large enough
+ * to be worth a separate render pass. Returns null otherwise — most ambient
+ * frames have one surface at 0dp, so the blur pipeline is skipped there.
+ */
+internal fun blurRenderEffectOrNull(radiusPx: Float): RenderEffect? =
+    if (radiusPx > FOCUS_BLUR_PIPELINE_THRESHOLD_PX &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    ) {
+        BlurEffect(radiusPx, radiusPx)
+    } else {
+        null
+    }
+
+/**
+ * Ambient + cinematic focus-blur controller. Ambient pulses one surface out of
+ * focus at a time with randomized timing; setting [overrideTarget] (or calling
+ * [requestFocus]) snaps the loop into a cinematic focus — the OPPOSITE surface
+ * blurs to peak and holds until the override clears.
+ */
+@Stable
+internal class FocusBlurVfx(
+    val enemyBlurRadius: Animatable<Float, *>,
+    val backgroundBlurRadius: Animatable<Float, *>,
+    val backgroundOscillation: State<Float>,
+    internal val overrideTarget: MutableState<FocusTarget?>,
+) {
+    suspend fun requestFocus(
+        target: FocusTarget,
+        holdMs: Long = FOCUS_BLUR_REQUEST_DEFAULT_HOLD_MS,
+    ) {
+        overrideTarget.value = target
+        try {
+            delay(holdMs)
+        } finally {
+            overrideTarget.value = null
+        }
+    }
+}
+
+@Composable
+internal fun rememberFocusBlurVfx(
+    key: Any,
+    enabled: Boolean,
+): FocusBlurVfx {
+    val enemyBlurRadius = remember(key) { Animatable(FOCUS_BLUR_ENEMY_REST_DP) }
+    val backgroundBlurRadius = remember(key) { Animatable(FOCUS_BLUR_BACKGROUND_REST_DP) }
+    val overrideTarget = remember(key) { mutableStateOf<FocusTarget?>(null) }
+    val backgroundOscillation = rememberBackgroundOscillation()
+    val vfx = remember(key) {
+        FocusBlurVfx(enemyBlurRadius, backgroundBlurRadius, backgroundOscillation, overrideTarget)
+    }
+
+    LaunchedEffect(key, enabled) {
+        if (!enabled) {
+            enemyBlurRadius.snapTo(FOCUS_BLUR_ENEMY_REST_DP)
+            backgroundBlurRadius.snapTo(FOCUS_BLUR_BACKGROUND_REST_DP)
+            overrideTarget.value = null
+            return@LaunchedEffect
+        }
+        runFocusBlurLoop(enemyBlurRadius, backgroundBlurRadius, overrideTarget)
+    }
+    return vfx
+}
+
+@Composable
+private fun rememberBackgroundOscillation(): State<Float> {
+    val transition = rememberInfiniteTransition(label = "focus_blur_bg_oscillation")
+    return transition.animateFloat(
+        initialValue = -FOCUS_BLUR_BACKGROUND_OSCILLATION_DP,
+        targetValue = FOCUS_BLUR_BACKGROUND_OSCILLATION_DP,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                FOCUS_BLUR_BACKGROUND_OSCILLATION_HALF_PERIOD_MS,
+                easing = EaseInOut,
+            ),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "focus_blur_bg_oscillation_value",
     )
+}
+
+private suspend fun runFocusBlurLoop(
+    enemyBlurRadius: Animatable<Float, *>,
+    backgroundBlurRadius: Animatable<Float, *>,
+    overrideTarget: MutableState<FocusTarget?>,
+) {
+    while (true) {
+        val override = overrideTarget.value
+        if (override != null) {
+            runFocusBlurOverride(
+                override,
+                enemyBlurRadius,
+                backgroundBlurRadius,
+                overrideTarget,
+            )
+        } else {
+            runFocusBlurPulse(enemyBlurRadius, backgroundBlurRadius, overrideTarget)
+        }
+    }
+}
+
+private suspend fun runFocusBlurOverride(
+    target: FocusTarget,
+    enemyBlurRadius: Animatable<Float, *>,
+    backgroundBlurRadius: Animatable<Float, *>,
+    overrideTarget: MutableState<FocusTarget?>,
+) {
+    // Focusing on a surface blurs the OPPOSITE surface.
+    val blurSurface = if (target == FocusTarget.ENEMY) FocusTarget.BACKGROUND else FocusTarget.ENEMY
+    val toBlur = if (blurSurface == FocusTarget.ENEMY) enemyBlurRadius else backgroundBlurRadius
+    val toClear = if (target == FocusTarget.ENEMY) enemyBlurRadius else backgroundBlurRadius
+    val blurSurfaceRest = restDpFor(blurSurface)
+    val focusedSurfaceRest = restDpFor(target)
+    coroutineScope {
+        launch {
+            toClear.animateTo(
+                focusedSurfaceRest,
+                tween(FOCUS_BLUR_OVERRIDE_RAMP_MS, easing = EaseInOut),
+            )
+        }
+        launch {
+            toBlur.animateTo(
+                FOCUS_BLUR_OVERRIDE_PEAK_DP,
+                tween(FOCUS_BLUR_OVERRIDE_RAMP_MS, easing = EaseInOut),
+            )
+        }
+    }
+    snapshotFlow { overrideTarget.value }.first { it == null }
+    toBlur.animateTo(
+        blurSurfaceRest,
+        tween(FOCUS_BLUR_OVERRIDE_RELEASE_MS, easing = EaseInOut),
+    )
+}
+
+private suspend fun runFocusBlurPulse(
+    enemyBlurRadius: Animatable<Float, *>,
+    backgroundBlurRadius: Animatable<Float, *>,
+    overrideTarget: MutableState<FocusTarget?>,
+) {
+    val idleMs = Random.nextLong(FOCUS_BLUR_IDLE_MIN_MS, FOCUS_BLUR_IDLE_MAX_MS)
+    val overrideAppeared = withTimeoutOrNull(idleMs) {
+        snapshotFlow { overrideTarget.value }.first { it != null }
+    }
+    if (overrideAppeared != null) return
+
+    val enemyPeak = FOCUS_BLUR_PULSE_PEAK_MIN_DP +
+        Random.nextFloat() * (FOCUS_BLUR_PULSE_PEAK_MAX_DP - FOCUS_BLUR_PULSE_PEAK_MIN_DP)
+    val rampInMs = Random.nextInt(FOCUS_BLUR_PULSE_RAMP_MIN_MS, FOCUS_BLUR_PULSE_RAMP_MAX_MS)
+    val holdMs = Random.nextLong(FOCUS_BLUR_PULSE_HOLD_MIN_MS, FOCUS_BLUR_PULSE_HOLD_MAX_MS)
+    val rampOutMs = Random.nextInt(FOCUS_BLUR_PULSE_RAMP_MIN_MS, FOCUS_BLUR_PULSE_RAMP_MAX_MS)
+
+    coroutineScope {
+        val pulse = launch {
+            // Cross-fade in: enemy blurs while background sharpens.
+            coroutineScope {
+                launch {
+                    enemyBlurRadius.animateTo(enemyPeak, tween(rampInMs, easing = EaseInOut))
+                }
+                launch {
+                    backgroundBlurRadius.animateTo(0f, tween(rampInMs, easing = EaseInOut))
+                }
+            }
+            delay(holdMs)
+            // Cross-fade out: enemy sharpens while background returns to baseline.
+            coroutineScope {
+                launch {
+                    enemyBlurRadius.animateTo(
+                        FOCUS_BLUR_ENEMY_REST_DP,
+                        tween(rampOutMs, easing = EaseInOut),
+                    )
+                }
+                launch {
+                    backgroundBlurRadius.animateTo(
+                        FOCUS_BLUR_BACKGROUND_REST_DP,
+                        tween(rampOutMs, easing = EaseInOut),
+                    )
+                }
+            }
+        }
+        val watcher = launch {
+            snapshotFlow { overrideTarget.value }.first { it != null }
+            pulse.cancel()
+        }
+        pulse.join()
+        watcher.cancel()
+    }
 }

@@ -240,6 +240,8 @@ object AudioManager {
     val musicManager = AudioManagerBase()
     val sfxManager = AudioManagerBase()
 
+    private val transitionHandler = Handler(Looper.getMainLooper())
+
     /** Disables the whole audio. Used for android tests. */
     fun setEnabled(isEnabled: Boolean) {
         musicManager.setEnabled(isEnabled)
@@ -267,7 +269,12 @@ object AudioManager {
         context: Context,
         layers: List<AudioLayer>,
         fadeDuration: Long = DEFAULT_FADE_DURATION,
+        fadeOutFirst: Boolean = false,
     ) {
+        // Cancel any pending sequential fade-in so a new transition isn't
+        // shadowed by a stale one that's still about to fire.
+        transitionHandler.removeCallbacksAndMessages(null)
+
         val layersToRemove = mutableStateListOf<AudioLayer>()
         for (existingLayer in musicManager.getLayers()) {
             if (!(layers.map { audioLayer -> audioLayer.resId }.contains(existingLayer.key))) {
@@ -284,9 +291,37 @@ object AudioManager {
             musicManager.removeLayer(layerToRemove, fadeDuration)
         }
 
-        // Add or update
-        for (newLayer in layers) {
-            musicManager.updateOrCreateLayer(context, newLayer, fadeDuration, true)
+        val addLayers = {
+            for (newLayer in layers) {
+                musicManager.updateOrCreateLayer(context, newLayer, fadeDuration, true)
+            }
+        }
+
+        if (fadeOutFirst && layersToRemove.isNotEmpty()) {
+            transitionHandler.postDelayed({ addLayers() }, fadeDuration)
+        } else {
+            addLayers()
+        }
+    }
+
+    /**
+     * Fades out all currently playing music layers without scheduling
+     * any replacement.
+     */
+    fun fadeOutMusic(fadeDuration: Long = DEFAULT_FADE_DURATION) {
+        transitionHandler.removeCallbacksAndMessages(null)
+        val layersToRemove = mutableStateListOf<AudioLayer>()
+        for (existingLayer in musicManager.getLayers()) {
+            layersToRemove.add(
+                AudioLayer(
+                    existingLayer.value.layer.resId,
+                    existingLayer.value.layer.baseVolume,
+                    existingLayer.value.layer.isActive,
+                ),
+            )
+        }
+        for (layerToRemove in layersToRemove) {
+            musicManager.removeLayer(layerToRemove, fadeDuration)
         }
     }
 

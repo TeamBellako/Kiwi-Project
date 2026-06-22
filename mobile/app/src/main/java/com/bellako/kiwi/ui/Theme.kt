@@ -66,6 +66,7 @@ data class KiwiColorsData(
     val colorR: Color,
     val colorR1: Color,
     val colorOcean: Color,
+    val colorPurple: Color,
 )
 
 val KiwiColors =
@@ -113,6 +114,7 @@ val KiwiColors =
         colorR = KiwiColorR,
         colorR1 = KiwiColorR1,
         colorOcean = KiwiColorOcean,
+        colorPurple = KiwiColorPurple,
     )
 
 val LocalKiwiColors = staticCompositionLocalOf { KiwiColors }

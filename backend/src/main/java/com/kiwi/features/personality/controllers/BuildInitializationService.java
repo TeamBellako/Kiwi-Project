@@ -9,7 +9,9 @@ import com.kiwi.features.skills.controllers.SkillService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class BuildInitializationService {
@@ -59,6 +61,25 @@ public class BuildInitializationService {
     private void giveSkills(Long userId, BuildType build) {
         for (Long skillId : build.getSkillIds()) {
             skillService.giveSkillToUser(userId, skillId);
+        }
+    }
+
+    @Transactional
+    public void switchBuildSkills(Long userId, BuildType oldBuild, BuildType newBuild) {
+
+        Set<Long> oldSkills = new HashSet<>(oldBuild.getSkillIds());
+        Set<Long> newSkills = new HashSet<>(newBuild.getSkillIds());
+
+        for (Long skillId : oldSkills) {
+            if (!newSkills.contains(skillId)) {
+                skillService.removeSkillFromUserIfPresent(userId, skillId);
+            }
+        }
+
+        for (Long skillId : newBuild.getSkillIds()) {
+            if (!skillService.userHasSkill(userId, skillId)) {
+                skillService.giveSkillToUser(userId, skillId);
+            }
         }
     }
 

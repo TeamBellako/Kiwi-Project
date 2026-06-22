@@ -8,21 +8,22 @@ object MapsInfo {
         MapInfo(
             mapTitle = "MINDVEIL",
             mapResourceId = R.drawable.mindveil_4k,
+            minZoom = 4f,
             maxZoom = 8f,
             backgroundColor = Color.White,
             mapId = 0,
         )
 
-    val Testing: MapInfo =
+    val VigilarisCastle: MapInfo =
         MapInfo(
-            mapTitle = "VESHTIBOLS",
-            mapResourceId = R.drawable.map_switch_test,
+            mapTitle = "VIGILARIS CASTLE",
+            mapResourceId = R.drawable.vigilaris_castle,
             maxZoom = 4f,
-            backgroundColor = Color.Red,
+            backgroundColor = Color.White,
             mapId = 1,
         )
 
-    val mapsList = listOf(MindVeil, Testing)
+    val mapsList = listOf(MindVeil, VigilarisCastle)
 
     fun findMapById(id: Int): MapInfo = mapsList.find { it.mapId == id } ?: MindVeil
 }

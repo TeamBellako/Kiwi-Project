@@ -231,6 +231,7 @@ fun SkillDetails(
                                     goalProgress,
                                     skill.goalData.target,
                                     onProgressChange = { goalProgress = it },
+                                    enabled = skill.isCooldown,
                                     kiwiColors,
                                     skill.isCooldown
                                 )
@@ -391,6 +392,7 @@ private fun SkillCooldownGoal(
     goalProgress: Float,
     goalTarget: Int,
     onProgressChange: (Float) -> Unit,
+    enabled: Boolean,
     currentColors: KiwiColorsData,
     isCooldown: Boolean,
 ) {

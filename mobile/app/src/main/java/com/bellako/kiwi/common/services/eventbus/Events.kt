@@ -8,6 +8,7 @@ enum class EventType {
     START_CNV,
     START_COMBAT,
     START_QUEST,
+    COMPLETE_NODE,
     COMPLETE_QUEST,
     COMPLETE_GOAL,
     GAIN_SKILL,
@@ -16,6 +17,16 @@ enum class EventType {
     START_TIP,
     DAILY_GOALS_UPDATED,
     QUESTS_UPDATED,
+    MAP_REVEAL,
+    MAP_CONTENT_AVAILABLE,
+
+    // Fired by features that fully cover the map (full-screen conversation,
+    // combat) so the map can pause its VFX (mist drift, cloud frame loop,
+    // water shader). Each START fires a MAP_COVERED; the matching dismissal
+    // fires MAP_UNCOVERED. Small dialogues don't fire these — the map stays
+    // visible behind them.
+    MAP_COVERED,
+    MAP_UNCOVERED,
 }
 
 sealed class EventPayload {

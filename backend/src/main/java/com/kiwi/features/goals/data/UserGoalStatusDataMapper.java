@@ -23,15 +23,35 @@ public class UserGoalStatusDataMapper {
                 .build();
     }
 
+    public static UserGoalStatusPersistence toEntity(
+            UserGoalStatusDTO dto,
+            UsersPersistence user,
+            GoalPersistence goal,
+            LocalDate date,
+            Integer targetOverride) {
+        return UserGoalStatusPersistence.builder()
+                .id(dto.getId())
+                .user(user)
+                .goal(goal)
+                .status(GoalStatus.valueOf(dto.getStatus()))
+                .date(date)
+                .value(dto.getValue())
+                .targetOverride(targetOverride)
+                .build();
+    }
+
     public static UserGoalStatusDTO toDTO(UserGoalStatusPersistence entity) {
         GoalPersistence goal = entity.getGoal();
         String onCompletedEvent = goal.getOnCompletedAction() + '_' + goal.getOnCompletedEntity();
+        int effectiveTarget = entity.getTargetOverride() != null
+                ? entity.getTargetOverride()
+                : goal.getTarget();
         return UserGoalStatusDTO.builder()
                 .id(entity.getId())
                 .goalId(goal.getId())
                 .name(goal.getName())
                 .action(goal.getAction())
-                .target(goal.getTarget())
+                .target(effectiveTarget)
                 .type(goal.getType().name())
                 .category(goal.getCategory().name())
                 .reward(goal.getReward())

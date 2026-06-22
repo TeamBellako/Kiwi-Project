@@ -3,11 +3,8 @@ package com.bellako.kiwi.features.combat.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -38,8 +36,9 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
-import com.bellako.kiwi.features.combat.components.CombatLog
+import com.bellako.kiwi.features.combat.components.CombatLogOverlay
 import com.bellako.kiwi.features.combat.components.buildCombatLogEntries
+import com.bellako.kiwi.features.combat.components.rememberCombatLogProgress
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.features.combat.data.CombatGeneralStatus
@@ -58,7 +57,6 @@ private const val EDGE_FADE_TOP_ALPHA = 0.85f
 private const val EDGE_FADE_BOTTOM_ALPHA = 0.95f
 private const val EDGE_FADE_TOP_END = 0.18f
 private const val EDGE_FADE_BOTTOM_START = 0.55f
-private const val LOG_HEIGHT_FRACTION = 0.7f
 private val CONTINUE_BUTTON_HORIZONTAL_MARGIN = 56.dp
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -75,6 +73,9 @@ fun CombatVictoryScreen(
             buildSkillUsedSummary(combat, skillsByName)
         }
     var isLogOpen by rememberSaveable(combat.id) { mutableStateOf(false) }
+    // Root-space bounds of the log button: the log panel morphs out of here.
+    var logButtonBounds by remember(combat.id) { mutableStateOf<Rect?>(null) }
+    val logProgress = rememberCombatLogProgress(isLogOpen)
 
     val logEntries =
         remember(combat.log, combat.combatStatus, combat.enemyName, colors) {
@@ -114,37 +115,13 @@ fun CombatVictoryScreen(
                     SkillsUsedHeader(
                         isLogOpen = isLogOpen,
                         onToggleLog = { isLogOpen = !isLogOpen },
+                        logProgress = logProgress,
+                        onLogButtonBounds = { logButtonBounds = it },
                     )
 
                     Kiwi_Spacer(Spacing.small)
 
                     SkillsUsedList(skillsUsed = skillsUsed)
-                }
-
-                if (isLogOpen) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.55f))
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = { isLogOpen = false },
-                                ),
-                    )
-                    CombatLog(
-                        entries = logEntries,
-                        modifier =
-                            Modifier
-                                .align(Alignment.Center)
-                                .fillMaxHeight(LOG_HEIGHT_FRACTION)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    onClick = {},
-                                ),
-                    )
                 }
             }
 
@@ -167,6 +144,13 @@ fun CombatVictoryScreen(
 
             Kiwi_Spacer(Spacing.large)
         }
+
+        CombatLogOverlay(
+            progress = logProgress,
+            entries = logEntries,
+            sourceBounds = logButtonBounds,
+            onDismiss = { isLogOpen = false },
+        )
     }
 }
 

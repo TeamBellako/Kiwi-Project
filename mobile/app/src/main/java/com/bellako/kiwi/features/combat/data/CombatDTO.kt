@@ -112,4 +112,7 @@ data class CombatTurnResultDTO(
     val onCompletedEvent: String,
     val onCompletedEntityId: Int,
     val bonusActionPending: Boolean = false,
+    // Jackson numeric timestamp: epoch seconds with a fractional sub-second
+    // part, e.g. 1779442908.578937396. Converted to epoch millis in the mapper.
+    val createdAt: Double? = null,
 )

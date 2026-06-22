@@ -1,5 +1,13 @@
 package com.bellako.kiwi.common.screens.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -8,10 +16,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,6 +32,20 @@ import com.bellako.kiwi.features.settings.tests.SettingsTestTags
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+
+private const val KIWI_SLIDER_THUMB_ACTIVE_SCALE = 1.25f
+private const val KIWI_SLIDER_THUMB_DARKEN = 0.25f
+private const val KIWI_SLIDER_COLOR_DURATION_MS = 120
+private const val KIWI_SLIDER_PERCENT = 100f
+
+private fun formatSliderValue(
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+): String {
+    val span = valueRange.endInclusive - valueRange.start
+    val fraction = if (span > 0f) (value - valueRange.start) / span else 0f
+    return "${(fraction.coerceIn(0f, 1f) * KIWI_SLIDER_PERCENT).toInt()}%"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,8 +61,38 @@ fun Kiwi_Slider(
     val kiwiColors = LocalKiwiColors.current
 
     if (textArguments != null) {
-        Kiwi_Label1(textArguments)
+        Kiwi_Label1(
+            textArguments.copy(
+                text = "${textArguments.text} (${formatSliderValue(value, valueRange)})",
+            ),
+        )
     }
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val isDragged by interactionSource.collectIsDraggedAsState()
+    val active = isPressed || isDragged
+
+    val thumbScale by animateFloatAsState(
+        targetValue = if (active) KIWI_SLIDER_THUMB_ACTIVE_SCALE else 1f,
+        animationSpec =
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMedium,
+            ),
+        label = "thumbScale",
+    )
+
+    val thumbColor by animateColorAsState(
+        targetValue =
+            if (active) {
+                lerp(kiwiColors.color7C, Color.Black, KIWI_SLIDER_THUMB_DARKEN)
+            } else {
+                kiwiColors.color7C
+            },
+        animationSpec = tween(durationMillis = KIWI_SLIDER_COLOR_DURATION_MS),
+        label = "thumbColor",
+    )
 
     Slider(
         value = value,
@@ -45,10 +101,16 @@ fun Kiwi_Slider(
         steps = steps,
         modifier = Modifier.fillMaxWidth().testTag(testTag).height(getResponsiveSizeHeight(40.dp)),
         enabled = enabled,
+        interactionSource = interactionSource,
         thumb = {
             Kiwi_Diamond(
                 size = getResponsiveSizeHeight(28.dp),
-                color = kiwiColors.color7C,
+                color = thumbColor,
+                modifier =
+                    Modifier.graphicsLayer {
+                        scaleX = thumbScale
+                        scaleY = thumbScale
+                    },
             )
         },
         track = { sliderState ->

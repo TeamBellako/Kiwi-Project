@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.conversations.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -10,8 +11,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +33,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -39,12 +46,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
-import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer_Horizontal
+import com.bellako.kiwi.common.screens.components.rememberBreathingModifier
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.conversations.components.CharacterName
+import com.bellako.kiwi.features.conversations.components.Kiwi_DialogueText
+import com.bellako.kiwi.features.conversations.components.Kiwi_TypewriterText
+import com.bellako.kiwi.features.conversations.components.rememberTypewriter
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.data.NextEventType
@@ -56,8 +65,10 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.delay
 
+private const val DIALOGUE_ADVANCE_MS = 450
+
 @Composable
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 fun DialogueScreen(
     conversation: ConversationDomain,
     viewModel: ConversationViewModel? = null,
@@ -96,8 +107,39 @@ fun DialogueScreen(
         }
     }
 
-    Box(
-        modifier = Modifier.fillMaxSize(),
+    val typewriter = rememberTypewriter(conversation.dialog)
+
+    // The compact dialogue always breathes — even Liria — since the small
+    // circular portrait has no room to read a floating orbit.
+    val breathingModifier = rememberBreathingModifier()
+
+    val advance: () -> Unit = {
+        AudioManager.playSFX(context, R.raw.snd_fx_03_page)
+        viewModel?.next()
+    }
+
+    val onTap: () -> Unit = {
+        if (typewriter.isComplete) advance() else typewriter.skip()
+    }
+
+    // Only show the advance chevron when tapping it would lead to more
+    // dialogue. If the next event ends the conversation, hide it — the screen
+    // is still tap-anywhere-to-dismiss via the outer Column clickable.
+    val showAdvanceChevron = typewriter.isComplete && conversation.nextEvent != NextEventType.END
+
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        modifier =
+            Modifier
+                .fillMaxSize()
+                // Tap anywhere advances/skips, but with no indication — the
+                // ripple lives on the dialogue container below, so the dark
+                // overlay never spreads across the whole screen.
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onTap,
+                ),
     ) {
         Box(
             modifier =
@@ -111,7 +153,14 @@ fun DialogueScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .clickable {},
+                    .clickable(onClick = onTap)
+                    .background(
+                        Brush.verticalGradient(
+                            -0f to Color.Transparent,
+                            0.3f to kiwiColor.color2.copy(alpha = 0.6f),
+                            0.5f to kiwiColor.color2.copy(alpha = 0.8f),
+                        ),
+                    ).padding(Spacing.medium, Spacing.large),
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -130,22 +179,9 @@ fun DialogueScreen(
                         modifier =
                             Modifier
                                 .matchParentSize()
-                                .clip(CircleShape),
-                    ) {
-                        Kiwi_Image(
-                            AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
-                            "Character image",
-                            contentScale = ContentScale.Crop,
-                            modifier =
-                                Modifier
-                                    .matchParentSize()
-                                    .scale(1.6f)
-                                    .background(kiwiColor.color0),
-                        )
-                    }
-                    Kiwi_Image(
-                        R.drawable.dialogue_small_frame,
-                        "Character frame",
+                                .scale(1.6f)
+                                .background(kiwiColor.color0)
+                                .then(breathingModifier),
                     )
                     Box(
                         contentAlignment = Alignment.BottomCenter,
@@ -194,6 +230,73 @@ fun DialogueScreen(
                                 },
                     )
                 }
+            }
+            Kiwi_Spacer_Horizontal()
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.weight(0.65f),
+            ) {
+                Kiwi_Image(
+                    R.drawable.dialogue_small_bg,
+                    "Dialogue frame",
+                    contentScale = ContentScale.FillWidth,
+                )
+                // Scroll-up advance: the current line slides up and out the
+                // top while the next line rises in from the bottom.
+                // clipToBounds keeps both inside the frame, off the BG.
+                AnimatedContent(
+                    targetState = conversation,
+                    transitionSpec = {
+                        slideInVertically(tween(DIALOGUE_ADVANCE_MS)) { it } togetherWith
+                            slideOutVertically(tween(DIALOGUE_ADVANCE_MS)) { -it }
+                    },
+                    contentKey = { it.id },
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.matchParentSize().clipToBounds(),
+                    label = "dialogue_advance",
+                ) { conv ->
+                    val textModifier = Modifier.padding(Spacing.medium, Spacing.medium)
+                    // Fill the frame so the slide travels the full frame height
+                    // and each line clears the masked region completely.
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        if (conv.id == conversation.id) {
+                            Kiwi_TypewriterText(
+                                typewriter = typewriter,
+                                textAlign = TextAlign.Center,
+                                color = kiwiColor.color6,
+                                modifier = textModifier,
+                            )
+                        } else {
+                            Kiwi_DialogueText(
+                                text = conv.dialog,
+                                textAlign = TextAlign.Center,
+                                color = kiwiColor.color6,
+                                modifier = textModifier,
+                            )
+                        }
+                    }
+                }
+                Kiwi_Image(
+                    R.drawable.ic_dialogue_arrow,
+                    "Arrow",
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                            .size(getResponsiveSizeWidth(10.dp), getResponsiveSizeHeight(10.dp))
+                            .offset(y = getResponsiveSizeHeight((offsetY - 12f).dp))
+                            .alpha(if (showAdvanceChevron) 1f else 0f)
+                            .then(
+                                if (showAdvanceChevron) {
+                                    Modifier.clickable(onClick = advance)
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                )
             }
         }
     }

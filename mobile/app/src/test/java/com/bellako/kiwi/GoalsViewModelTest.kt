@@ -1,7 +1,10 @@
 package com.bellako.kiwi
 
 import com.bellako.kiwi.common.utils.DateUtils
+import com.bellako.kiwi.features.goals.data.AppUsageStats
+import com.bellako.kiwi.features.goals.data.UserAppUsageDTO
 import com.bellako.kiwi.features.goals.data.UserGoalStatusDTO
+import com.bellako.kiwi.features.goals.model.AppUsageProvider
 import com.bellako.kiwi.features.goals.model.GoalsRepository
 import com.bellako.kiwi.features.goals.model.GoalsViewModel
 import com.bellako.kiwi.features.goals.model.IGoalsAPI
@@ -17,6 +20,11 @@ import java.time.LocalDate
 class GoalsViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
+
+    class FakeAppUsageProvider : AppUsageProvider(context = null) {
+        override fun getAverageWeeklyUsage(packageNames: List<String>): List<AppUsageStats> =
+            packageNames.map { AppUsageStats(it, 0L) }
+    }
 
     // Fake API implementation to control behavior and count invocations
     class FakeGoalsAPI {
@@ -127,10 +135,15 @@ class GoalsViewModelTest {
                     override suspend fun getSkillGoals(): List<UserGoalStatusDTO> {
                         TODO("Not yet implemented")
                     }
+
+                    override suspend fun saveAppUsageBaseline(dto: UserAppUsageDTO): UserAppUsageDTO =
+                        throw UnsupportedOperationException("Not needed in tests")
+
+                    override suspend fun autoReviewAppUsageGoals(): List<UserGoalStatusDTO> = emptyList()
                 },
             )
 
-        return GoalsViewModel(repo, NotificationManager(), usersRepository = UsersFakeRepository())
+        return GoalsViewModel(repo, NotificationManager(), usersRepository = UsersFakeRepository(), appUsageProvider = FakeAppUsageProvider())
     }
 
     @Test

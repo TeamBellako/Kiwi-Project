@@ -4,12 +4,15 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,8 +26,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,11 +37,13 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -50,6 +57,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.audio.Kiwi_Music_Conversation
 import com.bellako.kiwi.audio.Kiwi_Music_Home
 import com.bellako.kiwi.audio.Kiwi_Music_Login
 import com.bellako.kiwi.audio.Kiwi_Music_Settings
@@ -57,6 +65,9 @@ import com.bellako.kiwi.audio.Kiwi_Music_SignUp
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.screens.modals.PermissionsModalScreen
 import com.bellako.kiwi.common.screens.modals.WIPModalScreen
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.appbar.model.AppBarViewModel
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.combat.model.CombatViewModel
@@ -75,6 +86,9 @@ import com.bellako.kiwi.features.map.screens.MapScreen
 import com.bellako.kiwi.features.metrics.model.MetricsViewModel
 import com.bellako.kiwi.features.nodes.model.INodesViewModel
 import com.bellako.kiwi.features.nodes.model.NodesViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
+import com.bellako.kiwi.features.nodes.screens.NodeEntryVeilOverlay
+import com.bellako.kiwi.features.nodes.screens.rememberNodeEntryTransitionController
 import com.bellako.kiwi.features.notifications.controller.NotificationEvent
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.features.notifications.screens.NotificationOverlay
@@ -99,14 +113,16 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen2_Form
 import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.ui.LocalKiwiColors
+import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 private const val INITIAL_LOADING_MIN_DISPLAY_MS = 1500L
 private const val INITIAL_LOADING_SETTLE_MS = 400L
 private const val INITIAL_LOADING_MAX_DISPLAY_MS = 15_000L
-private const val AUTH_CHECK_GRACE_MS = 200L
 private const val PROGRESS_FILL_DURATION_MS = 4500
 private const val PROGRESS_HOLD_TARGET = 0.9f
 private const val PROGRESS_FINISH_DURATION_MS = 300
@@ -202,10 +218,21 @@ private fun AppScreen(
     val isConversationVisible by conversationViewModel.isVisible.collectAsState()
     val isTutorial by conversationViewModel.isTutorial.collectAsState()
 
+    // A no-background conversation sits over the map as a dialogue overlay
+    // (Small dialogues, and the rare FULL conversation that ships without a
+    // background). The map stays visible behind, so any selected-node action
+    // button is also visible — MapScreen hides it while this is true.
+    val isDialogueOverlaid by remember {
+        derivedStateOf {
+            isConversationVisible && activeConversation?.background.isNullOrBlank()
+        }
+    }
+
     val activeCombat by combatViewModel.active.collectAsState()
     val isCombatVisible by combatViewModel.isVisible.collectAsState()
     val isCombatTurnPlaying by combatViewModel.isTurnPlaying.collectAsState()
     val activeBark by combatViewModel.activeBark.collectAsState()
+    val hasResolvedCombatOnStartup by combatViewModel.hasResolvedCombatOnStartup.collectAsState()
     val skillsState by skillsViewModel.state.collectAsState()
 
     val isTipVisible by tipsViewModel.isVisible.collectAsState()
@@ -227,44 +254,52 @@ private fun AppScreen(
         }
     }
 
-    val initialAuthCheckPerformed by usersViewModel.initialAuthCheckPerformed.collectAsState()
-    val manualAuthOverlayActive by usersViewModel.manualAuthOverlayActive.collectAsState()
-    var showInitialLoading by remember { mutableStateOf(true) }
-    val overlayVisible by remember {
-        derivedStateOf { showInitialLoading || manualAuthOverlayActive }
+    // Curtain stays up not just until feature data settles, but until the
+    // combat-resume question has been answered — otherwise on a cold start
+    // with an active combat the curtain drops while the map is still showing
+    // and combat overlay/music are still racing to mount.
+    val isStartupSettled by remember {
+        derivedStateOf {
+            !anyFeatureLoading && hasResolvedCombatOnStartup
+        }
     }
 
-    LaunchedEffect(isLoginCompleted) {
-        if (!isLoginCompleted) return@LaunchedEffect
-        showInitialLoading = true
+    // Map music must NOT play while we're still figuring out whether to
+    // resume a combat. Once that's resolved: if combat is visible, combat
+    // music plays via CombatFlowScreen; if a conversation is visible, the
+    // overlay fades the music out via Kiwi_Music_Conversation; otherwise
+    // map music starts here.
+    val shouldPlayMapMusic by remember {
+        derivedStateOf {
+            hasResolvedCombatOnStartup && !isCombatVisible && !isConversationVisible
+        }
+    }
+
+    // Raised by the auth / sign-up screens the instant a map-bound action
+    // begins (manual log in, auto log in once stored credentials are found,
+    // the app-selection Confirm) — never at app launch or during sign-up
+    // steps. Lowered here once the map's data has finished loading.
+    val showAppLoading by usersViewModel.showAppLoading.collectAsState()
+
+    LaunchedEffect(showAppLoading) {
+        if (!showAppLoading) return@LaunchedEffect
         delay(INITIAL_LOADING_MIN_DISPLAY_MS)
         withTimeoutOrNull(INITIAL_LOADING_MAX_DISPLAY_MS) {
             while (true) {
-                snapshotFlow { anyFeatureLoading }.first { !it }
+                snapshotFlow { isStartupSettled }.first { it }
                 val resumed =
                     withTimeoutOrNull(INITIAL_LOADING_SETTLE_MS) {
-                        snapshotFlow { anyFeatureLoading }.first { it }
+                        snapshotFlow { isStartupSettled }.first { !it }
                     }
                 if (resumed == null) break
             }
         }
-        showInitialLoading = false
-    }
-
-    LaunchedEffect(initialAuthCheckPerformed) {
-        if (!initialAuthCheckPerformed) return@LaunchedEffect
-        val authStarted =
-            withTimeoutOrNull(AUTH_CHECK_GRACE_MS) {
-                snapshotFlow { isLoginCompleted || usersIsLoading }.first { it }
-            }
-        if (authStarted == null) {
-            showInitialLoading = false
-        }
+        usersViewModel.setShowAppLoading(false)
     }
 
     val loadingProgress = remember { Animatable(0f) }
-    LaunchedEffect(overlayVisible) {
-        if (overlayVisible) {
+    LaunchedEffect(showAppLoading) {
+        if (showAppLoading) {
             loadingProgress.snapTo(0f)
             loadingProgress.animateTo(
                 targetValue = PROGRESS_HOLD_TARGET,
@@ -299,6 +334,41 @@ private fun AppScreen(
 
     val goalsModalRequest = remember { mutableStateOf<Pair<GoalNotificationType, List<IGoal>>?>(null) }
 
+    val revealEventScope = rememberCoroutineScope()
+
+    val nodeEntryTransition = rememberNodeEntryTransitionController()
+    // The viewmodels invoke the veil runner from viewModelScope, which has no
+    // MonotonicFrameClock — calling Animatable.animateTo from there throws.
+    // Bridge through a Compose-aware scope (backed by AndroidUiDispatcher) so
+    // the animation work runs in a context that supplies the frame clock.
+    val veilAnimationScope = rememberCoroutineScope()
+
+    // Wire the same veil controller as the exit animation for conversation
+    // and combat completion: when the user finishes a conversation or wins a
+    // combat, the screen is dismissed under the veil rather than lerping off.
+    // Set once on first composition (the controller is a stable remembered
+    // instance, so the runner closure does not need to be re-installed).
+    LaunchedEffect(nodeEntryTransition) {
+        val veilRunner: suspend (suspend () -> Unit) -> Unit = { finalize ->
+            veilAnimationScope
+                .async {
+                    nodeEntryTransition.enter()
+                    finalize()
+                    nodeEntryTransition.fadeOut()
+                }.await()
+        }
+        conversationViewModel.setExitVeilRunner(veilRunner)
+        combatViewModel.setExitVeilRunner(veilRunner)
+    }
+
+    DisposableEffect(nodeEntryTransition) {
+        onDispose {
+            conversationViewModel.setExitVeilRunner(null)
+            combatViewModel.setExitVeilRunner(null)
+        }
+    }
+
+    CompositionLocalProvider(LocalNodeEntryTransition provides nodeEntryTransition) {
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = LocalKiwiColors.current.color2,
@@ -311,6 +381,11 @@ private fun AppScreen(
                 }
             },
             content = { paddingValues ->
+                // Screens are sized to the area above the bar so their layouts
+                // stay centered. The bar's rounded corners reveal the Scaffold's
+                // containerColor (color2) underneath, which matches the screen
+                // backgrounds — so the overlay still reads as one continuous
+                // surface bleeding under the bar.
                 Box(Modifier.padding(paddingValues)) {
                     AppNavHost(
                         navController = navController,
@@ -322,6 +397,8 @@ private fun AppScreen(
                         goalsViewModel = goalsViewModel,
                         skillsViewModel = skillsViewModel,
                         isCombatActive = activeCombat != null,
+                        shouldPlayMapMusic = shouldPlayMapMusic,
+                        isDialogueOverlaid = isDialogueOverlaid,
                     )
 
                     AnimatedVisibility(
@@ -366,6 +443,10 @@ private fun AppScreen(
                                 initialOffsetY = { fullHeight -> fullHeight },
                                 animationSpec = tween(durationMillis = 400, easing = EaseInOut),
                             ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        // The completion path runs the veil first via the runner,
+                        // so this slide-out plays under a fully-opaque veil and
+                        // is invisible to the user. It is kept as a fallback for
+                        // the no-runner case (previews / tests).
                         exit =
                             slideOutVertically(
                                 targetOffsetY = { fullHeight -> fullHeight },
@@ -374,6 +455,7 @@ private fun AppScreen(
                     ) {
                         activeConversation?.let { conversation ->
                             Box(modifier = Modifier.matchParentSize()) {
+                                Kiwi_Music_Conversation()
                                 if (conversation.type == ConversationType.SMALL) {
                                     DialogueScreen(
                                         conversation = conversation,
@@ -397,6 +479,9 @@ private fun AppScreen(
                                 initialOffsetY = { fullHeight -> fullHeight },
                                 animationSpec = tween(durationMillis = 400, easing = EaseInOut),
                             ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        // Victory routes through the veil runner — this slide-out
+                        // is hidden under the opaque veil. Abandon / defeat keep
+                        // the slide-out visible (they don't set the runner).
                         exit =
                             slideOutVertically(
                                 targetOffsetY = { fullHeight -> fullHeight },
@@ -424,12 +509,24 @@ private fun AppScreen(
                     }
 
                     TipModal(isTipVisible, tipsViewModel)
+
+                    // Veil for the node-entry transition. Lives inside the
+                    // Scaffold's content area on purpose so it covers the map
+                    // / conversation / combat but leaves the bottom nav bar
+                    // visible.
+                    NodeEntryVeilOverlay(
+                        controller = nodeEntryTransition,
+                        modifier = Modifier.zIndex(50f),
+                    )
                 }
             },
         )
 
-        // Overlay global de notificaciones — único colector, siempre activo
-        if (!isLoginScreen && isLoginCompleted) {
+        // Overlay global de notificaciones — único colector, siempre activo.
+        // Suppressed while the loading curtain is up so a cold-start (combat
+        // resume or otherwise) doesn't surface a queue of pop-ups before the
+        // user has actually landed on a screen.
+        if (!isLoginScreen && isLoginCompleted && !showAppLoading) {
             NotificationOverlay(
                 notificationManager = notificationManager,
                 onGoalClick = { type, goals ->
@@ -470,13 +567,19 @@ private fun AppScreen(
         }
 
         LoginLoadingScreen(
-            visible = overlayVisible,
+            visible = showAppLoading,
             progress = loadingProgress.value,
             modifier =
                 Modifier
                     .fillMaxSize()
                     .zIndex(100f),
+            onExitComplete = {
+                revealEventScope.launch {
+                    EventBus.emitEvent(EventType.MAP_REVEAL, EventPayload.EmptyPayload())
+                }
+            },
         )
+    }
     }
 }
 
@@ -542,6 +645,41 @@ private val NAVBAR_ORDER =
 
 private fun isMapRoute(route: String?): Boolean = route == ScreenRoutes.HOME
 
+// The apps screen is reused as a "change apps" settings sub-screen. When it is
+// reached from Settings (and popped back to it), we want the same rise-from-
+// bottom / slide-down feel as the map transitions, distinct from the plain
+// fade used during the sign-up flow.
+private fun isSettingsAppsTransition(
+    initial: String?,
+    target: String?,
+): Boolean =
+    (initial == ScreenRoutes.SETTINGS && target == ScreenRoutes.SIGNUP4_APPS) ||
+        (initial == ScreenRoutes.SIGNUP4_APPS && target == ScreenRoutes.SETTINGS)
+
+// The login screen rides up from / slides down to the bottom over the app — the
+// same vertical language as the map, but as a foreground curtain. This only
+// covers login <-> a real nav-bar screen (logging in to HOME, logging out to
+// LOGIN from Settings); transitions between login and the sign-up flow keep
+// their plain fade. The full loading curtain still covers a cold-start login, so
+// this lerp is only ever seen for an in-session log in / out.
+private fun isLoginAppTransition(
+    initial: String?,
+    target: String?,
+): Boolean =
+    (initial == ScreenRoutes.LOGIN && navIndex(target) >= 0) ||
+        (target == ScreenRoutes.LOGIN && navIndex(initial) >= 0)
+
+// The sign-up welcome → account-form step slides sideways (and slides back on
+// pop), distinct from the plain fade the rest of the sign-up flow uses. Both
+// routes sit outside NAVBAR_ORDER, so direction is read from the route pair
+// rather than nav indices.
+private fun isWelcomeFormTransition(
+    initial: String?,
+    target: String?,
+): Boolean =
+    (initial == ScreenRoutes.SIGNUP1_WELCOME && target == ScreenRoutes.SIGNUP2_FORM) ||
+        (initial == ScreenRoutes.SIGNUP2_FORM && target == ScreenRoutes.SIGNUP1_WELCOME)
+
 // Focus variants share their base screen's slot so deep links order correctly.
 private fun navIndex(route: String?): Int =
     when (route) {
@@ -561,6 +699,28 @@ private fun screenEnter(
     val from = navIndex(initial)
     val to = navIndex(target)
     return when {
+        // Settings → Change Apps rises from the bottom; popping back reveals
+        // Settings underneath instantly while the apps screen slides down.
+        isSettingsAppsTransition(initial, target) ->
+            if (target == ScreenRoutes.SIGNUP4_APPS) {
+                slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
+            } else {
+                EnterTransition.None
+            }
+        // Sign-up welcome ↔ account form: slide toward the form going forward,
+        // back toward welcome on pop.
+        isWelcomeFormTransition(initial, target) ->
+            if (target == ScreenRoutes.SIGNUP2_FORM) {
+                slideInHorizontally(animationSpec = screenOffsetSpec()) { it } +
+                    fadeIn(animationSpec = screenFadeSpec())
+            } else {
+                slideInHorizontally(animationSpec = screenOffsetSpec()) { -it } +
+                    fadeIn(animationSpec = screenFadeSpec())
+            }
+        // Login curtain: the entering screen (login on logout, the app on an
+        // in-session login) lifts up from the bottom over the one it replaces.
+        isLoginAppTransition(initial, target) ->
+            slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
         // Login / sign-up / any non-nav screen: keep a plain fade.
         from < 0 || to < 0 -> fadeIn(animationSpec = screenFadeSpec())
         // Going to the map: it is already rendered behind (this is a pop), so it
@@ -585,6 +745,27 @@ private fun screenExit(
     val from = navIndex(initial)
     val to = navIndex(target)
     return when {
+        // Settings → Change Apps: Settings holds still while the apps screen rises
+        // over it; on the way back the apps screen slides down to reveal Settings.
+        isSettingsAppsTransition(initial, target) ->
+            if (initial == ScreenRoutes.SIGNUP4_APPS) {
+                slideOutVertically(animationSpec = screenOffsetSpec(MAP_REVEAL_MS)) { it }
+            } else {
+                ExitTransition.None
+            }
+        // Sign-up welcome ↔ account form: the leaving screen slides off toward
+        // the side the new one enters from.
+        isWelcomeFormTransition(initial, target) ->
+            if (initial == ScreenRoutes.SIGNUP1_WELCOME) {
+                slideOutHorizontally(animationSpec = screenOffsetSpec()) { -it } +
+                    fadeOut(animationSpec = screenFadeSpec())
+            } else {
+                slideOutHorizontally(animationSpec = screenOffsetSpec()) { it } +
+                    fadeOut(animationSpec = screenFadeSpec())
+            }
+        // The screen being covered by the rising login curtain (or the app it
+        // reveals) holds still underneath while the other screen lerps over it.
+        isLoginAppTransition(initial, target) -> ExitTransition.None
         from < 0 || to < 0 -> fadeOut(animationSpec = screenFadeSpec())
         // Going to the map: the leaving screen slides straight down at full opacity,
         // slower so the reveal reads clearly.
@@ -601,8 +782,29 @@ private fun screenExit(
     }
 }
 
+@Composable
+private fun AnimatedContentScope.MapTransitionTopRadius(content: @Composable () -> Unit) {
+    val cornerRadius = getResponsiveSizeHeight(50.dp)
+    val radius by transition.animateDp(
+        transitionSpec = { tween(durationMillis = MAP_TRANSITION_MS, easing = EaseInOut) },
+        label = "screenTopRadius",
+    ) { state ->
+        if (state == EnterExitState.Visible) 0.dp else cornerRadius
+    }
+
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(topStart = radius, topEnd = radius)),
+    ) {
+        content()
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
+@Suppress("LongMethod")
 fun AppNavHost(
     navController: NavHostController,
     usersViewModel: UsersViewModel,
@@ -613,6 +815,8 @@ fun AppNavHost(
     goalsViewModel: IGoalsViewModel,
     skillsViewModel: ISkillsViewModel,
     isCombatActive: Boolean = false,
+    shouldPlayMapMusic: Boolean = true,
+    isDialogueOverlaid: Boolean = false,
 ) {
     NavHost(
         navController = navController,
@@ -670,7 +874,11 @@ fun AppNavHost(
             AppScreenWrapper {
                 Kiwi_Music_SignUp()
                 SignUpScreen4_Apps(
+                    usersViewModel = usersViewModel,
                     personalityViewModel = personalityViewModel,
+                    goalsViewModel = goalsViewModel,
+                    nodesViewModel = nodesViewModel,
+                    skillsViewModel = skillsViewModel,
                     navController = navController,
                 )
             }
@@ -678,22 +886,29 @@ fun AppNavHost(
 
         composable(ScreenRoutes.HOME) {
             AppScreenWrapper {
-                Kiwi_Music_Home()
+                // Gated so a cold-start combat resume doesn't flash map music
+                // before CombatFlowScreen takes over the audio.
+                if (shouldPlayMapMusic) {
+                    Kiwi_Music_Home()
+                }
                 MapScreen(
                     nodesViewModel = nodesViewModel,
                     goalsViewModel = goalsViewModel,
                     mapViewModel = hiltViewModel(),
                     usersViewModel = usersViewModel,
+                    isDialogueOverlaid = isDialogueOverlaid,
                 )
             }
         }
 
         composable(ScreenRoutes.OBJECTIVES) {
-            AppScreenWrapper {
-                ObjectivesScreen(
-                    questsViewModel = questsViewModel,
-                    goalsViewModel = goalsViewModel,
-                )
+            MapTransitionTopRadius {
+                AppScreenWrapper {
+                    ObjectivesScreen(
+                        questsViewModel = questsViewModel,
+                        goalsViewModel = goalsViewModel,
+                    )
+                }
             }
         }
 
@@ -703,19 +918,23 @@ fun AppNavHost(
         ) { backStackEntry ->
             val questId = backStackEntry.arguments?.getInt("questId")
 
-            ObjectivesScreen(
-                questsViewModel = questsViewModel,
-                focusedQuestId = questId,
-                goalsViewModel = goalsViewModel,
-            )
+            MapTransitionTopRadius {
+                ObjectivesScreen(
+                    questsViewModel = questsViewModel,
+                    focusedQuestId = questId,
+                    goalsViewModel = goalsViewModel,
+                )
+            }
         }
 
         composable(ScreenRoutes.SKILLS) {
-            AppScreenWrapper {
-                SkillsScreen(
-                    skillsViewModel = skillsViewModel,
-                    isDeckLocked = isCombatActive,
-                )
+            MapTransitionTopRadius {
+                AppScreenWrapper {
+                    SkillsScreen(
+                        skillsViewModel = skillsViewModel,
+                        isDeckLocked = isCombatActive,
+                    )
+                }
             }
         }
 
@@ -725,11 +944,13 @@ fun AppNavHost(
         ) { backStackEntry ->
             val questId = backStackEntry.arguments?.getLong("skillId")
 
-            SkillsScreen(
-                skillsViewModel = skillsViewModel,
-                focusedSkillId = questId,
-                isDeckLocked = isCombatActive,
-            )
+            MapTransitionTopRadius {
+                SkillsScreen(
+                    skillsViewModel = skillsViewModel,
+                    focusedSkillId = questId,
+                    isDeckLocked = isCombatActive,
+                )
+            }
         }
 
         composable(ScreenRoutes.SETTINGS) {

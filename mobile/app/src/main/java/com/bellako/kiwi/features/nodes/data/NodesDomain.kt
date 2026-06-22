@@ -13,6 +13,7 @@ data class NodesDomain(
     val mapId: Int,
     val onExecutionEvent: String,
     val onExecutionEntityId: Int,
+    val transitionStyle: NodeTransitionStyle = NodeTransitionStyle.VEIL,
 )
 
 enum class NodeStatus {
@@ -20,4 +21,13 @@ enum class NodeStatus {
     LOCKED,
     OPEN,
     COMPLETED,
+}
+
+// Presentation hint set by content authors: declares how the entry into the
+// node's follow-up sequence should be staged. Decoupled from the consequence
+// of the node — the veil layer reads this directly, never inspects what the
+// event ends up triggering.
+enum class NodeTransitionStyle {
+    VEIL,
+    IMMEDIATE,
 }

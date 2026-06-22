@@ -10,6 +10,7 @@ import com.bellako.kiwi.common.services.eventbus.listenToEvent
 import com.bellako.kiwi.common.utils.Logger.warn
 import com.bellako.kiwi.features.conversations.data.ConversationDomain
 import com.bellako.kiwi.features.conversations.data.ConversationOptionDomain
+import com.bellako.kiwi.features.conversations.data.ConversationType
 import com.bellako.kiwi.features.conversations.data.NextEventType
 import com.bellako.kiwi.features.incidences.model.UserIncidenceManager
 import com.bellako.kiwi.features.personality.model.IPersonalityRepository
@@ -55,6 +56,17 @@ class ConversationViewModel
             PersonalityScriptVariableResolver(personalityRepository)
         }
 
+        // Optional exit-veil hook. When set, end() defers the dismissal until
+        // the veil has fully covered the screen, so the user sees the same
+        // veil transition as a node entry instead of the conversation lerping
+        // off the bottom. Null in tests / previews — those keep the original
+        // slide-out timing.
+        private var exitVeilRunner: (suspend (finalize: suspend () -> Unit) -> Unit)? = null
+
+        fun setExitVeilRunner(runner: (suspend (finalize: suspend () -> Unit) -> Unit)?) {
+            exitVeilRunner = runner
+        }
+
         init {
             GlobalScope.launch(Dispatchers.Main) {
                 listenToEvent(EventType.START_CNV) { eventPayload ->
@@ -82,6 +94,13 @@ class ConversationViewModel
                         )
 
                     _isVisible.value = true
+
+                    // Tell the map to pause its VFX while a full-screen
+                    // conversation covers it. Small dialogues sit over the
+                    // map without hiding it, so they don't emit this.
+                    if (conversation.type == ConversationType.FULL) {
+                        EventBus.emitEvent(EventType.MAP_COVERED, EventPayload.EmptyPayload())
+                    }
 
                     if (conversation.incidenceNameToSet != null && !conversation.incidenceNameToSet.isEmpty()) {
                         userIncidenceManager.setIncidence(
@@ -140,18 +159,46 @@ class ConversationViewModel
                         warn("IO error saving options: ${e.message}")
                     }
                 }
-                _isVisible.value = false
-                delay(ANIMATION_DURATION_MS)
 
-                if (_active.value != null && _active.value?.onCompletedEvent != "_") {
-                    EventBus.emitEvent(
-                        EventType.valueOf(_active.value!!.onCompletedEvent),
-                        EventPayload.EntityIdPayload(_active.value!!.onCompletedEntityId),
-                    )
+                val clearActiveAndEmit: suspend () -> Unit = {
+                    // Uncover the map BEFORE firing the follow-up event so any
+                    // chained covering screen (another FULL conv / combat) can
+                    // emit its own MAP_COVERED last and win the final state.
+                    if (_active.value?.type == ConversationType.FULL) {
+                        EventBus.emitEvent(EventType.MAP_UNCOVERED, EventPayload.EmptyPayload())
+                    }
+                    if (_active.value != null && _active.value?.onCompletedEvent != "_") {
+                        EventBus.emitEvent(
+                            EventType.valueOf(_active.value!!.onCompletedEvent),
+                            EventPayload.EntityIdPayload(_active.value!!.onCompletedEntityId),
+                        )
+                    }
+                    _active.value = null
+                    _selectedOptions.value = emptyList()
                 }
 
-                _active.value = null
-                _selectedOptions.value = emptyList()
+                val runner = exitVeilRunner
+                // Conversations with no background sit over the map as a
+                // dialogue overlay — the map stays visible behind them, so the
+                // veil exit reads as an unnecessary blackout. Slide them
+                // straight down instead, same as the no-runner fallback.
+                val hasBackground = !_active.value?.background.isNullOrBlank()
+                if (runner != null && hasBackground) {
+                    // The runner plays the veil enter, calls the finalize block
+                    // while the veil is fully opaque (so the swap is invisible),
+                    // then plays the veil fade-out to reveal the map (or a
+                    // chained follow-up screen).
+                    runner {
+                        _isVisible.value = false
+                        clearActiveAndEmit()
+                    }
+                } else {
+                    // Fallback for previews / tests: keep the original slide-out
+                    // timing — hide content, wait for the slide, then clean up.
+                    _isVisible.value = false
+                    delay(ANIMATION_DURATION_MS)
+                    clearActiveAndEmit()
+                }
             }
         }
 

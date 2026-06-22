@@ -1,7 +1,7 @@
 package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
-import android.content.pm.ApplicationInfo
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -70,6 +70,14 @@ import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
+import com.bellako.kiwi.features.nodes.model.INodesViewModel
+import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
+import com.bellako.kiwi.features.nodes.tests.NodesFakeViewModel
+import com.bellako.kiwi.features.skills.model.ISkillsViewModel
+import com.bellako.kiwi.features.skills.tests.SkillsFakeViewModel
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -81,6 +89,11 @@ import com.bellako.kiwi.features.personality.data.PersonalityState
 import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.goals.model.IGoalsViewModel
+import com.bellako.kiwi.features.goals.tests.GoalsFakeViewModel
+import com.bellako.kiwi.features.users.data.UsersState
+import com.bellako.kiwi.features.users.model.IUsersViewModel
+import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
 import com.bellako.kiwi.features.users.tests.UsersTestTags
 import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -90,6 +103,7 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val APP_CARD_WIDTH = 96.dp
@@ -103,6 +117,10 @@ private const val DRAG_ALPHA = 1.0f
 private const val DRAG_SCALE_X = 1.0f
 private const val DRAG_SCALE_Y = 1.0f
 private const val NEUTRAL_APPS_GRID_SIZE = 3
+
+// Small settle before lifting the build→apps step veil, so the apps layout has
+// composed under the veil and the reveal lands on a finished screen.
+private const val SIGNUP_APPS_VEIL_LIFT_DELAY_MS = 150L
 
 private val GOOD_APP_PACKAGES =
     setOf(
@@ -147,11 +165,22 @@ private val BAD_APP_PACKAGES =
 
 @Composable
 fun SignUpScreen4_Apps(
+    usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
+    goalsViewModel: IGoalsViewModel,
+    nodesViewModel: INodesViewModel,
+    skillsViewModel: ISkillsViewModel,
     navController: NavController,
 ) {
-    SignUpScreen {
-        AppClassification(personalityViewModel, navController)
+    SignUpScreen(showSmoke = false) {
+        AppClassification(
+            usersViewModel,
+            personalityViewModel,
+            navController,
+            goalsViewModel,
+            nodesViewModel,
+            skillsViewModel,
+        )
     }
 }
 
@@ -163,13 +192,26 @@ data class AppInfo(
 
 @Composable
 fun AppClassification(
+    usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
     navController: NavController,
+    goalsViewModel: IGoalsViewModel,
+    nodesViewModel: INodesViewModel,
+    skillsViewModel: ISkillsViewModel,
 ) {
     val context = LocalContext.current
     val packageManager = context.packageManager
     val myPackageName = context.packageName
     val isPreview = LocalInspectionMode.current
+
+    // Lift the step veil raised by the build-confirm transition once the app
+    // step is mounted. No-op when reached without a veil (Settings "change
+    // apps", or resuming sign-up from login).
+    val nodeEntry = LocalNodeEntryTransition.current
+    LaunchedEffect(Unit) {
+        delay(SIGNUP_APPS_VEIL_LIFT_DELAY_MS)
+        nodeEntry?.fadeOut()
+    }
 
     val personalityUiState by personalityViewModel.uiState.collectAsState()
     val personalityIsLoading by personalityViewModel.isLoading.collectAsState()
@@ -177,48 +219,44 @@ fun AppClassification(
     var localLoading by remember { mutableStateOf(false) }
     val isLoading by remember { derivedStateOf { localLoading || personalityIsLoading } }
 
-    val excludedPackages =
-        remember {
-            listOf(
-                "com.google.android.webview",
-                "com.android.calendar",
-                "com.android.deskclock",
-                "com.android.contacts",
-                "com.google.android.apps.wellbeing",
-                "com.google.android.apps.docs",
-                "com.google.android.inputmethod.latin",
-                "com.google.android.setupwizard",
-                "com.google.android.gms",
-                "com.google.android.apps.maps",
-                "com.google.android.projection.gearhead",
-                "com.google.android.apps.fitness",
-                "com.google.android.apps.nbu.files",
-                "com.google.android.apps.photos",
-                "com.google.android.apps.safetyhub",
-                "com.google.android.apps.privatecompute",
-                "com.google.speechrecognition",
-                "com.google.android.speech",
-            )
-        }
-
     val apps =
         remember(packageManager, myPackageName) {
             val realApps =
                 try {
-                    packageManager
-                        .getInstalledApplications(PackageManager.GET_META_DATA)
-                        .filter {
-                            val isSystemApp = (it.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-                            val isUpdatedSystemApp =
-                                (it.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-                            val isExcludedPackage = excludedPackages.contains(it.packageName)
+                    // The user-visible app set = anything with a launcher
+                    // activity. This covers preinstalled apps with a drawer
+                    // icon and any Play Store install, and excludes pure OS
+                    // framework packages (no launcher, no Play presence).
+                    val launcherIntent =
+                        Intent(Intent.ACTION_MAIN).apply {
+                            addCategory(Intent.CATEGORY_LAUNCHER)
+                        }
+                    val launchable =
+                        packageManager
+                            .queryIntentActivities(launcherIntent, 0)
+                            .associateBy { it.activityInfo.packageName }
+                            .values
+                            .map { resolveInfo ->
+                                val applicationInfo = resolveInfo.activityInfo.applicationInfo
+                                val name = packageManager.getApplicationLabel(applicationInfo).toString()
+                                val icon = packageManager.getApplicationIcon(applicationInfo)
+                                AppInfo(applicationInfo.packageName, name, icon)
+                            }
 
-                            (!isSystemApp || isUpdatedSystemApp) && !isExcludedPackage
-                        }.map {
-                            val name = packageManager.getApplicationLabel(it).toString()
-                            val icon = packageManager.getApplicationIcon(it)
-                            AppInfo(it.packageName, name, icon)
-                        }.sortedBy { it.name.lowercase() }
+                    // GrowTale must always appear in the picker — re-add it
+                    // if the launcher query didn't return it for any reason.
+                    val withGrowTale =
+                        if (launchable.any { it.packageName == myPackageName }) {
+                            launchable
+                        } else {
+                            launchable +
+                                AppInfo(
+                                    packageName = myPackageName,
+                                    name = "GrowTale",
+                                    icon = ContextCompat.getDrawable(context, R.mipmap.ic_launcher_round)!!,
+                                )
+                        }
+                    withGrowTale.sortedBy { it.name.lowercase() }
                 } catch (_: Exception) {
                     emptyList()
                 }
@@ -284,7 +322,11 @@ fun AppClassification(
     } else {
         AppClassificationColumns(
             isLoading = isLoading,
+            usersViewModel = usersViewModel,
             personalityViewModel = personalityViewModel,
+            goalsViewModel = goalsViewModel,
+            nodesViewModel = nodesViewModel,
+            skillsViewModel = skillsViewModel,
             goodApps = goodApps,
             badApps = badApps,
             neutralApps = neutralApps,
@@ -327,7 +369,11 @@ private fun buildInitialAppBuckets(
 @Composable
 fun AppClassificationColumns(
     isLoading: Boolean,
+    usersViewModel: IUsersViewModel,
     personalityViewModel: IPersonalityViewModel,
+    goalsViewModel: IGoalsViewModel,
+    nodesViewModel: INodesViewModel,
+    skillsViewModel: ISkillsViewModel,
     goodApps: SnapshotStateList<AppInfo>,
     badApps: SnapshotStateList<AppInfo>,
     neutralApps: SnapshotStateList<AppInfo>,
@@ -365,6 +411,8 @@ fun AppClassificationColumns(
     Column(
         modifier = Modifier.padding(getResponsiveSizeHeight(Spacing.medium)),
     ) {
+        Kiwi_Spacer(Spacing.large)
+
         Kiwi_P2(
             KiwiTextArguments(
                 text = "Hold and drag to move apps",
@@ -428,15 +476,55 @@ fun AppClassificationColumns(
             color = kiwiColors.color5A,
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
+                    // Settings re-uses this screen for "change apps". In that mode
+                    // we save and slide back down to Settings — no map-entry curtain,
+                    // no baseline reset (the baseline is fixed at signup).
+                    val fromSettings =
+                        navController.previousBackStackEntry?.destination?.route == ScreenRoutes.SETTINGS
+                    if (!fromSettings) {
+                        // App selection is the final sign-up step — raise the
+                        // map-entry loading curtain now so it covers the save and
+                        // the navigation into the map.
+                        usersViewModel.setShowAppLoading(true)
+                    }
                     personalityViewModel.onAppsChanged(
                         goodApps.map { it.packageName },
                         badApps.map { it.packageName },
                         neutralApps.map { it.packageName },
                     )
                     if (personalityViewModel.updateApps().isSuccess) {
-                        firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
-                        navController.navigate(ScreenRoutes.HOME)
-                        onUpdateSuccess()
+                        if (fromSettings) {
+                            navController.popBackStack()
+                        } else {
+                            firebaseLogEvent(FirebaseEventNames.SIGNUP_4_APPS_COMPLETED)
+                            goalsViewModel.saveBaselineAppUsage(
+                                goodApps.map { it.packageName },
+                                badApps.map { it.packageName },
+                            )
+                            // Drive the fresh-account opening beat right here, under
+                            // the loading curtain. The map's own LaunchedEffect was
+                            // racing the backend's first-node provisioning on this
+                            // path — by awaiting the round-trip before navigating,
+                            // the map mounts with the first node already COMPLETED.
+                            val executedNode = nodesViewModel.autoExecuteFirstNode(0)
+                            // Auto-place one starter skill on the deck so the
+                            // fresh account has something playable in combat on
+                            // their very first map session. Awaited so the
+                            // backend round-trip lands before HOME mounts.
+                            skillsViewModel.equipStarterIfNeeded()
+                            navController.navigate(ScreenRoutes.HOME)
+                            onUpdateSuccess()
+                            executedNode?.let { node ->
+                                if (node.onExecutionEvent.isNotBlank() && node.onExecutionEvent != "_") {
+                                    EventBus.emitEvent(
+                                        EventType.valueOf(node.onExecutionEvent),
+                                        EventPayload.EntityIdPayload(node.onExecutionEntityId),
+                                    )
+                                }
+                            }
+                        }
+                    } else if (!fromSettings) {
+                        usersViewModel.setShowAppLoading(false)
                     }
                 }
             },
@@ -854,6 +942,7 @@ data class ColumnRects(
 fun SignUpScreen4_Apps_Preview() {
     Kiwi_Theme {
         SignUpScreen4_Apps(
+            usersViewModel = UsersFakeViewModel(UsersState("", "", "")),
             personalityViewModel =
                 PersonalityFakeViewModel(
                     PersonalityState(
@@ -866,6 +955,9 @@ fun SignUpScreen4_Apps_Preview() {
                     ),
                 ),
             navController = rememberNavController(),
+            goalsViewModel = GoalsFakeViewModel(),
+            nodesViewModel = NodesFakeViewModel(),
+            skillsViewModel = SkillsFakeViewModel(),
         )
     }
 }

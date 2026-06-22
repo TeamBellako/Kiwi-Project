@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -29,15 +28,19 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.screens.components.rememberBreathingScale
 import com.bellako.kiwi.common.utils.AssetResolver
 import com.bellako.kiwi.features.combat.data.CombatDomain
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
-import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -45,7 +48,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 private const val HEALTH_BAR_WIDTH_FRACTION = 0.6f
-private const val LOG_HEIGHT_FRACTION = 0.85f
 private const val DAMAGE_WIGGLE_CYCLES = 4
 private const val DAMAGE_WIGGLE_AMPLITUDE_PX = 22f
 private const val DAMAGE_WIGGLE_STEP_MS = 50
@@ -56,13 +58,16 @@ private const val DAMAGE_FLASH_DIM_ALPHA = 0.4f
 private const val ENEMY_DEFEAT_POST_DAMAGE_PAUSE_MS = 250L
 private const val ENEMY_DEFEAT_FADE_MS = 800
 private const val LOG_DIM_ALPHA = 0.55f
+// Breathing origin: bottom-center, so the sprite "grows upward" while its feet stay planted.
+private const val ENEMY_BREATHING_ORIGIN_X = 0.5f
+private const val ENEMY_BREATHING_ORIGIN_Y = 1f
 
 @Composable
 internal fun ColumnScope.CombatBattleArea(
     combat: CombatDomain,
-    isLogOpen: Boolean,
-    onDismissLog: () -> Unit,
-    logEntries: List<CombatLogEntry>,
+    enemyBarRevealProgress: Float = 1f,
+    enemyBarNumbersAlpha: Float = 1f,
+    timerIntroProgress: Float = 1f,
 ) {
     Box(
         modifier =
@@ -74,40 +79,23 @@ internal fun ColumnScope.CombatBattleArea(
             currentHp = combat.enemy.stats.currentHp,
             maxHp = combat.enemy.stats.maxHp,
             endsAt = combat.endsAt,
+            barRevealProgress = enemyBarRevealProgress,
+            barNumbersAlpha = enemyBarNumbersAlpha,
+            timerIntroProgress = timerIntroProgress,
         )
-
-        if (isLogOpen) {
-            LogDimOverlay(
-                modifier = Modifier.fillMaxSize(),
-                onDismiss = onDismissLog,
-            )
-
-            CombatLog(
-                entries = logEntries,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(
-                            horizontal = getResponsiveSizeWidth(Spacing.medium),
-                            vertical = getResponsiveSizeHeight(Spacing.small),
-                        ).fillMaxHeight(LOG_HEIGHT_FRACTION)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {},
-                        ),
-            )
-        }
     }
 }
 
 @Composable
+@Suppress("LongParameterList")
 internal fun CombatEnemySprite(
     enemySprite: String,
     currentHp: Int,
     isEnemyDefeated: Boolean,
     context: Context,
     modifier: Modifier = Modifier,
+    introAlpha: Float = 1f,
+    blurRadiusDp: () -> Float = { 0f },
 ) {
     var previousHp by remember { mutableIntStateOf(currentHp) }
     var damageTrigger by remember { mutableIntStateOf(0) }
@@ -121,6 +109,8 @@ internal fun CombatEnemySprite(
     val redAlpha = remember { Animatable(0f) }
     val spriteAlpha = remember { Animatable(1f) }
     var isDamageAnimating by remember { mutableStateOf(false) }
+
+    val breathingScale = rememberBreathingScale()
 
     LaunchedEffect(damageTrigger) {
         if (damageTrigger == 0) return@LaunchedEffect
@@ -160,7 +150,18 @@ internal fun CombatEnemySprite(
             modifier
                 .fillMaxSize()
                 .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-                .alpha(spriteAlpha.value),
+                .alpha(spriteAlpha.value * introAlpha)
+                // Single graphicsLayer carries the breathing scale and the
+                // focus blur — both read at draw phase, blur pipeline skipped
+                // when the radius is below the threshold.
+                .graphicsLayer {
+                    val scale = breathingScale.value
+                    scaleX = scale
+                    scaleY = scale
+                    transformOrigin =
+                        TransformOrigin(ENEMY_BREATHING_ORIGIN_X, ENEMY_BREATHING_ORIGIN_Y)
+                    renderEffect = blurRenderEffectOrNull(blurRadiusDp().dp.toPx())
+                },
         contentScale = ContentScale.Fit,
         colorFilter =
             if (redAlpha.value > 0f) {
@@ -175,10 +176,14 @@ internal fun CombatEnemySprite(
 }
 
 @Composable
+@Suppress("LongParameterList")
 private fun EnemyHud(
     currentHp: Int,
     maxHp: Int,
     endsAt: Long?,
+    barRevealProgress: Float = 1f,
+    barNumbersAlpha: Float = 1f,
+    timerIntroProgress: Float = 1f,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -190,13 +195,20 @@ private fun EnemyHud(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
         ) {
+            // zIndex on the health bar so the timer below can render behind it
+            // during the intro slide-down.
             CombatHealthBar(
                 currentHp = currentHp,
                 maxHp = maxHp,
-                modifier = Modifier.fillMaxWidth(HEALTH_BAR_WIDTH_FRACTION),
+                modifier = Modifier.fillMaxWidth(HEALTH_BAR_WIDTH_FRACTION).zIndex(1f),
+                barRevealProgress = barRevealProgress,
+                numbersAlpha = barNumbersAlpha,
             )
 
-            CombatTimer(endsAt = endsAt)
+            CombatTimer(
+                endsAt = endsAt,
+                introProgress = timerIntroProgress,
+            )
         }
     }
 }

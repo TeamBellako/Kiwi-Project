@@ -2,6 +2,7 @@ package com.kiwi.features.goals.controllers;
 
 import com.kiwi.features.goals.data.GoalCategory;
 import com.kiwi.features.goals.data.GoalStatus;
+import com.kiwi.features.goals.data.GoalType;
 import com.kiwi.features.goals.data.UserGoalStatusPersistence;
 import com.kiwi.features.users.data.UsersPersistence;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,4 +39,11 @@ public interface UserGoalStatusRepository extends JpaRepository<UserGoalStatusPe
     );
 
     Optional<UserGoalStatusPersistence> findByIdAndUser(Long id, UsersPersistence user);
+
+    Optional<UserGoalStatusPersistence> findFirstByUserAndGoal_TypeOrderByDateDesc(
+            UsersPersistence user,
+            GoalType type
+    );
+
+    void deleteByUser_IdAndGoal_Id(Long userId, Long goalId);
 }

@@ -40,6 +40,12 @@ class AppBarViewModel
                     onNewContent(ScreenRoutes.OBJECTIVES)
                 }
             }
+
+            GlobalScope.launch(Dispatchers.Main) {
+                listenToEvent(EventType.MAP_CONTENT_AVAILABLE) { eventPayload ->
+                    onNewContent(ScreenRoutes.HOME)
+                }
+            }
         }
 
         private val _state =

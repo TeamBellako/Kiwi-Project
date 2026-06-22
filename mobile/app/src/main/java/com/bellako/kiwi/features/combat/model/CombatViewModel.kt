@@ -58,11 +58,30 @@ class CombatViewModel
         private val _isVisible = MutableStateFlow(false)
         val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
+        // Optional exit-veil hook used on a victory continue. When set, the
+        // dismissal waits for the veil to cover the screen before clearing
+        // state and emitting the follow-up event, so the user sees the same
+        // veil transition as a node entry instead of the combat lerping off.
+        // Abandon / defeat keep the original slide-out.
+        private var exitVeilRunner: (suspend (finalize: suspend () -> Unit) -> Unit)? = null
+
+        fun setExitVeilRunner(runner: (suspend (finalize: suspend () -> Unit) -> Unit)?) {
+            exitVeilRunner = runner
+        }
+
         private val _lastTurnActions = MutableStateFlow<List<CombatActionDomain>>(emptyList())
         val lastTurnActions: StateFlow<List<CombatActionDomain>> = _lastTurnActions.asStateFlow()
 
         private val _isTurnPlaying = MutableStateFlow(false)
         val isTurnPlaying: StateFlow<Boolean> = _isTurnPlaying.asStateFlow()
+
+        // Flips true once tryResumeActive has finished its first run — whether
+        // or not it found a combat. MainScreen reads this to (a) keep the
+        // initial loading curtain up until the resume question is answered,
+        // and (b) suppress map music during that window, so a cold-start
+        // resume goes straight to combat music with no map-music flash.
+        private val _hasResolvedCombatOnStartup = MutableStateFlow(false)
+        val hasResolvedCombatOnStartup: StateFlow<Boolean> = _hasResolvedCombatOnStartup.asStateFlow()
 
         init {
             GlobalScope.launch(Dispatchers.Main) {
@@ -96,6 +115,7 @@ class CombatViewModel
                     _active.value = combat
                     _lastTurnActions.value = combat.log
                     _isVisible.value = true
+                    EventBus.emitEvent(EventType.MAP_COVERED, EventPayload.EmptyPayload())
                     barkController.onCombatStarted(combat)
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
@@ -104,7 +124,10 @@ class CombatViewModel
         }
 
         fun tryResumeActive() {
-            if (_active.value != null) return
+            if (_active.value != null) {
+                _hasResolvedCombatOnStartup.value = true
+                return
+            }
             viewModelScope.launch {
                 try {
                     val combat = repository.getActiveCombat() ?: return@launch
@@ -112,9 +135,15 @@ class CombatViewModel
                     _active.value = combat
                     _lastTurnActions.value = combat.log
                     _isVisible.value = true
+                    EventBus.emitEvent(EventType.MAP_COVERED, EventPayload.EmptyPayload())
                     barkController.onCombatStarted(combat)
                 } catch (e: Throwable) {
                     setUiState(mapExceptionToUIState(e))
+                } finally {
+                    // Flip AFTER _isVisible so any observer that reacts to the
+                    // flag (curtain wait, map-music gate) sees the combat
+                    // already in place when it unblocks.
+                    _hasResolvedCombatOnStartup.value = true
                 }
             }
         }
@@ -201,6 +230,7 @@ class CombatViewModel
             if (_active.value == null) return
             viewModelScope.launch {
                 _isVisible.value = false
+                EventBus.emitEvent(EventType.MAP_UNCOVERED, EventPayload.EmptyPayload())
                 delay(DISMISS_ANIMATION_DURATION_MS)
                 _active.value = null
                 _lastTurnActions.value = emptyList()
@@ -214,18 +244,32 @@ class CombatViewModel
                 val event = current.onCompletedEvent
                 val entityId = current.onCompletedEntityId
 
-                _isVisible.value = false
-                delay(DISMISS_ANIMATION_DURATION_MS)
-
-                if (event != null && entityId != null) {
-                    EventBus.emitEvent(
-                        EventType.valueOf(event),
-                        EventPayload.EntityIdPayload(entityId),
-                    )
+                val clearAndEmit: suspend () -> Unit = {
+                    // Uncover first so any chained follow-up's MAP_COVERED wins
+                    // the final state when both events fire in sequence.
+                    EventBus.emitEvent(EventType.MAP_UNCOVERED, EventPayload.EmptyPayload())
+                    if (event != null && entityId != null) {
+                        EventBus.emitEvent(
+                            EventType.valueOf(event),
+                            EventPayload.EntityIdPayload(entityId),
+                        )
+                    }
+                    _active.value = null
+                    _lastTurnActions.value = emptyList()
+                    barkController.onCombatEnded()
                 }
-                _active.value = null
-                _lastTurnActions.value = emptyList()
-                barkController.onCombatEnded()
+
+                val runner = exitVeilRunner
+                if (runner != null) {
+                    runner {
+                        _isVisible.value = false
+                        clearAndEmit()
+                    }
+                } else {
+                    _isVisible.value = false
+                    delay(DISMISS_ANIMATION_DURATION_MS)
+                    clearAndEmit()
+                }
             }
         }
 
@@ -236,7 +280,7 @@ class CombatViewModel
                 current.copy(
                     turnNumber = result.turnNumber,
                     combatStatus = result.combatStatus,
-                    log = current.log + result.actions,
+                    log = current.log + result.actions.map { it.copy(createdAt = result.createdAt) },
                     onCompletedEvent = if (isTerminal) result.onCompletedEvent else null,
                     onCompletedEntityId = if (isTerminal) result.onCompletedEntityId else null,
                 )
@@ -261,6 +305,13 @@ class CombatViewModel
             ) {
                 val prev = state
                 state = applyActionEffects(state, actions.first())
+                // Stamp the optimistically-added player action (the last log
+                // entry) with the turn timestamp so it groups with the rest of
+                // the turn instead of opening a separate timestamp section.
+                state =
+                    state.copy(
+                        log = state.log.dropLast(1) + state.log.last().copy(createdAt = result.createdAt),
+                    )
                 _active.value = state
                 playActionSFX(actions.first())
                 playerSkillId?.let { barkController.onSkillUsed(CombatActor.USER, it) }
@@ -273,7 +324,7 @@ class CombatViewModel
             }
 
             for (i in startIndex until actions.size) {
-                val action = actions[i]
+                val action = actions[i].copy(createdAt = result.createdAt)
                 val prev = state
                 state = state.copy(log = state.log + action)
                 state = applyActionEffects(state, action)

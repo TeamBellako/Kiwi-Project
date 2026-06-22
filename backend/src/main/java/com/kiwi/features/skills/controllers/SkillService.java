@@ -2,6 +2,7 @@ package com.kiwi.features.skills.controllers;
 
 import com.kiwi.features.combat.data.persistence.CombatElementPersistence;
 import com.kiwi.features.combat.repositories.CombatElementRepository;
+import com.kiwi.features.goals.controllers.UserGoalStatusRepository;
 import com.kiwi.features.skills.data.domain.SkillCombatDomain;
 import com.kiwi.features.skills.data.domain.SkillDomain;
 import com.kiwi.features.skills.data.mappers.SkillCombatMapper;
@@ -9,6 +10,7 @@ import com.kiwi.features.skills.data.mappers.SkillMapper;
 import com.kiwi.features.skills.data.persistence.EnemySkillPersistence;
 import com.kiwi.features.skills.data.persistence.SkillEffectPersistence;
 import com.kiwi.features.skills.data.persistence.SkillPersistence;
+import com.kiwi.features.skills.data.persistence.UserSkillStatusKey;
 import com.kiwi.features.skills.data.persistence.UserSkillStatusPersistence;
 import com.kiwi.features.skills.data.DTO.EquipSkillDTO;
 import com.kiwi.features.skills.data.DTO.SkillDTO;
@@ -36,12 +38,14 @@ public class SkillService {
     private final SkillProgressService skillProgressService;
     private final SkillEffectRepository skillEffectRepository;
     private final EnemySkillRepository enemySkillRepository;
+    private final UserGoalStatusRepository userGoalStatusRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public SkillService(
             SkillRepository skillRepository, CombatElementRepository elementRepository,
             UserSkillStatusRepository userSkillStatusRepository,
             SkillProgressService skillProgressService, SkillEffectRepository skillEffectRepository, EnemySkillRepository enemySkillRepository,
+            UserGoalStatusRepository userGoalStatusRepository,
             ApplicationEventPublisher eventPublisher
     ) {
         this.skillRepository = skillRepository;
@@ -50,6 +54,7 @@ public class SkillService {
         this.skillProgressService = skillProgressService;
         this.skillEffectRepository = skillEffectRepository;
         this.enemySkillRepository = enemySkillRepository;
+        this.userGoalStatusRepository = userGoalStatusRepository;
         this.eventPublisher = eventPublisher;
     }
 
@@ -300,6 +305,50 @@ public class SkillService {
         );
 
         return SkillMapper.toDTO(updated, getElementName(updated.getElementId()));
+    }
+
+    // ============================================================================================
+    // REMOVE
+    // ============================================================================================
+
+    @Transactional
+    public void removeSkillFromUser(Long userId, Long skillId) {
+
+        UserSkillStatusKey key = new UserSkillStatusKey(userId, skillId);
+
+        if (!userSkillStatusRepository.existsById(key)) {
+            throw new UserSkillStatusNotFoundException(userId, skillId);
+        }
+
+        performSkillRemoval(userId, skillId, key);
+    }
+
+    @Transactional
+    public void removeSkillFromUserIfPresent(Long userId, Long skillId) {
+
+        UserSkillStatusKey key = new UserSkillStatusKey(userId, skillId);
+
+        if (!userSkillStatusRepository.existsById(key)) {
+            return;
+        }
+
+        performSkillRemoval(userId, skillId, key);
+    }
+
+    public boolean userHasSkill(Long userId, Long skillId) {
+        return userSkillStatusRepository.existsById(new UserSkillStatusKey(userId, skillId));
+    }
+
+    private void performSkillRemoval(Long userId, Long skillId, UserSkillStatusKey key) {
+
+        SkillPersistence skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new SkillNotFoundException(skillId));
+
+        if (skill.getCooldownType() == CooldownType.GOAL && skill.getCooldownGoalId() != null) {
+            userGoalStatusRepository.deleteByUser_IdAndGoal_Id(userId, skill.getCooldownGoalId());
+        }
+
+        userSkillStatusRepository.deleteById(key);
     }
 
     // ============================================================================================

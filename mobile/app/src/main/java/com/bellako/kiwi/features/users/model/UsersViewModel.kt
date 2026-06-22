@@ -49,18 +49,22 @@ class UsersViewModel
         private val _isLoginCompleted = MutableStateFlow(false)
         val isLoginCompleted: StateFlow<Boolean> = _isLoginCompleted.asStateFlow()
 
-        private val _initialAuthCheckPerformed = MutableStateFlow(false)
-        override val initialAuthCheckPerformed: StateFlow<Boolean> = _initialAuthCheckPerformed.asStateFlow()
+        private val _showAppLoading = MutableStateFlow(false)
+        override val showAppLoading: StateFlow<Boolean> = _showAppLoading.asStateFlow()
 
-        override fun markInitialAuthCheckPerformed() {
-            _initialAuthCheckPerformed.value = true
+        override fun setShowAppLoading(active: Boolean) {
+            _showAppLoading.value = active
         }
 
-        private val _manualAuthOverlayActive = MutableStateFlow(false)
-        override val manualAuthOverlayActive: StateFlow<Boolean> = _manualAuthOverlayActive.asStateFlow()
+        // Latches once on the first LogInScreen mount in this app session;
+        // never reset (logout / manual nav back to LOGIN should NOT re-arm
+        // the auto-redirect to sign-up).
+        private var autoLoginAttempted: Boolean = false
 
-        override fun setManualAuthOverlayActive(active: Boolean) {
-            _manualAuthOverlayActive.value = active
+        override fun hasAttemptedAutoLogin(): Boolean = autoLoginAttempted
+
+        override fun markAutoLoginAttempted() {
+            autoLoginAttempted = true
         }
 
         init {
@@ -136,7 +140,6 @@ class UsersViewModel
             clearLocalCredentials(context)
             authRepository.setJwtToken("")
             _isLoginCompleted.value = false
-            _initialAuthCheckPerformed.value = false
         }
 
         // -----------------------------------------------------------------------------------------
@@ -249,7 +252,7 @@ class UsersViewModel
             }
         }
 
-        suspend fun getMyUserPoints() {
+        override suspend fun getMyUserPoints() {
             setIsLoading(true)
             val result = repository.getMyUserPoints()
             setIsLoading(false)

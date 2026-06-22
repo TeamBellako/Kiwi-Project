@@ -6,8 +6,12 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -39,7 +43,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -67,6 +70,9 @@ private const val NAV_ICON_POP_SCALE = 1.25f
 private const val NAV_ICON_POP_UP_MS = 110
 private const val NAV_ICON_PRESS_SCALE = 0.85f
 private const val NAV_ICON_PRESS_MS = 90
+private const val NAV_BADGE_PULSE_MAX_SCALE = 1.45f
+private const val NAV_BADGE_PULSE_MIN_ALPHA = 0.45f
+private const val NAV_BADGE_PULSE_MS = 650
 
 // -------------------------------------------------------------------------------------------------
 
@@ -75,12 +81,9 @@ fun AppBarScreen(
     navController: NavController,
     appBarViewModel: AppBarViewModel = hiltViewModel(),
 ) {
-    Box(
-        modifier =
-            Modifier
-                .wrapContentSize()
-                .background(LocalKiwiColors.current.color2),
-    ) {
+    // No background here: the rounded NavigationBar must let the screen behind
+    // it show through its top corners instead of a solid rectangle.
+    Box(modifier = Modifier.wrapContentSize()) {
         AppBarModalLayout(navController, appBarViewModel)
     }
 }
@@ -113,14 +116,7 @@ fun AppBarModalLayout(
         NavigationBar(
             modifier =
                 Modifier
-                    .clip(
-                        RoundedCornerShape(
-                            getResponsiveSizeHeight(30.dp),
-                            getResponsiveSizeHeight(30.dp),
-                            0.dp,
-                            0.dp,
-                        ),
-                    ).fillMaxWidth()
+                    .fillMaxWidth()
                     .navigationBarsPadding()
                     .height(getResponsiveSizeHeight(90.dp))
                     .testTag(CommonTestTags.BOTTOM_APPBAR),
@@ -241,10 +237,37 @@ private fun AppBarIcon(
             )
 
             if (showBadge) {
+                val pulse = rememberInfiniteTransition(label = "badgePulse")
+                val badgeScale by pulse.animateFloat(
+                    initialValue = 1f,
+                    targetValue = NAV_BADGE_PULSE_MAX_SCALE,
+                    animationSpec =
+                        infiniteRepeatable(
+                            animation = tween(NAV_BADGE_PULSE_MS, easing = EaseInOut),
+                            repeatMode = RepeatMode.Reverse,
+                        ),
+                    label = "badgeScale",
+                )
+                val badgeAlpha by pulse.animateFloat(
+                    initialValue = 1f,
+                    targetValue = NAV_BADGE_PULSE_MIN_ALPHA,
+                    animationSpec =
+                        infiniteRepeatable(
+                            animation = tween(NAV_BADGE_PULSE_MS, easing = EaseInOut),
+                            repeatMode = RepeatMode.Reverse,
+                        ),
+                    label = "badgeAlpha",
+                )
+
                 Box(
                     modifier =
                         Modifier
                             .size(getResponsiveSizeHeight(8.dp))
+                            .graphicsLayer {
+                                scaleX = badgeScale
+                                scaleY = badgeScale
+                                alpha = badgeAlpha
+                            }
                             .background(kiwiColors.color8A, CircleShape)
                             .align(Alignment.TopEnd),
                 )

@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS nodes (
   on_execution_action VARCHAR(255),
   on_execution_entity VARCHAR(255),
   on_execution_entity_id INT,
+  transition_style VARCHAR(50) NOT NULL DEFAULT 'VEIL',
   CONSTRAINT uq_nodes_name UNIQUE (name),
   CHECK (
     cord_x >= 0.0 AND cord_x <= 1.0
@@ -118,6 +119,7 @@ CREATE TABLE IF NOT EXISTS user_goal_status (
     status VARCHAR(50) NOT NULL,
     date DATE NOT NULL,
     value INT NOT NULL,
+    target_override INT DEFAULT NULL,
     CONSTRAINT fk_ugs_users FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_ugs_goals FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
 );

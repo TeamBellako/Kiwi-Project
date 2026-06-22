@@ -5,17 +5,21 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -42,16 +47,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
+import com.bellako.kiwi.common.screens.components.Kiwi_P1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.services.eventbus.EventType
@@ -94,6 +102,7 @@ private fun Modifier.featherHorizontalEdges(): Modifier =
 @OptIn(ExperimentalSharedTransitionApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongMethod")
 fun DashboardScreen2_Expanded(
     context: Context,
     coroutineScope: CoroutineScope,
@@ -161,7 +170,7 @@ fun DashboardScreen2_Expanded(
 
     ComposableEngagementMeasuring("expanded")
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Kiwi_Spacer(Spacing.xSmall)
@@ -174,31 +183,33 @@ fun DashboardScreen2_Expanded(
             SelectedDayText(metricsState)
         }
 
-        Crossfade(
-            targetState = shouldShowCalendarView.value,
-            animationSpec = tween(DAY_TRANSITION_ANIM_DURATION),
-            label = "calendarWeekToggle",
-        ) { showCalendar ->
-            if (showCalendar) {
-                CalendarMonthView(
-                    context = context,
-                    isLoading = isLoading,
-                    coroutineScope = coroutineScope,
-                    usersViewModel = usersViewModel,
-                    metricsViewModel = metricsViewModel,
-                    metricsState = metricsState,
-                    shouldShowCalendarView = shouldShowCalendarView,
-                    personalityViewModel = personalityViewModel,
-                    goalsViewModel = goalsViewModel,
-                    dayTransitionDirection = dayTransitionDirection,
-                )
-            } else {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Kiwi_Spacer(Spacing.small)
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clipToBounds(),
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Kiwi_Spacer(Spacing.small)
 
+                AnimatedVisibility(
+                    visible = !shouldShowCalendarView.value,
+                    enter =
+                        slideInVertically(
+                            animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                            initialOffsetY = { -it },
+                        ) + fadeIn(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                    exit =
+                        slideOutVertically(
+                            animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                            targetOffsetY = { -it },
+                        ) + fadeOut(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                ) {
                     AnimatedContent(
                         targetState = metricsState.date,
                         transitionSpec = dayTransitionSpec,
@@ -223,7 +234,13 @@ fun DashboardScreen2_Expanded(
                             )
                         }
                     }
+                }
 
+                AnimatedVisibility(
+                    visible = !shouldShowCalendarView.value,
+                    enter = fadeIn(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                    exit = fadeOut(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                ) {
                     CalendarWeekView(
                         context = context,
                         coroutineScope = coroutineScope,
@@ -234,10 +251,26 @@ fun DashboardScreen2_Expanded(
                         isLoading = isLoading,
                         goalsViewModel = goalsViewModel,
                         dayTransitionDirection = dayTransitionDirection,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
                     ) {
                         shouldShowCalendarView.value = true
                     }
+                }
 
+                AnimatedVisibility(
+                    visible = !shouldShowCalendarView.value,
+                    enter =
+                        slideInVertically(
+                            animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                            initialOffsetY = { it },
+                        ) + fadeIn(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                    exit =
+                        slideOutVertically(
+                            animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                            targetOffsetY = { it },
+                        ) + fadeOut(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+                ) {
                     AnimatedContent(
                         targetState = metricsState.date,
                         transitionSpec = dayTransitionSpec,
@@ -252,7 +285,66 @@ fun DashboardScreen2_Expanded(
                     }
                 }
             }
+
+            CalendarOpenFromCenter(
+                visible = shouldShowCalendarView.value,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                // Center the month grid in the available space between the day
+                // header above and the bottom of the sheet, rather than pinning
+                // it to the top. The bottom ~100dp of the sheet sits behind the
+                // bottom nav bar (same offset DashboardScreen uses for its
+                // loading overlay), so reserve it here — otherwise centering
+                // against the full sheet height drops the grid below the visible
+                // middle.
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(bottom = getResponsiveSizeHeight(100.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CalendarMonthView(
+                        context = context,
+                        isLoading = isLoading,
+                        coroutineScope = coroutineScope,
+                        usersViewModel = usersViewModel,
+                        metricsViewModel = metricsViewModel,
+                        metricsState = metricsState,
+                        shouldShowCalendarView = shouldShowCalendarView,
+                        personalityViewModel = personalityViewModel,
+                        goalsViewModel = goalsViewModel,
+                        dayTransitionDirection = dayTransitionDirection,
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun CalendarOpenFromCenter(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter =
+            scaleIn(
+                animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                initialScale = 0f,
+                transformOrigin = TransformOrigin.Center,
+            ) + fadeIn(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+        exit =
+            scaleOut(
+                animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION),
+                targetScale = 0f,
+                transformOrigin = TransformOrigin.Center,
+            ) + fadeOut(animationSpec = tween(CALENDAR_TRANSITION_ANIM_DURATION)),
+        modifier = modifier,
+    ) {
+        content()
     }
 }
 
@@ -284,12 +376,16 @@ private fun ExpandedProgressBox(
 }
 
 @Composable
-private fun ExpandedMetricProgressTitle(title: String) {
+private fun ExpandedMetricProgressTitle(
+    title: String,
+    isComplete: Boolean,
+) {
+    val kiwiColors = LocalKiwiColors.current
     Kiwi_P2(
         KiwiTextArguments(
             title,
             TextAlign.Center,
-            LocalKiwiColors.current.color9,
+            if (isComplete) kiwiColors.color8A else kiwiColors.color6,
             modifier =
                 Modifier
                     .fillMaxWidth(),
@@ -299,6 +395,10 @@ private fun ExpandedMetricProgressTitle(title: String) {
 
 @Composable
 private fun ExpandedMetricsProgress(state: MetricsState) {
+    val validMetrics = state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0
+    val goodComplete = validMetrics && state.currentGoodTimeSeconds >= state.maxGoodTimeSeconds
+    val badComplete = validMetrics && state.currentBadTimeSeconds >= state.maxBadTimeSeconds
+
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier =
@@ -308,11 +408,11 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
     ) {
         Box(modifier = Modifier.weight(1f)) {
             Column {
-                ExpandedMetricProgressTitle("Good Apps")
+                ExpandedMetricProgressTitle("Good Apps", isComplete = goodComplete)
                 SelectedMetricsTime(
                     state.maxGoodTimeSeconds,
                     state.currentGoodTimeSeconds,
-                    state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                    validMetrics,
                     true,
                     DashboardModalTestTags.GOOD_TIME,
                 )
@@ -320,11 +420,11 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
         }
         Box(modifier = Modifier.weight(1f)) {
             Column {
-                ExpandedMetricProgressTitle("Evil Apps")
+                ExpandedMetricProgressTitle("Evil Apps", isComplete = badComplete)
                 SelectedMetricsTime(
                     state.maxBadTimeSeconds,
                     state.currentBadTimeSeconds,
-                    state.currentGoodTimeSeconds > 0 || state.currentBadTimeSeconds > 0,
+                    validMetrics,
                     true,
                     DashboardModalTestTags.BAD_TIME,
                 )
@@ -351,7 +451,7 @@ private fun ExpandedSummaryCard(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(horizontal = getResponsiveSizeWidth(Spacing.medium)),
     ) {
-        Kiwi_P2(
+        Kiwi_P1(
             KiwiTextArguments(
                 "Challenges",
                 TextAlign.Center,

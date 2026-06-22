@@ -197,12 +197,9 @@ fun GoalCustomize(
             modifier = Modifier.width(buttonsWidth),
             color = kiwiColor.color7C,
             onClick = {
-                // Construir el goal actualizado con el nuevo valor y estado
-                val updatedGoal =
-                    goal.copy(
-                        value = current,
-                        status = if (current >= goal.target) GoalStatus.COMPLETED else goal.status,
-                    )
+                // Solo actualiza el valor; la transición a COMPLETED requiere
+                // confirmación explícita del usuario desde la barra del goal.
+                val updatedGoal = goal.copy(value = current)
 
                 coroutineScope.launch {
                     val result = goalsViewModel.updateGoal(updatedGoal)

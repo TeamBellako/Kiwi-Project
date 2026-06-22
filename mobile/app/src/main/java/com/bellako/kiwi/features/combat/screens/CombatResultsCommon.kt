@@ -1,5 +1,6 @@
 package com.bellako.kiwi.features.combat.screens
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,16 +22,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_P3
+import com.bellako.kiwi.features.combat.components.combatLogControlAlpha
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatDomain
@@ -43,6 +52,9 @@ import com.bellako.kiwi.ui.getResponsiveSizeWidth
 private val SKILL_CARD_RADIUS = 14.dp
 private val SKILL_ICON_SIZE = 36.dp
 private val LOG_TOGGLE_RADIUS = 10.dp
+private val CHEVRON_SIZE = 14.dp
+private const val CHEVRON_OPEN_ROTATION = 180f
+private const val CHEVRON_CLOSED_ROTATION = 0f
 
 internal data class SkillUsedSummary(
     val name: String,
@@ -83,8 +95,14 @@ private fun goalEquivalentText(
 internal fun SkillsUsedHeader(
     isLogOpen: Boolean,
     onToggleLog: () -> Unit,
+    logProgress: Float,
+    onLogButtonBounds: (Rect) -> Unit,
 ) {
     val colors = LocalKiwiColors.current
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isLogOpen) CHEVRON_OPEN_ROTATION else CHEVRON_CLOSED_ROTATION,
+        label = "skills_log_chevron",
+    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -97,9 +115,13 @@ internal fun SkillsUsedHeader(
             ),
         )
         Box(modifier = Modifier.weight(1f))
-        Box(
+        Row(
             modifier =
                 Modifier
+                    // Report the button's footprint so the log can grow out of
+                    // it, and fade the button as the morphing panel takes over.
+                    .onGloballyPositioned { onLogButtonBounds(it.boundsInRoot()) }
+                    .alpha(combatLogControlAlpha(logProgress))
                     .background(
                         color = colors.color3A,
                         shape = RoundedCornerShape(getResponsiveSizeHeight(LOG_TOGGLE_RADIUS)),
@@ -112,6 +134,7 @@ internal fun SkillsUsedHeader(
                         horizontal = getResponsiveSizeWidth(Spacing.medium),
                         vertical = getResponsiveSizeHeight(Spacing.small),
                     ),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Kiwi_Label2(
                 KiwiTextArguments(
@@ -119,6 +142,15 @@ internal fun SkillsUsedHeader(
                     color = colors.color7A,
                     italic = true,
                 ),
+            )
+            Spacer(modifier = Modifier.size(getResponsiveSizeWidth(Spacing.xSmall)))
+            Kiwi_Image(
+                painterResourceId = R.drawable.ic_dialogue_arrow,
+                alt = if (isLogOpen) "Close combat log" else "Open combat log",
+                modifier =
+                    Modifier
+                        .size(getResponsiveSizeHeight(CHEVRON_SIZE))
+                        .rotate(chevronRotation),
             )
         }
     }

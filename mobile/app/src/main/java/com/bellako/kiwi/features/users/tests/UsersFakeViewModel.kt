@@ -23,18 +23,19 @@ class UsersFakeViewModel(
     private val _state = MutableStateFlow<UsersState?>(initialState)
     override val state: StateFlow<UsersState?> = _state.asStateFlow()
 
-    private val _initialAuthCheckPerformed = MutableStateFlow(false)
-    override val initialAuthCheckPerformed: StateFlow<Boolean> = _initialAuthCheckPerformed.asStateFlow()
+    private val _showAppLoading = MutableStateFlow(false)
+    override val showAppLoading: StateFlow<Boolean> = _showAppLoading.asStateFlow()
 
-    override fun markInitialAuthCheckPerformed() {
-        _initialAuthCheckPerformed.value = true
+    override fun setShowAppLoading(active: Boolean) {
+        _showAppLoading.value = active
     }
 
-    private val _manualAuthOverlayActive = MutableStateFlow(false)
-    override val manualAuthOverlayActive: StateFlow<Boolean> = _manualAuthOverlayActive.asStateFlow()
+    private var autoLoginAttempted: Boolean = false
 
-    override fun setManualAuthOverlayActive(active: Boolean) {
-        _manualAuthOverlayActive.value = active
+    override fun hasAttemptedAutoLogin(): Boolean = autoLoginAttempted
+
+    override fun markAutoLoginAttempted() {
+        autoLoginAttempted = true
     }
 
     var fakeError: Boolean = false
@@ -94,6 +95,8 @@ class UsersFakeViewModel(
         }
 
     override suspend fun logout(context: Context) {}
+
+    override suspend fun getMyUserPoints() {}
 
     // ---------------------------------------------------------------------------------------------
 

@@ -81,13 +81,20 @@ public class PersonalityService {
     @Transactional
     public PersonalityDTO updateBuild(String email, @Valid BuildDTO buildDTO) {
         PersonalityDomain personalityDomain = getOrCreatePersonality(email);
+
+        Optional<BuildType> previousBuild = BuildType.fromString(personalityDomain.getBuild());
+
         personalityDomain.setBuild(buildDTO.getBuild());
         PersonalityPersistence saved = saveToPersistence(email, personalityDomain);
 
         BuildType.fromString(buildDTO.getBuild()).ifPresentOrElse(
-                buildType -> {
+                newBuild -> {
                     Long userId = saved.getUser().getId();
-                    buildInitializationService.initializeIfAbsent(userId, buildType);
+                    if (previousBuild.isPresent() && previousBuild.get() != newBuild) {
+                        buildInitializationService.switchBuildSkills(userId, previousBuild.get(), newBuild);
+                    } else {
+                        buildInitializationService.initializeIfAbsent(userId, newBuild);
+                    }
                 },
                 () -> log.warn("Unknown build type '{}' — skipping combat initialization", buildDTO.getBuild())
         );

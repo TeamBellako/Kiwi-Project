@@ -3,6 +3,7 @@ package com.kiwi.goals;
 import com.kiwi.features.goals.controllers.UserGoalStatusRepository;
 import com.kiwi.features.goals.data.GoalCategory;
 import com.kiwi.features.goals.data.GoalStatus;
+import com.kiwi.features.goals.data.GoalType;
 import com.kiwi.features.goals.data.UserGoalStatusPersistence;
 import com.kiwi.features.users.data.UsersPersistence;
 import org.springframework.data.domain.Example;
@@ -86,6 +87,21 @@ public class GoalTestRepositoryInMemory implements UserGoalStatusRepository {
                 .filter(g -> g.getId().equals(id))
                 .filter(g -> g.getUser().getId().equals(user.getId()))
                 .findFirst();
+    }
+
+    @Override
+    public Optional<UserGoalStatusPersistence> findFirstByUserAndGoal_TypeOrderByDateDesc(
+            UsersPersistence user, GoalType type) {
+        return store.values().stream()
+                .filter(g -> g.getUser().getId().equals(user.getId()))
+                .filter(g -> g.getGoal().getType() == type)
+                .max(Comparator.comparing(UserGoalStatusPersistence::getDate));
+    }
+
+    @Override
+    public void deleteByUser_IdAndGoal_Id(Long userId, Long goalId) {
+        store.values().removeIf(g ->
+                g.getUser().getId().equals(userId) && g.getGoal().getId().equals(goalId));
     }
 
     @Override

@@ -166,10 +166,17 @@ private fun CollapsedSummaryCard(
                 .align(alignment = Alignment.CenterEnd)
                 .padding(horizontal = getResponsiveSizeHeight(Spacing.large)),
         ) {
-            ShowCalendarButton(
-                isLoading,
-                onCalendarViewClicked,
-            )
+            with(sharedTransitionScope) {
+                ShowCalendarButton(
+                    isLoading = isLoading,
+                    modifier =
+                        Modifier.sharedElement(
+                            rememberSharedContentState(key = "calendarViewButton"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                        ),
+                    onCalendarViewClicked = onCalendarViewClicked,
+                )
+            }
         }
     }
 }

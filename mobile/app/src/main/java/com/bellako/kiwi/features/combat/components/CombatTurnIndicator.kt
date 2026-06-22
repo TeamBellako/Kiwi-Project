@@ -31,6 +31,7 @@ import com.bellako.kiwi.features.combat.data.CombatActionDomain
 import com.bellako.kiwi.features.combat.data.CombatActionType
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.SkillEffectResultType
+import com.bellako.kiwi.ui.KIWI_DISABLED_ALPHA
 import com.bellako.kiwi.ui.Kiwi_Theme
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
@@ -50,19 +51,33 @@ private val TURN_GLOW_DAMAGE = Color(0xB3D63A2F)
 private val TURN_GLOW_STAT_MOD = Color(0xB330B0FF)
 
 @Composable
+@Suppress("LongParameterList")
 fun CombatTurnIndicator(
     message: AnnotatedString,
     isLogOpen: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     glowColor: Color? = null,
+    introAlpha: Float = 1f,
+    dimmed: Boolean = false,
+    // When true the indicator gently pulses to signal the player can act.
+    isUserTurn: Boolean = false,
+    // When false, taps on the indicator are swallowed — used while a bark is
+    // up so the log toggle doesn't fire underneath the dialogue overlay.
+    clickEnabled: Boolean = true,
 ) {
     val colors = LocalKiwiColors.current
     val rotation by animateFloatAsState(
-        targetValue = if (isLogOpen) CHEVRON_CLOSED_ROTATION else CHEVRON_OPEN_ROTATION,
+        targetValue = if (isLogOpen) CHEVRON_OPEN_ROTATION else CHEVRON_CLOSED_ROTATION,
         label = "combat_turn_chevron",
     )
+    // Dimmed along with the rest of the HUD while an overlay (e.g. a bark) is up.
+    val dimAlpha by animateFloatAsState(
+        targetValue = if (dimmed) KIWI_DISABLED_ALPHA else 1f,
+        label = "combat_turn_dim",
+    )
     val blinkAlpha = rememberBlinkAlpha()
+    val turnPulseAlpha = rememberTurnPulseAlpha(active = isUserTurn && !dimmed)
 
     LaunchedEffect(message.text) {
         blinkAlpha.blink()
@@ -72,12 +87,13 @@ fun CombatTurnIndicator(
         modifier =
             modifier
                 .fillMaxWidth()
+                .alpha(introAlpha * dimAlpha)
                 .combatPanel(
                     bgColor = colors.color3A,
                     borderColor = colors.color5C,
                     radius = INDICATOR_RADIUS,
                     innerGlowColor = glowColor,
-                ).clickable(onClick = onClick)
+                ).clickable(enabled = clickEnabled, onClick = onClick)
                 .padding(
                     horizontal = getResponsiveSizeWidth(Spacing.medium),
                     vertical = getResponsiveSizeHeight(Spacing.medium),
@@ -85,7 +101,7 @@ fun CombatTurnIndicator(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.weight(1f).alpha(blinkAlpha.value),
+            modifier = Modifier.weight(1f).alpha(blinkAlpha.value * turnPulseAlpha),
             contentAlignment = Alignment.Center,
         ) {
             Kiwi_AnnotatedString_P2(
@@ -149,6 +165,7 @@ fun CombatTurnIndicator_Preview() {
             isLogOpen = false,
             onClick = {},
             modifier = Modifier.padding(Spacing.medium),
+            isUserTurn = true,
         )
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,8 +22,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.bellako.kiwi.R
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseLogEvent
 import com.bellako.kiwi.common.data.ScreenRoutes
@@ -31,6 +34,7 @@ import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
+import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.users.data.UsersState
@@ -83,6 +87,14 @@ private fun Welcome(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Kiwi_Image(
+            R.drawable.growtale_icon,
+            "GrowTale icon",
+            modifier = Modifier.size(getResponsiveSizeHeight(96.dp)),
+        )
+
+        Kiwi_Spacer(Spacing.large)
+
         Kiwi_H2(
             KiwiTextArguments(
                 "Your Legend is About\nTo Be Forged...",
@@ -116,7 +128,7 @@ private fun Welcome(
 }
 
 @Composable
-private fun GoToLogIn(onSignUp: () -> Unit) {
+internal fun GoToLogIn(onSignUp: () -> Unit) {
     val kiwiColors = LocalKiwiColors.current
     val annotatedString =
         buildAnnotatedString {

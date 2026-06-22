@@ -28,6 +28,7 @@ private val STATUS_POPUP_BOTTOM_OFFSET = 44.dp
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+@Suppress("LongParameterList")
 internal fun PlayerControls(
     deckSkills: List<SkillDomain>,
     userActor: CombatActorDomain,
@@ -37,6 +38,10 @@ internal fun PlayerControls(
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
     onStatusClick: (CombatActiveStatusDomain) -> Unit,
     onDismissPopup: () -> Unit,
+    skillSlotIntroScale: (slotIndex: Int) -> Float = { 1f },
+    skillSlotIntroAlpha: (slotIndex: Int) -> Float = { 1f },
+    playerBarRevealProgress: Float = 1f,
+    playerBarNumbersAlpha: Float = 1f,
 ) {
     val colors = LocalKiwiColors.current
     val dimAlpha = if (isOverlayOpen) KIWI_DISABLED_ALPHA else 1f
@@ -49,10 +54,14 @@ internal fun PlayerControls(
                 onSkillClick = onSkillClick,
                 onApplyGoalProgress = onApplyGoalProgress,
                 modifier = Modifier.alpha(dimAlpha),
+                slotIntroScale = skillSlotIntroScale,
+                slotIntroAlpha = skillSlotIntroAlpha,
             )
 
             Kiwi_Spacer(Spacing.small)
 
+            // The health bar is never dimmed by the overlay — the player must
+            // be able to read their HP clearly, especially while taking damage.
             CombatHealthBar(
                 currentHp = userActor.stats.currentHp,
                 maxHp = userActor.stats.maxHp,
@@ -61,8 +70,9 @@ internal fun PlayerControls(
                 modifier =
                     Modifier
                         .align(Alignment.CenterHorizontally)
-                        .fillMaxWidth(PLAYER_HEALTH_BAR_WIDTH_FRACTION)
-                        .alpha(dimAlpha),
+                        .fillMaxWidth(PLAYER_HEALTH_BAR_WIDTH_FRACTION),
+                barRevealProgress = playerBarRevealProgress,
+                numbersAlpha = playerBarNumbersAlpha,
             )
 
             Kiwi_Spacer(Spacing.small)
