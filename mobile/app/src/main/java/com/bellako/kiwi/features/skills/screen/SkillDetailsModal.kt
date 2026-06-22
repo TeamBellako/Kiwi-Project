@@ -233,6 +233,7 @@ fun SkillDetails(
                                     onProgressChange = { goalProgress = it },
                                     enabled = skill.isCooldown,
                                     kiwiColors,
+                                    skill.isCooldown
                                 )
                             }
                         }
@@ -393,6 +394,7 @@ private fun SkillCooldownGoal(
     onProgressChange: (Float) -> Unit,
     enabled: Boolean,
     currentColors: KiwiColorsData,
+    isCooldown: Boolean,
 ) {
     val currentValue = (goalProgress * goalTarget).toInt()
 
@@ -421,7 +423,7 @@ private fun SkillCooldownGoal(
                 steps = 100,
                 valueRange = 0f..1f,
                 testTag = "",
-                enabled = enabled,
+                enabled = isCooldown,
             )
 
             Kiwi_P3(

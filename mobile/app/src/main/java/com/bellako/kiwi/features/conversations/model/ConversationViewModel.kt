@@ -44,6 +44,10 @@ class ConversationViewModel
         private val _isVisible = MutableStateFlow(false)
         val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
+        // Not used yet
+        private val _isTutorial = MutableStateFlow(false)
+        val isTutorial: StateFlow<Boolean> = _isTutorial.asStateFlow()
+
         /** Lista de option ids seleccionados durante la sesión actual */
         private val _selectedOptions = MutableStateFlow<List<Long>>(emptyList())
         val selectedOptions: StateFlow<List<Long>> = _selectedOptions.asStateFlow()

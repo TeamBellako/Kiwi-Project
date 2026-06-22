@@ -1,6 +1,5 @@
 package com.bellako.kiwi.features.conversations.screens
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContent
@@ -412,23 +411,17 @@ private fun estimateLineCount(
     return (text.length + charsPerLine - 1) / charsPerLine
 }
 
-private fun getAsset(
-    conversation: ConversationDomain,
-    painterResourceId: Int,
-    context: Context,
-): Int {
-    val baseName = context.resources.getResourceEntryName(painterResourceId)
-    var resourceName = baseName
+private fun getAsset(conversation: ConversationDomain): Int {
     val lineCount = estimateLineCount(conversation.dialog)
-    val size =
-        when {
-            lineCount <= 1 -> "small"
-            lineCount <= 2 -> "medium"
-            else -> "big"
-        }
-    val color = if (conversation.dark) "dark" else "light"
-    resourceName = "dialogue_${color}_$size"
-    return context.resources.getIdentifier(resourceName, "drawable", context.packageName)
+
+    return when {
+        conversation.dark && lineCount <= 1 -> R.drawable.dialogue_dark_small
+        conversation.dark && lineCount <= 2 -> R.drawable.dialogue_dark_medium
+        conversation.dark && lineCount > 2 -> R.drawable.dialogue_dark_big
+        !conversation.dark && lineCount <= 1 -> R.drawable.dialogue_light_small
+        !conversation.dark && lineCount <= 2 -> R.drawable.dialogue_light_medium
+        else -> R.drawable.dialogue_light_big
+    }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)

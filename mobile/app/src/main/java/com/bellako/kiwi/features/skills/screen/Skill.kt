@@ -47,7 +47,6 @@ import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
-import com.bellako.kiwi.common.screens.components.Kiwi_Label1
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Label3
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
@@ -166,7 +165,8 @@ fun SkillComponent(
                     "Skill Icon",
                     modifier =
                         Modifier
-                            .size(getResponsiveSizeHeight(40.dp)),
+                            .size(getResponsiveSizeHeight(40.dp))
+                            .alpha(if (isDisabled) 0.7f else 1.0f),
                 )
             }
 
@@ -225,6 +225,7 @@ fun SkillBackground(
     holdFillAlpha: Float = HOLD_FILL_ALPHA,
     isHolding: Boolean = false,
 ) {
+    val skillHoldPadding = getResponsiveSizeHeight(4.dp)
     Box {
         Kiwi_Image(
             if (skill.isCooldown) {
@@ -233,6 +234,7 @@ fun SkillBackground(
                 R.drawable.skill_bg
             },
             "Skill background",
+            Modifier.padding(if (holdProgress > 0f) 0.dp else skillHoldPadding),
         )
 
         if (skill.isCooldown) {
@@ -269,7 +271,7 @@ fun SkillBackground(
                                         return Outline.Rectangle(Rect(0f, 0f, w, size.height))
                                     }
                                 }
-                        },
+                        }.padding(if (holdProgress > 0f) 0.dp else skillHoldPadding),
             )
         }
 
@@ -280,6 +282,7 @@ fun SkillBackground(
         Kiwi_Image(
             skillDecoration(isHolding, skill.isCooldown),
             "Skill background decoration",
+            Modifier.padding(if (holdProgress > 0f) 0.dp else skillHoldPadding),
         )
     }
 }

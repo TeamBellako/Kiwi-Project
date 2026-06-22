@@ -216,6 +216,7 @@ private fun AppScreen(
 
     val activeConversation by conversationViewModel.active.collectAsState()
     val isConversationVisible by conversationViewModel.isVisible.collectAsState()
+    val isTutorial by conversationViewModel.isTutorial.collectAsState()
 
     // A no-background conversation sits over the map as a dialogue overlay
     // (Small dialogues, and the rare FULL conversation that ships without a
@@ -436,7 +437,7 @@ private fun AppScreen(
                     }
 
                     AnimatedVisibility(
-                        visible = isConversationVisible,
+                        visible = isConversationVisible && (showDashboard || isTutorial),
                         enter =
                             slideInVertically(
                                 initialOffsetY = { fullHeight -> fullHeight },
@@ -459,6 +460,7 @@ private fun AppScreen(
                                     DialogueScreen(
                                         conversation = conversation,
                                         viewModel = conversationViewModel,
+                                        isConversationVisible,
                                     )
                                 } else {
                                     ConversationScreen(
@@ -686,11 +688,9 @@ private fun navIndex(route: String?): Int =
         else -> NAVBAR_ORDER.indexOf(route)
     }
 
-private fun screenOffsetSpec(durationMs: Int = SCREEN_TRANSITION_MS) =
-    tween<IntOffset>(durationMillis = durationMs, easing = EaseInOut)
+private fun screenOffsetSpec(durationMs: Int = SCREEN_TRANSITION_MS) = tween<IntOffset>(durationMillis = durationMs, easing = EaseInOut)
 
-private fun screenFadeSpec(durationMs: Int = SCREEN_TRANSITION_MS) =
-    tween<Float>(durationMillis = durationMs, easing = EaseInOut)
+private fun screenFadeSpec(durationMs: Int = SCREEN_TRANSITION_MS) = tween<Float>(durationMillis = durationMs, easing = EaseInOut)
 
 private fun screenEnter(
     initial: String?,

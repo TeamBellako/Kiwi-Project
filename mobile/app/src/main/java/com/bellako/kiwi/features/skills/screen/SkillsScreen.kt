@@ -216,6 +216,7 @@ fun DeckGrid(
     onApplyGoalProgress: (skillId: Long, goalId: Long, newProgress: Int) -> Unit,
     isLocked: Boolean = false,
 ) {
+    val skillHoldPadding = getResponsiveSizeHeight(4.dp);
     val slotMap = skills.associateBy { it.deckSlot }
 
     for (rowStart in 1..MAX_DECK_SLOTS step 2) {
@@ -237,7 +238,9 @@ fun DeckGrid(
                     Kiwi_Image(
                         R.drawable.skill_empty,
                         "Empty skill slot",
-                        modifier = Modifier.weight(SKILL_WEIGHT),
+                        modifier = Modifier
+                                    .weight(SKILL_WEIGHT)
+                                    .padding( skillHoldPadding),
                     )
                 }
             }

@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
@@ -269,7 +270,7 @@ fun MapScreen(
                 currentPoints = currentPoints,
                 revealStarted = revealStarted,
                 isDialogueOverlaid = isDialogueOverlaid,
-                modifier = Modifier.fillMaxSize().padding(top = topInsetDp),
+                modifier = Modifier.fillMaxSize().clipToBounds(),
             )
 
             // Mist covers the FULL screen, including behind the title and the
