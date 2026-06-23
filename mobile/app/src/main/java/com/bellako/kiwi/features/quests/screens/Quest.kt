@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,8 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
@@ -31,12 +37,15 @@ import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Label1
 import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.rememberTextWidthScale
 import com.bellako.kiwi.features.quests.data.QuestDomain
 import com.bellako.kiwi.features.quests.data.SubquestDomain
 import com.bellako.kiwi.features.quests.data.SubquestStatus
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+
+private const val SUBQUEST_TITLE_LINE_HEIGHT = 1.2f
 
 // ACTIVE QUESTS
 @Composable
@@ -199,11 +208,12 @@ fun Subquest(
 
         // TEXT
         Column {
-            Kiwi_Label1(
-                KiwiTextArguments(
-                    text = subquest.name,
-                ),
-            )
+            Box(
+                modifier = Modifier.height(getResponsiveSizeHeight(20.dp)),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                SubquestTitle(subquest.name)
+            }
 
             Kiwi_Label1(
                 KiwiTextArguments(
@@ -213,6 +223,30 @@ fun Subquest(
             )
         }
     }
+}
+
+// Subquest title rendered with font padding disabled and a centered line height so the
+// glyph sits at the true vertical center, aligning it with the status icon's y-axis.
+@Composable
+private fun SubquestTitle(text: String) {
+    val scale = rememberTextWidthScale()
+    val style = MaterialTheme.typography.labelLarge
+
+    Text(
+        text = text,
+        color = Color.White,
+        style =
+            style.copy(
+                fontSize = (style.fontSize.value * scale).sp,
+                lineHeight = (style.fontSize.value * scale * SUBQUEST_TITLE_LINE_HEIGHT).sp,
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                lineHeightStyle =
+                    LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.None,
+                    ),
+            ),
+    )
 }
 
 // HELPERS
