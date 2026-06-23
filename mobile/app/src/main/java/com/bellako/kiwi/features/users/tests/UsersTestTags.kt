@@ -3,6 +3,7 @@ package com.bellako.kiwi.features.users.tests
 object UsersTestTags {
     const val EMAIL_FIELD = "Login_email_field"
     const val PASSWORD_FIELD = "Login_password_field"
+    const val PASSWORD_ERROR = "Login_password_error"
 
     const val SIGNUP_BUTTON = "Login_signup_button"
     const val LOGIN_BUTTON = "Login_login_button"

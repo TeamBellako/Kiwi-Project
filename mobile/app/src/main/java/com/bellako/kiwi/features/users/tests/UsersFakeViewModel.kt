@@ -60,14 +60,7 @@ class UsersFakeViewModel(
             },
         )
 
-    override fun checkPasswordValid(): Boolean =
-        Password.of(_state.value!!.password).fold(
-            onSuccess = { _ -> true },
-            onFailure = { err ->
-                setUiState(UIState.Error(err.message.orEmpty()))
-                false
-            },
-        )
+    override fun checkPasswordValid(): Boolean = Password.isValid(_state.value!!.password)
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun getRegisterDate(): LocalDate = stringToDate(_state.value?.registerDate.orEmpty())

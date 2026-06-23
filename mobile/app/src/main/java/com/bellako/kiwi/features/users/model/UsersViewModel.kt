@@ -93,14 +93,10 @@ class UsersViewModel
                 },
             )
 
-        override fun checkPasswordValid(): Boolean =
-            Password.of(_state.value.password).fold(
-                onSuccess = { _ -> true },
-                onFailure = { err ->
-                    setUiState(UIState.Error(err.message.orEmpty()))
-                    false
-                },
-            )
+        // The "why" is surfaced inline next to the password field (see the
+        // sign-up form), so this only needs to gate submission — no error is
+        // pushed to the shared UI state here to avoid a duplicate message.
+        override fun checkPasswordValid(): Boolean = Password.isValid(_state.value.password)
 
         @RequiresApi(Build.VERSION_CODES.O)
         override fun getRegisterDate(): LocalDate = stringToDate(_state.value.registerDate)
