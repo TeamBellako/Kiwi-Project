@@ -69,6 +69,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_H1
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_HoldButton
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
+import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.map.data.MapState
 import com.bellako.kiwi.features.nodes.data.NodeStatus
@@ -265,6 +266,13 @@ fun NodeOnMap(
 ) {
     val centered = nodeViewportOffset(node, mapState)
 
+    // Only map-portal nodes keep their name label pinned on the map. Every
+    // other node's name shouldn't persist on the map screen, so it's dropped
+    // here — leaving the label exclusively for SWITCH_MAP nodes, which act as
+    // gateways the player needs to be able to identify at a glance.
+    val persistentName =
+        node.displayName.takeIf { node.onExecutionEvent == EventType.SWITCH_MAP.name }.orEmpty()
+
     Box(
         modifier =
             Modifier
@@ -277,7 +285,7 @@ fun NodeOnMap(
             node.status,
             node.icon,
             mapState.scale,
-            node.displayName,
+            persistentName,
             revealScale,
             nameAlpha,
             iconAnimationReady,

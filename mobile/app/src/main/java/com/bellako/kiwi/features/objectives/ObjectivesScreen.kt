@@ -225,3 +225,34 @@ fun ObjectivesScreen_Preview() {
         }
     }
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+@SuppressLint("ViewModelConstructorInComposable")
+@Preview(name = "Small Phone", widthDp = 320, heightDp = 640)
+@Preview(name = "Medium Phone", widthDp = 392, heightDp = 800)
+@Preview(name = "Large Phone", widthDp = 480, heightDp = 900)
+@Composable
+fun ObjectivesScreen_ExpandedQuest_Preview() {
+    Kiwi_Theme {
+        val fakeViewModel = QuestsFakeViewModel(QuestsTestFactory.validQuestsState())
+
+        Scaffold(
+            bottomBar = {
+                AppBarScreen(navController = rememberNavController())
+            },
+        ) { paddingValues ->
+            Box(
+                modifier =
+                    Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize(),
+            ) {
+                ObjectivesScreen(
+                    questsViewModel = fakeViewModel,
+                    goalsViewModel = GoalsFakeViewModel(),
+                    focusedQuestId = 1,
+                )
+            }
+        }
+    }
+}

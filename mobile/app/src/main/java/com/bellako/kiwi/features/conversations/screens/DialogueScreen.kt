@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -62,6 +61,11 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
 private const val DIALOGUE_ADVANCE_MS = 450
+
+// Distance the advance chevron is held above the inner bottom edge of the
+// dialogue frame. Scaled by width (like the FillWidth background) so the gap
+// stays proportional to the frame on every screen and never lands on the border.
+private val ARROW_BOTTOM_INSET = 12.dp
 
 @Composable
 @Suppress("MagicNumber", "LongMethod")
@@ -216,10 +220,13 @@ fun DialogueScreen(
                     "Arrow",
                     modifier =
                         Modifier
-                            .fillMaxWidth()
                             .align(Alignment.BottomCenter)
+                            // Hold the chevron a fixed gap inside the frame's
+                            // bottom edge, then let the bounce travel upward
+                            // from there so it never crosses the border.
+                            .padding(bottom = getResponsiveSizeWidth(ARROW_BOTTOM_INSET))
                             .size(getResponsiveSizeWidth(10.dp), getResponsiveSizeHeight(10.dp))
-                            .offset(y = getResponsiveSizeHeight((offsetY - 12f).dp))
+                            .offset(y = getResponsiveSizeHeight(offsetY.dp))
                             .alpha(if (showAdvanceChevron) 1f else 0f)
                             .then(
                                 if (showAdvanceChevron) {

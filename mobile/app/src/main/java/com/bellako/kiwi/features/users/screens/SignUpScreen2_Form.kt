@@ -2,13 +2,17 @@ package com.bellako.kiwi.features.users.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -27,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.analytics.FirebaseEventNames
@@ -49,6 +54,7 @@ import com.bellako.kiwi.features.personality.model.IPersonalityViewModel
 import com.bellako.kiwi.features.personality.tests.PersonalityFakeViewModel
 import com.bellako.kiwi.features.nodes.screens.LocalNodeEntryTransition
 import com.bellako.kiwi.features.personality.tests.PersonalityTestFactory.validPersonalityDTO
+import com.bellako.kiwi.features.users.data.Password
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
 import com.bellako.kiwi.features.users.tests.UsersFakeViewModel
@@ -219,6 +225,11 @@ private fun SignUpForm(
 ) {
     val kiwiColors = LocalKiwiColors.current
 
+    // Live typing feedback surfaces password problems on its own; this flag
+    // additionally reveals them after a submit attempt so an empty password
+    // (nothing typed yet) is still explained instead of silently blocking.
+    var attemptedSubmit by remember { mutableStateOf(false) }
+
     // Veil the step change into the questionnaire. rememberCoroutineScope (not
     // the detached CoroutineScope used for the async signup below) so the veil
     // Animatable has a frame clock.
@@ -237,6 +248,7 @@ private fun SignUpForm(
         isLoading = isLoading,
         usersViewModel = usersViewModel,
         usersState = usersState,
+        showErrorsWhenEmpty = attemptedSubmit,
     )
 
     Kiwi_Spacer(Spacing.xLarge)
@@ -250,6 +262,7 @@ private fun SignUpForm(
             ),
         color = kiwiColors.color8,
         onClick = {
+            attemptedSubmit = true
             CoroutineScope(Dispatchers.Main).launch {
                 if (personalityViewModel.checkRealNameValid() && personalityViewModel.checkKnightNameValid()) {
                     personalityViewModel.resetUiState()
@@ -330,8 +343,16 @@ private fun SignUpForm_Users(
     isLoading: Boolean,
     usersViewModel: IUsersViewModel,
     usersState: UsersState,
+    showErrorsWhenEmpty: Boolean,
 ) {
     val kiwiColors = LocalKiwiColors.current
+
+    // Explain why a password is rejected: the rules it fails, shown live while
+    // the user types and — once a submit has been attempted — even for an empty
+    // field. A valid password shows nothing.
+    val unmetRequirements = Password.unmetRequirements(usersState.password)
+    val showPasswordErrors =
+        unmetRequirements.isNotEmpty() && (usersState.password.isNotEmpty() || showErrorsWhenEmpty)
 
     Kiwi_InputField(
         enabled = !isLoading,
@@ -369,6 +390,46 @@ private fun SignUpForm_Users(
         color = kiwiColors.color3A,
         testTag = UsersTestTags.PASSWORD_FIELD,
     )
+
+    if (showPasswordErrors) {
+        PasswordValidationErrors(unmetRequirements)
+    }
+}
+
+@Suppress("MagicNumber")
+@Composable
+private fun PasswordValidationErrors(unmetRequirements: List<String>) {
+    val kiwiColors = LocalKiwiColors.current
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = getResponsiveSizeHeight(Spacing.xSmall))
+                .testTag(UsersTestTags.PASSWORD_ERROR),
+        verticalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.xSmall)),
+    ) {
+        unmetRequirements.forEach { requirement ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(getResponsiveSizeHeight(Spacing.small)),
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(getResponsiveSizeHeight(6.dp))
+                            .background(color = kiwiColors.colorR, shape = CircleShape),
+                )
+                Kiwi_Label2(
+                    KiwiTextArguments(
+                        requirement,
+                        color = kiwiColors.colorR,
+                    ),
+                )
+            }
+        }
+    }
 }
 
 @Composable

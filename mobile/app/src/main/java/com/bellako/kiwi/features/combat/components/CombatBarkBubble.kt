@@ -10,8 +10,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,7 +34,6 @@ import com.bellako.kiwi.common.screens.components.Kiwi_P2
 import com.bellako.kiwi.features.combat.data.ActiveBarkDomain
 import com.bellako.kiwi.features.combat.data.BarkDismissMode
 import com.bellako.kiwi.ui.LocalKiwiColors
-import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 import kotlinx.coroutines.delay
@@ -49,7 +46,14 @@ private val BARK_MIN_WIDTH = 180.dp
 private val BARK_MAX_WIDTH = 280.dp
 private val BARK_PADDING_HORIZONTAL = 24.dp
 private val BARK_PADDING_VERTICAL = 20.dp
+
+// When the click chevron is shown it lives inside the bubble frame, so the text
+// reserves extra space at the bottom to leave room for it (size + bounce + inset).
+private val BARK_PADDING_VERTICAL_WITH_ARROW = 36.dp
 private val BARK_ARROW_SIZE = 12.dp
+
+// Gap held between the chevron and the inner bottom edge of the bubble frame.
+private val BARK_ARROW_BOTTOM_INSET = 8.dp
 
 @Composable
 fun CombatBarkBubble(
@@ -90,8 +94,8 @@ fun CombatBarkBubble(
             }
         }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        contentAlignment = Alignment.Center,
         modifier =
             modifier
                 .alpha(appearAlpha.value)
@@ -100,36 +104,44 @@ fun CombatBarkBubble(
                     max = getResponsiveSizeWidth(BARK_MAX_WIDTH),
                 ).then(clickModifier),
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                painter = painterResource(R.drawable.dialogue_small_bg),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier.matchParentSize(),
-            )
-            Kiwi_P2(
-                KiwiTextArguments(
-                    bark.conversation.dialog,
-                    textAlign = TextAlign.Center,
-                    color = colors.color6,
-                    modifier =
-                        Modifier.padding(
-                            horizontal = getResponsiveSizeWidth(BARK_PADDING_HORIZONTAL),
-                            vertical = getResponsiveSizeHeight(BARK_PADDING_VERTICAL),
-                        ),
-                ),
-            )
-        }
+        Image(
+            painter = painterResource(R.drawable.dialogue_small_bg),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.matchParentSize(),
+        )
+        Kiwi_P2(
+            KiwiTextArguments(
+                bark.conversation.dialog,
+                textAlign = TextAlign.Center,
+                color = colors.color6,
+                modifier =
+                    Modifier.padding(
+                        start = getResponsiveSizeWidth(BARK_PADDING_HORIZONTAL),
+                        end = getResponsiveSizeWidth(BARK_PADDING_HORIZONTAL),
+                        top = getResponsiveSizeHeight(BARK_PADDING_VERTICAL),
+                        // Reserve room for the chevron so it sits inside the
+                        // frame without overlapping the text.
+                        bottom =
+                            getResponsiveSizeHeight(
+                                if (isAuto) BARK_PADDING_VERTICAL else BARK_PADDING_VERTICAL_WITH_ARROW,
+                            ),
+                    ),
+            ),
+        )
         if (!isAuto) {
-            BarkClickIndicator()
+            BarkClickIndicator(
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = getResponsiveSizeHeight(BARK_ARROW_BOTTOM_INSET)),
+            )
         }
     }
 }
 
 @Composable
-private fun BarkClickIndicator() {
+private fun BarkClickIndicator(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "bark_arrow_bounce")
     val offsetY by transition.animateFloat(
         initialValue = 0f,
@@ -141,20 +153,12 @@ private fun BarkClickIndicator() {
             ),
         label = "bark_arrow_offset",
     )
-    Box(
+    Kiwi_Image(
+        R.drawable.ic_dialogue_arrow,
+        "Tap to continue",
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = getResponsiveSizeHeight(Spacing.xSmall)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Kiwi_Image(
-            R.drawable.ic_dialogue_arrow,
-            "Tap to continue",
-            modifier =
-                Modifier
-                    .size(getResponsiveSizeWidth(BARK_ARROW_SIZE), getResponsiveSizeHeight(BARK_ARROW_SIZE))
-                    .offset(y = getResponsiveSizeHeight(offsetY.dp)),
-        )
-    }
+            modifier
+                .size(getResponsiveSizeWidth(BARK_ARROW_SIZE), getResponsiveSizeHeight(BARK_ARROW_SIZE))
+                .offset(y = getResponsiveSizeHeight(offsetY.dp)),
+    )
 }
