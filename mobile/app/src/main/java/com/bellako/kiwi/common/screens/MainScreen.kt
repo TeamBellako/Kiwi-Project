@@ -100,7 +100,10 @@ import com.bellako.kiwi.features.quests.model.QuestsViewModel
 import com.bellako.kiwi.features.quests.screens.QuestNotificationType
 import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
+import com.bellako.kiwi.features.settings.screens.SettingsAccountScreen
+import com.bellako.kiwi.features.settings.screens.SettingsAudioScreen
 import com.bellako.kiwi.features.settings.screens.SettingsScreen
+import com.bellako.kiwi.features.settings.screens.SettingsSupportScreen
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
 import com.bellako.kiwi.features.skills.model.SkillsViewModel
 import com.bellako.kiwi.features.skills.screen.SkillsScreen
@@ -114,9 +117,9 @@ import com.bellako.kiwi.features.users.screens.SignUpScreen3_Test
 import com.bellako.kiwi.features.users.screens.SignUpScreen4_Apps
 import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -368,216 +371,216 @@ private fun AppScreen(
     }
 
     CompositionLocalProvider(LocalNodeEntryTransition provides nodeEntryTransition) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            containerColor = LocalKiwiColors.current.color2,
-            bottomBar = {
-                if (!isLoginScreen && isLoginCompleted) {
-                    AppBarScreen(
-                        navController = navController,
-                        appBarViewModel = appBarViewModel,
-                    )
-                }
-            },
-            content = { paddingValues ->
-                // Screens are sized to the area above the bar so their layouts
-                // stay centered. The bar's rounded corners reveal the Scaffold's
-                // containerColor (color2) underneath, which matches the screen
-                // backgrounds — so the overlay still reads as one continuous
-                // surface bleeding under the bar.
-                Box(Modifier.padding(paddingValues)) {
-                    AppNavHost(
-                        navController = navController,
-                        usersViewModel = usersViewModel,
-                        settingsViewModel = settingsViewModel,
-                        personalityViewModel = personalityViewModel,
-                        nodesViewModel = nodesViewModel,
-                        questsViewModel = questsViewModel,
-                        goalsViewModel = goalsViewModel,
-                        skillsViewModel = skillsViewModel,
-                        isCombatActive = activeCombat != null,
-                        shouldPlayMapMusic = shouldPlayMapMusic,
-                        isDialogueOverlaid = isDialogueOverlaid,
-                    )
-
-                    AnimatedVisibility(
-                        visible = showDashboard && !isConversationVisible && !isCombatVisible,
-                        enter =
-                            slideInVertically(
-                                initialOffsetY = { fullHeight -> fullHeight },
-                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
-                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
-                        exit =
-                            slideOutVertically(
-                                targetOffsetY = { fullHeight -> fullHeight },
-                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
-                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
-                    ) {
-                        DashboardScreen(
-                            usersViewModel = usersViewModel,
-                            metricsViewModel = metricsViewModel,
-                            personalityViewModel = personalityViewModel,
-                            goalsViewModel = goalsViewModel,
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                containerColor = LocalKiwiColors.current.color2,
+                bottomBar = {
+                    if (!isLoginScreen && isLoginCompleted) {
+                        AppBarScreen(
+                            navController = navController,
+                            appBarViewModel = appBarViewModel,
                         )
                     }
-
-                    if (!isLoginScreen && isLoginCompleted) {
-                        Kiwi_LoggedInScreen(
+                },
+                content = { paddingValues ->
+                    // Screens are sized to the area above the bar so their layouts
+                    // stay centered. The bar's rounded corners reveal the Scaffold's
+                    // containerColor (color2) underneath, which matches the screen
+                    // backgrounds — so the overlay still reads as one continuous
+                    // surface bleeding under the bar.
+                    Box(Modifier.padding(paddingValues)) {
+                        AppNavHost(
+                            navController = navController,
+                            usersViewModel = usersViewModel,
                             settingsViewModel = settingsViewModel,
                             personalityViewModel = personalityViewModel,
+                            nodesViewModel = nodesViewModel,
+                            questsViewModel = questsViewModel,
+                            goalsViewModel = goalsViewModel,
+                            skillsViewModel = skillsViewModel,
+                            isCombatActive = activeCombat != null,
+                            shouldPlayMapMusic = shouldPlayMapMusic,
+                            isDialogueOverlaid = isDialogueOverlaid,
                         )
-                    }
 
-                    LaunchedEffect(isLoginCompleted) {
-                        if (isLoginCompleted) {
-                            skillsViewModel.onUserLoggedIn()
-                            combatViewModel.tryResumeActive()
+                        AnimatedVisibility(
+                            visible = showDashboard && !isConversationVisible && !isCombatVisible,
+                            enter =
+                                slideInVertically(
+                                    initialOffsetY = { fullHeight -> fullHeight },
+                                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                                ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                            exit =
+                                slideOutVertically(
+                                    targetOffsetY = { fullHeight -> fullHeight },
+                                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                                ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        ) {
+                            DashboardScreen(
+                                usersViewModel = usersViewModel,
+                                metricsViewModel = metricsViewModel,
+                                personalityViewModel = personalityViewModel,
+                                goalsViewModel = goalsViewModel,
+                            )
                         }
-                    }
 
-                    AnimatedVisibility(
-                        visible = isConversationVisible,
-                        enter =
-                            slideInVertically(
-                                initialOffsetY = { fullHeight -> fullHeight },
-                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
-                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
-                        // The completion path runs the veil first via the runner,
-                        // so this slide-out plays under a fully-opaque veil and
-                        // is invisible to the user. It is kept as a fallback for
-                        // the no-runner case (previews / tests).
-                        exit =
-                            slideOutVertically(
-                                targetOffsetY = { fullHeight -> fullHeight },
-                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
-                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
-                    ) {
-                        activeConversation?.let { conversation ->
-                            Box(modifier = Modifier.matchParentSize()) {
-                                Kiwi_Music_Conversation()
-                                if (conversation.type == ConversationType.SMALL) {
-                                    DialogueScreen(
-                                        conversation = conversation,
-                                        viewModel = conversationViewModel,
-                                    )
-                                } else {
-                                    ConversationScreen(
-                                        conversation = conversation,
-                                        viewModel = conversationViewModel,
-                                    )
+                        if (!isLoginScreen && isLoginCompleted) {
+                            Kiwi_LoggedInScreen(
+                                settingsViewModel = settingsViewModel,
+                                personalityViewModel = personalityViewModel,
+                            )
+                        }
+
+                        LaunchedEffect(isLoginCompleted) {
+                            if (isLoginCompleted) {
+                                skillsViewModel.onUserLoggedIn()
+                                combatViewModel.tryResumeActive()
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = isConversationVisible,
+                            enter =
+                                slideInVertically(
+                                    initialOffsetY = { fullHeight -> fullHeight },
+                                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                                ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                            // The completion path runs the veil first via the runner,
+                            // so this slide-out plays under a fully-opaque veil and
+                            // is invisible to the user. It is kept as a fallback for
+                            // the no-runner case (previews / tests).
+                            exit =
+                                slideOutVertically(
+                                    targetOffsetY = { fullHeight -> fullHeight },
+                                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                                ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        ) {
+                            activeConversation?.let { conversation ->
+                                Box(modifier = Modifier.matchParentSize()) {
+                                    Kiwi_Music_Conversation()
+                                    if (conversation.type == ConversationType.SMALL) {
+                                        DialogueScreen(
+                                            conversation = conversation,
+                                            viewModel = conversationViewModel,
+                                        )
+                                    } else {
+                                        ConversationScreen(
+                                            conversation = conversation,
+                                            viewModel = conversationViewModel,
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    AnimatedVisibility(
-                        visible = isCombatVisible && showDashboard,
-                        enter =
-                            slideInVertically(
-                                initialOffsetY = { fullHeight -> fullHeight },
-                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
-                            ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
-                        // Victory routes through the veil runner — this slide-out
-                        // is hidden under the opaque veil. Abandon / defeat keep
-                        // the slide-out visible (they don't set the runner).
-                        exit =
-                            slideOutVertically(
-                                targetOffsetY = { fullHeight -> fullHeight },
-                                animationSpec = tween(durationMillis = 400, easing = EaseInOut),
-                            ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
-                    ) {
-                        activeCombat?.let { combat ->
-                            CombatFlowScreen(
-                                combat = combat,
-                                deckSkills = skillsState?.deckSkills ?: emptyList(),
-                                isTurnPlaying = isCombatTurnPlaying,
-                                activeBark = activeBark,
-                                onBarkDismiss = combatViewModel::dismissBark,
-                                onConfirmAbandon = combatViewModel::confirmAbandon,
-                                onSkillClick = { skillId, skillName ->
-                                    combatViewModel.executeTurn(skillId, skillName)
-                                },
-                                onApplyGoalProgress = { skillId, goalId, newProgress ->
-                                    skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
-                                },
-                                onDismiss = combatViewModel::dismiss,
-                                onVictoryContinue = combatViewModel::onVictoryContinue,
-                            )
+                        AnimatedVisibility(
+                            visible = isCombatVisible && showDashboard,
+                            enter =
+                                slideInVertically(
+                                    initialOffsetY = { fullHeight -> fullHeight },
+                                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                                ) + fadeIn(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                            // Victory routes through the veil runner — this slide-out
+                            // is hidden under the opaque veil. Abandon / defeat keep
+                            // the slide-out visible (they don't set the runner).
+                            exit =
+                                slideOutVertically(
+                                    targetOffsetY = { fullHeight -> fullHeight },
+                                    animationSpec = tween(durationMillis = 400, easing = EaseInOut),
+                                ) + fadeOut(animationSpec = tween(durationMillis = 400, easing = EaseInOut)),
+                        ) {
+                            activeCombat?.let { combat ->
+                                CombatFlowScreen(
+                                    combat = combat,
+                                    deckSkills = skillsState?.deckSkills ?: emptyList(),
+                                    isTurnPlaying = isCombatTurnPlaying,
+                                    activeBark = activeBark,
+                                    onBarkDismiss = combatViewModel::dismissBark,
+                                    onConfirmAbandon = combatViewModel::confirmAbandon,
+                                    onSkillClick = { skillId, skillName ->
+                                        combatViewModel.executeTurn(skillId, skillName)
+                                    },
+                                    onApplyGoalProgress = { skillId, goalId, newProgress ->
+                                        skillsViewModel.updateGoalProgress(skillId, goalId, newProgress)
+                                    },
+                                    onDismiss = combatViewModel::dismiss,
+                                    onVictoryContinue = combatViewModel::onVictoryContinue,
+                                )
+                            }
                         }
+
+                        TipModal(isTipVisible, tipsViewModel)
+
+                        // Veil for the node-entry transition. Lives inside the
+                        // Scaffold's content area on purpose so it covers the map
+                        // / conversation / combat but leaves the bottom nav bar
+                        // visible.
+                        NodeEntryVeilOverlay(
+                            controller = nodeEntryTransition,
+                            modifier = Modifier.zIndex(50f),
+                        )
                     }
-
-                    TipModal(isTipVisible, tipsViewModel)
-
-                    // Veil for the node-entry transition. Lives inside the
-                    // Scaffold's content area on purpose so it covers the map
-                    // / conversation / combat but leaves the bottom nav bar
-                    // visible.
-                    NodeEntryVeilOverlay(
-                        controller = nodeEntryTransition,
-                        modifier = Modifier.zIndex(50f),
-                    )
-                }
-            },
-        )
-
-        // Overlay global de notificaciones — único colector, siempre activo.
-        // Suppressed while the loading curtain is up so a cold-start (combat
-        // resume or otherwise) doesn't surface a queue of pop-ups before the
-        // user has actually landed on a screen.
-        if (!isLoginScreen && isLoginCompleted && !showAppLoading) {
-            NotificationOverlay(
-                notificationManager = notificationManager,
-                onGoalClick = { type, goals ->
-                    goalsModalRequest.value = type to goals
-                    notificationManager.dismissCurrent()
                 },
-                onQuestClick = { type, quest, subquestId ->
-                    if (type != QuestNotificationType.QUEST_COMPLETED) {
-                        navController.navigate("OBJECTIVES/${quest.id}")
-                    }
-                    notificationManager.dismissCurrent()
-                },
-                onSkillClick = { _, skill ->
-                    navController.navigate("SKILLS/${skill.id}")
-                    notificationManager.dismissCurrent()
-                },
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .zIndex(10f),
             )
 
-            goalsModalRequest.value?.let { (type, goals) ->
-                Box(
+            // Overlay global de notificaciones — único colector, siempre activo.
+            // Suppressed while the loading curtain is up so a cold-start (combat
+            // resume or otherwise) doesn't surface a queue of pop-ups before the
+            // user has actually landed on a screen.
+            if (!isLoginScreen && isLoginCompleted && !showAppLoading) {
+                NotificationOverlay(
+                    notificationManager = notificationManager,
+                    onGoalClick = { type, goals ->
+                        goalsModalRequest.value = type to goals
+                        notificationManager.dismissCurrent()
+                    },
+                    onQuestClick = { type, quest, subquestId ->
+                        if (type != QuestNotificationType.QUEST_COMPLETED) {
+                            navController.navigate("OBJECTIVES/${quest.id}")
+                        }
+                        notificationManager.dismissCurrent()
+                    },
+                    onSkillClick = { _, skill ->
+                        navController.navigate("SKILLS/${skill.id}")
+                        notificationManager.dismissCurrent()
+                    },
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .zIndex(11f),
-                ) {
-                    GoalsModal(
-                        goalModalType = type,
-                        goals = goals,
-                        goalsViewModel = goalsViewModel,
-                        onDismiss = { goalsModalRequest.value = null },
-                    )
+                            .zIndex(10f),
+                )
+
+                goalsModalRequest.value?.let { (type, goals) ->
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .zIndex(11f),
+                    ) {
+                        GoalsModal(
+                            goalModalType = type,
+                            goals = goals,
+                            goalsViewModel = goalsViewModel,
+                            onDismiss = { goalsModalRequest.value = null },
+                        )
+                    }
                 }
             }
-        }
 
-        LoginLoadingScreen(
-            visible = showAppLoading,
-            progress = loadingProgress.value,
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .zIndex(100f),
-            onExitComplete = {
-                revealEventScope.launch {
-                    EventBus.emitEvent(EventType.MAP_REVEAL, EventPayload.EmptyPayload())
-                }
-            },
-        )
-    }
+            LoginLoadingScreen(
+                visible = showAppLoading,
+                progress = loadingProgress.value,
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .zIndex(100f),
+                onExitComplete = {
+                    revealEventScope.launch {
+                        EventBus.emitEvent(EventType.MAP_REVEAL, EventPayload.EmptyPayload())
+                    }
+                },
+            )
+        }
     }
 }
 
@@ -647,12 +650,20 @@ private fun isMapRoute(route: String?): Boolean = route == ScreenRoutes.HOME
 // reached from Settings (and popped back to it), we want the same rise-from-
 // bottom / slide-down feel as the map transitions, distinct from the plain
 // fade used during the sign-up flow.
-private fun isSettingsAppsTransition(
+private fun isSettingsSubScreenTransition(
     initial: String?,
     target: String?,
-): Boolean =
-    (initial == ScreenRoutes.SETTINGS && target == ScreenRoutes.SIGNUP4_APPS) ||
-        (initial == ScreenRoutes.SIGNUP4_APPS && target == ScreenRoutes.SETTINGS)
+): Boolean {
+    val settingsSubScreens =
+        setOf(
+            ScreenRoutes.SIGNUP4_APPS,
+            ScreenRoutes.SETTINGS_ACCOUNT,
+            ScreenRoutes.SETTINGS_AUDIO,
+            ScreenRoutes.SETTINGS_SUPPORT,
+        )
+    return (initial == ScreenRoutes.SETTINGS && target in settingsSubScreens) ||
+        (initial in settingsSubScreens && target == ScreenRoutes.SETTINGS)
+}
 
 // The login screen rides up from / slides down to the bottom over the app — the
 // same vertical language as the map, but as a foreground curtain. This only
@@ -686,11 +697,9 @@ private fun navIndex(route: String?): Int =
         else -> NAVBAR_ORDER.indexOf(route)
     }
 
-private fun screenOffsetSpec(durationMs: Int = SCREEN_TRANSITION_MS) =
-    tween<IntOffset>(durationMillis = durationMs, easing = EaseInOut)
+private fun screenOffsetSpec(durationMs: Int = SCREEN_TRANSITION_MS) = tween<IntOffset>(durationMillis = durationMs, easing = EaseInOut)
 
-private fun screenFadeSpec(durationMs: Int = SCREEN_TRANSITION_MS) =
-    tween<Float>(durationMillis = durationMs, easing = EaseInOut)
+private fun screenFadeSpec(durationMs: Int = SCREEN_TRANSITION_MS) = tween<Float>(durationMillis = durationMs, easing = EaseInOut)
 
 private fun screenEnter(
     initial: String?,
@@ -699,17 +708,20 @@ private fun screenEnter(
     val from = navIndex(initial)
     val to = navIndex(target)
     return when {
-        // Settings → Change Apps rises from the bottom; popping back reveals
-        // Settings underneath instantly while the apps screen slides down.
-        isSettingsAppsTransition(initial, target) ->
-            if (target == ScreenRoutes.SIGNUP4_APPS) {
+        // Settings → sub-screens (Change Apps, Account, Audio, Support) rise from the
+        // bottom; popping back reveals Settings underneath instantly while the
+        // sub-screen slides down.
+        isSettingsSubScreenTransition(initial, target) -> {
+            if (target != ScreenRoutes.SETTINGS) {
                 slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
             } else {
                 EnterTransition.None
             }
+        }
+
         // Sign-up welcome ↔ account form: slide toward the form going forward,
         // back toward welcome on pop.
-        isWelcomeFormTransition(initial, target) ->
+        isWelcomeFormTransition(initial, target) -> {
             if (target == ScreenRoutes.SIGNUP2_FORM) {
                 slideInHorizontally(animationSpec = screenOffsetSpec()) { it } +
                     fadeIn(animationSpec = screenFadeSpec())
@@ -717,24 +729,40 @@ private fun screenEnter(
                 slideInHorizontally(animationSpec = screenOffsetSpec()) { -it } +
                     fadeIn(animationSpec = screenFadeSpec())
             }
+        }
+
         // Login curtain: the entering screen (login on logout, the app on an
         // in-session login) lifts up from the bottom over the one it replaces.
-        isLoginAppTransition(initial, target) ->
+        isLoginAppTransition(initial, target) -> {
             slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
+        }
+
         // Login / sign-up / any non-nav screen: keep a plain fade.
-        from < 0 || to < 0 -> fadeIn(animationSpec = screenFadeSpec())
+        from < 0 || to < 0 -> {
+            fadeIn(animationSpec = screenFadeSpec())
+        }
+
         // Going to the map: it is already rendered behind (this is a pop), so it
         // just appears instantly while the leaving screen slides down to reveal it.
-        isMapRoute(target) -> EnterTransition.None
+        isMapRoute(target) -> {
+            EnterTransition.None
+        }
+
         // Leaving the map: the new screen rises from the bottom at full opacity.
-        isMapRoute(initial) -> slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
+        isMapRoute(initial) -> {
+            slideInVertically(animationSpec = screenOffsetSpec(MAP_TRANSITION_MS)) { it }
+        }
+
         // Horizontal siblings: enter from the side we are moving toward.
-        to > from ->
+        to > from -> {
             slideInHorizontally(animationSpec = screenOffsetSpec()) { it } +
                 fadeIn(animationSpec = screenFadeSpec())
-        else ->
+        }
+
+        else -> {
             slideInHorizontally(animationSpec = screenOffsetSpec()) { -it } +
                 fadeIn(animationSpec = screenFadeSpec())
+        }
     }
 }
 
@@ -745,17 +773,19 @@ private fun screenExit(
     val from = navIndex(initial)
     val to = navIndex(target)
     return when {
-        // Settings → Change Apps: Settings holds still while the apps screen rises
-        // over it; on the way back the apps screen slides down to reveal Settings.
-        isSettingsAppsTransition(initial, target) ->
-            if (initial == ScreenRoutes.SIGNUP4_APPS) {
+        // Settings → sub-screens: Settings holds still while the sub-screen rises
+        // over it; on the way back the sub-screen slides down to reveal Settings.
+        isSettingsSubScreenTransition(initial, target) -> {
+            if (initial != ScreenRoutes.SETTINGS) {
                 slideOutVertically(animationSpec = screenOffsetSpec(MAP_REVEAL_MS)) { it }
             } else {
                 ExitTransition.None
             }
+        }
+
         // Sign-up welcome ↔ account form: the leaving screen slides off toward
         // the side the new one enters from.
-        isWelcomeFormTransition(initial, target) ->
+        isWelcomeFormTransition(initial, target) -> {
             if (initial == ScreenRoutes.SIGNUP1_WELCOME) {
                 slideOutHorizontally(animationSpec = screenOffsetSpec()) { -it } +
                     fadeOut(animationSpec = screenFadeSpec())
@@ -763,22 +793,39 @@ private fun screenExit(
                 slideOutHorizontally(animationSpec = screenOffsetSpec()) { it } +
                     fadeOut(animationSpec = screenFadeSpec())
             }
+        }
+
         // The screen being covered by the rising login curtain (or the app it
         // reveals) holds still underneath while the other screen lerps over it.
-        isLoginAppTransition(initial, target) -> ExitTransition.None
-        from < 0 || to < 0 -> fadeOut(animationSpec = screenFadeSpec())
+        isLoginAppTransition(initial, target) -> {
+            ExitTransition.None
+        }
+
+        from < 0 || to < 0 -> {
+            fadeOut(animationSpec = screenFadeSpec())
+        }
+
         // Going to the map: the leaving screen slides straight down at full opacity,
         // slower so the reveal reads clearly.
-        isMapRoute(target) -> slideOutVertically(animationSpec = screenOffsetSpec(MAP_REVEAL_MS)) { it }
+        isMapRoute(target) -> {
+            slideOutVertically(animationSpec = screenOffsetSpec(MAP_REVEAL_MS)) { it }
+        }
+
         // Leaving the map: the map holds still while the new screen rises over it.
-        isMapRoute(initial) -> ExitTransition.None
+        isMapRoute(initial) -> {
+            ExitTransition.None
+        }
+
         // Horizontal siblings: leave toward the opposite side.
-        to > from ->
+        to > from -> {
             slideOutHorizontally(animationSpec = screenOffsetSpec()) { -it } +
                 fadeOut(animationSpec = screenFadeSpec())
-        else ->
+        }
+
+        else -> {
             slideOutHorizontally(animationSpec = screenOffsetSpec()) { it } +
                 fadeOut(animationSpec = screenFadeSpec())
+        }
     }
 }
 
@@ -957,8 +1004,34 @@ fun AppNavHost(
             AppScreenWrapper {
                 Kiwi_Music_Settings()
                 SettingsScreen(
+                    settingsViewModel = settingsViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.SETTINGS_ACCOUNT) {
+            AppScreenWrapper {
+                SettingsAccountScreen(
                     usersViewModel = usersViewModel,
                     settingsViewModel = settingsViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.SETTINGS_AUDIO) {
+            AppScreenWrapper {
+                SettingsAudioScreen(
+                    settingsViewModel = settingsViewModel,
+                    navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.SETTINGS_SUPPORT) {
+            AppScreenWrapper {
+                SettingsSupportScreen(
                     navController = navController,
                 )
             }
