@@ -1,0 +1,123 @@
+-- Seed data for the `skills` table.
+-- Generated from the Skills knowledge base export.
+-- Notes on transformations applied:
+--   * Notion links removed from all text fields; effect names in descriptions
+--     (Confusion, Poison, Mutis, Reversion, Freeze, BuffBlock, Loop) CamelCased.
+--     Stat abbreviations (VIT, PATK, PDEF, etc.) left untouched.
+--   * Empty `cooldown_type` defaulted to 'OTHER' (35 rows); CooldownType has no NONE value.
+--   * Duplicate IDs kept their first occurrence; later occurrences got fresh IDs (2 reassigned).
+--   * Empty nullable columns inserted as NULL.
+-- Ignored source columns: [TMP] Needs Review, barks, build, cooldown_goal, effects,
+--   element, isEnemy, levelup_skill, trigger combat/conversation/quest, type.
+
+INSERT INTO goals
+    (id, name, action, target, type, category, reward, difficulty, on_completed_action, on_completed_entity, on_completed_entity_id)
+VALUES
+    (1201, 'Write down all your thoughts on a piece of paper', 'Write down all your thoughts on a piece of paper', 2, 'CLARITY', 'DAILY_CHALLENGES', 1, 2, 'GAIN', 'SKILL', 4030),
+    (1702, 'Sit with boredom', 'Sit with boredom during @VARIABLE minutes', 2, 'PRESENCE', 'DAILY_CHALLENGES', 1, 2, 'GAIN', 'SKILL', 5080);
+
+-- Guard against the Hibernate-6 native-ENUM truncation issue (same as goals.type):
+ALTER TABLE skills MODIFY COLUMN cooldown_type VARCHAR(32) NOT NULL;
+
+INSERT IGNORE INTO skills
+    (id, element_id, name, description, quote, cooldown_type,
+     cooldown_goal_id, cooldown_time_minutes, cooldown_other_description, levelup_skill_id)
+VALUES
+    (5010, 1, 'Elemental Shift', 'Switch next attack to a random, different element', '“Be water, my friend” — Bruce Lee', 'GOAL', 1208, NULL, NULL, NULL),
+    (6020, 2, 'Confuse', 'Applies Confusion to an enemy (+3 turns)', '“Shock awakens the mind” — Aristotle', 'GOAL', 1509, NULL, NULL, NULL),
+    (6030, 2, 'Debilitate', 'Applies/extends Poison to an enemy (+3 turns)', '“What is false troubles the heart” — Marcus Aurelius', 'GOAL', 1508, NULL, NULL, NULL),
+    (6040, 2, 'Disarm', 'Disable enemy special skills (2 turns)', '“In war, the way is to avoid what is strong” — Miyamoto Musashi', 'GOAL', 1508, NULL, NULL, NULL),
+    (6050, 2, 'Silence', 'Applies Mutis to an enemy (+2 turns)', '“Wise men speak because they have something to say” — Plato', 'GOAL', NULL, NULL, NULL, NULL),
+    (6060, 2, 'Trap Setup', 'Applying any debuff deals a small amount of magic damage (25 VIT) (5 turns)', '“Plans are nothing; planning is everything” — Dwight D. Eisenhower', 'GOAL', 1007, NULL, NULL, NULL),
+    (6070, 2, 'Forced Loop', 'Applies Reversion to an enemy (1 turn)', '“The eye sees only what the mind is prepared” — Henri Bergson', 'GOAL', 1102, NULL, NULL, NULL),
+    (6080, 2, 'Control Wave', 'Removes Elemental Multipliers (5 turns)', '“Master yourself” — Epictetus', 'GOAL', 7204, NULL, NULL, NULL),
+    (6090, 2, 'Manipulation', 'Finisher. Applies/extends all disruptive effects on enemies (+2 turns)', '“The mind is everything” — Buddha', 'OTHER', NULL, NULL, 'Use 15 Control skills', NULL),
+    (6010, 2, 'Mind Bind', 'Applies Freeze to an enemy (+3 turns)', '“He who controls others is strong” — Lao Tzu', 'GOAL', 7206, NULL, NULL, NULL),
+    (5020, 1, 'Recycle State', 'Copy all enemy buffs. Deal minor damage (20 VIT) per new buff', '“Turn your wounds into wisdom” — Oprah Winfrey', 'GOAL', 1006, NULL, NULL, NULL),
+    (5030, 1, 'Cooldown Reset', 'Reset cooldown of all skills', '“Fall seven times, stand up eight” — Japanese Proverb', 'GOAL', 1602, NULL, NULL, NULL),
+    (5040, 1, 'Morph Stance', 'Damage is multiplied for the maximum debuff stack quantity (3 turns)', '“Risk comes from not knowing what you''re doing” — Warren Buffett', 'GOAL', 1402, NULL, NULL, NULL),
+    (5050, 1, 'Flow Inversion', 'Convert all STAT DOWN into STAT UP. Deal minor damage (20 VIT) per conversion', '“Rules are made to be broken” — Douglas MacArthur', 'GOAL', 1109, NULL, NULL, NULL),
+    (5060, 1, 'Buff Swap', 'Swap buffs/debuffs with the enemy', '“Life is about how much you can take” — Sylvester Stallone', 'GOAL', 1701, NULL, NULL, NULL),
+    (5070, 1, 'Adaptive Strike', 'Next attack damage adapts to enemy vulnerability', '“The bamboo that bends is stronger” — Japanese Proverb', 'GOAL', 1605, NULL, NULL, NULL),
+    (5080, 1, 'Reflexive Dodge', 'EVA UP + Extra TIME (1H)', '“The best defense is not to be there” — Bruce Lee', 'GOAL', 1702, NULL, NULL, NULL),
+    (5090, 1, 'Situational Mastery', 'Finisher. Applies/extends STAT UP on all stats (+3 turns)', '“For every action, there is a reaction” — Isaac Newton', 'OTHER', NULL, NULL, 'Use 15 Adaptability skills', NULL),
+    (4000, 3, 'Empathic Attack', 'Normal Attack, embodied with Empathic power. Deals 30 damage points (VIT.)', NULL, 'TIME', 7108, 30, NULL, NULL),
+    (4020, 3, 'Supportive Aura', '+ MDEF buff (3 turns)', '“We rise by lifting others” — Robert Ingersoll', 'GOAL', 1310, NULL, NULL, NULL),
+    (4030, 3, 'Cleanse', 'Consumes 1 turn of debuffs. Deal minor damage to enemies per debuff cleansed (20 per debuff)', '“Let go or be dragged” — Zen Proverb', 'GOAL', 1201, NULL, NULL, NULL),
+    (4040, 3, 'Empathic Boost', 'Each buff applied also heals 20 VIT (3 turns)', '“In union there is strength” — Aesop', 'GOAL', 7102, NULL, NULL, NULL),
+    (4050, 3, 'Harmonize', 'Consumes 1 turn from all active buffs and converts them into VIT (30 per buff)', '“Peace begins with a smile” — Mother Teresa', 'GOAL', NULL, NULL, NULL, NULL),
+    (4060, 3, 'Overflowing Care', 'Instant heal (40% total VIT). + PATK 50%', '“Music gives a soul to the universe” — Plato', 'GOAL', 7201, NULL, NULL, NULL),
+    (7095, 3, 'Bond of Strain', 'Link to enemy: physic damage dealt to self partially affects the enemy (1/2) (5 turns)', '“Compassion is radicalism of our time” — Dalai Lama', 'GOAL', 1109, NULL, NULL, NULL),
+    (4080, 3, 'Spirit Link', 'Duplicate duration of all active buffs', '“We rise by lifting others” — Robert Ingersoll', 'GOAL', 1304, NULL, NULL, NULL),
+    (4090, 3, 'Divine Blessing', 'Finisher. Heal 100% HP', '“Love bears all things” — Bible (1 Corinthians)', 'OTHER', NULL, NULL, 'Use 15 Empathy skills', NULL),
+    (3090, 6, 'Iron Will', 'Finisher. 100% damage reduction (one turn)', '“Fall seven times, stand up eight” — Japanese Proverb', 'OTHER', NULL, NULL, 'Use 15 Resilience skills', NULL),
+    (3000, 6, 'Resilient Attack', 'Normal Attack, embodied with Resilience power. Deals 30 damage points (VIT.)', NULL, 'TIME', 4302, 30, NULL, NULL),
+    (3020, 6, 'Endurance Shield', 'Shield (60): Absorbs a maximum of 60 damage in the next turn', '“Endure and persist” — Goethe', 'GOAL', 1205, NULL, NULL, NULL),
+    (3030, 6, 'Sturdy Resolve', 'Receive any debuff causes an accumulative PDEF UP', '“Deep roots are not reached by frost” — Tolkien', 'GOAL', 4401, NULL, NULL, NULL),
+    (3040, 6, 'Pain Block', 'If hitted in the next turn, reflects 1/2 damage and gains PATK UP (1 turn)', '“Out of suffering have emerged the strongest souls” — Khalil Gibran', 'GOAL', NULL, NULL, NULL, NULL),
+    (3050, 6, 'Mental Fortitude', '+ 50% negative effect resistance (3 turns)', '“He who conquers himself is the mightiest warrior” — Confucius', 'GOAL', 4108, NULL, NULL, NULL),
+    (3060, 6, 'Last Stand', 'If receiving a lethal attack with >1HP, 1 HP remains (3 turns)', '“Come what may, I will face it” — Hernán Cortés', 'OTHER', NULL, NULL, 'Receive 10 hits', NULL),
+    (3070, 6, 'Recovery Boost', '+DEF 50%', '“A field that has rested gives a bountiful crop” — Ovid', 'GOAL', NULL, NULL, NULL, NULL),
+    (3080, 6, 'Tough Spirit', 'Shield 150 + Reflects full damage (one turn)', '“Pressure makes diamonds” — George S. Patton', 'GOAL', 1406, NULL, NULL, NULL),
+    (2000, 4, 'Focused Attack', 'Normal Attack, embodied with Focus power. Deals 30 damage points (VIT.)', NULL, 'TIME', 1006, 30, NULL, NULL),
+    (2020, 4, 'Insight Strike', 'Deal 30 magic damage +20 damage per debuff on target', '“Focus is a matter of deciding what not to do” — John Carmack', 'GOAL', 1306, NULL, NULL, NULL),
+    (2030, 4, 'Steady Mind', 'Gain ACC UP (3 turns)', '“Great things are done by a series of small things” — Van Gogh', 'GOAL', NULL, NULL, NULL, NULL),
+    (2040, 4, 'Clean Execution', 'Deal 50 magic damage. If target has no buffs, deal +30% damage', '“A goal properly set is halfway reached” — Zig Ziglar', 'GOAL', 1503, NULL, NULL, NULL),
+    (2050, 4, 'Tactical Pause', 'Guaranteed next action (ignore RNG, EVA, ACC)', '“Silence is a source of great strength” — Lao Tzu', 'GOAL', NULL, NULL, NULL, NULL),
+    (2060, 4, 'Chain Reaction', 'Next attack deals damage that is inversely proportional to current health.', '“Intentionality shapes reality” — John C. Maxwell', 'GOAL', 1106, NULL, NULL, NULL),
+    (2070, 4, 'Flow State', 'Extend duration of all buffs on self by +2 turns', '“Time disappears in flow” — Mihaly Csikszentmihalyi', 'GOAL', 1107, NULL, NULL, NULL),
+    (2080, 4, 'Perfect Timing', 'Consume all debuffs on target in a proportional magic attack (30 per debuff)', '“Done is better than perfect” — Mark Zuckerberg', 'GOAL', 1001, NULL, NULL, NULL),
+    (2090, 4, 'Strategic Advantage', 'Finisher. Refunds next skill used if its critical', '“Simplicity is the ultimate sophistication” — Leonardo da Vinci', 'OTHER', NULL, NULL, 'Use 15 Focus skills', NULL),
+    (1001, 5, 'Battle Cry', 'Berserker exclusive trait. Attack becomes increasingly powerful (10% each turn; max 200%) as long as offensive abilities are used in a streak.', '“Energy and persistence conquer all things” — Benjamin Franklin', 'GOAL', 4012, NULL, NULL, NULL),
+    (1020, 5, 'Burst Charge', 'Deal 30x2 damage points (VIT)', '“He who has a ‘why’ can bear almost any ‘how’” — Friedrich Nietzsche', 'GOAL', 4011, NULL, NULL, NULL),
+    (1030, 5, 'Commited Slam', 'Deal 85 damage points (VIT), but applied PDEF DOWN to self (1 turn)', '“Discipline equals freedom” — Jocko Willink', 'GOAL', 4611, NULL, NULL, NULL),
+    (1040, 5, 'Momentum Slash', 'Automatically deals 10 damage points (VIT) at the beginning of the turn (3 turns)', '“Motion creates emotion” — Tony Robbins', 'GOAL', 4606, NULL, NULL, NULL),
+    (1050, 5, 'Breakthrough', 'Deal 50 damage points. Reverses PATK DOWN (applying PATK UP)', '“Do it with passion or not at all” — Rosa Nouchette Carey', 'GOAL', 4605, NULL, NULL, NULL),
+    (1060, 5, 'Focused Jab', 'Deal 60 damage points (VIT) and applies Confusion', '“Give me liberty or give me death!” — Patrick Henry', 'GOAL', 4603, NULL, NULL, NULL),
+    (1070, 5, 'Adrenaline Rush', '+PATK 100% (2 turns)', '“Obstacles are what you see when you lose focus” — Henry Ford', 'GOAL', 4604, NULL, NULL, NULL),
+    (1080, 5, 'Overdrive', 'Deal 80 damage points (VIT).', '“Improvise, adapt, overcome” — US Marines', 'GOAL', 4607, NULL, NULL, NULL),
+    (1090, 5, 'Finisher Blow', 'Finisher. Deal 150 damage points (VIT) ignoring altered states', '“Now is the time to act” — Dalai Lama', 'OTHER', NULL, NULL, 'Use 15 Motivation skills', NULL),
+    (7011, 1, 'Attention Split', 'Reduces player accuracy (-30%)', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7010, 2, 'Glitch Pulse', '40% chance to apply Confusion', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7012, 2, 'Micro-Interrupt', 'Cancels current player action (low chance)', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7013, 4, 'Light Scatter', 'Reduces multipliers by 50%', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7020, 2, 'Endless Feed', 'Applies Loop (custom Confusion variant)', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7021, 1, 'Time Drain', 'Reduces TIM', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7022, 5, 'Scroll Bite', 'Medium damage + Poison', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7023, 2, 'Recursive Loop', 'Forces player to repeat last action', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7030, 1, 'Self Consumption', 'Heals % of damage dealt', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7031, 4, 'Cycle Collapse', 'Resets all cooldowns (enemy)', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7032, 2, 'Notification Burst', 'Applies Mutis (disable skills)', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7040, 5, 'Ping Storm', 'Multi-hit low damage (100 x rnd(2,4))', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7041, 4, 'Anxiety', 'Increases enemy crit chance', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7050, 1, 'Dual Thought', 'Duplicates player debuffs', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7051, 2, 'Paralysis Stance', 'Freeze chance', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7052, 5, 'Divide Strike', 'Hits twice', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7060, 5, 'Reckless Slam', 'Massive damage, self DEF down', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7061, 1, 'Impulse Chain', 'Gains extra turn', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7062, 2, 'No Filter', 'Cannot be debuffed', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7070, 3, 'Warm Drift', 'Heal each turn', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7071, 3, 'Sticky Body', 'Reduces incoming damage', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7072, 3, 'Absorb Feed', 'Heals from damage', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7073, 2, 'Slow Pull', 'Reduces player speed', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7074, 2, 'Heavy Aura', 'Reduces player damage', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7075, 2, 'Sleep Field', 'Chance to skip turn', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7080, 1, 'Form Shift', 'Changes resistances each turn', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7081, 2, 'Cognitive Distortion', 'Random debuff', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7082, 4, 'False Clarity', 'Fake buff (becomes debuff next turn)', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7083, 2, 'Loop Thought', 'Applies Confusion', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7090, 2, 'Ad Flood', 'Applies BuffBlock + Confusion', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7091, 2, 'Sensory Overload', 'High chance Freeze', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7092, 1, 'Data Crash', 'Random cooldown increase', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7096, 5, 'Crushing Depth', 'Massive damage', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7093, 2, 'Saturation', 'All player multipliers reduced to 0.5', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (7094, 2, 'Signal Loss', 'Mutis all skills', NULL, 'OTHER', NULL, NULL, NULL, NULL),
+    (1010, 5, 'Power Strike', 'Deal 40 damage points (VIT)', '“Action is the foundational key” — Pablo Picasso', 'GOAL', 4609, NULL, NULL, NULL),
+    (5000, 1, 'Adaptable Attack', 'Normal Attack, embodied with Adaptability power. Deals 30 damage points (VIT.)', NULL, 'TIME', 1006, 30, NULL, NULL),
+    (4010, 3, 'Healing Touch', 'Small instant heal (20% total VIT)', '“Where there is love, there is life” — Gandhi', 'GOAL', 7101, NULL, NULL, NULL),
+    (1000, 5, 'Motivational Attack', 'Normal Attack, embodied with Motivation power. Deals 30 damage points (VIT.)', NULL, 'TIME', NULL, 30, NULL, NULL),
+    (2010, 4, 'Tunnel Vision', 'Gain PATK UP and MATK UP (3 turns)', '“You can do anything, not everything” — David Allen', 'GOAL', 1006, NULL, NULL, NULL),
+    (3010, 6, 'Iron Wall', '+ PDEF buff (3 turns)', '“Be like a rock” — Marcus Aurelius', 'GOAL', 4302, NULL, NULL, NULL),
+    (4001, 3, 'Quiet Restoration', 'Monk exclusive trait. Heals an small amount of HP each turn (10% HP) while no direct attacks are made.', '“The quieter you become, the more you can hear” — Ram Dass', 'GOAL', 7108, NULL, NULL, NULL),
+    (5001, 1, 'Tactical Thinking', 'Shaman exclusive trait. Store your current action for double the next turn.', '“When there is clarity, there is no choice” — Jiddu Krishnamurti', 'GOAL', 1006, NULL, NULL, NULL),
+    (6000, 2, 'Controlled Attack', 'Normal Attack, embodied with Control power. Deals 30 damage points (VIT.)', NULL, 'TIME', 7206, 30, NULL, NULL);
