@@ -1,8 +1,8 @@
 package com.bellako.kiwi.features.goals.model
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.services.eventbus.EventBus
@@ -76,7 +76,10 @@ class GoalsViewModel
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        private suspend fun addGoalsToCache(newGoals: List<UserGoalStatusDomain>, date: String) {
+        private suspend fun addGoalsToCache(
+            newGoals: List<UserGoalStatusDomain>,
+            date: String,
+        ) {
             cacheMutex.withLock {
                 val existing = cachedGoalsByDate[date]
                 cachedGoalsByDate[date] = if (existing == null) newGoals else existing + newGoals
@@ -98,7 +101,7 @@ class GoalsViewModel
                         currentState.copy(
                             goals = resultDTOs.map { UserGoalStatusDataMapper.toState(it) },
                             isLoading = false,
-                            error = null
+                            error = null,
                         )
                     }
                     addGoalsToCache(newGoalsDomain, dateToString(LocalDate.now()))
@@ -110,7 +113,7 @@ class GoalsViewModel
                     _state.update { it.copy(isLoading = false, error = throwable.message) }
                     setUiState(mapExceptionToUIState(throwable))
                     Result.failure(throwable)
-                }
+                },
             )
         }
 
@@ -133,7 +136,7 @@ class GoalsViewModel
                 onFailure = { throwable ->
                     _state.update { it.copy(isLoading = false, error = throwable.message) }
                     Result.failure(throwable)
-                }
+                },
             )
         }
 
@@ -156,11 +159,12 @@ class GoalsViewModel
                 onFailure = { throwable ->
                     _state.update { it.copy(isLoading = false, error = throwable.message) }
                     Result.failure(throwable)
-                }
+                },
             )
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
+        @Suppress("TooGenericExceptionCaught")
         override suspend fun completeGoal(goalId: Long): Result<Unit> {
             _state.update { it.copy(isLoading = true, error = null) }
             val result = repository.completeGoal(goalId)
@@ -169,7 +173,7 @@ class GoalsViewModel
                 onSuccess = { responseDTO ->
                     val updatedDomain = UserGoalStatusDataMapper.toDomain(responseDTO)
                     val updatedState = UserGoalStatusDataMapper.toState(updatedDomain)
-                    
+
                     _state.update { currentState ->
                         val updatedList = currentState.goals.map { if (it.id == updatedState.id) updatedState else it }
                         currentState.copy(goals = updatedList, isLoading = false)
@@ -192,7 +196,7 @@ class GoalsViewModel
                 onFailure = { throwable ->
                     _state.update { it.copy(isLoading = false, error = throwable.message) }
                     Result.failure(throwable)
-                }
+                },
             )
         }
 
@@ -215,7 +219,7 @@ class GoalsViewModel
                 onFailure = { throwable ->
                     _state.update { it.copy(isLoading = false, error = throwable.message) }
                     Result.failure(throwable)
-                }
+                },
             )
         }
 
@@ -249,7 +253,7 @@ class GoalsViewModel
                 onFailure = { throwable ->
                     _state.update { it.copy(isLoading = false, error = throwable.message) }
                     Result.failure(throwable)
-                }
+                },
             )
         }
 
@@ -299,7 +303,9 @@ class GoalsViewModel
         }
 
         fun notifyNewGoals(goals: List<IGoal>) = notificationManager.notify(NotificationEvent.Goal(GoalNotificationType.NEW, goals))
-        fun notifyYesterdayGoals(goals: List<IGoal>) = notificationManager.notify(NotificationEvent.Goal(GoalNotificationType.YESTERDAY, goals))
+
+        fun notifyYesterdayGoals(goals: List<IGoal>) =
+            notificationManager.notify(NotificationEvent.Goal(GoalNotificationType.YESTERDAY, goals))
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun checkAndNotifyGoals() {
@@ -318,6 +324,7 @@ class GoalsViewModel
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
+        @Suppress("ReturnCount")
         override suspend fun getDailyGoalsProgress(date: String): Float {
             val goals = getGoalsByDate(date).getOrElse { return 0f }
             if (goals.isEmpty()) return 0f
@@ -325,26 +332,45 @@ class GoalsViewModel
         }
 
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
-        override suspend fun getAppsAverageUsage(goodApps: List<String>, badApps: List<String>): Result<AppUsageResult> =
-            runCatching { AppUsageResult(appUsageProvider.getAverageWeeklyUsage(goodApps), appUsageProvider.getAverageWeeklyUsage(badApps)) }
+        override suspend fun getAppsAverageUsage(
+            goodApps: List<String>,
+            badApps: List<String>,
+        ): Result<AppUsageResult> =
+            runCatching {
+                AppUsageResult(
+                    appUsageProvider.getAverageWeeklyUsage(goodApps),
+                    appUsageProvider.getAverageWeeklyUsage(badApps),
+                )
+            }
 
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
-        override suspend fun saveBaselineAppUsage(goodApps: List<String>, badApps: List<String>): Result<UserAppUsageDTO> =
+        override suspend fun saveBaselineAppUsage(
+            goodApps: List<String>,
+            badApps: List<String>,
+        ): Result<UserAppUsageDTO> =
             runCatching {
-                val dto = UserAppUsageDTO(
-                    appUsageProvider.getAverageWeeklyUsage(goodApps).sumOf { it.averageDailyUsageMs },
-                    appUsageProvider.getAverageWeeklyUsage(badApps).sumOf { it.averageDailyUsageMs }
-                )
+                val dto =
+                    UserAppUsageDTO(
+                        appUsageProvider.getAverageWeeklyUsage(goodApps).sumOf { it.averageDailyUsageMs },
+                        appUsageProvider.getAverageWeeklyUsage(badApps).sumOf { it.averageDailyUsageMs },
+                    )
                 repository.saveAppUsageBaseline(dto).getOrThrow()
             }
 
-        override suspend fun autoReviewAppUsageGoals(): Result<Unit> = runCatching { repository.autoReviewAppUsageGoals().getOrThrow(); Unit }
+        override suspend fun autoReviewAppUsageGoals(): Result<Unit> =
+            runCatching {
+                repository.autoReviewAppUsageGoals().getOrThrow()
+                Unit
+            }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun createGoalsFromDefinitions(goalDefinitions: List<GoalDomain>): Result<Unit> {
             if (goalDefinitions.isEmpty()) return Result.failure(IllegalArgumentException("Empty list"))
             val today = dateToString(LocalDate.now())
-            cacheMutex.withLock { cachedGoalDefinitions = null; cachedGoalsByDate.remove(today) }
+            cacheMutex.withLock {
+                cachedGoalDefinitions = null
+                cachedGoalsByDate.remove(today)
+            }
             return createGoals(goalDefinitions.map { GoalDataMapper.toUserGoalStatusState(it, today) })
         }
     }
