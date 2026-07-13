@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.goals.model
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import android.util.Log
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.services.eventbus.EventBus
@@ -27,6 +28,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
@@ -58,234 +60,174 @@ class GoalsViewModel
         @RequiresApi(Build.VERSION_CODES.O)
         private fun getCurrentDate(): String = dateToString(LocalDate.now())
 
-        /**
-         * Actualiza un goal en todas las entradas del cache donde aparezca
-         * @param updatedGoal El goal actualizado
-         */
         @RequiresApi(Build.VERSION_CODES.O)
         private suspend fun updateGoalInCache(updatedGoal: UserGoalStatusDomain) {
             cacheMutex.withLock {
-                // Actualizar en cachedGoalsByDate
                 val keys = cachedGoalsByDate.keys.toList()
                 keys.forEach { date ->
                     val goals = cachedGoalsByDate[date] ?: emptyList()
                     val updatedList = goals.map { goal -> if (goal.id == updatedGoal.id) updatedGoal else goal }
                     cachedGoalsByDate[date] = updatedList
                 }
-
-                // Actualizar en cachedGoalsInProgress si existe
                 cachedGoalsInProgress = cachedGoalsInProgress?.map { goal -> if (goal.id == updatedGoal.id) updatedGoal else goal }
-
-                // Mantener fecha de cache actualizada
                 cacheDate = getCurrentDate()
-
                 EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
             }
         }
 
-        /**
-         * Añade nuevas goals al cache de la fecha correspondiente
-         * @param newGoals Lista de goals creadas
-         * @param date Fecha en formato yyyy-MM-dd
-         */
         @RequiresApi(Build.VERSION_CODES.O)
-        private suspend fun addGoalsToCache(
-            newGoals: List<UserGoalStatusDomain>,
-            date: String,
-        ) {
+        private suspend fun addGoalsToCache(newGoals: List<UserGoalStatusDomain>, date: String) {
             cacheMutex.withLock {
                 val existing = cachedGoalsByDate[date]
-                if (existing == null) {
-                    cachedGoalsByDate[date] = newGoals
-                } else {
-                    cachedGoalsByDate[date] = existing + newGoals
-                }
+                cachedGoalsByDate[date] = if (existing == null) newGoals else existing + newGoals
                 cacheDate = getCurrentDate()
             }
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         private suspend fun createGoals(goals: List<GoalState>): Result<Unit> {
-            setIsLoading(true)
+            _state.update { it.copy(isLoading = true, error = null) }
             setUiState(UIState.Loading)
-            _state.value = _state.value.copy(isLoading = true, error = null)
 
-            val goalsDTO = goals.map { UserGoalStatusDataMapper.toDTO(it) }
-            val result = repository.createGoals(goalsDTO)
+            val result = repository.createGoals(goals.map { UserGoalStatusDataMapper.toDTO(it) })
 
-            setIsLoading(false)
-            setUiState(UIState.Idle)
-
-            return handleResultSuspend(result) {
-                val resultDTOs = result.getOrNull()!!
-                _state.value =
-                    _state.value.copy(
-                        goals = resultDTOs.map { UserGoalStatusDataMapper.toState(it) },
-                        isLoading = false,
-                        error = null,
-                    )
-                val newGoalsDomain = resultDTOs.map { UserGoalStatusDataMapper.toDomain(it) }
-                val today = dateToString(LocalDate.now())
-                addGoalsToCache(newGoalsDomain, today)
-
-                EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
-            }.also {
-                if (it.isFailure) {
-                    _state.value =
-                        _state.value.copy(
+            return result.fold(
+                onSuccess = { resultDTOs ->
+                    val newGoalsDomain = resultDTOs.map { UserGoalStatusDataMapper.toDomain(it) }
+                    _state.update { currentState ->
+                        currentState.copy(
+                            goals = resultDTOs.map { UserGoalStatusDataMapper.toState(it) },
                             isLoading = false,
-                            error = it.exceptionOrNull()?.message,
+                            error = null
                         )
+                    }
+                    addGoalsToCache(newGoalsDomain, dateToString(LocalDate.now()))
+                    EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
+                    setUiState(UIState.Success(Unit))
+                    Result.success(Unit)
+                },
+                onFailure = { throwable ->
+                    _state.update { it.copy(isLoading = false, error = throwable.message) }
+                    setUiState(mapExceptionToUIState(throwable))
+                    Result.failure(throwable)
                 }
-            }
+            )
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun updateGoalProgress(goalId: Long): Result<UserGoalStatusDomain> {
-            setIsLoading(true)
-            setUiState(UIState.Loading)
-            _state.value = _state.value.copy(isLoading = true, error = null)
-
+            _state.update { it.copy(isLoading = true, error = null) }
             val result = repository.updateGoalProgress(goalId)
 
-            setIsLoading(false)
-            setUiState(UIState.Idle)
-
-            // Manejar explícitamente para poder usar suspend dentro del flujo
-            return if (result.isSuccess) {
-                val updatedDTO = result.getOrNull()!!
-                val updatedState = UserGoalStatusDataMapper.toState(updatedDTO)
-                val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
-                _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
-                val updatedDomain = UserGoalStatusDataMapper.toDomain(updatedDTO)
-                updateGoalInCache(updatedDomain)
-                Result.success(updatedDomain)
-            } else {
-                _state.value = _state.value.copy(isLoading = false, error = result.exceptionOrNull()?.message)
-                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
-            }
+            return result.fold(
+                onSuccess = { updatedDTO ->
+                    val updatedDomain = UserGoalStatusDataMapper.toDomain(updatedDTO)
+                    val updatedState = UserGoalStatusDataMapper.toState(updatedDomain)
+                    _state.update { currentState ->
+                        val updatedList = currentState.goals.map { if (it.id == updatedState.id) updatedState else it }
+                        currentState.copy(goals = updatedList, isLoading = false)
+                    }
+                    updateGoalInCache(updatedDomain)
+                    Result.success(updatedDomain)
+                },
+                onFailure = { throwable ->
+                    _state.update { it.copy(isLoading = false, error = throwable.message) }
+                    Result.failure(throwable)
+                }
+            )
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun updateGoal(goal: UserGoalStatusDomain): Result<UserGoalStatusDomain> {
-            setIsLoading(true)
-            setUiState(UIState.Loading)
-            _state.value = _state.value.copy(isLoading = true, error = null)
-
+            _state.update { it.copy(isLoading = true, error = null) }
             val result = repository.updateGoal(UserGoalStatusDataMapper.toDTO(goal))
 
-            setIsLoading(false)
-            setUiState(UIState.Idle)
-
-            return if (result.isSuccess) {
-                val updatedDTO = result.getOrNull()!!
-                val updatedState = UserGoalStatusDataMapper.toState(updatedDTO)
-                val updatedGoals = _state.value.goals.map { if (it.id == updatedState.id) updatedState else it }
-
-                _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
-
-                val updatedDomain = UserGoalStatusDataMapper.toDomain(updatedDTO)
-
-                updateGoalInCache(updatedDomain)
-
-                Result.success(updatedDomain)
-            } else {
-                _state.value = _state.value.copy(isLoading = false, error = result.exceptionOrNull()?.message)
-                Result.failure(result.exceptionOrNull() ?: Exception("Unknown error"))
-            }
-        }
-
-        @RequiresApi(Build.VERSION_CODES.O)
-        override suspend fun createGoalsFromDefinitions(goalDefinitions: List<GoalDomain>): Result<Unit> {
-            if (goalDefinitions.isEmpty()) {
-                return Result.failure(IllegalArgumentException("La lista de sugerencias está vacía"))
-            }
-            val today = dateToString(LocalDate.now())
-            val goalsToCreate = goalDefinitions.map { GoalDataMapper.toUserGoalStatusState(it, today) }
-            cacheMutex.withLock {
-                cachedGoalDefinitions = null
-                cachedGoalsByDate.remove(today)
-            }
-            return createGoals(goalsToCreate)
+            return result.fold(
+                onSuccess = { updatedDTO ->
+                    val updatedDomain = UserGoalStatusDataMapper.toDomain(updatedDTO)
+                    val updatedState = UserGoalStatusDataMapper.toState(updatedDomain)
+                    _state.update { currentState ->
+                        val updatedList = currentState.goals.map { if (it.id == updatedState.id) updatedState else it }
+                        currentState.copy(goals = updatedList, isLoading = false)
+                    }
+                    updateGoalInCache(updatedDomain)
+                    Result.success(updatedDomain)
+                },
+                onFailure = { throwable ->
+                    _state.update { it.copy(isLoading = false, error = throwable.message) }
+                    Result.failure(throwable)
+                }
+            )
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun completeGoal(goalId: Long): Result<Unit> {
-            setIsLoading(true)
-            setUiState(UIState.Loading)
-            _state.value = _state.value.copy(isLoading = true, error = null)
-
+            _state.update { it.copy(isLoading = true, error = null) }
             val result = repository.completeGoal(goalId)
 
-            setIsLoading(false)
-            setUiState(UIState.Idle)
+            return result.fold(
+                onSuccess = { responseDTO ->
+                    val updatedDomain = UserGoalStatusDataMapper.toDomain(responseDTO)
+                    val updatedState = UserGoalStatusDataMapper.toState(updatedDomain)
+                    
+                    _state.update { currentState ->
+                        val updatedList = currentState.goals.map { if (it.id == updatedState.id) updatedState else it }
+                        currentState.copy(goals = updatedList, isLoading = false)
+                    }
 
-            return handleResultSuspend(result) {
-                val updatedGoal = UserGoalStatusDataMapper.toState(result.getOrNull()!!)
-                val updatedGoals = _state.value.goals.map { if (it.id == updatedGoal.id) updatedGoal else it }
-                _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
+                    if (updatedDomain.onCompletedEvent != "_") {
+                        try {
+                            val eventName = updatedDomain.onCompletedEvent.uppercase().trim()
+                            val eventType = EventType.valueOf(eventName)
+                            EventBus.emitEvent(eventType, EventPayload.EntityIdPayload(updatedDomain.onCompletedEntityId))
+                        } catch (e: Exception) {
+                            Log.e("GoalsViewModel", "Event emission failed for: ${updatedDomain.onCompletedEvent}", e)
+                        }
+                    }
 
-                val updatedDomain = UserGoalStatusDataMapper.toDomain(result.getOrNull()!!)
-
-                EventBus.emitEvent(EventType.DAILY_GOALS_UPDATED, EventPayload.EmptyPayload())
-
-                if (updatedDomain.onCompletedEvent != "_") {
-                    EventBus.emitEvent(
-                        EventType.valueOf(updatedDomain.onCompletedEvent),
-                        EventPayload.EntityIdPayload(updatedDomain.onCompletedEntityId),
-                    )
+                    updateGoalInCache(updatedDomain)
+                    usersRepository.getMyUserPoints()
+                    Result.success(Unit)
+                },
+                onFailure = { throwable ->
+                    _state.update { it.copy(isLoading = false, error = throwable.message) }
+                    Result.failure(throwable)
                 }
-
-                updateGoalInCache(updatedDomain)
-                usersRepository.getMyUserPoints() // Refrescar puntos al completar goal
-            }.also {
-                if (it.isFailure) {
-                    _state.value = _state.value.copy(isLoading = false, error = it.exceptionOrNull()?.message)
-                }
-            }
+            )
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun uncompleteGoal(goalId: Long): Result<Unit> {
-            setIsLoading(true)
-            setUiState(UIState.Loading)
-            _state.value = _state.value.copy(isLoading = true, error = null)
-
+            _state.update { it.copy(isLoading = true, error = null) }
             val result = repository.uncompleteGoal(goalId)
 
-            setIsLoading(false)
-            setUiState(UIState.Idle)
-
-            return handleResultSuspend(result) {
-                val updatedGoal = UserGoalStatusDataMapper.toState(result.getOrNull()!!)
-                val updatedGoals = _state.value.goals.map { if (it.id == updatedGoal.id) updatedGoal else it }
-                _state.value = _state.value.copy(goals = updatedGoals, isLoading = false, error = null)
-                val updatedDomain = UserGoalStatusDataMapper.toDomain(result.getOrNull()!!)
-                updateGoalInCache(updatedDomain)
-            }.also {
-                if (it.isFailure) {
-                    _state.value = _state.value.copy(isLoading = false, error = it.exceptionOrNull()?.message)
+            return result.fold(
+                onSuccess = { responseDTO ->
+                    val updatedDomain = UserGoalStatusDataMapper.toDomain(responseDTO)
+                    val updatedState = UserGoalStatusDataMapper.toState(updatedDomain)
+                    _state.update { currentState ->
+                        val updatedList = currentState.goals.map { if (it.id == updatedState.id) updatedState else it }
+                        currentState.copy(goals = updatedList, isLoading = false)
+                    }
+                    updateGoalInCache(updatedDomain)
+                    Result.success(Unit)
+                },
+                onFailure = { throwable ->
+                    _state.update { it.copy(isLoading = false, error = throwable.message) }
+                    Result.failure(throwable)
                 }
-            }
+            )
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun getGoalsByDate(date: String): Result<List<UserGoalStatusDomain>> {
-            // Comprobar cache atómicamente
             cacheMutex.withLock {
                 if (cachedGoalsByDate.containsKey(date) && cacheDate == getCurrentDate()) {
                     return Result.success(cachedGoalsByDate[date]!!)
                 }
             }
 
-            setIsLoading(true)
-            setUiState(UIState.Loading)
-
             val result = repository.getGoalsByDate(stringToDate(date))
-
-            setIsLoading(false)
-            setUiState(UIState.Idle)
-
             return result.map { goalDTOs ->
                 val domainGoals = goalDTOs?.map { UserGoalStatusDataMapper.toDomain(it) } ?: emptyList()
                 cacheMutex.withLock {
@@ -297,26 +239,18 @@ class GoalsViewModel
         }
 
         override suspend fun loadAllGoals(): Result<Unit> {
-            setIsLoading(true)
-            setUiState(UIState.Loading)
-            _state.value = _state.value.copy(isLoading = true, error = null)
-
+            _state.update { it.copy(isLoading = true, error = null) }
             val result = repository.getAllGoals()
-
-            setIsLoading(false)
-            setUiState(UIState.Idle)
-
-            return handleResult(result) {
-                _state.value = _state.value.copy(isLoading = false, error = null)
-            }.also {
-                if (it.isFailure) {
-                    _state.value =
-                        _state.value.copy(
-                            isLoading = false,
-                            error = it.exceptionOrNull()?.message,
-                        )
+            return result.fold(
+                onSuccess = {
+                    _state.update { it.copy(isLoading = false) }
+                    Result.success(Unit)
+                },
+                onFailure = { throwable ->
+                    _state.update { it.copy(isLoading = false, error = throwable.message) }
+                    Result.failure(throwable)
                 }
-            }
+            )
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
@@ -327,17 +261,8 @@ class GoalsViewModel
                 }
             }
 
-            setIsLoading(true)
-            setUiState(UIState.Loading)
-
-            val result = repository.getGoalsInProgress()
-
-            setIsLoading(false)
-            setUiState(UIState.Idle)
-
-            return result.map { goalDTOs ->
+            return repository.getGoalsInProgress().map { goalDTOs ->
                 val domainGoals = goalDTOs.map { UserGoalStatusDataMapper.toDomain(it) }
-                // Guardar en cache
                 cacheMutex.withLock {
                     cachedGoalsInProgress = domainGoals
                     cacheDate = getCurrentDate()
@@ -354,30 +279,17 @@ class GoalsViewModel
                 }
             }
 
-            setIsLoading(true)
-            setUiState(UIState.Loading)
-
-            val result = repository.getGoalDefinitions()
-
-            setIsLoading(false)
-            setUiState(UIState.Idle)
-
-            return result.map { goalDTOs ->
+            return repository.getGoalDefinitions().map { goalDTOs ->
                 val goalDomains = goalDTOs.map { GoalDataMapper.toDomain(it) }
-                cacheMutex.withLock {
-                    cachedGoalDefinitions = goalDomains
-                }
+                cacheMutex.withLock { cachedGoalDefinitions = goalDomains }
                 goalDomains
             }
         }
 
         override suspend fun invalidateGoalsInProgressCache() {
-            cacheMutex.withLock {
-                cachedGoalsInProgress = null
-            }
+            cacheMutex.withLock { cachedGoalsInProgress = null }
         }
 
-        // Limpiar cache cuando se destruye el ViewModel
         override fun onCleared() {
             super.onCleared()
             cachedGoalsByDate.clear()
@@ -386,115 +298,53 @@ class GoalsViewModel
             cacheDate = null
         }
 
-        fun notifyNewGoals(goals: List<IGoal>) {
-            notificationManager.notify(
-                NotificationEvent.Goal(
-                    type = GoalNotificationType.NEW,
-                    goals = goals,
-                ),
-            )
-        }
+        fun notifyNewGoals(goals: List<IGoal>) = notificationManager.notify(NotificationEvent.Goal(GoalNotificationType.NEW, goals))
+        fun notifyYesterdayGoals(goals: List<IGoal>) = notificationManager.notify(NotificationEvent.Goal(GoalNotificationType.YESTERDAY, goals))
 
-        fun notifyYesterdayGoals(goals: List<IGoal>) {
-            notificationManager.notify(
-                NotificationEvent.Goal(
-                    type = GoalNotificationType.YESTERDAY,
-                    goals = goals,
-                ),
-            )
-        }
-
-        /**
-         * Evalúa si hay notificaciones de goals que mostrar y las envía automáticamente.
-         * 1. Verifica si hay goals de ayer en progreso (muestra primero)
-         * 2. Verifica si hay goals de hoy o sugerencias (muestra después)
-         */
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun checkAndNotifyGoals() {
-            val today = dateToString(LocalDate.now())
-
-            // Silently auto-review yesterday's APP_USAGE goals before showing user-facing modals
             autoReviewAppUsageGoals()
-
-            val inProgressResult = getGoalsInProgress()
-            val yesterdayGoals = inProgressResult.getOrNull()
-
-            if (!yesterdayGoals.isNullOrEmpty()) {
-                notifyYesterdayGoals(yesterdayGoals)
-                return // Salir para mostrar solo la de ayer primero
-            }
-
-            val todayResult = getGoalsByDate(today)
-            val todayGoals = todayResult.getOrNull()
-
-            if (!todayGoals.isNullOrEmpty()) {
+            val inProgress = getGoalsInProgress().getOrNull()
+            if (!inProgress.isNullOrEmpty()) {
+                notifyYesterdayGoals(inProgress)
                 return
             }
-
-            val goalDefinitionsResult = getGoalDefinitions()
-            val goalDefinitions = goalDefinitionsResult.getOrNull()
-
-            if (!goalDefinitions.isNullOrEmpty()) {
-                createGoalsFromDefinitions(goalDefinitions)
-                notifyNewGoals(goalDefinitions)
+            if (getGoalsByDate(dateToString(LocalDate.now())).getOrNull().isNullOrEmpty()) {
+                getGoalDefinitions().getOrNull()?.let {
+                    createGoalsFromDefinitions(it)
+                    notifyNewGoals(it)
+                }
             }
         }
 
-        @Suppress("ReturnCount")
         @RequiresApi(Build.VERSION_CODES.O)
         override suspend fun getDailyGoalsProgress(date: String): Float {
-            val currentGoals = getGoalsByDate(date).getOrElse { return 0f }
-
-            if (currentGoals.isEmpty()) return 0f
-
-            val progress =
-                currentGoals
-                    .map { goal ->
-                        if (goal.target <= 0) {
-                            0f
-                        } else {
-                            (goal.value.toFloat() / goal.target.toFloat()).coerceIn(0f, 1f)
-                        }
-                    }.average()
-                    .toFloat()
-
-            return progress
+            val goals = getGoalsByDate(date).getOrElse { return 0f }
+            if (goals.isEmpty()) return 0f
+            return goals.map { if (it.target <= 0) 0f else (it.value.toFloat() / it.target).coerceIn(0f, 1f) }.average().toFloat()
         }
 
-        /**
-         * Returns the average daily usage (last 7 days) for each app in [goodApps] and [badApps].
-         * Requires PACKAGE_USAGE_STATS permission to have been granted by the user.
-         */
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
-        override suspend fun getAppsAverageUsage(
-            goodApps: List<String>,
-            badApps: List<String>,
-        ): Result<AppUsageResult> =
-            runCatching {
-                AppUsageResult(
-                    goodAppsUsage = appUsageProvider.getAverageWeeklyUsage(goodApps),
-                    badAppsUsage = appUsageProvider.getAverageWeeklyUsage(badApps),
-                )
-            }
+        override suspend fun getAppsAverageUsage(goodApps: List<String>, badApps: List<String>): Result<AppUsageResult> =
+            runCatching { AppUsageResult(appUsageProvider.getAverageWeeklyUsage(goodApps), appUsageProvider.getAverageWeeklyUsage(badApps)) }
 
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
-        override suspend fun saveBaselineAppUsage(
-            goodApps: List<String>,
-            badApps: List<String>,
-        ): Result<UserAppUsageDTO> =
+        override suspend fun saveBaselineAppUsage(goodApps: List<String>, badApps: List<String>): Result<UserAppUsageDTO> =
             runCatching {
-                val goodAvgMs = appUsageProvider.getAverageWeeklyUsage(goodApps).sumOf { it.averageDailyUsageMs }
-                val badAvgMs = appUsageProvider.getAverageWeeklyUsage(badApps).sumOf { it.averageDailyUsageMs }
                 val dto = UserAppUsageDTO(
-                    avgGoodDailyUsageMs = goodAvgMs,
-                    avgBadDailyUsageMs = badAvgMs,
+                    appUsageProvider.getAverageWeeklyUsage(goodApps).sumOf { it.averageDailyUsageMs },
+                    appUsageProvider.getAverageWeeklyUsage(badApps).sumOf { it.averageDailyUsageMs }
                 )
                 repository.saveAppUsageBaseline(dto).getOrThrow()
             }
 
-        override suspend fun autoReviewAppUsageGoals(): Result<Unit> =
-            runCatching {
-                repository.autoReviewAppUsageGoals().getOrThrow()
-                Unit
-            }
+        override suspend fun autoReviewAppUsageGoals(): Result<Unit> = runCatching { repository.autoReviewAppUsageGoals().getOrThrow(); Unit }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override suspend fun createGoalsFromDefinitions(goalDefinitions: List<GoalDomain>): Result<Unit> {
+            if (goalDefinitions.isEmpty()) return Result.failure(IllegalArgumentException("Empty list"))
+            val today = dateToString(LocalDate.now())
+            cacheMutex.withLock { cachedGoalDefinitions = null; cachedGoalsByDate.remove(today) }
+            return createGoals(goalDefinitions.map { GoalDataMapper.toUserGoalStatusState(it, today) })
+        }
     }

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.bellako.kiwi.R
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H1
@@ -35,7 +36,6 @@ import com.bellako.kiwi.common.services.eventbus.EventBus
 import com.bellako.kiwi.common.services.eventbus.EventPayload
 import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.goals.data.GoalCategory
-import com.bellako.kiwi.features.goals.data.GoalDomain
 import com.bellako.kiwi.features.goals.data.GoalStatus
 import com.bellako.kiwi.features.goals.data.GoalType
 import com.bellako.kiwi.features.goals.data.IGoal
@@ -47,6 +47,8 @@ import com.bellako.kiwi.ui.LocalKiwiColors
 import com.bellako.kiwi.ui.Spacing
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 @Composable
@@ -58,6 +60,7 @@ fun GoalsModal(
     onDismiss: () -> Unit = {},
 ) {
     var showWorkInProgressPopup by remember { mutableStateOf(false) }
+    var isProcessing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     val header =
@@ -97,7 +100,7 @@ fun GoalsModal(
                         .padding(horizontal = getResponsiveSizeHeight(24.dp)),
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.goals_modal),
+                    painter = painterResource(id = com.bellako.kiwi.R.drawable.goals_modal),
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -147,6 +150,7 @@ fun GoalsModal(
                         .spacedBy(12.dp),
             ) {
                 Kiwi_FixedSizeButton(
+                    enabled = !isProcessing,
                     textArguments =
                         KiwiTextArguments(
                             "Modify",
@@ -158,42 +162,59 @@ fun GoalsModal(
                             .weight(buttonPercentage),
                     onClick = { showWorkInProgressPopup = true },
                 )
-                Kiwi_FixedSizeButton(
-                    textArguments =
-                        KiwiTextArguments(
-                            if (goalModalType == GoalNotificationType.NEW) "Let's go!" else "Done",
-                            color = kiwiColor.colorF,
-                        ),
-                    color = kiwiColor.color8,
-                    modifier =
-                        Modifier
-                            .weight(buttonPercentage),
-                    onClick = {
-                        coroutineScope.launch {
-                            var anyCompleted = false
-                            if (goalModalType == GoalNotificationType.YESTERDAY) {
-                                for (goal in goals) {
-                                    if (goal is UserGoalStatusDomain) {
-                                        if (goal.value == goal.target) {
-                                            goalsViewModel.completeGoal(goalId = goal.id)
-                                            anyCompleted = true
-                                        } else {
-                                            goalsViewModel.uncompleteGoal(goalId = goal.id)
+                Box(
+                    modifier = Modifier.weight(buttonPercentage),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Kiwi_FixedSizeButton(
+                        enabled = !isProcessing,
+                        textArguments =
+                            KiwiTextArguments(
+                                if (isProcessing) "" else if (goalModalType == GoalNotificationType.NEW) "Let's go!" else "Done",
+                                color = kiwiColor.colorF,
+                            ),
+                        color = kiwiColor.color8,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            if (isProcessing) return@Kiwi_FixedSizeButton
+                            coroutineScope.launch {
+                                isProcessing = true
+                                var anyCompleted = false
+                                if (goalModalType == GoalNotificationType.YESTERDAY) {
+                                    // Procesar todas las llamadas en paralelo para mejorar rendimiento
+                                    val tasks = goals.filterIsInstance<UserGoalStatusDomain>().map { goal ->
+                                        async {
+                                            if (goal.value >= goal.target) {
+                                                anyCompleted = true
+                                                goalsViewModel.completeGoal(goalId = goal.id)
+                                            } else {
+                                                goalsViewModel.uncompleteGoal(goalId = goal.id)
+                                            }
                                         }
                                     }
+                                    tasks.awaitAll()
+
+                                    goalsViewModel.invalidateGoalsInProgressCache()
+                                    if (anyCompleted) {
+                                        EventBus.emitEvent(
+                                            EventType.MAP_CONTENT_AVAILABLE,
+                                            EventPayload.EmptyPayload(),
+                                        )
+                                    }
                                 }
-                                goalsViewModel.invalidateGoalsInProgressCache()
-                                if (anyCompleted) {
-                                    EventBus.emitEvent(
-                                        EventType.MAP_CONTENT_AVAILABLE,
-                                        EventPayload.EmptyPayload(),
-                                    )
-                                }
+                                isProcessing = false
+                                onDismiss()
                             }
-                            onDismiss()
-                        }
-                    },
-                )
+                        },
+                    )
+                    if (isProcessing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = kiwiColor.colorF,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                }
             }
         }
     }
