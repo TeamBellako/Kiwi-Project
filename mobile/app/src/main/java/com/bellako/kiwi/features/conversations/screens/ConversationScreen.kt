@@ -98,6 +98,7 @@ fun ConversationScreen(
     conversation: ConversationDomain,
     viewModel: ConversationViewModel? = null,
 ) {
+    val kiwiColor = LocalKiwiColors.current
     val infiniteTransition = rememberInfiniteTransition(label = "arrow_bounce")
     val offsetY by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -198,7 +199,14 @@ fun ConversationScreen(
                             !typewriter.isComplete -> typewriter.skip()
                             conversation.options.isEmpty() -> advance()
                         }
-                    },
+                    }.background(
+                        Brush.verticalGradient(
+                            0f to Color.Transparent,
+                            0.2f to Color.Transparent,
+                            0.8f to kiwiColor.color2,
+                            1f to kiwiColor.color2,
+                        ),
+                    ),
         ) {
             val charExtraX =
                 if (isProtagonist) 0.dp else -screenWidth * (1f - characterProgress.value)
@@ -252,20 +260,12 @@ private fun DialogueBox(
     alpha: Float,
     modifier: Modifier = Modifier,
 ) {
-    val kiwiColor = LocalKiwiColors.current
     val context = LocalContext.current
     Box(
         modifier =
             modifier
                 .fillMaxWidth()
-                .alpha(alpha)
-                .background(
-                    Brush.verticalGradient(
-                        -0.2f to Color.Transparent,
-                        0.5f to kiwiColor.color2,
-                        1f to kiwiColor.color2,
-                    ),
-                ),
+                .alpha(alpha),
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -358,8 +358,8 @@ private fun ConversationOptionsPanel(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .alpha(alpha)
-                .background(kiwiColor.color2),
+                .alpha(alpha),
+//                .background(kiwiColor.color2),
     ) {
         val optionHeight = getResponsiveSizeHeight(50.dp)
         val maxVisible = 3
@@ -451,7 +451,7 @@ fun ConversationScreen_Preview() {
                         1L,
                         "Conversación de prueba",
                         ConversationType.FULL,
-                        "liria_neutral",
+                        "character_liria_base",
                         null,
                         null,
                         false,
