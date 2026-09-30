@@ -12,7 +12,9 @@ class KiwiApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        com.bellako.kiwi.common.ResourceProvider.init(this)
         firebaseInit(this)
+
 
         val prefs = getSharedPreferences("kiwi_prefs", MODE_PRIVATE)
         val isFirstOpen = prefs.getBoolean("is_first_open", true)

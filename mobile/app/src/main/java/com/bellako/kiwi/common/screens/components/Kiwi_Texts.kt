@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.ui.getResponsiveSizeHeight
 import com.bellako.kiwi.ui.getResponsiveSizeWidth
 
@@ -43,7 +44,7 @@ data class KiwiTextArguments(
 )
 
 data class KiwiAnnotatedStringArguments(
-    val text: AnnotatedString,
+    val buildText: (resolve: (String) -> String) -> AnnotatedString,
     val textAlign: TextAlign = TextAlign.Left,
     val modifier: Modifier = Modifier,
 )
@@ -58,9 +59,10 @@ private fun Kiwi_Text(
     bodyStyle: TextStyle,
 ) {
     val scale = rememberTextWidthScale()
+    val text = ResourceProvider.stringResource(arguments.text)
 
     Text(
-        text = arguments.text,
+        text = text,
         textAlign = arguments.textAlign,
         color = arguments.color,
         modifier = arguments.modifier,
@@ -145,9 +147,10 @@ private fun Kiwi_AnnotatedString_P(
     bodyStyle: TextStyle,
 ) {
     val scale = rememberTextWidthScale()
+    val text = arguments.buildText(ResourceProvider::stringResource)
 
     Text(
-        text = arguments.text,
+        text = text,
         textAlign = arguments.textAlign,
         modifier = arguments.modifier,
         style = bodyStyle.copy(fontSize = bodyStyle.fontSize * scale),

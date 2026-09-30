@@ -106,7 +106,7 @@ fun CombatTurnIndicator(
         ) {
             Kiwi_AnnotatedString_P2(
                 KiwiAnnotatedStringArguments(
-                    text = message,
+                    buildText = { message },
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 ),

@@ -97,7 +97,7 @@ private fun Welcome(
 
         Kiwi_H2(
             KiwiTextArguments(
-                "Your Legend is About\nTo Be Forged...",
+                "your_leyend",
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
                 fontWeight = FontWeight.Bold,
@@ -110,7 +110,7 @@ private fun Welcome(
             horizontalMargin = Spacing.medium,
             textArguments =
                 KiwiTextArguments(
-                    "LET'S DO IT",
+                    "lets_do_it",
                     color = kiwiColors.colorF,
                     fontWeight = FontWeight.Bold,
                 ),
@@ -130,42 +130,41 @@ private fun Welcome(
 @Composable
 internal fun GoToLogIn(onSignUp: () -> Unit) {
     val kiwiColors = LocalKiwiColors.current
-    val annotatedString =
-        buildAnnotatedString {
-            withStyle(
-                style =
-                    SpanStyle(
-                        color = kiwiColors.color6,
-                    ),
-            ) {
-                append("Not Your First Time?\nContinue Your Adventure By\n")
-            }
-
-            withLink(
-                link =
-                    LinkAnnotation.Clickable(
-                        tag = "HERE",
-                        linkInteractionListener = {
-                            onSignUp()
-                        },
-                    ),
-            ) {
-                withStyle(
-                    style =
-                        SpanStyle(
-                            color = kiwiColors.color7B,
-                            textDecoration = TextDecoration.Underline,
-                        ),
-                ) {
-                    append("Logging In")
-                }
-            }
-        }
-
     Kiwi_AnnotatedString_P2(
         KiwiAnnotatedStringArguments(
-            annotatedString,
-            TextAlign.Center,
+            buildText = { resolve ->
+                buildAnnotatedString {
+                    withStyle(
+                    style =
+                        SpanStyle(
+                                color = kiwiColors.color6,
+                        ),
+                    ) {
+                        append(resolve("not_first_time"))
+                    }
+
+                    withLink(
+                        link =
+                            LinkAnnotation.Clickable(
+                                tag = "HERE",
+                                linkInteractionListener = {
+                                    onSignUp()
+                                },
+                            ),
+                    ) {
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = kiwiColors.color7B,
+                                    textDecoration = TextDecoration.Underline,
+                                ),
+                        ) {
+                            append(resolve("logging_in"))
+                        }
+                    }
+                }
+            },
+            textAlign = TextAlign.Center,
         ),
     )
 }

@@ -133,6 +133,7 @@ fun LogInScreen(
                     }
                 })
             }
+
             else -> {
                 ScrollingLoginBackground(imgPercentage)
 
@@ -381,7 +382,7 @@ private fun LogInForm(
             label = {
                 Kiwi_Label2(
                     KiwiTextArguments(
-                        "Email",
+                        "email",
                         color = kiwiColors.color7B,
                     ),
                 )
@@ -401,7 +402,7 @@ private fun LogInForm(
             label = {
                 Kiwi_Label2(
                     KiwiTextArguments(
-                        "Password",
+                        "password",
                         color = kiwiColors.color7B,
                     ),
                 )
@@ -417,7 +418,7 @@ private fun LogInForm(
         Kiwi_FixedSizeButton(
             textArguments =
                 KiwiTextArguments(
-                    "LOG IN",
+                    "login",
                     color = kiwiColors.colorF,
                     fontWeight = FontWeight.Bold,
                 ),
@@ -450,7 +451,7 @@ private fun WelcomeText() {
     ) {
         Kiwi_H1(
             KiwiTextArguments(
-                "Welcome Back,\nKnight",
+                "welcome_back_knight",
                 TextAlign.Center,
                 color = kiwiColors.colorF,
                 fontWeight = FontWeight.Bold,
@@ -474,7 +475,9 @@ private fun LogInErrorMessage(usersUiState: UIState<Unit>) {
         when (usersUiState) {
             is UIState.Error -> {
                 usersUiState.message
-            } else -> {
+            }
+
+            else -> {
                 ""
             }
         }
@@ -532,11 +535,15 @@ private suspend fun performLogin(
                         usersViewModel.setShowAppLoading(false)
                         navController.navigate(ScreenRoutes.SIGNUP3_TEST)
                     }
+
                     needsApps -> {
                         usersViewModel.setShowAppLoading(false)
                         navController.navigate(ScreenRoutes.SIGNUP4_APPS)
                     }
-                    else -> navController.navigate(ScreenRoutes.HOME)
+
+                    else -> {
+                        navController.navigate(ScreenRoutes.HOME)
+                    }
                 }
             },
             onFailure = {
@@ -554,42 +561,41 @@ private suspend fun performLogin(
 private fun SignUp(onSignUp: () -> Unit) {
     val kiwiColors = LocalKiwiColors.current
 
-    val annotatedString =
-        buildAnnotatedString {
-            withStyle(
-                style =
-                    SpanStyle(
-                        color = kiwiColors.color6,
-                    ),
-            ) {
-                append("First Time? \nStart Your Adventure ")
-            }
-
-            withLink(
-                link =
-                    LinkAnnotation.Clickable(
-                        tag = "HERE",
-                        linkInteractionListener = {
-                            onSignUp()
-                        },
-                    ),
-            ) {
-                withStyle(
-                    style =
-                        SpanStyle(
-                            color = kiwiColors.color7B,
-                            textDecoration = TextDecoration.Underline,
-                        ),
-                ) {
-                    append("Here")
-                }
-            }
-        }
-
     Kiwi_AnnotatedString_P2(
         KiwiAnnotatedStringArguments(
-            annotatedString,
-            TextAlign.Center,
+            buildText = { resolve ->
+                buildAnnotatedString {
+                    withStyle(
+                    style =
+                        SpanStyle(
+                                color = kiwiColors.color6,
+                        ),
+                    ) {
+                        append(resolve("first_time"))
+                    }
+
+                    withLink(
+                        link =
+                            LinkAnnotation.Clickable(
+                                tag = "HERE",
+                                linkInteractionListener = {
+                                    onSignUp()
+                                },
+                            ),
+                    ) {
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = kiwiColors.color7B,
+                                    textDecoration = TextDecoration.Underline,
+                                ),
+                        ) {
+                            append(resolve("here"))
+                        }
+                    }
+                }
+            },
+            textAlign = TextAlign.Center,
         ),
     )
 }

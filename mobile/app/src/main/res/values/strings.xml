@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">GrowTale</string>
+    <string name="work_in_progress">Work in progress</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">LOG IN</string>
+    <string name="welcome_back_knight">Welcome Back, \nKnight</string>
+    <string name="first_time">First Time? \nStart Your Adventure </string>
+    <string name="here">here</string>
+    <string name="HERE">HERE</string>
+    <string name="your_legend">Your Legend is About\nTo Be Forged...</string>
+    <string name="lets_do_it">"LET'S DO IT"</string>
+    <string name="not_first_time">Not Your First Time?\nContinue Your Adventure By\n</string>
+    <string name="logging_in">Logging In</string>
+    <string name="start_with_basics">"Let's Start With\nThe Basics"</string>
+    <string name="start_journey">START JOURNEY</string>
+    <string name="real_name">Real Name</string>
+    <string name="knight_name">Knight Name</string>
+    <string name="node_cost">Cost: </string>
 </resources>

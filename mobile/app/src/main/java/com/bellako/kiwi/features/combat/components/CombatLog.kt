@@ -120,7 +120,7 @@ fun CombatLog(
                     is CombatLogEntry.Action ->
                         Kiwi_AnnotatedString_P2(
                             KiwiAnnotatedStringArguments(
-                                text = entry.text,
+                                buildText = { entry.text },
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth().then(entryModifier),
                             ),
@@ -129,7 +129,7 @@ fun CombatLog(
                     is CombatLogEntry.Intro ->
                         Kiwi_AnnotatedString_P2(
                             KiwiAnnotatedStringArguments(
-                                text = entry.text,
+                                buildText = { entry.text },
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth().then(entryModifier),
                             ),

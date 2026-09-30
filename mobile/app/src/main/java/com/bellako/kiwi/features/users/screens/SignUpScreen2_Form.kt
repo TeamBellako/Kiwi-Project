@@ -179,7 +179,7 @@ private fun SignUpFormLayout(
 
         Kiwi_H2(
             KiwiTextArguments(
-                "Let's Start With\nThe Basics",
+                "start_with_basics",
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
                 fontWeight = FontWeight.Bold,
@@ -256,7 +256,7 @@ private fun SignUpForm(
     Kiwi_FixedSizeButton(
         textArguments =
             KiwiTextArguments(
-                "START JOURNEY",
+                "start_journey",
                 color = kiwiColors.colorF,
                 fontWeight = FontWeight.Bold,
             ),
@@ -308,7 +308,7 @@ private fun SignUpForm_Personality(
         label = {
             Kiwi_Label2(
                 KiwiTextArguments(
-                    "Real Name",
+                    "real_name",
                     color = kiwiColors.color7B,
                 ),
             )
@@ -327,7 +327,7 @@ private fun SignUpForm_Personality(
         label = {
             Kiwi_Label2(
                 KiwiTextArguments(
-                    "Knight Name",
+                    "knight_name",
                     color = kiwiColors.color7B,
                 ),
             )
@@ -361,7 +361,7 @@ private fun SignUpForm_Users(
         label = {
             Kiwi_Label2(
                 KiwiTextArguments(
-                    "Email",
+                    "email",
                     color = kiwiColors.color7B,
                 ),
             )
@@ -380,7 +380,7 @@ private fun SignUpForm_Users(
         label = {
             Kiwi_Label2(
                 KiwiTextArguments(
-                    "Password",
+                    "password",
                     color = kiwiColors.color7B,
                 ),
             )
