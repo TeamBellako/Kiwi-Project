@@ -109,7 +109,7 @@ internal fun SkillsUsedHeader(
     ) {
         Kiwi_H3(
             KiwiTextArguments(
-                text = "Skills Used",
+                text = "skills_used",
                 color = colors.colorF,
                 fontWeight = FontWeight.Bold,
             ),
@@ -138,7 +138,7 @@ internal fun SkillsUsedHeader(
         ) {
             Kiwi_Label2(
                 KiwiTextArguments(
-                    text = if (isLogOpen) "Close" else "Log",
+                    text = if (isLogOpen) "close" else "combat_log",
                     color = colors.color7A,
                     italic = true,
                 ),
@@ -146,7 +146,7 @@ internal fun SkillsUsedHeader(
             Spacer(modifier = Modifier.size(getResponsiveSizeWidth(Spacing.xSmall)))
             Kiwi_Image(
                 painterResourceId = R.drawable.ic_dialogue_arrow,
-                alt = if (isLogOpen) "Close combat log" else "Open combat log",
+                alt = "",
                 modifier =
                     Modifier
                         .size(getResponsiveSizeHeight(CHEVRON_SIZE))
@@ -249,8 +249,9 @@ private fun SkillInfoColumn(
             )
             Kiwi_P3(
                 KiwiTextArguments(
-                    text = "x${entry.count}",
+                    text = "skill_count",
                     color = colors.color7A,
+                    formatArgs = listOf(entry.count),
                 ),
             )
         }

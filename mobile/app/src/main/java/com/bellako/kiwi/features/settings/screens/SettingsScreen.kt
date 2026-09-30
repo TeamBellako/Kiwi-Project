@@ -112,7 +112,7 @@ private fun SettingsScreenContainer(
                 Kiwi_Display1(
                     arguments =
                         KiwiTextArguments(
-                            text = "SETTINGS",
+                            text = "settings",
                             color = LocalKiwiColors.current.colorF,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
@@ -124,7 +124,7 @@ private fun SettingsScreenContainer(
 
                 SettingsSectionRow(
                     icon = Icons.Default.Person,
-                    label = "Account",
+                    label = "account",
                     testTag = SettingsTestTags.SECTION_ACCOUNT,
                     onClick = { navController.navigate(ScreenRoutes.SETTINGS_ACCOUNT) },
                 )
@@ -133,7 +133,7 @@ private fun SettingsScreenContainer(
 
                 SettingsSectionRow(
                     icon = Icons.Default.MusicNote,
-                    label = "Audio",
+                    label = "audio",
                     testTag = SettingsTestTags.SECTION_AUDIO,
                     onClick = { navController.navigate(ScreenRoutes.SETTINGS_AUDIO) },
                 )
@@ -142,7 +142,7 @@ private fun SettingsScreenContainer(
 
                 SettingsSectionRow(
                     icon = Icons.Default.QuestionMark,
-                    label = "Support",
+                    label = "support",
                     testTag = SettingsTestTags.SECTION_SUPPORT,
                     onClick = { navController.navigate(ScreenRoutes.SETTINGS_SUPPORT) },
                 )

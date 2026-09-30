@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <resourceProvider name="es">
+        <path path="com/bellako/kiwi/resources/"
+             file="strings.bin"/>
+    </resourceProvider>
+
+    <resourceProvider name="en">
+        <path path="com/bellako/kiwi/resources/"
+             file="strings.bin"/>
+    </resourceProvider>
+</resources>

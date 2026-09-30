@@ -7,6 +7,7 @@ package com.bellako.kiwi.common
  */
 interface ResourceRepository {
     fun stringResource(key: String): String
+    fun formattedStringResource(key: String, vararg args: Any): String
     fun pluralResource(key: String, count: Int, vararg args: Any): String
     fun arrayResource(key: String): List<String>
 }

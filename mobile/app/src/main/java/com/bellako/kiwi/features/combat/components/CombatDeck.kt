@@ -67,7 +67,7 @@ fun CombatDeck(
                     } else {
                         Kiwi_Image(
                             R.drawable.skill_empty,
-                            "Empty skill slot",
+                            "",
                             modifier = slotMod,
                         )
                     }

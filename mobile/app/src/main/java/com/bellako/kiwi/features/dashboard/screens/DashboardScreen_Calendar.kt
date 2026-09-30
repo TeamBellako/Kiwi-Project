@@ -110,13 +110,13 @@ fun CurrentDayIndicator(
 
         Kiwi_Image(
             R.drawable.heart_exterior_empty,
-            "Day indicator challenges bg",
+            "",
             modifier = Modifier.matchParentSize(),
         )
 
         Kiwi_Image(
             R.drawable.heart_exterior_completed,
-            "Day indicator challenges fill",
+            "",
             modifier =
                 Modifier
                     .matchParentSize()
@@ -182,13 +182,13 @@ fun CurrentDayIndicator(
 
         Kiwi_Image(
             R.drawable.heart_interior_empty,
-            "Day indicator stepscreen bg",
+            "",
             modifier = Modifier.matchParentSize(),
         )
 
         Kiwi_Image(
             R.drawable.heart_interior_completed,
-            "Day indicator challenges fill",
+            "",
             modifier =
                 Modifier
                     .matchParentSize()
@@ -719,7 +719,7 @@ fun ShowCalendarButton(
     ) {
         Kiwi_Image(
             R.drawable.ic_calendar,
-            "Show Calendar View Button",
+            "show_calendar_view",
             Modifier
                 .size(getResponsiveSizeHeight(20.dp)),
         )

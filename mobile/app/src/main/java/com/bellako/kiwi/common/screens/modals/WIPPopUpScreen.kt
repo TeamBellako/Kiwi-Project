@@ -53,7 +53,7 @@ fun WIPPopUpScreen(onDismiss: () -> Unit = {}) {
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            "Close",
+                            "close",
                             color = kiwiColor.colorF,
                         ),
                     color = kiwiColor.color8,

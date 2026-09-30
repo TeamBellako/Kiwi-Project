@@ -65,16 +65,16 @@ fun GoalsModal(
 
     val header =
         if (goalModalType == GoalNotificationType.NEW) {
-            "New Daily Challenges!"
+            "new_daily_challenges_title"
         } else {
-            "Yesterday's Challenge"
+            "yesterdays_challenge_title"
         }
 
     val body =
         if (goalModalType == GoalNotificationType.NEW) {
-            "These are the new challenges that await for you today"
+            "new_challenges_body"
         } else {
-            "You didn't checked these goals yesterday.\n Did you completed them?"
+            "review_yesterday_goals_body"
         }
     val kiwiColor = LocalKiwiColors.current
 
@@ -153,7 +153,7 @@ fun GoalsModal(
                     enabled = !isProcessing,
                     textArguments =
                         KiwiTextArguments(
-                            "Modify",
+                            "modify",
                             color = kiwiColor.colorF,
                         ),
                     color = kiwiColor.color7D,
@@ -170,7 +170,7 @@ fun GoalsModal(
                         enabled = !isProcessing,
                         textArguments =
                             KiwiTextArguments(
-                                if (isProcessing) "" else if (goalModalType == GoalNotificationType.NEW) "Let's go!" else "Done",
+                                if (isProcessing) "" else if (goalModalType == GoalNotificationType.NEW) "lets_go" else "done",
                                 color = kiwiColor.colorF,
                             ),
                         color = kiwiColor.color8,

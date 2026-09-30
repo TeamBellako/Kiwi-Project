@@ -180,7 +180,7 @@ fun ConversationScreen(
         if (backgroundRes != null) {
             Kiwi_Image(
                 painterResourceId = backgroundRes,
-                alt = "Conversation background",
+                alt = "",
                 contentScale = ContentScale.Crop,
                 modifier =
                     Modifier
@@ -227,7 +227,7 @@ fun ConversationScreen(
                 Kiwi_Image(
                     painterResourceId =
                         AssetResolver.drawableOr(context, conversation.sprite, R.drawable.character_liria_base),
-                    alt = "Character Pose",
+                    alt = "",
                     modifier = idleModifier,
                 )
             }
@@ -273,7 +273,7 @@ private fun DialogueBox(
         ) {
             Kiwi_Image(
                 painterResourceId = getAsset(conversation, R.drawable.dialogue_light_small, context),
-                alt = "Conversation modal",
+                    alt = "",
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -388,7 +388,7 @@ private fun ConversationOptionsPanel(
             Kiwi_Spacer(Spacing.medium)
             Kiwi_Image(
                 R.drawable.ic_dialogue_arrow,
-                "Arrow",
+                "",
                 modifier =
                     Modifier
                         .fillMaxWidth()

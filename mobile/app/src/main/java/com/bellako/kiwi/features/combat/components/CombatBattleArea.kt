@@ -145,7 +145,7 @@ internal fun CombatEnemySprite(
 
     Kiwi_Image(
         painterResourceId = resolveEnemySprite(enemySprite, context),
-        alt = "Enemy sprite",
+        alt = "enemy_sprite",
         modifier =
             modifier
                 .fillMaxSize()

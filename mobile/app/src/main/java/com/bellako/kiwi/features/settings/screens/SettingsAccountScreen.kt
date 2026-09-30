@@ -110,7 +110,7 @@ private fun SettingsAccountScreenContainer(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 SettingsSubScreenHeader(
-                    title = "Account",
+                    title = "account",
                     navController = navController,
                 )
 
@@ -124,7 +124,7 @@ private fun SettingsAccountScreenContainer(
                         label = {
                             Kiwi_Label2(
                                 KiwiTextArguments(
-                                    "Email",
+                                    "email",
                                     color = MaterialTheme.colorScheme.inversePrimary,
                                 ),
                             )
@@ -144,7 +144,7 @@ private fun SettingsAccountScreenContainer(
                     horizontalMargin = Spacing.xLarge,
                     textArguments =
                         KiwiTextArguments(
-                            "CHANGE GOOD/BAD APPS",
+                            "change_good_bad_apps",
                             color = LocalKiwiColors.current.color6,
                             fontWeight = FontWeight.Bold,
                         ),
@@ -158,7 +158,7 @@ private fun SettingsAccountScreenContainer(
                     horizontalMargin = Spacing.xLarge,
                     textArguments =
                         KiwiTextArguments(
-                            "RETAKE PERSONALITY TEST",
+                            "retake_personality_test",
                             color = LocalKiwiColors.current.color6,
                             fontWeight = FontWeight.Bold,
                         ),
@@ -172,7 +172,7 @@ private fun SettingsAccountScreenContainer(
                     horizontalMargin = Spacing.xLarge,
                     textArguments =
                         KiwiTextArguments(
-                            "LOG OUT",
+                            "log_out",
                             color = LocalKiwiColors.current.color6,
                             fontWeight = FontWeight.Bold,
                         ),
@@ -193,7 +193,7 @@ private fun SettingsAccountScreenContainer(
                     horizontalMargin = Spacing.xLarge,
                     textArguments =
                         KiwiTextArguments(
-                            "RESET PROGRESS",
+                            "reset_progress",
                             color = LocalKiwiColors.current.color6,
                             fontWeight = FontWeight.Bold,
                         ),

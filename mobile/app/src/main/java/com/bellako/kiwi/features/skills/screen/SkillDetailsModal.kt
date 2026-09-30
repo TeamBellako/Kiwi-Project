@@ -144,7 +144,7 @@ fun SkillDetails(
             // BG
             Kiwi_Image(
                 R.drawable.combat_modal,
-                "Skill info background",
+                "",
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -359,7 +359,7 @@ private fun SkillCooldownTime(
         ) {
             Kiwi_Label3(
                 KiwiTextArguments(
-                    "Cooldown time",
+                    "cooldown_time",
                     TextAlign.Center,
                     color = currentColors.color6,
                 ),
@@ -467,7 +467,7 @@ private fun ApplyProgressButton(
     Kiwi_FixedSizeButton(
         textArguments =
             KiwiTextArguments(
-                "Apply",
+                "apply",
                 color = currentColors.colorF,
             ),
         enabled = enabled,
@@ -487,7 +487,7 @@ private fun CancelButton(
     Kiwi_FixedSizeButton(
         textArguments =
             KiwiTextArguments(
-                "Cancel",
+                "cancel",
                 color = currentColors.colorF,
             ),
         enabled = enabled,

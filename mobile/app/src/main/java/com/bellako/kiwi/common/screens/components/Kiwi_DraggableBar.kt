@@ -237,7 +237,7 @@ fun Kiwi_DraggableBar_Preview(initialStateIndex: Int = 0) {
                 ) {
                     Kiwi_H3(
                         KiwiTextArguments(
-                            "Content",
+                            "content",
                             TextAlign.Center,
                             LocalKiwiColors.current.color6,
                         ),

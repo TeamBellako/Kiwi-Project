@@ -41,6 +41,7 @@ data class KiwiTextArguments(
     val fontWeight: FontWeight = FontWeight.Normal,
     val italic: Boolean = false,
     val modifier: Modifier = Modifier,
+    val formatArgs: List<Any> = emptyList(),
 )
 
 data class KiwiAnnotatedStringArguments(
@@ -59,7 +60,12 @@ private fun Kiwi_Text(
     bodyStyle: TextStyle,
 ) {
     val scale = rememberTextWidthScale()
-    val text = ResourceProvider.stringResource(arguments.text)
+    val text =
+        if (arguments.formatArgs.isNotEmpty()) {
+            ResourceProvider.formattedStringResource(arguments.text, *arguments.formatArgs.toTypedArray())
+        } else {
+            ResourceProvider.stringResource(arguments.text)
+        }
 
     Text(
         text = text,

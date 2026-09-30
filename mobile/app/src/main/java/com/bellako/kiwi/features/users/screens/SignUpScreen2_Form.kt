@@ -168,7 +168,7 @@ private fun SignUpFormLayout(
     ) {
         Kiwi_P2(
             KiwiTextArguments(
-                "Initial Setup Will Take\nApproximately 3 Minutes",
+                "initial_setup_duration",
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
             ),

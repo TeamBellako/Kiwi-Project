@@ -50,7 +50,7 @@ fun Kiwi_InfoBox_Preview() {
     Kiwi_Theme {
         Column {
             Kiwi_InfoBox(
-                message = "Invalid email or password",
+                message = "invalid_credentials",
                 color = MaterialTheme.colorScheme.error,
                 testTag = UsersTestTags.ERROR_TEXT,
             )

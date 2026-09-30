@@ -18,6 +18,19 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
         }
     }
 
+    override fun formattedStringResource(
+        key: String,
+        vararg args: Any,
+    ): String {
+        val resId = context.resources.getIdentifier(key, "string", context.packageName)
+        return if (resId != 0) {
+            context.getString(resId, *args)
+        } else {
+            Log.w("AndroidResourceRepository", "Resource not found for key: $key")
+            key
+        }
+    }
+
     override fun pluralResource(key: String, count: Int, vararg args: Any): String {
         val resId = context.resources.getIdentifier(key, "plurals", context.packageName)
         return if (resId != 0) {

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.features.appbar.screens.AppBarScreen
 import com.bellako.kiwi.features.combat.components.CombatAbandonConfirmModal
 import com.bellako.kiwi.features.combat.components.CombatBackground
@@ -189,7 +190,7 @@ fun CombatScreen(
 
             Column(modifier = Modifier.fillMaxSize().padding(top = Spacing.large)) {
                 CombatHeader(
-                    title = "Ongoing Combat",
+                    title = "ongoing_combat",
                     onClose = { showAbandonConfirm = true },
                 )
 
@@ -349,12 +350,19 @@ private fun currentTurnMessage(
     val skillName = lastSkill?.skillName
     if (lastSkill == null || skillName == null) return userTurnMessage()
 
-    val actorName = if (lastSkill.actor == CombatActor.USER) "You" else enemyName
+    val actorName =
+        if (lastSkill.actor == CombatActor.USER) {
+            ResourceProvider.stringResource("combat_player_name")
+        } else {
+            enemyName
+        }
     return buildAnnotatedString {
         withStyle(SpanStyle(color = colors.color7A, fontStyle = FontStyle.Italic)) {
             append(actorName)
         }
-        withStyle(SpanStyle(color = colors.color6, fontStyle = FontStyle.Italic)) { append(" used ") }
+        withStyle(SpanStyle(color = colors.color6, fontStyle = FontStyle.Italic)) {
+            append(ResourceProvider.stringResource("combat_used"))
+        }
         withStyle(SpanStyle(color = colors.color8A, fontStyle = FontStyle.Italic)) {
             append(skillName)
         }

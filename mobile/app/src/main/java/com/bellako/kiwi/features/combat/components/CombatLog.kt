@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
@@ -49,8 +50,6 @@ private val LOG_RADIUS = 12.dp
 private val LOG_INNER_PADDING = 16.dp
 // The player as the sentence subject ("You have used...") vs. as the object
 // ("...against you").
-private const val USER_NAME_PLACEHOLDER = "You"
-private const val USER_NAME_PLACEHOLDER_TARGET = "you"
 private const val LOG_BG_ALPHA = 0.85f
 
 sealed class CombatLogEntry {
@@ -187,8 +186,8 @@ fun buildCombatLogEntries(
     if (combatStatus != CombatGeneralStatus.ONGOING) {
         val outcome =
             when (combatStatus) {
-                CombatGeneralStatus.USER_WON -> "You won the battle!"
-                CombatGeneralStatus.USER_LOST -> "You were defeated."
+                CombatGeneralStatus.USER_WON -> ResourceProvider.stringResource("combat_victory_message")
+                CombatGeneralStatus.USER_LOST -> ResourceProvider.stringResource("combat_defeat_message")
                 CombatGeneralStatus.ONGOING -> ""
             }
         result +=
@@ -211,85 +210,88 @@ private fun formatAction(
     colors: KiwiColorsData,
 ): AnnotatedString {
     val actorIsUser = action.actor == CombatActor.USER
-    val actorName = if (actorIsUser) USER_NAME_PLACEHOLDER else enemyName
+    val actorName = if (actorIsUser) ResourceProvider.stringResource("combat_player_name") else enemyName
     val targetActor = if (actorIsUser) CombatActor.ENEMY else CombatActor.USER
-    val targetName = if (actorIsUser) enemyName else USER_NAME_PLACEHOLDER_TARGET
+    val targetName = if (actorIsUser) enemyName else ResourceProvider.stringResource("combat_player_object")
     return buildAnnotatedString {
         when (action.actionType) {
             CombatActionType.SKILL_USED -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative(if (actorIsUser) " have used " else " has used ", colors)
+                appendNarrative(
+                    ResourceProvider.stringResource(if (actorIsUser) "combat_player_used" else "combat_enemy_used"),
+                    colors,
+                )
                 action.skillName?.let { appendSkill(it, action.actor, colors) }
-                appendNarrative(" against ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_against"), colors)
                 appendActor(targetName, targetActor, colors)
                 appendNarrative(".", colors)
             }
 
             CombatActionType.ACTOR_BLOCKED_BY_STATE -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative(" is blocked by ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_blocked_by"), colors)
                 appendStatus(action.stateName, colors)
                 appendNarrative(".", colors)
             }
 
             CombatActionType.SKILL_REPEAT_BY_STATE -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative(" repeats ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_repeats"), colors)
                 action.skillName?.let { appendSkill(it, action.actor, colors) }
-                appendNarrative(" because of ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_because_of"), colors)
                 appendStatus(action.stateName, colors)
                 appendNarrative(".", colors)
             }
 
             CombatActionType.ACTOR_DAMAGED_BY_STATE -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative(" suffers from ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_suffers_from"), colors)
                 appendStatus(action.stateName, colors)
                 appendNarrative(".", colors)
             }
 
             CombatActionType.BLOCKED_SKILLS_BY_STATE -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative("'s skills are blocked by ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_skills_blocked_by"), colors)
                 appendStatus(action.stateName, colors)
                 appendNarrative(".", colors)
             }
 
             CombatActionType.RELEASED_SKILLS_BY_STATE -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative("'s skills are released from ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_skills_released_from"), colors)
                 appendStatus(action.stateName, colors)
                 appendNarrative(".", colors)
             }
 
             CombatActionType.SKIP -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative(" skipped the turn.", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_skipped_turn"), colors)
             }
 
             CombatActionType.ACTOR_SKIPPED_BY_TURNS -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative("'s turn was skipped!", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_turn_skipped"), colors)
             }
 
             CombatActionType.STATUS_TURN_REDUCED -> {
                 appendStatus(action.stateName, colors)
-                appendNarrative(" weakens on ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_weakens_on"), colors)
                 appendActor(actorName, action.actor, colors)
                 appendNarrative(".", colors)
             }
 
             CombatActionType.STATUS_FINISHED -> {
                 appendStatus(action.stateName, colors)
-                appendNarrative(" wears off on ", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_wears_off_on"), colors)
                 appendActor(actorName, action.actor, colors)
                 appendNarrative(".", colors)
             }
 
-            CombatActionType.TIMEOUT -> appendNarrative("The battle timed out.", colors)
+            CombatActionType.TIMEOUT -> appendNarrative(ResourceProvider.stringResource("combat_timeout"), colors)
             CombatActionType.ABANDON -> {
                 appendActor(actorName, action.actor, colors)
-                appendNarrative(" abandoned the battle.", colors)
+                appendNarrative(ResourceProvider.stringResource("combat_abandoned"), colors)
             }
         }
     }
@@ -336,7 +338,7 @@ private fun AnnotatedStringBuilder.appendStatus(
     name: String?,
     colors: KiwiColorsData,
 ) {
-    val safeName = name ?: "an effect"
+    val safeName = name ?: ResourceProvider.stringResource("an_effect")
     withStyle(SpanStyle(color = colors.color7A, fontStyle = FontStyle.Italic)) {
         append(safeName)
     }
@@ -384,7 +386,7 @@ fun CombatLog_Preview() {
             Column {
                 CombatLog(entries = entries)
                 Kiwi_Spacer()
-                Kiwi_P2(KiwiTextArguments("(preview)", color = LocalKiwiColors.current.color7A))
+                Kiwi_P2(KiwiTextArguments("combat_preview", color = LocalKiwiColors.current.color7A))
             }
         }
     }

@@ -94,7 +94,7 @@ private fun SettingsAudioScreenContainer(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 SettingsSubScreenHeader(
-                    title = "Audio",
+                    title = "audio",
                     navController = navController,
                 )
 
@@ -110,7 +110,7 @@ private fun SettingsAudioScreenContainer(
 
                     Kiwi_Slider(
                         KiwiTextArguments(
-                            "SFX Volume",
+                            "sfx_volume",
                             modifier =
                                 Modifier
                                     .padding(getResponsiveSizeHeight(Spacing.medium), 0.dp)
@@ -135,7 +135,7 @@ private fun SettingsAudioScreenContainer(
 
                     Kiwi_Slider(
                         KiwiTextArguments(
-                            "Music Volume",
+                            "music_volume",
                             modifier =
                                 Modifier
                                     .padding(getResponsiveSizeHeight(Spacing.medium), 0.dp)

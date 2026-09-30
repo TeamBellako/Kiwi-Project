@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.ui.LocalKiwiColors
@@ -33,7 +34,7 @@ internal fun SettingsSubScreenHeader(
         IconButton(onClick = { navController.popBackStack() }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = ResourceProvider.stringResource("back"),
                 tint = kiwiColors.colorOcean,
                 modifier = Modifier.size(28.dp),
             )

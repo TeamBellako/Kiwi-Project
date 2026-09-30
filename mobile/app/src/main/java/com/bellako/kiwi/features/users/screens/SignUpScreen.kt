@@ -33,7 +33,7 @@ fun SignUpScreen(
     ) {
         Kiwi_Image(
             R.drawable.ph_onboarding_bkg,
-            "Sign Up Background",
+            "",
             modifier =
                 Modifier
                     .fillMaxSize()

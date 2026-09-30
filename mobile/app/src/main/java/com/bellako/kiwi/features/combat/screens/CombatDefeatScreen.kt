@@ -133,7 +133,7 @@ fun CombatDefeatScreen(
             Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
-                        text = "Continue",
+                        text = "continue_button",
                         color = colors.colorF,
                         fontWeight = FontWeight.Bold,
                     ),
@@ -172,7 +172,7 @@ private fun DefeatHeader() {
     ) {
         Kiwi_H3(
             KiwiTextArguments(
-                text = "Results",
+                text = "results",
                 color = colors.colorF,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -190,7 +190,7 @@ private fun DefeatBanner() {
     ) {
         Kiwi_H2(
             KiwiTextArguments(
-                text = "You Have Been Defeated",
+                text = "combat_defeat_title",
                 color = colors.colorF,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -200,7 +200,7 @@ private fun DefeatBanner() {
         Kiwi_Spacer(Spacing.small)
         Kiwi_P2(
             KiwiTextArguments(
-                text = "Your Will Is Not Strong Enough Yet",
+                text = "combat_defeat_subtitle",
                 color = colors.color7A,
                 italic = true,
                 textAlign = TextAlign.Center,
@@ -216,7 +216,7 @@ private fun DefeatBackground(background: String?) {
     val resId = AssetResolver.drawable(LocalContext.current, background) ?: return
     Kiwi_Image(
         painterResourceId = resId,
-        alt = "Combat background",
+        alt = "",
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,
         colorFilter =

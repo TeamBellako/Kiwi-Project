@@ -138,7 +138,7 @@ fun Quest(
                 // Background image
                 Kiwi_Image(
                     R.drawable.subquest_bg,
-                    "Subquest background",
+                    "",
                     modifier = Modifier.matchParentSize(),
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.BottomCenter,
@@ -269,8 +269,8 @@ private fun subquestStatusIcon(status: SubquestStatus): Int =
 
 private fun subquestStatusText(status: SubquestStatus): String =
     when (status) {
-        SubquestStatus.COMPLETED -> "Completed"
-        SubquestStatus.FAILED -> "Failed"
-        SubquestStatus.ACTIVE -> "Current Objective"
-        SubquestStatus.LOCKED -> "Upcoming"
+        SubquestStatus.COMPLETED -> "completed"
+        SubquestStatus.FAILED -> "failed"
+        SubquestStatus.ACTIVE -> "current_objective"
+        SubquestStatus.LOCKED -> "upcoming"
     }

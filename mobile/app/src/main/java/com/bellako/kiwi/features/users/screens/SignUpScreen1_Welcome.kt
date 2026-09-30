@@ -89,7 +89,7 @@ private fun Welcome(
     ) {
         Kiwi_Image(
             R.drawable.growtale_icon,
-            "GrowTale icon",
+            "growtale_icon",
             modifier = Modifier.size(getResponsiveSizeHeight(96.dp)),
         )
 
@@ -97,7 +97,7 @@ private fun Welcome(
 
         Kiwi_H2(
             KiwiTextArguments(
-                "your_leyend",
+                "your_legend",
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
                 fontWeight = FontWeight.Bold,

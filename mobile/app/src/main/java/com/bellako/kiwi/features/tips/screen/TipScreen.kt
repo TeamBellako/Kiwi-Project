@@ -65,7 +65,7 @@ fun TipScreen(viewModel: ITipsViewModel) {
     ) {
         Kiwi_Image(
             R.drawable.dialogue_small_bg,
-            "Dialogue frame",
+            "",
             contentScale = ContentScale.FillWidth,
         )
 
@@ -104,7 +104,7 @@ fun TipScreen(viewModel: ITipsViewModel) {
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            "Read more",
+                            "read_more",
                             color = kiwiColor.color6,
                         ),
                     color = kiwiColor.color5A,

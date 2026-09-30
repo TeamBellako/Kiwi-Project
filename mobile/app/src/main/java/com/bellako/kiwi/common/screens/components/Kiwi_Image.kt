@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import com.bellako.kiwi.common.ResourceProvider
 
 @Composable
 fun Kiwi_Image(
@@ -18,9 +19,16 @@ fun Kiwi_Image(
     alignment: Alignment = Alignment.Center,
     colorFilter: ColorFilter? = null,
 ) {
+    val contentDescription =
+        if (alt.isBlank()) {
+            null
+        } else {
+            ResourceProvider.stringResource(alt)
+        }
+
     Image(
         painter = painter,
-        contentDescription = alt,
+        contentDescription = contentDescription,
         modifier = modifier,
         contentScale = contentScale,
         alignment = alignment,

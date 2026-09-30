@@ -75,14 +75,14 @@ fun CombatHealthBar(
         ) {
             Kiwi_Image(
                 painterResourceId = R.drawable.health_bar_bg,
-                alt = "$label background",
+                alt = "",
                 modifier = Modifier.fillMaxWidth(),
                 contentScale = ContentScale.FillWidth,
             )
 
             Kiwi_Image(
                 painterResourceId = R.drawable.health_bar_fill,
-                alt = "$label fill",
+                alt = "",
                 modifier =
                     Modifier
                         .fillMaxWidth()

@@ -91,7 +91,7 @@ fun CombatAbandonConfirmModal(
                 ) {
                     Kiwi_H3(
                         KiwiTextArguments(
-                            text = "Leave combat?",
+                            text = "leave_combat",
                             color = colors.colorF,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -100,7 +100,7 @@ fun CombatAbandonConfirmModal(
                     )
                     Kiwi_P2(
                         KiwiTextArguments(
-                            text = "Leaving now counts as an automatic defeat. Are you sure?",
+                            text = "leave_combat_confirmation",
                             color = colors.color7A,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth(),
@@ -111,7 +111,7 @@ fun CombatAbandonConfirmModal(
                         Kiwi_FixedSizeButton(
                             textArguments =
                                 KiwiTextArguments(
-                                    text = "Cancel",
+                                    text = "cancel",
                                     color = colors.colorF,
                                 ),
                             onClick = onCancel,
@@ -122,7 +122,7 @@ fun CombatAbandonConfirmModal(
                         Kiwi_FixedSizeButton(
                             textArguments =
                                 KiwiTextArguments(
-                                    text = "Leave",
+                                    text = "leave",
                                     color = colors.colorF,
                                 ),
                             onClick = onConfirm,

@@ -93,10 +93,10 @@ fun QuestNotification(
                         color = kiwiColors.colorF,
                         text =
                             when (type) {
-                                QuestNotificationType.NEW -> "Your have a New Quest!"
-                                QuestNotificationType.QUEST_COMPLETED -> "Quest Completed!"
-                                QuestNotificationType.SUBQUEST_COMPLETED -> "Objective Completed!"
-                                QuestNotificationType.SUBQUEST_FAILED -> "Objective Failed"
+                                QuestNotificationType.NEW -> "new_quest_notification"
+                                QuestNotificationType.QUEST_COMPLETED -> "quest_completed"
+                                QuestNotificationType.SUBQUEST_COMPLETED -> "objective_completed"
+                                QuestNotificationType.SUBQUEST_FAILED -> "objective_failed"
                             },
                         italic = true,
                         modifier =

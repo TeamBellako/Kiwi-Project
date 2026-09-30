@@ -408,7 +408,7 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
     ) {
         Box(modifier = Modifier.weight(1f)) {
             Column {
-                ExpandedMetricProgressTitle("Good Apps", isComplete = goodComplete)
+                ExpandedMetricProgressTitle("good_apps", isComplete = goodComplete)
                 SelectedMetricsTime(
                     state.maxGoodTimeSeconds,
                     state.currentGoodTimeSeconds,
@@ -420,7 +420,7 @@ private fun ExpandedMetricsProgress(state: MetricsState) {
         }
         Box(modifier = Modifier.weight(1f)) {
             Column {
-                ExpandedMetricProgressTitle("Evil Apps", isComplete = badComplete)
+                ExpandedMetricProgressTitle("evil_apps", isComplete = badComplete)
                 SelectedMetricsTime(
                     state.maxBadTimeSeconds,
                     state.currentBadTimeSeconds,
@@ -453,7 +453,7 @@ private fun ExpandedSummaryCard(
     ) {
         Kiwi_P1(
             KiwiTextArguments(
-                "Challenges",
+                "challenges",
                 TextAlign.Center,
                 LocalKiwiColors.current.color6,
                 modifier =
@@ -478,7 +478,7 @@ private fun ExpandedSummaryCard(
             ) {
                 Kiwi_P2(
                     KiwiTextArguments(
-                        "No Daily Challenges",
+                        "no_daily_challenges",
                         TextAlign.Center,
                         LocalKiwiColors.current.color7D,
                     ),

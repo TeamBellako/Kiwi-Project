@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.audio.AudioManager
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_Display1
@@ -118,7 +119,7 @@ fun SkillsScreen(
                 Kiwi_Display1(
                     arguments =
                         KiwiTextArguments(
-                            text = "Current Deck",
+                            text = "current_deck",
                             color = kiwiColors.colorF,
                         ),
                 )
@@ -133,7 +134,7 @@ fun SkillsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Info,
-                        contentDescription = "How the deck works",
+                        contentDescription = ResourceProvider.stringResource("how_the_deck_works"),
                         tint = kiwiColors.colorF,
                         modifier = Modifier.size(getResponsiveSizeHeight(DECK_INFO_ICON_SIZE)),
                     )
@@ -172,7 +173,7 @@ fun SkillsScreen(
             Kiwi_Display1(
                 arguments =
                     KiwiTextArguments(
-                        text = "Skills",
+                        text = "skills",
                         color = kiwiColors.colorF,
                         modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.small), vertical = Spacing.medium),
                     ),
@@ -236,7 +237,7 @@ fun DeckGrid(
                 } else {
                     Kiwi_Image(
                         R.drawable.skill_empty,
-                        "Empty skill slot",
+                        "",
                         modifier = Modifier.weight(SKILL_WEIGHT),
                     )
                 }

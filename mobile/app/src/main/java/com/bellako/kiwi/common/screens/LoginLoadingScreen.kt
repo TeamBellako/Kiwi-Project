@@ -211,7 +211,7 @@ private fun LoginLoadingContent(
 
             Kiwi_Image(
                 R.drawable.background_mindveil,
-                "Loading background",
+                            "",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize().then(linkedEntry),
             )
@@ -237,7 +237,7 @@ private fun LoginLoadingContent(
                     ) {
                         Kiwi_Image(
                             R.drawable.character_liria_base,
-                            "Liria",
+                                    "character_liria",
                             modifier = floatingModifier,
                         )
                     }
@@ -256,13 +256,13 @@ private fun LoginLoadingContent(
                             ) {
                                 Kiwi_Image(
                                     R.drawable.dialogue_light_medium,
-                                    "Dialogue frame",
+                                        "",
                                     contentScale = ContentScale.FillWidth,
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                                 Kiwi_P2(
                                     KiwiTextArguments(
-                                        "We are loading your adventure, please stay put.",
+                                        "loading_adventure_message",
                                         textAlign = TextAlign.Center,
                                         color = kiwiColors.color3,
                                         modifier = Modifier.padding(Spacing.medium, Spacing.medium),

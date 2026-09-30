@@ -133,7 +133,7 @@ private fun PermissionRequestLayout(context: Context) {
         ) {
             Icon(
                 imageVector = Icons.Filled.Warning,
-                contentDescription = "Error icon",
+                contentDescription = null,
                 tint = kiwiColors.color8A,
                 modifier =
                     Modifier
@@ -144,7 +144,7 @@ private fun PermissionRequestLayout(context: Context) {
 
             Kiwi_H2(
                 KiwiTextArguments(
-                    "Permissions Required",
+                    "permissions_required",
                     color = kiwiColors.colorF,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
@@ -155,7 +155,7 @@ private fun PermissionRequestLayout(context: Context) {
 
             Kiwi_P2(
                 KiwiTextArguments(
-                    "GrowTale requires permissions to access metrics such as apps usage time.",
+                    "permissions_usage_message",
                     TextAlign.Center,
                     color = kiwiColors.colorF1,
                 ),
@@ -165,7 +165,7 @@ private fun PermissionRequestLayout(context: Context) {
 
             Kiwi_P2(
                 KiwiTextArguments(
-                    "Please click below to activate them before proceeding.",
+                    "permissions_activate_prompt",
                     TextAlign.Center,
                     color = kiwiColors.colorF1,
                 ),
@@ -177,7 +177,7 @@ private fun PermissionRequestLayout(context: Context) {
                 horizontalMargin = Spacing.xLarge,
                 textArguments =
                     KiwiTextArguments(
-                        "ENABLE APP USAGE ACCESS",
+                        "enable_app_usage_access",
                         color = kiwiColors.color7,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,

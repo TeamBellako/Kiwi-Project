@@ -253,7 +253,7 @@ fun SkillBackground(
 
             Kiwi_Image(
                 R.drawable.skill_cooldown_fill,
-                "Skill cooldown percentage",
+                "",
                 modifier =
                     Modifier
                         .graphicsLayer {
@@ -291,7 +291,7 @@ private fun HoldProgressFill(
 ) {
     Kiwi_Image(
         R.drawable.skill_cooldown_fill,
-        "Skill hold progress",
+        "",
         colorFilter = ColorFilter.tint(Color.White),
         modifier =
             Modifier
@@ -332,9 +332,9 @@ fun skillDecoration(
 
 fun skillStatusText(isCooldown: Boolean): String =
     if (isCooldown) {
-        "Cooldown"
+        "cooldown"
     } else {
-        "Ready"
+        "ready"
     }
 
 fun skillStatusColor(

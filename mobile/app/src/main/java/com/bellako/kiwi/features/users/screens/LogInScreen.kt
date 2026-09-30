@@ -265,7 +265,7 @@ private fun LoginBackgroundImage(
 ) {
     Kiwi_Image(
         R.drawable.login_bg,
-        "Login Background",
+        "",
         modifier =
             Modifier
                 .requiredWidth(width)
@@ -461,7 +461,7 @@ private fun WelcomeText() {
 
         Kiwi_Image(
             R.drawable.growtale_icon,
-            "GrowTale icon",
+            "growtale_icon",
             modifier = Modifier.size(getResponsiveSizeHeight(64.dp)),
         )
     }

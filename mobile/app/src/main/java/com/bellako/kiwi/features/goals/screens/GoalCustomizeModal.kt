@@ -90,12 +90,12 @@ fun GoalCustomize(
         Box {
             Kiwi_Image(
                 painter = painterResource(id = R.drawable.goal_customize_modal),
-                alt = "Goal customize modal",
+                alt = "",
                 modifier = Modifier.fillMaxWidth(),
             )
             Kiwi_Image(
                 painter = painterResource(id = goalIcon(goal.type)),
-                alt = "Goal icon",
+                alt = "",
                 modifier =
                     Modifier
                         .padding(top = getResponsiveSizeWidth(18.dp))
@@ -149,7 +149,7 @@ fun GoalCustomize(
                             .background(kiwiColor.color2),
                 )
 
-                Kiwi_Label1(KiwiTextArguments("Difficulty"))
+                Kiwi_Label1(KiwiTextArguments("difficulty"))
 
                 Box(
                     modifier =
@@ -167,7 +167,7 @@ fun GoalCustomize(
                 ) {
                     Kiwi_Label1(
                         KiwiTextArguments(
-                            goal.difficulty.name.lowercase().replaceFirstChar { it.uppercase() },
+                            goal.difficulty.name.lowercase(),
                             color = kiwiColor.color6,
                         ),
                     )
@@ -176,7 +176,7 @@ fun GoalCustomize(
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            "Swap",
+                            "swap",
                             color = kiwiColor.colorF,
                         ),
                     color = kiwiColor.color8,
@@ -191,7 +191,7 @@ fun GoalCustomize(
         Kiwi_FixedSizeButton(
             textArguments =
                 KiwiTextArguments(
-                    "Apply",
+                    "apply",
                     color = kiwiColor.colorF,
                 ),
             modifier = Modifier.width(buttonsWidth),

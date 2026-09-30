@@ -170,7 +170,7 @@ fun Kiwi_Slider_Preview() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Kiwi_Slider(
-                KiwiTextArguments("Sound Volume"),
+                KiwiTextArguments("sfx_volume"),
                 value = 0.0f,
                 onValueChange = { },
                 valueRange = 0f..3f,
@@ -181,7 +181,7 @@ fun Kiwi_Slider_Preview() {
             Kiwi_Spacer()
 
             Kiwi_Slider(
-                KiwiTextArguments("Sound Volume"),
+                KiwiTextArguments("sfx_volume"),
                 value = 2.0f,
                 onValueChange = { },
                 valueRange = 0f..3f,
