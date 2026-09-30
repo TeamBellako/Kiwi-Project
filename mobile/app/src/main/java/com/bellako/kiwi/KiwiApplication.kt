@@ -2,6 +2,7 @@ package com.bellako.kiwi
 
 import android.app.Application
 import androidx.core.content.edit
+import com.bellako.kiwi.common.AppLanguageManager
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseInit
 import com.bellako.kiwi.analytics.firebaseLogEvent
@@ -13,6 +14,7 @@ class KiwiApplication : Application() {
         super.onCreate()
 
         com.bellako.kiwi.common.ResourceProvider.init(this)
+        AppLanguageManager.initialize(this)
         firebaseInit(this)
 
 

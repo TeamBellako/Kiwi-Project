@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionMark
@@ -136,6 +137,15 @@ private fun SettingsScreenContainer(
                     label = "audio",
                     testTag = SettingsTestTags.SECTION_AUDIO,
                     onClick = { navController.navigate(ScreenRoutes.SETTINGS_AUDIO) },
+                )
+
+                Kiwi_Spacer(Spacing.medium)
+
+                SettingsSectionRow(
+                    icon = Icons.Default.Language,
+                    label = "language",
+                    testTag = "settings_language",
+                    onClick = { navController.navigate(ScreenRoutes.SETTINGS_LANGUAGE) },
                 )
 
                 Kiwi_Spacer(Spacing.medium)

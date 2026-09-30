@@ -12,6 +12,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.bellako.kiwi.common.AppLanguageManager
 import com.bellako.kiwi.common.screens.MainScreen
 import com.bellako.kiwi.features.notifications.controller.NotificationManager
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -23,6 +24,10 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var notificationManager: NotificationManager
+
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(AppLanguageManager.wrapContext(newBase))
+    }
 
     @SuppressLint("SourceLockedOrientationActivity")
     @RequiresApi(Build.VERSION_CODES.Q)

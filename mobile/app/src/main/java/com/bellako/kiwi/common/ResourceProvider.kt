@@ -1,6 +1,7 @@
 package com.bellako.kiwi.common
 
 import android.content.Context
+import java.util.Locale
 
 /**
  * ResourceProvider provides a centralized way to access localized strings,
@@ -53,5 +54,9 @@ object ResourceProvider {
      */
     fun setRepository(newRepository: ResourceRepository) {
         this.repository = newRepository
+    }
+
+    fun setLocale(locale: Locale) {
+        repository?.setLocale(locale)
     }
 }

@@ -194,4 +194,8 @@
     <string name="button">BOTÓN</string>
     <string name="content">Contenido</string>
     <string name="invalid_credentials">Correo o contraseña no válidos</string>
+    <string name="language">Idioma</string>
+    <string name="language_english">Inglés</string>
+    <string name="language_spanish">Español</string>
+    <string name="change_language">Cambiar idioma</string>
 </resources>

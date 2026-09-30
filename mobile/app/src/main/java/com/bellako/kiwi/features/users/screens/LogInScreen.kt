@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,6 +48,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -58,9 +62,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.AppLanguageManager
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
@@ -135,6 +142,9 @@ fun LogInScreen(
             }
 
             else -> {
+                LanguageFlagButton(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(Spacing.medium),
+                )
                 ScrollingLoginBackground(imgPercentage)
 
                 Box(
@@ -169,6 +179,25 @@ fun LogInScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun LanguageFlagButton(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val language by AppLanguageManager.language.collectAsState()
+
+    IconButton(
+        onClick = { AppLanguageManager.cycle(context) },
+        modifier =
+            modifier.semantics {
+                contentDescription = ResourceProvider.stringResource("change_language")
+            },
+    ) {
+        Text(
+            text = language.flag,
+            fontSize = 24.sp,
+        )
     }
 }
 
