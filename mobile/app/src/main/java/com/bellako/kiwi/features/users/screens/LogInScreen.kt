@@ -63,6 +63,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
@@ -80,6 +81,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.LanguageFlagButton
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -142,11 +144,10 @@ fun LogInScreen(
             }
 
             else -> {
-                LanguageFlagButton(
-                    modifier = Modifier.align(Alignment.TopEnd).padding(Spacing.medium),
-                )
+                // Background elements first (including scrolling background)
                 ScrollingLoginBackground(imgPercentage)
 
+                // Content elements - login form and flag button
                 Box(
                     modifier =
                         Modifier
@@ -177,27 +178,17 @@ fun LogInScreen(
                     personalityViewModel = personalityViewModel,
                     navController = navController,
                 )
+
+                // Flag button on top of everything - ensure it's positioned properly
+                LanguageFlagButton(
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(Spacing.medium)
+                            .zIndex(1f),
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun LanguageFlagButton(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val language by AppLanguageManager.language.collectAsState()
-
-    IconButton(
-        onClick = { AppLanguageManager.cycle(context) },
-        modifier =
-            modifier.semantics {
-                contentDescription = ResourceProvider.stringResource("change_language")
-            },
-    ) {
-        Text(
-            text = language.flag,
-            fontSize = 24.sp,
-        )
     }
 }
 
@@ -595,10 +586,10 @@ private fun SignUp(onSignUp: () -> Unit) {
             buildText = { resolve ->
                 buildAnnotatedString {
                     withStyle(
-                    style =
-                        SpanStyle(
+                        style =
+                            SpanStyle(
                                 color = kiwiColors.color6,
-                        ),
+                            ),
                     ) {
                         append(resolve("first_time"))
                     }

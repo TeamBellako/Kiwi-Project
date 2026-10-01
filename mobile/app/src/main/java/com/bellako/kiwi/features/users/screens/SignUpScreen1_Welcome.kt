@@ -23,6 +23,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
@@ -36,6 +37,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.LanguageFlagButton
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
@@ -55,6 +57,15 @@ fun SignUpScreen1_Welcome(
         Welcome(
             viewModel,
             navController,
+        )
+
+        // Language flag button - positioned in top-right corner
+        LanguageFlagButton(
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(Spacing.medium)
+                    .zIndex(1f),
         )
 
         Box(
@@ -135,10 +146,10 @@ internal fun GoToLogIn(onSignUp: () -> Unit) {
             buildText = { resolve ->
                 buildAnnotatedString {
                     withStyle(
-                    style =
-                        SpanStyle(
+                        style =
+                            SpanStyle(
                                 color = kiwiColors.color6,
-                        ),
+                            ),
                     ) {
                         append(resolve("not_first_time"))
                     }
