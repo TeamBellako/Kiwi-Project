@@ -50,7 +50,7 @@ public class UserGoalStatusDataMapper {
                 .id(entity.getId())
                 .goalId(goal.getId())
                 .name(goal.getName())
-                .action(goal.getAction())
+                .action(goal.getAction() == null ? goal.getName() : goal.getAction())
                 .target(effectiveTarget)
                 .type(goal.getType().name())
                 .category(goal.getCategory().name())

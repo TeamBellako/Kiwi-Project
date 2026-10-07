@@ -7,12 +7,14 @@ import com.kiwi.features.quests.controllers.QuestController;
 import com.kiwi.features.quests.controllers.QuestService;
 import com.kiwi.features.quests.data.QuestDTO;
 import com.kiwi.features.quests.data.SubquestDTO;
+import com.kiwi.features.localization.LocalizedDataService;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.features.users.controllers.CustomUserDetailsService;
 import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,6 +30,8 @@ import java.util.Optional;
 
 import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +50,13 @@ public class QuestControllerTests {
     @MockitoBean private AuthEntryPointJwt authEntryPointJwt;
     @MockitoBean private UsersService usersService;
     @MockitoBean private QuestService questService;
+    @MockitoBean private LocalizedDataService localizedDataService;
+
+    @Before
+    public void setUp() {
+        when(localizedDataService.localizeQuests(anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+    }
 
     private final String baseAPIUrl = "/api/quests";
 
@@ -64,6 +75,8 @@ public class QuestControllerTests {
         mockMvc.perform(get(baseAPIUrl + "/active")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        verify(localizedDataService).localizeQuests(anyList());
     }
 
     @Test

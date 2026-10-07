@@ -1,15 +1,19 @@
 package com.kiwi.features.users.controllers;
 
 import com.kiwi.features.users.data.LoggedDTO;
+import com.kiwi.features.users.data.LanguagePreferenceDTO;
 import com.kiwi.features.users.data.LoginDTO;
 import com.kiwi.features.users.exceptions.LoginUserInvalidException;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.JwtUtils;
 import com.kiwi.common.types.Email;
 import com.kiwi.common.types.Password;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,4 +71,22 @@ public class UsersController {
         }
     }
 
+    @RestController
+    @RequestMapping("/api/user/language")
+    public static class LanguageController {
+        private final UsersService usersService;
+
+        public LanguageController(UsersService usersService) {
+            this.usersService = usersService;
+        }
+
+        @PutMapping
+        public ResponseEntity<Void> updateLanguage(
+                @Valid @RequestBody LanguagePreferenceDTO request,
+                Authentication authentication) {
+            System.out.println("Updating language for user: " + authentication.getName());
+            usersService.updateUserLanguage(authentication.getName(), request.language());
+            return ResponseEntity.noContent().build();
+        }
+    }
 }

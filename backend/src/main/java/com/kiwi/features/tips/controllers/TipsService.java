@@ -2,7 +2,6 @@ package com.kiwi.features.tips.controllers;
 
 import com.kiwi.features.tips.data.TipDomain;
 import com.kiwi.features.tips.data.TipMapper;
-import com.kiwi.features.tips.data.TipPersistence;
 import com.kiwi.features.tips.exceptions.TipNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +16,12 @@ public class TipsService {
     }
 
     public TipDomain getTip(Long id) {
-        Optional<TipPersistence> tipPersistence = tipsRepository.findById(id);
+        Optional<TipsRepository.LocalizedTip> tip = tipsRepository.findLocalizedById(id);
         
-        if (tipPersistence.isPresent()) { return TipMapper.toDomain(tipPersistence.get()); }
+        if (tip.isPresent()) {
+            TipsRepository.LocalizedTip localizedTip = tip.get();
+            return new TipDomain(localizedTip.getTitle(), localizedTip.getText(), localizedTip.getReadMoreURL());
+        }
         
         throw new TipNotFoundException(id);
     }

@@ -52,6 +52,18 @@ public class NodesTestRepositoryInMemory implements NodesRepository {
     }
 
     @Override
+    public List<LocalizedNode> findLocalizedByIds(List<Long> ids) {
+        return ids.stream()
+                .map(nodeStore::get)
+                .filter(Objects::nonNull)
+                .<LocalizedNode>map(node -> new LocalizedNode() {
+                    @Override public Long getId() { return node.getId(); }
+                    @Override public String getDisplayName() { return node.getDisplayName(); }
+                })
+                .toList();
+    }
+
+    @Override
     public boolean existsById(Long id) {
         return nodeStore.containsKey(id);
     }

@@ -37,13 +37,13 @@ public class ConversationPersistence {
     @Column(name = "delay_end_ms")
     private Integer delayEndMs;
     
-    @Column(name = "dialog", length = 1000, nullable = false)
+    @Column(name = "dialog_en", columnDefinition = "TEXT", nullable = false)
     private String dialog;
 
-    @Column(name = "dialog_m", length = 1000, nullable = false)
+    @Column(name = "dialog_m_en", columnDefinition = "TEXT", nullable = false)
     private String dialogM;
 
-    @Column(name = "dialog_w", length = 1000, nullable = false)
+    @Column(name = "dialog_w_en", columnDefinition = "TEXT", nullable = false)
     private String dialogW;
 
     @Enumerated(EnumType.STRING)

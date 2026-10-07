@@ -2,6 +2,7 @@ package com.kiwi.users;
 
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersDomain;
+import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.exceptions.CreateUserConflictException;
 import com.kiwi.features.users.exceptions.CreateUserInvalidException;
@@ -68,6 +69,22 @@ public class UsersServiceTests {
     @Test
     public void getNonExistingUser() {
         assertEquals(Optional.empty(), usersService.getUserByEmail(getValidEmail()));
+    }
+
+    @Test
+    public void updateUserLanguage_persistsSupportedLanguageAndDefaultsUnsupportedLanguage() {
+        UsersPersistence user = new UsersPersistence();
+        user.setId(1L);
+        user.setEmail(validEmailString);
+        usersTestRepositoryInMemory.saveAndFlush(user);
+
+        usersService.updateUserLanguage(validEmailString, "es");
+        assertEquals("es", usersTestRepositoryInMemory.findByEmail(validEmailString)
+                .orElseThrow().getLanguagePreference());
+
+        usersService.updateUserLanguage(validEmailString, "fr");
+        assertEquals("en", usersTestRepositoryInMemory.findByEmail(validEmailString)
+                .orElseThrow().getLanguagePreference());
     }
 
     private Email getValidEmail() { return new Email(validEmailString); }

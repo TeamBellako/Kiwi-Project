@@ -20,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -52,6 +53,7 @@ public class GoalsIntegrationTests {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private UsersRepository usersRepository;
     @Autowired private UserGoalStatusRepository userGoalStatusRepository;
+    @Autowired private JdbcTemplate jdbc;
 
     // ============================================================
     // HELPERS
@@ -113,6 +115,27 @@ public class GoalsIntegrationTests {
     // TESTS: GET GOALS
     // ============================================================
 
+        @Test
+        @WithMockUser(username = "finn@thehuman.com")
+        public void getGoalDefinitions_usesSpanishActionColumn() throws Exception {
+        UsersPersistence user = createUser();
+        user.setLanguagePreference("en");
+        usersRepository.saveAndFlush(user);
+        jdbc.update("UPDATE goals SET action_en = ?, action_es = ? WHERE id = ?",
+            "English action", "Accion en espanol", 1L);
+
+        mockMvc.perform(get(API_URL + "/suggestions")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].action").value("English action"));
+
+        user.setLanguagePreference("es");
+        usersRepository.saveAndFlush(user);
+        mockMvc.perform(get(API_URL + "/suggestions")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].action").value("Accion en espanol"));
+        }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
@@ -130,6 +153,27 @@ public class GoalsIntegrationTests {
                 .andExpect(jsonPath("$.date").value(date.toString()))
                 .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
     }
+
+            @Test
+            @WithMockUser(username = "finn@thehuman.com")
+            public void getGoalById_missingLocalizedAction_usesGoalNameAsFallback() throws Exception {
+            UsersPersistence user = createUser();
+            UserGoalStatusPersistence goal = userGoalStatusRepository.saveAndFlush(
+                inProgressGoalPersistence(null, LocalDate.now(), user));
+            jdbc.update("UPDATE goals SET action_en = NULL, action_es = NULL WHERE id = ?", 1L);
+
+            mockMvc.perform(get(API_URL + "/" + goal.getId())
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.action").value("Exercise Goal"));
+
+            user.setLanguagePreference("es");
+            usersRepository.saveAndFlush(user);
+            mockMvc.perform(get(API_URL + "/" + goal.getId())
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.action").value("Exercise Goal"));
+            }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")
@@ -163,6 +207,10 @@ public class GoalsIntegrationTests {
     @WithMockUser(username = "finn@thehuman.com")
     public void getAllGoals_valid_returnsAllGoalsGroupedByDate() throws Exception {
         UsersPersistence user = createUser();
+        user.setLanguagePreference("en");
+        usersRepository.saveAndFlush(user);
+        jdbc.update("UPDATE goals SET action_en = ?, action_es = ? WHERE id = ?",
+            "English action", "Accion traducida", 1L);
         
         LocalDate date1 = LocalDate.now();
         LocalDate date2 = LocalDate.now().minusDays(1);
@@ -174,8 +222,18 @@ public class GoalsIntegrationTests {
 
         mockMvc.perform(get(API_URL + "/all")
                         .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(3))
+            .andExpect(jsonPath("$[0].action").value("English action"));
+
+        user.setLanguagePreference("es");
+        usersRepository.saveAndFlush(user);
+        mockMvc.perform(get(API_URL + "/all")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].name").value("Exercise Goal"))
+                .andExpect(jsonPath("$[0].action").value("Accion traducida"))
                 .andExpect(jsonPath("$[0].date").value(date1.toString()))
                 .andExpect(jsonPath("$[1].date").value(date1.toString()))
                 .andExpect(jsonPath("$[2].date").value(date2.toString()));

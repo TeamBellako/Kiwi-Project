@@ -5,12 +5,14 @@ import com.kiwi.common.exceptions.GlobalExceptionHandler;
 import com.kiwi.config.WebSecurityConfig;
 import com.kiwi.features.skills.controllers.SkillController;
 import com.kiwi.features.skills.controllers.SkillService;
+import com.kiwi.features.localization.LocalizedDataService;
 import com.kiwi.features.users.controllers.CustomUserDetailsService;
 import com.kiwi.features.users.controllers.UsersService;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
 import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +28,8 @@ import java.util.Optional;
 
 import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,6 +48,13 @@ public class SkillControllerTests {
     @MockitoBean private AuthEntryPointJwt authEntryPointJwt;
     @MockitoBean private UsersService usersService;
     @MockitoBean private SkillService skillService;
+    @MockitoBean private LocalizedDataService localizedDataService;
+
+    @Before
+    public void setUp() {
+        when(localizedDataService.localizeSkills(anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+    }
 
     private final String baseAPIUrl = "/api/skills";
 
@@ -70,6 +81,8 @@ public class SkillControllerTests {
         mockMvc.perform(get(baseAPIUrl)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+
+        verify(localizedDataService).localizeSkills(anyList());
     }
 
     // ============================================================

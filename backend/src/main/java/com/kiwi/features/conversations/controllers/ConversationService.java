@@ -28,12 +28,49 @@ public class ConversationService {
      */
     @Transactional(readOnly = true)
     public ConversationDTO getConversationById(Long id) {
-        ConversationPersistence conversation = conversationsRepository.findById(id)
+        ConversationsRepository.LocalizedConversation localized = conversationsRepository.findLocalizedById(id)
                 .orElseThrow(() -> new ConversationNotFoundException(id));
+        ConversationPersistence conversation = ConversationPersistence.builder()
+            .id(localized.getId())
+            .type(ConversationType.valueOf(localized.getType()))
+            .name(localized.getName())
+            .sprite(localized.getSprite())
+            .background(localized.getBackground())
+            .fx(localized.getFx())
+            .dark(localized.getDark())
+            .delayStartMs(localized.getDelayStartMs())
+            .delayEndMs(localized.getDelayEndMs())
+            .dialog(localized.getDialog())
+            .dialogM(localized.getDialogM())
+            .dialogW(localized.getDialogW())
+            .nextEvent(NextEventType.valueOf(localized.getNextEvent()))
+            .eventId(localized.getEventId())
+            .incidenceForNextEvent(localized.getIncidenceForNextEvent())
+            .fallbackEventId(localized.getFallbackEventId())
+            .incidenceNameToSet(localized.getIncidenceNameToSet())
+            .incidenceValueToSet(localized.getIncidenceValueToSet())
+            .onCompletedAction(localized.getOnCompletedAction())
+            .onCompletedEntity(localized.getOnCompletedEntity())
+            .onCompletedEntityId(localized.getOnCompletedEntityId())
+            .build();
 
-        List<ConversationOptionPersistence> options = conversationOptionsRepository.findByConversationId(id);
+        List<ConversationOptionDTO> localizedOptions = conversationOptionsRepository.findLocalizedByConversationId(id)
+            .stream()
+            .map(option -> ConversationOptionDTO.builder()
+                .id(option.getId())
+                .conversationId(id)
+                .text(option.getText())
+                .textM(option.getTextM())
+                .textW(option.getTextW())
+                .nextEventId(option.getNextEventId())
+                .cost(option.getCost())
+                .incidenceToShow(option.getIncidenceToShow())
+                .build())
+            .toList();
 
-        return ConversationMapper.toDto(conversation, options);
+        ConversationDTO dto = ConversationMapper.toDto(conversation, List.of());
+        dto.setOptions(localizedOptions);
+        return dto;
     }
     
     /**

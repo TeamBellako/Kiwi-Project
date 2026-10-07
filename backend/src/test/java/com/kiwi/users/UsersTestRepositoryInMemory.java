@@ -39,6 +39,14 @@ public class UsersTestRepositoryInMemory implements UsersRepository {
     }
 
     @Override
+    public void updateUserLanguage(Long userId, String language) {
+        users.values().stream()
+                .filter(user -> userId.equals(user.getId()))
+                .findFirst()
+                .ifPresent(user -> user.setLanguagePreference(language));
+    }
+
+    @Override
     public void flush() {
 
     }

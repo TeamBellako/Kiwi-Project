@@ -16,7 +16,10 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class NodesService {
@@ -48,7 +51,7 @@ public class NodesService {
         List<UserNodeStatusPersistence> statuses =
                 userNodeStatusRepository.findByIdUserId(userId);
 
-        return statuses.stream()
+        List<NodesDTO> nodes = statuses.stream()
                 .map(status -> {
                     NodesPersistence node = nodesRepository.findById(status.getId().getNodeId())
                             .orElseThrow(() -> new NodeNotFoundException(
@@ -61,6 +64,7 @@ public class NodesService {
                     return NodesDataMapper.toDTO(domain);
                 })
                 .toList();
+        return localizeDisplayNames(nodes);
     }
 
     //FOR FUTURE CONDITION EDGES
@@ -84,7 +88,7 @@ public class NodesService {
 
         userNodeStatusRepository.saveAndFlush(persistence);
 
-        return NodesDataMapper.toDTO(node, persistence);
+        return localizeDisplayNames(List.of(NodesDataMapper.toDTO(node, persistence))).get(0);
     }
 
 
@@ -113,7 +117,7 @@ public class NodesService {
         List<NodesDTO> result = new ArrayList<>();
         result.add(NodesDataMapper.toDTO(node, persistence));
         
-        return result;
+        return localizeDisplayNames(result);
     }
 
     @Transactional
@@ -149,7 +153,7 @@ public class NodesService {
                 .map(nextNodeId -> lockNode(userId, nextNodeId))
                 .forEach(result::add);
 
-        return result;
+        return localizeDisplayNames(result);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -174,4 +178,22 @@ public class NodesService {
             userNodeStatusRepository.saveAndFlush(persistence);
         }
     }
+
+        private List<NodesDTO> localizeDisplayNames(List<NodesDTO> nodes) {
+                if (nodes == null || nodes.isEmpty()) {
+                        return nodes;
+                }
+
+                List<Long> ids = nodes.stream().map(NodesDTO::getId).distinct().toList();
+                Map<Long, NodesRepository.LocalizedNode> localizedById = nodesRepository.findLocalizedByIds(ids).stream()
+                                .collect(Collectors.toMap(NodesRepository.LocalizedNode::getId, Function.identity()));
+
+                nodes.forEach(node -> {
+                        NodesRepository.LocalizedNode localized = localizedById.get(node.getId());
+                        if (localized != null) {
+                                node.setDisplayName(localized.getDisplayName());
+                        }
+                });
+                return nodes;
+        }
 }

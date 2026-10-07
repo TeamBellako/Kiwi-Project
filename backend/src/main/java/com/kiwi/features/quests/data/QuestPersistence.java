@@ -12,10 +12,10 @@ public class QuestPersistence {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable = false)
+    @Column(name = "name_en", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "description_en", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)

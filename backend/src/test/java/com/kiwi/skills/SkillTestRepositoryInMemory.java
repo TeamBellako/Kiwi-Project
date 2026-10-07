@@ -134,7 +134,7 @@ public class SkillTestRepositoryInMemory implements SkillRepository {
     }
 
     @Override
-    public List<SkillPersistence> findByIdIn(List<Long> ids) {
+    public List<LocalizedSkill> findLocalizedByIds(List<Long> ids) {
         return List.of();
     }
 }

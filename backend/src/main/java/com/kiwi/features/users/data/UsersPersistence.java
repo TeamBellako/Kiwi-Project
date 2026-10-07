@@ -30,4 +30,8 @@ public class UsersPersistence {
     @Builder.Default
     @Column(name = "total_points", nullable = false)
     private Integer totalPoints = 0;
+
+    @Builder.Default
+    @Column(name = "language_preference", nullable = false)
+    private String languagePreference = "en";
 }

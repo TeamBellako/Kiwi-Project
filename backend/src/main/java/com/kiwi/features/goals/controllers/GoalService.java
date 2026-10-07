@@ -322,9 +322,22 @@ public class GoalService {
         UsersPersistence user = getUserFromAuthentication(authentication);
 
         return goalRepository.findTwoRandomForUser(user.getId())
-                .stream()
-                .map(GoalDataMapper::toDTO)
-                .collect(Collectors.toList());
+            .stream()
+            .map(goal -> GoalDTO.builder()
+                .id(goal.getId())
+                .name(goal.getName())
+                .action(goal.getAction())
+                .target(goal.getTarget())
+                .type(goal.getType())
+                .category(goal.getCategory())
+                .reward(goal.getReward())
+                .difficulty(goal.getDifficulty())
+                .onCompletedAction(goal.getOnCompletedAction())
+                .onCompletedEntity(goal.getOnCompletedEntity())
+                .onCompletedEntityId(goal.getOnCompletedEntityId())
+                .onCompletedEvent(goal.getOnCompletedAction() + '_' + goal.getOnCompletedEntity())
+                .build())
+            .collect(Collectors.toList());
     }
 
     /**

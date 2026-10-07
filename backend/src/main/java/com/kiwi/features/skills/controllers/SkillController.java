@@ -4,6 +4,7 @@ import com.kiwi.common.types.Email;
 
 import com.kiwi.features.skills.data.DTO.EquipSkillDTO;
 import com.kiwi.features.skills.data.DTO.SkillDTO;
+import com.kiwi.features.localization.LocalizedDataService;
 
 import com.kiwi.features.users.controllers.UsersService;
 import org.jetbrains.annotations.NotNull;
@@ -20,10 +21,12 @@ public class SkillController {
 
     private final SkillService skillService;
     private final UsersService usersService;
+        private final LocalizedDataService localizedDataService;
 
-    public SkillController(SkillService skillService, UsersService usersService) {
+        public SkillController(SkillService skillService, UsersService usersService, LocalizedDataService localizedDataService) {
         this.skillService = skillService;
         this.usersService = usersService;
+                this.localizedDataService = localizedDataService;
     }
 
     // ============================================================================================
@@ -38,7 +41,8 @@ public class SkillController {
                 .orElseThrow()
                 .getId();
 
-        return ResponseEntity.ok(skillService.getAllSkillsForUser(userId));
+        return ResponseEntity.ok(localizedDataService.localizeSkills(
+                skillService.getAllSkillsForUser(userId)));
     }
 
     // ============================================================================================
@@ -54,7 +58,7 @@ public class SkillController {
                 .orElseThrow()
                 .getId();
 
-        return ResponseEntity.ok(skillService.giveSkillToUser(userId, skillId));
+        return ResponseEntity.ok(localize(skillService.giveSkillToUser(userId, skillId)));
     }
 
     @PostMapping("/{skillId}/levelup")
@@ -66,7 +70,7 @@ public class SkillController {
                 .orElseThrow()
                 .getId();
 
-        return ResponseEntity.ok(skillService.levelUpSkill(userId, skillId));
+        return ResponseEntity.ok(localize(skillService.levelUpSkill(userId, skillId)));
     }
 
     // ============================================================================================
@@ -82,7 +86,7 @@ public class SkillController {
                 .orElseThrow()
                 .getId();
 
-        return ResponseEntity.ok(skillService.putSkillOnCooldown(userId, skillId));
+        return ResponseEntity.ok(localize(skillService.putSkillOnCooldown(userId, skillId)));
     }
 
     @PostMapping("/{skillId}/ready")
@@ -94,7 +98,7 @@ public class SkillController {
                 .orElseThrow()
                 .getId();
 
-        return ResponseEntity.ok(skillService.removeCooldown(userId, skillId));
+        return ResponseEntity.ok(localize(skillService.removeCooldown(userId, skillId)));
     }
 
     // ============================================================================================
@@ -111,7 +115,7 @@ public class SkillController {
                 .orElseThrow()
                 .getId();
 
-        return ResponseEntity.ok(skillService.equipSkill(userId, skillId, equipSkillDTO));
+        return ResponseEntity.ok(localize(skillService.equipSkill(userId, skillId, equipSkillDTO)));
     }
 
     @PostMapping("/{skillId}/unequip")
@@ -123,7 +127,7 @@ public class SkillController {
                 .orElseThrow()
                 .getId();
 
-        return ResponseEntity.ok(skillService.unequipSkill(userId, skillId));
+        return ResponseEntity.ok(localize(skillService.unequipSkill(userId, skillId)));
     }
 
     // ============================================================================================
@@ -143,5 +147,9 @@ public class SkillController {
 
         return ResponseEntity.noContent().build();
     }
+
+        private SkillDTO localize(SkillDTO skill) {
+                return localizedDataService.localizeSkills(List.of(skill)).get(0);
+        }
 
 }

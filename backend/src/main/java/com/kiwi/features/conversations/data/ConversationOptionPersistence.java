@@ -16,13 +16,13 @@ public class ConversationOptionPersistence {
     @JoinColumn(name = "conversation_id", nullable = false)
     private ConversationPersistence conversation;
 
-    @Column(name = "text", length = 500, nullable = false)
+    @Column(name = "text_en", length = 500, nullable = false)
     private String text;
 
-    @Column(name = "text_m", length = 500, nullable = false)
+    @Column(name = "text_m_en", length = 500, nullable = false)
     private String textM;
 
-    @Column(name = "text_w", length = 500, nullable = false)
+    @Column(name = "text_w_en", length = 500, nullable = false)
     private String textW;
 
     @Column(name = "next_event_id", nullable = false)

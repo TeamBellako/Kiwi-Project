@@ -6,8 +6,10 @@ import com.kiwi.common.types.Password;
 import com.kiwi.common.types.PositiveOrZeroInteger;
 import com.kiwi.features.users.data.*;
 import com.kiwi.features.users.exceptions.CreateUserConflictException;
+import com.kiwi.features.users.exceptions.UsersNotFoundException;
 import com.kiwi.common.types.Email;
 import com.kiwi.features.users.exceptions.CreateUserInvalidException;
+import com.kiwi.features.localization.LocalizationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +73,20 @@ public class UsersService {
     public Optional<UserPointsDTO> getUserPointsById(@NotNull Long userId) {
         return usersRepository.findById(userId)
                 .map(UsersDataMapper::toPointsDTO);
+    }
+
+    @Transactional
+    public void updateUserLanguage(@NotNull Long userId, @NotNull String language) {
+        usersRepository.updateUserLanguage(
+                userId,
+                LocalizationService.normalizeLanguagePreference(language));
+    }
+
+    @Transactional
+    public void updateUserLanguage(@NotNull String email, @NotNull String language) {
+        UsersPersistence user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new UsersNotFoundException(email));
+        updateUserLanguage(user.getId(), language);
     }
 
     //POINTS
