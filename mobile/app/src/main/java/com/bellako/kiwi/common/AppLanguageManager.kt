@@ -3,6 +3,7 @@ package com.bellako.kiwi.common
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.LocaleList
 import androidx.core.content.edit
@@ -27,17 +28,26 @@ object AppLanguageManager {
     fun setLanguage(
         context: Context,
         language: AppLanguage,
+        recreateActivity: Boolean = true,
     ) {
         if (_language.value == language) return
 
         persistLanguage(context, language)
         _language.value = language
         ResourceProvider.setLocale(language.locale)
-        context.findActivity()?.recreate()
+        if (recreateActivity) context.findActivity()?.recreate()
     }
 
     fun cycle(context: Context) {
         setLanguage(context, _language.value.next())
+    }
+
+    fun restartActivity(context: Context) {
+        val activity = context.findActivity() ?: return
+        val intent = Intent(activity, activity.javaClass)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+        activity.startActivity(intent)
+        activity.finish()
     }
 
     fun wrapContext(context: Context): Context {

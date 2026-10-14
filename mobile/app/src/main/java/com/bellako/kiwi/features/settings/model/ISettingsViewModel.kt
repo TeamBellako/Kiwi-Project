@@ -7,4 +7,9 @@ interface ISettingsViewModel : IBaseViewModel<SettingsState> {
     suspend fun loadSettings()
 
     suspend fun updateSettings(state: SettingsState)
+
+    fun updateLanguagePreference(
+        language: String,
+        onSuccess: () -> Unit = {},
+    )
 }

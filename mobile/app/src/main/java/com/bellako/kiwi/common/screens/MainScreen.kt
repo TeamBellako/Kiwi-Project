@@ -1035,6 +1035,7 @@ fun AppNavHost(
             AppScreenWrapper {
                 SettingsLanguageScreen(
                     navController = navController,
+                    settingsViewModel = settingsViewModel,
                 )
             }
         }
