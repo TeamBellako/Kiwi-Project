@@ -201,7 +201,16 @@ public class QuestService {
                         current.getQuest().getId()
                 );
 
-        int index = subquests.indexOf(current);
+        // Find the next subquest by comparing IDs instead of object references
+        int currentIndex = -1;
+        for (int i = 0; i < subquests.size(); i++) {
+            if (subquests.get(i).getId() == current.getId()) {
+                currentIndex = i;
+                break;
+            }
+        }
+
+        int index = currentIndex;
         if (index == -1 || index + 1 >= subquests.size())
         {
             return;

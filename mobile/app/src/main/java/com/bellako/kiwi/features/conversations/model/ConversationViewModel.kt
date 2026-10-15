@@ -139,7 +139,9 @@ class ConversationViewModel
         fun next(option: ConversationOptionDomain) {
             val conversation = _active.value ?: return
             option.id?.let { _selectedOptions.value = _selectedOptions.value + it }
-            handleNextEvent(conversation, option.nextEventId)
+            viewModelScope.launch {
+                handleNextEvent(conversation, option.nextEventId)
+            }
         }
 
         /** Termina la conversación activa y limpia las selecciones acumuladas */
@@ -163,12 +165,7 @@ class ConversationViewModel
                     if (_active.value?.type == ConversationType.FULL) {
                         EventBus.emitEvent(EventType.MAP_UNCOVERED, EventPayload.EmptyPayload())
                     }
-                    if (_active.value != null && _active.value?.onCompletedEvent != "_") {
-                        EventBus.emitEvent(
-                            EventType.valueOf(_active.value!!.onCompletedEvent),
-                            EventPayload.EntityIdPayload(_active.value!!.onCompletedEntityId),
-                        )
-                    }
+                    _active.value?.let { emitOnCompletedEvent(it) }
                     _active.value = null
                     _selectedOptions.value = emptyList()
                 }
@@ -204,7 +201,7 @@ class ConversationViewModel
 
         // -------------------------------------------------------------------------
 
-        private fun handleNextEvent(
+        private suspend fun handleNextEvent(
             conversation: ConversationDomain,
             nextEventId: Long?,
         ) {
@@ -213,6 +210,7 @@ class ConversationViewModel
                     if (nextEventId == null) {
                         end()
                     } else {
+                        emitOnCompletedEvent(conversation)
                         start(nextEventId)
                     }
                 }
@@ -220,6 +218,15 @@ class ConversationViewModel
                 NextEventType.END -> {
                     end()
                 }
+            }
+        }
+
+        private suspend fun emitOnCompletedEvent(conversation: ConversationDomain) {
+            if (conversation.onCompletedEvent != "_") {
+                EventBus.emitEvent(
+                    EventType.valueOf(conversation.onCompletedEvent),
+                    EventPayload.EntityIdPayload(conversation.onCompletedEntityId),
+                )
             }
         }
 
