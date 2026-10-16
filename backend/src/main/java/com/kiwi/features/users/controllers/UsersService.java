@@ -56,6 +56,8 @@ public class UsersService {
 
         String hashedPassword = passwordEncoder.encode(validPassword.value());
         UsersPersistence usersPersistence = UsersDataMapper.toPersistenceWithoutPoints(userDto, hashedPassword);
+        usersPersistence.setLanguagePreference(
+            LocalizationService.normalizeLanguagePreference(loginDTO.getLanguage()));
         usersRepository.saveAndFlush(usersPersistence);
 
         eventPublisher.publishEvent(new UserCreatedEvent(usersPersistence.getId()));

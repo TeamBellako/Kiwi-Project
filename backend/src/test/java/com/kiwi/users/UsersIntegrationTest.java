@@ -61,6 +61,7 @@ public class UsersIntegrationTest {
     public void validSignup() throws Exception {
         UsersDTO userDTO = validUserDTO();
         LoginDTO loginDTO = validLoginDTO();
+        loginDTO.setLanguage("es");
 
         mockMvc.perform(getPostRequestBuilder(signupAPIUrl, loginDTO))
                 .andExpect(status().isCreated());
@@ -71,6 +72,7 @@ public class UsersIntegrationTest {
 
         assertTrue(passwordEncoder.matches(loginDTO.getPassword(), savedUser.getHashedPassword()));
         assertEquals(userDTO.getEmail(), savedUser.getEmail());
+        assertEquals("es", savedUser.getLanguagePreference());
     }
 
     @Test
@@ -123,14 +125,14 @@ public class UsersIntegrationTest {
         UsersDomain user = UsersDataMapper.toDomainWithoutPoints(validUserDTO());
         usersRepository.saveAndFlush(UsersDataMapper.toPersistence(user, validLoginDTO().getPassword()));
         
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), "Marceline*Simon4Ever");
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), "Marceline*Simon4Ever", "en");
 
         mockMvc.perform(getPostRequestBuilder(loginAPIUrl, loginDTO))
                 .andExpect(status().isUnauthorized());
     }
     
-    private LoginDTO getValidLoginDTO() { return new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword()); }
-    private LoginDTO getinValidLoginDTO() { return new LoginDTO(invalidUserDTO().getEmail(), invalidLoginDTO().getPassword()); }
+    private LoginDTO getValidLoginDTO() { return new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword(), "en"); }
+    private LoginDTO getinValidLoginDTO() { return new LoginDTO(invalidUserDTO().getEmail(), invalidLoginDTO().getPassword(), "en"); }
 
     @TestConfiguration
     static class TestConfig {

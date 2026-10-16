@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.analytics.firebaseSetUserId
+import com.bellako.kiwi.common.AppLanguageManager
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.model.BaseViewModel
 import com.bellako.kiwi.common.utils.DateUtils.stringToDate
@@ -108,7 +109,13 @@ class UsersViewModel
         override suspend fun signup(context: Context): Result<Unit> {
             setIsLoading(true)
             setUiState(UIState.Loading)
-            val result = repository.signup(LoginDTO(_state.value.email, _state.value.password))
+            val result = repository.signup(
+                LoginDTO(
+                    _state.value.email,
+                    _state.value.password,
+                    AppLanguageManager.language.value.locale.language,
+                ),
+            )
             setIsLoading(false)
             setUiState(UIState.Idle)
 

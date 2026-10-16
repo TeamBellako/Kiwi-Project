@@ -9,11 +9,11 @@ import static com.kiwi.common.utils.FormatUtils.formatDate;
 
 public class UsersTestFactory {
     public static LoginDTO validLoginDTO() {
-        return new LoginDTO("finn@thehuman.com", "Math3matic!");
+        return new LoginDTO("finn@thehuman.com", "Math3matic!", "en");
     }
 
     public static LoginDTO invalidLoginDTO() {
-        return new LoginDTO("football", "kk");
+        return new LoginDTO("football", "kk", "en");
     }
 
     private static final String DATE = formatDate(LocalDate.of(2025, 1, 1));

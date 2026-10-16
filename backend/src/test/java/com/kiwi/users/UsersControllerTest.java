@@ -56,7 +56,7 @@ public class UsersControllerTest {
     
     @Test
     public void validSignup() throws Exception {
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword());
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword(), "en");
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/signup", loginDTO))
                 .andExpect(status().isCreated());
     }
@@ -70,7 +70,7 @@ public class UsersControllerTest {
         when(usersService.getUserByEmail(any(Email.class)))
                 .thenReturn(Optional.of(UsersDataMapper.toPersistence(user, passwordEncoder.encode(validLoginDTO().getPassword()))));
 
-        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword());
+        LoginDTO loginDTO = new LoginDTO(validUserDTO().getEmail(), validLoginDTO().getPassword(), "en");
         mockMvc.perform(getPostRequestBuilder(baseAPIUrl + "/login", loginDTO))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwt").value(mockToken));
