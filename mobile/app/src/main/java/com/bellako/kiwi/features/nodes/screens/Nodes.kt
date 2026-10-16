@@ -190,7 +190,7 @@ fun Node(
             )
             Kiwi_Image(
                 R.drawable.ic_player_indicator,
-                "player indicator",
+                "player_position",
                 modifier =
                     Modifier
                         .size(getResponsiveSizeHeight(18.dp))
@@ -452,7 +452,7 @@ fun NodeAction(
                 ) { status ->
                     when (status) {
                         NodeStatus.LOCKED -> {
-                            UnlockButton("Unlock", currentPoints >= node.price) {
+                            UnlockButton("unlock", currentPoints >= node.price) {
                                 onUnlockNode(
                                     node.id,
                                 )
@@ -460,13 +460,13 @@ fun NodeAction(
                         }
 
                         NodeStatus.OPEN -> {
-                            PlayButton("Play") {
+                            PlayButton("play") {
                                 onCompleteNode(node.id)
                             }
                         }
 
                         NodeStatus.COMPLETED -> {
-                            PlayButton("Replay") {
+                            PlayButton("replay") {
                                 onRetryNode(node.id)
                                 replayFirebaseEvent(node.id)
                             }
@@ -504,31 +504,30 @@ private fun NodeCostBubble(
                 ).background(kiwiColors.colorF),
         contentAlignment = Alignment.Center,
     ) {
-        val annotatedString =
-            buildAnnotatedString {
-                withStyle(
-                    style =
-                        SpanStyle(
-                            color = kiwiColors.color1B,
-                        ),
-                ) {
-                    append("Cost: ")
-                }
-                withStyle(
-                    style =
-                        SpanStyle(
-                            color = kiwiColors.color1B,
-                            fontWeight = FontWeight.Bold,
-                        ),
-                ) {
-                    append("$currentPoints/$price")
-                }
-            }
-
         Kiwi_AnnotatedString_P2(
             KiwiAnnotatedStringArguments(
-                annotatedString,
-                TextAlign.Center,
+                buildText = { resolve ->
+                    buildAnnotatedString {
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = kiwiColors.color1B,
+                                ),
+                        ) {
+                            append(resolve("node_cost"))
+                        }
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = kiwiColors.color1B,
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                        ) {
+                            append("$currentPoints/$price")
+                        }
+                    }
+                },
+                textAlign = TextAlign.Center,
                 modifier =
                     Modifier
                         .padding(

@@ -3,6 +3,7 @@ package com.bellako.kiwi
 import androidx.lifecycle.viewModelScope
 import com.bellako.kiwi.common.utils.HTTPUtils.createFakeHttpException
 import com.bellako.kiwi.features.settings.data.SettingsDataMapper
+import com.bellako.kiwi.features.settings.data.LanguagePreferenceDTO
 import com.bellako.kiwi.features.settings.model.ISettingsAPI
 import com.bellako.kiwi.features.settings.model.SettingsRepository
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
@@ -97,6 +98,46 @@ class SettingsIntegrationTest {
 
             Assert.assertTrue(result.isFailure)
             Assert.assertNotNull(result.exceptionOrNull())
+        }
+
+    @Test
+    fun `language change sends backend language code and only latest selection`() =
+        runTest {
+            viewModel.updateLanguagePreference("es")
+            viewModel.updateLanguagePreference("en")
+            advanceUntilIdle()
+
+            verify(api, times(0)).updateLanguagePreference(LanguagePreferenceDTO("es"))
+            verify(api, times(1)).updateLanguagePreference(LanguagePreferenceDTO("en"))
+        }
+
+    @Test
+    fun `language preference invokes completion callback after successful API update`() =
+        runTest {
+            var completed = false
+
+            viewModel.updateLanguagePreference("es") {
+                completed = true
+            }
+            advanceUntilIdle()
+
+            Assert.assertTrue(completed)
+        }
+
+    @Test
+    fun `language preference does not invoke completion callback after API failure`() =
+        runTest {
+            doThrow(createFakeHttpException(500))
+                .`when`(api)
+                .updateLanguagePreference(LanguagePreferenceDTO("es"))
+            var completed = false
+
+            viewModel.updateLanguagePreference("es") {
+                completed = true
+            }
+            advanceUntilIdle()
+
+            Assert.assertFalse(completed)
         }
 
     @Test

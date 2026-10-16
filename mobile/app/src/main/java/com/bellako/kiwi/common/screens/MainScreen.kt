@@ -102,6 +102,7 @@ import com.bellako.kiwi.features.settings.model.ISettingsViewModel
 import com.bellako.kiwi.features.settings.model.SettingsViewModel
 import com.bellako.kiwi.features.settings.screens.SettingsAccountScreen
 import com.bellako.kiwi.features.settings.screens.SettingsAudioScreen
+import com.bellako.kiwi.features.settings.screens.SettingsLanguageScreen
 import com.bellako.kiwi.features.settings.screens.SettingsScreen
 import com.bellako.kiwi.features.settings.screens.SettingsSupportScreen
 import com.bellako.kiwi.features.skills.model.ISkillsViewModel
@@ -659,6 +660,7 @@ private fun isSettingsSubScreenTransition(
             ScreenRoutes.SIGNUP4_APPS,
             ScreenRoutes.SETTINGS_ACCOUNT,
             ScreenRoutes.SETTINGS_AUDIO,
+            ScreenRoutes.SETTINGS_LANGUAGE,
             ScreenRoutes.SETTINGS_SUPPORT,
         )
     return (initial == ScreenRoutes.SETTINGS && target in settingsSubScreens) ||
@@ -1025,6 +1027,15 @@ fun AppNavHost(
                 SettingsAudioScreen(
                     settingsViewModel = settingsViewModel,
                     navController = navController,
+                )
+            }
+        }
+
+        composable(ScreenRoutes.SETTINGS_LANGUAGE) {
+            AppScreenWrapper {
+                SettingsLanguageScreen(
+                    navController = navController,
+                    settingsViewModel = settingsViewModel,
                 )
             }
         }

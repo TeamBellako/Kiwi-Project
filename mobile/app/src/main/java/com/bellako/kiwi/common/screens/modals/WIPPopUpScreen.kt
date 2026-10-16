@@ -44,7 +44,7 @@ fun WIPPopUpScreen(onDismiss: () -> Unit = {}) {
             ) {
                 Kiwi_H1(
                     KiwiTextArguments(
-                        "Work in progress",
+                        "work_in_progress",
                         TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                     ),
@@ -53,7 +53,7 @@ fun WIPPopUpScreen(onDismiss: () -> Unit = {}) {
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            "Close",
+                            "close",
                             color = kiwiColor.colorF,
                         ),
                     color = kiwiColor.color8,

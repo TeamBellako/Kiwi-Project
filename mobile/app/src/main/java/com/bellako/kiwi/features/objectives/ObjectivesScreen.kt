@@ -125,7 +125,7 @@ private fun ObjectivesContent(
             Kiwi_Display1(
                 arguments =
                     KiwiTextArguments(
-                        text = "Main Missions",
+                        text = "main_missions",
                         color = kiwiColors.colorF,
                         modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.small), vertical = Spacing.medium),
                     ),
@@ -154,7 +154,7 @@ private fun ObjectivesContent(
             Kiwi_Display1(
                 arguments =
                     KiwiTextArguments(
-                        text = "Daily Challenges",
+                        text = "daily_challenges",
                         color = kiwiColors.colorF,
                         modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.small), vertical = Spacing.medium),
                     ),
@@ -175,7 +175,7 @@ private fun ObjectivesContent(
         item {
             Kiwi_Spacer(Spacing.medium)
             Kiwi_HorizontalLine_Text(
-                "Yesterday",
+                "yesterday",
                 kiwiColors.color1A,
                 kiwiColors.colorF,
                 modifier = Modifier.padding(horizontal = getResponsiveSizeHeight(Spacing.large)),

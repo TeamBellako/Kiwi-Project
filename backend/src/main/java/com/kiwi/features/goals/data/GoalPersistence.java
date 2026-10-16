@@ -22,7 +22,7 @@ public class GoalPersistence {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "action", columnDefinition = "TEXT")
+    @Column(name = "action_en", columnDefinition = "TEXT")
     private String action;
 
     @Column(name = "target", nullable = false)

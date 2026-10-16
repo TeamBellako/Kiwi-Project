@@ -22,12 +22,13 @@ public class SkillPersistence {
     @Column(name="element_id", nullable = false)
     private Long elementId;
     
-    @Column(nullable = false, unique = true)
+    @Column(name = "name_en", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "description_en", nullable = false, columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "quote_en", columnDefinition = "TEXT")
     private String quote;
 
     @Enumerated(EnumType.STRING)
@@ -40,7 +41,7 @@ public class SkillPersistence {
     @Column(name = "cooldown_time_minutes")
     private Integer cooldownTimeMinutes;
 
-    @Column(name = "cooldown_other_description")
+    @Column(name = "cooldown_other_description_en", columnDefinition = "TEXT")
     private String cooldownOtherDescription;
 
     @Column(name = "levelup_skill_id")

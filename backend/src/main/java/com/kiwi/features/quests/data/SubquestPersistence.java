@@ -16,7 +16,7 @@ public class SubquestPersistence {
     @JoinColumn(name = "quest_id", nullable = false)
     private QuestPersistence quest;
 
-    @Column(nullable = false)
+    @Column(name = "name_en", nullable = false)
     private String name;
 
     @Column(nullable = false)

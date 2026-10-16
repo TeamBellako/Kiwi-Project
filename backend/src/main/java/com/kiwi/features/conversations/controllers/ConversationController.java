@@ -14,15 +14,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/conversations")
 public class ConversationController {
-    
+
     private final ConversationService conversationService;
     private final UsersService usersService;
-    
+
     public ConversationController(ConversationService conversationService, UsersService usersService) {
         this.conversationService = conversationService;
         this.usersService = usersService;
     }
-    
+
     /**
      * GET /api/conversations/{id}
      * Obtener una conversation por ID con sus options.
@@ -45,6 +45,7 @@ public class ConversationController {
         Long userId = usersService.getUserByEmail(new Email(userDetails.getUsername()))
                 .orElseThrow()
                 .getId();
+
         conversationService.saveConversationOptions(userId, optionIds);
         return ResponseEntity.ok().build();
     }

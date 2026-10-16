@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -58,6 +59,7 @@ public class NodesIntegrationTests {
     @Autowired private NodesRepository nodesRepository;
     @Autowired private UserNodeStatusRepository statusRepository;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private JdbcTemplate jdbc;
 
     // ============================================================
     // HELPERS
@@ -105,6 +107,50 @@ public class NodesIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(4));
     }
+
+    @Test
+    @WithMockUser(username = "finn@thehuman.com")
+    public void getNodesForUser_usesSpanishDisplayName() throws Exception {
+        var user = createUser();
+        user.setLanguagePreference("en");
+        usersRepository.saveAndFlush(user);
+
+        var node = createNode(1L, 0);
+        node.setDisplayName("START");
+        nodesRepository.saveAndFlush(node);
+        jdbc.update("UPDATE nodes SET display_name_es = ? WHERE id = ?", "INICIO", node.getId());
+        statusRepository.saveAndFlush(openStatus(user.getId(), node.getId()));
+
+        mockMvc.perform(get(API_URL))
+                .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].displayName").value("START"));
+
+        user.setLanguagePreference("es");
+        usersRepository.saveAndFlush(user);
+        mockMvc.perform(get(API_URL))
+            .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].displayName").value("INICIO"));
+    }
+
+        @Test
+        @WithMockUser(username = "finn@thehuman.com")
+        public void getNodesForUser_missingLocalizedDisplayName_returnsEmptyString() throws Exception {
+        var user = createUser();
+        var node = createNode(1L, 0);
+        nodesRepository.saveAndFlush(node);
+        jdbc.update("UPDATE nodes SET display_name_en = NULL, display_name_es = NULL WHERE id = ?", node.getId());
+        statusRepository.saveAndFlush(openStatus(user.getId(), node.getId()));
+
+        mockMvc.perform(get(API_URL))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].displayName").value(""));
+
+        user.setLanguagePreference("es");
+        usersRepository.saveAndFlush(user);
+        mockMvc.perform(get(API_URL))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].displayName").value(""));
+        }
 
     @Test
     @WithMockUser(username = "finn@thehuman.com")

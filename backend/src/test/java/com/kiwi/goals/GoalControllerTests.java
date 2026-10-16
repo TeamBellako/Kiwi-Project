@@ -8,10 +8,12 @@ import com.kiwi.features.goals.controllers.GoalService;
 import com.kiwi.features.goals.data.UserGoalStatusDTO;
 import com.kiwi.features.goals.exceptions.GoalNotFoundException;
 import com.kiwi.features.goals.exceptions.GoalUnauthorizedException;
+import com.kiwi.features.localization.LocalizedDataService;
 import com.kiwi.features.users.controllers.CustomUserDetailsService;
 import com.kiwi.security.AuthEntryPointJwt;
 import com.kiwi.security.JwtUtils;
 import org.junit.Test;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,6 +31,7 @@ import static com.kiwi.goals.GoalsTestFactory.*;
 import static com.kiwi.utils.HTTPTestUtils.getPostRequestBuilder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +49,13 @@ public class GoalControllerTests {
     @MockitoBean private CustomUserDetailsService userDetailsService;
     @MockitoBean private AuthEntryPointJwt authEntryPointJwt;
     @MockitoBean private GoalService goalService;
+    @MockitoBean private LocalizedDataService localizedDataService;
+
+    @Before
+    public void setUp() {
+        when(localizedDataService.localizeGoalStatuses(anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+    }
 
     private final String baseAPIUrl = "/api/user/goals";
 

@@ -64,4 +64,9 @@ class SettingsFakeViewModel(
         setIsLoading(false)
         setUiState(UIState.Idle)
     }
+
+    override fun updateLanguagePreference(
+        language: String,
+        onSuccess: () -> Unit,
+    ) = Unit
 }

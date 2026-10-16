@@ -54,6 +54,11 @@ public class UsersTestRepositoryInMemory implements UsersRepository {
     }
 
     @Override
+    public void updateUserLanguage(Long userId, String language) {
+        findById(userId).ifPresent(user -> user.setLanguagePreference(language));
+    }
+
+    @Override
     public List<UsersPersistence> findAll() {
         return new ArrayList<>(store.values());
     }

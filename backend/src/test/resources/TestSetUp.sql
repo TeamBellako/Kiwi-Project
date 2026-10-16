@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS nodes (
   cord_x FLOAT NOT NULL,
   cord_y FLOAT NOT NULL,
   name VARCHAR(255) NOT NULL,
-  display_name VARCHAR(255),
+    display_name_en VARCHAR(255),
   map_id INT NOT NULL,
   is_first_node_of_map BOOLEAN DEFAULT FALSE,
   on_execution_action VARCHAR(255),
@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS nodes (
     AND cord_y >= 0.0 AND cord_y <= 1.0
   )
 );
+
+ALTER TABLE nodes ADD COLUMN IF NOT EXISTS display_name_es VARCHAR(255);
 
 -- Create node_edges table
 CREATE TABLE IF NOT EXISTS node_edges (
@@ -93,6 +95,8 @@ CREATE TABLE IF NOT EXISTS goals (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     action TEXT,
+    action_en TEXT,
+    action_es TEXT,
     target INT NOT NULL,
     type VARCHAR(50) NOT NULL,
     category VARCHAR(50) NOT NULL,
@@ -102,6 +106,35 @@ CREATE TABLE IF NOT EXISTS goals (
     on_completed_entity VARCHAR(255),
     on_completed_entity_id INT
 );
+
+ALTER TABLE quests ADD COLUMN IF NOT EXISTS name_en VARCHAR(255);
+ALTER TABLE quests ADD COLUMN IF NOT EXISTS name_es VARCHAR(255);
+ALTER TABLE quests ADD COLUMN IF NOT EXISTS description_en TEXT;
+ALTER TABLE quests ADD COLUMN IF NOT EXISTS description_es TEXT;
+ALTER TABLE subquests ADD COLUMN IF NOT EXISTS name_es VARCHAR(255);
+
+ALTER TABLE skills ADD COLUMN IF NOT EXISTS name_en VARCHAR(255);
+ALTER TABLE skills ADD COLUMN IF NOT EXISTS name_es VARCHAR(255);
+ALTER TABLE skills ADD COLUMN IF NOT EXISTS description_en TEXT;
+ALTER TABLE skills ADD COLUMN IF NOT EXISTS description_es TEXT;
+ALTER TABLE skills ADD COLUMN IF NOT EXISTS quote_en TEXT;
+ALTER TABLE skills ADD COLUMN IF NOT EXISTS quote_es TEXT;
+ALTER TABLE skills ADD COLUMN IF NOT EXISTS cooldown_other_description_en TEXT;
+ALTER TABLE skills ADD COLUMN IF NOT EXISTS cooldown_other_description_es TEXT;
+
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS dialog_en TEXT;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS dialog_es TEXT;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS dialog_m_en TEXT;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS dialog_m_es TEXT;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS dialog_w_en TEXT;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS dialog_w_es TEXT;
+
+ALTER TABLE conversation_options ADD COLUMN IF NOT EXISTS text_en VARCHAR(500);
+ALTER TABLE conversation_options ADD COLUMN IF NOT EXISTS text_es VARCHAR(500);
+ALTER TABLE conversation_options ADD COLUMN IF NOT EXISTS text_m_en VARCHAR(500);
+ALTER TABLE conversation_options ADD COLUMN IF NOT EXISTS text_m_es VARCHAR(500);
+ALTER TABLE conversation_options ADD COLUMN IF NOT EXISTS text_w_en VARCHAR(500);
+ALTER TABLE conversation_options ADD COLUMN IF NOT EXISTS text_w_es VARCHAR(500);
 
 -- Seed goal definitions used by tests (IDs: 1=exercise, 2=app, 3=skill)
 INSERT INTO goals (name, action, target, type, category, reward, difficulty, on_completed_action, on_completed_entity, on_completed_entity_id)
@@ -136,13 +169,16 @@ CREATE TABLE IF NOT EXISTS user_goal_progress (
 
 CREATE TABLE IF NOT EXISTS tips (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    text VARCHAR(255) NOT NULL,
+    title_en VARCHAR(255) NOT NULL,
+    text_en TEXT NOT NULL,
     read_more_url VARCHAR(255)
 );
 
-INSERT INTO tips (title, text, read_more_url) 
-    VALUES ('Pomodoro Timer', 'Just work, bro', 'https://www.todoist.com/es/productivity-methods/pomodoro-technique');
+ALTER TABLE tips ADD COLUMN IF NOT EXISTS title_es VARCHAR(255);
+ALTER TABLE tips ADD COLUMN IF NOT EXISTS text_es TEXT;
+
+INSERT INTO tips (title_en, title_es, text_en, text_es, read_more_url)
+    VALUES ('Pomodoro Timer', 'Pomodoro traducido', 'Just work, bro', 'Texto traducido', 'https://www.todoist.com/es/productivity-methods/pomodoro-technique');
     
 CREATE TABLE IF NOT EXISTS incidences (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -164,11 +200,11 @@ INSERT INTO combat_elements (id, name, icon, description) VALUES
 (6, 'Resilience',   6, '');
 
 INSERT INTO skills
-    (id, element_id, name, description, cooldown_type, cooldown_goal_id, cooldown_time_minutes, cooldown_other_description, levelup_skill_id) VALUES
-(1001, 1, 'Fake Attack', 'Deals 1 physical damage.', 'GOAL', 101, NULL, NULL, NULL),
-(1000, 2, 'Attack',     'Deals 40 physical damage.', 'GOAL',  100,  NULL, NULL, NULL),
-(1002, 5, 'Inner Focus', 'Grants you an extra turn on the next exchange.', 'GOAL', 102, NULL, NULL, NULL),
-(1003, 5, 'Mental Lock', 'Skips the opponent''s next turn.',              'GOAL', 103, NULL, NULL, NULL);
+    (id, element_id, name_en, name_es, description_en, description_es, cooldown_type, cooldown_goal_id, cooldown_time_minutes, cooldown_other_description_en, cooldown_other_description_es, levelup_skill_id) VALUES
+(1001, 1, 'Fake Attack', 'Fake Attack', 'Deals 1 physical damage.', 'Deals 1 physical damage.', 'GOAL', 101, NULL, NULL, NULL, NULL),
+(1000, 2, 'Attack', 'Attack', 'Deals 40 physical damage.', 'Deals 40 physical damage.', 'GOAL', 100, NULL, NULL, NULL, NULL),
+(1002, 5, 'Inner Focus', 'Inner Focus', 'Grants you an extra turn on the next exchange.', 'Grants you an extra turn on the next exchange.', 'GOAL', 102, NULL, NULL, NULL, NULL),
+(1003, 5, 'Mental Lock', 'Mental Lock', 'Skips the opponent''s next turn.', 'Skips the opponent''s next turn.', 'GOAL', 103, NULL, NULL, NULL, NULL);
 
 
 

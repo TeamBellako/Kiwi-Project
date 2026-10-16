@@ -60,7 +60,7 @@ private fun SettingsSupportScreenContent(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         SettingsSubScreenHeader(
-            title = "Support",
+            title = "support",
             navController = navController,
         )
 
@@ -70,7 +70,7 @@ private fun SettingsSupportScreenContent(navController: NavController) {
             horizontalMargin = Spacing.xLarge,
             textArguments =
                 KiwiTextArguments(
-                    "CONTACT US",
+                    "contact_us",
                     color = kiwiColors.color6,
                     fontWeight = FontWeight.Bold,
                 ),
@@ -84,7 +84,7 @@ private fun SettingsSupportScreenContent(navController: NavController) {
             horizontalMargin = Spacing.xLarge,
             textArguments =
                 KiwiTextArguments(
-                    "REPORT A BUG",
+                    "report_a_bug",
                     color = kiwiColors.color6,
                     fontWeight = FontWeight.Bold,
                 ),

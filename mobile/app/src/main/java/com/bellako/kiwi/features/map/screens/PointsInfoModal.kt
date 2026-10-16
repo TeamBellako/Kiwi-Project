@@ -48,7 +48,7 @@ fun PointsInfoModal(onDismiss: () -> Unit = {}) {
             ) {
                 Kiwi_H2(
                     KiwiTextArguments(
-                        "Points",
+                        "points_title",
                         TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         color = kiwiColors.colorF,
@@ -57,7 +57,7 @@ fun PointsInfoModal(onDismiss: () -> Unit = {}) {
 
                 Kiwi_P2(
                     KiwiTextArguments(
-                        "These are the points you've earned on your adventure.",
+                        "points_earned_message",
                         TextAlign.Center,
                         color = kiwiColors.colorF1,
                     ),
@@ -65,7 +65,7 @@ fun PointsInfoModal(onDismiss: () -> Unit = {}) {
 
                 Kiwi_P2(
                     KiwiTextArguments(
-                        "Spend them to unlock new nodes on the map.",
+                        "points_spend_message",
                         TextAlign.Center,
                         color = kiwiColors.colorF1,
                     ),
@@ -76,7 +76,7 @@ fun PointsInfoModal(onDismiss: () -> Unit = {}) {
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            "Got it",
+                            "got_it",
                             color = kiwiColors.colorF,
                             fontWeight = FontWeight.Bold,
                         ),

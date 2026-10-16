@@ -10,6 +10,7 @@ object ScreenRoutes {
     const val SETTINGS = "SETTINGS"
     const val SETTINGS_ACCOUNT = "SETTINGS_ACCOUNT"
     const val SETTINGS_AUDIO = "SETTINGS_AUDIO"
+    const val SETTINGS_LANGUAGE = "SETTINGS_LANGUAGE"
     const val SETTINGS_SUPPORT = "SETTINGS_SUPPORT"
     const val WIP = "WIP"
     const val OBJECTIVES = "OBJECTIVES"

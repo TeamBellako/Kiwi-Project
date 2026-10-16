@@ -1,11 +1,17 @@
 package com.bellako.kiwi
 
+import com.bellako.kiwi.common.services.eventbus.EventBus
+import com.bellako.kiwi.common.services.eventbus.EventPayload
+import com.bellako.kiwi.common.services.eventbus.EventType
 import com.bellako.kiwi.features.conversations.model.ConversationViewModel
 import com.bellako.kiwi.features.conversations.model.ConversationsRepository
 import com.bellako.kiwi.features.conversations.tests.ConversationsTestFactory
 import com.bellako.kiwi.features.incidences.model.UserIncidenceManager
 import com.bellako.kiwi.features.personality.model.PersonalityRepository
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -112,6 +118,36 @@ class ConversationViewModelTest {
 
             assertEquals(secondConversation, viewModel.active.value)
             assertTrue(viewModel.isVisible.value)
+        }
+
+    @Test
+    fun `next to another conversation emits outgoing completion event`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val firstConversation =
+                ConversationsTestFactory.chainedConversationDomain().copy(
+                    onCompletedEvent = "START_QUEST",
+                    onCompletedEntityId = 1,
+                )
+            val secondConversation = ConversationsTestFactory.endConversationDomain()
+
+            whenever(repository.getById(1L)).thenReturn(firstConversation)
+            whenever(repository.getById(2L)).thenReturn(secondConversation)
+
+            viewModel.start(1L)
+            advanceUntilIdle()
+
+            val emittedEvent =
+                async(start = CoroutineStart.UNDISPATCHED) {
+                    EventBus.eventFlow.first { (type, _) -> type == EventType.START_QUEST }
+                }
+
+            viewModel.next()
+            advanceUntilIdle()
+
+            val (type, payload) = emittedEvent.await()
+            assertEquals(EventType.START_QUEST, type)
+            assertEquals(1, (payload as EventPayload.EntityIdPayload).targetEntityId)
+            assertEquals(secondConversation, viewModel.active.value)
         }
 
     @Test

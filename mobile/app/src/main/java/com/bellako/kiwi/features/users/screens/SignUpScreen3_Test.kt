@@ -420,7 +420,7 @@ private fun BuildModal(
 
         Kiwi_H1(
             KiwiTextArguments(
-                "Your initial build is...",
+                "your_initial_build",
                 TextAlign.Center,
                 modifier =
                     Modifier
@@ -453,7 +453,7 @@ private fun BuildModal(
 
             Kiwi_P1(
                 KiwiTextArguments(
-                    text = "And these are your initial skills:",
+                    text = "initial_skills_intro",
                     TextAlign.Center,
                     modifier =
                         Modifier.padding(
@@ -504,7 +504,7 @@ private fun BuildModal(
             Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
-                        "Get Started",
+                        "get_started",
                         color = kiwiColors.color6,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(8.dp),

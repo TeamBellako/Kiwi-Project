@@ -48,7 +48,7 @@ internal fun CombatBackground(
     ) {
         Kiwi_Image(
             painterResourceId = resId,
-            alt = "Combat background",
+            alt = "",
             modifier =
                 Modifier
                     // requiredSize, not size — size would be coerced back to the

@@ -122,7 +122,7 @@ fun GoalComponent(
     ) {
         Kiwi_Image(
             R.drawable.daily_challenges_bg,
-            "Bar bg",
+            "",
             modifier = Modifier.fillMaxWidth(),
         )
 

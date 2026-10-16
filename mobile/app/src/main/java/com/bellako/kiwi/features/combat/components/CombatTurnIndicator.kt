@@ -24,6 +24,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_AnnotatedString_P2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
@@ -106,7 +107,7 @@ fun CombatTurnIndicator(
         ) {
             Kiwi_AnnotatedString_P2(
                 KiwiAnnotatedStringArguments(
-                    text = message,
+                    buildText = { message },
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 ),
@@ -115,7 +116,7 @@ fun CombatTurnIndicator(
 
         Kiwi_Image(
             painterResourceId = R.drawable.ic_dialogue_arrow,
-            alt = if (isLogOpen) "Close combat log" else "Open combat log",
+                alt = if (isLogOpen) "close_combat_log" else "open_combat_log",
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(CHEVRON_SIZE))
@@ -129,7 +130,7 @@ fun userTurnMessage(): AnnotatedString {
     val colors = LocalKiwiColors.current
     return buildAnnotatedString {
         withStyle(SpanStyle(color = colors.color7A, fontStyle = FontStyle.Italic)) {
-            append("IT'S YOUR TURN!")
+            append(ResourceProvider.stringResource("your_turn"))
         }
     }
 }

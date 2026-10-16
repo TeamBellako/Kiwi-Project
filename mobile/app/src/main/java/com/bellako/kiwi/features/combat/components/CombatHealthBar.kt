@@ -38,7 +38,6 @@ fun CombatHealthBar(
     maxHp: Int,
     modifier: Modifier = Modifier,
     fillTint: Color? = null,
-    label: String = "HP bar",
     // 0f = bar hidden, 1f = fully revealed. The reveal grows from the centre
     // outward toward both edges, used by the combat intro to introduce the bar.
     barRevealProgress: Float = 1f,
@@ -75,14 +74,14 @@ fun CombatHealthBar(
         ) {
             Kiwi_Image(
                 painterResourceId = R.drawable.health_bar_bg,
-                alt = "$label background",
+                alt = "",
                 modifier = Modifier.fillMaxWidth(),
                 contentScale = ContentScale.FillWidth,
             )
 
             Kiwi_Image(
                 painterResourceId = R.drawable.health_bar_fill,
-                alt = "$label fill",
+                alt = "",
                 modifier =
                     Modifier
                         .fillMaxWidth()

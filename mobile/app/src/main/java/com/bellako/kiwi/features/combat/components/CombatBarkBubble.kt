@@ -155,7 +155,7 @@ private fun BarkClickIndicator(modifier: Modifier = Modifier) {
     )
     Kiwi_Image(
         R.drawable.ic_dialogue_arrow,
-        "Tap to continue",
+        "tap_to_continue",
         modifier =
             modifier
                 .size(getResponsiveSizeWidth(BARK_ARROW_SIZE), getResponsiveSizeHeight(BARK_ARROW_SIZE))

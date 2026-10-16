@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.common.ResourceProvider
 import androidx.compose.ui.zIndex
 import com.bellako.kiwi.R
 import com.bellako.kiwi.audio.AudioManager
@@ -504,7 +505,7 @@ private fun PointsIndicator(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Info,
-                    contentDescription = "About points",
+                    contentDescription = ResourceProvider.stringResource("about_points"),
                     tint = kiwiColors.color6,
                     modifier = Modifier.size(getResponsiveSizeHeight(POINTS_INFO_ICON_SIZE)),
                 )
@@ -662,7 +663,7 @@ private fun InteractiveMap(
             // MAP
             Kiwi_Image(
                 painterResourceId = mapResourceId,
-                alt = "Interactive Map",
+                alt = "interactive_map",
                 modifier =
                     Modifier
                         .fillMaxSize()

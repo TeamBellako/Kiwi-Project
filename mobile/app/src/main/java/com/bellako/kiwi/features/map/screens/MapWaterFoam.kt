@@ -68,7 +68,7 @@ fun MapWaterFoam(modifier: Modifier = Modifier) {
     // the two line up. The swap is an instant pop — no fade.
     Kiwi_Image(
         painterResourceId = FOAM_FRAMES[frameIndex],
-        alt = "River foam",
+        alt = "",
         modifier = modifier,
         contentScale = ContentScale.FillBounds,
     )

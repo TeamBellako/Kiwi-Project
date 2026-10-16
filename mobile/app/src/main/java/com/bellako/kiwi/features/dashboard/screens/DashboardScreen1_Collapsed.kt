@@ -145,7 +145,7 @@ private fun CollapsedSummaryCard(
                         metricsState.currentGoodTimeSeconds > 0 || metricsState.currentBadTimeSeconds > 0,
                         false,
                         DashboardModalTestTags.GOOD_TIME,
-                        label = "Good Apps",
+                        label = "good_apps",
                     )
 
                     Kiwi_Spacer(Spacing.xSmall)
@@ -156,7 +156,7 @@ private fun CollapsedSummaryCard(
                         metricsState.currentGoodTimeSeconds > 0 || metricsState.currentBadTimeSeconds > 0,
                         false,
                         DashboardModalTestTags.BAD_TIME,
-                        label = "Evil Apps",
+                        label = "evil_apps",
                     )
                 }
             }

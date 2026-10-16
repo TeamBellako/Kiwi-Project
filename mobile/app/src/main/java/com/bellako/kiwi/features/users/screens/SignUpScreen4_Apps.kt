@@ -415,7 +415,7 @@ fun AppClassificationColumns(
 
         Kiwi_P2(
             KiwiTextArguments(
-                text = "Hold and drag to move apps",
+                text = "hold_and_drag_apps",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
@@ -470,7 +470,7 @@ fun AppClassificationColumns(
             horizontalMargin = Spacing.xLarge,
             textArguments =
                 KiwiTextArguments(
-                    "Confirm",
+                    "confirm",
                     textAlign = TextAlign.Center,
                 ),
             color = kiwiColors.color5A,
@@ -568,7 +568,7 @@ private fun AppColumnsRow(
                     .weight(1f),
         ) {
             ColumnApps(
-                title = "Good",
+                title = "good",
                 apps = appLists.goodApps,
                 draggingApp = draggingApp,
                 isLoading = isLoading,
@@ -581,7 +581,7 @@ private fun AppColumnsRow(
             )
 
             ColumnApps(
-                title = "Evil",
+                title = "evil",
                 apps = appLists.badApps,
                 draggingApp = draggingApp,
                 isLoading = isLoading,
@@ -601,7 +601,7 @@ private fun AppColumnsRow(
                     .weight(1f),
         ) {
             GridApps(
-                title = "Neutral",
+                title = "neutral",
                 apps = appLists.neutralApps,
                 draggingApp = draggingApp,
                 isLoading = isLoading,
@@ -701,7 +701,7 @@ fun AppItem(
         ) {
             Kiwi_Image(
                 painter = rememberDrawablePainter(app.icon),
-                alt = "app icon",
+                alt = app.name,
                 modifier = Modifier.size(APP_ICON_SIZE_DP),
             )
         }

@@ -3,6 +3,7 @@ package com.kiwi.features.quests.controllers;
 import com.kiwi.common.types.Email;
 import com.kiwi.features.quests.data.QuestDTO;
 import com.kiwi.features.quests.data.SubquestDTO;
+import com.kiwi.features.localization.LocalizedDataService;
 import com.kiwi.features.users.controllers.UsersService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,12 @@ public class QuestController {
 
     private final QuestService questService;
     private final UsersService usersService;
+        private final LocalizedDataService localizedDataService;
 
-    public QuestController(QuestService questService, UsersService usersService) {
+        public QuestController(QuestService questService, UsersService usersService, LocalizedDataService localizedDataService) {
         this.questService = questService;
         this.usersService = usersService;
+                this.localizedDataService = localizedDataService;
     }
 
     // ============================================================================================
@@ -36,7 +39,8 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        List<QuestDTO> quests = questService.getActiveQuestsForUser(userId);
+        List<QuestDTO> quests = localizedDataService.localizeQuests(
+                questService.getActiveQuestsForUser(userId));
         return ResponseEntity.ok(quests);
     }
 
@@ -48,7 +52,8 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        List<QuestDTO> quests = questService.getCompletedQuestsForUser(userId);
+        List<QuestDTO> quests = localizedDataService.localizeQuests(
+                questService.getCompletedQuestsForUser(userId));
         return ResponseEntity.ok(quests);
     }
 
@@ -65,7 +70,8 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        QuestDTO quest = questService.getQuestForUser(userId, questId);
+        QuestDTO quest = localizedDataService.localizeQuests(
+                List.of(questService.getQuestForUser(userId, questId))).get(0);
         return ResponseEntity.ok(quest);
     }
 
@@ -82,8 +88,8 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        SubquestDTO subquest =
-                questService.getSubquestForUser(userId, subquestId);
+        SubquestDTO subquest = localizedDataService.localizeSubquest(
+                questService.getSubquestForUser(userId, subquestId));
 
         return ResponseEntity.ok(subquest);
     }
@@ -101,7 +107,8 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        QuestDTO quest = questService.giveQuestToUser(userId, questId);
+        QuestDTO quest = localizedDataService.localizeQuests(
+                List.of(questService.giveQuestToUser(userId, questId))).get(0);
         return ResponseEntity.ok(quest);
     }
 
@@ -118,7 +125,8 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        QuestDTO result = questService.completeSubquest(userId, subquestId);
+        QuestDTO result = localizedDataService.localizeQuests(
+                List.of(questService.completeSubquest(userId, subquestId))).get(0);
         return ResponseEntity.ok(result);
     }
 
@@ -131,7 +139,8 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        QuestDTO result = questService.failSubquest(userId, subquestId);
+        QuestDTO result = localizedDataService.localizeQuests(
+                List.of(questService.failSubquest(userId, subquestId))).get(0);
         return ResponseEntity.ok(result);
     }
 }

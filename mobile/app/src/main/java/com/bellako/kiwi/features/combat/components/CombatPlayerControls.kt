@@ -66,7 +66,7 @@ internal fun PlayerControls(
                 currentHp = userActor.stats.currentHp,
                 maxHp = userActor.stats.maxHp,
                 fillTint = colors.color7C,
-                label = "Player HP",
+//                label = "Player HP",
                 modifier =
                     Modifier
                         .align(Alignment.CenterHorizontally)

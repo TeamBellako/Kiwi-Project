@@ -32,6 +32,11 @@ public class QuestTestRepositoryInMemory implements QuestRepository {
         return new ArrayList<>(db.quests.values());
     }
 
+    @Override
+    public List<LocalizedQuest> findLocalizedByIds(List<Integer> ids) {
+        return List.of();
+    }
+
     // ---- unused methods ----
 
     @Override public List<QuestPersistence> findAll(Sort sort) { return findAll(); }

@@ -48,7 +48,7 @@ fun SkillsInfoModal(onDismiss: () -> Unit = {}) {
             ) {
                 Kiwi_H2(
                     KiwiTextArguments(
-                        "Managing Your Deck",
+                        "managing_your_deck",
                         TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         color = kiwiColors.colorF,
@@ -57,7 +57,7 @@ fun SkillsInfoModal(onDismiss: () -> Unit = {}) {
 
                 Kiwi_P2(
                     KiwiTextArguments(
-                        "Hold a skill to equip it to your deck, or to un-equip it.",
+                        "hold_skill_to_equip",
                         TextAlign.Center,
                         color = kiwiColors.colorF1,
                     ),
@@ -65,7 +65,7 @@ fun SkillsInfoModal(onDismiss: () -> Unit = {}) {
 
                 Kiwi_P2(
                     KiwiTextArguments(
-                        "Tap a skill to view its details.",
+                        "tap_skill_details",
                         TextAlign.Center,
                         color = kiwiColors.colorF1,
                     ),
@@ -76,7 +76,7 @@ fun SkillsInfoModal(onDismiss: () -> Unit = {}) {
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            "Got it",
+                            "got_it",
                             color = kiwiColors.colorF,
                             fontWeight = FontWeight.Bold,
                         ),

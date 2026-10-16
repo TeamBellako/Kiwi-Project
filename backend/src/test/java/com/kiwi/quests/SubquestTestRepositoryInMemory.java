@@ -36,6 +36,25 @@ public class SubquestTestRepositoryInMemory implements SubquestRepository {
     }
 
     @Override
+    public List<LocalizedSubquest> findLocalizedByIds(List<Integer> ids) {
+        return ids.stream()
+                .map(db.subquests::get)
+                .filter(Objects::nonNull)
+                .<LocalizedSubquest>map(subquest -> new LocalizedSubquest() {
+                    @Override
+                    public Integer getId() {
+                        return subquest.getId();
+                    }
+
+                    @Override
+                    public String getName() {
+                        return subquest.getName();
+                    }
+                })
+                .toList();
+    }
+
+    @Override
     public List<SubquestPersistence> findAll() {
         return new ArrayList<>(db.subquests.values());
     }

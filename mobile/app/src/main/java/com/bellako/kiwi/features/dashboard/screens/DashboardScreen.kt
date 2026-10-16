@@ -275,7 +275,7 @@ private fun Header(
         ) {
             Kiwi_H3(
                 KiwiTextArguments(
-                    ":: Daily Progress ::",
+                    "daily_progress",
                     TextAlign.Center,
                     LocalKiwiColors.current.color6,
                 ),
@@ -310,7 +310,7 @@ private fun LayoutChevron(
     ) {
         Kiwi_Image(
             R.drawable.ic_dialogue_arrow,
-            "Layout chevron",
+            "",
             modifier =
                 Modifier
                     .size(getResponsiveSizeHeight(14.dp))

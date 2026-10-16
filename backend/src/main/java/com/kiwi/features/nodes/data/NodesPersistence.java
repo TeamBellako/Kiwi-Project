@@ -30,7 +30,7 @@ public class NodesPersistence {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "display_name")
+    @Column(name = "display_name_en")
     private String displayName;
 
     @Column(name = "map_id")

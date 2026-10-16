@@ -158,7 +158,7 @@ fun DialogueScreen(
                 }
                 Kiwi_Image(
                     R.drawable.dialogue_small_frame,
-                    "Character frame",
+                    "",
                 )
                 Box(
                     contentAlignment = Alignment.BottomCenter,
@@ -174,7 +174,7 @@ fun DialogueScreen(
             ) {
                 Kiwi_Image(
                     R.drawable.dialogue_small_bg,
-                    "Dialogue frame",
+                    "",
                     contentScale = ContentScale.FillWidth,
                 )
                 // Scroll-up advance: the current line slides up and out the
@@ -217,7 +217,7 @@ fun DialogueScreen(
                 }
                 Kiwi_Image(
                     R.drawable.ic_dialogue_arrow,
-                    "Arrow",
+                    "",
                     modifier =
                         Modifier
                             .align(Alignment.BottomCenter)

@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,6 +48,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -58,9 +62,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
+import com.bellako.kiwi.common.AppLanguageManager
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.common.data.ScreenRoutes
 import com.bellako.kiwi.common.data.UIState
 import com.bellako.kiwi.common.screens.components.KiwiAnnotatedStringArguments
@@ -73,6 +81,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_InfoBox
 import com.bellako.kiwi.common.screens.components.Kiwi_InputField
 import com.bellako.kiwi.common.screens.components.Kiwi_Label2
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.LanguageFlagButton
 import com.bellako.kiwi.common.screens.components.LoadingModal
 import com.bellako.kiwi.common.screens.modals.ErrorModalScreen
 import com.bellako.kiwi.features.personality.data.PersonalityState
@@ -133,9 +142,12 @@ fun LogInScreen(
                     }
                 })
             }
+
             else -> {
+                // Background elements first (including scrolling background)
                 ScrollingLoginBackground(imgPercentage)
 
+                // Content elements - login form and flag button
                 Box(
                     modifier =
                         Modifier
@@ -165,6 +177,15 @@ fun LogInScreen(
                     usersUiState = usersUiState,
                     personalityViewModel = personalityViewModel,
                     navController = navController,
+                )
+
+                // Flag button on top of everything - ensure it's positioned properly
+                LanguageFlagButton(
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(Spacing.medium)
+                            .zIndex(1f),
                 )
             }
         }
@@ -264,7 +285,7 @@ private fun LoginBackgroundImage(
 ) {
     Kiwi_Image(
         R.drawable.login_bg,
-        "Login Background",
+        "",
         modifier =
             Modifier
                 .requiredWidth(width)
@@ -381,7 +402,7 @@ private fun LogInForm(
             label = {
                 Kiwi_Label2(
                     KiwiTextArguments(
-                        "Email",
+                        "email",
                         color = kiwiColors.color7B,
                     ),
                 )
@@ -401,7 +422,7 @@ private fun LogInForm(
             label = {
                 Kiwi_Label2(
                     KiwiTextArguments(
-                        "Password",
+                        "password",
                         color = kiwiColors.color7B,
                     ),
                 )
@@ -417,7 +438,7 @@ private fun LogInForm(
         Kiwi_FixedSizeButton(
             textArguments =
                 KiwiTextArguments(
-                    "LOG IN",
+                    "login",
                     color = kiwiColors.colorF,
                     fontWeight = FontWeight.Bold,
                 ),
@@ -450,7 +471,7 @@ private fun WelcomeText() {
     ) {
         Kiwi_H1(
             KiwiTextArguments(
-                "Welcome Back,\nKnight",
+                "welcome_back_knight",
                 TextAlign.Center,
                 color = kiwiColors.colorF,
                 fontWeight = FontWeight.Bold,
@@ -460,7 +481,7 @@ private fun WelcomeText() {
 
         Kiwi_Image(
             R.drawable.growtale_icon,
-            "GrowTale icon",
+            "growtale_icon",
             modifier = Modifier.size(getResponsiveSizeHeight(64.dp)),
         )
     }
@@ -474,7 +495,9 @@ private fun LogInErrorMessage(usersUiState: UIState<Unit>) {
         when (usersUiState) {
             is UIState.Error -> {
                 usersUiState.message
-            } else -> {
+            }
+
+            else -> {
                 ""
             }
         }
@@ -532,11 +555,15 @@ private suspend fun performLogin(
                         usersViewModel.setShowAppLoading(false)
                         navController.navigate(ScreenRoutes.SIGNUP3_TEST)
                     }
+
                     needsApps -> {
                         usersViewModel.setShowAppLoading(false)
                         navController.navigate(ScreenRoutes.SIGNUP4_APPS)
                     }
-                    else -> navController.navigate(ScreenRoutes.HOME)
+
+                    else -> {
+                        navController.navigate(ScreenRoutes.HOME)
+                    }
                 }
             },
             onFailure = {
@@ -554,42 +581,41 @@ private suspend fun performLogin(
 private fun SignUp(onSignUp: () -> Unit) {
     val kiwiColors = LocalKiwiColors.current
 
-    val annotatedString =
-        buildAnnotatedString {
-            withStyle(
-                style =
-                    SpanStyle(
-                        color = kiwiColors.color6,
-                    ),
-            ) {
-                append("First Time? \nStart Your Adventure ")
-            }
-
-            withLink(
-                link =
-                    LinkAnnotation.Clickable(
-                        tag = "HERE",
-                        linkInteractionListener = {
-                            onSignUp()
-                        },
-                    ),
-            ) {
-                withStyle(
-                    style =
-                        SpanStyle(
-                            color = kiwiColors.color7B,
-                            textDecoration = TextDecoration.Underline,
-                        ),
-                ) {
-                    append("Here")
-                }
-            }
-        }
-
     Kiwi_AnnotatedString_P2(
         KiwiAnnotatedStringArguments(
-            annotatedString,
-            TextAlign.Center,
+            buildText = { resolve ->
+                buildAnnotatedString {
+                    withStyle(
+                        style =
+                            SpanStyle(
+                                color = kiwiColors.color6,
+                            ),
+                    ) {
+                        append(resolve("first_time"))
+                    }
+
+                    withLink(
+                        link =
+                            LinkAnnotation.Clickable(
+                                tag = "HERE",
+                                linkInteractionListener = {
+                                    onSignUp()
+                                },
+                            ),
+                    ) {
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = kiwiColors.color7B,
+                                    textDecoration = TextDecoration.Underline,
+                                ),
+                        ) {
+                            append(resolve("here"))
+                        }
+                    }
+                }
+            },
+            textAlign = TextAlign.Center,
         ),
     )
 }

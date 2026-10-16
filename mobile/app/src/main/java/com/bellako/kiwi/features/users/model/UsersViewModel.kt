@@ -35,6 +35,8 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import java.time.LocalDate
 
+private val Context.dataStore by preferencesDataStore("secure_prefs")
+
 @HiltViewModel
 class UsersViewModel
     @Inject
@@ -140,7 +142,6 @@ class UsersViewModel
 
         // -----------------------------------------------------------------------------------------
 
-        private val Context.dataStore by preferencesDataStore("secure_prefs")
         private val prefFileName = "prefs"
         private val keysetName = "usersKeyset"
         private val usernameDataKey = stringPreferencesKey("username_key")

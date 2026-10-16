@@ -21,6 +21,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,6 +53,7 @@ class SettingsViewModel
         private var previousSettingsDomain: SettingsDomain? = null
 
         private val pendingSave = MutableStateFlow<SettingsDomain?>(null)
+        private var languageUpdateJob: Job? = null
 
         // ---------------------------------------------------------------------------------------------
 
@@ -96,6 +98,23 @@ class SettingsViewModel
             updateVolume()
             previousValidSettingsDomain = currentDomain
             pendingSave.value = newDomain
+        }
+
+        override fun updateLanguagePreference(
+            language: String,
+            onSuccess: () -> Unit,
+        ) {
+            languageUpdateJob?.cancel()
+            languageUpdateJob = viewModelScope.launch {
+                setUiState(UIState.Idle)
+                repository.updateLanguagePreference(language).fold(
+                    onSuccess = {
+                        setUiState(UIState.Success(Unit))
+                        onSuccess()
+                    },
+                    onFailure = { setUiState(mapExceptionToUIState(it)) },
+                )
+            }
         }
 
         // ---------------------------------------------------------------------------------------------

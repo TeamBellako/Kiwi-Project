@@ -2,6 +2,7 @@ package com.bellako.kiwi.features.users.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SignUpScreen(
     showSmoke: Boolean = true,
-    content: @Composable () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
         modifier =
@@ -33,7 +34,7 @@ fun SignUpScreen(
     ) {
         Kiwi_Image(
             R.drawable.ph_onboarding_bkg,
-            "Sign Up Background",
+            "",
             modifier =
                 Modifier
                     .fillMaxSize()

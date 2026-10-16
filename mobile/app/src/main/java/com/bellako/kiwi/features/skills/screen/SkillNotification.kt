@@ -44,9 +44,9 @@ fun SkillNotification(
 ) {
     val notificationInfo =
         if (type == SkillNotificationType.NEW) {
-            "New Skill acquired!"
+            "new_skill_acquired"
         } else {
-            "Skill ready to use!"
+            "skill_ready_to_use"
         }
     val skillName = skill.name
 
@@ -69,7 +69,7 @@ fun SkillNotification(
     ) {
         Image(
             painter = painterResource(id = R.drawable.generic_notification),
-            contentDescription = "Skill notification background",
+            contentDescription = null,
             modifier = Modifier.fillMaxWidth(),
         )
         Row(
@@ -81,7 +81,7 @@ fun SkillNotification(
         ) {
             Kiwi_Image(
                 painter = painterResource(id = skill.icon),
-                alt = "Skill icon",
+                alt = skill.name,
                 colorFilter = ColorFilter.tint(kiwiColor.colorF),
                 modifier =
                     Modifier

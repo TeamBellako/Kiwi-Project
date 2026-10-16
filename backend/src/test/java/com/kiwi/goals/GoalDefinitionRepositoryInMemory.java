@@ -44,12 +44,33 @@ public class GoalDefinitionRepositoryInMemory implements GoalRepository {
     }
 
     @Override
-    public List<GoalPersistence> findTwoRandomForUser(Long userId) {
+    public List<LocalizedGoal> findTwoRandomForUser(Long userId) {
         List<GoalPersistence> all = new ArrayList<>(store.values());
         all.removeIf(goal -> goal.getCategory() != GoalCategory.DAILY_CHALLENGES);
         all.removeIf(goal -> goal.getDifficulty() != null && goal.getDifficulty() != 1);
         Collections.shuffle(all);
-        return all.stream().limit(2).toList();
+        return all.stream().limit(2).map(this::toLocalizedGoal).toList();
+    }
+
+    private LocalizedGoal toLocalizedGoal(GoalPersistence goal) {
+        return new LocalizedGoal() {
+            @Override public Long getId() { return goal.getId(); }
+            @Override public String getName() { return goal.getName(); }
+            @Override public String getAction() { return goal.getAction(); }
+            @Override public Integer getTarget() { return goal.getTarget(); }
+            @Override public String getType() { return goal.getType().name(); }
+            @Override public String getCategory() { return goal.getCategory().name(); }
+            @Override public Integer getReward() { return goal.getReward(); }
+            @Override public Integer getDifficulty() { return goal.getDifficulty(); }
+            @Override public String getOnCompletedAction() { return goal.getOnCompletedAction(); }
+            @Override public String getOnCompletedEntity() { return goal.getOnCompletedEntity(); }
+            @Override public Integer getOnCompletedEntityId() { return goal.getOnCompletedEntityId(); }
+        };
+    }
+
+    @Override
+    public List<LocalizedGoal> findLocalizedByIds(List<Long> ids) {
+        return List.of();
     }
 
     @Override

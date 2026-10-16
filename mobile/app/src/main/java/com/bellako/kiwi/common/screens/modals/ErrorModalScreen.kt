@@ -38,12 +38,9 @@ import com.bellako.kiwi.ui.getResponsiveSizeHeight
 @Composable
 fun ErrorModalScreen(
     modifier: Modifier = Modifier,
-    message: String =
-        "Wild Error Appeared!",
-    subMessage: String =
-        "Uh-oh! It seems a careless scribe forgot to write this part of the story.\n\n" +
-            "Let's get back on track!",
-    buttonMessage: String = "RETRY",
+    message: String = "error_modal_title",
+    subMessage: String = "error_modal_message",
+    buttonMessage: String = "retry",
     onButtonClick: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
@@ -90,7 +87,7 @@ private fun ErrorModalLayout(
     ) {
         Icon(
             imageVector = Icons.Filled.Warning,
-            contentDescription = "Error icon",
+            contentDescription = null,
             tint = kiwiColors.colorR,
             modifier =
                 Modifier

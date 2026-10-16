@@ -71,7 +71,7 @@ fun GoalConfirmCompletionModal(
             ) {
                 Kiwi_Image(
                     R.drawable.dialogue_small_bg,
-                    "Confirm completion frame",
+                    "",
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -89,7 +89,7 @@ fun GoalConfirmCompletionModal(
                 ) {
                     Kiwi_H1(
                         KiwiTextArguments(
-                            "Goal Reached!",
+                            "goal_reached",
                             TextAlign.Center,
                             color = kiwiColor.color6,
                             fontWeight = FontWeight.Bold,
@@ -98,17 +98,18 @@ fun GoalConfirmCompletionModal(
                     )
                     Kiwi_P1(
                         KiwiTextArguments(
-                            "Confirm to complete this goal and earn +$rewardPoints points.",
+                            "confirm_goal_completion",
                             TextAlign.Center,
                             color = kiwiColor.color6,
                             modifier = Modifier.fillMaxWidth(),
+                            formatArgs = listOf(rewardPoints),
                         ),
                     )
                     Kiwi_FixedSizeButton(
                         horizontalMargin = Spacing.xLarge,
                         textArguments =
                             KiwiTextArguments(
-                                "CONFIRM",
+                                "confirm",
                                 color = kiwiColor.color6,
                                 fontWeight = FontWeight.Bold,
                             ),

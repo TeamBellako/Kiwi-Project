@@ -23,6 +23,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.bellako.kiwi.R
@@ -36,6 +37,7 @@ import com.bellako.kiwi.common.screens.components.Kiwi_FixedSizeButton
 import com.bellako.kiwi.common.screens.components.Kiwi_H2
 import com.bellako.kiwi.common.screens.components.Kiwi_Image
 import com.bellako.kiwi.common.screens.components.Kiwi_Spacer
+import com.bellako.kiwi.common.screens.components.LanguageFlagButton
 import com.bellako.kiwi.common.tests.CommonTestTags
 import com.bellako.kiwi.features.users.data.UsersState
 import com.bellako.kiwi.features.users.model.IUsersViewModel
@@ -55,6 +57,15 @@ fun SignUpScreen1_Welcome(
         Welcome(
             viewModel,
             navController,
+        )
+
+        // Language flag button - positioned in top-right corner
+        LanguageFlagButton(
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(Spacing.medium)
+                    .zIndex(1f),
         )
 
         Box(
@@ -89,7 +100,7 @@ private fun Welcome(
     ) {
         Kiwi_Image(
             R.drawable.growtale_icon,
-            "GrowTale icon",
+            "growtale_icon",
             modifier = Modifier.size(getResponsiveSizeHeight(96.dp)),
         )
 
@@ -97,7 +108,7 @@ private fun Welcome(
 
         Kiwi_H2(
             KiwiTextArguments(
-                "Your Legend is About\nTo Be Forged...",
+                "your_legend",
                 textAlign = TextAlign.Center,
                 color = kiwiColors.color6,
                 fontWeight = FontWeight.Bold,
@@ -110,7 +121,7 @@ private fun Welcome(
             horizontalMargin = Spacing.medium,
             textArguments =
                 KiwiTextArguments(
-                    "LET'S DO IT",
+                    "lets_do_it",
                     color = kiwiColors.colorF,
                     fontWeight = FontWeight.Bold,
                 ),
@@ -130,42 +141,41 @@ private fun Welcome(
 @Composable
 internal fun GoToLogIn(onSignUp: () -> Unit) {
     val kiwiColors = LocalKiwiColors.current
-    val annotatedString =
-        buildAnnotatedString {
-            withStyle(
-                style =
-                    SpanStyle(
-                        color = kiwiColors.color6,
-                    ),
-            ) {
-                append("Not Your First Time?\nContinue Your Adventure By\n")
-            }
-
-            withLink(
-                link =
-                    LinkAnnotation.Clickable(
-                        tag = "HERE",
-                        linkInteractionListener = {
-                            onSignUp()
-                        },
-                    ),
-            ) {
-                withStyle(
-                    style =
-                        SpanStyle(
-                            color = kiwiColors.color7B,
-                            textDecoration = TextDecoration.Underline,
-                        ),
-                ) {
-                    append("Logging In")
-                }
-            }
-        }
-
     Kiwi_AnnotatedString_P2(
         KiwiAnnotatedStringArguments(
-            annotatedString,
-            TextAlign.Center,
+            buildText = { resolve ->
+                buildAnnotatedString {
+                    withStyle(
+                        style =
+                            SpanStyle(
+                                color = kiwiColors.color6,
+                            ),
+                    ) {
+                        append(resolve("not_first_time"))
+                    }
+
+                    withLink(
+                        link =
+                            LinkAnnotation.Clickable(
+                                tag = "HERE",
+                                linkInteractionListener = {
+                                    onSignUp()
+                                },
+                            ),
+                    ) {
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = kiwiColors.color7B,
+                                    textDecoration = TextDecoration.Underline,
+                                ),
+                        ) {
+                            append(resolve("logging_in"))
+                        }
+                    }
+                }
+            },
+            textAlign = TextAlign.Center,
         ),
     )
 }

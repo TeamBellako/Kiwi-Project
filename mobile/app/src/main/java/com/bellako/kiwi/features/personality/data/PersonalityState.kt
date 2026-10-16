@@ -11,93 +11,93 @@ data class PersonalityState(
     val questions: List<Question> =
         listOf(
             Question(
-                question = "When you finally have free time, what usually happens?",
+                question = "personality_free_time_question",
                 options =
                     listOf(
-                        "I want to do many things but end up doing very little",
-                        "I relax with something easy like videos or scrolling",
-                        "I use the time to get important things done",
+                        "personality_free_time_many_plans",
+                        "personality_free_time_relax",
+                        "personality_free_time_get_things_done",
                     ),
             ),
             Question(
-                question = "Which sentence best describes your relationship with your phone?",
+                question = "personality_phone_question",
                 options =
                     listOf(
-                        "I use it for everything, even when I try to focus",
-                        "I use it mainly to disconnect or entertain myself",
-                        "I use it with clear goals like organizing or learning",
+                        "personality_phone_everything",
+                        "personality_phone_disconnect",
+                        "personality_phone_clear_goals",
                     ),
             ),
             Question(
-                question = "What stresses you the most lately?",
+                question = "personality_stress_question",
                 options =
                     listOf(
-                        "Feeling like I could be doing more",
-                        "Being bored or missing out on something",
-                        "Not doing things as well as I want",
+                        "personality_stress_doing_more",
+                        "personality_stress_missing_out",
+                        "personality_stress_not_well_enough",
                     ),
             ),
             Question(
-                question = "What motivates you the most to keep going?",
+                question = "personality_motivation_question",
                 options =
                     listOf(
-                        "Feeling better about myself",
-                        "Having fun and feeling engaged",
-                        "Seeing clear and meaningful progress",
+                        "personality_motivation_self",
+                        "personality_motivation_fun",
+                        "personality_motivation_progress",
                     ),
             ),
             Question(
-                question = "When an activity is slow or repetitive...",
+                question = "personality_repetitive_question",
                 options =
                     listOf(
-                        "My mind starts drifting to other things",
-                        "I quit and look for something more entertaining",
-                        "I push through because I know it’s worth it",
+                        "personality_repetitive_distracted",
+                        "personality_repetitive_quit",
+                        "personality_repetitive_persist",
                     ),
             ),
             Question(
-                question = "On social media, you usually...",
+                question = "personality_social_media_question",
                 options =
                     listOf(
-                        "Feel inspired but also compare yourself to others",
-                        "Look mainly for entertainment and trends",
-                        "Follow accounts that genuinely add value",
+                        "personality_social_media_compare",
+                        "personality_social_media_entertainment",
+                        "personality_social_media_value",
                     ),
             ),
             Question(
-                question = "When you feel mentally tired...",
+                question = "personality_mental_fatigue_question",
                 options =
                     listOf(
-                        "I keep pushing even if my performance drops",
-                        "I distract myself so I don’t have to think",
-                        "I stop and try to reorganize myself",
+                        "personality_mental_fatigue_push",
+                        "personality_mental_fatigue_distract",
+                        "personality_mental_fatigue_reorganize",
                     ),
             ),
             Question(
-                question = "You learn best when...",
+                question = "personality_learning_question",
                 options =
                     listOf(
-                        "You experiment and learn as you go",
-                        "It’s short, visual, and entertaining",
-                        "You understand the theory and the why",
+                        "personality_learning_experiment",
+                        "personality_learning_visual",
+                        "personality_learning_theory",
                     ),
             ),
             Question(
-                question = "If no one sets a pace for you...",
+                question = "personality_pace_question",
                 options =
                     listOf(
-                        "I struggle to prioritize",
-                        "I go with the flow depending on how I feel",
-                        "I organize myself naturally",
+                        "personality_pace_prioritize",
+                        "personality_pace_flow",
+                        "personality_pace_organize",
                     ),
             ),
             Question(
-                question = "When you face a tough choice, what do you trust most?",
+                question = "personality_tough_choice_question",
                 options =
                     listOf(
-                        "My gut feeling",
-                        "Logical reasoning",
-                        "How others might feel",
+                        "personality_tough_choice_gut",
+                        "personality_tough_choice_logic",
+                        "personality_tough_choice_empathy",
                     ),
             ),
         )

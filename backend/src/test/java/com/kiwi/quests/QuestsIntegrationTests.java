@@ -13,12 +13,14 @@ import com.kiwi.features.quests.data.QuestPersistence;
 import com.kiwi.features.quests.data.QuestStatus;
 import com.kiwi.features.quests.data.SubquestPersistence;
 import com.kiwi.features.quests.data.SubquestStatus;
+import com.kiwi.features.localization.LocalizedDataService;
 import com.kiwi.features.users.controllers.UsersRepository;
 import com.kiwi.features.users.data.UsersDataMapper;
 import com.kiwi.features.users.data.UsersDomain;
 import com.kiwi.features.users.data.UsersPersistence;
 import com.kiwi.security.JwtUtils;
 import jakarta.transaction.Transactional;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +30,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static com.kiwi.quests.QuestTestFactory.*;
 import static com.kiwi.users.UsersTestFactory.validLoginDTO;
 import static com.kiwi.users.UsersTestFactory.validUserDTO;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -94,17 +101,38 @@ public class QuestsIntegrationTests {
     @WithMockUser(username = "finn@thehuman.com")
     public void getActiveQuests() throws Exception {
         var user = createUser();
+        user.setLanguagePreference("en");
+        usersRepository.saveAndFlush(user);
 
         var q1 = createQuestWithSubquests(1, 1);
         var q2 = createQuestWithSubquests(2, 2);
         var q3 = createQuestWithSubquests(4, 3);
+
+        jdbc.update("UPDATE quests SET name_en = ?, name_es = ?, description_en = ?, description_es = ? WHERE id IN (?, ?)",
+            "English quest", "Mision traducida", "English description", "Descripcion traducida", q1.getId(), q2.getId());
+        assertEquals("English quest", questRepository.findLocalizedByIds(List.of(q1.getId()))
+                .get(0).getName());
+        assertEquals("English description", questRepository.findLocalizedByIds(List.of(q1.getId()))
+            .get(0).getDescription());
 
         questStatusRepository.saveAndFlush(activeQuestStatus(user.getId(), q1));
         questStatusRepository.saveAndFlush(activeQuestStatus(user.getId(), q2));
 
         mockMvc.perform(get(API_URL + "/active"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].name").value("English quest"))
+            .andExpect(jsonPath("$[0].description").value("English description"));
+
+        user.setLanguagePreference("es");
+        usersRepository.saveAndFlush(user);
+        assertEquals("es", usersRepository.findByEmail(user.getEmail()).orElseThrow().getLanguagePreference());
+        mockMvc.perform(get(API_URL + "/active"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].name").value("Mision traducida"))
+            .andExpect(jsonPath("$[0].description").value("Descripcion traducida"))
+            .andExpect(jsonPath("$[1].name").value("Mision traducida"));
     }
 
     @Test

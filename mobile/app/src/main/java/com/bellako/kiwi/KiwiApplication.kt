@@ -2,6 +2,7 @@ package com.bellako.kiwi
 
 import android.app.Application
 import androidx.core.content.edit
+import com.bellako.kiwi.common.AppLanguageManager
 import com.bellako.kiwi.analytics.FirebaseEventNames
 import com.bellako.kiwi.analytics.firebaseInit
 import com.bellako.kiwi.analytics.firebaseLogEvent
@@ -12,7 +13,10 @@ class KiwiApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        com.bellako.kiwi.common.ResourceProvider.init(this)
+        AppLanguageManager.initialize(this)
         firebaseInit(this)
+
 
         val prefs = getSharedPreferences("kiwi_prefs", MODE_PRIVATE)
         val isFirstOpen = prefs.getBoolean("is_first_open", true)

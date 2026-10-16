@@ -47,15 +47,15 @@ fun GoalsNotification(
 ) {
     val header =
         if (type == GoalNotificationType.NEW) {
-            "New Daily Goals!"
+            "new_daily_goals_title"
         } else {
-            "Yesterday's Challenge"
+            "yesterdays_challenge_title"
         }
     val body =
         if (type == GoalNotificationType.NEW) {
-            "What can you accomplish today?"
+            "daily_goals_prompt"
         } else {
-            "Let's check what you accomplished"
+            "review_goals_prompt"
         }
 
     val kiwiColor = LocalKiwiColors.current
@@ -87,7 +87,7 @@ fun GoalsNotification(
             ) {
                 Kiwi_Image(
                     painter = painterResource(id = goalIcon(goals[0].type)),
-                    alt = "Goal icon",
+                    alt = "",
                     colorFilter = ColorFilter.tint(kiwiColor.colorF),
                     modifier =
                         Modifier
@@ -98,7 +98,7 @@ fun GoalsNotification(
                 if (goals.size > 1) {
                     Kiwi_Image(
                         painter = painterResource(id = goalIcon(goals[1].type)),
-                        alt = "Goal icon",
+                        alt = "",
                         colorFilter = ColorFilter.tint(kiwiColor.colorF),
                         modifier =
                             Modifier

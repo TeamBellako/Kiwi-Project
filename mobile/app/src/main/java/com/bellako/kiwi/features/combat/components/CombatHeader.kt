@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.common.screens.components.KiwiTextArguments
 import com.bellako.kiwi.common.screens.components.Kiwi_H3
 import com.bellako.kiwi.ui.Kiwi_Theme
@@ -58,7 +59,7 @@ fun CombatHeader(
         ) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Close combat",
+                contentDescription = ResourceProvider.stringResource("close_combat"),
                 tint = colors.colorF,
                 modifier = Modifier.size(getResponsiveSizeHeight(HEADER_ICON_SIZE)),
             )
@@ -87,7 +88,7 @@ fun CombatHeader(
 fun CombatHeader_Preview() {
     Kiwi_Theme {
         CombatHeader(
-            title = "Ongoing Combat",
+            title = "ongoing_combat",
             onClose = {},
         )
     }

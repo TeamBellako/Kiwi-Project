@@ -17,10 +17,10 @@ public class TipPersistence {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false)
+    @Column(name = "title_en", nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(name = "text_en", nullable = false, columnDefinition = "TEXT")
     private String text;
 
     @Column(name = "read_more_url")

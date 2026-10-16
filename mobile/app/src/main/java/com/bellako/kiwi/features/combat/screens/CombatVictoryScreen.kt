@@ -130,7 +130,7 @@ fun CombatVictoryScreen(
             Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
-                        text = "Continue",
+                        text = "continue_button",
                         color = colors.colorF,
                         fontWeight = FontWeight.Bold,
                     ),
@@ -169,7 +169,7 @@ private fun VictoryHeader() {
     ) {
         Kiwi_H3(
             KiwiTextArguments(
-                text = "Results",
+                text = "results",
                 color = colors.colorF,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -187,7 +187,7 @@ private fun VictoryBanner() {
     ) {
         Kiwi_H2(
             KiwiTextArguments(
-                text = "You Have Won!",
+                text = "combat_victory_title",
                 color = colors.colorF,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -197,7 +197,7 @@ private fun VictoryBanner() {
         Kiwi_Spacer(Spacing.small)
         Kiwi_P2(
             KiwiTextArguments(
-                text = "Your Inner Spirit Grows",
+                text = "combat_victory_subtitle",
                 color = colors.color7A,
                 italic = true,
                 textAlign = TextAlign.Center,
@@ -213,7 +213,7 @@ private fun VictoryBackground(background: String?) {
     val resId = AssetResolver.drawable(LocalContext.current, background) ?: return
     Kiwi_Image(
         painterResourceId = resId,
-        alt = "Combat background",
+        alt = "",
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,
     )

@@ -421,7 +421,7 @@ fun Kiwi_Button_Preview() {
             Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
-                        "BUTTON",
+                        "button",
                         color = kiwiColors.colorF,
                         fontWeight = FontWeight.Bold,
                     ),
@@ -434,7 +434,7 @@ fun Kiwi_Button_Preview() {
             Kiwi_FixedSizeButton(
                 textArguments =
                     KiwiTextArguments(
-                        "BUTTON",
+                        "button",
                         color = kiwiColors.colorF,
                         fontWeight = FontWeight.Bold,
                     ),
@@ -447,7 +447,7 @@ fun Kiwi_Button_Preview() {
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            "BUTTON",
+                            "button",
                             color = kiwiColors.colorF,
                             fontWeight = FontWeight.Bold,
                         ),
@@ -461,7 +461,7 @@ fun Kiwi_Button_Preview() {
                 Kiwi_FixedSizeButton(
                     textArguments =
                         KiwiTextArguments(
-                            "BUTTON",
+                            "button",
                             color = kiwiColors.colorF,
                             fontWeight = FontWeight.Bold,
                         ),
