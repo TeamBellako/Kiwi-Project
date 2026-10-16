@@ -35,6 +35,13 @@ object ResourceProvider {
         return repository?.formattedStringResource(key, *args) ?: key
     }
 
+    fun formattedStringResource(
+        key: String,
+        args: List<Any>,
+    ): String {
+        return repository?.formattedStringResource(key, args) ?: key
+    }
+
     /**
      * Returns a plural string associated with the given [key] and [count].
      */

@@ -38,7 +38,6 @@ fun CombatHealthBar(
     maxHp: Int,
     modifier: Modifier = Modifier,
     fillTint: Color? = null,
-    label: String = "HP bar",
     // 0f = bar hidden, 1f = fully revealed. The reveal grows from the centre
     // outward toward both edges, used by the combat intro to introduce the bar.
     barRevealProgress: Float = 1f,

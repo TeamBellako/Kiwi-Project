@@ -18,6 +18,9 @@ public class LocalizationService {
         // Quests table columns that need localization
         LOCALIZED_COLUMNS.put("quests", new String[]{"name", "description"});
 
+        // Subquests table columns that need localization
+        LOCALIZED_COLUMNS.put("subquests", new String[]{"name"});
+
         // Skills table columns that need localization
         LOCALIZED_COLUMNS.put("skills", new String[]{"name", "description", "quote", "cooldown_other_description"});
 

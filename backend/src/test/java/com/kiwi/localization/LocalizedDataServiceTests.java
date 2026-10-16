@@ -4,7 +4,9 @@ import com.kiwi.features.goals.controllers.GoalRepository;
 import com.kiwi.features.goals.data.UserGoalStatusDTO;
 import com.kiwi.features.localization.LocalizedDataService;
 import com.kiwi.features.quests.controllers.QuestRepository;
+import com.kiwi.features.quests.controllers.SubquestRepository;
 import com.kiwi.features.quests.data.QuestDTO;
+import com.kiwi.features.quests.data.SubquestDTO;
 import com.kiwi.features.skills.controllers.SkillRepository;
 import com.kiwi.features.skills.data.DTO.SkillDTO;
 import org.junit.Before;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.when;
 public class LocalizedDataServiceTests {
 
     @Mock private QuestRepository questRepository;
+    @Mock private SubquestRepository subquestRepository;
     @Mock private SkillRepository skillRepository;
     @Mock private GoalRepository goalRepository;
 
@@ -30,7 +33,8 @@ public class LocalizedDataServiceTests {
 
     @Before
     public void setUp() {
-        localizedDataService = new LocalizedDataService(questRepository, skillRepository, goalRepository);
+        localizedDataService = new LocalizedDataService(
+            questRepository, subquestRepository, skillRepository, goalRepository);
     }
 
     @Test
@@ -46,6 +50,37 @@ public class LocalizedDataServiceTests {
 
         assertEquals("Nombre traducido", quest.getName());
         assertEquals("Descripcion traducida", quest.getDescription());
+    }
+
+    @Test
+    public void localizeQuests_overridesNestedSubquestName() {
+        SubquestDTO subquest = SubquestDTO.builder().subquestId(12).name("English name").build();
+        QuestDTO quest = QuestDTO.builder().questId(7).subquests(List.of(subquest)).build();
+        QuestRepository.LocalizedQuest questTranslation = mock(QuestRepository.LocalizedQuest.class);
+        when(questTranslation.getId()).thenReturn(7);
+        when(questRepository.findLocalizedByIds(List.of(7))).thenReturn(List.of(questTranslation));
+
+        SubquestRepository.LocalizedSubquest translation = mock(SubquestRepository.LocalizedSubquest.class);
+        when(translation.getId()).thenReturn(12);
+        when(translation.getName()).thenReturn("Nombre de subquest traducido");
+        when(subquestRepository.findLocalizedByIds(List.of(12))).thenReturn(List.of(translation));
+
+        localizedDataService.localizeQuests(List.of(quest));
+
+        assertEquals("Nombre de subquest traducido", subquest.getName());
+    }
+
+    @Test
+    public void localizeSubquest_overridesName() {
+        SubquestDTO subquest = SubquestDTO.builder().subquestId(12).name("English name").build();
+        SubquestRepository.LocalizedSubquest translation = mock(SubquestRepository.LocalizedSubquest.class);
+        when(translation.getId()).thenReturn(12);
+        when(translation.getName()).thenReturn("Nombre de subquest traducido");
+        when(subquestRepository.findLocalizedByIds(List.of(12))).thenReturn(List.of(translation));
+
+        localizedDataService.localizeSubquest(subquest);
+
+        assertEquals("Nombre de subquest traducido", subquest.getName());
     }
 
     @Test

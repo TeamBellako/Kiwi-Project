@@ -3,7 +3,9 @@ package com.kiwi.features.localization;
 import com.kiwi.features.goals.controllers.GoalRepository;
 import com.kiwi.features.goals.data.UserGoalStatusDTO;
 import com.kiwi.features.quests.controllers.QuestRepository;
+import com.kiwi.features.quests.controllers.SubquestRepository;
 import com.kiwi.features.quests.data.QuestDTO;
+import com.kiwi.features.quests.data.SubquestDTO;
 import com.kiwi.features.skills.controllers.SkillRepository;
 import com.kiwi.features.skills.data.DTO.SkillDTO;
 import org.springframework.stereotype.Service;
@@ -18,14 +20,17 @@ import java.util.stream.Collectors;
 public class LocalizedDataService {
 
     private final QuestRepository questRepository;
+    private final SubquestRepository subquestRepository;
     private final SkillRepository skillRepository;
     private final GoalRepository goalRepository;
 
     public LocalizedDataService(
             QuestRepository questRepository,
+            SubquestRepository subquestRepository,
             SkillRepository skillRepository,
             GoalRepository goalRepository) {
         this.questRepository = questRepository;
+        this.subquestRepository = subquestRepository;
         this.skillRepository = skillRepository;
         this.goalRepository = goalRepository;
     }
@@ -46,7 +51,37 @@ public class LocalizedDataService {
                 quest.setDescription(translation.getDescription());
             }
         });
+
+        List<SubquestDTO> subquests = quests.stream()
+                .map(QuestDTO::getSubquests)
+                .filter(java.util.Objects::nonNull)
+                .flatMap(List::stream)
+                .toList();
+        localizeSubquests(subquests);
+
         return quests;
+    }
+
+    public SubquestDTO localizeSubquest(SubquestDTO subquest) {
+        localizeSubquests(List.of(subquest));
+        return subquest;
+    }
+
+    private void localizeSubquests(List<SubquestDTO> subquests) {
+        if (subquests == null || subquests.isEmpty()) {
+            return;
+        }
+
+        List<Integer> ids = subquests.stream().map(SubquestDTO::getSubquestId).distinct().toList();
+        Map<Integer, SubquestRepository.LocalizedSubquest> byId = subquestRepository.findLocalizedByIds(ids).stream()
+                .collect(Collectors.toMap(SubquestRepository.LocalizedSubquest::getId, Function.identity()));
+
+        subquests.forEach(subquest -> {
+            SubquestRepository.LocalizedSubquest translation = byId.get(subquest.getSubquestId());
+            if (translation != null && translation.getName() != null && !translation.getName().isBlank()) {
+                subquest.setName(translation.getName());
+            }
+        });
     }
 
     public List<SkillDTO> localizeSkills(List<SkillDTO> skills) {

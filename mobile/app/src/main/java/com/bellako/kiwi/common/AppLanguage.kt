@@ -31,12 +31,14 @@ enum class AppLanguage(
          * Detects language from device locale and maps it to AppLanguage.
          * Returns SPANISH for any Spanish variant (es-ES, es-MX, etc.) or ENGLISH if not supported.
          */
-        fun detectFromLocale(locale: Locale): AppLanguage {
-            return when (locale.language) {
+        fun detectFromLocale(locale: Locale): AppLanguage =
+            when (locale.language) {
                 "en" -> ENGLISH
-                "es" -> SPANISH  // Any Spanish variant maps to Spanish
+
+                "es" -> SPANISH
+
+                // Any Spanish variant maps to Spanish
                 else -> ENGLISH
             }
-        }
     }
 }

@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -98,8 +98,7 @@ fun SettingsLanguageScreen(
                                     AppLanguageManager.restartActivity(context)
                                 }
                             }
-                        }
-                    .padding(horizontal = Spacing.medium, vertical = Spacing.medium),
+                        }.padding(horizontal = Spacing.medium, vertical = Spacing.medium),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 androidx.compose.material3.Text(

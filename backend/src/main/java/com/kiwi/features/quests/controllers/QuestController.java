@@ -88,8 +88,8 @@ public class QuestController {
                 .orElseThrow()
                 .getId();
 
-        SubquestDTO subquest =
-                questService.getSubquestForUser(userId, subquestId);
+        SubquestDTO subquest = localizedDataService.localizeSubquest(
+                questService.getSubquestForUser(userId, subquestId));
 
         return ResponseEntity.ok(subquest);
     }

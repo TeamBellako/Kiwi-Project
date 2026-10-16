@@ -11,6 +11,7 @@ interface ResourceRepository {
     fun setLocale(locale: Locale)
     fun stringResource(key: String): String
     fun formattedStringResource(key: String, vararg args: Any): String
+    fun formattedStringResource(key: String, args: List<Any>): String
     fun pluralResource(key: String, count: Int, vararg args: Any): String
     fun arrayResource(key: String): List<String>
 }

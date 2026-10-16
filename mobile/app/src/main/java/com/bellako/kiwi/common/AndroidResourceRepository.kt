@@ -21,6 +21,7 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
     }
 
     override fun stringResource(key: String): String {
+        if (key.toIntOrNull() != null) return key
         val resId = localizedContext.resources.getIdentifier(key, "string", context.packageName)
         return if (resId != 0) {
             localizedContext.getString(resId)
@@ -34,9 +35,18 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
         key: String,
         vararg args: Any,
     ): String {
+        return formattedStringResource(key, args.toList())
+    }
+
+    override fun formattedStringResource(
+        key: String,
+        args: List<Any>,
+    ): String {
+        if (key.toIntOrNull() != null) return key
         val resId = localizedContext.resources.getIdentifier(key, "string", context.packageName)
         return if (resId != 0) {
-            localizedContext.getString(resId, *args)
+            @Suppress("SpreadOperator")
+            localizedContext.getString(resId, *args.toTypedArray())
         } else {
             Log.w("AndroidResourceRepository", "Resource not found for key: $key")
             key
@@ -44,6 +54,7 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
     }
 
     override fun pluralResource(key: String, count: Int, vararg args: Any): String {
+        if (key.toIntOrNull() != null) return key
         val resId = localizedContext.resources.getIdentifier(key, "plurals", context.packageName)
         return if (resId != 0) {
             localizedContext.resources.getQuantityString(resId, count, *args)
@@ -54,6 +65,7 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
     }
 
     override fun arrayResource(key: String): List<String> {
+        if (key.toIntOrNull() != null) return emptyList()
         val resId = localizedContext.resources.getIdentifier(key, "array", context.packageName)
         return if (resId != 0) {
             localizedContext.resources.getStringArray(resId).toList()

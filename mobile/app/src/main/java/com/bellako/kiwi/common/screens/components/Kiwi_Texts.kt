@@ -62,7 +62,7 @@ private fun Kiwi_Text(
     val scale = rememberTextWidthScale()
     val text =
         if (arguments.formatArgs.isNotEmpty()) {
-            ResourceProvider.formattedStringResource(arguments.text, *arguments.formatArgs.toTypedArray())
+            ResourceProvider.formattedStringResource(arguments.text, arguments.formatArgs)
         } else {
             ResourceProvider.stringResource(arguments.text)
         }

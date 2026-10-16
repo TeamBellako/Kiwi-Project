@@ -35,6 +35,14 @@ public class QueryBuildingUtilsTests {
     }
 
     @Test
+    public void buildLocalizedQuery_localizesSubquestName() {
+        String template = "SELECT name_en AS name FROM subquests WHERE id = :id";
+
+        assertEquals("SELECT name_es AS name FROM subquests WHERE id = :id",
+                queryBuildingUtils.buildLocalizedQuery(template, "es"));
+    }
+
+    @Test
     public void buildLocalizedQuery_usesBaseTemplateForUnsupportedLanguage() {
         String template = "SELECT action_en AS action FROM goals";
 
