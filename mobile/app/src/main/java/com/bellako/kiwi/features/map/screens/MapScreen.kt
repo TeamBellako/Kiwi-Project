@@ -47,7 +47,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
@@ -103,8 +102,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.min
@@ -144,9 +141,13 @@ fun MapScreen(
     val nodesState by nodesViewModel.state.collectAsState()
     val nodesMap = nodesState?.nodes.orEmpty()
 
-    val imageBitmap = ImageBitmap.imageResource(id = mapState.mapInfo.mapResourceId)
-    val imageW = imageBitmap.width.toFloat()
-    val imageH = imageBitmap.height.toFloat()
+    val context = LocalContext.current
+    val options = remember(mapState.mapInfo.mapResourceId) {
+        android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            .also { android.graphics.BitmapFactory.decodeResource(context.resources, mapState.mapInfo.mapResourceId, it) }
+    }
+    val imageW = options.outWidth.toFloat()
+    val imageH = options.outHeight.toFloat()
 
     val fitScale = min(viewportWidthPx / imageW, viewportHeightPx / imageH)
 
@@ -208,8 +209,30 @@ fun MapScreen(
         mapViewModel.setZoomOutLimit(effectiveMaxZoomOut)
     }
 
-    LaunchedEffect(Unit) {
-        loadNodes(mapViewModel, nodesViewModel, 0)
+    LaunchedEffect(mapState.mapInfo.mapId) {
+        nodesViewModel.loadNodes(mapState.mapInfo.mapId)
+
+        nodesViewModel.state.collect { nodesState ->
+            val nodesMap = nodesState?.nodes ?: return@collect
+            if (nodesMap.isNotEmpty()) {
+                val nodesList = nodesMap.values.toList()
+
+                val lastOpen = nodesList.lastOrNull { it.status == NodeStatus.OPEN }
+                val lastCompleted = nodesList.lastOrNull { it.status == NodeStatus.COMPLETED }
+                val defaultNode = nodesList.firstOrNull()
+
+                val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
+
+                selectedNode?.let { node ->
+                    // Force the focus animation to play on every map entry by
+                    // clearing the selection first — selectNode() short-circuits
+                    // if the target is already selected.
+                    mapViewModel.unSelectNode()
+                    mapViewModel.selectNode(node.id, node.cordX, node.cordY, animate = true)
+                    mapViewModel.setPlayerNode(node.id)
+                }
+            }
+        }
     }
 
     // Fresh-account safety net: after a brand-new sign-up the user can land
@@ -240,7 +263,6 @@ fun MapScreen(
             val mapInfo = MapsInfo.findMapById(payload.targetEntityId)
 
             mapViewModel.switchMap(mapInfo)
-            loadNodes(mapViewModel, nodesViewModel, mapInfo.mapId)
         }
     }
 
@@ -520,36 +542,7 @@ private fun PointsIndicator(
 
 private const val POINTS_BG_ALPHA = 0.7f
 
-private fun loadNodes(
-    mapViewModel: MapViewModel,
-    nodesViewModel: INodesViewModel,
-    mapId: Int,
-) {
-    nodesViewModel.loadNodes(mapId)
 
-    nodesViewModel.state
-        .onEach { nodesState ->
-            val nodesMap = nodesState?.nodes ?: return@onEach
-            if (nodesMap.isNotEmpty()) {
-                val nodesList = nodesMap.values.toList()
-
-                val lastOpen = nodesList.lastOrNull { it.status == NodeStatus.OPEN }
-                val lastCompleted = nodesList.lastOrNull { it.status == NodeStatus.COMPLETED }
-                val defaultNode = nodesList.firstOrNull()
-
-                val selectedNode = lastOpen ?: lastCompleted ?: defaultNode
-
-                selectedNode?.let { node ->
-                    // Force the focus animation to play on every map entry by
-                    // clearing the selection first — selectNode() short-circuits
-                    // if the target is already selected.
-                    mapViewModel.unSelectNode()
-                    mapViewModel.selectNode(node.id, node.cordX, node.cordY, animate = true)
-                    mapViewModel.setPlayerNode(node.id)
-                }
-            }
-        }.launchIn(CoroutineScope(Dispatchers.Main))
-}
 
 private suspend fun runAutoExecuteFirstNodeIfNeeded(
     nodesViewModel: INodesViewModel,
@@ -661,9 +654,18 @@ private fun InteractiveMap(
             contentAlignment = Alignment.Center,
         ) {
             // MAP
-            Kiwi_Image(
-                painterResourceId = mapResourceId,
-                alt = "interactive_map",
+            val imageLoader = remember(context) {
+                coil.ImageLoader.Builder(context)
+                    .bitmapConfig(android.graphics.Bitmap.Config.RGB_565)
+                    .build()
+            }
+            coil.compose.AsyncImage(
+                model = coil.request.ImageRequest.Builder(context)
+                    .data(mapResourceId)
+                    .size(coil.size.Size.ORIGINAL)
+                    .build(),
+                imageLoader = imageLoader,
+                contentDescription = com.bellako.kiwi.common.ResourceProvider.stringResource("interactive_map"),
                 modifier =
                     Modifier
                         .fillMaxSize()
