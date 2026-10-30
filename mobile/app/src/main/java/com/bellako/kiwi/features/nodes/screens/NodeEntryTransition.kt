@@ -18,9 +18,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.delay
 
-private const val VEIL_FADE_IN_MS = 800
-private const val VEIL_FADE_OUT_MS = 500
-private const val VEIL_HOLD_MS = 450L
+import com.bellako.kiwi.common.screens.components.LoadingModal
+
+private const val VEIL_FADE_IN_MS = 200
+private const val VEIL_FADE_OUT_MS = 200
+// VEIL_HOLD_MS eliminado, ya no forzamos bloqueos por tiempo hardcodeado
 
 private val VEIL_COLOR = Color.Black
 
@@ -53,7 +55,6 @@ class NodeEntryTransitionController internal constructor(
             targetValue = 1f,
             animationSpec = tween(VEIL_FADE_IN_MS, easing = LinearEasing),
         )
-        delay(VEIL_HOLD_MS)
     }
 
     /**
@@ -108,5 +109,8 @@ fun NodeEntryVeilOverlay(
                     indication = null,
                     onClick = {},
                 ),
-    )
+        contentAlignment = androidx.compose.ui.Alignment.Center,
+    ) {
+        LoadingModal()
+    }
 }

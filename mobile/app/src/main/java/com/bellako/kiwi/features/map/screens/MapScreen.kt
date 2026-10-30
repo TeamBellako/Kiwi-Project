@@ -108,7 +108,7 @@ import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 fun MapScreen(
     mapMarginFactor: Float = 0.08f,
     elasticityFactor: Float = 1.4f,
@@ -210,7 +210,15 @@ fun MapScreen(
     }
 
     LaunchedEffect(mapState.mapInfo.mapId) {
+        val startNodesTime = System.currentTimeMillis()
+        android.util.Log.d("MapScreenTimers", "Load nodes started: mapId=${mapState.mapInfo.mapId}")
         nodesViewModel.loadNodes(mapState.mapInfo.mapId)
+
+        nodesViewModel.state.first { nodesState ->
+            nodesState?.nodes?.isNotEmpty() == true
+        }
+        val nodesLoadedTime = System.currentTimeMillis()
+        android.util.Log.d("MapScreenTimers", "Nodes loaded. Time elapsed: ${nodesLoadedTime - startNodesTime} ms")
 
         nodesViewModel.state.collect { nodesState ->
             val nodesMap = nodesState?.nodes ?: return@collect
@@ -228,7 +236,11 @@ fun MapScreen(
                     // clearing the selection first — selectNode() short-circuits
                     // if the target is already selected.
                     mapViewModel.unSelectNode()
+                    val focusStartTime = System.currentTimeMillis()
+                    android.util.Log.d("MapScreenTimers", "Focus on node started")
                     mapViewModel.selectNode(node.id, node.cordX, node.cordY, animate = true)
+                    val focusEndTime = System.currentTimeMillis()
+                    android.util.Log.d("MapScreenTimers", "Focus on node completed. Time elapsed: ${focusEndTime - focusStartTime} ms")
                     mapViewModel.setPlayerNode(node.id)
                 }
             }
@@ -256,13 +268,19 @@ fun MapScreen(
     }
 
     LaunchedEffect(Unit) {
+        val startMapTime = System.currentTimeMillis()
+        android.util.Log.d("MapScreenTimers", "Map initialization started")
         mapViewModel.setBackgroundColor(kiwiColors.colorOcean)
+        android.util.Log.d("MapScreenTimers", "Map initialization ended. Time elapsed: ${System.currentTimeMillis() - startMapTime} ms")
 
         listenToEvent(EventType.SWITCH_MAP) { eventPayload ->
+            val switchMapStartTime = System.currentTimeMillis()
+            android.util.Log.d("MapScreenTimers", "Switch map event received")
             val payload = eventPayload as EventPayload.EntityIdPayload
             val mapInfo = MapsInfo.findMapById(payload.targetEntityId)
 
             mapViewModel.switchMap(mapInfo)
+            android.util.Log.d("MapScreenTimers", "Map switched. Time elapsed: ${System.currentTimeMillis() - switchMapStartTime} ms")
         }
     }
 
@@ -842,7 +860,7 @@ fun Background(mapViewModel: MapViewModel) {
 // reveal. This is just a safety net for follow-ups that don't self-dismiss —
 // generous enough to outlast a slow server load plus the conversation's
 // slide-in, so it never wins the race against the conversation's own dismiss.
-private const val FALLBACK_VEIL_HOLD_MS = 6_000L
+private const val FALLBACK_VEIL_HOLD_MS = 200L
 
 // A node whose start event IS the completion event has no follow-up screen
 // to fade up under the veil — running the veil over an instant state change
