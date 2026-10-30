@@ -60,6 +60,7 @@ class NodesViewModel
             viewModelScope.launch {
                 setIsLoading(true)
                 setUiState(UIState.Loading)
+                _state.value = NodesState()
                 try {
                     val nodes = repository.getNodesByMapId(mapId)
                     _state.value = NodesState(nodes = nodes.associateBy { it.id })

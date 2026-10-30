@@ -72,8 +72,14 @@ class MetricsViewModel
             val result = repository.getMetricsByDate(stringToDate(date))
             setIsLoading(false)
             setUiState(UIState.Idle)
-            return handleResult(result) {
-                _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
+            return if (result.isSuccess && result.getOrNull() != null) {
+                handleResult(result) {
+                    _state.value = MetricsDataMapper.toState(result.getOrNull()!!)
+                }
+            } else {
+                val error = result.exceptionOrNull() ?: Exception("Metrics not found")
+                setUiState(mapExceptionToUIState(error))
+                Result.failure(error)
             }
         }
 
