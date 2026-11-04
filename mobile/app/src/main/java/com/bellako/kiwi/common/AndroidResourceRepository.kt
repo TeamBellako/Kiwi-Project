@@ -3,7 +3,7 @@ package com.bellako.kiwi.common
 import android.content.Context
 import android.content.res.Configuration
 import android.os.LocaleList
-import android.util.Log
+
 import java.util.Locale
 
 /**
@@ -26,7 +26,6 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
         return if (resId != 0) {
             localizedContext.getString(resId)
         } else {
-            Log.w("AndroidResourceRepository", "Resource not found for key: $key")
             key
         }
     }
@@ -48,7 +47,6 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
             @Suppress("SpreadOperator")
             localizedContext.getString(resId, *args.toTypedArray())
         } else {
-            Log.w("AndroidResourceRepository", "Resource not found for key: $key")
             key
         }
     }
@@ -59,7 +57,6 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
         return if (resId != 0) {
             localizedContext.resources.getQuantityString(resId, count, *args)
         } else {
-            Log.w("AndroidResourceRepository", "Plural resource not found for key: $key")
             key
         }
     }
@@ -70,7 +67,6 @@ class AndroidResourceRepository(private val context: Context) : ResourceReposito
         return if (resId != 0) {
             localizedContext.resources.getStringArray(resId).toList()
         } else {
-            Log.w("AndroidResourceRepository", "Array resource not found for key: $key")
             emptyList()
         }
     }
