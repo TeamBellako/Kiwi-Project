@@ -23,6 +23,13 @@ class JwtAuthInterceptor
                         }
                     }.build()
 
-            return chain.proceed(newRequest)
+            val url = newRequest.url.toString()
+            android.util.Log.d("ApiDebug", "Llamada $url")
+
+            val response = chain.proceed(newRequest)
+
+            android.util.Log.d("ApiDebug", "Llamada $url -> código ${response.code}")
+
+            return response
         }
     }
