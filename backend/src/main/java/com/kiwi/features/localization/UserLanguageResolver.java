@@ -1,6 +1,7 @@
 package com.kiwi.features.localization;
 
 import com.kiwi.features.users.controllers.UsersRepository;
+import com.kiwi.features.users.data.LanguageAwareUserDetails;
 import com.kiwi.features.users.data.UsersPersistence;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,10 @@ public final class UserLanguageResolver {
         if (authentication == null || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken) {
             return "en";
+        }
+
+        if (authentication.getPrincipal() instanceof LanguageAwareUserDetails userDetails) {
+            return LocalizationService.normalizeLanguagePreference(userDetails.getLanguagePreference());
         }
 
         return usersRepository.findByEmail(authentication.getName())
