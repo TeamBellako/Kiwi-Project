@@ -1,5 +1,7 @@
 package com.kiwi.security;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
@@ -15,11 +17,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RateLimitFilter extends OncePerRequestFilter {
-    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private static final long MAX_BUCKETS = 10_000;
+    private static final Duration BUCKET_IDLE_EXPIRATION = Duration.ofMinutes(2);
+
+    private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
+            .maximumSize(MAX_BUCKETS)
+            .expireAfterAccess(BUCKET_IDLE_EXPIRATION)
+            .build();
     
     private final JwtUtils jwtUtils;
     
@@ -49,7 +55,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             key = request.getRemoteAddr();
         }
         
-        Bucket bucket = buckets.computeIfAbsent(key, k -> createNewBucket());
+        Bucket bucket = buckets.get(key, k -> createNewBucket());
 
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
