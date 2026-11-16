@@ -1,6 +1,8 @@
 package com.bellako.kiwi
 
+import android.content.res.Configuration
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -13,7 +15,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.filters.SdkSuppress
+import androidx.test.platform.app.InstrumentationRegistry
 import com.bellako.kiwi.audio.AudioManager
+import com.bellako.kiwi.common.AppLanguage
+import com.bellako.kiwi.common.AppLanguageManager
+import com.bellako.kiwi.common.ResourceProvider
 import com.bellako.kiwi.features.combat.data.CombatActionDomain
 import com.bellako.kiwi.features.combat.data.CombatActor
 import com.bellako.kiwi.features.combat.data.CombatDomain
@@ -45,7 +51,7 @@ class CombatScreenTest {
     @Test
     fun headerIsDisplayed() {
         setContent(combat())
-        rule.onNodeWithText("Ongoing Combat").assertIsDisplayed()
+        rule.onNodeWithText(text(R.string.ongoing_combat)).assertIsDisplayed()
     }
 
     @Test
@@ -66,16 +72,16 @@ class CombatScreenTest {
     @Test
     fun closeButtonShowsAbandonModal() {
         setContent(combat())
-        rule.onNodeWithContentDescription("Close combat").performClick()
-        rule.onNodeWithText("Leave combat?").assertIsDisplayed()
+        rule.onNodeWithContentDescription(text(R.string.close_combat)).performClick()
+        rule.onNodeWithText(text(R.string.leave_combat)).assertIsDisplayed()
     }
 
     @Test
     fun confirmingAbandonFiresCallback() {
         var confirmed = false
         setContent(combat(), onConfirmAbandon = { confirmed = true })
-        rule.onNodeWithContentDescription("Close combat").performClick()
-        rule.onNodeWithText("Leave").performClick()
+        rule.onNodeWithContentDescription(text(R.string.close_combat)).performClick()
+        rule.onNodeWithText(text(R.string.leave)).performClick()
         rule.waitForIdle()
         assert(confirmed) { "onConfirmAbandon callback should have fired" }
     }
@@ -84,12 +90,27 @@ class CombatScreenTest {
     fun cancellingAbandonClosesModal() {
         var confirmed = false
         setContent(combat(), onConfirmAbandon = { confirmed = true })
-        rule.onNodeWithContentDescription("Close combat").performClick()
-        rule.onNodeWithText("Leave combat?").assertIsDisplayed()
-        rule.onNodeWithText("Cancel").performClick()
+        rule.onNodeWithContentDescription(text(R.string.close_combat)).performClick()
+        rule.onNodeWithText(text(R.string.leave_combat)).assertIsDisplayed()
+        rule.onNodeWithText(text(R.string.cancel)).performClick()
         rule.waitForIdle()
-        rule.onNodeWithText("Leave combat?").assertIsNotDisplayed()
+        rule.onNodeWithText(text(R.string.leave_combat)).assertIsNotDisplayed()
         assert(!confirmed) { "Cancel must not fire onConfirmAbandon" }
+    }
+
+    @Test
+    fun headerAndAbandonModalAreDisplayedInSpanish() {
+        ResourceProvider.setLocale(AppLanguage.SPANISH.locale)
+        try {
+            setContent(combat())
+            rule.onNodeWithText("Combate en curso").assertIsDisplayed()
+            rule.onNodeWithContentDescription("Cerrar combate").performClick()
+            rule.onNodeWithText("¿Abandonar el combate?").assertIsDisplayed()
+            rule.onNodeWithText("Cancelar").performClick()
+            rule.onNodeWithText("¿Abandonar el combate?").assertIsNotDisplayed()
+        } finally {
+            ResourceProvider.setLocale(AppLanguageManager.language.value.locale)
+        }
     }
 
     @Test
@@ -160,6 +181,13 @@ class CombatScreenTest {
                 ),
             log = log,
         )
+
+    private fun text(@StringRes id: Int): String {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val configuration = Configuration(context.resources.configuration)
+        configuration.setLocale(AppLanguageManager.language.value.locale)
+        return context.createConfigurationContext(configuration).getString(id)
+    }
 
     private fun setContent(
         combat: CombatDomain,

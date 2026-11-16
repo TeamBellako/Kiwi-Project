@@ -1,5 +1,7 @@
 package com.kiwi.features.users.exceptions;
 
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import java.util.Map;
 import static com.kiwi.common.utils.HTTPUtils.createErrorResponseBody;
 
 @RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class UsersExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(UsersExceptionHandler.class);
 
