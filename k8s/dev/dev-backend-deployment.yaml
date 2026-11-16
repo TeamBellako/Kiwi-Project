@@ -22,21 +22,21 @@ spec:
         - containerPort: 8080
         startupProbe:
           httpGet:
-            path: /actuator/health/liveness
+            path: /api/public/ping
             port: 8080
           periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 30
         readinessProbe:
           httpGet:
-            path: /actuator/health/readiness
+            path: /api/public/ping
             port: 8080
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 3
         livenessProbe:
           httpGet:
-            path: /actuator/health/liveness
+            path: /api/public/ping
             port: 8080
           periodSeconds: 10
           timeoutSeconds: 3
