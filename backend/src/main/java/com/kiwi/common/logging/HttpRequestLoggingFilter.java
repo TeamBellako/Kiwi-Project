@@ -13,11 +13,23 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
+import java.util.Set;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class HttpRequestLoggingFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestLoggingFilter.class);
+    private static final Set<String> HEALTH_CHECK_PATHS = Set.of(
+            "/api/ping",
+            "/api/public/ping",
+            "/api/user/ping",
+            "/api/admin/ping"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return HEALTH_CHECK_PATHS.contains(request.getRequestURI());
+    }
 
     @Override
     protected void doFilterInternal(

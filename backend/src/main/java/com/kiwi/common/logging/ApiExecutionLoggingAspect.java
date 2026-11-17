@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 public class ApiExecutionLoggingAspect {
     private static final Logger logger = LoggerFactory.getLogger(ApiExecutionLoggingAspect.class);
 
-    @Around("@within(org.springframework.web.bind.annotation.RestController)")
+    @Around("@within(org.springframework.web.bind.annotation.RestController) && " +
+            "!within(com.kiwi.common.controllers.PingController)")
     public Object logControllerExecution(ProceedingJoinPoint joinPoint) throws Throwable {
         return logExecution(joinPoint, true);
     }
