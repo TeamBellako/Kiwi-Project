@@ -7,6 +7,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +27,7 @@ import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtUtils jwtUtils;
     private final CustomUserDetailsService userDetailsService;
@@ -47,10 +50,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NotNull FilterChain filterChain
     ) throws ServletException, IOException {
 
+        String requestPath = request.getRequestURI();
+        boolean isPublicAuthenticationEndpoint =
+                "/api/public/login".equals(requestPath) || "/api/public/signup".equals(requestPath);
+
         try {
             String jwt = jwtUtils.parseJwt(request);
 
+            if (isPublicAuthenticationEndpoint) {
+                log.info("JWT filter reached public authentication endpoint: method={}, path={}, bearerTokenPresent={}",
+                        request.getMethod(), requestPath, jwt != null);
+            }
+
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+                log.info("JWT validated for request: method={}, path={}", request.getMethod(), requestPath);
                 String username = jwtUtils.getUsernameFromToken(jwt);
                 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -69,12 +82,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("JWT authentication established for request: method={}, path={}",
+                        request.getMethod(), requestPath);
             }
 
             filterChain.doFilter(request, response);
 
         } catch (JwtException | IllegalArgumentException ex) {
-            logger.warn("JWT processing failed: {}", ex);
+            log.warn("JWT processing failed for request: method={}, path={}, reason={}",
+                    request.getMethod(), requestPath, ex.getClass().getSimpleName());
             authenticationEntryPoint.commence(request, response,
                     new AuthenticationServiceException("JWT Error: " + ex.getMessage(), ex));
         }

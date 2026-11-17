@@ -20,6 +20,8 @@ spec:
       containers:
       - name: kiwi-mysql-dev
         image: mysql:8.0
+        args:
+          - --log-bin-trust-function-creators=1
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:

@@ -12,6 +12,8 @@ import com.kiwi.features.users.exceptions.CreateUserInvalidException;
 import com.kiwi.features.localization.LocalizationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +29,8 @@ import static com.kiwi.common.utils.FormatUtils.formatDate;
 
 @Service
 public class UsersService {
+    private static final Logger logger = LoggerFactory.getLogger(UsersService.class);
+
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
@@ -40,9 +44,11 @@ public class UsersService {
 
     @Transactional
     public void createUser(@Valid @NotNull LoginDTO loginDTO) {
-
+        logger.info("Signup service started");
         String email = loginDTO.getEmail();
-        if (usersRepository.existsByEmail(email)) {
+        boolean userAlreadyExists = usersRepository.existsByEmail(email);
+        logger.info("Signup duplicate check completed: userAlreadyExists={}", userAlreadyExists);
+        if (userAlreadyExists) {
             throw new CreateUserConflictException(email);
         }
         UsersDTO userDto = new UsersDTO(email, formatDate(LocalDate.now()));
@@ -51,16 +57,22 @@ public class UsersService {
         try {
             validPassword = new Password(loginDTO.getPassword());
         } catch (IllegalArgumentException e) {
+            logger.warn("Signup rejected during password format validation");
             throw new CreateUserInvalidException(e.getMessage());
         }
 
+        logger.info("Signup password format validated");
         String hashedPassword = passwordEncoder.encode(validPassword.value());
         UsersPersistence usersPersistence = UsersDataMapper.toPersistenceWithoutPoints(userDto, hashedPassword);
         usersPersistence.setLanguagePreference(
             LocalizationService.normalizeLanguagePreference(loginDTO.getLanguage()));
+        logger.info("Persisting new user");
         usersRepository.saveAndFlush(usersPersistence);
+        logger.info("New user persisted: userId={}", usersPersistence.getId());
 
+        logger.info("Publishing user-created event: userId={}", usersPersistence.getId());
         eventPublisher.publishEvent(new UserCreatedEvent(usersPersistence.getId()));
+        logger.info("User-created event published: userId={}", usersPersistence.getId());
     }
 
     public Optional<UsersPersistence> getUserByEmail(@NotNull Email email) {

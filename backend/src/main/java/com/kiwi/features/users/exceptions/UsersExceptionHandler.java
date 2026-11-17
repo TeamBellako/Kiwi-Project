@@ -30,7 +30,7 @@ public class UsersExceptionHandler {
     
     @ExceptionHandler(CreateUserConflictException.class)
     public ResponseEntity<Map<String, String>> handleCreateUserConflict(CreateUserConflictException ex) {
-        logger.error("Create user conflict: {}", ex.getMessage(), ex);
+        logger.warn("Signup rejected because the account already exists");
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -48,7 +48,7 @@ public class UsersExceptionHandler {
 
     @ExceptionHandler(LoginUserInvalidException.class)
     public ResponseEntity<Map<String, String>> handleLoginUserInvalid(LoginUserInvalidException ex) {
-        logger.error("Login user invalid: {}", ex.getMessage(), ex);
+        logger.warn("Login rejected: invalid credentials");
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .contentType(MediaType.APPLICATION_JSON)

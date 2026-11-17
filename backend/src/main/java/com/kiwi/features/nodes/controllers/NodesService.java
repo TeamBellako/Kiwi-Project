@@ -6,6 +6,8 @@ import com.kiwi.features.nodes.data.*;
 import com.kiwi.features.nodes.exceptions.NodeInaccessibleException;
 import com.kiwi.features.nodes.exceptions.NodeNotFoundException;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class NodesService {
+    private static final Logger logger = LoggerFactory.getLogger(NodesService.class);
 
     private final NodesRepository nodesRepository;
     private final UserNodeStatusRepository userNodeStatusRepository;
@@ -159,24 +162,33 @@ public class NodesService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener
     public void onUserCreated(UserCreatedEvent event) {
+        logger.info("User-created event received: userId={}", event.userId());
         initializeUserProgress(event.userId());
+        logger.info("User-created event processing completed: userId={}", event.userId());
     }
 
     public void initializeUserProgress(Long userId) {
+        logger.info("Initializing node progress for userId={}", userId);
         List<NodesPersistence> firstNodes = nodesRepository.findByIsFirstNodeOfMapTrue();
+        logger.info("Found {} first nodes for userId={}", firstNodes.size(), userId);
 
         if (firstNodes.isEmpty()) {
+            logger.error("Cannot initialize node progress: no first nodes are configured");
             throw new NodeNotFoundException(userId);
         }
 
         for (NodesPersistence firstNode : firstNodes) {
+            logger.info("Creating initial node status: userId={}, nodeId={}", userId, firstNode.getId());
             NodesDomain domain = NodesDataMapper.toDomain(firstNode, null);
 
             NodesDomain locked = progressService.lock(domain);
 
             UserNodeStatusPersistence persistence = NodesDataMapper.toPersistence(userId, locked);
             userNodeStatusRepository.saveAndFlush(persistence);
+            logger.info("Created initial node status: userId={}, nodeId={}", userId, firstNode.getId());
         }
+
+        logger.info("Node progress initialized for userId={}", userId);
     }
 
         private List<NodesDTO> localizeDisplayNames(List<NodesDTO> nodes) {
